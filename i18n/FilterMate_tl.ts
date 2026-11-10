@@ -32,13 +32,13 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
         <source>Undone: {}</source>
         <translation>Na-undo: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Undo of the last request</source>
         <translation>Pag-undo sa huling kahilingan</translation>
     </message>
@@ -69,7 +69,7 @@
         <translation>Libreng quota</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Na-renew ang access sa libreng quota: ipadala ulit ang iyong kahilingan.</translation>
     </message>
@@ -79,7 +79,7 @@
         <translation>May ibang application na nagbabago sa project: subukan ulit sa ilang sandali.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
         <source>Another application: {}</source>
         <translation>Ibang application: {}</translation>
     </message>
@@ -121,47 +121,47 @@
         <translation>Ilagay ang iyong API key sa mga setting ng agent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Export of {}</source>
         <translation>Export ng {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Favorite applied</source>
         <translation>Nailapat ang paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Filter on the points of {}</source>
         <translation>Filter sa mga punto ng {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Filter on {}</source>
         <translation>Filter sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Filter on {} by an area</source>
         <translation>Filter sa {} ayon sa isang lugar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
         <source>Filter on {} by {}</source>
         <translation>Filter sa {} ayon sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
         <source>FilterMate agent</source>
         <translation>FilterMate agent</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Filters removed from {}</source>
         <translation>Inalis ang mga filter sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Hidden: {}</source>
         <translation>Nakatago: {}</translation>
     </message>
@@ -171,13 +171,13 @@
         <translation>Sumasagot ito.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Layer added: {}</source>
         <translation>Naidagdag ang layer: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Layers removed: {}</source>
         <translation>Inalis ang mga layer: {}</translation>
     </message>
@@ -199,32 +199,32 @@
         <translation>Walang ibabalik.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Reading the active filters</source>
         <translation>Binabasa ang mga aktibong filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Reading the favorites</source>
         <translation>Binabasa ang mga paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Reading the fields of {}</source>
         <translation>Binabasa ang mga field ng {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Reading the layers</source>
         <translation>Binabasa ang mga layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Reading the map</source>
         <translation>Binabasa ang mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Reading the values of {}</source>
         <translation>Binabasa ang mga halaga ng {}</translation>
     </message>
@@ -234,32 +234,32 @@
         <translation>Naibalik: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Naghahanap ng satellite imagery sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Searching {} for {}</source>
         <translation>Hinahanap sa {} ang {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection cleared on {}</source>
         <translation>Na-clear ang pinili sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection on {}</source>
         <translation>Pinili sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Shown: {}</source>
         <translation>Ipinakita: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>Stopped.</source>
         <translation>Itinigil.</translation>
     </message>
@@ -279,12 +279,12 @@
         <translation>Kailangan ang master password ng QGIS para magamit ang naka-store na key.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Huminto ang agent bago matapos ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -295,7 +295,7 @@ Do you agree?</source>
 Sumasang-ayon ka ba?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -306,7 +306,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 Ang remote na source ay binabasa ng QGIS mula sa server nito, at ang laman ng layer ay maaaring ipadala sa provider ng agent. Sumasang-ayon ka ba?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -317,7 +317,7 @@ Do you agree?</source>
 Sumasang-ayon ka ba?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -328,7 +328,7 @@ Do you agree?</source>
 Sumasang-ayon ka ba?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -341,7 +341,7 @@ Do you agree?</source>
 Sumasang-ayon ka ba?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Naubos na ang credit o quota ng account na ito.</translation>
     </message>
@@ -362,7 +362,7 @@ Sumasang-ayon ka ba?</translation>
         <translation>Hindi muna available ang libreng quota.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Naubos na ang libreng quota ngayong buwan. Ilagay ang sarili mong API key sa mga setting ng agent.</translation>
     </message>
@@ -373,17 +373,17 @@ Sumasang-ayon ka ba?</translation>
         <translation>Hindi ma-store ang key.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>The provider could not be reached: {}</source>
         <translation>Hindi maabot ang provider: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Tinanggihan ng provider ang API key: tingnan ito sa mga setting ng agent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
         <source>The provider reported a problem: {}</source>
         <translation>May iniulat na problema ang provider: {}</translation>
     </message>
@@ -394,7 +394,7 @@ Sumasang-ayon ka ba?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Thinking…</source>
         <translation>Nag-iisip…</translation>
     </message>
@@ -404,27 +404,27 @@ Sumasang-ayon ka ba?</translation>
         <translation>Napakaraming bagong account mula sa address na ito ngayon: subukan ulit bukas, o ilagay ang sarili mong API key.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Masyadong maraming request sa ngayon: subukan ulit sa ilang sandali.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Trying a filter on {}</source>
         <translation>Sinusubukan ang isang filter sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Zoom on {}</source>
         <translation>Mag-zoom sa {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>an area</source>
         <translation>isang lugar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>everything</source>
         <translation>lahat</translation>
     </message>
@@ -433,370 +433,469 @@ Sumasang-ayon ka ba?</translation>
         <source>{} tools available</source>
         <translation>{} tool ang available</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <source>The request is back in the line below: fix the settings, then send it again.</source>
+        <translation>Nasa linya sa ibaba muli ang kahilingan: ayusin ang mga setting, saka ipadala itong muli.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <source>The request is back in the line below: send it again when you are ready.</source>
+        <translation>Nasa linya sa ibaba muli ang kahilingan: ipadala itong muli kapag handa ka na.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="269"/>
+        <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Ang mga layer ayon sa dati bago ang hakbang na ito ng huling kahilingan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="267"/>
+        <location filename="../ui/widgets/agent_panel.py" line="283"/>
         <source>Undo back to here</source>
         <translation>I-undo hanggang dito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="364"/>
+        <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SUBUKAN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="111"/>
+        <location filename="../ui/widgets/agent_thread.py" line="133"/>
         <source>Undo</source>
         <translation>I-undo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="312"/>
+        <location filename="../ui/widgets/agent_panel.py" line="333"/>
         <source>(no request)</source>
         <translation>(walang kahilingan)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="611"/>
+        <location filename="../ui/widgets/agent_panel.py" line="721"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>Ilang libreng kahilingan bawat buwan, sa pamamagitan ng relay ng FilterMate papunta sa Claude (Anthropic), ayon sa mga tuntunin ng Anthropic. Binibilang ng relay ang nagagastos at hindi nag-iimbak ng anumang usapan. Kapag naubos na, pumili ng provider at ilagay ang sarili mong API key.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="616"/>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>API key</source>
         <translation>API key</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="770"/>
+        <location filename="../ui/widgets/agent_panel.py" line="946"/>
         <source>Add</source>
         <translation>Idagdag</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="610"/>
-        <location filename="../ui/widgets/agent_panel.py" line="702"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
+        <location filename="../ui/widgets/agent_panel.py" line="874"/>
         <source>Address</source>
         <translation>Address</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="205"/>
+        <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Mga setting ng agent</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="622"/>
+        <location filename="../ui/widgets/agent_panel.py" line="738"/>
         <source>Allow attribute values to be sent</source>
         <translation>Payagang maipadala ang mga halaga ng attribute</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="695"/>
+        <location filename="../ui/widgets/agent_panel.py" line="867"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>Kailangang i-set up muli ang mga application na na-set up na.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation>Hilingin sa agent na i-filter ang iyong mga layer</translation>
+        <translation type="obsolete">Hilingin sa agent na i-filter ang iyong mga layer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="240"/>
+        <location filename="../ui/widgets/agent_panel.py" line="253"/>
         <source>Back to the conversation</source>
         <translation>Bumalik sa usapan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="668"/>
+        <location filename="../ui/widgets/agent_panel.py" line="840"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>Pagkabukas ng FilterMate, maaaring i-filter ng Claude Code o ibang MCP client sa computer na ito ang iyong mga layer, ayon sa mga patakaran ng panel na ito: parehong mga source, parehong kumpirmasyon, at maaaring i-undo rito ang mga filter. Ipinapadala ng application na iyon ang binabasa nito sa sarili nitong AI provider.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Magkonekta ng AI provider para magsimula. Walang ipapadala bago ka pumayag.</translation>
+        <translation type="obsolete">Magkonekta ng AI provider para magsimula. Walang ipapadala bago ka pumayag.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <location filename="../ui/widgets/agent_panel.py" line="908"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>Nakopya, kasama ang access token: ingatan ito. I-save ang mga setting na ito para mailapat.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="685"/>
+        <location filename="../ui/widgets/agent_panel.py" line="857"/>
         <source>Copy for Claude Desktop</source>
         <translation>Kopyahin para sa Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="690"/>
+        <location filename="../ui/widgets/agent_panel.py" line="862"/>
         <source>Copy the Claude Code command</source>
         <translation>Kopyahin ang command ng Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="682"/>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
         <source>Copy the configuration</source>
         <translation>Kopyahin ang configuration</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Ilarawan ito sa sarili mong salita. Maaaring i-undo ang bawat filter.</translation>
+        <translation type="obsolete">Ilarawan ito sa sarili mong salita. Maaaring i-undo ang bawat filter.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="471"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>Filter your layers from a sentence</source>
         <translation>I-filter ang iyong mga layer sa isang pangungusap</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="594"/>
+        <location filename="../ui/widgets/agent_panel.py" line="704"/>
         <source>FilterMate agent</source>
         <translation>FilterMate agent</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="242"/>
+        <location filename="../ui/widgets/agent_panel.py" line="255"/>
         <source>History</source>
         <translation>History</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="201"/>
+        <location filename="../ui/widgets/agent_panel.py" line="212"/>
         <source>History…</source>
         <translation>History…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation>Pumapayag akong ipadala ang data na ito sa provider na ito</translation>
+        <translation type="obsolete">Pumapayag akong ipadala ang data na ito sa provider na ito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="672"/>
+        <location filename="../ui/widgets/agent_panel.py" line="844"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>Hayaang kontrolin ng ibang application sa computer na ito ang FilterMate (MCP server)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <location filename="../ui/widgets/agent_panel.py" line="943"/>
         <source>MCP connector</source>
         <translation>MCP connector</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <location filename="../ui/widgets/agent_panel.py" line="983"/>
         <source>MCP connectors</source>
         <translation>Mga MCP connector</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="606"/>
+        <location filename="../ui/widgets/agent_panel.py" line="716"/>
         <source>Model</source>
         <translation>Model</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="198"/>
+        <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Higit pa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="693"/>
+        <location filename="../ui/widgets/agent_panel.py" line="865"/>
         <source>New access token</source>
         <translation>Bagong access token</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="203"/>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Bagong usapan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="904"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>Bagong token: mailalapat ito kapag na-save na ang mga setting na ito.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="795"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Open data platforms</source>
         <translation>Mga open data platform</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="166"/>
+        <location filename="../ui/widgets/agent_panel.py" line="177"/>
+        <location filename="../ui/widgets/agent_panel.py" line="667"/>
         <source>Open the settings</source>
         <translation>Buksan ang mga setting</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="657"/>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
         <source>Other applications</source>
         <translation>Ibang mga application</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="701"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="638"/>
-        <location filename="../ui/widgets/agent_panel.py" line="655"/>
+        <location filename="../ui/widgets/agent_panel.py" line="773"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Provider</source>
         <translation>Provider</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="264"/>
+        <location filename="../ui/widgets/agent_panel.py" line="280"/>
         <source>Redo</source>
         <translation>I-redo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="755"/>
+        <location filename="../ui/widgets/agent_panel.py" line="730"/>
+        <location filename="../ui/widgets/agent_panel.py" line="931"/>
         <source>Remove</source>
         <translation>Alisin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="619"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>Remove the stored key</source>
         <translation>Alisin ang naka-store na key</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="796"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>Satellite imagery</source>
         <translation>Satellite imagery</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Send (Enter)</source>
         <translation>Ipadala (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <location filename="../ui/widgets/agent_panel.py" line="288"/>
         <source>Send again</source>
         <translation>Ipadala ulit</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="479"/>
+        <location filename="../ui/widgets/agent_panel.py" line="574"/>
         <source>Sent to: {}</source>
         <translation>Ipinadala sa: {}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation>I-set up ang agent</translation>
+        <translation type="obsolete">I-set up ang agent</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="656"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Sources</source>
         <translation>Mga source</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Stop (Esc)</source>
         <translation>Ihinto (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
         <source>Stored: leave empty to keep it</source>
         <translation>Naka-store: iwanang walang laman para panatilihin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="753"/>
+        <location filename="../ui/widgets/agent_panel.py" line="929"/>
         <source>Test</source>
         <translation>Subukan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
         <source>Testing…</source>
         <translation>Sinusubukan…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="659"/>
+        <location filename="../ui/widgets/agent_panel.py" line="802"/>
         <source>The MCP server could not start: {}</source>
         <translation>Hindi masimulan ang MCP server: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="745"/>
+        <location filename="../ui/widgets/agent_panel.py" line="917"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>Maaaring maghanap ang agent sa mga source na may tsek dito. Ipinapadala sa kanila ang iyong mga paghahanap at ang ipinapasa ng agent sa isang connector; ang layer na idinagdag mula sa kanila ay binabasa mula sa kanilang mga server.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>Ipinapadala ng agent ang iyong kahilingan, ang mga pangalan ng iyong mga layer at field, ang iyong mga filter expression at ang mga resulta ng mga tool nito sa provider na pinili rito, ayon sa mga tuntunin ng provider na iyon. Kung walang opsyon sa ibaba, hindi binabasa ng agent ang mga halaga ng iyong mga field; ang mga halagang nakasulat na sa iyong mga filter at paborito ay ipinapadala pa rin. Itinatago ang usapan sa computer na ito para sa bawat project, hanggang magsimula ka ng bago.</translation>
+        <translation type="obsolete">Ipinapadala ng agent ang iyong kahilingan, ang mga pangalan ng iyong mga layer at field, ang iyong mga filter expression at ang mga resulta ng mga tool nito sa provider na pinili rito, ayon sa mga tuntunin ng provider na iyon. Kung walang opsyon sa ibaba, hindi binabasa ng agent ang mga halaga ng iyong mga field; ang mga halagang nakasulat na sa iyong mga filter at paborito ay ipinapadala pa rin. Itinatago ang usapan sa computer na ito para sa bawat project, hanggang magsimula ka ng bago.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="687"/>
+        <location filename="../ui/widgets/agent_panel.py" line="859"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>Sa pamamagitan ng mcp-remote, na nangangailangan ng Node.js: sinisimulan ng Claude Desktop ang mga lokal na server bilang mga program.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="846"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
         <source>Too many sources added: remove one first.</source>
         <translation>Masyadong maraming source ang naidagdag: mag-alis muna ng isa.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="261"/>
+        <location filename="../ui/widgets/agent_panel.py" line="277"/>
         <source>Undo the last</source>
         <translation>I-undo ang huli</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="170"/>
+        <location filename="../ui/widgets/agent_panel.py" line="181"/>
         <source>Undo this turn</source>
         <translation>I-undo ang turn na ito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="468"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>What do you want to filter?</source>
         <translation>Ano ang gusto mong i-filter?</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
         <source>added by you</source>
         <translation>idinagdag mo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>applied</source>
         <translation>nailapat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>community</source>
         <translation>komunidad</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="765"/>
+        <location filename="../ui/widgets/agent_panel.py" line="941"/>
         <source>https://... or a portal address</source>
         <translation>https://... o address ng portal</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="310"/>
+        <location filename="../ui/widgets/agent_panel.py" line="338"/>
+        <location filename="../ui/widgets/agent_panel.py" line="339"/>
         <source>no change</source>
         <translation>walang pagbabago</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>official</source>
         <translation>opisyal</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>this computer</source>
         <translation>computer na ito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>undone</source>
         <translation>na-undo</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation>{} turn</translation>
+        <translation type="obsolete">{} turn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Which layers are in this project?</source>
-        <translation type="obsolete">Anong mga layer ang nasa project na ito?</translation>
+        <translation>Anong mga layer ang nasa project na ito?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
-        <translation type="obsolete">Panatilihin ang mga gusaling mas mataas sa 15 m</translation>
+        <translation>Panatilihin ang mga gusaling mas mataas sa 15 m</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
         <source>Filter the roads inside the selected feature</source>
-        <translation type="obsolete">I-filter ang mga kalsada sa loob ng napiling feature</translation>
+        <translation>I-filter ang mga kalsada sa loob ng napiling feature</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
+        <source>Add the municipalities from data.gouv.fr</source>
+        <translation>Idagdag ang mga munisipyo mula sa data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="195"/>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Ask for a filter…</source>
+        <translation>Humiling ng filter…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <source>Choosing another provider or address asks for this agreement again.</source>
+        <translation>Hihingin muli ang pahintulot na ito kapag nagpalit ng provider o address.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="429"/>
+        <source>Connect a provider</source>
+        <translation>Ikonekta ang isang provider</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Connect a provider to start</source>
+        <translation>Magkonekta ng provider para magsimula</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
+        <translation>Ilarawan ito sa sarili mong salita. Binabasa ng agent ang proyekto, sinusubukan ang filter, saka ito inilalapat. Maaaring i-undo ang bawat palitan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>FilterMate (free quota)</source>
+        <translation>FilterMate (libreng quota)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <source>I agree to send this data to {}</source>
+        <translation>Pumapayag akong ipadala ang datos na ito sa {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="425"/>
+        <source>It needs an AI provider: the free quota of FilterMate, your own key, or a local model. Nothing is sent before you agree.</source>
+        <translation>Kailangan nito ng AI provider: ang libreng quota ng FilterMate, sarili mong key, o isang lokal na modelo. Walang ipinapadala bago ka pumayag.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>Ollama (local)</source>
+        <translation>Ollama (lokal)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
+        <translation>Binabasa ng agent ang mga layer ng proyekto mo, isinusulat ang mga filter at inilalapat ang mga ito. Maaaring i-undo ang bawat palitan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
+        <translation>Iniingatan ang key sa authentication database ng QGIS, hindi kailanman sa isang settings file. Ipinapadala lamang ito sa address na ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <source>WHAT LEAVES THIS MACHINE</source>
+        <translation>ANG LUMALABAS SA MAKINANG ITO</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
+        <translation>Kung wala ito, hindi binabasa ng agent ang mga halaga ng iyong mga field. Ipinapadala pa rin ang mga nakasulat na sa iyong mga filter at paborito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <source>You can already type the next request.</source>
+        <translation>Maaari mo nang i-type ang susunod na kahilingan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Ang iyong kahilingan, ang mga pangalan ng iyong mga layer at field, ang iyong mga filter expression at ang mga resulta ng mga tool ng agent, sa provider na ito at ayon sa mga tuntunin nito. Iniingatan ang usapan sa computer na ito para sa bawat proyekto, hanggang magsimula ka ng bago.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="349"/>
+        <source>this project · {} turn(s)</source>
+        <translation>proyektong ito · {} palitan</translation>
     </message>
 </context>
 <context>

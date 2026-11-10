@@ -8,17 +8,18 @@ follow the links it holds. Nothing here ever parses HTML.
 from __future__ import annotations
 
 import time
-from typing import Tuple
+from typing import Sequence, Tuple
 
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QMenu,
+    QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QMenu,
     QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
     QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from .agent_thread import AgentThread
+from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
@@ -27,6 +28,7 @@ from ...core.agent.sources import (
     custom_to_json, make_source,
 )
 from ..styles.mockup_design import FONT_FAMILY, render_icon, stylesheet_is_dark, tokens
+from ..styles.theme_manager import OWN_STYLE_PROPERTY
 
 PANEL_NAME = "AGENT"
 INPUT_HEIGHT = 32
@@ -35,6 +37,7 @@ BUTTON_SIZE = 26
 ICON_SIZE = 16
 PROGRESS_HEIGHT = 3
 STATUS_MAX_HEIGHT = 48
+WELCOME_ICON_SIZE = 36
 _WELCOME_PAGE, _THREAD_PAGE, _HISTORY_PAGE = 0, 1, 2
 _TURN_ROLE = Qt.ItemDataRole.UserRole
 _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
@@ -42,15 +45,22 @@ _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
-EXAMPLES = (
-    "Which layers are in this project?",
-    "Keep the buildings taller than 15 m",
-    "Filter the roads inside the selected feature",
-)
 
 
 def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentPanel", text)
+
+
+def preset_label(name: str) -> str:
+    """The name of a provider preset as the settings show it, in the language of QGIS."""
+    translated = {FREE_PRESET: _tr("FilterMate (free quota)"), "ollama": _tr("Ollama (local)")}
+    return translated.get(name) or PRESET_LABELS.get(name, name)
+
+
+def examples() -> Tuple[str, ...]:
+    """The requests offered on an empty conversation (mockup: Ready board), in the language of QGIS."""
+    return (_tr("Which layers are in this project?"), _tr("Keep the buildings taller than 15 m"),
+            _tr("Filter the roads inside the selected feature"), _tr("Add the municipalities from data.gouv.fr"))
 
 
 class AgentInput(QLineEdit):
@@ -163,6 +173,7 @@ class AgentPanel(QFrame):
         # A wrapping label reports a tall minimum at its narrowest: it must not push the input out of the section.
         self.status.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self.status.setMaximumHeight(STATUS_MAX_HEIGHT)
+        self.status.setVisible(False)  # only while it says something: the input sits right under the thread
         self.fix_button = QPushButton(_tr("Open the settings"), self)
         self.fix_button.setObjectName("pushButton_agent_fix")
         self.fix_button.setVisible(False)
@@ -181,7 +192,7 @@ class AgentPanel(QFrame):
 
         self.input = AgentInput(self)
         self.input.setObjectName("lineEdit_agent_input")
-        self.input.setPlaceholderText(_tr("Ask the agent to filter your layers"))
+        self.input.setPlaceholderText(_tr("Ask for a filter…"))
         self.input.returnPressed.connect(self._on_send)
         self.input.escape_pressed.connect(self._on_escape)
 
@@ -227,12 +238,14 @@ class AgentPanel(QFrame):
         layout.addLayout(actions)
         layout.addLayout(ask)
         layout.addWidget(self.destination)
+        self.set_ready(False)
         self.set_working(False)
         self._refresh_look()
 
     def _build_history(self) -> QWidget:
         """The turns of this project: what was asked, what changed, applied or undone."""
-        page = QWidget(self)
+        page = QFrame(self)
+        page.setObjectName("frame_agent_history")
         self.back_button = QToolButton(page)
         self.back_button.setObjectName("toolButton_agent_back")
         self.back_button.setAutoRaise(True)
@@ -245,9 +258,11 @@ class AgentPanel(QFrame):
         title.setFont(font)
         self.history_count = QLabel(page)
         self.history_count.setObjectName("label_agent_history_count")
-        header = QHBoxLayout()
-        header.setContentsMargins(0, 0, 0, 0)
-        header.setSpacing(6)
+        header_bar = QWidget(page)
+        header_bar.setObjectName("widget_agent_history_header")
+        header = QHBoxLayout(header_bar)
+        header.setContentsMargins(8, 6, 10, 6)
+        header.setSpacing(8)
         header.addWidget(self.back_button)
         header.addWidget(title)
         header.addStretch(1)
@@ -256,6 +271,7 @@ class AgentPanel(QFrame):
         self.history_list = QListWidget(page)
         self.history_list.setObjectName("listWidget_agent_history")
         self.history_list.setWordWrap(True)
+        self.history_list.setFrameShape(QFrame.Shape.NoFrame)
         self.history_list.itemSelectionChanged.connect(self._on_turn_selected)
 
         self.history_undo_button = QPushButton(_tr("Undo the last"), page)
@@ -271,23 +287,28 @@ class AgentPanel(QFrame):
         self.step_button.clicked.connect(self._undo_to_selected_step)
         self.resend_button = QPushButton(_tr("Send again"), page)
         self.resend_button.setObjectName("pushButton_agent_resend")
+        self.resend_button.setFlat(True)
+        self.resend_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.resend_button.setEnabled(False)
         self.resend_button.clicked.connect(self._resend_selected)
-        buttons = QHBoxLayout()
-        buttons.setContentsMargins(0, 0, 0, 0)
-        buttons.setSpacing(4)
+        footer = QWidget(page)
+        footer.setObjectName("widget_agent_history_footer")
+        buttons = QHBoxLayout(footer)
+        buttons.setContentsMargins(10, 8, 10, 8)
+        buttons.setSpacing(6)
         buttons.addWidget(self.history_undo_button)
         buttons.addWidget(self.history_redo_button)
         buttons.addStretch(1)
         buttons.addWidget(self.step_button)
         buttons.addWidget(self.resend_button)
 
+        self.step_button.setVisible(False)
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
-        layout.addLayout(header)
+        layout.setContentsMargins(1, 1, 1, 1)
+        layout.setSpacing(0)
+        layout.addWidget(header_bar)
         layout.addWidget(self.history_list, 1)
-        layout.addLayout(buttons)
+        layout.addWidget(footer)
         return page
 
     def show_history(self) -> None:
@@ -302,31 +323,70 @@ class AgentPanel(QFrame):
 
     def set_history(self, turns, can_undo: bool, can_redo: bool) -> None:
         """``turns``: dicts with time, request, layers, applied; oldest first."""
-        palette = tokens(self._dark())
+        dark = self._dark()
+        palette = tokens(dark)
         self.history_list.clear()
         last_applied = max((index for index, turn in enumerate(turns) if turn.get("applied")), default=-1)
         for position, turn in enumerate(turns):
             when = time.strftime("%H:%M", time.localtime(turn.get("time") or 0))
-            layers = ", ".join(turn.get("layers") or ()) or _tr("no change")
-            state = _tr("applied") if turn.get("applied") else _tr("undone")
-            item = QListWidgetItem(f"{when}  {turn.get('request') or _tr('(no request)')}\n{layers} · {state}")
+            layers = ", ".join(turn.get("layers") or ())
+            request = turn.get("request") or _tr("(no request)")
+            # A turn that changed nothing has nothing to undo: no state (mockup: History board).
+            state = "" if not layers else (_tr("applied") if turn.get("applied") else _tr("undone"))
+            item = QListWidgetItem()
             item.setData(_TURN_ROLE, turn.get("request") or "")
-            if not turn.get("applied"):
-                item.setForeground(QColor(palette["fm_text_muted"]))
-            self.history_list.addItem(item)
+            item.setToolTip(f"{when}  {request}\n{layers or _tr('no change')}" + (f" · {state}" if state else ""))
+            self._history_row(item, when, request, layers or _tr("no change"), state, bool(turn.get("applied")),
+                              palette, dark)
             if position == last_applied:  # the steps of the last request can be undone one by one
                 for number, label in enumerate(turn.get("steps") or ()):
-                    step = QListWidgetItem(f"    {number + 1}. {label}")
+                    step = QListWidgetItem()
                     step.setData(_TURN_ROLE, "")
                     step.setData(_STEP_ROLE, number)
-                    step.setForeground(QColor(palette["fm_text_muted"]))
-                    self.history_list.addItem(step)
+                    step.setToolTip(label)
+                    self._history_row(step, "", f"{number + 1}. {label}", "", "", True, palette, dark, step=True)
         self.history_list.scrollToBottom()
-        self.history_count.setText(_tr("{} turn(s)").format(len(turns)))
+        self.history_count.setText(_tr("this project · {} turn(s)").format(len(turns)))
         self.history_count.setStyleSheet(f"color: {palette['fm_text_muted']};")
         self.history_undo_button.setEnabled(can_undo and not self._working)
         self.history_redo_button.setEnabled(can_redo and not self._working)
         self._on_turn_selected()
+
+    def _history_row(self, item: QListWidgetItem, when: str, request: str, layers: str, state: str, applied: bool,
+                     palette: dict, dark: bool, step: bool = False) -> None:
+        """One line of the history: time, request, what it changed, applied or undone; an undone one is dimmed."""
+        muted = palette["fm_text_muted"]
+        row = QWidget(self.history_list)
+        row.setObjectName("widget_agent_history_row")
+        row.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)  # the list keeps the selection
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(24 if step else 10, 6 if step else 8, 10, 6 if step else 8)
+        layout.setSpacing(10)
+        if when:
+            time_label = QLabel(when, row)
+            time_label.setStyleSheet(f"font-size: 11px; color: {muted};")
+            layout.addWidget(time_label, 0, Qt.AlignmentFlag.AlignTop)
+        column = QVBoxLayout()
+        column.setContentsMargins(0, 0, 0, 0)
+        column.setSpacing(2)
+        title = ElidedLabel(request, row)
+        title.setStyleSheet(f"font-size: {12 if step else 13}px; color: {palette['fm_text'] if applied and not step else muted};")
+        column.addWidget(title)
+        if layers:
+            sub = ElidedLabel(layers, row)
+            sub.setStyleSheet(f"font-size: 11px; color: {muted};")
+            column.addWidget(sub)
+        layout.addLayout(column, 1)
+        if state:
+            state_label = QLabel(state, row)
+            state_label.setStyleSheet(f"font-size: 11px; color: {DONE_COLOR['dark' if dark else 'light'] if applied else muted};")
+            layout.addWidget(state_label, 0, Qt.AlignmentFlag.AlignTop)
+        for label in row.findChildren(QLabel):
+            label.setTextFormat(Qt.TextFormat.PlainText)
+            label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self.history_list.addItem(item)
+        item.setSizeHint(row.sizeHint())
+        self.history_list.setItemWidget(item, row)
 
     def _on_turn_selected(self) -> None:
         items = self.history_list.selectedItems()
@@ -335,6 +395,7 @@ class AgentPanel(QFrame):
                       and not str(items[0].data(_TURN_ROLE) or "").startswith(EXTERNAL_MARK))
         self.resend_button.setEnabled(typed_here and not self._working)
         self.step_button.setEnabled(step is not None and not self._working)
+        self.step_button.setVisible(step is not None)  # only on a step: the footer is the mockup's otherwise
 
     def _undo_to_selected_step(self) -> None:
         items = self.history_list.selectedItems()
@@ -349,6 +410,9 @@ class AgentPanel(QFrame):
 
     def _build_welcome(self) -> QWidget:
         page = QWidget(self)
+        self.welcome_icon = QLabel(page)
+        self.welcome_icon.setObjectName("label_agent_welcome_icon")
+        self.welcome_icon.setFixedSize(WELCOME_ICON_SIZE, WELCOME_ICON_SIZE)
         self.welcome_title = QLabel(page)
         self.welcome_title.setObjectName("label_agent_welcome")
         self.welcome_title.setWordWrap(True)
@@ -358,7 +422,11 @@ class AgentPanel(QFrame):
         self.welcome_text = QLabel(page)
         self.welcome_text.setObjectName("label_agent_welcome_text")
         self.welcome_text.setWordWrap(True)
-        self.configure_button = QPushButton(_tr("Set up the agent"), page)
+        self.welcome_note = QLabel(_tr("It needs an AI provider: the free quota of FilterMate, your own key, or a local "
+                                       "model. Nothing is sent before you agree."), page)
+        self.welcome_note.setObjectName("label_agent_welcome_note")
+        self.welcome_note.setWordWrap(True)
+        self.configure_button = QPushButton(_tr("Connect a provider"), page)
         self.configure_button.setObjectName("pushButton_agent_configure")
         self.configure_button.clicked.connect(self.settings_requested)
         self.try_label = QLabel(_tr("TRY"), page)
@@ -367,14 +435,15 @@ class AgentPanel(QFrame):
         layout = QVBoxLayout(page)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(10)
+        layout.addWidget(self.welcome_icon)
         layout.addWidget(self.welcome_title)
         layout.addWidget(self.welcome_text)
+        layout.addWidget(self.welcome_note)
         layout.addWidget(self.configure_button, 0, Qt.AlignmentFlag.AlignLeft)
         layout.addSpacing(4)
         layout.addWidget(self.try_label)
         self.example_buttons = []
-        for example in EXAMPLES:
-            text = _tr(example)
+        for text in examples():
             button = QPushButton(text, page)
             button.setObjectName("pushButton_agent_example")
             button.clicked.connect(lambda _checked=False, value=text: self.use_example(value))
@@ -430,7 +499,21 @@ class AgentPanel(QFrame):
             f" color: {palette['fm_text']}; }}"
             f"QPushButton#pushButton_agent_example:hover {{ border-color: {palette['fm_active_border']}; }}"
             f"QPushButton#pushButton_agent_configure {{ padding: 8px 16px; font-weight: 500; border: none;"
-            f" border-radius: 6px; background: {palette['fm_accent']}; color: {palette['fm_accent_text']}; }}")
+            f" border-radius: 6px; background: {palette['fm_accent']}; color: {palette['fm_accent_text']}; }}"
+            f"QLabel#label_agent_welcome_note {{ font-size: 12px; color: {muted}; border: none; border-left: 2px solid"
+            f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
+            f"QFrame#frame_agent_history {{ background: {palette['fm_list']}; border: 1px solid"
+            f" {palette['fm_group_border']}; border-radius: 6px; }}"
+            f"QWidget#widget_agent_history_header {{ background: transparent; border: none; border-bottom: 1px solid"
+            f" {palette['fm_group_border']}; }}"
+            f"QWidget#widget_agent_history_footer {{ background: {palette['fm_group']}; border: none; border-top: 1px solid"
+            f" {palette['fm_group_border']}; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }}"
+            f"QListWidget#listWidget_agent_history {{ background: {palette['fm_list']}; border: none; outline: 0; }}"
+            f"QListWidget#listWidget_agent_history::item {{ border-bottom: 1px solid {palette['fm_group']}; }}"
+            f"QListWidget#listWidget_agent_history::item:selected {{ background: {palette['fm_active']}; }}"
+            f"QFrame#frame_agent_history QPushButton {{ font-size: 12px; min-height: 0; padding: 4px 10px; }}"
+            f"QPushButton#pushButton_agent_resend {{ color: {palette['fm_accent']}; background: transparent; border: none; }}"
+            f"QPushButton#pushButton_agent_resend:disabled {{ color: {muted}; }}")
         if sheet != self.styleSheet() and not getattr(self, "_styling", False):
             self._styling = True  # a new sheet is itself a style change: it must not come back here
             try:
@@ -447,6 +530,9 @@ class AgentPanel(QFrame):
         back = render_icon("undo", dark)
         if back is not None:
             self.back_button.setIcon(back)
+        welcome = render_icon("agent", dark, palette["fm_accent"])
+        if welcome is not None:
+            self.welcome_icon.setPixmap(welcome.pixmap(WELCOME_ICON_SIZE, WELCOME_ICON_SIZE))
 
     def changeEvent(self, event) -> None:  # noqa: N802 - Qt name
         super().changeEvent(event)
@@ -466,11 +552,20 @@ class AgentPanel(QFrame):
         self._ready = ready
         if ready:
             self.welcome_title.setText(_tr("What do you want to filter?"))
-            self.welcome_text.setText(_tr("Describe it in your own words. Each filter can be undone."))
+            self.welcome_text.setText(_tr("Describe it in your own words. The agent reads the project, tries the filter, "
+                                          "then applies it. Each turn can be undone."))
         else:
             self.welcome_title.setText(_tr("Filter your layers from a sentence"))
-            self.welcome_text.setText(_tr("Connect an AI provider to start. Nothing is sent before you agree."))
+            self.welcome_text.setText(_tr("The agent reads the layers of your project, writes the filters and applies "
+                                          "them. Each turn can be undone."))
+        self.welcome_icon.setVisible(not ready)
+        self.welcome_note.setVisible(not ready)
         self.configure_button.setVisible(not ready)
+        # Nothing can be asked before a provider is set up (mockup: Welcome board); the menu still opens the settings.
+        if hasattr(self, "send_button"):
+            self.input.setEnabled(ready)
+            self.input.setPlaceholderText(_tr("Ask for a filter…") if ready else _tr("Connect a provider to start"))
+            self.send_button.setEnabled(ready or self._working)
         if hasattr(self, "try_label"):
             self.try_label.setVisible(ready)
         for button in self.example_buttons if hasattr(self, "example_buttons") else ():
@@ -492,6 +587,8 @@ class AgentPanel(QFrame):
         self.history_redo_button.setEnabled(self.history_redo_button.isEnabled() and not working)
         self._on_turn_selected()
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
+        self.send_button.setEnabled(self._ready or working)
+        self.thread.set_hint(_tr("You can already type the next request.") if working else "")
         self._refresh_look()
 
     def set_can_undo(self, possible: bool) -> None:
@@ -508,6 +605,7 @@ class AgentPanel(QFrame):
         danger = tokens(self._dark())["fm_danger"]
         self.status.setStyleSheet(f"color: {danger};" if error else "")
         self.status.setText(text)
+        self.status.setVisible(bool(text))
         self.fix_button.setVisible(offer_settings)
 
     def _on_send(self) -> None:
@@ -553,10 +651,21 @@ class AgentPanel(QFrame):
         self.thread.add_user(text)
         self._in_answer = False
 
-    def add_action(self, text: str, succeeded: bool = True, detail: str = "", count: str = "") -> None:
-        """Something the agent changed, or failed to change, in a card; ``count`` is what it kept (``12 / 586``)."""
+    def add_action(self, text: str, succeeded: bool = True, detail: str = "", count: str = "",
+                   strong: Sequence[str] = ()) -> None:
+        """Something the agent changed, or failed to change, in a card; ``count`` is what it kept (``12 / 586``).
+
+        ``strong``: the layer names of ``text``, shown in bold.
+        """
         self._show_conversation()
-        self.thread.add_card(text, succeeded, detail, count)
+        self.thread.add_card(text, succeeded, detail, count, strong)
+        self._in_answer = False
+
+    def show_error(self, title: str, detail: str = "", offer_settings: bool = False) -> None:
+        """A request that failed, as a card in the thread (mockup: Error board)."""
+        self._show_conversation()
+        self.thread.add_error(title, detail, _tr("Open the settings") if offer_settings else "",
+                              self.settings_requested.emit if offer_settings else None)
         self._in_answer = False
 
     def begin_step(self) -> None:
@@ -591,6 +700,7 @@ class AgentSettingsDialog(QDialog):
 
     def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="") -> None:
         super().__init__(parent)
+        self.setProperty(OWN_STYLE_PROPERTY, True)  # styled as the mockup draws it: the dock must not reset it
         self.setWindowTitle(_tr("FilterMate agent"))
         self._tester = tester
         self._values = values
@@ -599,7 +709,7 @@ class AgentSettingsDialog(QDialog):
         self.preset = QComboBox(self)
         for name in sorted(PRESETS, key=lambda item: item != FREE_PRESET):  # the free quota first, when there is one
             if name != FREE_PRESET or free_available:
-                self.preset.addItem(PRESET_LABELS.get(name, name), name)
+                self.preset.addItem(preset_label(name), name)
         # A first use starts on what needs no key; a free quota that went away falls back on the first provider.
         first_use = free_available and not values.model
         self.preset.setCurrentIndex(max(self.preset.findData(FREE_PRESET if first_use else values.preset), 0))
@@ -613,43 +723,76 @@ class AgentSettingsDialog(QDialog):
             "Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider "
             "and enter your own API key."), self)
         self.free_notice.setWordWrap(True)
+        self.free_notice.setObjectName("label_agent_settings_note")
         self.key_label = QLabel(_tr("API key"), self)
         self.key = QLineEdit(self)
         self.key.setEchoMode(QLineEdit.EchoMode.Password)
-        self.forget_button = QPushButton(_tr("Remove the stored key"), self)
+        self.forget_button = QPushButton(_tr("Remove"), self)
         self.forget_button.setObjectName("pushButton_agent_forget_key")
+        self.forget_button.setToolTip(_tr("Remove the stored key"))
         self.forget_button.clicked.connect(self._on_forget)
+        self.key_note = QLabel(_tr("The key is kept in the authentication database of QGIS, never in a settings file. "
+                                   "It is only sent to this address."), self)
+        self.key_note.setObjectName("label_agent_settings_note")
+        self.key_note.setWordWrap(True)
         self.send_values = QCheckBox(_tr("Allow attribute values to be sent"), self)
         self.send_values.setChecked(values.send_values)
+        values_note = QLabel(_tr("Without it, the agent does not read the values of your fields. Those already written "
+                                 "in your filters and favorites are still sent."), self)
+        values_note.setObjectName("label_agent_settings_sub")
+        values_note.setWordWrap(True)
+        leaving = QLabel(_tr("WHAT LEAVES THIS MACHINE"), self)
+        leaving.setObjectName("label_agent_settings_heading")
         notice = QLabel(_tr(
-            "The agent sends your request, the names of your layers and fields, your filter expressions and the "
-            "results of its tools to the provider chosen here, under that provider's terms. Without the option "
-            "below, the agent does not read the values of your fields; values already written in your filters and "
-            "favorites are still sent. The conversation is kept on this computer for each project, until you start "
-            "a new one."), self)
+            "Your request, the names of your layers and fields, your filter expressions and the results of the tools "
+            "of the agent, to this provider and under its terms. The conversation is kept on this computer for each "
+            "project, until you start a new one."), self)
         notice.setWordWrap(True)
-        self.consent = QCheckBox(_tr("I agree to send this data to this provider"), self)
+        self.consent = QCheckBox(self)
+        consent_note = QLabel(_tr("Choosing another provider or address asks for this agreement again."), self)
+        consent_note.setObjectName("label_agent_consent_note")
+        consent_note.setWordWrap(True)
+        consent_box = QFrame(self)
+        consent_box.setObjectName("frame_agent_consent")
+        consent_layout = QVBoxLayout(consent_box)
+        consent_layout.setContentsMargins(10, 8, 10, 8)
+        consent_layout.setSpacing(2)
+        consent_layout.addWidget(self.consent)
+        consent_layout.addWidget(consent_note)
         self.preset.currentIndexChanged.connect(self._on_preset)
         self.base_url.textChanged.connect(self._on_destination)
         self._on_preset()
         self.model.setEditText(values.model)
 
+        key_row = QHBoxLayout()
+        key_row.setContentsMargins(0, 0, 0, 0)
+        key_row.setSpacing(6)
+        key_row.addWidget(self.key, 1)
+        key_row.addWidget(self.forget_button)
         form = QFormLayout()
         form.addRow(_tr("Provider"), self.preset)
         form.addRow(self.model_label, self.model)
-        form.addRow(self.key_label, self.key)
-        form.addRow("", self.forget_button)
+        form.addRow(self.key_label, key_row)
         form.addRow(self.address_label, self.base_url)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
+        buttons.button(QDialogButtonBox.StandardButton.Save).setObjectName("pushButton_agent_settings_save")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
+        line = QFrame(self)
+        line.setObjectName("frame_agent_settings_line")
+        line.setFixedHeight(1)
         general = QWidget(self)
         general_layout = QVBoxLayout(general)
+        general_layout.setSpacing(10)
         general_layout.addLayout(form)
+        general_layout.addWidget(self.key_note)
         general_layout.addWidget(self.free_notice)
+        general_layout.addWidget(line)
+        general_layout.addWidget(leaving)
         general_layout.addWidget(notice)
         general_layout.addWidget(self.send_values)
-        general_layout.addWidget(self.consent)
+        general_layout.addWidget(values_note)
+        general_layout.addWidget(consent_box)
         general_layout.addStretch(1)
         self.tabs = QTabWidget(self)
         self.tabs.addTab(general, _tr("Provider"))
@@ -660,6 +803,35 @@ class AgentSettingsDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)
         layout.addWidget(buttons)
+        self._style_dialog()
+
+    def showEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().showEvent(event)
+        # As a child of the dock, its sheet is set again once shown: polished earlier, it may not apply.
+        QTimer.singleShot(0, self._style_dialog)
+
+    def _style_dialog(self) -> None:
+        """The look of the mockup (Settings and Sources boards), in the colors of the theme of QGIS."""
+        dark = self.palette().window().color().lightness() < 128
+        palette = tokens(dark)
+        muted = palette["fm_text_muted"]
+        sheet = (
+            f"QLabel#label_agent_settings_note {{ font-size: 11px; color: {muted}; border: none; border-left: 2px solid"
+            f" {palette['fm_group_border']}; padding: 0 0 0 10px; }}"
+            f"QLabel#label_agent_settings_sub {{ font-size: 11px; color: {muted}; padding-left: 24px; }}"
+            f"QLabel#label_agent_settings_heading {{ font-size: 12px; font-weight: 600; color: {muted};"
+            " letter-spacing: 1px; }"
+            f"QFrame#frame_agent_settings_line {{ background: {palette['fm_group_border']}; border: none; }}"
+            f"QFrame#frame_agent_consent {{ border: 1px solid {palette['fm_active_border']}; border-radius: 6px;"
+            f" background: {palette['fm_active']}; }}"
+            "QFrame#frame_agent_consent QCheckBox { font-weight: 500; }"
+            f"QLabel#label_agent_consent_note {{ font-size: 11px; color: {palette['fm_accent']}; padding-left: 24px;"
+            " background: transparent; }"
+            f"QPushButton#pushButton_agent_settings_save, QPushButton#pushButton_agent_add_source {{ font-weight: 500;"
+            f" border: none; border-radius: 6px; padding: 5px 16px; background: {palette['fm_accent']};"
+            f" color: {palette['fm_accent_text']}; }}")
+        self.setStyleSheet("")  # the same text again would not polish anew
+        self.setStyleSheet(sheet)
 
     def _build_applications(self, values) -> QWidget:
         """The MCP server of the plugin: off by default, and only ever reachable from this computer."""
@@ -749,6 +921,10 @@ class AgentSettingsDialog(QDialog):
         self.sources_tree.setObjectName("treeWidget_agent_sources")
         self.sources_tree.setHeaderHidden(True)
         self.sources_tree.setRootIsDecorated(False)
+        self.sources_tree.setColumnCount(2)  # the name, and where it comes from on the right (mockup: Sources board)
+        self.sources_tree.header().setStretchLastSection(False)
+        self.sources_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.sources_tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.sources_tree.currentItemChanged.connect(lambda *_: self._on_source_selected())
         self.test_button = QPushButton(_tr("Test"), page)
         self.test_button.clicked.connect(self._on_test_source)
@@ -768,6 +944,7 @@ class AgentSettingsDialog(QDialog):
                             (KIND_WFS, "WFS"), (KIND_STAC, "STAC")):
             self.new_kind.addItem(label, kind)
         self.add_button = QPushButton(_tr("Add"), page)
+        self.add_button.setObjectName("pushButton_agent_add_source")
         self.add_button.clicked.connect(self._on_add_source)
         add_row = QHBoxLayout()
         add_row.addWidget(self.new_address, 1)
@@ -784,7 +961,16 @@ class AgentSettingsDialog(QDialog):
     def _source_item(self, parent, source, checked: bool) -> None:
         origin = {ORIGIN_OFFICIAL: _tr("official"), ORIGIN_COMMUNITY: _tr("community"), ORIGIN_LOCAL: _tr("this computer"),
                   ORIGIN_USER: _tr("added by you")}.get(source.origin, "")
-        item = QTreeWidgetItem(parent, [f"{source.title}  ·  {origin}"])
+        item = QTreeWidgetItem(parent, [source.title, origin])
+        dark = self.palette().window().color().lightness() < 128
+        palette = tokens(dark)
+        color = {ORIGIN_OFFICIAL: DONE_COLOR["dark" if dark else "light"], ORIGIN_LOCAL: palette["fm_accent"]}.get(
+            source.origin, palette["fm_text_muted"])
+        item.setForeground(1, QColor(color))
+        item.setTextAlignment(1, int(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter))
+        small = item.font(1)
+        small.setPointSizeF(max(small.pointSizeF() - 1, 7))
+        item.setFont(1, small)
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
         item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         item.setData(0, _TURN_ROLE, source.id)
@@ -796,11 +982,13 @@ class AgentSettingsDialog(QDialog):
                   (_tr("Satellite imagery"), lambda source: source.kind == KIND_STAC),
                   (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
         for title, belongs in groups:
-            group = QTreeWidgetItem(self.sources_tree, [title])
+            group = QTreeWidgetItem(self.sources_tree, [title.upper()])
             group.setFlags(Qt.ItemFlag.ItemIsEnabled)
             font = group.font(0)
             font.setBold(True)
+            font.setPointSizeF(max(font.pointSizeF() - 1, 7))
             group.setFont(0, font)
+            group.setForeground(0, QColor(tokens(self.palette().window().color().lightness() < 128)["fm_text_muted"]))
             for source in all_sources(self._custom):
                 if belongs(source):
                     self._source_item(group, source, source.id in enabled_ids)
@@ -874,6 +1062,7 @@ class AgentSettingsDialog(QDialog):
         no_key = free or name == "ollama"
         self.key_label.setVisible(not no_key)
         self.key.setVisible(not no_key)
+        self.key_note.setVisible(not no_key)
         for widget in (self.model_label, self.model, self.address_label, self.base_url):
             widget.setVisible(not free)
         self.free_notice.setVisible(free)
@@ -886,6 +1075,8 @@ class AgentSettingsDialog(QDialog):
         self.key.setPlaceholderText(_tr("Stored: leave empty to keep it") if stored else "")
         self.forget_button.setVisible(stored and self.key.isVisibleTo(self))
         self.consent.setChecked(self._values.consent and self._values.consent_target == target)
+        name = preset_label(self.preset.currentData()) if self.preset.currentData() else self.preset.currentText()
+        self.consent.setText(_tr("I agree to send this data to {}").format(name))
 
     def _on_forget(self) -> None:
         self.forget_key = True

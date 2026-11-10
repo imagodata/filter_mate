@@ -32,13 +32,13 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
         <source>Undone: {}</source>
         <translation>Annullato: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Undo of the last request</source>
         <translation>Annullamento dell'ultima richiesta</translation>
     </message>
@@ -69,7 +69,7 @@
         <translation>Quota gratuita</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>L'accesso alla quota gratuita è stato rinnovato: invia di nuovo la richiesta.</translation>
     </message>
@@ -79,7 +79,7 @@
         <translation>Un'altra applicazione sta modificando il progetto: riprova tra un momento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
         <source>Another application: {}</source>
         <translation>Altra applicazione: {}</translation>
     </message>
@@ -121,47 +121,47 @@
         <translation>Inserisci la tua chiave API nelle impostazioni dell'agente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Export of {}</source>
         <translation>Esportazione di {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Favorite applied</source>
         <translation>Preferito applicato</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Filter on the points of {}</source>
         <translation>Filtro sui punti di {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Filter on {}</source>
         <translation>Filtro su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Filter on {} by an area</source>
         <translation>Filtro su {} per un'area</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
         <source>Filter on {} by {}</source>
         <translation>Filtro su {} per {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
         <source>FilterMate agent</source>
         <translation>Agente FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Filters removed from {}</source>
         <translation>Filtri rimossi da {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Hidden: {}</source>
         <translation>Nascosto: {}</translation>
     </message>
@@ -171,13 +171,13 @@
         <translation>La fonte risponde.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Layer added: {}</source>
         <translation>Layer aggiunto: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Layers removed: {}</source>
         <translation>Layer rimossi: {}</translation>
     </message>
@@ -199,32 +199,32 @@
         <translation>Niente da ripristinare.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Reading the active filters</source>
         <translation>Lettura dei filtri attivi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Reading the favorites</source>
         <translation>Lettura dei preferiti</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Reading the fields of {}</source>
         <translation>Lettura dei campi di {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Reading the layers</source>
         <translation>Lettura dei layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Reading the map</source>
         <translation>Lettura della mappa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Reading the values of {}</source>
         <translation>Lettura dei valori di {}</translation>
     </message>
@@ -234,32 +234,32 @@
         <translation>Ripristinato: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Ricerca di immagini satellitari su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Searching {} for {}</source>
         <translation>Ricerca di {} su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection cleared on {}</source>
         <translation>Selezione cancellata su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection on {}</source>
         <translation>Selezione su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Shown: {}</source>
         <translation>Visibile: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>Stopped.</source>
         <translation>Interrotto.</translation>
     </message>
@@ -279,12 +279,12 @@
         <translation>La password principale di QGIS è necessaria per usare la chiave salvata.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>L'agente si è interrotto prima della fine ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -295,7 +295,7 @@ Do you agree?</source>
 Acconsenti?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -306,7 +306,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 Una fonte remota viene letta da QGIS dal suo server, e il contenuto del layer può essere inviato al provider dell'agente. Acconsenti?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -317,7 +317,7 @@ Do you agree?</source>
 Acconsenti?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -328,7 +328,7 @@ Do you agree?</source>
 Acconsenti?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -341,7 +341,7 @@ Do you agree?</source>
 Acconsenti?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Il credito o la quota di questo account è esaurito.</translation>
     </message>
@@ -362,7 +362,7 @@ Acconsenti?</translation>
         <translation>La quota gratuita non è disponibile al momento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>La quota gratuita è esaurita per questo mese. Inserisci la tua chiave API nelle impostazioni dell'agente.</translation>
     </message>
@@ -373,17 +373,17 @@ Acconsenti?</translation>
         <translation>Impossibile salvare la chiave.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>The provider could not be reached: {}</source>
         <translation>Impossibile raggiungere il provider: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Il provider ha rifiutato la chiave API: controllala nelle impostazioni dell'agente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
         <source>The provider reported a problem: {}</source>
         <translation>Il provider ha segnalato un problema: {}</translation>
     </message>
@@ -394,7 +394,7 @@ Acconsenti?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Thinking…</source>
         <translation>Elaborazione…</translation>
     </message>
@@ -404,27 +404,27 @@ Acconsenti?</translation>
         <translation>Troppi nuovi account da questo indirizzo oggi: riprova domani oppure inserisci la tua chiave API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Troppe richieste al momento: riprova tra un momento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Trying a filter on {}</source>
         <translation>Prova di un filtro su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Zoom on {}</source>
         <translation>Zoom su {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>an area</source>
         <translation>un'area</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>everything</source>
         <translation>tutto</translation>
     </message>
@@ -433,370 +433,469 @@ Acconsenti?</translation>
         <source>{} tools available</source>
         <translation>{} strumenti disponibili</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <source>The request is back in the line below: fix the settings, then send it again.</source>
+        <translation>La richiesta torna nella riga qui sotto: correggi le impostazioni, poi inviala di nuovo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <source>The request is back in the line below: send it again when you are ready.</source>
+        <translation>La richiesta torna nella riga qui sotto: inviala di nuovo quando vuoi.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="269"/>
+        <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>I livelli come erano prima di questo passaggio dell'ultima richiesta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="267"/>
+        <location filename="../ui/widgets/agent_panel.py" line="283"/>
         <source>Undo back to here</source>
         <translation>Annulla fino a qui</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="364"/>
+        <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROVA</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="111"/>
+        <location filename="../ui/widgets/agent_thread.py" line="133"/>
         <source>Undo</source>
         <translation>Annulla</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="312"/>
+        <location filename="../ui/widgets/agent_panel.py" line="333"/>
         <source>(no request)</source>
         <translation>(nessuna richiesta)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="611"/>
+        <location filename="../ui/widgets/agent_panel.py" line="721"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>Qualche richiesta gratuita al mese, tramite il relay di FilterMate verso Claude (Anthropic), secondo le condizioni di Anthropic. Il relay conta quanto viene speso e non conserva alcuna conversazione. Quando la quota è esaurita, scegli un provider e inserisci la tua chiave API.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="616"/>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>API key</source>
         <translation>Chiave API</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="770"/>
+        <location filename="../ui/widgets/agent_panel.py" line="946"/>
         <source>Add</source>
         <translation>Aggiungi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="610"/>
-        <location filename="../ui/widgets/agent_panel.py" line="702"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
+        <location filename="../ui/widgets/agent_panel.py" line="874"/>
         <source>Address</source>
         <translation>Indirizzo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="205"/>
+        <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Impostazioni dell'agente</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="622"/>
+        <location filename="../ui/widgets/agent_panel.py" line="738"/>
         <source>Allow attribute values to be sent</source>
         <translation>Consenti l'invio dei valori degli attributi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="695"/>
+        <location filename="../ui/widgets/agent_panel.py" line="867"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>Le applicazioni già configurate dovranno essere configurate di nuovo.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation>Chiedi all'agente di filtrare i tuoi layer</translation>
+        <translation type="obsolete">Chiedi all'agente di filtrare i tuoi layer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="240"/>
+        <location filename="../ui/widgets/agent_panel.py" line="253"/>
         <source>Back to the conversation</source>
         <translation>Torna alla conversazione</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="668"/>
+        <location filename="../ui/widgets/agent_panel.py" line="840"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>Claude Code o un altro client MCP di questo computer potrà quindi filtrare i tuoi layer, una volta aperto FilterMate, secondo le regole di questo pannello: le stesse fonti, le stesse conferme, e i filtri si possono annullare qui. Quell'applicazione invia ciò che legge al proprio provider di IA.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Collega un provider di IA per iniziare. Non viene inviato nulla senza il tuo consenso.</translation>
+        <translation type="obsolete">Collega un provider di IA per iniziare. Non viene inviato nulla senza il tuo consenso.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <location filename="../ui/widgets/agent_panel.py" line="908"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>Copiato, con il token di accesso: tienilo per te. Salva queste impostazioni perché venga applicato.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="685"/>
+        <location filename="../ui/widgets/agent_panel.py" line="857"/>
         <source>Copy for Claude Desktop</source>
         <translation>Copia per Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="690"/>
+        <location filename="../ui/widgets/agent_panel.py" line="862"/>
         <source>Copy the Claude Code command</source>
         <translation>Copia il comando di Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="682"/>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
         <source>Copy the configuration</source>
         <translation>Copia la configurazione</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Descrivilo con parole tue. Ogni filtro può essere annullato.</translation>
+        <translation type="obsolete">Descrivilo con parole tue. Ogni filtro può essere annullato.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="471"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>Filter your layers from a sentence</source>
         <translation>Filtra i tuoi layer con una frase</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="594"/>
+        <location filename="../ui/widgets/agent_panel.py" line="704"/>
         <source>FilterMate agent</source>
         <translation>Agente FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="242"/>
+        <location filename="../ui/widgets/agent_panel.py" line="255"/>
         <source>History</source>
         <translation>Cronologia</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="201"/>
+        <location filename="../ui/widgets/agent_panel.py" line="212"/>
         <source>History…</source>
         <translation>Cronologia…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation>Accetto di inviare questi dati a questo provider</translation>
+        <translation type="obsolete">Accetto di inviare questi dati a questo provider</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="672"/>
+        <location filename="../ui/widgets/agent_panel.py" line="844"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>Consenti ad altre applicazioni di questo computer di controllare FilterMate (server MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <location filename="../ui/widgets/agent_panel.py" line="943"/>
         <source>MCP connector</source>
         <translation>Connettore MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <location filename="../ui/widgets/agent_panel.py" line="983"/>
         <source>MCP connectors</source>
         <translation>Connettori MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="606"/>
+        <location filename="../ui/widgets/agent_panel.py" line="716"/>
         <source>Model</source>
         <translation>Modello</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="198"/>
+        <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Altro</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="693"/>
+        <location filename="../ui/widgets/agent_panel.py" line="865"/>
         <source>New access token</source>
         <translation>Nuovo token di accesso</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="203"/>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Nuova conversazione</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="904"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>Nuovo token: viene applicato dopo il salvataggio di queste impostazioni.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="795"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Open data platforms</source>
         <translation>Piattaforme open data</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="166"/>
+        <location filename="../ui/widgets/agent_panel.py" line="177"/>
+        <location filename="../ui/widgets/agent_panel.py" line="667"/>
         <source>Open the settings</source>
         <translation>Apri le impostazioni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="657"/>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
         <source>Other applications</source>
         <translation>Altre applicazioni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="701"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Port</source>
         <translation>Porta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="638"/>
-        <location filename="../ui/widgets/agent_panel.py" line="655"/>
+        <location filename="../ui/widgets/agent_panel.py" line="773"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Provider</source>
         <translation>Provider</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="264"/>
+        <location filename="../ui/widgets/agent_panel.py" line="280"/>
         <source>Redo</source>
         <translation>Ripeti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="755"/>
+        <location filename="../ui/widgets/agent_panel.py" line="730"/>
+        <location filename="../ui/widgets/agent_panel.py" line="931"/>
         <source>Remove</source>
         <translation>Rimuovi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="619"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>Remove the stored key</source>
         <translation>Elimina la chiave salvata</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="796"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>Satellite imagery</source>
         <translation>Immagini satellitari</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Send (Enter)</source>
         <translation>Invia (Invio)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <location filename="../ui/widgets/agent_panel.py" line="288"/>
         <source>Send again</source>
         <translation>Invia di nuovo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="479"/>
+        <location filename="../ui/widgets/agent_panel.py" line="574"/>
         <source>Sent to: {}</source>
         <translation>Inviato a: {}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation>Configura l'agente</translation>
+        <translation type="obsolete">Configura l'agente</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="656"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Sources</source>
         <translation>Fonti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Stop (Esc)</source>
         <translation>Interrompi (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
         <source>Stored: leave empty to keep it</source>
         <translation>Salvata: lascia vuoto per conservarla</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="753"/>
+        <location filename="../ui/widgets/agent_panel.py" line="929"/>
         <source>Test</source>
         <translation>Prova</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
         <source>Testing…</source>
         <translation>Prova in corso…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="659"/>
+        <location filename="../ui/widgets/agent_panel.py" line="802"/>
         <source>The MCP server could not start: {}</source>
         <translation>Impossibile avviare il server MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="745"/>
+        <location filename="../ui/widgets/agent_panel.py" line="917"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>L'agente può interrogare le fonti spuntate qui. Le tue ricerche, e ciò che l'agente passa a un connettore, vengono inviati a queste fonti; un layer aggiunto da esse viene letto dai loro server.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>L'agente invia la tua richiesta, i nomi dei tuoi layer e campi, le tue espressioni di filtro e i risultati dei suoi strumenti al provider scelto qui, secondo le condizioni di tale provider. Senza l'opzione qui sotto, l'agente non legge i valori dei tuoi campi; i valori già scritti nei tuoi filtri e preferiti vengono comunque inviati. La conversazione è conservata su questo computer per ciascun progetto, finché non ne avvii una nuova.</translation>
+        <translation type="obsolete">L'agente invia la tua richiesta, i nomi dei tuoi layer e campi, le tue espressioni di filtro e i risultati dei suoi strumenti al provider scelto qui, secondo le condizioni di tale provider. Senza l'opzione qui sotto, l'agente non legge i valori dei tuoi campi; i valori già scritti nei tuoi filtri e preferiti vengono comunque inviati. La conversazione è conservata su questo computer per ciascun progetto, finché non ne avvii una nuova.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="687"/>
+        <location filename="../ui/widgets/agent_panel.py" line="859"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>Tramite mcp-remote, che richiede Node.js: Claude Desktop avvia i server locali come programmi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="846"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
         <source>Too many sources added: remove one first.</source>
         <translation>Troppe fonti aggiunte: rimuovine prima una.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="261"/>
+        <location filename="../ui/widgets/agent_panel.py" line="277"/>
         <source>Undo the last</source>
         <translation>Annulla l'ultimo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="170"/>
+        <location filename="../ui/widgets/agent_panel.py" line="181"/>
         <source>Undo this turn</source>
         <translation>Annulla questo turno</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="468"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>What do you want to filter?</source>
         <translation>Cosa vuoi filtrare?</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
         <source>added by you</source>
         <translation>aggiunta da te</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>applied</source>
         <translation>applicato</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>community</source>
         <translation>della community</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="765"/>
+        <location filename="../ui/widgets/agent_panel.py" line="941"/>
         <source>https://... or a portal address</source>
         <translation>https://... o indirizzo di un portale</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="310"/>
+        <location filename="../ui/widgets/agent_panel.py" line="338"/>
+        <location filename="../ui/widgets/agent_panel.py" line="339"/>
         <source>no change</source>
         <translation>nessuna modifica</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>official</source>
         <translation>ufficiale</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>this computer</source>
         <translation>questo computer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>undone</source>
         <translation>annullato</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation>{} turno/i</translation>
+        <translation type="obsolete">{} turno/i</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Which layers are in this project?</source>
-        <translation type="obsolete">Quali layer contiene questo progetto?</translation>
+        <translation>Quali layer contiene questo progetto?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
-        <translation type="obsolete">Mantieni gli edifici più alti di 15 m</translation>
+        <translation>Mantieni gli edifici più alti di 15 m</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
         <source>Filter the roads inside the selected feature</source>
-        <translation type="obsolete">Filtra le strade all'interno dell'elemento selezionato</translation>
+        <translation>Filtra le strade all'interno dell'elemento selezionato</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
+        <source>Add the municipalities from data.gouv.fr</source>
+        <translation>Aggiungi i comuni da data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="195"/>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Ask for a filter…</source>
+        <translation>Chiedi un filtro…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <source>Choosing another provider or address asks for this agreement again.</source>
+        <translation>Cambiare fornitore o indirizzo richiede di nuovo questo consenso.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="429"/>
+        <source>Connect a provider</source>
+        <translation>Collega un fornitore</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Connect a provider to start</source>
+        <translation>Collega un fornitore per iniziare</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
+        <translation>Descrivilo con parole tue. L'agente legge il progetto, prova il filtro, poi lo applica. Ogni turno può essere annullato.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>FilterMate (free quota)</source>
+        <translation>FilterMate (quota gratuita)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <source>I agree to send this data to {}</source>
+        <translation>Accetto di inviare questi dati a {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="425"/>
+        <source>It needs an AI provider: the free quota of FilterMate, your own key, or a local model. Nothing is sent before you agree.</source>
+        <translation>Serve un fornitore di IA: la quota gratuita di FilterMate, la tua chiave o un modello locale. Nulla viene inviato prima del tuo consenso.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>Ollama (local)</source>
+        <translation>Ollama (locale)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
+        <translation>L'agente legge i livelli del progetto, scrive i filtri e li applica. Ogni turno può essere annullato.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
+        <translation>La chiave è conservata nel database di autenticazione di QGIS, mai in un file di impostazioni. Viene inviata solo a questo indirizzo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <source>WHAT LEAVES THIS MACHINE</source>
+        <translation>COSA LASCIA QUESTO COMPUTER</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
+        <translation>Senza questa opzione, l'agente non legge i valori dei tuoi campi. Quelli già scritti nei filtri e nei preferiti vengono comunque inviati.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <source>You can already type the next request.</source>
+        <translation>Puoi già scrivere la richiesta successiva.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>La tua richiesta, i nomi dei livelli e dei campi, le espressioni di filtro e i risultati degli strumenti dell'agente, verso questo fornitore e secondo le sue condizioni. La conversazione è conservata su questo computer per ogni progetto, finché non ne inizi una nuova.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="349"/>
+        <source>this project · {} turn(s)</source>
+        <translation>questo progetto · {} turno/i</translation>
     </message>
 </context>
 <context>

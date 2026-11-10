@@ -30,7 +30,7 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
 from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLineEdit, QPushButton, QScrollArea, QToolButton
+from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QPushButton, QScrollArea, QToolButton
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -1276,6 +1276,88 @@ def headers_height(toolbox):
     return heights.pop() if len(heights) == 1 else -1
 
 
+def capture_boards(d, chat, folder):
+    """The states of the mockup boards, one image each, to compare with the mockup (FM_BOARDS=folder)."""
+    import time as _time
+    from qgis.PyQt.QtWidgets import QDialog as _Dialog
+    panel = chat.panel
+    shot = lambda name, widget=None: (QApplication.processEvents(), (widget or d).grab().save(
+        os.path.join(folder, f"{name}.png")))
+    destination = 'Claude · haiku-5-5'
+    was_floating, size = d.isFloating(), d.size()
+    d.setFloating(True)
+    d.resize(int(os.environ.get('FM_BOARD_W', '360')), int(os.environ.get('FM_BOARD_H', '720')))
+    panel.clear_thread()
+    panel.set_status('')
+    header = getattr(chat, '_header_label', None)  # the destination sits in the AGENT header, as the controller puts it
+    if header is not None:
+        header.setText('')
+    panel.set_ready(False)
+    panel.show_thread()
+    shot('Welcome')
+    if header is not None:
+        header.setText(destination)
+    panel.set_ready(True, '' if header is not None else destination)
+    shot('Ready')
+    panel.add_user('Garde les communes de plus de 10 000 habitants')
+    panel.add_action('Filtre sur communes', True, '"population" > 10000', '12 / 586', ('communes',))
+    panel.add_text('12 communes gardées sur 586. Les plus peuplées sont **Toulouse**, Colomiers et Tournefeuille.')
+    panel.end_answer()
+    panel.add_user('Et les bâtiments qui sont dedans')
+    panel.add_action('Filtre sur batiments par communes', True, 'Are within · 12 communes', '38 412',
+                     ('batiments', 'communes'))
+    panel.add_text('38 412 bâtiments gardés dans ces 12 communes.')
+    panel.end_answer()
+    panel.set_can_undo(True)
+    panel.show_thread()
+    shot('Main')
+    panel.clear_thread()
+    panel.add_user('Les bâtiments à moins de 50 m des routes sélectionnées')
+    panel.add_step('Lecture des champs de batiments')
+    panel.add_step('Lecture de la carte · 3 routes sélectionnées')
+    panel.add_step('Filtre sur batiments par routes · tampon 50 m')
+    panel.set_working(True)
+    panel.show_thread()
+    shot('Working')
+    panel.set_working(False)
+    panel.clear_thread()
+    panel.add_user("Les parcelles de plus d'un hectare")
+    panel.input.setText("Les parcelles de plus d'un hectare")
+    panel.show_error('The provider refused the API key (401).',
+                     'The request is back in the line below: fix the settings, then send it again.', True)
+    panel.show_thread()
+    shot('Error')
+    panel.input.clear()
+    panel.set_status('')
+    now = _time.time()
+    panel.set_history([
+        {'time': now - 600, 'request': "Les parcelles de plus d'un hectare", 'layers': ['parcelles'], 'applied': False},
+        {'time': now - 420, 'request': 'Garde les communes de plus de 10 000 habitants', 'layers': ['communes'],
+         'applied': True},
+        {'time': now - 360, 'request': 'Et les bâtiments qui sont dedans', 'layers': ['batiments'], 'applied': True,
+         'steps': ['Filtre sur batiments par communes', 'Sélection de 3 routes']},
+        {'time': now - 180, 'request': 'Quelles couches contient ce projet ?', 'layers': [], 'applied': False},
+    ], True, False)
+    panel.show_history()
+    shot('History')
+    panel.show_thread()
+    settings = importlib.import_module(f'{PACKAGE}.adapters.agent.settings')
+    load_settings, target_of = settings.load_settings, settings.target_of
+    AgentSettingsDialog = importlib.import_module(f'{PACKAGE}.ui.widgets.agent_panel').AgentSettingsDialog
+    dialog = AgentSettingsDialog(load_settings(), target_of, d, free_available=True)
+    dialog.resize(440, 660)
+    dialog.show()
+    QApplication.processEvents()
+    shot('Settings', dialog)
+    dialog.tabs.setCurrentIndex(1)
+    shot('Sources', dialog)
+    dialog.done(_Dialog.DialogCode.Rejected)
+    panel.clear_thread()
+    d.setFloating(was_floating)
+    d.resize(size)
+    QApplication.processEvents()
+
+
 def s_agent_panel():
     """Two stacks: EXPLORING / AGENT above, FILTERING / EXPORTING / CONFIGURATION below, and their rules."""
     d = dock()
@@ -1384,6 +1466,8 @@ def s_agent_panel():
                   f"{widget.contentsMargins().top()},{widget.contentsMargins().right()}", flush=True)
         print(f"GEOMETRY panel layout margins={panel.layout().contentsMargins().left()},"
               f"{panel.layout().contentsMargins().top()} sheet={panel.styleSheet()[:0]}", flush=True)
+    if os.environ.get('FM_BOARDS'):
+        capture_boards(d, chat, os.environ['FM_BOARDS'])
     panel.clear_thread()
     toolbox.setCurrentWidget(d.EXPORTING)
     QApplication.processEvents()

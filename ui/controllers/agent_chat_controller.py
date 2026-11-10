@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer
@@ -41,7 +41,7 @@ from ...filtermate_api.config import _default_export_root
 from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
 from .agent_mcp_bridge import AgentMcpBridge
-from ..widgets.agent_panel import PRESET_LABELS, AgentPanel, AgentSettingsDialog, ask_plain
+from ..widgets.agent_panel import AgentPanel, AgentSettingsDialog, ask_plain, preset_label
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -65,7 +65,7 @@ def _tr(text: str) -> str:
 
 def destination_text(preset: str, model: str) -> str:
     """Where the requests go, short, as the mockup heads the section: ``Claude · haiku-5-5``."""
-    short = {FREE_PRESET: _tr("Free quota"), "anthropic": "Claude"}.get(preset) or PRESET_LABELS.get(preset, preset)
+    short = {FREE_PRESET: _tr("Free quota"), "anthropic": "Claude"}.get(preset) or preset_label(preset)
     name = model[len("claude-"):] if model.startswith("claude-") else model
     return f"{short} · {name}" if name else short
 
@@ -195,7 +195,7 @@ class AgentChatController(QObject):
             if kind == "user":
                 self.panel.add_user(item["text"])
             elif kind == "action":
-                self.panel.add_action(item["text"], item["ok"], item["detail"], item["count"])
+                self.panel.add_action(item["text"], item["ok"], item["detail"], item["count"], item.get("strong", ()))
             elif kind == "text":
                 self.panel.add_text(item["text"])
                 self.panel.end_answer()
@@ -552,6 +552,16 @@ class AgentChatController(QObject):
             self._answer = []
 
     @staticmethod
+    def _layer_names(call: ToolCallPart) -> Tuple[str, ...]:
+        """The layers a call is about, as its card names them (in bold)."""
+        args = call.arguments if isinstance(call.arguments, dict) else {}
+        names = [args.get(key) for key in ("layer", "layer_name", "source_layer")]
+        for key in ("target_layers", "layers"):
+            values = args.get(key)
+            names.extend(values if isinstance(values, list) else ())
+        return tuple(dict.fromkeys(str(name) for name in names if isinstance(name, str) and name.strip()))
+
+    @staticmethod
     def _names(values) -> str:
         return ", ".join(str(value) for value in (values or []))
 
@@ -620,9 +630,10 @@ class AgentChatController(QObject):
             if call.name in self._connector_labels:
                 detail = json.dumps(call.arguments, ensure_ascii=False, default=str)[:MAX_DETAIL_CHARS]
             count = self._kept_count(result)
-            self.panel.add_action(label, not result.is_error, detail, count)
+            strong = self._layer_names(call)
+            self.panel.add_action(label, not result.is_error, detail, count, strong)
             if keep:
-                self._record("action", label, ok=not result.is_error, detail=detail, count=count)
+                self._record("action", label, ok=not result.is_error, detail=detail, count=count, strong=strong)
 
     # --- what another application does (AgentMcpBridge) --------------------------
 
@@ -710,14 +721,19 @@ class AgentChatController(QObject):
                 return
             message = (_tr("The free quota is used up for this month. Enter your own API key in the agent settings.")
                        if free and outcome.error.kind == ERROR_QUOTA else self._error_message(outcome.error))
-            self._say(message, error=True, offer_settings=outcome.error.kind in FIXED_IN_SETTINGS)
+            fix = outcome.error.kind in FIXED_IN_SETTINGS
+            self._say("")
+            self.panel.show_error(message, _tr("The request is back in the line below: fix the settings, then send it "
+                                               "again.") if fix else _tr("The request is back in the line below: send it "
+                                                                         "again when you are ready."), fix)
             return
         if outcome.status == OUTCOME_CANCELLED:
             self._give_back_request()
             self._say(_tr("Stopped."))
             return
         if outcome.status == OUTCOME_STOPPED:
-            self._say(_tr("The agent stopped before the end ({}).").format(outcome.reason), error=True)
+            self._say("")
+            self.panel.show_error(_tr("The agent stopped before the end ({}).").format(outcome.reason))
             return
         self._say("")  # the cards of the turn say what changed (mockup)
 

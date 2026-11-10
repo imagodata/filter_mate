@@ -32,13 +32,13 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
         <source>Undone: {}</source>
         <translation>Bekor qilindi: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Undo of the last request</source>
         <translation>Oxirgi so'rovni bekor qilish</translation>
     </message>
@@ -69,7 +69,7 @@
         <translation>Bepul kvota</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Bepul kvotaga kirish yangilandi: so'rovingizni qayta yuboring.</translation>
     </message>
@@ -79,7 +79,7 @@
         <translation>Boshqa ilova loyihani o'zgartirmoqda: birozdan so'ng qayta urinib ko'ring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
         <source>Another application: {}</source>
         <translation>Boshqa ilova: {}</translation>
     </message>
@@ -121,47 +121,47 @@
         <translation>Agent sozlamalarida API kalitingizni kiriting.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Export of {}</source>
         <translation>{} eksporti</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Favorite applied</source>
         <translation>Sevimli qo'llandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Filter on the points of {}</source>
         <translation>{} nuqtalari bo'yicha filtr</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Filter on {}</source>
         <translation>{} bo'yicha filtr</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Filter on {} by an area</source>
         <translation>{} bo'yicha hudud orqali filtr</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
         <source>Filter on {} by {}</source>
         <translation>{} bo'yicha {} orqali filtr</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
         <source>FilterMate agent</source>
         <translation>FilterMate agenti</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Filters removed from {}</source>
         <translation>{} dan filtrlar olib tashlandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Hidden: {}</source>
         <translation>Yashirildi: {}</translation>
     </message>
@@ -171,13 +171,13 @@
         <translation>U javob beradi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Layer added: {}</source>
         <translation>Qatlam qo'shildi: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Layers removed: {}</source>
         <translation>Qatlamlar olib tashlandi: {}</translation>
     </message>
@@ -199,32 +199,32 @@
         <translation>Tiklanadigan narsa yo'q.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Reading the active filters</source>
         <translation>Faol filtrlar o'qilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Reading the favorites</source>
         <translation>Sevimlilar o'qilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Reading the fields of {}</source>
         <translation>{} maydonlari o'qilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Reading the layers</source>
         <translation>Qatlamlar o'qilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Reading the map</source>
         <translation>Xarita o'qilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Reading the values of {}</source>
         <translation>{} qiymatlari o'qilmoqda</translation>
     </message>
@@ -234,32 +234,32 @@
         <translation>Tiklandi: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
         <source>Searching satellite imagery on {}</source>
         <translation>{} da sun'iy yo'ldosh tasvirlari qidirilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Searching {} for {}</source>
         <translation>{} da {} qidirilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection cleared on {}</source>
         <translation>{} da tanlov tozalandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection on {}</source>
         <translation>{} da tanlov</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Shown: {}</source>
         <translation>Ko'rsatildi: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>Stopped.</source>
         <translation>To'xtatildi.</translation>
     </message>
@@ -279,12 +279,12 @@
         <translation>Saqlangan kalitdan foydalanish uchun QGIS asosiy paroli kerak.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Agent oxirigacha yetmay to'xtadi ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -295,7 +295,7 @@ Do you agree?</source>
 Rozimisiz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -306,7 +306,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 Masofaviy manbani QGIS uning serveridan o'qiydi, qatlam tarkibi esa agent ta'minotchisiga yuborilishi mumkin. Rozimisiz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -317,7 +317,7 @@ Do you agree?</source>
 Rozimisiz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -328,7 +328,7 @@ Do you agree?</source>
 Rozimisiz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -341,7 +341,7 @@ Do you agree?</source>
 Rozimisiz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Bu hisobning krediti yoki kvotasi tugagan.</translation>
     </message>
@@ -362,7 +362,7 @@ Rozimisiz?</translation>
         <translation>Bepul kvota hozircha mavjud emas.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Bu oy uchun bepul kvota tugadi. Agent sozlamalarida o'z API kalitingizni kiriting.</translation>
     </message>
@@ -373,17 +373,17 @@ Rozimisiz?</translation>
         <translation>Kalitni saqlab bo'lmadi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>The provider could not be reached: {}</source>
         <translation>Ta'minotchiga ulanib bo'lmadi: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Ta'minotchi API kalitini rad etdi: uni agent sozlamalarida tekshiring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
         <source>The provider reported a problem: {}</source>
         <translation>Ta'minotchi muammo haqida xabar berdi: {}</translation>
     </message>
@@ -394,7 +394,7 @@ Rozimisiz?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Thinking…</source>
         <translation>O'ylanmoqda…</translation>
     </message>
@@ -404,27 +404,27 @@ Rozimisiz?</translation>
         <translation>Bugun bu manzildan juda ko'p yangi hisoblar ochildi: ertaga qayta urinib ko'ring yoki o'z API kalitingizni kiriting.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Hozircha juda ko'p so'rovlar: birozdan so'ng qayta urinib ko'ring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Trying a filter on {}</source>
         <translation>{} da filtr sinab ko'rilmoqda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Zoom on {}</source>
         <translation>{} ga masshtablash</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>an area</source>
         <translation>hudud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>everything</source>
         <translation>hammasi</translation>
     </message>
@@ -433,370 +433,469 @@ Rozimisiz?</translation>
         <source>{} tools available</source>
         <translation>{} ta vosita mavjud</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <source>The request is back in the line below: fix the settings, then send it again.</source>
+        <translation>So'rov pastdagi qatorga qaytarildi: sozlamalarni tuzating, so'ng uni qayta yuboring.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <source>The request is back in the line below: send it again when you are ready.</source>
+        <translation>So'rov pastdagi qatorga qaytarildi: tayyor bo'lganingizda uni qayta yuboring.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="269"/>
+        <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Oxirgi so'rovning shu bosqichidan oldingi qatlamlar holati</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="267"/>
+        <location filename="../ui/widgets/agent_panel.py" line="283"/>
         <source>Undo back to here</source>
         <translation>Shu yergacha bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="364"/>
+        <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SINAB KORING</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="111"/>
+        <location filename="../ui/widgets/agent_thread.py" line="133"/>
         <source>Undo</source>
         <translation>Bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="312"/>
+        <location filename="../ui/widgets/agent_panel.py" line="333"/>
         <source>(no request)</source>
         <translation>(so'rov yo'q)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="611"/>
+        <location filename="../ui/widgets/agent_panel.py" line="721"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>Oyiga bir nechta bepul so'rov, FilterMate'ning Claude (Anthropic) ga ulovchi relesi orqali, Anthropic shartlariga muvofiq. Rele sarflanganini hisoblaydi va hech qanday suhbatni saqlamaydi. Kvota tugagach, ta'minotchini tanlang va o'z API kalitingizni kiriting.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="616"/>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>API key</source>
         <translation>API kaliti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="770"/>
+        <location filename="../ui/widgets/agent_panel.py" line="946"/>
         <source>Add</source>
         <translation>Qo'shish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="610"/>
-        <location filename="../ui/widgets/agent_panel.py" line="702"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
+        <location filename="../ui/widgets/agent_panel.py" line="874"/>
         <source>Address</source>
         <translation>Manzil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="205"/>
+        <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Agent sozlamalari</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="622"/>
+        <location filename="../ui/widgets/agent_panel.py" line="738"/>
         <source>Allow attribute values to be sent</source>
         <translation>Atribut qiymatlarini yuborishga ruxsat berish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="695"/>
+        <location filename="../ui/widgets/agent_panel.py" line="867"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>Allaqachon sozlangan ilovalarni qayta sozlash kerak bo'ladi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation>Agentdan qatlamlaringizni filtrlashni so'rang</translation>
+        <translation type="obsolete">Agentdan qatlamlaringizni filtrlashni so'rang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="240"/>
+        <location filename="../ui/widgets/agent_panel.py" line="253"/>
         <source>Back to the conversation</source>
         <translation>Suhbatga qaytish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="668"/>
+        <location filename="../ui/widgets/agent_panel.py" line="840"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>FilterMate ochilgandan so'ng, bu kompyuterdagi Claude Code yoki boshqa MCP mijozi ushbu panel qoidalariga muvofiq qatlamlaringizni filtrlay oladi: bir xil manbalar, bir xil tasdiqlashlar, filtrlarni shu yerda bekor qilish mumkin. Bu ilova o'qiganini o'zining sun'iy intellekt ta'minotchisiga yuboradi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Boshlash uchun sun'iy intellekt ta'minotchisini ulang. Roziligingizsiz hech narsa yuborilmaydi.</translation>
+        <translation type="obsolete">Boshlash uchun sun'iy intellekt ta'minotchisini ulang. Roziligingizsiz hech narsa yuborilmaydi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <location filename="../ui/widgets/agent_panel.py" line="908"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>Kirish tokeni bilan nusxalandi: uni o'zingizda saqlang. Qo'llanishi uchun ushbu sozlamalarni saqlang.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="685"/>
+        <location filename="../ui/widgets/agent_panel.py" line="857"/>
         <source>Copy for Claude Desktop</source>
         <translation>Claude Desktop uchun nusxalash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="690"/>
+        <location filename="../ui/widgets/agent_panel.py" line="862"/>
         <source>Copy the Claude Code command</source>
         <translation>Claude Code buyrug'ini nusxalash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="682"/>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
         <source>Copy the configuration</source>
         <translation>Konfiguratsiyani nusxalash</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Buni o'z so'zlaringiz bilan tasvirlang. Har bir filtrni bekor qilish mumkin.</translation>
+        <translation type="obsolete">Buni o'z so'zlaringiz bilan tasvirlang. Har bir filtrni bekor qilish mumkin.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="471"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>Filter your layers from a sentence</source>
         <translation>Qatlamlaringizni bitta gap bilan filtrlang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="594"/>
+        <location filename="../ui/widgets/agent_panel.py" line="704"/>
         <source>FilterMate agent</source>
         <translation>FilterMate agenti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="242"/>
+        <location filename="../ui/widgets/agent_panel.py" line="255"/>
         <source>History</source>
         <translation>Tarix</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="201"/>
+        <location filename="../ui/widgets/agent_panel.py" line="212"/>
         <source>History…</source>
         <translation>Tarix…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation>Bu ma'lumotlarni ushbu ta'minotchiga yuborishga roziman</translation>
+        <translation type="obsolete">Bu ma'lumotlarni ushbu ta'minotchiga yuborishga roziman</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="672"/>
+        <location filename="../ui/widgets/agent_panel.py" line="844"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>Bu kompyuterdagi boshqa ilovalarga FilterMate'ni boshqarishga ruxsat berish (MCP serveri)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <location filename="../ui/widgets/agent_panel.py" line="943"/>
         <source>MCP connector</source>
         <translation>MCP konnektori</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <location filename="../ui/widgets/agent_panel.py" line="983"/>
         <source>MCP connectors</source>
         <translation>MCP konnektorlari</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="606"/>
+        <location filename="../ui/widgets/agent_panel.py" line="716"/>
         <source>Model</source>
         <translation>Model</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="198"/>
+        <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Yana</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="693"/>
+        <location filename="../ui/widgets/agent_panel.py" line="865"/>
         <source>New access token</source>
         <translation>Yangi kirish tokeni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="203"/>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Yangi suhbat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="904"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>Yangi token: ushbu sozlamalar saqlangach qo'llanadi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="795"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Open data platforms</source>
         <translation>Ochiq ma'lumotlar platformalari</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="166"/>
+        <location filename="../ui/widgets/agent_panel.py" line="177"/>
+        <location filename="../ui/widgets/agent_panel.py" line="667"/>
         <source>Open the settings</source>
         <translation>Sozlamalarni ochish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="657"/>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
         <source>Other applications</source>
         <translation>Boshqa ilovalar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="701"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="638"/>
-        <location filename="../ui/widgets/agent_panel.py" line="655"/>
+        <location filename="../ui/widgets/agent_panel.py" line="773"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Provider</source>
         <translation>Ta'minotchi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="264"/>
+        <location filename="../ui/widgets/agent_panel.py" line="280"/>
         <source>Redo</source>
         <translation>Qayta bajarish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="755"/>
+        <location filename="../ui/widgets/agent_panel.py" line="730"/>
+        <location filename="../ui/widgets/agent_panel.py" line="931"/>
         <source>Remove</source>
         <translation>Olib tashlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="619"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>Remove the stored key</source>
         <translation>Saqlangan kalitni o'chirish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="796"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>Satellite imagery</source>
         <translation>Sun'iy yo'ldosh tasvirlari</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Send (Enter)</source>
         <translation>Yuborish (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <location filename="../ui/widgets/agent_panel.py" line="288"/>
         <source>Send again</source>
         <translation>Qayta yuborish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="479"/>
+        <location filename="../ui/widgets/agent_panel.py" line="574"/>
         <source>Sent to: {}</source>
         <translation>Yuborildi: {}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation>Agentni sozlash</translation>
+        <translation type="obsolete">Agentni sozlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="656"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Sources</source>
         <translation>Manbalar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Stop (Esc)</source>
         <translation>To'xtatish (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
         <source>Stored: leave empty to keep it</source>
         <translation>Saqlangan: saqlab qolish uchun bo'sh qoldiring</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="753"/>
+        <location filename="../ui/widgets/agent_panel.py" line="929"/>
         <source>Test</source>
         <translation>Sinash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
         <source>Testing…</source>
         <translation>Sinalmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="659"/>
+        <location filename="../ui/widgets/agent_panel.py" line="802"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP serverini ishga tushirib bo'lmadi: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="745"/>
+        <location filename="../ui/widgets/agent_panel.py" line="917"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>Agent shu yerda belgilangan manbalarda qidira oladi. Qidiruvlaringiz va agent konnektorga uzatgani ularga yuboriladi; ulardan qo'shilgan qatlam ularning serverlaridan o'qiladi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>Agent so'rovingizni, qatlam va maydonlaringiz nomlarini, filtr ifodalaringizni va vositalari natijalarini shu yerda tanlangan ta'minotchiga, uning shartlariga muvofiq yuboradi. Quyidagi variantsiz agent maydonlaringiz qiymatlarini o'qimaydi; filtr va sevimlilaringizda allaqachon yozilgan qiymatlar baribir yuboriladi. Suhbat yangisini boshlamaguningizcha har bir loyiha uchun shu kompyuterda saqlanadi.</translation>
+        <translation type="obsolete">Agent so'rovingizni, qatlam va maydonlaringiz nomlarini, filtr ifodalaringizni va vositalari natijalarini shu yerda tanlangan ta'minotchiga, uning shartlariga muvofiq yuboradi. Quyidagi variantsiz agent maydonlaringiz qiymatlarini o'qimaydi; filtr va sevimlilaringizda allaqachon yozilgan qiymatlar baribir yuboriladi. Suhbat yangisini boshlamaguningizcha har bir loyiha uchun shu kompyuterda saqlanadi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="687"/>
+        <location filename="../ui/widgets/agent_panel.py" line="859"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>Node.js talab qiladigan mcp-remote orqali: Claude Desktop lokal serverlarni dastur sifatida ishga tushiradi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="846"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
         <source>Too many sources added: remove one first.</source>
         <translation>Juda ko'p manba qo'shildi: avval bittasini olib tashlang.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="261"/>
+        <location filename="../ui/widgets/agent_panel.py" line="277"/>
         <source>Undo the last</source>
         <translation>Oxirgisini bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="170"/>
+        <location filename="../ui/widgets/agent_panel.py" line="181"/>
         <source>Undo this turn</source>
         <translation>Bu navbatni bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="468"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>What do you want to filter?</source>
         <translation>Nimani filtrlamoqchisiz?</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
         <source>added by you</source>
         <translation>siz qo'shgansiz</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>applied</source>
         <translation>qo'llandi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>community</source>
         <translation>hamjamiyat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="765"/>
+        <location filename="../ui/widgets/agent_panel.py" line="941"/>
         <source>https://... or a portal address</source>
         <translation>https://... yoki portal manzili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="310"/>
+        <location filename="../ui/widgets/agent_panel.py" line="338"/>
+        <location filename="../ui/widgets/agent_panel.py" line="339"/>
         <source>no change</source>
         <translation>o'zgarish yo'q</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>official</source>
         <translation>rasmiy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>this computer</source>
         <translation>bu kompyuter</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>undone</source>
         <translation>bekor qilindi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation>{} navbat</translation>
+        <translation type="obsolete">{} navbat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Which layers are in this project?</source>
-        <translation type="obsolete">Bu loyihada qaysi qatlamlar bor?</translation>
+        <translation>Bu loyihada qaysi qatlamlar bor?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
-        <translation type="obsolete">15 m dan baland binolarni qoldirish</translation>
+        <translation>15 m dan baland binolarni qoldirish</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
         <source>Filter the roads inside the selected feature</source>
-        <translation type="obsolete">Tanlangan xususiyat ichidagi yo'llarni filtrlash</translation>
+        <translation>Tanlangan xususiyat ichidagi yo'llarni filtrlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
+        <source>Add the municipalities from data.gouv.fr</source>
+        <translation>data.gouv.fr dan munitsipalitetlarni qo'sh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="195"/>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Ask for a filter…</source>
+        <translation>Filtr so'rang…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <source>Choosing another provider or address asks for this agreement again.</source>
+        <translation>Provayder yoki manzilni almashtirish bu roziligingizni qayta so'raydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="429"/>
+        <source>Connect a provider</source>
+        <translation>Provayderni ulash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Connect a provider to start</source>
+        <translation>Boshlash uchun provayderni ulang</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
+        <translation>Buni o'z so'zlaringiz bilan tasvirlang. Agent loyihani o'qiydi, filtrni sinab ko'radi, so'ng uni qo'llaydi. Har bir navbatni bekor qilish mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>FilterMate (free quota)</source>
+        <translation>FilterMate (bepul kvota)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <source>I agree to send this data to {}</source>
+        <translation>Bu ma'lumotlarni {} ga yuborishga roziman</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="425"/>
+        <source>It needs an AI provider: the free quota of FilterMate, your own key, or a local model. Nothing is sent before you agree.</source>
+        <translation>Sun'iy intellekt provayderi kerak: FilterMate bepul kvotasi, o'z kalitingiz yoki mahalliy model. Roziligingizdan oldin hech narsa yuborilmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>Ollama (local)</source>
+        <translation>Ollama (mahalliy)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
+        <translation>Agent loyihangiz qatlamlarini o'qiydi, filtrlarni yozadi va ularni qo'llaydi. Har bir navbatni bekor qilish mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
+        <translation>Kalit QGIS autentifikatsiya bazasida saqlanadi, hech qachon sozlamalar faylida emas. U faqat shu manzilga yuboriladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <source>WHAT LEAVES THIS MACHINE</source>
+        <translation>BU KOMPYUTERDAN NIMA CHIQADI</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
+        <translation>Busiz agent maydonlaringiz qiymatlarini o'qimaydi. Filtrlaringiz va sevimlilaringizda allaqachon yozilganlari baribir yuboriladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <source>You can already type the next request.</source>
+        <translation>Keyingi so'rovni hozirdanoq yozishingiz mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>So'rovingiz, qatlam va maydonlaringiz nomlari, filtr ifodalaringiz va agent vositalarining natijalari ushbu provayderga va uning shartlariga ko'ra. Suhbat har bir loyiha uchun ushbu kompyuterda, yangisini boshlaguningizcha saqlanadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="349"/>
+        <source>this project · {} turn(s)</source>
+        <translation>bu loyiha · {} navbat</translation>
     </message>
 </context>
 <context>

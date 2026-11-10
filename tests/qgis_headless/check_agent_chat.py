@@ -28,7 +28,7 @@ from qgis.core import (  # noqa: E402
 )
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
-from qgis.PyQt.QtWidgets import QLabel, QToolBox  # noqa: E402
+from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox  # noqa: E402
 
 RESULTS = []
 SECRET = "sk-test-do-not-log-0123456789"
@@ -456,6 +456,8 @@ def check_chat(provider, layer, authcfg, work):
     check("the welcome shows first", panel.stack.currentIndex() == 0 and panel.welcome_title.isVisible())
     check("not set up: a way to set it up, no examples",
           panel.configure_button.isVisible() and not panel.example_buttons[0].isVisible())
+    check("not set up: nothing can be asked yet (mockup: Welcome)", not panel.input.isEnabled()
+          and not panel.send_button.isEnabled() and panel.more_button.isEnabled())
     check("nothing to undo: no button", not panel.undo_offered() and not panel.undo_button.isVisible())
 
     def settings(**changes):
@@ -463,6 +465,7 @@ def check_chat(provider, layer, authcfg, work):
                       consent_target=target_of("anthropic", provider.url), key_target=target_of("anthropic", provider.url))
         values.update(changes)
         save_settings(AgentSettings(**values))
+        chat._refresh_ready()  # as the settings dialog does once saved
         chat.new_conversation()
 
     def ask(text, seconds=10.0):
@@ -475,6 +478,7 @@ def check_chat(provider, layer, authcfg, work):
     chat._refresh_ready()
     wait(lambda: False, 0.05)
     check("set up: examples, no set-up button", panel.example_buttons[0].isVisible() and not panel.configure_button.isVisible())
+    check("set up: the line takes a request", panel.input.isEnabled() and panel.send_button.isEnabled())
     check("says where requests go", "test-model" in panel.destination.text() and panel.destination.isVisible(), panel.destination.text())
     panel.example_buttons[1].click()
     check("an example fills the line", panel.input.text() == panel.example_buttons[1].text())
@@ -559,7 +563,18 @@ def check_chat(provider, layer, authcfg, work):
     settings()
     provider.reset((401, {}, b'{"error":{"message":"invalid x-api-key"}}'))
     ask("salut")
-    check("a refused key says where to go", "key" in panel.status.text().lower() and panel.fix_button.isVisible(), panel.status.text())
+    error_cards = panel.thread.findChildren(QFrame, "frame_agent_error")
+    fix_buttons = panel.thread.findChildren(QPushButton, "pushButton_agent_error_action")
+    check("a refused key says where to go, in a card of the thread (mockup)", error_cards and fix_buttons and
+          "key" in panel.thread.toPlainText().splitlines()[-2].lower(), panel.thread.toPlainText()[-300:])
+    settings_opened = []
+    panel.settings_requested.disconnect()  # the controller's: the real settings are a modal dialog
+    panel.settings_requested.connect(lambda: settings_opened.append(True))
+    if fix_buttons:
+        fix_buttons[-1].click()
+    panel.settings_requested.disconnect()
+    panel.settings_requested.connect(type(chat).open_settings.__get__(chat))
+    check("its button opens the settings", settings_opened, settings_opened)
     check("the request comes back", panel.input.text() == "salut", panel.input.text())
     panel.input.clear()
     check("the panel is usable again", panel.input.isEnabled())
@@ -956,7 +971,7 @@ def check_free_quota(chat, provider, settings, ask):
     use_free()
     provider.reset((402, {}, json.dumps({"type": "error", "error": {"type": "insufficient_quota", "message": "used up"}}).encode()))
     ask("encore")
-    check("free: used up, it says what to do", "own API key" in panel.status.text() or "propre" in panel.status.text(), panel.status.text())
+    check("free: used up, it says what to do", "own API key" in panel.thread.toPlainText()[-400:], panel.thread.toPlainText()[-400:])
     check("free: the request comes back in the line", panel.input.text() == "encore", panel.input.text())
     panel.input.clear()
 
@@ -1294,8 +1309,21 @@ def check_effects(layer_id):
           and "scratch" in left, (restored, left))
 
 
+def check_thread_markup():
+    """The bold of the cards: whole layer names only, everything else escaped."""
+    from filter_mate.ui.widgets.agent_thread import strong_markup
+    check("bold: the layer names", strong_markup("Filter on communes by roads", ["communes", "roads"])
+          == "Filter on <b>communes</b> by <b>roads</b>")
+    check("bold: a short name is not bolded inside other words", strong_markup("Filter on a by an area", ["a"])
+          == "Filter on <b>a</b> by an area", strong_markup("Filter on a by an area", ["a"]))
+    check("bold: a name holding markup is escaped", strong_markup('Filter on <img src="x">', ['<img src="x">'])
+          == "Filter on <b>&lt;img src=&quot;x&quot;&gt;</b>", strong_markup('Filter on <img src="x">', ['<img src="x">']))
+    check("bold: no name, plain escaped text", strong_markup("a < b", []) == "a &lt; b")
+
+
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
+    check_thread_markup()
     work = tempfile.mkdtemp()
     provider = Provider()
     layer = make_layer(os.path.join(work, "communes.gpkg"))

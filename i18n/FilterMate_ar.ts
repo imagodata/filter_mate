@@ -32,13 +32,13 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
         <source>Undone: {}</source>
         <translation>تم التراجع: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Undo of the last request</source>
         <translation>التراجع عن الطلب الأخير</translation>
     </message>
@@ -69,7 +69,7 @@
         <translation>حصة مجانية</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>تم تجديد الوصول إلى الحصة المجانية: أعد إرسال طلبك.</translation>
     </message>
@@ -79,7 +79,7 @@
         <translation>يقوم تطبيق آخر بتعديل المشروع: حاول مجدداً بعد قليل.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
         <source>Another application: {}</source>
         <translation>تطبيق آخر: {}</translation>
     </message>
@@ -121,47 +121,47 @@
         <translation>أدخل مفتاح API في إعدادات الوكيل.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Export of {}</source>
         <translation>تصدير {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Favorite applied</source>
         <translation>تم تطبيق المفضلة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Filter on the points of {}</source>
         <translation>تصفية على نقاط {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Filter on {}</source>
         <translation>تصفية على {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Filter on {} by an area</source>
         <translation>تصفية على {} حسب منطقة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
         <source>Filter on {} by {}</source>
         <translation>تصفية على {} حسب {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
         <source>FilterMate agent</source>
         <translation>وكيل FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Filters removed from {}</source>
         <translation>تمت إزالة التصفيات من {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Hidden: {}</source>
         <translation>مخفي: {}</translation>
     </message>
@@ -171,13 +171,13 @@
         <translation>يستجيب.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Layer added: {}</source>
         <translation>تمت إضافة الطبقة: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Layers removed: {}</source>
         <translation>تمت إزالة الطبقات: {}</translation>
     </message>
@@ -199,32 +199,32 @@
         <translation>لا شيء لاستعادته.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Reading the active filters</source>
         <translation>قراءة التصفيات النشطة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Reading the favorites</source>
         <translation>قراءة المفضلات</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Reading the fields of {}</source>
         <translation>قراءة حقول {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Reading the layers</source>
         <translation>قراءة الطبقات</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Reading the map</source>
         <translation>قراءة الخريطة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Reading the values of {}</source>
         <translation>قراءة قيم {}</translation>
     </message>
@@ -234,32 +234,32 @@
         <translation>تمت الاستعادة: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
         <source>Searching satellite imagery on {}</source>
         <translation>البحث عن صور الأقمار الصناعية في {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Searching {} for {}</source>
         <translation>البحث في {} عن {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection cleared on {}</source>
         <translation>تم مسح التحديد في {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection on {}</source>
         <translation>تحديد في {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Shown: {}</source>
         <translation>ظاهر: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>Stopped.</source>
         <translation>تم الإيقاف.</translation>
     </message>
@@ -279,12 +279,12 @@
         <translation>كلمة المرور الرئيسية لـ QGIS مطلوبة لاستخدام المفتاح المخزَّن.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>توقف الوكيل قبل النهاية ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -295,7 +295,7 @@ Do you agree?</source>
 هل توافق؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -306,7 +306,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 يقرأ QGIS المصدر البعيد من خادمه، وقد يُرسَل محتوى الطبقة إلى مزوّد الوكيل. هل توافق؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -317,7 +317,7 @@ Do you agree?</source>
 هل توافق؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -328,7 +328,7 @@ Do you agree?</source>
 هل توافق؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -341,7 +341,7 @@ Do you agree?</source>
 هل توافق؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>نفد رصيد هذا الحساب أو حصته.</translation>
     </message>
@@ -362,7 +362,7 @@ Do you agree?</source>
         <translation>الحصة المجانية غير متاحة حالياً.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>نفدت الحصة المجانية لهذا الشهر. أدخل مفتاح API الخاص بك في إعدادات الوكيل.</translation>
     </message>
@@ -373,17 +373,17 @@ Do you agree?</source>
         <translation>تعذر تخزين المفتاح.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>The provider could not be reached: {}</source>
         <translation>تعذر الوصول إلى المزوّد: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>رفض المزوّد مفتاح API: تحقق منه في إعدادات الوكيل.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
         <source>The provider reported a problem: {}</source>
         <translation>أبلغ المزوّد عن مشكلة: {}</translation>
     </message>
@@ -394,7 +394,7 @@ Do you agree?</source>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Thinking…</source>
         <translation>جارٍ التفكير…</translation>
     </message>
@@ -404,27 +404,27 @@ Do you agree?</source>
         <translation>عدد كبير جداً من الحسابات الجديدة من هذا العنوان اليوم: حاول غداً، أو أدخل مفتاح API الخاص بك.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>طلبات كثيرة جداً حالياً: حاول مجدداً بعد قليل.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Trying a filter on {}</source>
         <translation>تجربة تصفية على {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Zoom on {}</source>
         <translation>تكبير إلى {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>an area</source>
         <translation>منطقة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>everything</source>
         <translation>كل شيء</translation>
     </message>
@@ -433,370 +433,469 @@ Do you agree?</source>
         <source>{} tools available</source>
         <translation>{} أداة متاحة</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <source>The request is back in the line below: fix the settings, then send it again.</source>
+        <translation>عاد الطلب إلى السطر أدناه: صحّح الإعدادات ثم أرسله من جديد.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <source>The request is back in the line below: send it again when you are ready.</source>
+        <translation>عاد الطلب إلى السطر أدناه: أرسله من جديد متى شئت.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="269"/>
+        <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>الطبقات كما كانت قبل هذه الخطوة من الطلب الأخير</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="267"/>
+        <location filename="../ui/widgets/agent_panel.py" line="283"/>
         <source>Undo back to here</source>
         <translation>التراجع حتى هنا</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="364"/>
+        <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>جرّب</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="111"/>
+        <location filename="../ui/widgets/agent_thread.py" line="133"/>
         <source>Undo</source>
         <translation>تراجع</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="312"/>
+        <location filename="../ui/widgets/agent_panel.py" line="333"/>
         <source>(no request)</source>
         <translation>(بلا طلب)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="611"/>
+        <location filename="../ui/widgets/agent_panel.py" line="721"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>بضعة طلبات مجانية شهرياً، عبر وسيط FilterMate إلى Claude (Anthropic)، وفق شروط Anthropic. يحتسب الوسيط ما يُستهلك ولا يحتفظ بأي محادثة. عند نفاد الحصة، اختر مزوّداً وأدخل مفتاح API الخاص بك.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="616"/>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>API key</source>
         <translation>مفتاح API</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="770"/>
+        <location filename="../ui/widgets/agent_panel.py" line="946"/>
         <source>Add</source>
         <translation>إضافة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="610"/>
-        <location filename="../ui/widgets/agent_panel.py" line="702"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
+        <location filename="../ui/widgets/agent_panel.py" line="874"/>
         <source>Address</source>
         <translation>العنوان</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="205"/>
+        <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>إعدادات الوكيل</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="622"/>
+        <location filename="../ui/widgets/agent_panel.py" line="738"/>
         <source>Allow attribute values to be sent</source>
         <translation>السماح بإرسال قيم السمات</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="695"/>
+        <location filename="../ui/widgets/agent_panel.py" line="867"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>ستحتاج التطبيقات التي سبق إعدادها إلى إعدادها من جديد.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation>اطلب من الوكيل تصفية طبقاتك</translation>
+        <translation type="obsolete">اطلب من الوكيل تصفية طبقاتك</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="240"/>
+        <location filename="../ui/widgets/agent_panel.py" line="253"/>
         <source>Back to the conversation</source>
         <translation>العودة إلى المحادثة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="668"/>
+        <location filename="../ui/widgets/agent_panel.py" line="840"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>يمكن حينئذٍ لـ Claude Code أو لأي عميل MCP آخر على هذا الكمبيوتر تصفية طبقاتك، بعد فتح FilterMate، وفق قواعد هذه اللوحة: المصادر نفسها، والتأكيدات نفسها، ويمكن التراجع عن التصفيات هنا. يرسل هذا التطبيق ما يقرؤه إلى مزوّد الذكاء الاصطناعي الخاص به.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>اربط مزوّد ذكاء اصطناعي للبدء. لا يُرسَل شيء قبل موافقتك.</translation>
+        <translation type="obsolete">اربط مزوّد ذكاء اصطناعي للبدء. لا يُرسَل شيء قبل موافقتك.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <location filename="../ui/widgets/agent_panel.py" line="908"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>تم النسخ مع رمز الوصول: احتفظ به لنفسك. احفظ هذه الإعدادات لكي يُطبَّق.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="685"/>
+        <location filename="../ui/widgets/agent_panel.py" line="857"/>
         <source>Copy for Claude Desktop</source>
         <translation>نسخ لـ Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="690"/>
+        <location filename="../ui/widgets/agent_panel.py" line="862"/>
         <source>Copy the Claude Code command</source>
         <translation>نسخ أمر Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="682"/>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
         <source>Copy the configuration</source>
         <translation>نسخ التكوين</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>صِفه بكلماتك. يمكن التراجع عن كل تصفية.</translation>
+        <translation type="obsolete">صِفه بكلماتك. يمكن التراجع عن كل تصفية.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="471"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>Filter your layers from a sentence</source>
         <translation>صفِّ طبقاتك بجملة واحدة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="594"/>
+        <location filename="../ui/widgets/agent_panel.py" line="704"/>
         <source>FilterMate agent</source>
         <translation>وكيل FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="242"/>
+        <location filename="../ui/widgets/agent_panel.py" line="255"/>
         <source>History</source>
         <translation>السجل</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="201"/>
+        <location filename="../ui/widgets/agent_panel.py" line="212"/>
         <source>History…</source>
         <translation>السجل…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation>أوافق على إرسال هذه البيانات إلى هذا المزوّد</translation>
+        <translation type="obsolete">أوافق على إرسال هذه البيانات إلى هذا المزوّد</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="672"/>
+        <location filename="../ui/widgets/agent_panel.py" line="844"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>السماح للتطبيقات الأخرى على هذا الكمبيوتر بتشغيل FilterMate (خادم MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <location filename="../ui/widgets/agent_panel.py" line="943"/>
         <source>MCP connector</source>
         <translation>موصّل MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <location filename="../ui/widgets/agent_panel.py" line="983"/>
         <source>MCP connectors</source>
         <translation>موصّلات MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="606"/>
+        <location filename="../ui/widgets/agent_panel.py" line="716"/>
         <source>Model</source>
         <translation>النموذج</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="198"/>
+        <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>المزيد</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="693"/>
+        <location filename="../ui/widgets/agent_panel.py" line="865"/>
         <source>New access token</source>
         <translation>رمز وصول جديد</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="203"/>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>محادثة جديدة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="904"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>رمز جديد: يُطبَّق بعد حفظ هذه الإعدادات.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="795"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Open data platforms</source>
         <translation>منصات البيانات المفتوحة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="166"/>
+        <location filename="../ui/widgets/agent_panel.py" line="177"/>
+        <location filename="../ui/widgets/agent_panel.py" line="667"/>
         <source>Open the settings</source>
         <translation>فتح الإعدادات</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="657"/>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
         <source>Other applications</source>
         <translation>تطبيقات أخرى</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="701"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Port</source>
         <translation>المنفذ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="638"/>
-        <location filename="../ui/widgets/agent_panel.py" line="655"/>
+        <location filename="../ui/widgets/agent_panel.py" line="773"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Provider</source>
         <translation>المزوّد</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="264"/>
+        <location filename="../ui/widgets/agent_panel.py" line="280"/>
         <source>Redo</source>
         <translation>إعادة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="755"/>
+        <location filename="../ui/widgets/agent_panel.py" line="730"/>
+        <location filename="../ui/widgets/agent_panel.py" line="931"/>
         <source>Remove</source>
         <translation>إزالة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="619"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>Remove the stored key</source>
         <translation>حذف المفتاح المخزَّن</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="796"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>Satellite imagery</source>
         <translation>صور الأقمار الصناعية</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Send (Enter)</source>
         <translation>إرسال (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <location filename="../ui/widgets/agent_panel.py" line="288"/>
         <source>Send again</source>
         <translation>إعادة الإرسال</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="479"/>
+        <location filename="../ui/widgets/agent_panel.py" line="574"/>
         <source>Sent to: {}</source>
         <translation>أُرسل إلى: {}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation>إعداد الوكيل</translation>
+        <translation type="obsolete">إعداد الوكيل</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="656"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Sources</source>
         <translation>المصادر</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Stop (Esc)</source>
         <translation>إيقاف (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
         <source>Stored: leave empty to keep it</source>
         <translation>مخزَّن: اتركه فارغاً للإبقاء عليه</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="753"/>
+        <location filename="../ui/widgets/agent_panel.py" line="929"/>
         <source>Test</source>
         <translation>اختبار</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
         <source>Testing…</source>
         <translation>جارٍ الاختبار…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="659"/>
+        <location filename="../ui/widgets/agent_panel.py" line="802"/>
         <source>The MCP server could not start: {}</source>
         <translation>تعذر تشغيل خادم MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="745"/>
+        <location filename="../ui/widgets/agent_panel.py" line="917"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>يمكن للوكيل البحث في المصادر المحددة هنا. تُرسَل إليها عمليات بحثك وما يمرّره الوكيل إلى موصّل؛ وتُقرأ الطبقة المضافة منها من خوادمها.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>يرسل الوكيل طلبك وأسماء طبقاتك وحقولك وتعابير التصفية ونتائج أدواته إلى المزوّد المختار هنا، وفق شروط هذا المزوّد. من دون الخيار أدناه، لا يقرأ الوكيل قيم حقولك؛ أما القيم المكتوبة أصلاً في تصفياتك ومفضلاتك فتبقى مُرسَلة. تُحفظ المحادثة على هذا الكمبيوتر لكل مشروع، حتى تبدأ محادثة جديدة.</translation>
+        <translation type="obsolete">يرسل الوكيل طلبك وأسماء طبقاتك وحقولك وتعابير التصفية ونتائج أدواته إلى المزوّد المختار هنا، وفق شروط هذا المزوّد. من دون الخيار أدناه، لا يقرأ الوكيل قيم حقولك؛ أما القيم المكتوبة أصلاً في تصفياتك ومفضلاتك فتبقى مُرسَلة. تُحفظ المحادثة على هذا الكمبيوتر لكل مشروع، حتى تبدأ محادثة جديدة.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="687"/>
+        <location filename="../ui/widgets/agent_panel.py" line="859"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>عبر mcp-remote الذي يتطلب Node.js: يشغّل Claude Desktop الخوادم المحلية كبرامج.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="846"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
         <source>Too many sources added: remove one first.</source>
         <translation>عدد المصادر المضافة كبير جداً: أزل أحدها أولاً.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="261"/>
+        <location filename="../ui/widgets/agent_panel.py" line="277"/>
         <source>Undo the last</source>
         <translation>التراجع عن الأخير</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="170"/>
+        <location filename="../ui/widgets/agent_panel.py" line="181"/>
         <source>Undo this turn</source>
         <translation>التراجع عن هذه الدورة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="468"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>What do you want to filter?</source>
         <translation>ماذا تريد أن تصفّي؟</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
         <source>added by you</source>
         <translation>أضفتَه أنت</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>applied</source>
         <translation>مطبَّق</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>community</source>
         <translation>مجتمعي</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="765"/>
+        <location filename="../ui/widgets/agent_panel.py" line="941"/>
         <source>https://... or a portal address</source>
         <translation>https://... أو عنوان بوابة</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="310"/>
+        <location filename="../ui/widgets/agent_panel.py" line="338"/>
+        <location filename="../ui/widgets/agent_panel.py" line="339"/>
         <source>no change</source>
         <translation>بلا تغيير</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>official</source>
         <translation>رسمي</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>this computer</source>
         <translation>هذا الكمبيوتر</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>undone</source>
         <translation>تم التراجع</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation>{} دورة (دورات)</translation>
+        <translation type="obsolete">{} دورة (دورات)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Which layers are in this project?</source>
-        <translation type="obsolete">ما الطبقات الموجودة في هذا المشروع؟</translation>
+        <translation>ما الطبقات الموجودة في هذا المشروع؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
-        <translation type="obsolete">احتفظ بالمباني الأعلى من 15 م</translation>
+        <translation>احتفظ بالمباني الأعلى من 15 م</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
         <source>Filter the roads inside the selected feature</source>
-        <translation type="obsolete">صفِّ الطرق داخل المعلم المحدد</translation>
+        <translation>صفِّ الطرق داخل المعلم المحدد</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
+        <source>Add the municipalities from data.gouv.fr</source>
+        <translation>أضف البلديات من data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="195"/>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Ask for a filter…</source>
+        <translation>اطلب مرشّحًا…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <source>Choosing another provider or address asks for this agreement again.</source>
+        <translation>تغيير المزوّد أو العنوان يطلب هذه الموافقة من جديد.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="429"/>
+        <source>Connect a provider</source>
+        <translation>ربط مزوّد</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Connect a provider to start</source>
+        <translation>اربط مزوّدًا للبدء</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
+        <translation>صِفه بكلماتك. يقرأ الوكيل المشروع ويجرّب المرشّح ثم يطبّقه. يمكن التراجع عن كل دور.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>FilterMate (free quota)</source>
+        <translation>FilterMate (حصة مجانية)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <source>I agree to send this data to {}</source>
+        <translation>أوافق على إرسال هذه البيانات إلى {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="425"/>
+        <source>It needs an AI provider: the free quota of FilterMate, your own key, or a local model. Nothing is sent before you agree.</source>
+        <translation>يحتاج إلى مزوّد ذكاء اصطناعي: الحصة المجانية من FilterMate أو مفتاحك الخاص أو نموذج محلي. لا يُرسل شيء قبل موافقتك.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>Ollama (local)</source>
+        <translation>Ollama (محلي)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
+        <translation>يقرأ الوكيل طبقات مشروعك ويكتب المرشّحات ويطبّقها. يمكن التراجع عن كل دور.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
+        <translation>يُحفظ المفتاح في قاعدة المصادقة في QGIS، وليس أبدًا في ملف إعدادات. لا يُرسل إلا إلى هذا العنوان.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <source>WHAT LEAVES THIS MACHINE</source>
+        <translation>ما يغادر هذا الجهاز</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
+        <translation>من دون ذلك لا يقرأ الوكيل قيم حقولك. أما القيم المكتوبة مسبقًا في مرشّحاتك ومفضّلاتك فتُرسل على أي حال.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <source>You can already type the next request.</source>
+        <translation>يمكنك من الآن كتابة الطلب التالي.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>طلبك وأسماء طبقاتك وحقولك وتعابير المرشّحات ونتائج أدوات الوكيل، إلى هذا المزوّد ووفق شروطه. تُحفظ المحادثة على هذا الحاسوب لكل مشروع، إلى أن تبدأ محادثة جديدة.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="349"/>
+        <source>this project · {} turn(s)</source>
+        <translation>هذا المشروع · {} دور</translation>
     </message>
 </context>
 <context>

@@ -32,13 +32,13 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
         <source>Undone: {}</source>
         <translation>Razveljavljeno: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Undo of the last request</source>
         <translation>Razveljavitev zadnje zahteve</translation>
     </message>
@@ -69,7 +69,7 @@
         <translation>Brezplačna kvota</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Dostop do brezplačne kvote je bil obnovljen: ponovno pošljite zahtevo.</translation>
     </message>
@@ -79,7 +79,7 @@
         <translation>Druga aplikacija spreminja projekt: poskusite znova čez trenutek.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
         <source>Another application: {}</source>
         <translation>Druga aplikacija: {}</translation>
     </message>
@@ -121,47 +121,47 @@
         <translation>Vnesite svoj ključ API v nastavitvah agenta.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Export of {}</source>
         <translation>Izvoz {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Favorite applied</source>
         <translation>Priljubljeni uporabljen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Filter on the points of {}</source>
         <translation>Filter na točkah {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Filter on {}</source>
         <translation>Filter na {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Filter on {} by an area</source>
         <translation>Filter na {} po območju</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
         <source>Filter on {} by {}</source>
         <translation>Filter na {} po {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
         <source>FilterMate agent</source>
         <translation>Agent FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Filters removed from {}</source>
         <translation>Filtri odstranjeni iz {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Hidden: {}</source>
         <translation>Skrito: {}</translation>
     </message>
@@ -171,13 +171,13 @@
         <translation>Vir odgovarja.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Layer added: {}</source>
         <translation>Plast dodana: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Layers removed: {}</source>
         <translation>Plasti odstranjene: {}</translation>
     </message>
@@ -199,32 +199,32 @@
         <translation>Ni česa obnoviti.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Reading the active filters</source>
         <translation>Branje aktivnih filtrov</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Reading the favorites</source>
         <translation>Branje priljubljenih</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Reading the fields of {}</source>
         <translation>Branje polj plasti {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Reading the layers</source>
         <translation>Branje plasti</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Reading the map</source>
         <translation>Branje zemljevida</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Reading the values of {}</source>
         <translation>Branje vrednosti {}</translation>
     </message>
@@ -234,32 +234,32 @@
         <translation>Obnovljeno: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Iskanje satelitskih posnetkov v {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Searching {} for {}</source>
         <translation>Iskanje v {}: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection cleared on {}</source>
         <translation>Izbor počiščen na {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Selection on {}</source>
         <translation>Izbor na {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Shown: {}</source>
         <translation>Prikazano: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>Stopped.</source>
         <translation>Ustavljeno.</translation>
     </message>
@@ -279,12 +279,12 @@
         <translation>Za uporabo shranjenega ključa je potrebno glavno geslo QGIS.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Agent se je ustavil pred koncem ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -295,7 +295,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -306,7 +306,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS oddaljen vir bere z njegovega strežnika, vsebina plasti pa se lahko pošlje ponudniku agenta. Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -317,7 +317,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -328,7 +328,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -341,7 +341,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Kredit ali kvota tega računa je porabljena.</translation>
     </message>
@@ -362,7 +362,7 @@ Se strinjate?</translation>
         <translation>Brezplačna kvota trenutno ni na voljo.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Brezplačna kvota je za ta mesec porabljena. Vnesite svoj ključ API v nastavitvah agenta.</translation>
     </message>
@@ -373,17 +373,17 @@ Se strinjate?</translation>
         <translation>Ključa ni bilo mogoče shraniti.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>The provider could not be reached: {}</source>
         <translation>Ponudnika ni bilo mogoče doseči: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Ponudnik je zavrnil ključ API: preverite ga v nastavitvah agenta.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
         <source>The provider reported a problem: {}</source>
         <translation>Ponudnik je sporočil težavo: {}</translation>
     </message>
@@ -394,7 +394,7 @@ Se strinjate?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Thinking…</source>
         <translation>Razmišljanje…</translation>
     </message>
@@ -404,27 +404,27 @@ Se strinjate?</translation>
         <translation>Danes je bilo s tega naslova ustvarjenih preveč novih računov: poskusite jutri ali vnesite svoj ključ API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Trenutno je preveč zahtev: poskusite znova čez trenutek.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Trying a filter on {}</source>
         <translation>Preizkušanje filtra na {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Zoom on {}</source>
         <translation>Povečaj na {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>an area</source>
         <translation>območje</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>everything</source>
         <translation>vse</translation>
     </message>
@@ -433,370 +433,469 @@ Se strinjate?</translation>
         <source>{} tools available</source>
         <translation>Razpoložljiva orodja: {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <source>The request is back in the line below: fix the settings, then send it again.</source>
+        <translation>Zahteva je spet v vrstici spodaj: popravite nastavitve, nato jo pošljite znova.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <source>The request is back in the line below: send it again when you are ready.</source>
+        <translation>Zahteva je spet v vrstici spodaj: pošljite jo znova, ko želite.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="269"/>
+        <location filename="../ui/widgets/agent_panel.py" line="285"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Sloji, kakršni so bili pred tem korakom zadnje zahteve</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="267"/>
+        <location filename="../ui/widgets/agent_panel.py" line="283"/>
         <source>Undo back to here</source>
         <translation>Razveljavi do tu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="364"/>
+        <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>POSKUSITE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="111"/>
+        <location filename="../ui/widgets/agent_thread.py" line="133"/>
         <source>Undo</source>
         <translation>Razveljavi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="312"/>
+        <location filename="../ui/widgets/agent_panel.py" line="333"/>
         <source>(no request)</source>
         <translation>(brez zahteve)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="611"/>
+        <location filename="../ui/widgets/agent_panel.py" line="721"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>Nekaj brezplačnih zahtev na mesec prek releja FilterMate do Claude (Anthropic), pod pogoji družbe Anthropic. Rele šteje porabo in ne hrani nobenega pogovora. Ko je kvota porabljena, izberite ponudnika in vnesite svoj ključ API.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="616"/>
+        <location filename="../ui/widgets/agent_panel.py" line="727"/>
         <source>API key</source>
         <translation>Ključ API</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="770"/>
+        <location filename="../ui/widgets/agent_panel.py" line="946"/>
         <source>Add</source>
         <translation>Dodaj</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="610"/>
-        <location filename="../ui/widgets/agent_panel.py" line="702"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
+        <location filename="../ui/widgets/agent_panel.py" line="874"/>
         <source>Address</source>
         <translation>Naslov</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="205"/>
+        <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Nastavitve agenta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="622"/>
+        <location filename="../ui/widgets/agent_panel.py" line="738"/>
         <source>Allow attribute values to be sent</source>
         <translation>Dovoli pošiljanje vrednosti atributov</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="695"/>
+        <location filename="../ui/widgets/agent_panel.py" line="867"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>Že nastavljene aplikacije bo treba nastaviti znova.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation>Prosite agenta, naj filtrira vaše plasti</translation>
+        <translation type="obsolete">Prosite agenta, naj filtrira vaše plasti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="240"/>
+        <location filename="../ui/widgets/agent_panel.py" line="253"/>
         <source>Back to the conversation</source>
         <translation>Nazaj na pogovor</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="668"/>
+        <location filename="../ui/widgets/agent_panel.py" line="840"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>Claude Code ali drug odjemalec MCP na tem računalniku lahko nato filtrira vaše plasti, ko je FilterMate odprt, po pravilih te plošče: isti viri, ista potrditev, filtre pa je tu mogoče razveljaviti. Ta aplikacija prebrano pošilja svojemu ponudniku UI.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Za začetek povežite ponudnika UI. Brez vašega soglasja se ne pošlje nič.</translation>
+        <translation type="obsolete">Za začetek povežite ponudnika UI. Brez vašega soglasja se ne pošlje nič.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <location filename="../ui/widgets/agent_panel.py" line="908"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>Kopirano z dostopnim žetonom: obdržite ga zase. Shranite te nastavitve, da se uveljavijo.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="685"/>
+        <location filename="../ui/widgets/agent_panel.py" line="857"/>
         <source>Copy for Claude Desktop</source>
         <translation>Kopiraj za Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="690"/>
+        <location filename="../ui/widgets/agent_panel.py" line="862"/>
         <source>Copy the Claude Code command</source>
         <translation>Kopiraj ukaz Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="682"/>
+        <location filename="../ui/widgets/agent_panel.py" line="854"/>
         <source>Copy the configuration</source>
         <translation>Kopiraj konfiguracijo</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Opišite to s svojimi besedami. Vsak filter je mogoče razveljaviti.</translation>
+        <translation type="obsolete">Opišite to s svojimi besedami. Vsak filter je mogoče razveljaviti.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="471"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>Filter your layers from a sentence</source>
         <translation>Filtrirajte plasti z enim stavkom</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="594"/>
+        <location filename="../ui/widgets/agent_panel.py" line="704"/>
         <source>FilterMate agent</source>
         <translation>Agent FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="242"/>
+        <location filename="../ui/widgets/agent_panel.py" line="255"/>
         <source>History</source>
         <translation>Zgodovina</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="201"/>
+        <location filename="../ui/widgets/agent_panel.py" line="212"/>
         <source>History…</source>
         <translation>Zgodovina…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation>Strinjam se s pošiljanjem teh podatkov temu ponudniku</translation>
+        <translation type="obsolete">Strinjam se s pošiljanjem teh podatkov temu ponudniku</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="672"/>
+        <location filename="../ui/widgets/agent_panel.py" line="844"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>Dovoli drugim aplikacijam na tem računalniku upravljanje FilterMate (strežnik MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <location filename="../ui/widgets/agent_panel.py" line="943"/>
         <source>MCP connector</source>
         <translation>Povezovalnik MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <location filename="../ui/widgets/agent_panel.py" line="983"/>
         <source>MCP connectors</source>
         <translation>Povezovalniki MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="606"/>
+        <location filename="../ui/widgets/agent_panel.py" line="716"/>
         <source>Model</source>
         <translation>Model</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="198"/>
+        <location filename="../ui/widgets/agent_panel.py" line="209"/>
         <source>More</source>
         <translation>Več</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="693"/>
+        <location filename="../ui/widgets/agent_panel.py" line="865"/>
         <source>New access token</source>
         <translation>Nov dostopni žeton</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="203"/>
+        <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Nov pogovor</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="904"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>Nov žeton: uveljavi se, ko so te nastavitve shranjene.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="795"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Open data platforms</source>
         <translation>Platforme odprtih podatkov</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="166"/>
+        <location filename="../ui/widgets/agent_panel.py" line="177"/>
+        <location filename="../ui/widgets/agent_panel.py" line="667"/>
         <source>Open the settings</source>
         <translation>Odpri nastavitve</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="657"/>
+        <location filename="../ui/widgets/agent_panel.py" line="800"/>
         <source>Other applications</source>
         <translation>Druge aplikacije</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="701"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Port</source>
         <translation>Vrata</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="638"/>
-        <location filename="../ui/widgets/agent_panel.py" line="655"/>
+        <location filename="../ui/widgets/agent_panel.py" line="773"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Provider</source>
         <translation>Ponudnik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="264"/>
+        <location filename="../ui/widgets/agent_panel.py" line="280"/>
         <source>Redo</source>
         <translation>Ponovi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="755"/>
+        <location filename="../ui/widgets/agent_panel.py" line="730"/>
+        <location filename="../ui/widgets/agent_panel.py" line="931"/>
         <source>Remove</source>
         <translation>Odstrani</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="619"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>Remove the stored key</source>
         <translation>Odstrani shranjeni ključ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="796"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>Satellite imagery</source>
         <translation>Satelitski posnetki</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Send (Enter)</source>
         <translation>Pošlji (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <location filename="../ui/widgets/agent_panel.py" line="288"/>
         <source>Send again</source>
         <translation>Pošlji znova</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="479"/>
+        <location filename="../ui/widgets/agent_panel.py" line="574"/>
         <source>Sent to: {}</source>
         <translation>Poslano na: {}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation>Nastavi agenta</translation>
+        <translation type="obsolete">Nastavi agenta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="656"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Sources</source>
         <translation>Viri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <location filename="../ui/widgets/agent_panel.py" line="589"/>
         <source>Stop (Esc)</source>
         <translation>Ustavi (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
         <source>Stored: leave empty to keep it</source>
         <translation>Shranjen: pustite prazno, če ga želite obdržati</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="753"/>
+        <location filename="../ui/widgets/agent_panel.py" line="929"/>
         <source>Test</source>
         <translation>Preizkusi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
         <source>Testing…</source>
         <translation>Preizkušanje…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="659"/>
+        <location filename="../ui/widgets/agent_panel.py" line="802"/>
         <source>The MCP server could not start: {}</source>
         <translation>Strežnika MCP ni bilo mogoče zagnati: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="745"/>
+        <location filename="../ui/widgets/agent_panel.py" line="917"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>Agent lahko išče po tu označenih virih. Vaša iskanja in to, kar agent posreduje povezovalniku, se jim pošljejo; plast, dodana iz njih, se bere z njihovih strežnikov.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>Agent pošilja vašo zahtevo, imena vaših plasti in polj, vaše filtrirne izraze in rezultate svojih orodij ponudniku, izbranemu tu, pod pogoji tega ponudnika. Brez spodnje možnosti agent ne bere vrednosti vaših polj; vrednosti, ki so že zapisane v vaših filtrih in priljubljenih, se še vedno pošljejo. Pogovor se hrani na tem računalniku za vsak projekt, dokler ne začnete novega.</translation>
+        <translation type="obsolete">Agent pošilja vašo zahtevo, imena vaših plasti in polj, vaše filtrirne izraze in rezultate svojih orodij ponudniku, izbranemu tu, pod pogoji tega ponudnika. Brez spodnje možnosti agent ne bere vrednosti vaših polj; vrednosti, ki so že zapisane v vaših filtrih in priljubljenih, se še vedno pošljejo. Pogovor se hrani na tem računalniku za vsak projekt, dokler ne začnete novega.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="687"/>
+        <location filename="../ui/widgets/agent_panel.py" line="859"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>Prek mcp-remote, ki zahteva Node.js: Claude Desktop lokalne strežnike zažene kot programe.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="846"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
         <source>Too many sources added: remove one first.</source>
         <translation>Dodanih je preveč virov: najprej enega odstranite.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="261"/>
+        <location filename="../ui/widgets/agent_panel.py" line="277"/>
         <source>Undo the last</source>
         <translation>Razveljavi zadnjega</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="170"/>
+        <location filename="../ui/widgets/agent_panel.py" line="181"/>
         <source>Undo this turn</source>
         <translation>Razveljavi ta krog</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="468"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>What do you want to filter?</source>
         <translation>Kaj želite filtrirati?</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
         <source>added by you</source>
         <translation>dodali ste</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>applied</source>
         <translation>uporabljeno</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>community</source>
         <translation>skupnostni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="765"/>
+        <location filename="../ui/widgets/agent_panel.py" line="941"/>
         <source>https://... or a portal address</source>
         <translation>https://... ali naslov portala</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="310"/>
+        <location filename="../ui/widgets/agent_panel.py" line="338"/>
+        <location filename="../ui/widgets/agent_panel.py" line="339"/>
         <source>no change</source>
         <translation>brez sprememb</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>official</source>
         <translation>uradni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>this computer</source>
         <translation>ta računalnik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <location filename="../ui/widgets/agent_panel.py" line="335"/>
         <source>undone</source>
         <translation>razveljavljeno</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation>Krogi: {}</translation>
+        <translation type="obsolete">Krogi: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Which layers are in this project?</source>
-        <translation type="obsolete">Katere plasti vsebuje ta projekt?</translation>
+        <translation>Katere plasti vsebuje ta projekt?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="62"/>
         <source>Keep the buildings taller than 15 m</source>
-        <translation type="obsolete">Obdrži stavbe, višje od 15 m</translation>
+        <translation>Obdrži stavbe, višje od 15 m</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
         <source>Filter the roads inside the selected feature</source>
-        <translation type="obsolete">Filtriraj ceste znotraj izbranega objekta</translation>
+        <translation>Filtriraj ceste znotraj izbranega objekta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="63"/>
+        <source>Add the municipalities from data.gouv.fr</source>
+        <translation>Dodaj občine iz data.gouv.fr</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="195"/>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Ask for a filter…</source>
+        <translation>Zaprosite za filter…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <source>Choosing another provider or address asks for this agreement again.</source>
+        <translation>Zamenjava ponudnika ali naslova znova zahteva to soglasje.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="429"/>
+        <source>Connect a provider</source>
+        <translation>Poveži ponudnika</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <source>Connect a provider to start</source>
+        <translation>Za začetek povežite ponudnika</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
+        <translation>Opišite z lastnimi besedami. Agent prebere projekt, preizkusi filter in ga nato uporabi. Vsak krog je mogoče razveljaviti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>FilterMate (free quota)</source>
+        <translation>FilterMate (brezplačna kvota)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <source>I agree to send this data to {}</source>
+        <translation>Strinjam se s pošiljanjem teh podatkov v {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="425"/>
+        <source>It needs an AI provider: the free quota of FilterMate, your own key, or a local model. Nothing is sent before you agree.</source>
+        <translation>Potreben je ponudnik UI: brezplačna kvota FilterMate, vaš ključ ali lokalni model. Brez vašega soglasja se nič ne pošlje.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="56"/>
+        <source>Ollama (local)</source>
+        <translation>Ollama (lokalno)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
+        <translation>Agent prebere sloje projekta, napiše filtre in jih uporabi. Vsak krog je mogoče razveljaviti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
+        <translation>Ključ je shranjen v overitveni bazi QGIS, nikoli v datoteki z nastavitvami. Pošlje se samo na ta naslov.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <source>WHAT LEAVES THIS MACHINE</source>
+        <translation>KAJ ZAPUSTI TA RAČUNALNIK</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
+        <translation>Brez tega agent ne bere vrednosti vaših polj. Vrednosti, ki so že v vaših filtrih in priljubljenih, se vseeno pošljejo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <source>You can already type the next request.</source>
+        <translation>Naslednjo zahtevo že lahko pišete.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Vaša zahteva, imena slojev in polj, izrazi filtrov in rezultati orodij agenta, temu ponudniku in pod njegovimi pogoji. Pogovor se hrani v tem računalniku za vsak projekt, dokler ne začnete novega.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="349"/>
+        <source>this project · {} turn(s)</source>
+        <translation>ta projekt · krogov: {}</translation>
     </message>
 </context>
 <context>

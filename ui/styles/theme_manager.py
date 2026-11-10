@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
 
 logger = logging.getLogger(__name__)
+# A dialog with this property set keeps its own style sheet (see DialogStyleFilter._reset_dialog_style).
+OWN_STYLE_PROPERTY = "fm_own_style"
 
 
 class GlobalDialogStyleFilter(QObject):
@@ -379,6 +381,9 @@ class ChildDialogStyleFilter(QObject):
                 return
 
             class_name = dialog.__class__.__name__
+            # A dialog of FilterMate that draws its own look (the agent settings) keeps it.
+            if dialog.property(OWN_STYLE_PROPERTY):
+                return
 
             # Only reset protected dialog types
             if class_name in self.PROTECTED_DIALOGS or isinstance(dialog, QDialog):
