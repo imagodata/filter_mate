@@ -67,7 +67,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Se den valda videon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Se videon</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">Läs guiden <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
-            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 och Qt6</p>
+            <p class="home-version">FilterMate 5.1 · QGIS 3.22–4.x · Qt5 och Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Se arbetsflödet</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -112,8 +112,31 @@
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">Nytt i FilterMate 5</p><h2 id="fm5-title">Raster och LiDAR-punktmoln, filtrerade som vilket lager som helst.</h2><p>Välj ett raster eller ett punktmoln som aktuellt lager så visar EXPLORING dess egna verktyg. FILTERING kopplar sedan urvalet till lager av alla slag.</p></div>
-            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixelväljare, värdeintervall med histogram och direktförhandsvisning, lutning, exposition, terrängskuggning eller ojämnhet beräknade ur en DTM, klasser, rasteruttryck.</span></li><li><strong>Punktmoln</strong><span>ASPRS- och LiDAR HD-klasser, villkor på valfritt attribut, en klass kombinerad med en höjd över en DTM.</span></li><li><strong>Åt alla håll</strong><span>Vektor, raster och punktmoln som källa eller mål: nio kombinationer med buffert, minsta täckning och Disjoint.</span></li><li><strong>Enkelt att ångra</strong><span>Beskurna lager behåller sitt id och sin stil. Ångra, gör om och projektfiler återgår till originalkällan.</span></li><li><strong>Exportera</strong><span>GeoTIFF och COG för raster; LAZ, LAS, COPC, GPKG och CSV för punktmoln.</span></li><li><strong>Automatisera</strong><span>Nio Processing-algoritmer, fyra modeller, qgis_process samt Python- och REST-API.</span></li><li><strong>Testat</strong><span>CI i QGIS 3.22, 3.28, 3.34, 3.44 och 4.2, via Processing och själva panelen.</span></li></ul>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixelväljare, värdeintervall med histogram och direktförhandsvisning, lutning, exposition, terrängskuggning eller ojämnhet beräknade ur en DTM, klasser, rasteruttryck.</span></li><li><strong>Punktmoln</strong><span>ASPRS- och LiDAR HD-klasser, villkor på valfritt attribut, en klass kombinerad med en höjd över en DTM.</span></li><li><strong>Åt alla håll</strong><span>Vektor, raster och punktmoln som källa eller mål: nio kombinationer med buffert, minsta täckning och Disjoint.</span></li><li><strong>Enkelt att ångra</strong><span>Beskurna lager behåller sitt id och sin stil. Ångra, gör om och projektfiler återgår till originalkällan.</span></li><li><strong>Exportera</strong><span>GeoTIFF och COG för raster; LAZ, LAS, COPC, GPKG och CSV för punktmoln.</span></li><li><strong>Webbtjänster</strong><span>WFS, OGC API Features, ArcGIS, WCS, vektorplattor och externa COPC- eller EPT-punktmoln filtreras och utforskas med begränsade läsningar, aldrig i huvudtråden.</span></li><li><strong>Automatisera</strong><span>Tio Processing-algoritmer, fyra modeller, qgis_process samt Python- och REST-API.</span></li><li><strong>Kontrollerat</strong><span>I QGIS 3.22 till 4.x före varje version, via Processing och själva panelen.</span></li></ul>
             <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">Läs guiden till FilterMate 5 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section examples agent" id="agent" aria-labelledby="agent-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Experimentellt · Nytt i FilterMate 5.1</p><h2 id="agent-title">Be om ett filter med en mening.</h2><p>AGENT är en chatt högst upp i panelen. Skriv vad du vill, till exempel byggnader över 1200 m i vald kommun, så filtrerar, väljer, zoomar eller exporterar den. Varje steg kan ångras.</p></div>
+            <a class="inline-cta" href="guide.html#agent" hreflang="en">Läs kapitlet Agent <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+        <ul class="capability-list"><li><strong>Din modell</strong><span>Claude, Mistral, OpenAI och kompatibla servrar, eller en lokal Ollama-modell. Några gratisförfrågningar i månaden för att prova, sedan din egen nyckel, lagrad i QGIS autentiseringsdatabas.</span></li><li><strong>Ångra steg för steg</strong><span>Filter tillämpas direkt. Undo och Redo går igenom agentens förfrågningar, och Undo back to here går tillbaka till valfritt steg.</span></li><li><strong>Du bekräftar</strong><span>Exporter och tillagda eller borttagna lager frågar först. Ett filter är en enda enkel WHERE-sats, som kontrolleras innan den körs.</span></li><li><strong>Källor du bockar i</strong><span>Öppna dataportaler, WFS-tjänster, Sentinel-2-scener och MCP-kopplingar, allt avstängt tills du bockar i det.</span></li><li><strong>Ditt samtycke först</strong><span>Inget skickas innan du har valt en modell och godkänt. Guiden listar vad som följer med varje förfrågan.</span></li><li><strong>MCP-server</strong><span>Av som standard. Claude Code eller en annan MCP-klient på din dator kan styra FilterMate via 127.0.0.1, med en åtkomsttoken.</span></li></ul>
+    </div>
+</section>
+
+<section class="home-section objects" id="objects" aria-labelledby="objects-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Experimentellt · Nytt i FilterMate 5.1</p><h2 id="objects-title">Klicka på ett objekt. SAM ritar det.</h2><p>På ett raster ritar pixelväljaren det klickade objektet med SAM, en modell som körs på din dator. Liknande objekt kommer som förslag som du behåller eller förkastar. Resultatet är vanliga polygoner, så ett filter spelas upp igen utan modellen.</p></div>
+            <a class="inline-cta" href="guide.html#sam" hreflang="en">Läs om SAM i guiden <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+        <div>
+            <dl class="result-list"><div><dt>0.82</dt><dd>median av överlappningen med 100 byggnadsomrisser, från en ruta</dd></div><div><dt>0.81</dt><dd>median av överlappningen med 40 BD TOPO-fotavtryck, från Processing</dd></div></dl>
+            <ul class="capability-list"><li><strong>Rita</strong><span>Klicka; Skift+klick för att utvidga, högerklick för att beskära, eller dra en ruta. G visar nästa kontur som SAM föreslog.</span></li><li><strong>Liknande objekt</strong><span>Förslag med streckad kontur: ett klick behåller ett, ett högerklick förkastar det. Ungefär hälften är byggnader.</span></li><li><strong>Installeras en gång</strong><span>En bekräftelse installerar onnxruntime och en modell på 62 MB i din QGIS-profil. Innan dess installeras ingenting.</span></li><li><strong>Utanför panelen</strong><span>To layer lägger till objekten som ett polygonlager. Processing ritar ett objekt per punkt eller polygon i ett lager, och polygoner kan filtrera från skript, REST och MCP.</span></li><li><strong>Begränsningar</strong><span>Fungerar bäst på byggnader och väl avgränsade objekt. Fastigheter och träd är inte validerade.</span></li></ul>
         </div>
     </div>
 </section>
@@ -201,7 +224,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.sv.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Rumslig filtrering för QGIS, av imagodata.</p></div><ul><li><a href="guide.html" hreflang="en">Användarguide <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">Användningsfall <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">Utvecklingsplan <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Källkod</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Rapportera ett problem</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 5.0 · Kartdata i videor och skärmbilder: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.1 · Kartdata i videor och skärmbilder: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Stäng</button></form></dialog>

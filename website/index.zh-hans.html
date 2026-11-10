@@ -67,7 +67,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="观看所选视频"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看视频</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">阅读指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
-            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 和 Qt6</p>
+            <p class="home-version">FilterMate 5.1 · QGIS 3.22–4.x · Qt5 和 Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>了解操作流程</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -112,8 +112,31 @@
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">FilterMate 5 新功能</p><h2 id="fm5-title">栅格与 LiDAR 点云，像任何图层一样筛选。</h2><p>将栅格或点云设为当前图层，EXPLORING 就会显示相应的工具；FILTERING 再把选择结果与任何类型的图层关联起来。</p></div>
-            <ul class="capability-list"><li><strong>栅格</strong><span>波段、像素拾取、带直方图与实时预览的数值范围、由 DTM 计算的坡度、坡向、山体阴影或粗糙度、类别、栅格表达式。</span></li><li><strong>点云</strong><span>ASPRS 与 LiDAR HD 类别、任一属性的条件、类别结合高于 DTM 的高度。</span></li><li><strong>任意方向</strong><span>矢量、栅格与点云都能作为源或目标：九种组合，并支持缓冲区、最小覆盖率与 Disjoint。</span></li><li><strong>可放心撤销</strong><span>裁切后的图层保留原有 ID 与样式。撤销、重做和工程文件都会回到原始数据源。</span></li><li><strong>导出</strong><span>栅格输出 GeoTIFF 与 COG；点云输出 LAZ、LAS、COPC、GPKG 与 CSV。</span></li><li><strong>自动化</strong><span>九个 Processing 算法、四个模型、qgis_process，以及 Python 与 REST API。</span></li><li><strong>已测试</strong><span>CI 在 QGIS 3.22、3.28、3.34、3.44 和 4.2 上，通过 Processing 和面板本身进行测试。</span></li></ul>
+            <ul class="capability-list"><li><strong>栅格</strong><span>波段、像素拾取、带直方图与实时预览的数值范围、由 DTM 计算的坡度、坡向、山体阴影或粗糙度、类别、栅格表达式。</span></li><li><strong>点云</strong><span>ASPRS 与 LiDAR HD 类别、任一属性的条件、类别结合高于 DTM 的高度。</span></li><li><strong>任意方向</strong><span>矢量、栅格与点云都能作为源或目标：九种组合，并支持缓冲区、最小覆盖率与 Disjoint。</span></li><li><strong>可放心撤销</strong><span>裁切后的图层保留原有 ID 与样式。撤销、重做和工程文件都会回到原始数据源。</span></li><li><strong>导出</strong><span>栅格输出 GeoTIFF 与 COG；点云输出 LAZ、LAS、COPC、GPKG 与 CSV。</span></li><li><strong>网络服务</strong><span>WFS、OGC API Features、ArcGIS、WCS、矢量切片，以及远程 COPC 或 EPT 点云，都以有上限的读取方式筛选和浏览，且绝不在主线程上进行。</span></li><li><strong>自动化</strong><span>十个 Processing 算法、四个模型、qgis_process，以及 Python 与 REST API。</span></li><li><strong>已验证</strong><span>每次发布前都在 QGIS 3.22 至 4.x 中验证，涵盖 Processing 和面板本身。</span></li></ul>
             <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">阅读 FilterMate 5 指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section examples agent" id="agent" aria-labelledby="agent-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">实验性 · FilterMate 5.1 新功能</p><h2 id="agent-title">用一句话提出筛选需求。</h2><p>AGENT 是面板顶部的聊天区。写下你想要的内容，例如所选市镇中海拔 1200 m 以上的建筑，它就会筛选、选择、缩放或导出。每一步都可以撤销。</p></div>
+            <a class="inline-cta" href="guide.html#agent" hreflang="en">阅读 Agent 章节 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+        <ul class="capability-list"><li><strong>你的模型</strong><span>Claude、Mistral、OpenAI 及兼容的服务器，或本地的 Ollama 模型。每月提供少量免费请求供试用，之后使用你自己的密钥，密钥保存在 QGIS 认证数据库中。</span></li><li><strong>逐步撤销</strong><span>筛选会立即应用。Undo 和 Redo 会逐个走过代理的请求，Undo back to here 则可回到任意一步。</span></li><li><strong>由你确认</strong><span>导出，以及添加或移除图层，都会先询问。筛选条件只是一条单纯的 WHERE 子句，执行前会先检查。</span></li><li><strong>由你勾选的来源</strong><span>开放数据门户、WFS 服务、Sentinel-2 影像和 MCP 连接器，在你勾选之前全部关闭。</span></li><li><strong>先取得你的同意</strong><span>在你选好模型并同意之前，不会发送任何内容。指南列出了每次请求会一并发送的内容。</span></li><li><strong>MCP 服务器</strong><span>默认关闭。你电脑上的 Claude Code 或其他 MCP 客户端，可通过 127.0.0.1 并凭访问令牌操作 FilterMate。</span></li></ul>
+    </div>
+</section>
+
+<section class="home-section objects" id="objects" aria-labelledby="objects-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">实验性 · FilterMate 5.1 新功能</p><h2 id="objects-title">点一个对象，SAM 把它画出来。</h2><p>在栅格上，像素拾取工具会用 SAM 画出点选的对象；SAM 是在你电脑上运行的模型。相似对象会以建议的形式出现，由你保留或拒绝。结果只是单纯的多边形，所以筛选不需要模型就能重新执行。</p></div>
+            <a class="inline-cta" href="guide.html#sam" hreflang="en">在指南中阅读 SAM 说明 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+        <div>
+            <dl class="result-list"><div><dt>0.82</dt><dd>与 100 个建筑轮廓的重叠度中位数，以框选生成</dd></div><div><dt>0.81</dt><dd>与 40 个 BD TOPO 建筑范围的重叠度中位数，由 Processing 生成</dd></div></dl>
+            <ul class="capability-list"><li><strong>绘制</strong><span>点一下；Shift+点击可扩大，右键可修剪，或拖出一个框。按 G 会显示 SAM 提出的下一个轮廓。</span></li><li><strong>相似对象</strong><span>以虚线框出的建议：点一下保留，右键拒绝。其中约有一半是建筑。</span></li><li><strong>只需安装一次</strong><span>确认一次，就会把 onnxruntime 和 62 MB 的模型安装到你的 QGIS 配置文件中。在此之前不会安装任何东西。</span></li><li><strong>不只在面板中</strong><span>To layer 会把这些对象添加为多边形图层。Processing 会为图层的每个点或多边形画出一个对象，多边形也能从脚本、REST 和 MCP 进行筛选。</span></li><li><strong>限制</strong><span>最适合建筑和边界清晰的对象。地块和树木尚未通过验证。</span></li></ul>
         </div>
     </div>
 </section>
@@ -201,7 +224,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.zh-hans.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>imagodata 开发的 QGIS 空间筛选工具。</p></div><ul><li><a href="guide.html" hreflang="en">使用指南 <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">应用案例 <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">开发规划 <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">源代码</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">报告问题</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 5.0 · 视频和截图地图数据：BD TOPO® © IGN，Licence Ouverte 2.0。</div>
+    <div class="home-container footer-note">FilterMate 5.1 · 视频和截图地图数据：BD TOPO® © IGN，Licence Ouverte 2.0。</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="视频"><video controls playsinline muted></video><form method="dialog"><button>关闭</button></form></dialog>

@@ -67,7 +67,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Regarder la vidéo sélectionnée"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Voir la présentation</button>
                 <a class="home-text-link" href="guide.fr.html">Lire le guide <span aria-hidden="true">→</span></a>
             </div>
-            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 et Qt6</p>
+            <p class="home-version">FilterMate 5.1 · QGIS 3.22–4.x · Qt5 et Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Découvrir le fonctionnement</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -108,8 +108,31 @@
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">Nouveau dans FilterMate 5</p><h2 id="fm5-title">Rasters et nuages de points LiDAR, filtrés comme n’importe quelle couche.</h2><p>Choisissez un raster ou un nuage de points comme couche courante et EXPLORING affiche ses propres outils. FILTERING relie ensuite la sélection à des couches de tout type.</p></div>
-            <ul class="capability-list"><li><strong>Raster</strong><span>Bande, pipette de pixel, plage de valeurs avec histogramme et aperçu en direct, pente, exposition, ombrage ou rugosité calculés depuis un MNT, classes, expression raster.</span></li><li><strong>Nuages de points</strong><span>Classes ASPRS et LiDAR HD, conditions sur tout attribut, une classe combinée avec une hauteur au-dessus d’un MNT.</span></li><li><strong>Dans tous les sens</strong><span>Vecteur, raster et nuage de points en source ou en cible : neuf combinaisons avec tampon, couverture minimale et Disjoint.</span></li><li><strong>Sans risque</strong><span>Les couches découpées gardent leur identifiant et leur style. Annuler, rétablir et les fichiers de projet reviennent à la source d’origine.</span></li><li><strong>Exporter</strong><span>GeoTIFF et COG pour les rasters ; LAZ, LAS, COPC, GPKG et CSV pour les nuages de points.</span></li><li><strong>Automatiser</strong><span>Neuf algorithmes Processing, quatre modèles, qgis_process, API Python et REST.</span></li><li><strong>Testé</strong><span>CI sur QGIS 3.22, 3.28, 3.34, 3.44 et 4.2, via Processing et le panneau lui-même.</span></li></ul>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Bande, pipette de pixel, plage de valeurs avec histogramme et aperçu en direct, pente, exposition, ombrage ou rugosité calculés depuis un MNT, classes, expression raster.</span></li><li><strong>Nuages de points</strong><span>Classes ASPRS et LiDAR HD, conditions sur tout attribut, une classe combinée avec une hauteur au-dessus d’un MNT.</span></li><li><strong>Dans tous les sens</strong><span>Vecteur, raster et nuage de points en source ou en cible : neuf combinaisons avec tampon, couverture minimale et Disjoint.</span></li><li><strong>Sans risque</strong><span>Les couches découpées gardent leur identifiant et leur style. Annuler, rétablir et les fichiers de projet reviennent à la source d’origine.</span></li><li><strong>Exporter</strong><span>GeoTIFF et COG pour les rasters ; LAZ, LAS, COPC, GPKG et CSV pour les nuages de points.</span></li><li><strong>Services web</strong><span>WFS, OGC API Features, ArcGIS, WCS, tuiles vectorielles et nuages de points COPC ou EPT distants sont filtrés et explorés avec des lectures bornées, jamais sur le fil principal.</span></li><li><strong>Automatiser</strong><span>Dix algorithmes Processing, quatre modèles, qgis_process, API Python et REST.</span></li><li><strong>Vérifié</strong><span>Dans QGIS 3.22 à 4.x avant chaque version, via Processing et le panneau lui-même.</span></li></ul>
             <a class="inline-cta" href="guide.fr.html#raster-lidar">Lire le guide de FilterMate 5 <span aria-hidden="true">→</span></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section examples agent" id="agent" aria-labelledby="agent-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Expérimental · Nouveau dans FilterMate 5.1</p><h2 id="agent-title">Demandez un filtre en une phrase.</h2><p>AGENT est un tchat en haut du panneau. Écrivez ce que vous voulez, par exemple les bâtiments au-dessus de 1200 m dans la commune sélectionnée, et il filtre, sélectionne, zoome ou exporte. Chaque étape peut être annulée.</p></div>
+            <a class="inline-cta" href="guide.fr.html#agent">Lire le chapitre Agent <span aria-hidden="true">→</span></a>
+        </div>
+        <ul class="capability-list"><li><strong>Votre modèle</strong><span>Claude, Mistral, OpenAI et serveurs compatibles, ou un modèle Ollama local. Quelques requêtes gratuites par mois pour essayer, puis votre propre clé, conservée dans la base d’authentification de QGIS.</span></li><li><strong>Annuler par étape</strong><span>Les filtres s’appliquent aussitôt. Undo et Redo parcourent les demandes de l’agent, et Undo back to here revient à n’importe quelle étape.</span></li><li><strong>Vous confirmez</strong><span>Les exports et les couches ajoutées ou retirées demandent d’abord. Un filtre est une simple clause WHERE, vérifiée avant de s’exécuter.</span></li><li><strong>Sources que vous cochez</strong><span>Portails de données ouvertes, services WFS, scènes Sentinel-2 et connecteurs MCP, tous désactivés tant que vous ne les cochez pas.</span></li><li><strong>Votre accord d’abord</strong><span>Rien n’est envoyé avant que vous ayez choisi un modèle et donné votre accord. Le guide liste ce qui part avec chaque requête.</span></li><li><strong>Serveur MCP</strong><span>Désactivé par défaut. Claude Code ou un autre client MCP de votre ordinateur peut piloter FilterMate par 127.0.0.1, avec un jeton d’accès.</span></li></ul>
+    </div>
+</section>
+
+<section class="home-section objects" id="objects" aria-labelledby="objects-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Expérimental · Nouveau dans FilterMate 5.1</p><h2 id="objects-title">Cliquez un objet. SAM le dessine.</h2><p>Sur un raster, la pipette dessine l’objet cliqué avec SAM, un modèle qui tourne sur votre ordinateur. Les objets similaires arrivent comme des propositions que vous gardez ou rejetez. Le résultat est de simples polygones : un filtre se rejoue sans le modèle.</p></div>
+            <a class="inline-cta" href="guide.fr.html#sam">Lire le passage sur SAM dans le guide <span aria-hidden="true">→</span></a>
+        </div>
+        <div>
+            <dl class="result-list"><div><dt>0,82</dt><dd>recouvrement médian avec 100 contours de bâtiments, depuis un rectangle</dd></div><div><dt>0,81</dt><dd>recouvrement médian avec 40 emprises de la BD TOPO, depuis Processing</dd></div></dl>
+            <ul class="capability-list"><li><strong>Dessiner</strong><span>Clic, Maj+clic pour étendre, clic droit pour rogner, ou un rectangle. G montre le contour suivant proposé par SAM.</span></li><li><strong>Objets similaires</strong><span>Des propositions cernées de tirets : un clic en garde une, un clic droit la rejette. Environ la moitié sont des bâtiments.</span></li><li><strong>Installer une fois</strong><span>Une confirmation installe onnxruntime et un modèle de 62 Mo dans votre profil QGIS. Rien n’est installé avant.</span></li><li><strong>Au-delà du panneau</strong><span>To layer ajoute les objets comme une couche de polygones. Processing dessine un objet par point ou polygone d’une couche, et les polygones peuvent filtrer depuis des scripts, REST et MCP.</span></li><li><strong>Limites</strong><span>Meilleur sur les bâtiments et les objets bien délimités. Les parcelles et les arbres ne sont pas validés.</span></li></ul>
         </div>
     </div>
 </section>
@@ -136,7 +159,7 @@
             </tbody>
         </table>
         </div>
-        <p class="matrix-note">Tampon, couverture minimale, Disjoint et les opérateurs AND / OR / AND NOT s’appliquent dans chaque case. <a href="guide.fr.html#combinaisons">Lire le tableau des combinaisons dans le guide</a>.</p>
+        <p class="matrix-note">Tampon, couverture minimale, Disjoint et les opérateurs AND / OR / AND NOT s’appliquent dans chaque case. <a href="guide.fr.html#combinations">Lire le tableau des combinaisons dans le guide</a>.</p>
     </div>
 </section>
 
@@ -194,7 +217,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.fr.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Le filtrage spatial pour QGIS, par imagodata.</p></div><ul><li><a href="guide.fr.html">Guide utilisateur</a></li><li><a href="stories.fr.html">Cas d’usage</a></li><li><a href="roadmap.fr.html">Feuille de route</a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Code source</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Signaler un problème</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 5.0 · Données des vidéos et captures : BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.1 · Données des vidéos et captures : BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Vidéo"><video controls playsinline muted></video><form method="dialog"><button>Fermer</button></form></dialog>
