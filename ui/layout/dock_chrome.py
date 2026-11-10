@@ -204,7 +204,7 @@ def _save_share(share: float) -> None:
     try:
         from qgis.PyQt.QtCore import QSettings
         QSettings().setValue(SHARE_KEY, round(share, 4))
-    except Exception:  # not worth a message: the share is only a convenience
+    except Exception:  # nosec B110 - not worth a message: the share is only a convenience
         pass
 
 
