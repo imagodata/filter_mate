@@ -1228,7 +1228,7 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>Για να συνδέσετε το εύρος τιμών με το στυλ, επιλέξτε Στυλ επιπέδου στην Εμφάνιση στον χάρτη</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
@@ -1561,7 +1561,7 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1528"/>
         <source>No valid pixels to display in the selected bands.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν υπάρχουν έγκυρα εικονοστοιχεία προς εμφάνιση στα επιλεγμένα κανάλια.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1805"/>
@@ -1661,27 +1661,27 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1522"/>
         <source>Preparing band display…</source>
-        <translation type="unfinished"></translation>
+        <translation>Προετοιμασία εμφάνισης καναλιών…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1538"/>
         <source>The selected bands could not be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν ήταν δυνατή η εμφάνιση των επιλεγμένων καναλιών.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1610"/>
         <source>Unknown raster layer or band in expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Άγνωστο επίπεδο ράστερ ή κανάλι στην έκφραση</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>The raster histogram could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν ήταν δυνατός ο υπολογισμός του ιστογράμματος του ράστερ.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
         <source>The raster preview could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν ήταν δυνατός ο υπολογισμός της προεπισκόπησης του ράστερ.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1155"/>
@@ -4016,7 +4016,7 @@ Drop anyway?</source>
     <message>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
-        <translation type="unfinished"></translation>
+        <translation>η πηγή άλλαξε κατά το φιλτράρισμα: δεν εφαρμόστηκε τίποτα</translation>
     </message>
 </context>
 <context>
@@ -5258,167 +5258,171 @@ Continue?</source>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
         <source>Favorite name or identifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα ή αναγνωριστικό του αγαπημένου</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
         <source>Provide the name of the favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Δώστε το όνομα του αγαπημένου</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
         <source>Favorite: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Αγαπημένο: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
         <source>Apply a FilterMate favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Εφαρμογή αγαπημένου του FilterMate</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
         <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αναπαράγει ένα αγαπημένο που έχει αποθηκευτεί στο FilterMate (με όνομα ή αναγνωριστικό): φίλτρα των διανυσματικών επιπέδων και των νεφών σημείων, αποκοπές των ράστερ και των νεφών σημείων. Τα επίπεδα εντοπίζονται με υπογραφή, έπειτα αναγνωριστικό και όνομα. Χωρίς το πάνελ (qgis_process) χρησιμοποιούνται τα αγαπημένα που έχουν αποθηκευτεί στο έργο.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="66"/>
         <source>Filter expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκφραση φίλτρου</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
         <source>No layer selected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν έχει επιλεγεί επίπεδο.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρη έκφραση για το επίπεδο '{0}', παραλείφθηκε.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρισμα πολλών επιπέδων (batch)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εφαρμόζει την ίδια έκφραση φίλτρου σε πολλά διανυσματικά επίπεδα με μία εκτέλεση.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="79"/>
         <source>Layers to clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Επίπεδα για αφαίρεση φίλτρου</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
         <source>cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>χωρίς φίλτρο</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
         <source>Clear the filters of layers of any type</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση των φίλτρων επιπέδων οποιουδήποτε τύπου</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
         <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαιρεί το φίλτρο από τα επιλεγμένα επίπεδα: το υποσύνολο εκκαθαρίζεται για τα διανύσματα και τα νέφη σημείων, η αρχική πηγή αποκαθίσταται για τα αποκομμένα ράστερ και νέφη σημείων. Χρήσιμο στην αρχή ενός μοντέλου για να ξεκινήσετε ξανά από τα πλήρη δεδομένα. Μπορεί να αναιρεθεί από το FilterMate.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Επίπεδο πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
-        <translation type="unfinished"></translation>
+        <translation>Μόνο οι επιλεγμένες οντότητες</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο επίπεδο πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} οντότητα(ες) πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρισμα επιπέδων οποιουδήποτε τύπου με βάση ένα διανυσματικό επίπεδο</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρει επιτόπου διανυσματικά επίπεδα, επίπεδα ράστερ και νέφη σημείων με βάση τις οντότητες ενός διανυσματικού επιπέδου, με τα γεωμετρικά κατηγορήματα, μια ζώνη buffer και ελάχιστη κάλυψη.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκταση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
-        <translation type="unfinished"></translation>
+        <translation>Γεωμετρία (WKT, υπερισχύει της έκτασης)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Δώστε μια έκταση ή μια γεωμετρία</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρισμα επιπέδων οποιουδήποτε τύπου με βάση μια έκταση ή μια γεωμετρία</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρει τα επίπεδα-στόχους με βάση μια έκταση (επίπεδο, καμβάς, πληκτρολογημένη) ή μια γεωμετρία WKT, με τα ίδια κατηγορήματα, buffer και κάλυψη όπως η καρτέλα ΦΙΛΤΡΑΡΙΣΜΑ. Η λειτουργία καταγράφεται στο ιστορικό του πρώτου επιπέδου-στόχου.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Νέφος σημείων πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδυασμός των κριτηρίων με το υπάρχον φίλτρο της πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανάλυση του αποτυπώματος των σημείων (μονάδες του νέφους σημείων)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο νέφος σημείων πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Κριτήρια: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
-        <translation type="unfinished"></translation>
+        <translation>Το αποτύπωμα υπολογίστηκε από περιορισμένο αριθμό σημείων: αυξήστε την ανάλυση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρισμα επιπέδων οποιουδήποτε τύπου με βάση τα σημεία ενός νέφους σημείων</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
@@ -5429,107 +5433,113 @@ Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = b
 Without criteria, the footprint covers the points displayed by the point cloud.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Εφαρμόζει κριτήρια στο νέφος σημείων πηγής (κλάσεις ASPRS, εύρη Z και έντασης, αριθμός επιστροφής, έκφραση), υπολογίζει το αποτύπωμα των σημείων που διατηρούνται και φιλτράρει τα επίπεδα-στόχους με βάση αυτή την περιοχή.
+
+Παραδείγματα: κτίρια που τέμνουν σημεία κλάσης 6 (κάλυψη ≥ 10%), Disjoint = κτίρια που απουσιάζουν από το νέφος σημείων, ένα DEM περιορισμένο στην έκταση των σημείων νερού (κλάση 9).
+
+Χωρίς κριτήρια, το αποτύπωμα καλύπτει τα σημεία που εμφανίζει το νέφος σημείων.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Ράστερ πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικονοστοιχεία προς διατήρηση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
-        <translation type="unfinished"></translation>
+        <translation>Εύρος τιμών</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλάσεις</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
-        <translation type="unfinished"></translation>
+        <translation>Το εύρος αφορά (κανάλι που διαβάζεται ως DEM για κλίση, προσανατολισμό...)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
-        <translation type="unfinished"></translation>
+        <translation>Τραχύτητα (TRI)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστη τιμή (εύρος)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστη τιμή (εύρος)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
-        <translation type="unfinished"></translation>
+        <translation>Τιμές κλάσεων (π.χ. 6,7)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκφραση ράστερ, το εικονοστοιχείο διατηρείται αν δεν είναι μηδέν (π.χ. &quot;dem@1&quot; &gt; 1200)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
         <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
-        <translation type="unfinished"></translation>
+        <translation>Αντικείμενα που διατηρούνται αντί για τιμές εικονοστοιχείων (πολύγωνα, π.χ. σχεδιασμένα με SAM)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Απόκρυψη και του ράστερ πηγής εκτός της επιλογής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστος αριθμός εικονοστοιχείων που διαβάζονται (πέρα από αυτόν: επαναδειγματοληψία)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο ράστερ πηγής</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
         <source>An object cannot be read in the CRS of the raster: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Ένα αντικείμενο δεν μπορεί να διαβαστεί στο CRS του ράστερ: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
         <source>The objects layer holds no polygon</source>
-        <translation type="unfinished"></translation>
+        <translation>Το επίπεδο αντικειμένων δεν περιέχει πολύγωνο</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
         <source>{0} object(s) kept instead of pixel values</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} αντικείμενο(α) διατηρήθηκαν αντί για τιμές εικονοστοιχείων</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} από {1} εικονοστοιχεία διατηρήθηκαν</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρισμα επιπέδων οποιουδήποτε τύπου με βάση τα εικονοστοιχεία ενός ράστερ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
@@ -5540,171 +5550,181 @@ Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a 
 The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Διατηρεί τα εικονοστοιχεία ενός ράστερ (εύρος τιμών ενός καναλιού, κλάσεις ενός κατηγοριοποιημένου ράστερ ή έκφραση ράστερ), τα διανυσματοποιεί στο μέγεθος του εικονοστοιχείου και φιλτράρει τα επίπεδα-στόχους με βάση αυτή την περιοχή.
+
+Παραδείγματα: αγροτεμάχια που περιέχονται στη ζώνη 1200–1300 m με κάλυψη 50%, ένα DEM περιορισμένο στις κλάσεις δάσους, σημεία LiDAR των περιοχών με κλίση &lt; 15% (επιλέξτε «Κλίση (%)» στο «Το εύρος αφορά» με ένα DEM ως πηγή: δεν χρειάζεται προηγούμενο βήμα «Κλίση»).
+
+Το ράστερ πηγής μπορεί να είναι έξοδος μοντέλου: διαβάζεται χωρίς τροποποίηση. Με το «Απόκρυψη και του ράστερ πηγής εκτός της επιλογής» και πηγή του έργου, φιλτράρεται η ίδια η πηγή.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="149"/>
         <source>Vector format</source>
-        <translation type="unfinished"></translation>
+        <translation>Μορφή διανύσματος</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="151"/>
         <source>Raster format</source>
-        <translation type="unfinished"></translation>
+        <translation>Μορφή ράστερ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="153"/>
         <source>Point cloud format</source>
-        <translation type="unfinished"></translation>
+        <translation>Μορφή νέφους σημείων</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
         <source>Output CRS (empty = the layer&apos;s CRS)</source>
-        <translation type="unfinished"></translation>
+        <translation>CRS εξόδου (κενό = το CRS του επιπέδου)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
         <source>Files written</source>
-        <translation type="unfinished"></translation>
+        <translation>Αρχεία που γράφτηκαν</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
         <source>exported</source>
-        <translation type="unfinished"></translation>
+        <translation>εξαγμένο</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
         <source>Export filtered layers (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Εξαγωγή φιλτραρισμένων επιπέδων (διάνυσμα, ράστερ, νέφος σημείων)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
         <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
 
 In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Γράφει κάθε επίπεδο όπως φιλτράρεται, ένα αρχείο ανά επίπεδο με το όνομα του επιπέδου: οντότητες του υποσυνόλου για τα διανύσματα, εικονοστοιχεία που διατηρήθηκαν (αλλού NoData) ως GeoTIFF ή COG για τα ράστερ, σημεία που διατηρήθηκαν ως LAZ, COPC, LAS, GPKG ή CSV για τα νέφη σημείων.
+
+Σε ένα μοντέλο, συνδέστε τα «Επεξεργασμένα επίπεδα» ενός φίλτρου FilterMate με τα «Επίπεδα προς εξαγωγή». Το COPC απαιτεί PDAL (περιλαμβάνεται στο QGIS), ενώ χωρίς PDAL γράφεται LAZ.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="90"/>
         <source>Layers to filter (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Επίπεδα προς φιλτράρισμα (διάνυσμα, ράστερ, νέφος σημείων)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="96"/>
         <source>Buffer (source units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Buffer (μονάδες της πηγής)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="99"/>
         <source>Minimum coverage of the target polygons (%)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστη κάλυψη των πολυγώνων-στόχων (%)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="102"/>
         <source>Combine with the existing filter of the targets</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδυασμός με το υπάρχον φίλτρο των στόχων</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="109"/>
         <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
 
 Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διάνυσμα: υποσύνολο των οντοτήτων. Ράστερ: εικονοστοιχεία εκτός περιοχής σε NoData (αποκομμένο VRT). Νέφος σημείων: σημεία εκτός περιοχής αφαιρούνται (παράγωγο αρχείο COPC, PDAL). Το Disjoint κρατά το εξωτερικό.
+
+Μόνο τα επίπεδα του έργου φιλτράρονται. Το φίλτρο μπορεί να αναιρεθεί από το FilterMate και οι αρχικές πηγές καταγράφονται πάντα στο έργο. Η έξοδος «Επεξεργασμένα επίπεδα» μπορεί να αλυσσοδεθεί σε ένα μοντέλο, για παράδειγμα προς την «Εξαγωγή φιλτραρισμένων επιπέδων».</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="117"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Αντικατάσταση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="123"/>
         <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλάσεις ASPRS προς διατήρηση (π.χ. 3,4,5, κενό = όλες)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστο Z</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστο Z</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστη ένταση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστη ένταση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="129"/>
         <source>Return number (empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός επιστροφής (κενό = όλοι)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="132"/>
         <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκφραση νέφους σημείων (π.χ. ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="137"/>
         <source>Processed layers</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασμένα επίπεδα</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="185"/>
         <source>Layer skipped: {0} ({1})</source>
-        <translation type="unfinished"></translation>
+        <translation>Παραλείφθηκε επίπεδο: {0} ({1})</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="188"/>
         <source>filtered</source>
-        <translation type="unfinished"></translation>
+        <translation>φιλτραρισμένο</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
-        <translation type="unfinished"></translation>
+        <translation> ({0:.1f} s)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: {1}{2}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: αποτυχία — {1}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="42"/>
         <source>Point clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Νέφη σημείων</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
         <source>Combine with the existing filter of each point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδυασμός με το υπάρχον φίλτρο κάθε νέφους σημείων</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
         <source>Provide classes, a range, a return number or an expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Δώστε κλάσεις, ένα εύρος, έναν αριθμό επιστροφής ή μια έκφραση</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
         <source>Filter point clouds by criteria</source>
-        <translation type="unfinished"></translation>
+        <translation>Φιλτράρισμα νεφών σημείων με κριτήρια</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εφαρμόζει τα ίδια κριτήρια (κλάσεις ASPRS, εύρη Z και έντασης, αριθμός επιστροφής, έκφραση) σε ένα ή περισσότερα νέφη σημείων του έργου, για παράδειγμα σε όλα τα πλακίδια LiDAR HD ενός εργοταξίου. Το φίλτρο είναι η έκφραση του νέφους σημείων (υποσύνολο): είναι άμεσο και μπορεί να αναιρεθεί από το FilterMate.</translation>
     </message>
 </context>
 <context>
@@ -6570,7 +6590,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="349"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Σταθερή τιμή: {0}</translation>
     </message>
 </context>
 <context>
@@ -6978,7 +6998,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="887"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση του πρώτου επιλεγμένου καναλιού σε γκρι ή των επιλεγμένων καναλιών ως έγχρωμης σύνθεσης</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
@@ -7243,62 +7263,62 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
         <source>Choose 1 to 3 bands for display.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλέξτε από 1 έως 3 κανάλια για εμφάνιση.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1094"/>
         <source>Grey: band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Γκρι: κανάλι {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Layer style</source>
-        <translation type="unfinished"></translation>
+        <translation>Στυλ επιπέδου</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση στον χάρτη</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1096"/>
         <source>R: {0} · G: {1} · B: {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>R: {0} · G: {1} · B: {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="967"/>
         <source>Select band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή καναλιού {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλεγμένα κανάλια</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2480"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλέξτε τουλάχιστον ένα κανάλι στα ΚΑΝΑΛΙΑ πριν χρησιμοποιήσετε το σταγονόμετρο.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>First checked band</source>
-        <translation type="unfinished"></translation>
+        <translation>Πρώτο επιλεγμένο κανάλι</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="956"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ή αποεπιλογή όλων των καναλιών. Το ιστόγραμμα εμφανίζει το πρώτο επιλεγμένο κανάλι.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση αυτού του καναλιού για το σταγονόμετρο, το εύρος τιμών και την εμφάνιση των επιλεγμένων καναλιών</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2184"/>
         <source>VALUE RANGE — selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>ΕΥΡΟΣ ΤΙΜΩΝ — επιλεγμένα κανάλια</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="919"/>
@@ -7343,127 +7363,127 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>Το μικρότερο παρόμοιο αντικείμενο, ως ποσοστό κάθε αναφοράς στην οποία κάνατε κλικ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>Το μεγαλύτερο παρόμοιο αντικείμενο, ως πολλαπλάσιο κάθε αναφοράς στην οποία κάνατε κλικ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separation</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαχωρισμός</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Connected pixels</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνεκτικά εικονοστοιχεία</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1303"/>
         <source>Bridge removal: {0} px</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση γεφυρών: {0} px</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαχωρισμός αντικειμένων που συνδέονται με στενές γέφυρες, ενώ μεγαλύτερες τιμές κόβουν πλατύτερες γέφυρες</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1308"/>
         <source>Fill holes</source>
-        <translation type="unfinished"></translation>
+        <translation>Συμπλήρωση οπών</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
-        <translation type="unfinished"></translation>
+        <translation>Συμπλήρωση των κλειστών οπών στο αντικείμενο που επιλέξατε, ενώ η αποεπιλογή διατηρεί τις αυλές και τους εσωτερικούς δακτυλίους</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1453"/>
         <source>Custom expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσαρμοσμένη έκφραση</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1463"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμητικός τύπος ράστερ, π.χ. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
         <source>Custom derived value expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκφραση προσαρμοσμένης παράγωγης τιμής</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1465"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
-        <translation type="unfinished"></translation>
+        <translation>Μια αριθμητική έκφραση του υπολογιστή ράστερ. Το ιστόγραμμα και τα όρια χρησιμοποιούν τις υπολογισμένες τιμές της.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
-        <translation type="unfinished"></translation>
+        <translation>Υπολογισμένες τιμές της έκφρασης. Σύρετε τις λαβές για να χρησιμοποιήσετε αυτή την έκφραση ως παράγωγη τιμή με όρια.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1532"/>
         <source>Use as derived value</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση ως παράγωγης τιμής</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1741"/>
         <source>Computing histogram…</source>
-        <translation type="unfinished"></translation>
+        <translation>Υπολογισμός ιστογράμματος…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>No histogram available</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν υπάρχει διαθέσιμο ιστόγραμμα</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Σταθερή τιμή: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>{0} sampled pixels · {1} to {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} εικονοστοιχεία δείγματος · {1} έως {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2337"/>
         <source>Distribution (approximate)</source>
-        <translation type="unfinished"></translation>
+        <translation>Κατανομή (προσεγγιστική)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 98% (P1–P99)</source>
-        <translation type="unfinished"></translation>
+        <translation>Κεντρικό 98% (P1–P99)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 90% (P5–P95)</source>
-        <translation type="unfinished"></translation>
+        <translation>Κεντρικό 90% (P5–P95)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Interquartile range (P25–P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενδοτεταρτημοριακό εύρος (P25–P75)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Upper quartile (≥ P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνω τεταρτημόριο (≥ P75)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2346"/>
         <source>All values</source>
-        <translation type="unfinished"></translation>
+        <translation>Όλες οι τιμές</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2350"/>
         <source>Derived spectral values</source>
-        <translation type="unfinished"></translation>
+        <translation>Παράγωγες φασματικές τιμές</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
@@ -7507,7 +7527,7 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2967"/>
         <source>Derived value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Παράγωγη τιμή: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>

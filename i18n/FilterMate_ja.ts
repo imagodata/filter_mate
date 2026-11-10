@@ -1228,7 +1228,7 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>範囲をスタイルにリンクするには、「地図表示」で「レイヤスタイル」を選択してください</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
@@ -1561,7 +1561,7 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1528"/>
         <source>No valid pixels to display in the selected bands.</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックしたバンドに表示できる有効なピクセルがありません。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1805"/>
@@ -1661,27 +1661,27 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1522"/>
         <source>Preparing band display…</source>
-        <translation type="unfinished"></translation>
+        <translation>バンド表示を準備しています…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1538"/>
         <source>The selected bands could not be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックしたバンドを表示できませんでした。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1610"/>
         <source>Unknown raster layer or band in expression</source>
-        <translation type="unfinished"></translation>
+        <translation>式内のラスタレイヤまたはバンドが不明です</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>The raster histogram could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタのヒストグラムを計算できませんでした。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
         <source>The raster preview could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタのプレビューを計算できませんでした。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1155"/>
@@ -4016,7 +4016,7 @@ Drop anyway?</source>
     <message>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタの実行中にソースが変更されました: 何も適用されていません</translation>
     </message>
 </context>
 <context>
@@ -5253,167 +5253,171 @@ Continue?</source>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
         <source>Favorite name or identifier</source>
-        <translation type="unfinished"></translation>
+        <translation>お気に入りの名前または識別子</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
         <source>Provide the name of the favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>お気に入りの名前を指定してください</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
         <source>Favorite: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>お気に入り: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
         <source>Apply a FilterMate favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>FilterMate のお気に入りを適用</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
         <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
-        <translation type="unfinished"></translation>
+        <translation>FilterMate に保存されたお気に入りを（名前または識別子で）再実行します: ベクタおよびポイントクラウドレイヤのフィルタ、ラスタおよびポイントクラウドのクリップ。レイヤはシグネチャ、識別子、名前の順で検索されます。ドック（qgis_process）がない場合は、プロジェクトに保存されたお気に入りが使用されます。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="66"/>
         <source>Filter expression</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタ式</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
         <source>No layer selected.</source>
-        <translation type="unfinished"></translation>
+        <translation>レイヤが選択されていません。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
-        <translation type="unfinished"></translation>
+        <translation>レイヤ '{0}' の式が無効なため、スキップしました。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
-        <translation type="unfinished"></translation>
+        <translation>複数のレイヤをフィルタ（バッチ）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
-        <translation type="unfinished"></translation>
+        <translation>同じフィルタ式を複数のベクタレイヤに一度に適用します。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="79"/>
         <source>Layers to clear</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタを解除するレイヤ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
         <source>cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタ解除済み</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
         <source>Clear the filters of layers of any type</source>
-        <translation type="unfinished"></translation>
+        <translation>あらゆる種類のレイヤのフィルタを解除</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
         <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>選択したレイヤからフィルタを削除します: ベクタとポイントクラウドはサブセットを解除し、クリップされたラスタとポイントクラウドは元のソースに戻します。モデルの先頭で完全なデータからやり直す場合に便利です。FilterMate から元に戻せます。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>ソースレイヤ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
-        <translation type="unfinished"></translation>
+        <translation>選択したフィーチャのみ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>無効なソースレイヤ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>ソースフィーチャ {0} 件</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
-        <translation type="unfinished"></translation>
+        <translation>ベクタレイヤであらゆる種類のレイヤをフィルタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>ベクタレイヤのフィーチャを使用して、ベクタ、ラスタ、ポイントクラウドのレイヤをその場でフィルタします。幾何述語、バッファ、最小被覆率を指定できます。
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
-        <translation type="unfinished"></translation>
+        <translation>範囲</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
-        <translation type="unfinished"></translation>
+        <translation>ジオメトリ（WKT、範囲より優先）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>範囲またはジオメトリを指定してください</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>範囲またはジオメトリであらゆる種類のレイヤをフィルタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>ターゲットレイヤを範囲（レイヤ、キャンバス、入力）または WKT ジオメトリでフィルタします。述語、バッファ、被覆率はフィルタリングタブと同じです。操作は最初のターゲットレイヤの履歴に記録されます。
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>ソースポイントクラウド</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
-        <translation type="unfinished"></translation>
+        <translation>条件をソースの既存のフィルタと組み合わせる</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
-        <translation type="unfinished"></translation>
+        <translation>ポイントのフットプリント解像度（ポイントクラウドの単位）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>無効なソースポイントクラウド</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>条件: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
-        <translation type="unfinished"></translation>
+        <translation>フットプリントは限られた数のポイントから計算されました: 解像度を上げてください</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>ポイントクラウドのポイントであらゆる種類のレイヤをフィルタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
@@ -5424,107 +5428,113 @@ Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = b
 Without criteria, the footprint covers the points displayed by the point cloud.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>ソースポイントクラウドに条件（ASPRS クラス、Z と強度の範囲、リターン番号、式）を適用し、残したポイントのフットプリントを計算して、この領域でターゲットレイヤをフィルタします。
+
+例: クラス 6 のポイントと交差する建物（被覆率 ≥ 10%）、Disjoint = ポイントクラウドに存在しない建物、水のポイント（クラス 9）の範囲に限定した DEM。
+
+条件がない場合、フットプリントはポイントクラウドが表示しているポイントを対象にします。
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>ソースラスタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
-        <translation type="unfinished"></translation>
+        <translation>残すピクセル</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
-        <translation type="unfinished"></translation>
+        <translation>値の範囲</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
-        <translation type="unfinished"></translation>
+        <translation>クラス</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
-        <translation type="unfinished"></translation>
+        <translation>範囲の対象（傾斜や斜面方位などでは DTM として読み込むバンド）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
-        <translation type="unfinished"></translation>
+        <translation>粗度（TRI）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>最小値（範囲）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>最大値（範囲）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
-        <translation type="unfinished"></translation>
+        <translation>クラス値（例: 6,7）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタ式、0 以外のピクセルを残す（例: &quot;dem@1&quot; &gt; 1200）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
         <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
-        <translation type="unfinished"></translation>
+        <translation>ピクセル値の代わりに残すオブジェクト（ポリゴン、例: SAM で描画）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
-        <translation type="unfinished"></translation>
+        <translation>選択範囲外のソースラスタも非表示にする</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
-        <translation type="unfinished"></translation>
+        <translation>読み込むピクセルの最大数（超過時: リサンプリング）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>無効なソースラスタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>選択: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
         <source>An object cannot be read in the CRS of the raster: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタの CRS でオブジェクトを読み取れません: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
         <source>The objects layer holds no polygon</source>
-        <translation type="unfinished"></translation>
+        <translation>オブジェクトレイヤにポリゴンがありません</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
         <source>{0} object(s) kept instead of pixel values</source>
-        <translation type="unfinished"></translation>
+        <translation>ピクセル値の代わりに {0} 個のオブジェクトを残しました</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
-        <translation type="unfinished"></translation>
+        <translation>{1} ピクセル中 {0} ピクセルを残しました</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタのピクセルであらゆる種類のレイヤをフィルタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
@@ -5535,176 +5545,186 @@ Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a 
 The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタのピクセル（バンドの値の範囲、カテゴリ分類ラスタのクラス、またはラスタ式）を残し、ピクセルサイズでベクタ化して、この領域でターゲットレイヤをフィルタします。
+
+例: 1200–1300 m のゾーンに含まれ、被覆率 50% の区画、森林クラスに限定した DEM、傾斜 &lt; 15% の領域の LiDAR ポイント（DEM をソースにして「範囲の対象」で「傾斜（%）」を選択: 事前の「傾斜」ステップは不要）。
+
+ソースラスタはモデルの出力でもかまいません。変更せずに読み込まれます。「選択範囲外のソースラスタも非表示にする」とプロジェクトのソースを指定すると、ソース自体がフィルタされます。
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="147"/>
         <source>Layers to export</source>
-        <translation type="unfinished"></translation>
+        <translation>エクスポートするレイヤ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="149"/>
         <source>Vector format</source>
-        <translation type="unfinished"></translation>
+        <translation>ベクタ形式</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="151"/>
         <source>Raster format</source>
-        <translation type="unfinished"></translation>
+        <translation>ラスタ形式</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="153"/>
         <source>Point cloud format</source>
-        <translation type="unfinished"></translation>
+        <translation>ポイントクラウド形式</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
         <source>Output CRS (empty = the layer&apos;s CRS)</source>
-        <translation type="unfinished"></translation>
+        <translation>出力 CRS（空 = レイヤの CRS）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
         <source>Files written</source>
-        <translation type="unfinished"></translation>
+        <translation>書き込まれたファイル</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
         <source>exported</source>
-        <translation type="unfinished"></translation>
+        <translation>エクスポート済み</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
         <source>Export filtered layers (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタ済みレイヤをエクスポート（ベクタ、ラスタ、ポイントクラウド）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
         <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
 
 In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>各レイヤをフィルタ結果のまま、レイヤ名を付けたレイヤごとのファイルとして書き込みます: ベクタはサブセットのフィーチャ、ラスタは残したピクセル（それ以外は NoData）を GeoTIFF または COG、ポイントクラウドは残したポイントを LAZ、COPC、LAS、GPKG、CSV で出力します。
+
+モデルでは、FilterMate フィルタの「処理済みレイヤ」を「エクスポートするレイヤ」に接続します。COPC には PDAL（QGIS に同梱）が必要です。PDAL がない場合は代わりに LAZ が書き込まれます。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="90"/>
         <source>Layers to filter (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタするレイヤ（ベクタ、ラスタ、ポイントクラウド）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="96"/>
         <source>Buffer (source units)</source>
-        <translation type="unfinished"></translation>
+        <translation>バッファ（ソースの単位）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="99"/>
         <source>Minimum coverage of the target polygons (%)</source>
-        <translation type="unfinished"></translation>
+        <translation>ターゲットポリゴンの最小被覆率（%）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="102"/>
         <source>Combine with the existing filter of the targets</source>
-        <translation type="unfinished"></translation>
+        <translation>ターゲットの既存のフィルタと組み合わせる</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="109"/>
         <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
 
 Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
-        <translation type="unfinished"></translation>
+        <translation>ベクタ: フィーチャのサブセット。ラスタ: 領域外のピクセルを NoData に設定（クリップした VRT）。ポイントクラウド: 領域外のポイントを削除（派生 COPC ファイル、PDAL）。Disjoint は外側を残します。
+
+フィルタされるのはプロジェクトのレイヤのみです。フィルタは FilterMate から元に戻せ、元のソースは常にプロジェクトに記録されます。「処理済みレイヤ」出力はモデル内で連結できます（例: 「フィルタ済みレイヤをエクスポート」へ）。</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="117"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>置換</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="123"/>
         <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>残す ASPRS クラス（例: 3,4,5、空 = すべて）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>最小 Z</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>最大 Z</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>最小強度</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>最大強度</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="129"/>
         <source>Return number (empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>リターン番号（空 = すべて）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="132"/>
         <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
-        <translation type="unfinished"></translation>
+        <translation>ポイントクラウド式（例: ReturnNumber = NumberOfReturns）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="137"/>
         <source>Processed layers</source>
-        <translation type="unfinished"></translation>
+        <translation>処理済みレイヤ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="185"/>
         <source>Layer skipped: {0} ({1})</source>
-        <translation type="unfinished"></translation>
+        <translation>スキップしたレイヤ: {0}（{1}）</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="188"/>
         <source>filtered</source>
-        <translation type="unfinished"></translation>
+        <translation>フィルタ済み</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
-        <translation type="unfinished"></translation>
+        <translation> ({0:.1f} s)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: {1}{2}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: 失敗 — {1}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="42"/>
         <source>Point clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>ポイントクラウド</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
         <source>Combine with the existing filter of each point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>各ポイントクラウドの既存のフィルタと組み合わせる</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
         <source>Provide classes, a range, a return number or an expression</source>
-        <translation type="unfinished"></translation>
+        <translation>クラス、範囲、リターン番号、または式を指定してください</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
         <source>Filter point clouds by criteria</source>
-        <translation type="unfinished"></translation>
+        <translation>条件でポイントクラウドをフィルタ</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>同じ条件（ASPRS クラス、Z と強度の範囲、リターン番号、式）をプロジェクトの1つ以上のポイントクラウド（例: 工事現場の LiDAR HD タイルすべて）に適用します。フィルタはポイントクラウドの式（サブセット）で、即座に反映され、FilterMate から元に戻せます。</translation>
     </message>
 </context>
 <context>
@@ -6570,7 +6590,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="349"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>一定値: {0}</translation>
     </message>
 </context>
 <context>
@@ -6978,7 +6998,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="887"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
-        <translation type="unfinished"></translation>
+        <translation>最初にチェックしたバンドをグレーで、またはチェックしたバンドをカラー合成で表示</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
@@ -7243,62 +7263,62 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
         <source>Choose 1 to 3 bands for display.</source>
-        <translation type="unfinished"></translation>
+        <translation>表示するバンドを 1～3 個チェックしてください。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1094"/>
         <source>Grey: band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>グレー: バンド {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Layer style</source>
-        <translation type="unfinished"></translation>
+        <translation>レイヤスタイル</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>地図表示</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1096"/>
         <source>R: {0} · G: {1} · B: {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>R: {0} · G: {1} · B: {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="967"/>
         <source>Select band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>バンド {0} を選択</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックしたバンド</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2480"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
-        <translation type="unfinished"></translation>
+        <translation>スポイトを使う前に、「バンド」で少なくとも 1 つのバンドをチェックしてください。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>First checked band</source>
-        <translation type="unfinished"></translation>
+        <translation>最初にチェックしたバンド</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="956"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
-        <translation type="unfinished"></translation>
+        <translation>すべてのバンドを選択または解除します。ヒストグラムには最初にチェックしたバンドが表示されます。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
-        <translation type="unfinished"></translation>
+        <translation>このバンドをスポイト、値の範囲、チェックしたバンドの表示に使用</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2184"/>
         <source>VALUE RANGE — selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>値の範囲 — チェックしたバンド</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="919"/>
@@ -7343,127 +7363,127 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>最小の類似オブジェクト（クリックした各参照に対する割合）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>最大の類似オブジェクト（クリックした各参照に対する倍数）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separation</source>
-        <translation type="unfinished"></translation>
+        <translation>分離</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Connected pixels</source>
-        <translation type="unfinished"></translation>
+        <translation>連結ピクセル</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1303"/>
         <source>Bridge removal: {0} px</source>
-        <translation type="unfinished"></translation>
+        <translation>ブリッジ除去: {0} px</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
-        <translation type="unfinished"></translation>
+        <translation>細いブリッジでつながったオブジェクトを分離します。値を大きくすると、より幅の広いブリッジも切断されます</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1308"/>
         <source>Fill holes</source>
-        <translation type="unfinished"></translation>
+        <translation>穴を埋める</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
-        <translation type="unfinished"></translation>
+        <translation>クリックしたオブジェクト内部の閉じた隙間を埋めます。中庭や内側のリングを残すにはオフにしてください</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1453"/>
         <source>Custom expression</source>
-        <translation type="unfinished"></translation>
+        <translation>カスタム式</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1463"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>数値のラスタ式、例: (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
         <source>Custom derived value expression</source>
-        <translation type="unfinished"></translation>
+        <translation>カスタム派生値の式</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1465"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
-        <translation type="unfinished"></translation>
+        <translation>数値のラスタ計算式です。ヒストグラムとしきい値にはその計算値が使われます。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
-        <translation type="unfinished"></translation>
+        <translation>式の計算値です。ハンドルをドラッグして、この式をしきい値付きの派生値として使用します。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1532"/>
         <source>Use as derived value</source>
-        <translation type="unfinished"></translation>
+        <translation>派生値として使用</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1741"/>
         <source>Computing histogram…</source>
-        <translation type="unfinished"></translation>
+        <translation>ヒストグラムを計算中…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>No histogram available</source>
-        <translation type="unfinished"></translation>
+        <translation>利用可能なヒストグラムがありません</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>一定値: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>{0} sampled pixels · {1} to {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>サンプリングしたピクセル {0} 個 · {1} ～ {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2337"/>
         <source>Distribution (approximate)</source>
-        <translation type="unfinished"></translation>
+        <translation>分布（近似）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 98% (P1–P99)</source>
-        <translation type="unfinished"></translation>
+        <translation>中央 98%（P1–P99）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 90% (P5–P95)</source>
-        <translation type="unfinished"></translation>
+        <translation>中央 90%（P5–P95）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Interquartile range (P25–P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>四分位範囲（P25–P75）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Upper quartile (≥ P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>上位四分位（≥ P75）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2346"/>
         <source>All values</source>
-        <translation type="unfinished"></translation>
+        <translation>すべての値</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2350"/>
         <source>Derived spectral values</source>
-        <translation type="unfinished"></translation>
+        <translation>派生スペクトル値</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
@@ -7507,7 +7527,7 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2967"/>
         <source>Derived value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>派生値: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
