@@ -121,7 +121,7 @@
   "prompt": "Garde les bâtiments qui touchent les routes sélectionnées.",
   "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"]},
     "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "predicates": ["Touch"]}}],
-   [{"tool": "clear_filters", "args": {"layers": ["batiments"]}}]]},
+   [{"tool": "clear_filters", "args": {"layers": ["batiments"]}, "call_args": {"layers": ["batiments"]}}]]},
  {"id": "cross_every_source_feature", "setup": {"selected": []},
   "prompt": "Garde les bâtiments à moins de 20 mètres d'une route, n'importe laquelle.",
   "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20,
