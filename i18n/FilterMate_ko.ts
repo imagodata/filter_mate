@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 레이어 편집을 저장할 때까지 편집 버퍼에 남아 있으며, 이 차례를 실행 취소하면 되돌아옵니다. 동의하십니까?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>레이아웃 {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>레이아웃 {} 내보냄</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>에이전트가 레이아웃 {}을(를) {} 파일로 내보내기 폴더({})에 내보내려고 합니다. 같은 이름의 파일은 대체됩니다. 동의하십니까?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{}의 값 읽는 중</translation>

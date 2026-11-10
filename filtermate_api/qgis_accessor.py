@@ -33,6 +33,8 @@ from .accessor import (
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
+    LayoutExport,
+    LayoutResult,
     EditResult,
     LabelsResult,
     StyleResult,
@@ -439,6 +441,23 @@ class QGISFilterMateAccessor:
                    color: str = "", buffer: bool = True) -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
                                           buffer=buffer))
+
+    @staticmethod
+    def _layouts(name: str, *args, **kwargs):
+        """Call ``adapters.public_api.layouts.<name>`` on the main thread."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.layouts"), name)
+            try:
+                return function(*args, **kwargs)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
+    def create_layout(self, name: str, **options: Any) -> LayoutResult:
+        return LayoutResult(**self._layouts("create_layout", name, **options))
+
+    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
+        return LayoutExport(**self._layouts("export_layout", name, folder, file_format=file_format, dpi=dpi))
 
     @staticmethod
     def _edit(name: str, *args, **kwargs):

@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 De blir i redigeringsbufferen til du lagrer redigeringene av laget, og angring av runden henter dem tilbake. Er du enig?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>Utforming {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>Utforming {} eksportert</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>Agenten vil eksportere utformingen {} som en {}-fil til eksportmappen ({}). En fil med samme navn der erstattes. Er du enig?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Leser verdiene i {}</translation>

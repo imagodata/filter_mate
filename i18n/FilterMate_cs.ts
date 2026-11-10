@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 Zůstanou ve vyrovnávací paměti úprav, dokud úpravy vrstvy neuložíte, a zrušení kola je vrátí. Souhlasíte?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>Tisková sestava {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>Tisková sestava {} exportována</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>Agent chce exportovat tiskovou sestavu {} jako soubor {} do složky exportu ({}). Soubor se stejným názvem tam bude nahrazen. Souhlasíte?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Čtení hodnot {}</translation>

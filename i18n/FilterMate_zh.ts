@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 在您保存图层编辑之前，它们会保留在编辑缓冲区中，撤销本轮操作即可恢复。您同意吗？</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>布局 {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>已导出布局 {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>代理想要将布局 {} 作为 {} 文件导出到导出文件夹（{}）。那里的同名文件将被替换。您同意吗？</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>正在读取 {} 的值</translation>

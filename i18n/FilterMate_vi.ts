@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 Chúng vẫn ở trong bộ đệm chỉnh sửa cho đến khi bạn lưu các chỉnh sửa của lớp, và hoàn tác lượt này sẽ khôi phục chúng. Bạn có đồng ý không?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>Bố cục {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>Đã xuất bố cục {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>Tác tử muốn xuất bố cục {} thành tệp {} vào thư mục xuất ({}). Tệp cùng tên ở đó sẽ bị thay thế. Bạn có đồng ý không?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Đang đọc các giá trị của {}</translation>

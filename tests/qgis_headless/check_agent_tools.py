@@ -410,6 +410,61 @@ def check_edits(project, work):
     project.removeMapLayer(layer.id())
 
 
+def check_layouts(project, work):
+    """create_layout / export_layout on real layers, and the layout an undo of the turn removes."""
+    from filter_mate.adapters.public_api import layouts
+    from filter_mate.adapters.public_api.introspection import map_context
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("l1", "create_layout", {"name": "Carte des communes"}))
+    made = layouts.create_layout("Carte des communes", title="Communes de plus de 1000 habitants", page="A3",
+                                 orientation="portrait", extent_layer="communes")
+    layout = project.layoutManager().layoutByName("Carte des communes")
+    check("layout: added with its items", layout is not None and made["items"] == [
+        "map", "title", "legend", "scale_bar", "north_arrow"] and made["extent_from"] == "layer", made)
+    page = layout.pageCollection().page(0).pageSize() if layout is not None else None
+    check("layout: A3 portrait", page is not None and (round(page.width()), round(page.height())) == (297, 420),
+          (page.width(), page.height()) if page is not None else None)
+    plain = layouts.create_layout("Sans décor", layers=["routes"], legend=False, scale_bar=False, north_arrow=False,
+                                  extent=[650000, 6859990, 650070, 6860010])
+    check("layout: chosen layers, given extent, no decoration", plain["items"] == ["map"] and
+          plain["extent_from"] == "given" and plain["layers"] == ["routes"], plain)
+    for call, label in ((lambda: layouts.create_layout("Carte des communes"), "a name taken"),
+                        (lambda: layouts.create_layout(" "), "no name"),
+                        (lambda: layouts.create_layout("x", layers=["nope"]), "an unknown layer"),
+                        (lambda: layouts.create_layout("x", page="B0"), "an unknown page"),
+                        (lambda: layouts.create_layout("x", extent=[1, 1, 1, 1]), "an empty extent")):
+        check(f"layout: refuses {label}", refused(call))
+    check("layout: map_context lists them", {"Carte des communes", "Sans décor"} <= set(map_context()["layouts"]),
+          map_context()["layouts"])
+    folder = os.path.join(work, "layouts_out")
+    os.makedirs(folder, exist_ok=True)
+    pdf = layouts.export_layout("Carte des communes", folder, "pdf", dpi=96)
+    png = layouts.export_layout("Sans décor", folder, "png", dpi=96)
+    check("layout: exported as PDF and PNG", pdf["bytes"] > 1000 and png["bytes"] > 1000 and
+          os.path.dirname(pdf["path"]) == folder and pdf["path"].endswith(".pdf") and
+          open(pdf["path"], "rb").read(4) == b"%PDF" and open(png["path"], "rb").read(4) == b"\x89PNG", (pdf, png))
+    for call, label in ((lambda: layouts.export_layout("nope", folder), "an unknown layout"),
+                        (lambda: layouts.export_layout("Sans décor", folder, "svg"), "a format"),
+                        (lambda: layouts.export_layout("Sans décor", folder, "png", dpi=5000), "a resolution")):
+        check(f"layout: export refuses {label}", refused(call))
+    effects = recorder.finish()
+    check("layout: the turn keeps the layouts it made", sorted(effect[4] for effect in effects) ==
+          ["Carte des communes", "Sans décor"], [effect[0] for effect in effects])
+    done, left = apply_effects(effects, undo=True)
+    check("layout: undo removes them", not left and project.layoutManager().layoutByName("Sans décor") is None and
+          project.layoutManager().layoutByName("Carte des communes") is None, (done, left))
+    done, left = apply_effects(effects, undo=False)
+    back = project.layoutManager().layoutByName("Carte des communes")
+    check("layout: redo brings them back with their items", not left and back is not None and
+          len([item for item in back.items() if item.__class__.__name__.startswith("QgsLayoutItem")]) >= 5,
+          (done, left))
+    for layout in list(project.layoutManager().printLayouts()):
+        project.layoutManager().removeLayout(layout)
+
+
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
@@ -531,6 +586,7 @@ def main(introspection):
     check_processing(project, gpkg)
     check_style(project, gpkg, work)
     check_edits(project, work)
+    check_layouts(project, work)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

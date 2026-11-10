@@ -397,6 +397,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 Elles restent dans le tampon d'édition tant que vous n'enregistrez pas les modifications de la couche, et annuler le tour les rétablit. Acceptez-vous ?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>Mise en page {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>Mise en page {} exportée</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>L'agent veut exporter la mise en page {} en fichier {} dans le dossier d'export ({}). Un fichier du même nom y est remplacé. Acceptez-vous ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lecture des filtres actifs</translation>

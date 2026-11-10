@@ -614,6 +614,25 @@ def check_chat(provider, layer, authcfg, work):
     answers["export"] = was
     layer.rollBack()
 
+    provider.reset((200, {}, tool_turn("create_layout", {"name": "Carte agent", "title": "Communes"})),
+                   (200, {}, text_turn("Mise en page prête.")))
+    check("a layout through the chat", ask("fais une mise en page des communes"))
+    manager = QgsProject.instance().layoutManager()
+    check("it is in the project", manager.layoutByName("Carte agent") is not None,
+          [item.name() for item in manager.printLayouts()])
+    check("its card names it", "Layout Carte agent" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
+    was, answers["export"] = answers["export"], False
+    provider.reset((200, {}, tool_turn("export_layout", {"name": "Carte agent", "format": "pdf"})),
+                   (200, {}, text_turn("D'accord.")))
+    ask("exporte-la en PDF")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("an export of a layout is confirmed first, and declined here", result.get("is_error") is True
+          and "declined" in result["content"], result)
+    answers["export"] = was
+    chat._on_undo()
+    check("undoing the turn removes the layout", manager.layoutByName("Carte agent") is None,
+          [item.name() for item in manager.printLayouts()])
+
     from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
     write_notes([])
     provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),

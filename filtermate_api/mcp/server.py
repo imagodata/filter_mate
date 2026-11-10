@@ -377,7 +377,8 @@ def build_server(client: FilterMateClient) -> Any:
         """What the user is looking at in QGIS.
 
         Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and
-        canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name,
+        canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, layouts (the print layouts of the
+        project, by name), active_layer_id, active_layer_name,
         selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as
         its source) and drawn_objects [{layer_id, name, crs_authid, count, area_m2, extent_wkt}] (the rasters on which
         the user drew objects in the FilterMate dock: cross_filter uses them with that raster as source_layer and
@@ -682,6 +683,46 @@ def build_server(client: FilterMateClient) -> Any:
         are not saved.
         """
         return await call("POST", "/layers/features/add", _body(layer=layer, features=features, crs=crs))
+
+    @mcp.tool(annotations=_write("Make a print layout", idempotent=False))
+    async def create_layout(
+        name: Annotated[str, Field(min_length=1, max_length=100, description="Name of the layout, new in the project")],
+        title: Annotated[str, Field(max_length=200, description="Title written above the map")] = "",
+        page: Annotated[Literal["A4", "A3", "A5", "Letter"], Field(description="Paper size")] = "A4",
+        orientation: Annotated[Literal["landscape", "portrait"], Field(description="Page orientation")] = "landscape",
+        layers: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
+            max_length=100, description="Layers of the map; by default those checked in the layer tree")] = None,
+        extent: Annotated[Optional[List[float]], Field(min_length=4, max_length=4, description=(
+            "[xmin, ymin, xmax, ymax] in the project CRS; by default extent_layer, then the map view"))] = None,
+        extent_layer: Annotated[str, Field(max_length=1000, description="Show the whole of this layer")] = "",
+        legend: Annotated[bool, Field(description="A legend of the layers shown")] = True,
+        scale_bar: Annotated[bool, Field(description="A scale bar")] = True,
+        north_arrow: Annotated[bool, Field(description="A north arrow")] = True,
+    ) -> Dict[str, Any]:
+        """Make a print layout of the map: the map, a title, a legend, a scale bar and a north arrow on a page.
+
+        It is added to the project, where the user opens it in the layout designer to finish it. Returns name, items,
+        extent_from (given, layer, view or layers) and the scale of its map. export_layout writes it to a file. In the
+        chat of FilterMate, undoing the turn removes it.
+        """
+        return await call("POST", "/layouts", _body(
+            name=name, title=title, page=page, orientation=orientation, layers=layers, extent=extent,
+            extent_layer=extent_layer, legend=legend, scale_bar=scale_bar, north_arrow=north_arrow))
+
+    @mcp.tool(annotations=_write("Export a print layout", idempotent=True, destructive=True))
+    async def export_layout(
+        name: Annotated[str, Field(min_length=1, max_length=100, description="A layout of the project (map_context lists them)")],
+        format: Annotated[Literal["pdf", "png"], Field(description="File format")] = "pdf",  # noqa: A002
+        dpi: Annotated[int, Field(ge=72, le=600, description="Resolution")] = 150,
+        subfolder: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "Sub-folder of the export root (a/b allowed, no ..)"))] = "layouts",
+    ) -> Dict[str, Any]:
+        """Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root.
+
+        A file of the same name there is overwritten. The chat of FilterMate asks the user first. Returns path
+        (relative to the sub-folder) and bytes.
+        """
+        return await call("POST", "/layouts/export", _body(name=name, format=format, dpi=dpi, subfolder=subfolder))
 
     @mcp.tool(annotations=_write("Show or hide layers", idempotent=True))
     async def set_layers_visibility(

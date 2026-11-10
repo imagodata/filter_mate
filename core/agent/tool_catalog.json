@@ -492,7 +492,7 @@
   {
    "name": "map_context",
    "title": "Map context",
-   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name, selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source) and drawn_objects [{layer_id, name, crs_authid, count, area_m2, extent_wkt}] (the rasters on which the user drew objects in the FilterMate dock: cross_filter uses them with that raster as source_layer and raster_selection {\"dock_objects\": true}). available is false when QGIS has no map canvas.",
+   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, layouts (the print layouts of the project, by name), active_layer_id, active_layer_name, selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source) and drawn_objects [{layer_id, name, crs_authid, count, area_m2, extent_wkt}] (the rasters on which the user drew objects in the FilterMate dock: cross_filter uses them with that raster as source_layer and raster_selection {\"dock_objects\": true}). available is false when QGIS has no map canvas.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -1540,6 +1540,157 @@
     "required": [
      "layer",
      "features"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "create_layout",
+   "title": "Make a print layout",
+   "description": "Make a print layout of the map: the map, a title, a legend, a scale bar and a north arrow on a page. It is added to the project, where the user opens it in the layout designer to finish it. Returns name, items, extent_from (given, layer, view or layers) and the scale of its map. export_layout writes it to a file. In the chat of FilterMate, undoing the turn removes it.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "name": {
+      "description": "Name of the layout, new in the project",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "title": {
+      "default": "",
+      "description": "Title written above the map",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "page": {
+      "default": "A4",
+      "description": "Paper size",
+      "enum": [
+       "A4",
+       "A3",
+       "A5",
+       "Letter"
+      ],
+      "type": "string"
+     },
+     "orientation": {
+      "default": "landscape",
+      "description": "Page orientation",
+      "enum": [
+       "landscape",
+       "portrait"
+      ],
+      "type": "string"
+     },
+     "layers": {
+      "anyOf": [
+       {
+        "items": {
+         "maxLength": 1000,
+         "minLength": 1,
+         "type": "string"
+        },
+        "maxItems": 100,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Layers of the map; by default those checked in the layer tree"
+     },
+     "extent": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "number"
+        },
+        "maxItems": 4,
+        "minItems": 4,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "[xmin, ymin, xmax, ymax] in the project CRS; by default extent_layer, then the map view"
+     },
+     "extent_layer": {
+      "default": "",
+      "description": "Show the whole of this layer",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "legend": {
+      "default": true,
+      "description": "A legend of the layers shown",
+      "type": "boolean"
+     },
+     "scale_bar": {
+      "default": true,
+      "description": "A scale bar",
+      "type": "boolean"
+     },
+     "north_arrow": {
+      "default": true,
+      "description": "A north arrow",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "export_layout",
+   "title": "Export a print layout",
+   "description": "Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root. A file of the same name there is overwritten. The chat of FilterMate asks the user first. Returns path (relative to the sub-folder) and bytes.",
+   "read_only": false,
+   "destructive": true,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "name": {
+      "description": "A layout of the project (map_context lists them)",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "format": {
+      "default": "pdf",
+      "description": "File format",
+      "enum": [
+       "pdf",
+       "png"
+      ],
+      "type": "string"
+     },
+     "dpi": {
+      "default": 150,
+      "description": "Resolution",
+      "maximum": 600,
+      "minimum": 72,
+      "type": "integer"
+     },
+     "subfolder": {
+      "default": "layouts",
+      "description": "Sub-folder of the export root (a/b allowed, no ..)",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
     ],
     "type": "object"
    }

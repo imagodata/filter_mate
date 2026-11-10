@@ -10,7 +10,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
 * ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
 * ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
-  after the commands of the turn (``adapters/public_api/feature_edits.py``).
+  after the commands of the turn (``adapters/public_api/feature_edits.py``);
+* ``("layout", "", xml, "", name)``: a print layout the turn added to the project.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -31,6 +32,11 @@ Place = Tuple[Tuple[str, ...], int]
 STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features")
+LAYOUT_TOOLS = ("create_layout",)
+
+
+def _layout_names(project: QgsProject) -> Set[str]:
+    return {layout.name() for layout in project.layoutManager().printLayouts()}
 
 
 def _notes_label() -> str:
@@ -158,6 +164,7 @@ class EffectsRecorder:
         self._styles: Dict[str, str] = {}
         self._notes: Optional[Tuple[str, ...]] = None
         self._edits: Dict[str, int] = {}
+        self._layouts: Optional[Set[str]] = None
 
     def before_call(self, call: Any) -> None:
         project = QgsProject.instance()
@@ -177,6 +184,9 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
+            elif name in LAYOUT_TOOLS:
+                if self._layouts is None:
+                    self._layouts = _layout_names(project)
             elif name in EDIT_TOOLS:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
@@ -224,6 +234,12 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
+        if self._layouts is not None:
+            from ..public_api.layouts import layout_xml
+            for name in sorted(_layout_names(project) - self._layouts):
+                layout = project.layoutManager().layoutByName(name)
+                if layout is not None:
+                    effects.append(("layout", "", layout_xml(layout), "", name))
         for layer_id, before in self._edits.items():
             layer = project.mapLayer(layer_id)
             after = _edit_index(layer) if layer is not None else before
@@ -274,6 +290,18 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 if node is not None:
                     node.setItemVisibilityChecked(bool(effect[2] if undo else effect[3]))
                     done.append(node.name())
+            elif kind == "layout":
+                manager = project.layoutManager()
+                layout = manager.layoutByName(effect[4])
+                if undo:
+                    if layout is not None:
+                        manager.removeLayout(layout)
+                    done.append(effect[4])
+                elif layout is None:
+                    from ..public_api.layouts import layout_from_xml
+                    (done if layout_from_xml(effect[2]) else left).append(effect[4])
+                else:
+                    left.append(effect[4])  # another layout took its name meanwhile
             elif kind == "edits":
                 layer = project.mapLayer(layer_id)
                 start, end = (effect[3], effect[2]) if undo else (effect[2], effect[3])

@@ -395,6 +395,8 @@ def map_context() -> Dict[str, Any]:
             if count:
                 selections.append({'layer_id': layer.id(), 'name': layer.name(), 'selected_count': count})
     context['selections'] = selections[:MAX_SELECTIONS]
+    from .layouts import layout_names
+    context['layouts'] = _safe(layout_names, []) or []
     canvas = _safe(iface.mapCanvas) if iface is not None else None
     if canvas is None:
         return {**context, 'available': False}
