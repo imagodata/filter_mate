@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **AGENT styles and labels a layer.** `set_layer_style` draws a layer anew: one symbol, categories of a field (100 values at most), graduated classes of a numeric field (quantile, equal interval, Jenks, pretty, standard deviation), a raster pseudocolor ramp or gray stretch, an opacity; `set_labels` writes a field on the map or turns labels off. In the chat, the REST API and both MCP servers; the answer says how many classes were made, never the values they hold. Undoing the turn puts the former symbology, labels and rendering back.
+- **The action bar hugs its buttons**: its frame is the height of the buttons and its margins. A failure of `add_layer` that nobody expected names its type instead of "unexpected error in QGIS", and a refused TLS handshake is said as such.
 - **AGENT reads the objects drawn on a raster and draws some with SAM.** `map_context` and the project summary of each request list the rasters with objects drawn in the dock; `cross_filter` uses them with `raster_selection.dock_objects`, read in QGIS, never sent to the model. `segment_objects` (chat, MCP, `POST /objects/segment`) has SAM draw the objects that the points or footprints of a guide layer point at, adds them as a layer with `sam_score` and `sam_iou`, and stops past 20 s with what it drew; Undo of the turn removes the layer. Checked on QGIS 3.22, LTR and 4.3 with a stub model, and on the agent bench (`docs/SEGMENTATION.md`).
 - **AGENT adds layers again.** `add_layer` and `add_service_layer` failed in QGIS with a `TypeError` (the name of the layer collided with an argument of the call that runs them on the main thread); they work again in the chat, REST and MCP.
 
