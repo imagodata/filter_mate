@@ -1276,9 +1276,47 @@ def headers_height(toolbox):
     return heights.pop() if len(heights) == 1 else -1
 
 
+BOARD_TEXTS = {
+    'fr': {
+        'communes': 'Garde les communes de plus de 10 000 habitants',
+        'filter_communes': 'Filtre sur communes',
+        'communes_kept': '12 communes gardées sur 586. Les plus peuplées sont **Toulouse**, Colomiers et Tournefeuille.',
+        'buildings': 'Et les bâtiments qui sont dedans',
+        'filter_buildings': 'Filtre sur batiments par communes',
+        'within': 'Are within · 12 communes',
+        'buildings_kept': '38 412 bâtiments gardés dans ces 12 communes.',
+        'near_roads': 'Les bâtiments à moins de 50 m des routes sélectionnées',
+        'steps': ('Lecture des champs de batiments', 'Lecture de la carte · 3 routes sélectionnées',
+                  'Filtre sur batiments par routes · tampon 50 m'),
+        'parcels': "Les parcelles de plus d'un hectare",
+        'select_roads': 'Sélection de 3 routes',
+        'which_layers': 'Quelles couches contient ce projet ?',
+    },
+    'en': {
+        'communes': 'Keep the communes of more than 10,000 people',
+        'filter_communes': 'Filter on communes',
+        'communes_kept': '12 communes kept out of 586. The largest are **Toulouse**, Colomiers and Tournefeuille.',
+        'buildings': 'And the buildings inside them',
+        'filter_buildings': 'Filter on batiments by communes',
+        'within': 'Are within · 12 communes',
+        'buildings_kept': '38,412 buildings kept in these 12 communes.',
+        'near_roads': 'The buildings less than 50 m from the selected roads',
+        'steps': ('Reading the fields of batiments', 'Reading the map · 3 roads selected',
+                  'Filter on batiments by roads · buffer 50 m'),
+        'parcels': 'The parcels larger than one hectare',
+        'select_roads': 'Selection of 3 roads',
+        'which_layers': 'Which layers does this project hold?',
+    },
+}
+
+
 def capture_boards(d, chat, folder):
-    """The states of the mockup boards, one image each, to compare with the mockup (FM_BOARDS=folder)."""
+    """The states of the mockup boards, one image each, to compare with the mockup (FM_BOARDS=folder).
+
+    FM_BOARDS_LANG=en writes the requests and answers of the example in English (the site's English guide);
+    French by default, as the mockup."""
     import time as _time
+    t = BOARD_TEXTS['en' if os.environ.get('FM_BOARDS_LANG') == 'en' else 'fr']
     from qgis.PyQt.QtWidgets import QDialog as _Dialog
     panel = chat.panel
     shot = lambda name, widget=None: (QApplication.processEvents(), (widget or d).grab().save(
@@ -1299,30 +1337,28 @@ def capture_boards(d, chat, folder):
         header.setText(destination)
     panel.set_ready(True, '' if header is not None else destination)
     shot('Ready')
-    panel.add_user('Garde les communes de plus de 10 000 habitants')
-    panel.add_action('Filtre sur communes', True, '"population" > 10000', '12 / 586', ('communes',))
-    panel.add_text('12 communes gardées sur 586. Les plus peuplées sont **Toulouse**, Colomiers et Tournefeuille.')
+    panel.add_user(t['communes'])
+    panel.add_action(t['filter_communes'], True, '"population" > 10000', '12 / 586', ('communes',))
+    panel.add_text(t['communes_kept'])
     panel.end_answer()
-    panel.add_user('Et les bâtiments qui sont dedans')
-    panel.add_action('Filtre sur batiments par communes', True, 'Are within · 12 communes', '38 412',
-                     ('batiments', 'communes'))
-    panel.add_text('38 412 bâtiments gardés dans ces 12 communes.')
+    panel.add_user(t['buildings'])
+    panel.add_action(t['filter_buildings'], True, t['within'], '38 412', ('batiments', 'communes'))
+    panel.add_text(t['buildings_kept'])
     panel.end_answer()
     panel.set_can_undo(True)
     panel.show_thread()
     shot('Main')
     panel.clear_thread()
-    panel.add_user('Les bâtiments à moins de 50 m des routes sélectionnées')
-    panel.add_step('Lecture des champs de batiments')
-    panel.add_step('Lecture de la carte · 3 routes sélectionnées')
-    panel.add_step('Filtre sur batiments par routes · tampon 50 m')
+    panel.add_user(t['near_roads'])
+    for step in t['steps']:
+        panel.add_step(step)
     panel.set_working(True)
     panel.show_thread()
     shot('Working')
     panel.set_working(False)
     panel.clear_thread()
-    panel.add_user("Les parcelles de plus d'un hectare")
-    panel.input.setText("Les parcelles de plus d'un hectare")
+    panel.add_user(t['parcels'])
+    panel.input.setText(t['parcels'])
     panel.show_error('The provider refused the API key (401).',
                      'The request is back in the line below: fix the settings, then send it again.', True)
     panel.show_thread()
@@ -1331,12 +1367,11 @@ def capture_boards(d, chat, folder):
     panel.set_status('')
     now = _time.time()
     panel.set_history([
-        {'time': now - 600, 'request': "Les parcelles de plus d'un hectare", 'layers': ['parcelles'], 'applied': False},
-        {'time': now - 420, 'request': 'Garde les communes de plus de 10 000 habitants', 'layers': ['communes'],
-         'applied': True},
-        {'time': now - 360, 'request': 'Et les bâtiments qui sont dedans', 'layers': ['batiments'], 'applied': True,
-         'steps': ['Filtre sur batiments par communes', 'Sélection de 3 routes']},
-        {'time': now - 180, 'request': 'Quelles couches contient ce projet ?', 'layers': [], 'applied': False},
+        {'time': now - 600, 'request': t['parcels'], 'layers': ['parcelles'], 'applied': False},
+        {'time': now - 420, 'request': t['communes'], 'layers': ['communes'], 'applied': True},
+        {'time': now - 360, 'request': t['buildings'], 'layers': ['batiments'], 'applied': True,
+         'steps': [t['filter_buildings'], t['select_roads']]},
+        {'time': now - 180, 'request': t['which_layers'], 'layers': [], 'applied': False},
     ], True, False)
     panel.show_history()
     shot('History')
