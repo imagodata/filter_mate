@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """The top of the dock, and two stacks of sections.
 
-* Favorites sit in the title bar of the dock, at the right of its title.
+* Favorites sit in the title bar of the dock, at the right of its title; float and close are badges of the same look
+  and height, drawn here rather than taken from the style (their pixmaps sat lower than the star on Windows).
 * The source tag (``Vector · OGR``) sits in the layer card, at its top right; the row that held both is gone.
 * Two stacks, each an accordion with the same headers: EXPLORING / AGENT above the splitter handle, FILTERING /
   EXPORTING / CONFIGURATION below. In each, one section is open at most, and a click on an open header folds it.
@@ -14,16 +15,18 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QSize, Qt
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
+from qgis.PyQt.QtGui import QColor, QPainter, QPen, QPolygonF
 from qgis.PyQt.QtWidgets import (
-    QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QStyle, QToolButton, QVBoxLayout, QWidget,
+    QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
 )
 
 logger = logging.getLogger("FilterMate")
 
 AGENT_PAGE = "AGENT"
 EXPLORING_TITLE = "EXPLORING"  # a section name, never translated, as FILTERING
-TITLE_BUTTON = 20
+TITLE_BUTTON = 22  # height of everything in the title bar: favorites, float, close
+TITLE_GLYPH = 8  # side of the float and close glyphs
 TAG_GAP = 8
 
 
@@ -31,8 +34,73 @@ def _tr(text: str) -> str:
     return QCoreApplication.translate("DockChrome", text)
 
 
+def _title_colors(dock: QDockWidget) -> tuple:
+    """``(background, hover, pressed, glyph)`` of the favorites badge with no favorite, in the current theme."""
+    dark = bool(getattr(getattr(dock, "_icon_manager", None), "is_dark_mode", False))
+    try:
+        from ..styles.mockup_design import TITLE_BADGE_PRESSED, TITLE_BADGE_TEXT, title_badge_colors
+        background, hover = title_badge_colors(dark)
+        return background, hover, TITLE_BADGE_PRESSED, TITLE_BADGE_TEXT
+    except Exception:
+        return ("#e8e8e8" if dark else "#dcdcdc"), "#ffffff", "#c8c8c8", "#555555"
+
+
+class DockTitleButton(QAbstractButton):
+    """Float or close, a square badge with the look of the favorites one."""
+
+    FLOAT = "float"
+    CLOSE = "close"
+
+    def __init__(self, kind: str, dock: QDockWidget, tooltip: str, parent: QWidget) -> None:
+        super().__init__(parent)
+        self._kind = kind
+        self._dock = dock
+        self.setObjectName(f"toolButton_dock_{kind}")
+        self.setFixedSize(TITLE_BUTTON, TITLE_BUTTON)
+        self.setToolTip(tooltip)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover, True)  # a repaint on enter and leave
+
+    def sizeHint(self) -> QSize:  # noqa: N802 - Qt name
+        return QSize(TITLE_BUTTON, TITLE_BUTTON)
+
+    def paintEvent(self, _event: Any) -> None:  # noqa: N802 - Qt name
+        background, hover, pressed, glyph = _title_colors(self._dock)
+        fill = pressed if self.isDown() else (hover if self.underMouse() else background)
+        try:
+            from ..styles.mockup_design import TITLE_BADGE_RADIUS as radius
+        except Exception:
+            radius = 4
+        painter = QPainter(self)
+        try:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(fill))
+            painter.drawRoundedRect(QRectF(self.rect()), radius, radius)
+            pen = QPen(QColor(glyph), 1.4)
+            pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+            painter.setPen(pen)
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            center = QRectF(self.rect()).center()
+            half = TITLE_GLYPH / 2
+            if self._kind == self.CLOSE:
+                painter.drawLine(QPointF(center.x() - half, center.y() - half), QPointF(center.x() + half, center.y() + half))
+                painter.drawLine(QPointF(center.x() - half, center.y() + half), QPointF(center.x() + half, center.y() - half))
+            else:  # two windows, the front one lower left; the back one shows its top and right sides
+                side, shift = TITLE_GLYPH - 2, 2
+                left, top = center.x() - half, center.y() - half
+                painter.drawRect(QRectF(left, top + shift, side, side))
+                painter.drawPolyline(QPolygonF([QPointF(left + shift, top + shift), QPointF(left + shift, top),
+                                      QPointF(left + TITLE_GLYPH, top), QPointF(left + TITLE_GLYPH, top + side),
+                                      QPointF(left + side, top + side)]))
+        finally:
+            painter.end()
+
+
 class DockTitleBar(QWidget):
-    """Title, fold EXPLORING, favorites, float and close: a drag or a double click acts as on any dock."""
+    """Title, favorites, float and close: a drag or a double click acts as on any dock."""
 
     def __init__(self, dock: QDockWidget) -> None:
         super().__init__(dock)
@@ -44,39 +112,27 @@ class DockTitleBar(QWidget):
         self.title.setStyleSheet("font-weight: normal;")  # as the title of every other dock of QGIS
         self.title.setFont(dock.font())
         dock.windowTitleChanged.connect(self.title.setText)
-        self.float_button = self._button("toolButton_dock_float", QStyle.StandardPixmap.SP_TitleBarNormalButton,
-                                         _tr("Detach or dock the panel"))
+        self.float_button = DockTitleButton(DockTitleButton.FLOAT, dock, _tr("Detach or dock the panel"), self)
         self.float_button.clicked.connect(lambda: dock.setFloating(not dock.isFloating()))
-        self.close_button = self._button("toolButton_dock_close", QStyle.StandardPixmap.SP_TitleBarCloseButton,
-                                         _tr("Close"))
+        self.close_button = DockTitleButton(DockTitleButton.CLOSE, dock, _tr("Close"), self)
         self.close_button.clicked.connect(dock.close)
         self._row = QHBoxLayout(self)
-        self._row.setContentsMargins(6, 2, 2, 2)
+        self._row.setContentsMargins(6, 3, 3, 3)
         self._row.setSpacing(4)
-        self._row.addWidget(self.title)
+        center = Qt.AlignmentFlag.AlignVCenter
+        self._row.addWidget(self.title, 0, center)
         self._row.addStretch(1)
         self._slot = self._row.count()  # favorites go here
-        self._row.addWidget(self.float_button)
-        self._row.addWidget(self.close_button)
+        self._row.addWidget(self.float_button, 0, center)
+        self._row.addWidget(self.close_button, 0, center)
         dock.featuresChanged.connect(self._follow_features)
         self._follow_features(dock.features())
 
-    def _button(self, name: str, pixmap: Any = None, tooltip: str = "") -> QToolButton:
-        button = QToolButton(self)
-        button.setObjectName(name)
-        button.setAutoRaise(True)
-        button.setFixedSize(TITLE_BUTTON, TITLE_BUTTON)
-        button.setIconSize(QSize(14, 14))
-        if pixmap is not None:
-            button.setIcon(self.style().standardIcon(pixmap))
-        button.setToolTip(tooltip)
-        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        return button
-
     def hold(self, widget: QWidget) -> None:
-        """``widget`` at the right of the title, before the buttons of the dock."""
+        """``widget`` at the right of the title, before the buttons of the dock, at their height."""
         widget.setParent(self)
-        self._row.insertWidget(self._slot, widget)
+        widget.setFixedHeight(TITLE_BUTTON)
+        self._row.insertWidget(self._slot, widget, 0, Qt.AlignmentFlag.AlignVCenter)
         self._slot += 1
         widget.show()
 
@@ -337,7 +393,6 @@ def install_dock_chrome(dock: Any) -> Optional[DockTitleBar]:
         dock.setTitleBarWidget(bar)
         favorites = getattr(dock, "favorites_indicator_label", None)
         if favorites is not None:
-            favorites.setFixedHeight(TITLE_BUTTON)
             bar.hold(favorites)
         header = getattr(dock, "frame_header", None)
         if header is not None:

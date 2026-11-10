@@ -1401,6 +1401,15 @@ def s_agent_panel():
         d.grab().save(os.path.join(shots, 'agent_folded.png'))
     bar_widget = d.titleBarWidget()
     check('dock: favorites in the title bar', bar_widget is not None and d.favorites_indicator_label.parentWidget() is bar_widget)
+    title_items = [w for w in (getattr(bar_widget, 'title', None), d.favorites_indicator_label,
+                               getattr(bar_widget, 'float_button', None), getattr(bar_widget, 'close_button', None))
+                   if w is not None and w.isVisibleTo(bar_widget)]
+    title_centers = [w.geometry().center().y() for w in title_items]
+    badge_heights = {w.height() for w in title_items[1:]}
+    # The style pixmaps of float and close sat lower than the star badge on Windows.
+    check('dock: title, favorites, float and close on one line', len(title_items) >= 3 and
+          max(title_centers) - min(title_centers) <= 1 and len(badge_heights) == 1,
+          f'centers {title_centers}, badge heights {badge_heights}')
     check('dock: no header row above EXPLORING', d.frame_header is None or d.frame_header.isHidden())
     tag = d.backend_indicator_label
     check('dock: the source tag is in the layer card', tag.parentWidget() is not None and
