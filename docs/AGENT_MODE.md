@@ -171,9 +171,20 @@ untrusted data is best run with a database role that cannot write.
     FILTERMATE_AGENT_API_KEY=... python scripts/agent_eval.py --live \
         --provider anthropic --model claude-haiku-5-5                    # real model, costs money
 
-31 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, export and read-only
-requests and one attribute value holding a prompt injection. A case is scored on the filters finally applied. It is
-what decides the model of the free quota, and whether a local model is good enough to offer.
+39 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
+read-only requests, and one attribute value holding a prompt injection. A case is scored on the filters finally applied.
+It is what decides the model of the free quota, and whether a local model is good enough to offer.
+
+The simulated project keeps what each change did, as QGIS does: `filter_state` and `list_layers` show the filters
+applied, `map_context` the selections. A case states what its request takes for granted in `setup`, such as a layer
+already filtered or a road selected. Without that, a model that checks its work sees nothing and rightly tries again.
+
+| Run (2026-11-10) | Result |
+|---|---|
+| Claude Haiku 5.5, direct | 39/39, about 0.09 $ estimated from the token counts |
+| Claude Haiku 5.5, through the free quota relay, 3 cases with tools | 3/3 |
+
+The first live run gave 31/39 on a project that kept no state: every failure came from the bench.
 
 ## Other applications (MCP server of the plugin)
 
