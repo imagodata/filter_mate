@@ -1093,6 +1093,8 @@ class CoverageModeController(BaseController):
             raster.segmentValidateRequested.connect(lambda: self._segmentation_controller().validate())
             raster.targetChanged.connect(self._on_raster_target_changed)
             raster.segmentToolRequested.connect(self._on_segment_tool_requested)
+            if hasattr(raster, 'engineChanged'):
+                raster.engineChanged.connect(self._on_raster_engine_changed)
             raster.segmentModelInstallRequested.connect(lambda: self._segmentation_controller().install_model())
             raster.segmentRuntimeInstallRequested.connect(self._on_segment_runtime_install_requested)
         if hasattr(pc, 'groupChosen'):
@@ -1146,6 +1148,12 @@ class CoverageModeController(BaseController):
     def _on_runtime_installed(self, _packages: Any) -> None:
         if not getattr(self, '_torn_down', False) and self._raster_panel is not None:
             self._call(self._raster_panel, 'set_segmentation_status', self.tr("onnxruntime installed"))
+            try:
+                from ...adapters.qgis.coverage_layers.segmentation import model_state
+                if not model_state().installed:  # one confirmation installed both: the model follows the runtime
+                    self._segmentation_controller().install_model()
+            except Exception as exc:  # the panel then offers the model on its own
+                logger.warning(f"[FM5] segmentation model not downloaded after onnxruntime: {exc}", exc_info=True)
 
     def _on_runtime_install_done(self) -> None:
         self._watching_runtime_install = False
@@ -2182,8 +2190,9 @@ class CoverageModeController(BaseController):
             target: ``'similar'`` (the pipette) or ``'object'`` (the detector); None keeps the target of the panel.
         """
         panel = self._raster_panel
+        target = 'object' if target == 'segment' else target  # the former SAM target, from an older project
         chosen = target if target is not None else (panel.pick_target() if panel is not None and hasattr(panel, 'pick_target') else None)
-        if chosen != 'segment' and self._active_layer is not None and not self._raster_capability(self._active_layer).has_raw_values:
+        if not self._sam_target(chosen) and self._active_layer is not None and not self._raster_capability(self._active_layer).has_raw_values:
             target = 'similar'
         if target is not None and panel is not None and hasattr(panel, 'set_pick_target'):
             panel.set_pick_target(target)
@@ -2198,7 +2207,7 @@ class CoverageModeController(BaseController):
             return
         self._swapping_pick_tool = True  # the tool leaving the map must not turn the pipette off
         try:
-            if (target or 'similar') == 'segment':  # its own map tool: prompts, not picks
+            if self._sam_target(target or 'similar'):  # SAM's own map tool: prompts, not picks
                 self._deactivate_pixel_tool()
                 if enabled:
                     self._segmentation_controller().activate()
@@ -2215,18 +2224,52 @@ class CoverageModeController(BaseController):
         elif not enabled and on_map:
             self._deactivate_pixel_tool()
 
+    def _sam_target(self, target: Optional[str]) -> bool:
+        """Clicks of ``target`` go to SAM: an object target while the panel uses the SAM engine."""
+        panel = self._raster_panel
+        if target not in ('object', 'similar_objects', 'segment') or panel is None or not hasattr(panel, 'object_engine'):
+            return False
+        try:
+            return panel.object_engine() == 'sam'
+        except Exception:  # a panel being deleted
+            return False
+
     def _on_raster_target_changed(self, target: str) -> None:
-        """A target of the PIPETTE group: the segmentation has no rail button, choosing it puts its tool on."""
+        """A target of the PIPETTE group: with the pipette on, the map tool follows (SAM or the pixel picker)."""
         segmenting = self._segmentation is not None and self._segmentation.on_map()
-        if target == 'segment' and not segmenting:
-            self._on_color_pick_toggled(True, 'segment')
-        elif target != 'segment' and segmenting:
+        if self._color_pick and self._sam_target(target) != segmenting:
             self._on_color_pick_toggled(True, target)
 
+    def _on_raster_engine_changed(self, _engine: str) -> None:
+        """The object targets changed engine (chosen, or SAM just installed): the tool on the map follows."""
+        if self._color_pick and self._raster_panel is not None:
+            self._on_color_pick_toggled(True, self._raster_panel.pick_target())
+
     def _on_segment_tool_requested(self) -> None:
-        """The Segment target, already chosen, clicked again: its tool comes back after another QGIS tool took the map."""
-        if self._raster_panel is not None and self._raster_panel.pick_target() == 'segment':
-            self._on_color_pick_toggled(True, 'segment')
+        """Kept for the panels that still emit it: the SAM tool comes back with the object target."""
+        if self._raster_panel is not None and self._sam_target(self._raster_panel.pick_target()):
+            self._on_color_pick_toggled(True, self._raster_panel.pick_target())
+
+    def _similar_candidates(self, layer: Any, reference: Any, visible: Any) -> list:
+        """Points inside the colour patches like the clicked object, in the visible map, nearest first (SAM redraws them).
+
+        Main thread, as the live similar objects: the colour under the object is read, the patches
+        of that colour of a roughly similar area are found, and one point inside each is kept.
+        """
+        from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
+        from ...adapters.qgis.coverage_layers.segmentation import similar_candidate_points
+        panel = self._raster_panel
+        if panel is None or not hasattr(panel, 'criterion_at'):
+            return []
+        inside = reference.pointOnSurface().asPoint()
+        base = self._base_raster(layer)  # the values: not a filtered view, nor a remote source read on this thread
+        terrain = self._terrain_at(base, inside)
+        quantity = self._quantity_expression()
+        if quantity:
+            from ...adapters.qgis.coverage_layers.raster_adapter import expression_value_at
+            terrain['custom'] = expression_value_at(base, quantity, inside)
+        criterion = panel.criterion_at(identify_values(base, inside), terrain)
+        return [] if criterion is None else similar_candidate_points(base, criterion, reference, visible)
 
     def _stop_segmentation(self) -> None:
         """A reset of the panel: the target goes back to the pipette, the tool leaves with it."""

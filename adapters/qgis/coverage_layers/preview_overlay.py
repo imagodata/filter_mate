@@ -210,10 +210,12 @@ class ObjectOutline:
     does not delete an item it removes, a band per click would pile up.
     """
 
-    def __init__(self, canvas) -> None:
+    def __init__(self, canvas, hover: bool = False) -> None:
+        """Args: hover: a lighter, dashed outline (the object under the mouse, not yet taken)."""
         self._canvas = canvas
         self._band = None
         self._shown = False
+        self._hover = hover
 
     @property
     def visible(self) -> bool:
@@ -231,10 +233,13 @@ class ObjectOutline:
             colour = QColor(self._canvas.selectionColor())
             colour.setAlpha(255)
             fill = QColor(colour)
-            fill.setAlpha(70)
+            fill.setAlpha(25 if self._hover else 70)
             band.setStrokeColor(colour)
             band.setFillColor(fill)
-            band.setWidth(2)
+            band.setWidth(1 if self._hover else 2)
+            if self._hover:
+                from qgis.PyQt.QtCore import Qt
+                band.setLineStyle(Qt.PenStyle.DashLine)
             self._band = band
         self._band.setToGeometry(geometry, layer.crs())  # reprojected to the map CRS (the layer overload is a vector one)
         self._band.show()

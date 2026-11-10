@@ -1777,7 +1777,7 @@ class TestPipetteAndDetectorButtons:
 
 @pytest.mark.unit
 class TestSegmentationTarget:
-    """2026-11-09: the segmentation has its own map tool, swapped with the picker without turning the pipette off."""
+    """2026-11-10: the object targets use SAM's map tool when the panel's engine is SAM, the pixel picker otherwise."""
 
     def _controller(self, ctrl_module, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
@@ -1785,7 +1785,8 @@ class TestSegmentationTarget:
         iface = MagicMock()
         iface.mapCanvas.return_value.mapTool.return_value = None
         panel = MagicMock()
-        panel.pick_target.return_value = "segment"
+        panel.pick_target.return_value = "object"
+        panel.object_engine.return_value = "sam"
         controller._raster_panel = panel
         controller._segmentation = MagicMock()
         controller._segmentation.on_map.return_value = False
@@ -1816,16 +1817,35 @@ class TestSegmentationTarget:
         panel.set_segmentation_status.assert_not_called()
         assert refreshed == []
 
-    def test_segment_replaces_the_picker(self, ctrl_module, monkeypatch):
+    @pytest.mark.parametrize("target", ["object", "similar_objects"])
+    def test_sam_replaces_the_picker_for_the_object_targets(self, ctrl_module, monkeypatch, target):
         controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
-        controller._on_color_pick_toggled(True, "segment")
+        controller._on_color_pick_toggled(True, target)
         assert calls == ["picker off"]
         controller._segmentation.activate.assert_called_once_with()
         assert controller._color_pick is True
 
+    def test_similar_pixels_keep_the_picker(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_color_pick_toggled(True, "similar")
+        assert calls == ["picker on"]
+        controller._segmentation.activate.assert_not_called()
+
+    def test_the_colour_engine_keeps_the_picker(self, ctrl_module, monkeypatch):
+        controller, panel, calls = self._controller(ctrl_module, monkeypatch)
+        panel.object_engine.return_value = "color"
+        controller._on_color_pick_toggled(True, "object")
+        assert calls == ["picker on"]
+        controller._segmentation.activate.assert_not_called()
+
+    def test_a_saved_segment_target_is_an_object_one(self, ctrl_module, monkeypatch):
+        controller, _panel, _calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_color_pick_toggled(True, "segment")
+        controller._segmentation.activate.assert_called_once_with()
+
     def test_off_takes_the_tool_off(self, ctrl_module, monkeypatch):
         controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
-        controller._on_color_pick_toggled(False, "segment")
+        controller._on_color_pick_toggled(False, "object")
         controller._segmentation.deactivate.assert_called_once_with()
         controller._segmentation.activate.assert_not_called()
 
@@ -1833,7 +1853,7 @@ class TestSegmentationTarget:
         controller, panel, calls = self._controller(ctrl_module, monkeypatch)
         controller._segmentation.on_map.return_value = True
         controller._segmentation.deactivate.side_effect = lambda: controller._show_picker_state(False)
-        controller._on_color_pick_toggled(True, "object")
+        controller._on_color_pick_toggled(True, "similar")
         assert controller._color_pick is True and controller._swapping_pick_tool is False
         assert calls == ["picker on"]
         panel.show_pipette_active.assert_called_once_with(True)  # never turned off on the way
@@ -1844,30 +1864,78 @@ class TestSegmentationTarget:
         controller._show_picker_state(False)
         assert controller._color_pick is False
 
-    def test_choosing_the_target_puts_the_tool_on(self, ctrl_module, monkeypatch):
+    def test_choosing_an_object_target_with_the_pipette_on_puts_sam_on(self, ctrl_module, monkeypatch):
         controller, _panel, _calls = self._controller(ctrl_module, monkeypatch)
-        controller._on_raster_target_changed("segment")
+        controller._color_pick = True
+        controller._on_raster_target_changed("object")
         controller._segmentation.activate.assert_called_once_with()
 
-    def test_leaving_the_target_gives_the_picker_back(self, ctrl_module, monkeypatch):
+    def test_choosing_a_target_with_the_pipette_off_arms_nothing(self, ctrl_module, monkeypatch):
         controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
-        controller._segmentation.on_map.return_value = True
         controller._on_raster_target_changed("object")
+        controller._segmentation.activate.assert_not_called()
+        assert calls == []
+
+    def test_leaving_for_similar_pixels_gives_the_picker_back(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._color_pick = True
+        controller._segmentation.on_map.return_value = True
+        controller._on_raster_target_changed("similar")
         controller._segmentation.deactivate.assert_called_once_with()
         assert calls == ["picker on"]
 
-    def test_another_target_with_the_picker_on_changes_nothing(self, ctrl_module, monkeypatch):
+    def test_between_the_object_targets_sam_stays(self, ctrl_module, monkeypatch):
         controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
-        controller._on_raster_target_changed("object")
+        controller._color_pick = True
+        controller._segmentation.on_map.return_value = True
+        controller._on_raster_target_changed("similar_objects")
+        controller._segmentation.deactivate.assert_not_called()
         assert calls == []
 
-    def test_a_rendered_layer_keeps_the_segment_target(self, ctrl_module, monkeypatch):
+    def test_an_engine_change_swaps_the_tool(self, ctrl_module, monkeypatch):
+        controller, panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._color_pick = True
+        controller._segmentation.on_map.return_value = True
+        panel.object_engine.return_value = "color"
+        controller._on_raster_engine_changed("color")
+        assert calls == ["picker on"]
+
+    def test_an_engine_change_with_the_pipette_off_arms_nothing(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_raster_engine_changed("sam")
+        controller._segmentation.activate.assert_not_called()
+        assert calls == []
+
+    def test_a_rendered_layer_keeps_sam_for_objects(self, ctrl_module, monkeypatch):
         controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
         controller._active_layer = MagicMock()
         monkeypatch.setattr(controller, "_raster_capability", lambda layer: types.SimpleNamespace(has_raw_values=False))
-        controller._on_color_pick_toggled(True, "segment")
-        panel.set_pick_target.assert_called_once_with("segment")
+        controller._on_color_pick_toggled(True, "object")
+        panel.set_pick_target.assert_called_once_with("object")
         controller._segmentation.activate.assert_called_once_with()
+
+    def test_a_rendered_layer_without_sam_falls_back_to_similar_pixels(self, ctrl_module, monkeypatch):
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        panel.object_engine.return_value = "color"
+        controller._active_layer = MagicMock()
+        monkeypatch.setattr(controller, "_raster_capability", lambda layer: types.SimpleNamespace(has_raw_values=False))
+        controller._on_color_pick_toggled(True, "object")
+        panel.set_pick_target.assert_called_once_with("similar")
+
+    def test_the_model_follows_the_runtime(self, ctrl_module, monkeypatch):
+        controller, _panel, _calls = self._controller(ctrl_module, monkeypatch)
+        state = types.SimpleNamespace(installed=False)
+        package = types.ModuleType(_PKG + '.adapters.qgis.coverage_layers')
+        package.__path__ = []
+        monkeypatch.setitem(sys.modules, package.__name__, package)
+        module = types.ModuleType(_PKG + '.adapters.qgis.coverage_layers.segmentation')
+        module.model_state = lambda: state
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        controller._on_runtime_installed(["onnxruntime"])
+        controller._segmentation.install_model.assert_called_once_with()
+        state.installed = True
+        controller._on_runtime_installed(["onnxruntime"])
+        controller._segmentation.install_model.assert_called_once_with()
 
     def test_validated_objects_count_as_detected(self, ctrl_module):
         selection = types.SimpleNamespace(seeds=(), segments=("POLYGON((0 0,1 0,1 1,0 0))",))

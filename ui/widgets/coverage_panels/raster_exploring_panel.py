@@ -263,8 +263,13 @@ DEFAULT_COLOR_TOLERANCE = 12.0  # percent of the value range, per band
 PICK_SIMILAR = "similar"
 PICK_OBJECT = "object"
 PICK_SIMILAR_OBJECTS = "similar_objects"  # every object of the raster like the clicked one (colour and size)
-PICK_SEGMENT = "segment"  # prompts to the segmentation model (downloaded on request, see sam_model)
-PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS, PICK_SEGMENT)
+PICK_SEGMENT = "segment"  # the former target of SAM, read from older states as PICK_OBJECT
+PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS)
+OBJECT_TARGETS = (PICK_OBJECT, PICK_SIMILAR_OBJECTS)
+# How the object targets find an object: the SAM model when it is installed, the colour of the pixels otherwise.
+ENGINE_SAM = "sam"
+ENGINE_COLOR = "color"
+ENGINES = (ENGINE_SAM, ENGINE_COLOR)
 DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: half to twice the clicked one
 CUSTOM_QUANTITY = "custom_expression"
 # Words of a band name that say it is the near infrared one.
@@ -630,7 +635,9 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "pipette_kind": state.get("pipette_kind") if state.get("pipette_kind") in ("color", "value", "classes", "preset") else "",
         "pipette_picks": _parse_picks(state.get("pipette_picks")),
         "pipette_seeds": _parse_seeds(state.get("pipette_seeds")),
-        "pipette_target": state.get("pipette_target") if state.get("pipette_target") in PICK_TARGETS else PICK_SIMILAR,
+        "pipette_target": (PICK_OBJECT if state.get("pipette_target") == PICK_SEGMENT
+                           else state.get("pipette_target") if state.get("pipette_target") in PICK_TARGETS else PICK_SIMILAR),
+        "pipette_engine": state.get("pipette_engine") if state.get("pipette_engine") in ENGINES else ENGINE_SAM,
         "pipette_similar": _parse_ratio(state.get("pipette_similar")),
         "pipette_shape": bool(state.get("pipette_shape", True)),  # states before the shape: on, the default
         "pipette_tolerance": _bounded_setting(state.get("pipette_tolerance"), DEFAULT_COLOR_TOLERANCE, 0.0, 100.0),
@@ -734,6 +741,7 @@ class RasterExploringPanel(QWidget):
     targetChanged = pyqtSignal(str)
     segmentValidateRequested = pyqtSignal()
     segmentToolRequested = pyqtSignal()
+    engineChanged = pyqtSignal(str)  # the object targets changed engine (the controller swaps the map tool)
     segmentModelInstallRequested = pyqtSignal()
     segmentRuntimeInstallRequested = pyqtSignal()
     displayChanged = pyqtSignal()
@@ -765,8 +773,9 @@ class RasterExploringPanel(QWidget):
         self._seeds: List[Tuple[float, float, Any]] = []
         self._pick_target = PICK_SIMILAR  # PICK_OBJECT: a click selects the object under it only
         self._segments: List[str] = []  # WKT of the objects validated with the segmentation tool (layer CRS)
-        self._model_runtime = True  # onnxruntime can be imported (the user installs it)
-        self._model_installed = True  # the model files are in the profile (downloaded on request)
+        self._model_runtime = False  # onnxruntime can be imported (installed once the user agreed)
+        self._model_installed = False  # the model files are in the profile (downloaded once the user agreed)
+        self._engine = ENGINE_SAM  # the engine chosen for the object targets (SAM only applies once installed)
         self._runtime_installing = False  # pip runs for onnxruntime
         self._runtime_asked = False  # the user was asked once this session: the button stays for a change of mind
         self._stashed_preset: Optional[RasterSelection] = None  # the spectral preset the Segment target set aside
@@ -1147,16 +1156,15 @@ class RasterExploringPanel(QWidget):
         targets = ((PICK_SIMILAR, self.tr("Similar pixels"),
                                  self.tr("Every pixel of the raster close to the picked colour or value (the pipette of the rail)")),
                                 (PICK_OBJECT, self.tr("Clicked object"),
-                                 self.tr("Only the patch of such pixels the click falls in: a pool, a roof, a field "
-                                         "(the object detector of the rail); Ctrl+click adds another object")),
+                                 self.tr("The object under the click: a roof, a pool, a field (the object detector of "
+                                         "the rail). With SAM: a click adds an object, Shift+click extends the last one, "
+                                         "a right click trims it, a box frames one, Escape removes it. With the colour "
+                                         "engine: the patch of such pixels, Ctrl+click adds another one")),
                                 (PICK_SIMILAR_OBJECTS, self.tr("Similar objects"),
-                                 self.tr("Every object of the raster like the clicked one: the patches of such pixels "
-                                         "whose area is within the ratios below (the similar objects tool of the rail); "
-                                         "Ctrl+click adds another reference object")),
-                                (PICK_SEGMENT, self.tr("Segment"),
-                                 self.tr("Draw an object with the segmentation model: left click on it, right click "
-                                         "off it, or drag a box; Enter validates. Best on buildings and "
-                                         "other well delimited objects")))
+                                 self.tr("Every object like the clicked one, whose area is within the ratios below (the "
+                                         "similar objects tool of the rail). With SAM: the patches of a similar colour in "
+                                         "the visible area are redrawn by the model, then compared with the clicked "
+                                         "object. With the colour engine: the patches of such pixels")))
         for index, (key, label, tip) in enumerate(targets):
             button = QRadioButton(label, self._pipette_group)
             button.setObjectName(f"radioButton_raster_pipette_{key}")
@@ -1167,14 +1175,25 @@ class RasterExploringPanel(QWidget):
             target_row.addWidget(button, 1 + index // 2, index % 2)
         target_row.setColumnStretch(2, 1)
         group_layout.addLayout(target_row)
-        # Clicked though already checked, it brings the tool back once another QGIS tool took the map.
-        self._target_buttons[PICK_SEGMENT].clicked.connect(lambda _checked=False: self.segmentToolRequested.emit())
         self._segment_widget = QWidget(self._pipette_group)
         self._segment_widget.setObjectName("widget_raster_segmentation")
         segment_layout = QVBoxLayout(self._segment_widget)
         segment_layout.setContentsMargins(0, 0, 0, 0)
         segment_layout.setSpacing(GAP)
-        # What is missing to segment: the runtime (installed by the user), the model (downloaded on request).
+        engine_row = QHBoxLayout()
+        engine_row.setSpacing(GAP)
+        engine_row.addWidget(QLabel(self.tr("Engine"), self._segment_widget))
+        self._engine_combo = QComboBox(self._segment_widget)
+        self._engine_combo.setObjectName("comboBox_raster_object_engine")
+        self._engine_combo.addItem("SAM 2.1", ENGINE_SAM)
+        self._engine_combo.addItem(self.tr("Colour"), ENGINE_COLOR)
+        self._engine_combo.setToolTip(self.tr("SAM draws the object from the image, locally on the CPU; the colour "
+                                              "engine grows the patch of pixels of the clicked colour"))
+        self._engine_combo.currentIndexChanged.connect(self._on_engine_changed)
+        engine_row.addWidget(self._engine_combo)
+        engine_row.addStretch(1)
+        segment_layout.addLayout(engine_row)
+        # What is missing for SAM: the runtime and the model, installed once the user agreed.
         self._segment_install_label = QLabel("", self._segment_widget)
         self._segment_install_label.setObjectName("label_raster_segment_install")
         self._segment_install_label.setWordWrap(True)
@@ -1185,8 +1204,8 @@ class RasterExploringPanel(QWidget):
         install_row.setSpacing(GAP)
         self._segment_install_button = QPushButton("", self._segment_widget)
         self._segment_install_button.setObjectName("pushButton_raster_segment_install")
-        self._segment_install_button.setToolTip(self.tr("Download the SAM 2.1 tiny model once, into your QGIS profile; "
-                                                        "the segmentation then runs locally, on the CPU"))
+        self._segment_install_button.setToolTip(self.tr("Install SAM 2.1 tiny once, into your QGIS profile; "
+                                                        "it then runs locally, on the CPU"))
         self._segment_install_button.clicked.connect(self._on_install_model_clicked)
         self._segment_install_button.setVisible(False)
         install_row.addWidget(self._segment_install_button)
@@ -1194,14 +1213,9 @@ class RasterExploringPanel(QWidget):
         segment_layout.addLayout(install_row)
         segment_row = QHBoxLayout()
         segment_row.setSpacing(GAP)
-        self._segment_validate_button = QPushButton(self.tr("Validate object"), self._segment_widget)
-        self._segment_validate_button.setObjectName("pushButton_raster_segment_validate")
-        self._segment_validate_button.setToolTip(self.tr("Add the object drawn to the selection (Enter on the map)"))
-        self._segment_validate_button.clicked.connect(self.segmentValidateRequested.emit)
-        segment_row.addWidget(self._segment_validate_button)
         self._segment_clear_button = QPushButton(self.tr("Clear"), self._segment_widget)
         self._segment_clear_button.setObjectName("pushButton_raster_segment_clear")
-        self._segment_clear_button.setToolTip(self.tr("Forget the validated objects"))
+        self._segment_clear_button.setToolTip(self.tr("Forget the objects drawn by SAM"))
         self._segment_clear_button.clicked.connect(self.clear_segments)
         segment_row.addWidget(self._segment_clear_button)
         segment_row.addStretch(1)
@@ -1939,6 +1953,7 @@ class RasterExploringPanel(QWidget):
             "pipette_kind": self._pick_kind,
             "pipette_seeds": [[x, y, list(pick) if isinstance(pick, tuple) else pick] for x, y, pick in self._seeds],
             "pipette_target": self._pick_target,
+            "pipette_engine": self._engine,
             "pipette_segments": list(self._segments),
             "pipette_similar": list(self.similar_ratio()),
             "pipette_shape": self.similar_shape(),
@@ -1985,6 +2000,10 @@ class RasterExploringPanel(QWidget):
             self._tolerance_spin.setValue(parsed["pipette_tolerance"])
             self._opening_combo.setCurrentIndex(self._opening_combo.findData(parsed["pipette_opening"]))
             self._fill_holes_check.setChecked(parsed["pipette_fill_holes"])
+        self._engine = parsed["pipette_engine"]
+        saved = parsed["pipette_selection"] or {}
+        if saved.get("seeds") and not saved.get("segments") and parsed["pipette_target"] in OBJECT_TARGETS:
+            self._engine = ENGINE_COLOR  # its objects were found by colour: their engine, whatever SAM can do now
         self._set_pick_target(parsed["pipette_target"])
         try:
             data = parsed["pipette_selection"]
@@ -1995,7 +2014,7 @@ class RasterExploringPanel(QWidget):
         if not self._pipette_bands and not (selection is not None and selection.segments):
             self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
             selection = None
-        # Kept while another target is active: they come back with the Segment target.
+        # Kept while the colour engine is in use: they come back with SAM.
         self._segments = [wkt for wkt in (state.get("pipette_segments") or (selection.segments if selection is not None else ()))]
         self._refresh_segment_buttons()
         if selection is not None:
@@ -2176,7 +2195,7 @@ class RasterExploringPanel(QWidget):
 
     def _forget_picks(self, kinds: Sequence[str] = ("color", "value", "classes", "preset")) -> None:
         """Picks of ``kinds`` were read on another band, bands or quantity: they and their selection no longer apply."""
-        if self._pick_target == PICK_SEGMENT and self._segments:
+        if self._sam_active() and self._segments:
             return  # polygons do not depend on the band read
         if self._pick_kind and self._pick_kind not in kinds:
             return
@@ -2410,10 +2429,27 @@ class RasterExploringPanel(QWidget):
             terrain: Slope, aspect... of the pixel, read when the pipette picks one.
             point: The clicked point (layer CRS): in object detection, the object grows from it.
         """
+        kind, pick, problem = self._read_pick(values, terrain)
+        if problem:
+            self._sample_label.setText(problem)
+            return
+        if not extend or kind != self._pick_kind:
+            self._picks, self._seeds = [], []
+        self._pick_kind = kind
+        if pick not in self._picks:
+            self._picks.append(pick)
+        if point is not None:
+            x, y = float(point[0]), float(point[1])
+            if math.isfinite(x) and math.isfinite(y) and all(seed[:2] != (x, y) for seed in self._seeds):
+                self._seeds.append((x, y, pick))  # another pool of the very same colour is another object
+        self._apply_picks()
+
+    def _read_pick(self, values: Dict[int, Optional[float]],
+                   terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> Tuple[str, Any, str]:
+        """``(kind, pick, problem)`` of a clicked pixel: a colour, a class or a value; ``problem`` says why there is none."""
         bands = list(self._pipette_bands)
         if not bands:
-            self._sample_label.setText(self.tr("Choose at least one band in BANDS before using the pipette."))
-            return
+            return "", None, self.tr("Choose at least one band in BANDS before using the pipette.")
         band = bands[0] if len(bands) == 1 and not self._derivative.is_terrain and not self._custom_quantity else self.current_band()
         if self._custom_quantity:
             value = (terrain or {}).get("custom")
@@ -2431,18 +2467,14 @@ class RasterExploringPanel(QWidget):
         flat = pick if isinstance(pick, tuple) else (pick,)
         missing = missing or any(value is None or not math.isfinite(value) for value in flat)
         if missing:
-            self._sample_label.setText(self.tr("This pixel has no value (NoData): pick another one"))
-            return
-        if not extend or kind != self._pick_kind:
-            self._picks, self._seeds = [], []
-        self._pick_kind = kind
-        if pick not in self._picks:
-            self._picks.append(pick)
-        if point is not None:
-            x, y = float(point[0]), float(point[1])
-            if math.isfinite(x) and math.isfinite(y) and all(seed[:2] != (x, y) for seed in self._seeds):
-                self._seeds.append((x, y, pick))  # another pool of the very same colour is another object
-        self._apply_picks()
+            return "", None, self.tr("This pixel has no value (NoData): pick another one")
+        return kind, pick, ""
+
+    def criterion_at(self, values: Dict[int, Optional[float]],
+                     terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> Optional[RasterSelection]:
+        """The pixels that look like this one (colour, class or value, with the tolerance), the picks unchanged; None without a value."""
+        kind, pick, problem = self._read_pick(values, terrain)
+        return None if problem else self._picks_selection([pick], kind=kind)
 
     def _apply_picks(self, debounced: bool = False) -> None:
         """Selection of the picks: a colour expression, the classes, or a range around the values.
@@ -2453,7 +2485,7 @@ class RasterExploringPanel(QWidget):
         Args:
             debounced: Signal the change after the input settles (the tolerance spin box), not at once.
         """
-        if self._pick_target == PICK_SEGMENT:
+        if self._sam_active():
             self._apply_segments(debounced)
             return
         if self._pick_kind == "preset":  # a spectral index: no pick to read again
@@ -2469,23 +2501,25 @@ class RasterExploringPanel(QWidget):
 
     def _picks_selection(self, picks: Sequence[Any], seeds: Tuple[Tuple[float, float], ...] = (),
                          objects: Tuple[RasterSelection, ...] = (), similar: Tuple[float, float] = (),
-                         shape: bool = False) -> RasterSelection:
+                         shape: bool = False, kind: str = "") -> RasterSelection:
         """Selection keeping what looks like ``picks`` (of the current kind), around ``seeds`` when given.
 
         Args:
             similar: Area ratios of the similar objects mode (empty otherwise).
             shape: The similar objects must be shaped like the clicked ones too.
+            kind: The kind of ``picks``; the kind of the panel's picks when empty.
         """
+        kind = kind or self._pick_kind
         bands = list(self._pipette_bands)
         band = bands[0] if len(bands) == 1 and not self._derivative.is_terrain and not self._custom_quantity else self.current_band()
         settings = dict(object_opening=int(self._opening_combo.currentData()), fill_holes=self._fill_holes_check.isChecked())
-        if self._pick_kind == "color":
+        if kind == "color":
             bands = list(self._pipette_bands)
             tolerances = [tolerance_value(self._tolerance_spin.value(), self._value_span(number)) for number in bands]
             expression = color_similarity_expression(self._reference, bands, picks, tolerances)
             return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
                                    seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
-        if self._pick_kind == "classes":
+        if kind == "classes":
             return RasterSelection(band=band, mode=RasterSelectionMode.CLASSES, classes=frozenset(picks),
                                    seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
         low_bound, high_bound = self._data_bounds()
@@ -2533,13 +2567,13 @@ class RasterExploringPanel(QWidget):
             self._apply_picks(debounced=True)
 
     def _set_pipette_selection(self, selection: Optional[RasterSelection], debounced: bool = False) -> None:
-        if selection is None and self._pick_target == PICK_SEGMENT and self._segments:
+        if selection is None and self._sam_active() and self._segments:
             selection = RasterSelection(band=self.current_band(), segments=tuple(self._segments))  # a chip was removed
         self._pipette_selection = None if selection is None or selection.is_empty else selection
         self._detected = None
         self._rebuild_chips()
         self._show_pipette_result()
-        if self._pipette_selection is None and self._picks and self._pick_target != PICK_SEGMENT:
+        if self._pipette_selection is None and self._picks and not self._sam_active():
             # A range over every value is no constraint (A7): say why nothing is selected.
             self._sample_label.setText(self.tr("The tolerance covers every value: lower it"))
         self._activate_mode(PIPETTE, emit=False)
@@ -2596,73 +2630,139 @@ class RasterExploringPanel(QWidget):
 
     def set_pick_target(self, target: str) -> None:
         """Adopt the target of the rail tool that went on the map (the detector or the pipette). Does not emit ``targetChanged``."""
-        left_segments = self._pick_target == PICK_SEGMENT
+        was_sam = self._sam_active()
         changed = self._set_pick_target(target)
-        if changed and left_segments:
-            self._leave_segments()
-        elif changed and self._picks and self._pick_kind in ("color", "value", "classes"):
-            self._apply_picks()  # the same picks, on the whole raster or as objects
+        if changed:
+            self._follow_engine(was_sam)
 
     def _set_pick_target(self, target: str) -> bool:
-        target = target if target in PICK_TARGETS else PICK_SIMILAR
+        target = PICK_OBJECT if target == PICK_SEGMENT else target if target in PICK_TARGETS else PICK_SIMILAR
         changed = target != self._pick_target
         self._pick_target = target
         button = self._target_buttons.get(target)
         if button is not None:
             with _signals_blocked(*self._target_buttons.values()):
                 button.setChecked(True)
-        if hasattr(self, "_similar_widget"):
-            self._similar_widget.setVisible(target == PICK_SIMILAR_OBJECTS)
-        if hasattr(self, "_object_settings"):
-            self._object_settings.setVisible(target in (PICK_OBJECT, PICK_SIMILAR_OBJECTS))
-            self._fill_holes_check.setVisible(target == PICK_OBJECT)
-        if hasattr(self, "_segment_widget"):
-            self._segment_widget.setVisible(target == PICK_SEGMENT)
+        self._refresh_object_widgets()
         return changed
+
+    def _refresh_object_widgets(self) -> None:
+        """The settings of the target and engine in use: colour settings for the colour engine, SAM's block for SAM."""
+        if not hasattr(self, "_object_settings"):
+            return  # still being built
+        target = self._pick_target
+        objects = target in OBJECT_TARGETS
+        sam = self._sam_active()
+        self._similar_widget.setVisible(target == PICK_SIMILAR_OBJECTS)
+        self._object_settings.setVisible(objects and not sam)
+        self._fill_holes_check.setVisible(target == PICK_OBJECT)
+        self._segment_widget.setVisible(objects)
+        self._segment_clear_button.setVisible(sam)
+        with _signals_blocked(self._engine_combo):
+            self._engine_combo.setCurrentIndex(self._engine_combo.findData(self.object_engine()))
 
     def _on_target_button(self, target: str, checked: bool) -> None:
         if not checked or target == self._pick_target:
             return
-        left_segments = self._pick_target == PICK_SEGMENT
-        if target == PICK_SEGMENT and self._pick_kind == "preset":
-            self._stashed_preset = self._pipette_selection
+        was_sam = self._sam_active()
         self._set_pick_target(target)
         self.targetChanged.emit(self._pick_target)
-        if target == PICK_SEGMENT:
+        self._follow_engine(was_sam)
+        if target in OBJECT_TARGETS:
+            self._offer_sam()
+
+    def _follow_engine(self, was_sam: bool) -> None:
+        """The selection of the engine now in use: SAM's polygons, or the picks read again (on the whole raster or as objects)."""
+        now_sam = self._sam_active()
+        if now_sam and not was_sam:
+            if self._pick_kind == "preset":
+                self._stashed_preset = self._pipette_selection
             self._apply_segments()
-            if not self._model_runtime and not self._runtime_installing and not self._runtime_asked:
-                self._ask_runtime_install()
-        elif left_segments:
+        elif was_sam and not now_sam:
             self._leave_segments()
-        elif self._picks and self._pick_kind in ("color", "value", "classes"):
+        elif not now_sam and self._picks and self._pick_kind in ("color", "value", "classes"):
             self._apply_picks()
+
+    # === Engine of the object targets ===
+
+    def segmentation_ready(self) -> bool:
+        """SAM can run: onnxruntime and the model files are there."""
+        return self._model_runtime and self._model_installed
+
+    def object_engine(self) -> str:
+        """The engine the object targets use now: SAM when chosen and installed, the colour otherwise."""
+        return ENGINE_SAM if self._engine == ENGINE_SAM and self.segmentation_ready() else ENGINE_COLOR
+
+    def uses_segmentation(self) -> bool:
+        """A click goes to SAM (an object target with the SAM engine), not to the pixel picker."""
+        return self._sam_active()
+
+    def _sam_active(self) -> bool:
+        return self._pick_target in OBJECT_TARGETS and self.object_engine() == ENGINE_SAM
+
+    def _on_engine_changed(self, _index: int) -> None:
+        engine = self._engine_combo.currentData()
+        if engine not in ENGINES or engine == self._engine:
+            return
+        was_sam = self._sam_active()
+        self._engine = engine
+        if engine == ENGINE_SAM and not self.segmentation_ready():
+            self._refresh_object_widgets()
+            self._offer_sam(force=True)
+            return
+        self._refresh_object_widgets()
+        self._follow_engine(was_sam)
+        self.engineChanged.emit(self.object_engine())
+
+    def _offer_sam(self, force: bool = False) -> None:
+        """Ask once a session, at the first object target, whether to install SAM; the button stays for later."""
+        if self.segmentation_ready() or self._engine != ENGINE_SAM or self._runtime_installing:
+            return
+        if self._runtime_asked and not force:
+            return
+        self._ask_sam_install()
 
     # === Segmentation (the model is FilterMate's own, downloaded on request; see adapters sam_model) ===
 
     def set_segmentation_readiness(self, runtime_available: bool, model_installed: bool, downloading: bool = False,
                                    installing_runtime: bool = False, runtime_failed: bool = False) -> None:
-        """Say what the Segment target still lacks; the target itself stays, validated objects filter without a model."""
-        from ....adapters.qgis.coverage_layers.sam_model import RUNTIME_MEGABYTES, install_command, total_megabytes
+        """Say what SAM still lacks; without it the object targets use the colour engine, objects drawn before keep filtering."""
+        from ....adapters.qgis.coverage_layers.sam_model import install_command
+        was_sam = self._sam_active()
+        was_ready = self.segmentation_ready()
         self._model_runtime, self._model_installed = bool(runtime_available), bool(model_installed)
         self._runtime_installing = bool(installing_runtime)
+        ready = self.segmentation_ready()
+        if ready and not was_ready and not was_sam and self._pick_target in OBJECT_TARGETS and self._seeds:
+            self._engine = ENGINE_COLOR  # objects picked by colour meanwhile stay: SAM is one choice of Engine away
         if installing_runtime:
             self._segment_install_label.setText(self.tr("Installing onnxruntime in the background…"))
+        elif downloading:
+            self._segment_install_label.setText(self.tr("Downloading the SAM model in the background…"))
         elif runtime_failed:
             self._segment_install_label.setText(self.tr(
                 "onnxruntime could not be installed automatically (see the FilterMate log). In a terminal "
                 "(the OSGeo4W Shell on Windows), run {0} then restart QGIS.").format(install_command()))
-        elif not self._model_runtime:
+        elif not ready:
             self._segment_install_label.setText(self.tr(
-                "The segmentation needs onnxruntime (about {0} MB), which is not installed yet.").format(RUNTIME_MEGABYTES))
-        self._segment_install_label.setVisible(not self._model_runtime)
-        if not self._model_runtime:  # first the runtime, then the model
-            self._segment_install_button.setText(self.tr("Install onnxruntime…"))
-            self._segment_install_button.setEnabled(not installing_runtime)
-            self._segment_install_button.setVisible(True)
-            return
-        self._segment_install_button.setText(self.tr("Install the model ({0} MB)…").format(total_megabytes()))
-        self._segment_install_button.setEnabled(not downloading)
-        self._segment_install_button.setVisible(not self._model_installed)
+                "Objects are found by their colour. SAM draws them from the image, far better on buildings "
+                "(about {0} MB to install).").format(self._sam_megabytes()))
+        self._segment_install_label.setVisible(not ready)
+        self._segment_install_button.setText(self.tr("Install SAM ({0} MB)…").format(self._sam_megabytes()))
+        self._segment_install_button.setEnabled(not installing_runtime and not downloading)
+        self._segment_install_button.setVisible(not ready)
+        model = self._engine_combo.model()
+        if hasattr(model, "item") and model.item(0) is not None:
+            model.item(0).setEnabled(ready)  # SAM is offered once installed
+        self._refresh_object_widgets()
+        if self._sam_active() != was_sam:
+            self._follow_engine(was_sam)
+            self.engineChanged.emit(self.object_engine())
+
+    def _sam_megabytes(self) -> int:
+        """Megabytes left to install for SAM: the runtime and the model, or what is missing of them."""
+        from ....adapters.qgis.coverage_layers.sam_model import RUNTIME_MEGABYTES, total_megabytes
+        return (0 if self._model_runtime else RUNTIME_MEGABYTES) + (0 if self._model_installed else total_megabytes())
 
     def offer_model_repair(self) -> None:
         """The files have the right size but the runtime refused them: the download replaces the damaged ones."""
@@ -2670,38 +2770,36 @@ class RasterExploringPanel(QWidget):
         self._segment_install_button.setEnabled(True)
         self._segment_install_button.setVisible(True)
 
-    def _ask_runtime_install(self) -> None:
+    def _ask_sam_install(self) -> None:
         """Nothing is installed without this answer; a refusal is not asked again this session, the button stays."""
         from qgis.PyQt.QtWidgets import QMessageBox
-        from ....adapters.qgis.coverage_layers.sam_model import RUNTIME_MEGABYTES
+        from ....adapters.qgis.coverage_layers.sam_model import REPOSITORY, total_megabytes
         self._runtime_asked = True
+        megabytes = self._sam_megabytes() or total_megabytes()  # a repair downloads the model again
         answer = QMessageBox.question(self, self.tr("Segmentation"), self.tr(
-            "The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.\n\n"
-            "Install it now from PyPI with pip, into your QGIS profile? "
-            "The Python of QGIS is not modified.").format(RUNTIME_MEGABYTES))
+            "Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. "
+            "Install it now (about {0} MB)?\n\n"
+            "onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against "
+            "its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves "
+            "your computer. Without SAM, objects are found by their colour.").format(megabytes, REPOSITORY))
         if answer != QMessageBox.StandardButton.Yes:
             return
         self._segment_install_button.setEnabled(False)
-        self.segmentRuntimeInstallRequested.emit()
+        if self._model_runtime:
+            self.segmentModelInstallRequested.emit()
+        else:
+            self.segmentRuntimeInstallRequested.emit()  # the controller downloads the model once pip is done
+
+    def _ask_runtime_install(self) -> None:
+        """Former name, kept for the callers of the Segment target."""
+        self._ask_sam_install()
 
     def _on_install_model_clicked(self) -> None:
-        """Ask before the download, then let the controller fetch the files; the button waits for the answer."""
-        if not self._model_runtime:
-            self._ask_runtime_install()
-            return
-        from qgis.PyQt.QtWidgets import QMessageBox
-        from ....adapters.qgis.coverage_layers.sam_model import REPOSITORY, total_megabytes
-        answer = QMessageBox.question(self, self.tr("Segmentation model"), self.tr(
-            "Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?\n\n"
-            "Every file is checked against its SHA-256. The model then runs locally, on the CPU; "
-            "nothing leaves your computer.").format(total_megabytes(), REPOSITORY))
-        if answer != QMessageBox.StandardButton.Yes:
-            return
-        self._segment_install_button.setEnabled(False)
-        self.segmentModelInstallRequested.emit()
+        """Ask before installing, then let the controller run pip and the download; the button waits for the answer."""
+        self._ask_sam_install()
 
     def _leave_segments(self) -> None:
-        """Another target was chosen: its picks select again; the validated objects wait for the Segment target."""
+        """The colour engine took over: its picks select again; SAM's objects wait for SAM to come back."""
         self._segment_status.setText("")
         if self._pick_kind == "preset":
             preset, self._stashed_preset = self._stashed_preset, None
@@ -2722,10 +2820,61 @@ class RasterExploringPanel(QWidget):
         self._segment_status.setText(text)
 
     def add_segment(self, wkt: str) -> None:
-        """Add a validated object (WKT, layer CRS) to the selection and signal it."""
+        """Add an object (WKT, layer CRS) to the selection and signal it."""
         if wkt and wkt not in self._segments:
             self._segments.append(wkt)
         self._apply_segments()
+
+    def add_segments(self, wkts: Sequence[str]) -> int:
+        """Add several objects at once, one signal; the number really added (a duplicate is not)."""
+        added = 0
+        for wkt in wkts:
+            if wkt and wkt not in self._segments:
+                self._segments.append(wkt)
+                added += 1
+        if added:
+            self._apply_segments()
+        return added
+
+    def segment_count(self) -> int:
+        return len(self._segments)
+
+    def index_of_segment(self, wkt: str) -> int:
+        """Index of an object; -1 when it is not there (cleared, reset, another layer)."""
+        try:
+            return self._segments.index(wkt)
+        except ValueError:
+            return -1
+
+    def replace_segment(self, index: int, wkt: str) -> bool:
+        """The object at ``index`` was redrawn (Shift+click, right click); False when it is no longer there."""
+        if not wkt or not 0 <= index < len(self._segments):
+            return False
+        if wkt in self._segments and self._segments.index(wkt) != index:
+            del self._segments[index]  # redrawn as another object already there: one is enough
+        else:
+            self._segments[index] = wkt
+        self._apply_segments()
+        return True
+
+    def remove_segment_wkts(self, wkts: Sequence[str]) -> int:
+        """Remove these objects (Escape: the last object or search); the number removed, one signal."""
+        wanted = set(wkts)
+        kept = [wkt for wkt in self._segments if wkt not in wanted]
+        removed = len(self._segments) - len(kept)
+        if removed:
+            self._segments = kept
+            self._apply_segments()
+        return removed
+
+    def remove_segments(self, start: int, count: int = 1) -> int:
+        """Remove ``count`` objects from ``start`` (Escape: the last object, or the last search); the number removed."""
+        if count <= 0 or not 0 <= start < len(self._segments):
+            return 0
+        removed = len(self._segments[start:start + count])
+        del self._segments[start:start + count]
+        self._apply_segments()
+        return removed
 
     def clear_segments(self) -> None:
         """Forget the validated objects and signal it."""
