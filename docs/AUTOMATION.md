@@ -347,6 +347,8 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `field_values` | `GET /layers/field-values` | distinct values of a vector field, minimum and maximum; refused on web services |
 | `layer_statistics` | `POST /layers/statistics` | count, sum, mean, extremes of a field, or lengths and areas of the geometries, in all or by the values of a field; refused on web services and above 500 000 features |
 | `sample_features` | `POST /layers/sample` | up to 20 features with their attributes, optionally matching a QGIS expression (plain conditions only) |
+| `set_layer_style` | `POST /layers/style` | one symbol, categories, graduated classes, a raster pseudocolor ramp or gray stretch, opacity |
+| `set_labels` | `POST /layers/labels` | labels a vector layer with a field, or turns its labels off |
 | `find_algorithms` | `GET /processing/algorithms` | Processing algorithms the agent may run, by words (algorithms of QGIS that make layers or answer statistics) |
 | `describe_algorithm` | `GET /processing/algorithm` | parameters and outputs of one, and how to give each |
 | `run_algorithm` | `POST /processing/run` | runs it on layers of the project; each layer it makes is a temporary file added to the project |

@@ -612,6 +612,8 @@ class AgentChatController(QObject):
             "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
             "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
+            "set_layer_style": lambda: _tr("Style of {}").format(layer),
+            "set_labels": lambda: _tr("Labels of {}").format(layer),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
             "map_context": lambda: _tr("Reading the map"),
             "filter_state": lambda: _tr("Reading the active filters"),
@@ -705,6 +707,9 @@ class AgentChatController(QObject):
     @staticmethod
     def _run_detail(call: ToolCallPart) -> str:
         """The parameters of an algorithm, on one line, for its card."""
+        if call.name in ("set_layer_style", "set_labels") and isinstance(call.arguments, dict):
+            keys = ("mode", "field", "ramp", "classes", "color") if call.name == "set_layer_style" else ("field",)
+            return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))
         if call.name != "run_algorithm":
             return ""
         values = call.arguments.get("parameters") if isinstance(call.arguments, dict) else None

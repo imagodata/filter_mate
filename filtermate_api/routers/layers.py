@@ -11,7 +11,10 @@ from typing import List, Literal, Optional
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
-from ..accessor import FeatureSample, FieldValues, FilterMateAccessor, LayerDetails, LayerStatistics, LayerSummary
+from ..accessor import (
+    FeatureSample, FieldValues, FilterMateAccessor, LabelsResult, LayerDetails, LayerStatistics, LayerSummary,
+    StyleResult,
+)
 
 router = APIRouter(prefix="/layers", tags=["layers"])
 
@@ -101,3 +104,45 @@ def sample_features(payload: SampleRequest, request: Request) -> FeatureSample:
     if sample is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer not found")
     return sample
+
+
+class StyleRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    mode: Literal["single", "categorized", "graduated", "pseudocolor", "gray"]
+    field: str = Field("", max_length=_MAX_NAME)
+    color: str = Field("", max_length=50)
+    ramp: str = Field("", max_length=100)
+    classes: int = Field(5, ge=2, le=12)
+    method: Literal["quantile", "equal_interval", "jenks", "pretty", "stddev"] = "quantile"
+    invert: bool = False
+    opacity: Optional[float] = Field(None, ge=0, le=1)
+    band: int = Field(1, ge=1, le=1000)
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+
+
+@router.post("/style", response_model=StyleResult)
+def set_layer_style(payload: StyleRequest, request: Request) -> StyleResult:
+    """Draw a layer anew: one symbol, categories, classes, a raster ramp or gray stretch, its opacity."""
+    options = payload.model_dump(exclude={"layer", "mode"})
+    return _accessor(request).set_layer_style(payload.layer, payload.mode, **options)
+
+
+class LabelsRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    field: str = Field("", max_length=_MAX_NAME)
+    enabled: bool = True
+    size: Optional[float] = Field(None, ge=4, le=72)
+    color: str = Field("", max_length=50)
+    buffer: bool = True
+
+
+@router.post("/labels", response_model=LabelsResult)
+def set_labels(payload: LabelsRequest, request: Request) -> LabelsResult:
+    """Label a vector layer with a field, or turn its labels off."""
+    return _accessor(request).set_labels(payload.layer, field=payload.field, enabled=payload.enabled,
+                                         size=payload.size, color=payload.color, buffer=payload.buffer)

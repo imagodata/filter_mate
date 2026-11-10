@@ -19,6 +19,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 5. Map context | The map, the layer tree and what changed, sent with each request; style, joins, relations on demand | done |
 | 6. Reading the data | Statistics by group, lengths and areas, a sample of features, what lies at a point | done |
 | 7. Processing | Find, describe and run the algorithms of QGIS that make layers, undone with the turn | done |
+| 8. Style | One symbol, categories, graduated classes, raster ramps, labels, opacity, undone with the turn | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -243,6 +244,14 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
 - it runs in a `QgsProcessingAlgRunnerTask` while the event loop turns, busy for the other operations, and Stop
   cancels it. An algorithm flagged `NoThreading` (geometry checks) holds QGIS while it runs;
 - without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.
+
+Style (`adapters/public_api/layer_style.py`): `set_layer_style` (vector: single, categorized on a field of 100 values
+at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation;
+raster: pseudocolor or gray stretch of a band, its range read from the statistics of the band or given, never read
+from a web service) and `set_labels` (a field, size, color, halo; or off), with a ramp of the style of QGIS and an
+opacity. The answer says how many classes were made, never their values. Before the first call of a turn on a layer,
+the turn checkpoint keeps its symbology, labels and rendering as XML (`exportNamedStyle`), and undoing the turn puts
+them back (`importNamedStyle`); redoing it applies the new style again.
 
 `apply_filter` and `preview_filter` take the same plain clauses through REST and both MCP servers: a subquery or a function
 outside the list answers 400. A filter still reaches the database with the rights of the user, so an external agent exposed to

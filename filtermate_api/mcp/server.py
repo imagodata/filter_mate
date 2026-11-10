@@ -578,6 +578,53 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layers/select", _body(layer=layer, expression=expression, clear=clear, add=add))
 
+    @mcp.tool(annotations=_write("Style a layer", idempotent=True))
+    async def set_layer_style(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
+        mode: Annotated[Literal["single", "categorized", "graduated", "pseudocolor", "gray"], Field(description=(
+            "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of "
+            "a numeric field). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch)"))],
+        field: Annotated[str, Field(max_length=1000, description="Field for categorized and graduated")] = "",
+        color: Annotated[str, Field(max_length=50, description="single: #rrggbb or a color name")] = "",
+        ramp: Annotated[str, Field(max_length=100, description=(
+            "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo..."))] = "",
+        classes: Annotated[int, Field(ge=2, le=12, description="graduated: number of classes")] = 5,
+        method: Annotated[Literal["quantile", "equal_interval", "jenks", "pretty", "stddev"], Field(
+            description="graduated: how the class breaks are found")] = "quantile",
+        invert: Annotated[bool, Field(description="Reverse the color ramp")] = False,
+        opacity: Annotated[Optional[float], Field(ge=0, le=1, description="Opacity of the layer, 0 to 1")] = None,
+        band: Annotated[int, Field(ge=1, le=1000, description="Raster: the band drawn")] = 1,
+        minimum: Annotated[Optional[float], Field(description="Raster: lowest value of the ramp (statistics by default)")] = None,
+        maximum: Annotated[Optional[float], Field(description="Raster: highest value of the ramp")] = None,
+    ) -> Dict[str, Any]:
+        """Change how a layer is drawn on the map: one symbol, categories, graduated classes, a raster ramp.
+
+        Returns mode, field, classes (how many were made), ramp, method, and for a raster band, minimum and
+        maximum. The values of the classes are not returned: describe_layer and layer_statistics read the data. A
+        field with more than 100 values cannot be categorized. In the chat of FilterMate, undoing the turn brings
+        the previous style back.
+        """
+        return await call("POST", "/layers/style", _body(
+            layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
+            invert=invert, opacity=opacity, band=band, minimum=minimum, maximum=maximum))
+
+    @mcp.tool(annotations=_write("Label a layer", idempotent=True))
+    async def set_labels(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(max_length=1000, description="Field whose values are written on the map")] = "",
+        enabled: Annotated[bool, Field(description="false turns the labels off")] = True,
+        size: Annotated[Optional[float], Field(ge=4, le=72, description="Text size in points")] = None,
+        color: Annotated[str, Field(max_length=50, description="Text color, #rrggbb or a name")] = "",
+        buffer: Annotated[bool, Field(description="A light halo around the text, to read it on any background")] = True,
+    ) -> Dict[str, Any]:
+        """Write the values of a field next to the features of a vector layer on the map, or turn the labels off.
+
+        Returns labels (on or off) and field. In the chat of FilterMate, undoing the turn brings the previous labels
+        back.
+        """
+        return await call("POST", "/layers/labels", _body(layer=layer, field=field, enabled=enabled, size=size,
+                                                          color=color, buffer=buffer))
+
     @mcp.tool(annotations=_write("Show or hide layers", idempotent=True))
     async def set_layers_visibility(
         layers: Annotated[LayerList, Field(description="Layer ids or names")],

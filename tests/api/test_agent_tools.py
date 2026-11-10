@@ -103,6 +103,25 @@ class TestHandlers:
         error, answer = run(accessor, root, "identify_at", x=570000.5, y=6270000)
         assert not error and (answer["x"], answer["layers"], answer["skipped"]) == (570000.5, [], [])
 
+    def test_style_tools(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="graduated", field="pop")
+        assert not error and (answer["mode"], answer["field"], answer["classes"]) == ("graduated", "pop", 5)
+        error, answer = run(accessor, root, "set_labels", layer="communes", field="nom")
+        assert not error and answer["labels"] is True and answer["field"] == "nom"
+        error, answer = run(accessor, root, "set_labels", layer="communes", enabled=False)
+        assert not error and answer["labels"] is False
+        assert run(accessor, root, "set_layer_style", layer="x", mode="single")[0] is True
+
+    @pytest.mark.parametrize("arguments", [
+        {"layer": "communes", "mode": "heatmap"}, {"layer": "communes", "mode": "graduated", "classes": 13},
+        {"layer": "communes", "mode": "single", "opacity": 2}, {"layer": "communes", "mode": "graduated",
+                                                                "method": "natural"},
+    ])
+    def test_style_refuses_bad_arguments(self, api, arguments):
+        accessor, root = api
+        assert run(accessor, root, "set_layer_style", **arguments)[0] is True
+
     def test_processing_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "find_algorithms", query="buffer")
@@ -360,6 +379,15 @@ class TestRoutes:
         response = client.get("/layers/field-values", params={"layer": "communes", "field": "nom"})
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.get("/layers/field-values", params={"layer": "x", "field": "y"}).status_code == 404
+
+    def test_style_routes(self, client):
+        response = client.post("/layers/style", json={"layer": "communes", "mode": "categorized", "field": "nom"})
+        assert response.status_code == 200 and response.json()["field"] == "nom"
+        assert client.post("/layers/style", json={"layer": "communes", "mode": "x"}).status_code == 422
+        assert client.post("/layers/style", json={"layer": "nope", "mode": "single"}).status_code == 400
+        response = client.post("/layers/labels", json={"layer": "communes", "field": "nom", "size": 9})
+        assert response.status_code == 200 and response.json()["labels"] is True
+        assert client.post("/layers/labels", json={"layer": "communes", "size": 100}).status_code == 422
 
     def test_processing_routes(self, client):
         response = client.get("/processing/algorithms", params={"query": "buffer"})

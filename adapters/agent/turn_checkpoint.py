@@ -116,7 +116,7 @@ class TurnCheckpoint:
         _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
                                                    steps=steps if len(steps) > 1 else (), effects=effects))
         for effect in effects:
-            if effect[0] in ("added", "removed") and len(effect) > 4 and effect[4] not in names:
+            if effect[0] in ("added", "removed", "style") and len(effect) > 4 and effect[4] not in names:
                 names.append(effect[4])
         return names
 
@@ -132,7 +132,7 @@ class TurnCheckpoint:
                 layer = project.mapLayer(before.layer_id)
                 layers.append(layer.name() if layer is not None else before.layer_id)
             for effect in getattr(operation, "effects", ()):
-                if effect[0] in ("added", "removed") and len(effect) > 4 and effect[4] not in layers:
+                if effect[0] in ("added", "removed", "style") and len(effect) > 4 and effect[4] not in layers:
                     layers.append(effect[4])
             return {"time": operation.timestamp, "request": operation.description, "layers": layers,
                     "applied": applied, "steps": [label for label, _states in getattr(operation, "steps", ())]}

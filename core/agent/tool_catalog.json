@@ -1222,6 +1222,187 @@
    }
   },
   {
+   "name": "set_layer_style",
+   "title": "Style a layer",
+   "description": "Change how a layer is drawn on the map: one symbol, categories, graduated classes, a raster ramp. Returns mode, field, classes (how many were made), ramp, method, and for a raster band, minimum and maximum. The values of the classes are not returned: describe_layer and layer_statistics read the data. A field with more than 100 values cannot be categorized. In the chat of FilterMate, undoing the turn brings the previous style back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "mode": {
+      "description": "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of a numeric field). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch)",
+      "enum": [
+       "single",
+       "categorized",
+       "graduated",
+       "pseudocolor",
+       "gray"
+      ],
+      "type": "string"
+     },
+     "field": {
+      "default": "",
+      "description": "Field for categorized and graduated",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "color": {
+      "default": "",
+      "description": "single: #rrggbb or a color name",
+      "maxLength": 50,
+      "type": "string"
+     },
+     "ramp": {
+      "default": "",
+      "description": "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo...",
+      "maxLength": 100,
+      "type": "string"
+     },
+     "classes": {
+      "default": 5,
+      "description": "graduated: number of classes",
+      "maximum": 12,
+      "minimum": 2,
+      "type": "integer"
+     },
+     "method": {
+      "default": "quantile",
+      "description": "graduated: how the class breaks are found",
+      "enum": [
+       "quantile",
+       "equal_interval",
+       "jenks",
+       "pretty",
+       "stddev"
+      ],
+      "type": "string"
+     },
+     "invert": {
+      "default": false,
+      "description": "Reverse the color ramp",
+      "type": "boolean"
+     },
+     "opacity": {
+      "anyOf": [
+       {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Opacity of the layer, 0 to 1"
+     },
+     "band": {
+      "default": 1,
+      "description": "Raster: the band drawn",
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "minimum": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Raster: lowest value of the ramp (statistics by default)"
+     },
+     "maximum": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Raster: highest value of the ramp"
+     }
+    },
+    "required": [
+     "layer",
+     "mode"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_labels",
+   "title": "Label a layer",
+   "description": "Write the values of a field next to the features of a vector layer on the map, or turn the labels off. Returns labels (on or off) and field. In the chat of FilterMate, undoing the turn brings the previous labels back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "field": {
+      "default": "",
+      "description": "Field whose values are written on the map",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "enabled": {
+      "default": true,
+      "description": "false turns the labels off",
+      "type": "boolean"
+     },
+     "size": {
+      "anyOf": [
+       {
+        "maximum": 72,
+        "minimum": 4,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Text size in points"
+     },
+     "color": {
+      "default": "",
+      "description": "Text color, #rrggbb or a name",
+      "maxLength": 50,
+      "type": "string"
+     },
+     "buffer": {
+      "default": true,
+      "description": "A light halo around the text, to read it on any background",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "set_layers_visibility",
    "title": "Show or hide layers",
    "description": "Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed.",

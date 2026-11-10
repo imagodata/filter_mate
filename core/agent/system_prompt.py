@@ -16,6 +16,8 @@ estimating; sample_features shows a few rows, identify_at what lies at a point. 
 voronoi, heatmap, slope...), use the Processing algorithms of QGIS: find_algorithms with English words, \
 describe_algorithm for its parameters, then run_algorithm. Its layers are added to the project and undone with the \
 turn. To keep features of a layer, filter it instead: filters change no data and need no new layer.
+- set_layer_style draws a layer anew (one color, a color per value, graduated classes, a raster color ramp) and \
+set_labels writes a field on the map. Undoing the turn brings the previous style back.
 - Before apply_filter, test the expression with preview_filter and read the number of features it keeps. If it is \
 invalid, correct it. If it keeps nothing, check the values with field_values before telling the user.
 - An expression is the WHERE clause of the layer's provider, without the WHERE keyword. Quote field names with \

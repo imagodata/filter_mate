@@ -283,6 +283,67 @@ def check_reading(introspection, project, gpkg, work):
     project.removeMapLayer(zones.id())
 
 
+def check_style(project, gpkg, work):
+    """set_layer_style / set_labels on real layers, and the style an undo of the turn brings back."""
+    from filter_mate.adapters.public_api import layer_style as style
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("s1", "set_layer_style", {"layer": "communes"}))
+    recorder.before_call(ToolCallPart("s2", "set_labels", {"layer": gpkg.id()}))
+    first = gpkg.renderer().type()
+    made = style.set_layer_style("communes", "graduated", field="pop", classes=4, method="equal_interval",
+                                 ramp="reds", opacity=0.7)
+    check("style: graduated classes on a field", (made["classes"], made["field"], made["ramp"], made["method"]) ==
+          (4, "pop", "Reds", "equal_interval") and gpkg.renderer().type() == "graduatedSymbol"
+          and abs(gpkg.opacity() - 0.7) < 1e-6, made)
+    check("style: no class value in the answer", "100" not in json.dumps(made) and "6000" not in json.dumps(made), made)
+    categories = style.set_layer_style("communes", "categorized", field="nom")
+    limit = style.MAX_CATEGORIES
+    style.MAX_CATEGORIES = 50  # pop takes 60 values
+    too_many = refused(style.set_layer_style, "communes", "categorized", field="pop")
+    style.MAX_CATEGORIES = limit
+    check("style: categories of a text field, too many values refused, NULL left out",
+          "more than 50" in too_many and categories["classes"] == 59, (too_many, categories))
+    single = style.set_layer_style("communes", "single", color="#00ff00")
+    check("style: one symbol of a color", gpkg.renderer().type() == "singleSymbol" and
+          gpkg.renderer().symbol().color().name() == "#00ff00", single)
+    labels = style.set_labels("communes", "nom", size=9, color="navy")
+    check("style: labels on a field", labels == {"layer_name": "communes", "labels": True, "field": "nom"}
+          and gpkg.labelsEnabled() and gpkg.labeling().settings().fieldName == "nom", labels)
+    for call, label in ((lambda: style.set_layer_style("communes", "graduated", field="nom"), "graduated on text"),
+                        (lambda: style.set_layer_style("communes", "single", color="url(x)"), "a bad color"),
+                        (lambda: style.set_layer_style("communes", "categorized", field="nom", ramp="nope"), "a bad ramp"),
+                        (lambda: style.set_layer_style("communes", "pseudocolor"), "a raster mode"),
+                        (lambda: style.set_labels("communes", "nope"), "labels on no field")):
+        check(f"style: refuses {label}", refused(call))
+    effects = recorder.finish()
+    check("style: the turn keeps the style before it", [effect[0] for effect in effects] == ["style"], effects)
+    done, left = apply_effects(effects, undo=True)
+    check("style: undo brings the symbol, the labels and the opacity back", done == ["communes"] and not left and
+          gpkg.renderer().type() == first and not gpkg.labelsEnabled() and gpkg.opacity() == 1.0,
+          (gpkg.renderer().type(), gpkg.labelsEnabled(), gpkg.opacity()))
+    apply_effects(effects, undo=False)
+    check("style: redo applies it again", gpkg.renderer().type() == "singleSymbol" and gpkg.labelsEnabled())
+    apply_effects(effects, undo=True)
+    if gdal is not None:
+        path = os.path.join(work, "style.tif")
+        make_raster(path)
+        raster = QgsRasterLayer(path, "bandes_style")
+        project.addMapLayer(raster)
+        check("style: a band with one value has no range", "no range" in refused(
+            style.set_layer_style, "bandes_style", "pseudocolor"))
+        ramp = style.set_layer_style("bandes_style", "pseudocolor", band=2, minimum=0, maximum=10, ramp="Viridis")
+        check("style: a raster ramp over a given range", raster.renderer().type() == "singlebandpseudocolor" and
+              (ramp["band"], ramp["minimum"], ramp["maximum"]) == (2, 0.0, 10.0), ramp)
+        gray = style.set_layer_style("bandes_style", "gray", minimum=0, maximum=4)
+        check("style: a gray stretch", raster.renderer().type() == "singlebandgray", gray)
+        check("style: a raster has no labels nor categories", refused(style.set_labels, "bandes_style", "x")
+              and refused(style.set_layer_style, "bandes_style", "categorized", field="x"))
+        project.removeMapLayer(raster.id())
+
+
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
@@ -402,6 +463,7 @@ def main(introspection):
     check_map_details(introspection, project, gpkg, shp, details)
     check_reading(introspection, project, gpkg, work)
     check_processing(project, gpkg)
+    check_style(project, gpkg, work)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

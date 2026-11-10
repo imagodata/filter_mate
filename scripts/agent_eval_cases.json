@@ -145,5 +145,13 @@
  {"id": "processing_centroids", "prompt": "Make a layer of the centroids of the communes.",
   "expect": [[{"tool": "run_algorithm", "args": {"algorithm_id": "native:centroids", "parameters": {"INPUT": "communes"}},
     "call_args": {"algorithm_id": "native:centroids", "parameters": {"INPUT": "communes"}}}]],
-  "forbid": ["export_layers", "remove_layers"]}
+  "forbid": ["export_layers", "remove_layers"]},
+ {"id": "style_graduated", "prompt": "Colore les communes selon leur population, en 5 classes.",
+  "expect": [[{"tool": "set_layer_style", "args": {"layer": "communes", "mode": "graduated", "field": "population"},
+    "call_args": {"layer": "communes", "mode": "graduated", "field": "population", "classes": 5}}]],
+  "forbid": ["export_layers", "apply_filter", "run_algorithm"]},
+ {"id": "labels_names", "prompt": "Show the names of the communes on the map.",
+  "expect": [[{"tool": "set_labels", "args": {"layer": "communes", "field": "nom"},
+    "call_args": {"layer": "communes", "field": "nom"}}]],
+  "forbid": ["export_layers", "apply_filter"]}
 ]}

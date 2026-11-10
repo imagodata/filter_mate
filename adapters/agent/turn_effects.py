@@ -6,7 +6,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("added", layer_id, definition, place, name)`` and ``("removed", layer_id, definition, place, name)``:
   ``definition`` is the layer definition (QLR) text, ``place`` the names of its groups from the root and its index;
 * ``("selection", layer_id, before, after)``: selected feature ids;
-* ``("visibility", layer_id, before, after)``: checked in the layer tree or not.
+* ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
+* ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and says so.
 """
@@ -22,6 +23,8 @@ logger = logging.getLogger("FilterMate.agent")
 
 MAX_SELECTION = 100_000  # beyond, the selection is not kept: too much to hold for an undo
 Place = Tuple[Tuple[str, ...], int]
+# The tools that change how a layer is drawn: its style is kept before their first call in a turn.
+STYLE_TOOLS = ("set_layer_style", "set_labels")
 
 
 def _resolve(project: QgsProject, reference: Any) -> Any:
@@ -86,6 +89,36 @@ def _bring_back(project: QgsProject, layer_id: str, definition: str, place: Plac
     return True
 
 
+def _style_categories():
+    """Symbology, labels and rendering (opacity, scales): what the style tools change, nothing of the data."""
+    from qgis.core import QgsMapLayer
+    category = getattr(QgsMapLayer, "StyleCategory", QgsMapLayer)
+    return category.Symbology | category.Labeling | category.Rendering
+
+
+def _style(layer: Any) -> Optional[str]:
+    """The style of ``layer`` as XML; None when it cannot be read."""
+    document = QDomDocument("qgis")
+    try:
+        error = layer.exportNamedStyle(document, QgsReadWriteContext(), _style_categories())
+    except (RuntimeError, TypeError):
+        logger.debug("Agent undo: style not read", exc_info=True)
+        return None
+    return None if error else document.toString()
+
+
+def _set_style(layer: Any, xml: str) -> bool:
+    document = QDomDocument("qgis")
+    if not document.setContent(xml):
+        return False
+    result = layer.importNamedStyle(document, _style_categories())
+    loaded = result[0] if isinstance(result, tuple) else bool(result)
+    if loaded:
+        layer.triggerRepaint()
+        layer.emitStyleChanged()
+    return bool(loaded)
+
+
 def _visible(project: QgsProject, layer_id: str) -> Optional[bool]:
     node = project.layerTreeRoot().findLayer(layer_id)
     return None if node is None else bool(node.itemVisibilityChecked())
@@ -105,6 +138,7 @@ class EffectsRecorder:
         self._removed: Dict[str, Tuple[str, Place, str, str]] = {}
         self._selection: Dict[str, Tuple[int, ...]] = {}
         self._visibility: Dict[str, bool] = {}
+        self._styles: Dict[str, str] = {}
 
     def before_call(self, call: Any) -> None:
         project = QgsProject.instance()
@@ -124,6 +158,11 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
+            elif name in STYLE_TOOLS:
+                layer = _resolve(project, arguments.get("layer"))
+                style = _style(layer) if layer is not None and layer.id() not in self._styles else None
+                if style is not None:
+                    self._styles[layer.id()] = style
             elif name == "set_layers_visibility":
                 for reference in arguments.get("layers") or ():
                     layer = _resolve(project, reference)
@@ -156,6 +195,11 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
+        for layer_id, before in self._styles.items():
+            layer = project.mapLayer(layer_id)
+            after = _style(layer) if layer is not None else None
+            if after is not None and after != before:
+                effects.append(("style", layer_id, before, after, layer.name()))
         self.__init__()
         return tuple(effects)
 
@@ -191,6 +235,12 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 if node is not None:
                     node.setItemVisibilityChecked(bool(effect[2] if undo else effect[3]))
                     done.append(node.name())
+            elif kind == "style":
+                layer = project.mapLayer(layer_id)
+                if layer is not None and _set_style(layer, effect[2] if undo else effect[3]):
+                    done.append(layer.name())
+                elif layer is not None:
+                    left.append(layer.name())
         except RuntimeError:
             logger.debug("Agent undo: %s of %s not applied", kind, layer_id, exc_info=True)
             left.append(layer_id)
