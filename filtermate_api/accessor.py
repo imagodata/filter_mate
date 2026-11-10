@@ -175,6 +175,9 @@ class LayerDetails:
     joins: List[Dict[str, Any]] = field(default_factory=list)
     # Vector: {"name", "role" (parent or child), "layer", "fields": [{"field", "other_field"}]} of the project.
     relations: List[Dict[str, Any]] = field(default_factory=list)
+    # Vector: in editing mode, and holding changes not saved yet.
+    editing: bool = False
+    unsaved: bool = False
 
 
 @dataclass(frozen=True)
@@ -303,6 +306,18 @@ class LabelsResult:
     layer_name: str
     labels: bool = False
     field: str = ""
+
+
+@dataclass(frozen=True)
+class EditResult:
+    """An edit of features, in the edit buffer of the layer: nothing is saved until the user saves it."""
+    layer_name: str
+    changed: int = 0
+    deleted: int = 0
+    added: int = 0
+    editing: bool = True
+    unsaved: bool = True
+    note: str = ""
 
 
 @dataclass(frozen=True)
@@ -436,6 +451,20 @@ class FilterMateAccessor(Protocol):
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True) -> LabelsResult:
         """Label a vector layer with a field, or turn its labels off; raises FilterRejected when refused."""
+        ...
+
+    def update_features(self, layer: str, values: Optional[Dict[str, Any]] = None,
+                        formulas: Optional[Dict[str, str]] = None, expression: str = "",
+                        selected_only: bool = False) -> EditResult:
+        """Set fields of chosen features in the edit buffer; raises FilterRejected when refused."""
+        ...
+
+    def delete_features(self, layer: str, expression: str = "", selected_only: bool = False) -> EditResult:
+        """Delete chosen features in the edit buffer; raises FilterRejected when refused."""
+        ...
+
+    def add_features(self, layer: str, features: List[Dict[str, Any]], crs: str = "") -> EditResult:
+        """Add features from WKT in the edit buffer; raises FilterRejected when refused."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -661,6 +690,25 @@ class InMemoryAccessor:
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
         return LabelsResult(layer_name=found.name, labels=enabled, field=field if enabled else "")
+
+    def _edited(self, layer: str, **counts: int) -> EditResult:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return EditResult(layer_name=found.name, **counts)
+
+    def update_features(self, layer: str, values: Optional[Dict[str, Any]] = None,
+                        formulas: Optional[Dict[str, str]] = None, expression: str = "",
+                        selected_only: bool = False) -> EditResult:
+        if not values and not formulas:
+            raise FilterRejected("give values or formulas")
+        return self._edited(layer, changed=1)
+
+    def delete_features(self, layer: str, expression: str = "", selected_only: bool = False) -> EditResult:
+        return self._edited(layer, deleted=1)
+
+    def add_features(self, layer: str, features: List[Dict[str, Any]], crs: str = "") -> EditResult:
+        return self._edited(layer, added=len(features))
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
         found = self._find(layer_name)

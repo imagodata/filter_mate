@@ -299,6 +299,44 @@
         <translation>የፕሮጀክት ማስታወሻዎች</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>የ{} ማስተካከያ (አልተቀመጠም)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>ከ{} የተሰረዙ ባህሪያት (አልተቀመጠም)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>ወደ {} የታከሉ ባህሪያት (አልተቀመጠም)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>ምርጫ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(የተመረጡ ባህሪያት)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>ወኪሉ የዚህን ንብርብር ባህሪያት መሰረዝ ይፈልጋል፦
+{}
+{}
+
+የንብርብሩን ማስተካከያዎች እስኪያስቀምጡ ድረስ በማስተካከያ ቋት ውስጥ ይቆያሉ፣ ዙሩን መቀልበስም ይመልሳቸዋል። ይስማማሉ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>የ{} እሴቶችን በማንበብ ላይ</translation>

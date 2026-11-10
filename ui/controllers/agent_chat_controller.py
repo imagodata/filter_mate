@@ -648,6 +648,9 @@ class AgentChatController(QObject):
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
             "set_layer_style": lambda: _tr("Style of {}").format(layer),
             "set_labels": lambda: _tr("Labels of {}").format(layer),
+            "update_features": lambda: _tr("Edit of {} (not saved)").format(layer),
+            "delete_features": lambda: _tr("Features deleted from {} (not saved)").format(layer),
+            "add_features": lambda: _tr("Features added to {} (not saved)").format(layer),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
@@ -704,7 +707,7 @@ class AgentChatController(QObject):
             return
         if spec is not None and (not spec.read_only or spec.open_world):
             self._flush_answer()
-            detail = one_line(call.arguments.get("expression") or self._run_detail(call), MAX_DETAIL_CHARS)
+            detail = one_line(self._run_detail(call) or call.arguments.get("expression") or "", MAX_DETAIL_CHARS)
             if call.name in self._connector_labels:
                 detail = json.dumps(call.arguments, ensure_ascii=False, default=str)[:MAX_DETAIL_CHARS]
             count = self._kept_count(result)
@@ -746,6 +749,14 @@ class AgentChatController(QObject):
     @staticmethod
     def _run_detail(call: ToolCallPart) -> str:
         """The parameters of an algorithm, on one line, for its card."""
+        if call.name == "update_features" and isinstance(call.arguments, dict):
+            changes = dict(call.arguments.get("values") or {}, **(call.arguments.get("formulas") or {}))
+            where = str(call.arguments.get("expression") or "")
+            return " · ".join(part for part in (", ".join(f"{name} = {value}" for name, value in changes.items()),
+                                                where) if part)
+        if call.name in ("delete_features",) and isinstance(call.arguments, dict):
+            return _tr("selection") if call.arguments.get("selected_only") and not call.arguments.get("expression") \
+                else ""
         if call.name == ADD_NOTE and isinstance(call.arguments, dict):
             return str(call.arguments.get("text", ""))
         if call.name in ("set_layer_style", "set_labels") and isinstance(call.arguments, dict):
@@ -795,6 +806,13 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
                        "server by QGIS, and what the layer holds can be sent to the provider of the agent. "
                        "Do you agree?").format(display_source(str(call.arguments.get("source", ""))))
+        elif call.name == "delete_features":
+            chosen = str(call.arguments.get("expression") or "")
+            if call.arguments.get("selected_only"):
+                chosen = (chosen + " " if chosen else "") + _tr("(selected features)")
+            text = _tr("The agent wants to delete features of this layer:\n{}\n{}\n\nThey stay in the edit buffer "
+                       "until you save the layer edits, and undoing the turn brings them back. Do you agree?").format(
+                one_line(str(call.arguments.get("layer", "")), 100), one_line(chosen, 300))
         elif call.name == "remove_layers":
             text = _tr("The agent wants to remove these layers from the project (their files stay, their styles and "
                        "filters here are lost):\n{}\n\nDo you agree?").format(layers)

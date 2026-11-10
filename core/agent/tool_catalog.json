@@ -1408,6 +1408,143 @@
    }
   },
   {
+   "name": "update_features",
+   "title": "Edit attributes of features",
+   "description": "Change attribute values of features, in the edit buffer of the layer: nothing is saved. The layer goes into editing mode; the user reviews the changes and saves them (Save Layer Edits) or discards them. Choose the features with expression and/or selected_only. Keys, joined and virtual fields are not changed; a value that does not fit its field is refused. Returns changed (features), editing and unsaved. In the chat of FilterMate, undoing the turn takes the changes back while they are not saved.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "values": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Field: value, each converted to the type of its field (a number, a text, true or false, null)"
+     },
+     "formulas": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "maxLength": 10000,
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Field: QGIS expression computed on each feature, such as \"pop\" * 2 or round($area / 10000, 2)"
+     },
+     "expression": {
+      "default": "",
+      "description": "QGIS expression choosing the features (\"nom\" = 'Muret'); the expression true for every feature",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "selected_only": {
+      "default": false,
+      "description": "Only the selected features",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "delete_features",
+   "title": "Delete features",
+   "description": "Delete features of a vector layer, in its edit buffer: they are gone from the data once the user saves. Only when the user asks to delete features; to hide them, filter the layer instead. The chat of FilterMate asks the user first. Returns deleted, editing and unsaved.",
+   "read_only": false,
+   "destructive": true,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "expression": {
+      "default": "",
+      "description": "QGIS expression choosing the features",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "selected_only": {
+      "default": false,
+      "description": "Only the selected features",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "add_features",
+   "title": "Add features",
+   "description": "Add features to a vector layer from WKT geometries and attributes, in its edit buffer: nothing is saved. Returns added, editing and unsaved. In the chat of FilterMate, undoing the turn takes them back while they are not saved.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "features": {
+      "description": "[{\"wkt\": \"POINT(1.44 43.6)\", \"attributes\": {\"nom\": \"Puits\"}}]: geometries of the type of the layer",
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "crs": {
+      "default": "",
+      "description": "CRS of the WKT, such as EPSG:4326; the layer's by default",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer",
+     "features"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "set_layers_visibility",
    "title": "Show or hide layers",
    "description": "Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed.",

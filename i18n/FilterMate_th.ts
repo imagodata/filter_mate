@@ -299,6 +299,44 @@
         <translation>โน้ตของโครงการ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>การแก้ไข {} (ยังไม่บันทึก)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>ลบฟีเจอร์จาก {} (ยังไม่บันทึก)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>เพิ่มฟีเจอร์ใน {} (ยังไม่บันทึก)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>การเลือก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(ฟีเจอร์ที่เลือก)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>เอเจนต์ต้องการลบฟีเจอร์ของชั้นข้อมูลนี้:
+{}
+{}
+
+ฟีเจอร์จะอยู่ในบัฟเฟอร์การแก้ไขจนกว่าคุณจะบันทึกการแก้ไขของชั้นข้อมูล และการเลิกทำรอบนี้จะนำกลับมา คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>กำลังอ่านค่าของ {}</translation>

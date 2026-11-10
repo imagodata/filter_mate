@@ -122,8 +122,9 @@ def describe_layer(reference: str) -> Optional[Dict[str, Any]]:
         'visible': visible, 'group': group, 'extent': _layer_extent(layer), 'style': _style(layer, kind),
     }
     if kind is LayerKind.VECTOR:
+        from .feature_edits import edit_state
         details.update(_vector_details(layer))
-        details.update({'joins': _joins(layer), 'relations': _relations(layer)})
+        details.update({'joins': _joins(layer), 'relations': _relations(layer), **edit_state(layer)})
     elif kind is LayerKind.RASTER:
         details.update(_raster_details(layer))
     elif kind is LayerKind.POINT_CLOUD:

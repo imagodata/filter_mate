@@ -278,6 +278,23 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return asdict(accessor.set_labels(args["layer"], field=args["field"], enabled=args["enabled"],
                                           size=args.get("size"), color=args["color"], buffer=args["buffer"]))
 
+    def _edit_answer(result) -> Dict[str, Any]:
+        answer = asdict(result)
+        answer["feature_count"] = answer["changed"] + answer["deleted"] + answer["added"]  # what the card shows
+        return answer
+
+    def update_features(args: Dict[str, Any]) -> Dict[str, Any]:
+        return _edit_answer(accessor.update_features(args["layer"], values=args.get("values"),
+                                                     formulas=args.get("formulas"), expression=args["expression"],
+                                                     selected_only=args["selected_only"]))
+
+    def delete_features(args: Dict[str, Any]) -> Dict[str, Any]:
+        return _edit_answer(accessor.delete_features(args["layer"], expression=args["expression"],
+                                                     selected_only=args["selected_only"]))
+
+    def add_features(args: Dict[str, Any]) -> Dict[str, Any]:
+        return _edit_answer(accessor.add_features(args["layer"], features=args["features"], crs=args["crs"]))
+
     def set_layers_visibility(args: Dict[str, Any]) -> Dict[str, Any]:
         return _report("Visibility", accessor.set_layers_visibility(args["layers"], args["visible"]))
 
@@ -331,6 +348,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
         "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
         "set_layer_style": set_layer_style, "set_labels": set_labels,
+        "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,

@@ -33,6 +33,7 @@ from .accessor import (
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
+    EditResult,
     LabelsResult,
     StyleResult,
     AlgorithmList,
@@ -422,6 +423,29 @@ class QGISFilterMateAccessor:
                    color: str = "", buffer: bool = True) -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
                                           buffer=buffer))
+
+    @staticmethod
+    def _edit(name: str, *args, **kwargs):
+        """Call ``adapters.public_api.feature_edits.<name>`` on the main thread."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.feature_edits"), name)
+            try:
+                return function(*args, **kwargs)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
+    def update_features(self, layer: str, values: Optional[Dict[str, Any]] = None,
+                        formulas: Optional[Dict[str, str]] = None, expression: str = "",
+                        selected_only: bool = False) -> EditResult:
+        return EditResult(**self._edit("update_features", layer, values=values, formulas=formulas,
+                                       expression=expression, selected_only=selected_only))
+
+    def delete_features(self, layer: str, expression: str = "", selected_only: bool = False) -> EditResult:
+        return EditResult(**self._edit("delete_features", layer, expression=expression, selected_only=selected_only))
+
+    def add_features(self, layer: str, features: List[Dict[str, Any]], crs: str = "") -> EditResult:
+        return EditResult(**self._edit("add_features", layer, features=features, crs=crs))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))

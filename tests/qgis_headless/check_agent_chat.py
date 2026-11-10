@@ -593,6 +593,27 @@ def check_chat(provider, layer, authcfg, work):
     check("the thread says so", "summed up in a few lines" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
     chat._engine._session._limits = AgentLimits()
 
+    provider.reset((200, {}, tool_turn("update_features", {"layer": "communes", "values": {"pop": 1},
+                                                           "expression": '"pop" <= 300'})),
+                   (200, {}, text_turn("Modifié, pas encore enregistré.")))
+    check("an edit through the chat", ask("mets la population à 1 pour les petites communes"))
+    check("it is in the edit buffer", layer.isEditable() and layer.isModified() and
+          sorted(f["pop"] for f in layer.getFeatures())[:4] == [1, 1, 1, 400], sorted(f["pop"] for f in layer.getFeatures())[:4])
+    check("its card says it is not saved", "(not saved)" in panel.thread.toPlainText() and "pop = 1" in
+          panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
+    chat._on_undo()
+    check("undoing the turn takes the edit back", not layer.isModified() and
+          sorted(f["pop"] for f in layer.getFeatures())[:3] == [100, 200, 300])
+    was, answers["export"] = answers["export"], False  # one answer stands for every confirmation of this check
+    provider.reset((200, {}, tool_turn("delete_features", {"layer": "communes", "expression": '"pop" = 100'})),
+                   (200, {}, text_turn("D'accord.")))
+    ask("supprime la commune de 100 habitants")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("a delete is confirmed first, and declined here", result.get("is_error") is True and "declined" in
+          result["content"] and layer.featureCount() == 60, result)
+    answers["export"] = was
+    layer.rollBack()
+
     from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
     write_notes([])
     provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),

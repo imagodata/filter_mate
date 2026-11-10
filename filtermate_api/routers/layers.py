@@ -6,13 +6,13 @@ Issue #30. Read-only endpoint, returns the projection from
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..accessor import (
-    FeatureSample, FieldValues, FilterMateAccessor, LabelsResult, LayerDetails, LayerStatistics, LayerSummary,
+    EditResult, FeatureSample, FieldValues, FilterMateAccessor, LabelsResult, LayerDetails, LayerStatistics, LayerSummary,
     StyleResult,
 )
 
@@ -146,3 +146,57 @@ def set_labels(payload: LabelsRequest, request: Request) -> LabelsResult:
     """Label a vector layer with a field, or turn its labels off."""
     return _accessor(request).set_labels(payload.layer, field=payload.field, enabled=payload.enabled,
                                          size=payload.size, color=payload.color, buffer=payload.buffer)
+
+
+class UpdateFeaturesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    values: Optional[Dict[str, Any]] = Field(None, description="Field: value")
+    formulas: Optional[Dict[str, str]] = Field(None, description="Field: QGIS expression computed on each feature")
+    expression: str = Field("", max_length=100_000, description="QGIS expression choosing the features")
+    selected_only: bool = False
+
+
+@router.post("/features/update", response_model=EditResult)
+def update_features(payload: UpdateFeaturesRequest, request: Request) -> EditResult:
+    """Set fields of the chosen features, in the edit buffer of the layer (not saved)."""
+    return _accessor(request).update_features(payload.layer, values=payload.values, formulas=payload.formulas,
+                                              expression=payload.expression, selected_only=payload.selected_only)
+
+
+class DeleteFeaturesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    expression: str = Field("", max_length=100_000)
+    selected_only: bool = False
+
+
+@router.post("/features/delete", response_model=EditResult)
+def delete_features(payload: DeleteFeaturesRequest, request: Request) -> EditResult:
+    """Delete the chosen features, in the edit buffer of the layer (not saved)."""
+    return _accessor(request).delete_features(payload.layer, expression=payload.expression,
+                                              selected_only=payload.selected_only)
+
+
+class NewFeature(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    wkt: str = Field(..., min_length=1, max_length=1_000_000)
+    attributes: Optional[Dict[str, Any]] = None
+
+
+class AddFeaturesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
+    features: List[NewFeature] = Field(..., min_length=1, max_length=100)
+    crs: str = Field("", max_length=200)
+
+
+@router.post("/features/add", response_model=EditResult)
+def add_features(payload: AddFeaturesRequest, request: Request) -> EditResult:
+    """Add features from WKT geometries, in the edit buffer of the layer (not saved)."""
+    return _accessor(request).add_features(payload.layer, features=[item.model_dump() for item in payload.features],
+                                           crs=payload.crs)

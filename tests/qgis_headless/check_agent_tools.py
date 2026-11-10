@@ -344,6 +344,72 @@ def check_style(project, gpkg, work):
         project.removeMapLayer(raster.id())
 
 
+def check_edits(project, work):
+    """update / delete / add_features on a real GeoPackage, in the edit buffer, and the undo of the turn."""
+    from filter_mate.adapters.public_api import feature_edits as edits
+    from filter_mate.adapters.public_api.introspection import describe_layer
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+
+    path = os.path.join(work, "edits.gpkg")
+    make_vector(path, "GPKG")
+    layer = QgsVectorLayer(path, "edits", "ogr")
+    project.addMapLayer(layer)
+    before = sorted(feature["pop"] for feature in layer.getFeatures())
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("e1", "update_features", {"layer": "edits"}))
+    changed = edits.update_features("edits", values={"nom": "Ville", "taux": "2.5"}, expression='"pop" <= 300')
+    check("edit: values on the chosen features, in the buffer", changed["changed"] == 3 and changed["unsaved"] and
+          layer.isEditable() and sorted(f["nom"] for f in layer.getFeatures() if f["pop"] <= 300) == ["Ville"] * 3
+          and {f["taux"] for f in layer.getFeatures() if f["pop"] <= 300} == {2.5}, changed)
+    formula = edits.update_features("edits", formulas={"pop": '"pop" * 2'}, expression='"pop" > 5800')
+    check("edit: a formula on each feature", formula["changed"] == 2 and
+          sorted(f["pop"] for f in layer.getFeatures())[-2:] == [11800, 12000], formula)
+    for call, label in ((lambda: edits.update_features("edits", values={"pop": "abc"}, expression="true"), "a text in a number"),
+                        (lambda: edits.update_features("edits", values={"fid": 9}, expression="true"), "the key"),
+                        (lambda: edits.update_features("edits", values={"nope": 1}, expression="true"), "no field"),
+                        (lambda: edits.update_features("edits", values={"pop": 1}), "no choice of features"),
+                        (lambda: edits.update_features("edits", formulas={"nom": "env('HOME')"}, expression="true"),
+                         "a formula reading the environment"),
+                        (lambda: edits.update_features("edits", values={"pop": 1}, expression="file_exists('/etc')"),
+                         "an expression reading the disk"),
+                        (lambda: edits.update_features("edits", values={"pop": 1}, selected_only=True), "no selection")):
+        check(f"edit: refuses {label}", refused(call))
+    check("edit: a refused edit changes nothing", sorted(f["pop"] for f in layer.getFeatures())[-1] == 12000)
+    recorder.before_call(ToolCallPart("e2", "delete_features", {"layer": "edits"}))
+    deleted = edits.delete_features("edits", expression='"pop" = 100')
+    check("edit: delete in the buffer", deleted["deleted"] == 1 and layer.featureCount() == 59, deleted)
+    recorder.before_call(ToolCallPart("e3", "add_features", {"layer": "edits"}))
+    added = edits.add_features("edits", [{"wkt": "POINT(1.44 43.6)", "attributes": {"nom": "Puits", "pop": 7}}],
+                               crs="EPSG:4326")
+    new = [f for f in layer.getFeatures() if f["nom"] == "Puits"]
+    check("edit: add from WKT in another CRS", added["added"] == 1 and len(new) == 1 and
+          new[0].geometry().asPoint().x() > 500000, (added, new[0].geometry().asWkt() if new else None))
+    check("edit: refuses a line in a point layer", "Point" in refused(
+        edits.add_features, "edits", [{"wkt": "LINESTRING(0 0, 1 1)"}]))
+    check("edit: refuses a bad WKT", refused(edits.add_features, "edits", [{"wkt": "POINT(abc)"}]))
+    details = describe_layer("edits")
+    check("edit: describe_layer says it is edited, not saved", details["editing"] and details["unsaved"], details)
+    check("edit: nothing is written to the file", sorted(f["pop"] for f in QgsVectorLayer(path, "x", "ogr").getFeatures())
+          == before)
+    effects = recorder.finish()
+    check("edit: the turn keeps its commands", [effect[0] for effect in effects] == ["edits"] and
+          (effects[0][2], effects[0][3]) == (0, 4), effects)
+    done, left = apply_effects(effects, undo=True)
+    check("edit: undo steps back over them", done == ["edits"] and not left and not layer.isModified() and
+          sorted(f["pop"] for f in layer.getFeatures()) == before, (done, left))
+    apply_effects(effects, undo=False)
+    check("edit: redo applies them again", layer.featureCount() == 60 and layer.isModified())
+    layer.beginEditCommand("user")
+    layer.changeAttributeValue(next(layer.getFeatures()).id(), 2, 1)
+    layer.endEditCommand()
+    done, left = apply_effects(effects, undo=True)
+    check("edit: after an edit of the user, the turn is left as it is", left == ["edits"] and layer.isModified(),
+          (done, left))
+    layer.rollBack()
+    project.removeMapLayer(layer.id())
+
+
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
@@ -464,6 +530,7 @@ def main(introspection):
     check_reading(introspection, project, gpkg, work)
     check_processing(project, gpkg)
     check_style(project, gpkg, work)
+    check_edits(project, work)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

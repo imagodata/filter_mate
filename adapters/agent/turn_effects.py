@@ -8,7 +8,9 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("selection", layer_id, before, after)``: selected feature ids;
 * ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
-* ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts).
+* ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
+* ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
+  after the commands of the turn (``adapters/public_api/feature_edits.py``).
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -28,6 +30,7 @@ Place = Tuple[Tuple[str, ...], int]
 # The tools that change how a layer is drawn: its style is kept before their first call in a turn.
 STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
+EDIT_TOOLS = ("update_features", "delete_features", "add_features")
 
 
 def _notes_label() -> str:
@@ -127,6 +130,12 @@ def _set_style(layer: Any, xml: str) -> bool:
     return bool(loaded)
 
 
+def _edit_index(layer: Any) -> int:
+    """Where the undo stack of a layer stands; 0 when it is not being edited (the stack starts empty then)."""
+    stack = layer.undoStack() if layer.isEditable() else None
+    return stack.index() if stack is not None else 0
+
+
 def _visible(project: QgsProject, layer_id: str) -> Optional[bool]:
     node = project.layerTreeRoot().findLayer(layer_id)
     return None if node is None else bool(node.itemVisibilityChecked())
@@ -148,6 +157,7 @@ class EffectsRecorder:
         self._visibility: Dict[str, bool] = {}
         self._styles: Dict[str, str] = {}
         self._notes: Optional[Tuple[str, ...]] = None
+        self._edits: Dict[str, int] = {}
 
     def before_call(self, call: Any) -> None:
         project = QgsProject.instance()
@@ -167,6 +177,10 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
+            elif name in EDIT_TOOLS:
+                layer = _resolve(project, arguments.get("layer"))
+                if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
+                    self._edits[layer.id()] = _edit_index(layer)
             elif name in NOTE_TOOLS:
                 if self._notes is None:
                     from .project_notes_store import read_notes
@@ -210,6 +224,11 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
+        for layer_id, before in self._edits.items():
+            layer = project.mapLayer(layer_id)
+            after = _edit_index(layer) if layer is not None else before
+            if after != before:
+                effects.append(("edits", layer_id, before, after, layer.name()))
         if self._notes is not None:
             from .project_notes_store import read_notes
             after_notes = tuple(read_notes(project))
@@ -255,6 +274,17 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 if node is not None:
                     node.setItemVisibilityChecked(bool(effect[2] if undo else effect[3]))
                     done.append(node.name())
+            elif kind == "edits":
+                layer = project.mapLayer(layer_id)
+                start, end = (effect[3], effect[2]) if undo else (effect[2], effect[3])
+                stack = layer.undoStack() if isinstance(layer, QgsVectorLayer) and layer.isEditable() else None
+                # Only over the commands of the turn: saved, discarded or edited since, the layer is left as it is.
+                if stack is not None and stack.index() == start and stack.count() >= max(start, end):
+                    stack.setIndex(end)
+                    layer.triggerRepaint()
+                    done.append(layer.name())
+                else:
+                    left.append(effect[4] if len(effect) > 4 else layer_id)
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)
