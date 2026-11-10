@@ -11,19 +11,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 SKIPPED_DIRS = {'tests', 'scripts', 'website', 'docs', '_bmad', 'free-quota-proxy', 'i18n', '.git', '.claude',
                 'node_modules', '__pycache__'}
 TRANSLATES = re.compile(r"QCoreApplication\.translate\(|\.tr\(|\b_tr\(")
-# Modules that were never in the project file: their strings are not translated yet (a backlog of its own).
-NOT_YET = {
-    'adapters/qgis/coverage_layers/point_cloud_footprint.py',
-    'core/export/layer_exporter.py',
-    'extensions/favorites_sharing/ui/git_binary_dialog.py',
-    'extensions/favorites_sharing/ui/repo_manager_dialog.py',
-    'ui/controllers/favorites_extension_bridge.py',
-    'ui/controllers/favorites_menu_builder.py',
-    'ui/controllers/favorites_spatial_handler.py',
-    'ui/controllers/property_controller.py',
-    'ui/managers/configuration_manager.py',
-    'ui/managers/optimization_manager.py',
-}
+# Modules not in the project file yet, their strings not translated (empty since the backlog was translated).
+NOT_YET = set()
 
 
 def _pro_sources():
