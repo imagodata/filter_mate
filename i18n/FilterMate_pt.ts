@@ -239,6 +239,21 @@
         <translation>A ler o mapa</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
+        <source>Computing statistics on {}</source>
+        <translation>A calcular estatísticas de {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
+        <source>Reading features of {}</source>
+        <translation>A ler elementos de {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
+        <source>Reading the map at a point</source>
+        <translation>A ler o mapa num ponto</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>A ler os valores de {}</translation>

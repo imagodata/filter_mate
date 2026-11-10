@@ -33,7 +33,10 @@ from .accessor import (
     Favorite,
     FavoritesUnavailable,
     FilterRejected,
+    FeatureSample,
     FieldValues,
+    IdentifyResult,
+    LayerStatistics,
     FilteredLayer,
     FilterPreview,
     FilterStatus,
@@ -288,6 +291,23 @@ class QGISFilterMateAccessor:
     def field_values(self, layer: str, field_name: str, search: str = "", limit: int = 50) -> Optional[FieldValues]:
         values = self._introspect("field_values", layer, field_name, search=search, limit=limit)
         return None if values is None else FieldValues(**values)
+
+    def layer_statistics(self, layer: str, field_name: str = "", group_by: str = "", measure: str = "",
+                         selected_only: bool = False, limit: int = 20) -> Optional[LayerStatistics]:
+        statistics = self._introspect("layer_statistics", layer, field_name=field_name, group_by=group_by,
+                                      measure=measure, selected_only=selected_only, limit=limit)
+        return None if statistics is None else LayerStatistics(**statistics)
+
+    def sample_features(self, layer: str, limit: int = 5, fields: Optional[List[str]] = None, expression: str = "",
+                        selected_only: bool = False, geometry: bool = False) -> Optional[FeatureSample]:
+        sample = self._introspect("sample_features", layer, limit=limit, fields=fields, expression=expression,
+                                  selected_only=selected_only, geometry=geometry)
+        return None if sample is None else FeatureSample(**sample)
+
+    def identify_at(self, x: float, y: float, crs: str = "", layers: Optional[List[str]] = None,
+                    tolerance: Optional[float] = None, limit: int = 5) -> IdentifyResult:
+        return IdentifyResult(**self._introspect("identify_at", x, y, crs=crs, layers=layers, tolerance=tolerance,
+                                                 limit=limit))
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
         preview = self._introspect("preview_filter", layer_name, expression)

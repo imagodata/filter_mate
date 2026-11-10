@@ -158,6 +158,202 @@
    }
   },
   {
+   "name": "layer_statistics",
+   "title": "Statistics of a layer",
+   "description": "Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group. Computed on the features the layer shows now (its filter applies), or on its selection: use it to answer \"how many\", \"what total\", \"which is the largest\", and to check what a filter kept. With neither field nor measure it counts features, by group when group_by is given. Returns feature_count (features read), statistics {count, nulls, minimum, maximum, and sum, mean, stdev for numbers or distinct for text}, unit (m or m2 for a measure), and with group_by: groups [{value, feature_count, and the same statistics}], groups_total and truncated. Refused on web services and above 500000 features: filter or select first.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "field": {
+      "default": "",
+      "description": "Field to sum up, from describe_layer. Leave empty to count features, or to use measure",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "group_by": {
+      "default": "",
+      "description": "Field whose values make the groups: one row of statistics per value",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "measure": {
+      "default": "",
+      "description": "Measure the geometries instead of a field: length of lines (perimeter of polygons) in metres, or area of polygons in square metres",
+      "enum": [
+       "",
+       "length",
+       "area"
+      ],
+      "type": "string"
+     },
+     "selected_only": {
+      "default": false,
+      "description": "Only the selected features",
+      "type": "boolean"
+     },
+     "limit": {
+      "default": 20,
+      "description": "At most this many groups, the largest first",
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "sample_features",
+   "title": "Sample of features",
+   "description": "A few features of a vector layer with their attributes, to see what its rows look like. Among the features the layer shows now (its filter applies). Returns crs_authid, features [{fid, attributes {field: value}, geometry {type, centroid, bbox}}], truncated (more features match) and fields_truncated. Long text is cut at 200 characters. Refused on web services.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "limit": {
+      "default": 5,
+      "description": "At most this many features",
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "fields": {
+      "anyOf": [
+       {
+        "items": {
+         "maxLength": 1000,
+         "minLength": 1,
+         "type": "string"
+        },
+        "maxItems": 50,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Only these fields; the first 50 fields by default"
+     },
+     "expression": {
+      "default": "",
+      "description": "QGIS expression (NOT SQL) the features must match, as for select_features: \"population\" > 10000",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "selected_only": {
+      "default": false,
+      "description": "Only the selected features",
+      "type": "boolean"
+     },
+     "geometry": {
+      "default": false,
+      "description": "Also the type, centroid and bounding box of each geometry, in the layer CRS",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "identify_at",
+   "title": "Identify at a point",
+   "description": "What lies at a point of the map: the features of the vector layers and the values of the rasters there. As the Identify tool of QGIS. Returns layers, only those with something at the point: [{layer_name, layer_kind, features [{fid, attributes}], truncated}] for a vector layer, [{layer_name, layer_kind, values [{band, value}]}] for a raster; and skipped (web services, which are not read).",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "x": {
+      "description": "X or longitude of the point",
+      "maximum": 1000000000.0,
+      "minimum": -1000000000.0,
+      "type": "number"
+     },
+     "y": {
+      "description": "Y or latitude of the point",
+      "maximum": 1000000000.0,
+      "minimum": -1000000000.0,
+      "type": "number"
+     },
+     "crs": {
+      "default": "",
+      "description": "CRS of the point, such as EPSG:4326; the CRS of the map (canvas_crs of map_context) by default",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "layers": {
+      "anyOf": [
+       {
+        "items": {
+         "maxLength": 1000,
+         "minLength": 1,
+         "type": "string"
+        },
+        "maxItems": 20,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Only these layers (ids or names); the visible layers by default"
+     },
+     "tolerance": {
+      "anyOf": [
+       {
+        "maximum": 1000000000.0,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Search distance around the point, in the units of crs; five pixels of the map by default"
+     },
+     "limit": {
+      "default": 5,
+      "description": "At most this many features per layer",
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "x",
+     "y"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "preview_filter",
    "title": "Try a filter",
    "description": "Try a filter expression on a private copy of the layer: nothing changes in the project. It is what apply_filter would do, and it replaces the layer's current filter in the same way. Returns valid, feature_count (features kept, -1 when unknown) and error (the reason when valid is false). Refused on web services and memory layers, and for anything but a plain condition (subqueries, most functions).",
@@ -1106,7 +1302,7 @@
   {
    "name": "remove_layers",
    "title": "Remove layers",
-   "description": "Remove layers from the project. Their files are not deleted, but their styles and filters in this project are lost and this cannot be undone. The chat of FilterMate asks the user first. Returns done and failed.",
+   "description": "Remove layers from the project. Their files are not deleted. The chat of FilterMate asks the user first, and undoing the turn there brings the layers back with their styles and filters, except a layer held in memory, whose features are lost. From another client it cannot be undone. Returns done and failed.",
    "read_only": false,
    "destructive": true,
    "idempotent": true,

@@ -239,6 +239,21 @@
         <translation>지도 읽는 중</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
+        <source>Computing statistics on {}</source>
+        <translation>{}의 통계 계산 중</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
+        <source>Reading features of {}</source>
+        <translation>{}의 피처 읽는 중</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
+        <source>Reading the map at a point</source>
+        <translation>한 지점의 지도 읽는 중</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{}의 값 읽는 중</translation>

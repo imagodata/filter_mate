@@ -239,6 +239,21 @@
         <translation>Läser kartan</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
+        <source>Computing statistics on {}</source>
+        <translation>Beräknar statistik för {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
+        <source>Reading features of {}</source>
+        <translation>Läser objekt i {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
+        <source>Reading the map at a point</source>
+        <translation>Läser kartan i en punkt</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Läser värdena i {}</translation>

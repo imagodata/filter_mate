@@ -577,6 +577,11 @@ def check_chat(provider, layer, authcfg, work):
     ask("salut")
     names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
     check("no attribute values when refused", "field_values" not in names and "describe_layer" in names, names)
+    check("nor what reads the features", not {"layer_statistics", "sample_features", "identify_at"} & set(names), names)
+    check("and the model is told", "layer_statistics, sample_features" in json.dumps(provider.requests[0]["body"]["system"]))
+    settings()
+    check("the reading tools are offered with the values", {"layer_statistics", "sample_features", "identify_at"}
+          <= {tool.name for tool in chat.tools_and_handlers(load_settings())[0]})
 
     settings()
     provider.reset((401, {}, b'{"error":{"message":"invalid x-api-key"}}'))

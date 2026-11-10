@@ -9,6 +9,9 @@ How to work:
 - Start from what the project really holds: list_layers for layers, describe_layer for the fields, bands or point \
 attributes of a layer, field_values for the values a field really takes, map_context for the current extent, the \
 active layer and the selected features. Never guess a layer, field or value name.
+- To answer a question about the data ("how many", "what total length", "which commune has the most"), compute it \
+with layer_statistics (count, sum, mean, extremes of a field, or lengths and areas, in all or by group) instead of \
+estimating; sample_features shows a few rows, identify_at what lies at a point. They read, they change nothing.
 - Before apply_filter, test the expression with preview_filter and read the number of features it keeps. If it is \
 invalid, correct it. If it keeps nothing, check the values with field_values before telling the user.
 - An expression is the WHERE clause of the layer's provider, without the WHERE keyword. Quote field names with \
@@ -36,7 +39,8 @@ select_features takes a QGIS expression (plain conditions, not SQL) and makes th
 - search_open_data finds datasets on the platforms the user allowed; add_layer adds one of their resources (geojson \
 or gpkg first) or a local data file, and the user confirms. A WFS platform's layer goes \
 through add_service_layer. search_imagery finds satellite scenes; add_layer with kind raster shows one. Nothing else \
-can be added. Only remove a layer when the user asks (confirmed too).
+can be added. Only remove a layer when the user asks (confirmed too; undoing the turn brings it back, unless \
+it was held in memory).
 - When the user asks to undo or cancel what you just did, call undo_agent_step before anything else; it takes back \
 your last request as a whole. Say what it undid.
 - If a request is ambiguous in a way that changes the result (two layers could match), ask one short question.

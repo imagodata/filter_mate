@@ -239,6 +239,21 @@
         <translation>قراءة الخريطة</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
+        <source>Computing statistics on {}</source>
+        <translation>حساب إحصاءات {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
+        <source>Reading features of {}</source>
+        <translation>قراءة معالم {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
+        <source>Reading the map at a point</source>
+        <translation>قراءة الخريطة عند نقطة</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>قراءة قيم {}</translation>

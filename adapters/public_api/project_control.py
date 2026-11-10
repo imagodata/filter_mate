@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Driving QGIS beyond filters: the view, the selection, the layer tree, layers added or removed, open data.
 
-Main thread only, plain dicts out. Nothing here is undone by the turn checkpoint: a zoom or a selection is
-not a filter, and a layer removed is gone (the chat asks the user first).
+Main thread only, plain dicts out. Nothing here undoes itself: the chat captures the selections, the
+visibility and the layers added or removed before each call (``adapters/agent/turn_effects.py``) and brings
+them back with the turn; a zoom is not undone, and a memory layer removed is gone (the chat asks first).
 """
 from __future__ import annotations
 

@@ -239,6 +239,21 @@
         <translation>A térkép beolvasása</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
+        <source>Computing statistics on {}</source>
+        <translation>{} statisztikáinak számítása</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
+        <source>Reading features of {}</source>
+        <translation>{} elemeinek beolvasása</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
+        <source>Reading the map at a point</source>
+        <translation>A térkép beolvasása egy pontban</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} értékeinek beolvasása</translation>

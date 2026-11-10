@@ -10,7 +10,7 @@ import logging
 import math
 from typing import Any, Dict, List, Optional, Set
 
-from ...core.agent.sql_guard import filter_problem, quoted_identifiers
+from ...core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
 from .operations import layer_kind, resolve_layer
 
@@ -21,6 +21,16 @@ MAX_CLASSES = 100
 MAX_VALUE_CHARS = 200
 MAX_VALUES = 200
 MAX_SELECTIONS = 50
+MAX_STAT_FEATURES = 500_000  # one pass on the main thread: beyond, QGIS would freeze for too long
+MAX_GROUPS = 100
+MAX_GROUPS_READ = 10_000
+MAX_DISTINCT = 10_000
+MAX_SAMPLE = 20
+MAX_SAMPLE_FIELDS = 50
+MAX_IDENTIFY_LAYERS = 20
+MAX_IDENTIFY_BANDS = 20
+IDENTIFY_PIXELS = 5
+MAX_COORDINATE = 1e9
 MAX_JOINS = 20
 MAX_RELATIONS = 20
 MAX_GROUP_CHARS = 200
@@ -398,3 +408,359 @@ def map_context() -> Dict[str, Any]:
     if active is not None:
         context.update({'active_layer_id': active.id(), 'active_layer_name': active.name()})
     return context
+
+
+# --- reading the features: statistics, a sample, what lies at a point -------------------------------------------
+
+def _checked_expression(layer, expression: str) -> str:
+    """A QGIS expression written by a model, as ``select_features`` accepts it.
+
+    Raises:
+        ValueError: More than a plain condition, a syntax error, or a field the layer does not have.
+    """
+    from qgis.core import QgsExpression
+    problem = expression_problem(expression)
+    if problem:
+        raise ValueError(f"this expression cannot be used: {problem}")
+    check = QgsExpression(expression)
+    if check.hasParserError():
+        raise ValueError(f"invalid QGIS expression: {check.parserErrorString()}")
+    known = {item.name().lower() for item in layer.fields()}
+    unknown = sorted({name for name in quoted_identifiers(expression) if name.lower() not in known})
+    if unknown:
+        raise ValueError(f"unknown field(s): {', '.join(unknown)}")
+    return expression
+
+
+def _request(layer, attributes: List[int], geometry: bool, selected_only: bool, expression: str = ''):
+    """A request for these attributes only, of the selected features or of those matching ``expression``."""
+    from qgis.core import QgsFeatureRequest
+    request = QgsFeatureRequest()
+    request.setSubsetOfAttributes(attributes)
+    if not geometry:
+        request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+    if selected_only:
+        if not layer.selectedFeatureCount():
+            raise ValueError(f"no feature is selected on '{layer.name()}'")
+        request.setFilterFids(layer.selectedFeatureIds())
+    if expression:
+        request.setFilterExpression(_checked_expression(layer, expression))
+    return request
+
+
+def _measurer(layer, measure: str):
+    """``(function of a geometry, unit, ellipsoid)`` measuring lengths in metres or areas in square metres.
+
+    On the ellipsoid of the project, or of the layer CRS when the project has none and the layer is in degrees;
+    without an ellipsoid the measure is planar, in the units of the layer CRS.
+    """
+    from qgis.core import QgsDistanceArea, QgsProject, QgsUnitTypes, QgsWkbTypes
+    project = QgsProject.instance()
+    crs = layer.crs()
+    ellipsoid = _safe(project.ellipsoid, '') or ''
+    if ellipsoid.upper() in ('', 'NONE') and _safe(crs.isGeographic, False):
+        ellipsoid = _safe(crs.ellipsoidAcronym, '') or ''
+    calculator = QgsDistanceArea()
+    calculator.setSourceCrs(crs, project.transformContext())
+    planar = ellipsoid.upper() in ('', 'NONE')
+    if not planar:
+        calculator.setEllipsoid(ellipsoid)
+    polygons = QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry
+    lines = QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry
+    if measure == 'area':
+        if not polygons:
+            raise ValueError(f"'{layer.name()}' has no polygons: it has no area to measure")
+        target = QgsUnitTypes.AreaUnit.AreaSquareMeters
+
+        def run(geometry):
+            return calculator.convertAreaMeasurement(calculator.measureArea(geometry), target)
+        unit = 'm2'
+    else:
+        if not (polygons or lines):
+            raise ValueError(f"'{layer.name()}' has neither lines nor polygons: it has no length to measure")
+        target = QgsUnitTypes.DistanceUnit.DistanceMeters
+        length = calculator.measurePerimeter if polygons else calculator.measureLength
+
+        def run(geometry):
+            return calculator.convertLengthMeasurement(length(geometry), target)
+        unit = 'm'
+    if planar and _safe(crs.isGeographic, False):
+        unit = 'degrees' if measure == 'length' else 'square degrees'
+    return run, unit, '' if planar else ellipsoid
+
+
+class _Series:
+    """Count, sum, extremes and spread of the values of one pass."""
+
+    def __init__(self, numeric: bool) -> None:
+        self.numeric = numeric
+        self.count = 0
+        self.nulls = 0
+        self.total = 0.0
+        self.squares = 0.0
+        self.minimum: Any = None
+        self.maximum: Any = None
+        self.distinct: Set[Any] = set()
+
+    def add(self, value: Any) -> None:
+        if value is None or (isinstance(value, float) and not math.isfinite(value)):
+            self.nulls += 1
+            return
+        self.count += 1
+        if self.numeric and isinstance(value, (int, float)) and not isinstance(value, bool):
+            self.total += value
+            self.squares += value * value
+        elif len(self.distinct) <= MAX_DISTINCT:
+            self.distinct.add(value)
+        try:
+            self.minimum = value if self.minimum is None or value < self.minimum else self.minimum
+            self.maximum = value if self.maximum is None or value > self.maximum else self.maximum
+        except TypeError:  # values of several types in one field: no order
+            pass
+
+    def summary(self) -> Dict[str, Any]:
+        answer: Dict[str, Any] = {'count': self.count, 'nulls': self.nulls, 'minimum': self.minimum,
+                                  'maximum': self.maximum}
+        if self.numeric:
+            mean = self.total / self.count if self.count else None
+            answer.update({'sum': _rounded(self.total), 'mean': _rounded(mean)})
+            if self.count > 1:
+                variance = max(self.squares / self.count - mean * mean, 0.0)
+                answer['stdev'] = _rounded(math.sqrt(variance * self.count / (self.count - 1)))
+        else:
+            answer['distinct'] = min(len(self.distinct), MAX_DISTINCT)
+            answer['distinct_truncated'] = len(self.distinct) > MAX_DISTINCT
+        return answer
+
+
+def _rounded(value: Any) -> Any:
+    """Six significant digits: a sum of floats does not need its noise."""
+    if not isinstance(value, float) or not math.isfinite(value) or value == 0:
+        return value
+    return round(value, max(0, 6 - int(math.floor(math.log10(abs(value)))) - 1)) if abs(value) < 1e6 else round(value, 1)
+
+
+def layer_statistics(reference: str, field_name: str = '', group_by: str = '', measure: str = '',
+                     selected_only: bool = False, limit: int = 20) -> Optional[Dict[str, Any]]:
+    """Statistics of a field or of the geometries of a vector layer, in all or by the values of another field.
+
+    Counts the features when neither ``field_name`` nor ``measure`` is given. One pass over the features the layer
+    shows now (its filter applies), or over its selection. None when the layer or a field does not resolve.
+
+    Raises:
+        ValueError: Not a vector layer, a web service, more features than ``MAX_STAT_FEATURES``, too many groups,
+            a measure the geometries do not have, or nothing selected with ``selected_only``.
+    """
+    layer = _vector_layer(reference)
+    if layer is None:
+        return None
+    fields = layer.fields()
+    index = fields.lookupField(field_name) if field_name else -1
+    group_index = fields.lookupField(group_by) if group_by else -1
+    if (field_name and index < 0) or (group_by and group_index < 0):
+        return None
+    if measure not in ('', 'length', 'area'):
+        raise ValueError("measure is 'length', 'area' or nothing")
+    if field_name and measure:
+        raise ValueError('give a field or a measure, not both')
+    _refuse_web_service(layer)
+    known = layer.selectedFeatureCount() if selected_only else (_safe(layer.featureCount, -1) or 0)
+    too_many = (f"'{layer.name()}' has more than {MAX_STAT_FEATURES} features to read: filter it or select "
+                "features first")
+    if known > MAX_STAT_FEATURES:
+        raise ValueError(too_many)
+    run, unit, ellipsoid = _measurer(layer, measure) if measure else (None, '', '')
+    numeric = bool(measure) or (index >= 0 and fields.at(index).isNumeric())
+    request = _request(layer, [item for item in (index, group_index) if item >= 0], bool(measure), selected_only)
+    overall = _Series(numeric)
+    groups: Dict[Any, _Series] = {}
+    read = 0
+    for feature in layer.getFeatures(request):
+        read += 1
+        if read > MAX_STAT_FEATURES:
+            raise ValueError(too_many)
+        if measure:
+            geometry = feature.geometry()
+            value = None if geometry is None or geometry.isNull() else run(geometry)
+        elif index >= 0:
+            value = _json_value(feature.attribute(index))
+        else:
+            value = 1  # counting features
+        overall.add(value)
+        if group_index >= 0:
+            key = _json_value(feature.attribute(group_index))
+            series = groups.get(key)
+            if series is None:
+                if len(groups) >= MAX_GROUPS_READ:
+                    raise ValueError(f"'{group_by}' takes more than {MAX_GROUPS_READ} values: group by another field")
+                series = groups[key] = _Series(numeric)
+            series.add(value)
+    answer: Dict[str, Any] = {'layer_name': layer.name(), 'field': fields.at(index).name() if index >= 0 else '',
+                              'measure': measure, 'unit': unit, 'ellipsoid': ellipsoid, 'selected_only': selected_only,
+                              'feature_count': read}
+    counting = index < 0 and not measure
+    if not counting:
+        answer['statistics'] = overall.summary()
+    if group_index >= 0:
+        limit = max(1, min(int(limit), MAX_GROUPS))
+        ranked = sorted(groups.items(), key=lambda item: (-(item[1].count + item[1].nulls), str(item[0])))
+        answer.update({
+            'group_by': fields.at(group_index).name(), 'groups_total': len(ranked), 'truncated': len(ranked) > limit,
+            'groups': [{'value': key, 'feature_count': series.count + series.nulls,
+                        **({} if counting else series.summary())} for key, series in ranked[:limit]]})
+    return answer
+
+
+def _shape(geometry) -> Optional[Dict[str, Any]]:
+    """Where a geometry is, without its vertices: its type, its centroid and its bounding box."""
+    from qgis.core import QgsWkbTypes
+    if geometry is None or geometry.isNull():
+        return None
+    centroid = _safe(lambda: geometry.centroid().asPoint())
+    return {'type': _safe(lambda: QgsWkbTypes.displayString(geometry.wkbType()), '') or '',
+            'centroid': [centroid.x(), centroid.y()] if centroid is not None else [],
+            'bbox': _rectangle(_safe(geometry.boundingBox))}
+
+
+def _attributes(feature, indexes: List[int], fields) -> Dict[str, Any]:
+    return {fields.at(index).name(): _json_value(feature.attribute(index)) for index in indexes}
+
+
+def _field_indexes(layer, names: Optional[List[str]]) -> List[int]:
+    """Indexes of ``names``, or of the first ``MAX_SAMPLE_FIELDS`` fields.
+
+    Raises:
+        ValueError: A name is no field of the layer.
+    """
+    fields = layer.fields()
+    if not names:
+        return list(range(min(fields.count(), MAX_SAMPLE_FIELDS)))
+    indexes = [fields.lookupField(name) for name in names[:MAX_SAMPLE_FIELDS]]
+    unknown = [name for name, index in zip(names, indexes) if index < 0]
+    if unknown:
+        raise ValueError(f"unknown field(s): {', '.join(unknown)}")
+    return indexes
+
+
+def sample_features(reference: str, limit: int = 5, fields: Optional[List[str]] = None, expression: str = '',
+                    selected_only: bool = False, geometry: bool = False) -> Optional[Dict[str, Any]]:
+    """A few features of a vector layer, with their attributes; None when the layer does not resolve.
+
+    Raises:
+        ValueError: Not a vector layer, a web service, an unknown field, an expression that is more than a plain
+            condition, or nothing selected with ``selected_only``.
+    """
+    layer = _vector_layer(reference)
+    if layer is None:
+        return None
+    _refuse_web_service(layer)
+    limit = max(1, min(int(limit), MAX_SAMPLE))
+    indexes = _field_indexes(layer, fields)
+    request = _request(layer, indexes, geometry, selected_only, expression)
+    request.setLimit(limit + 1)  # one more tells whether there are others
+    rows: List[Dict[str, Any]] = []
+    for feature in layer.getFeatures(request):
+        row: Dict[str, Any] = {'fid': feature.id(), 'attributes': _attributes(feature, indexes, layer.fields())}
+        if geometry:
+            row['geometry'] = _shape(feature.geometry())
+        rows.append(row)
+    crs = _safe(layer.crs)
+    return {'layer_name': layer.name(), 'crs_authid': (_safe(crs.authid, '') if crs is not None else '') or '',
+            'features': rows[:limit], 'truncated': len(rows) > limit,
+            'fields_truncated': not fields and layer.fields().count() > MAX_SAMPLE_FIELDS}
+
+
+def _identify_layers(references: Optional[List[str]]) -> List[Any]:
+    """The layers named, or the visible vector and raster layers of the tree, top first."""
+    from qgis.core import QgsProject
+    if references:
+        layers = []
+        for reference in references[:MAX_IDENTIFY_LAYERS]:
+            layer = _resolve(reference)
+            if layer is None:
+                raise ValueError(f"layer {reference!r} not found")
+            layers.append(layer)
+        return layers
+    project = QgsProject.instance()
+    places = tree_places()
+    ranked = sorted((rank, layer_id) for layer_id, (rank, _, visible) in places.items() if visible)
+    layers = [project.mapLayer(layer_id) for _, layer_id in ranked]
+    return [layer for layer in layers if layer is not None and _safe(layer.isValid, False)
+            and layer_kind(layer) in (LayerKind.VECTOR, LayerKind.RASTER)][:MAX_IDENTIFY_LAYERS]
+
+
+def identify_at(x: float, y: float, crs: str = '', layers: Optional[List[str]] = None,
+                tolerance: Optional[float] = None, limit: int = 5) -> Dict[str, Any]:
+    """The features and the raster values at a point, as the Identify tool of QGIS reads them.
+
+    ``crs`` is the CRS of the map by default, ``tolerance`` (in its units) five pixels of the map, or nothing
+    without a map. Web services are left out and named in ``skipped``.
+
+    Raises:
+        ValueError: Coordinates out of range, an unknown CRS, a layer that does not resolve.
+    """
+    from qgis.core import (
+        QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsFeatureRequest, QgsGeometry, QgsPointXY, QgsProject,
+        QgsRectangle,
+    )
+    try:
+        from qgis.utils import iface
+    except ImportError:
+        iface = None
+    if not all(isinstance(item, (int, float)) and math.isfinite(item) and abs(item) < MAX_COORDINATE for item in (x, y)):
+        raise ValueError('these coordinates are out of range')
+    project = QgsProject.instance()
+    canvas = _safe(iface.mapCanvas) if iface is not None else None
+    map_crs = _safe(lambda: canvas.mapSettings().destinationCrs()) if canvas is not None else None
+    point_crs = QgsCoordinateReferenceSystem(crs) if crs else (map_crs or project.crs())
+    if crs and not point_crs.isValid():
+        raise ValueError(f"unknown CRS {crs!r}")
+    if tolerance is None:
+        tolerance = 0.0
+        if canvas is not None and map_crs is not None and map_crs == point_crs:
+            tolerance = IDENTIFY_PIXELS * (_safe(canvas.mapUnitsPerPixel, 0.0) or 0.0)
+    tolerance = max(0.0, min(float(tolerance), MAX_COORDINATE))
+    limit = max(1, min(int(limit), MAX_SAMPLE))
+    area = QgsRectangle(x - tolerance, y - tolerance, x + tolerance, y + tolerance)
+    found: List[Dict[str, Any]] = []
+    skipped: List[str] = []
+    for layer in _identify_layers(layers):
+        if _is_web_service(layer):
+            skipped.append(layer.name())
+            continue
+        kind = layer_kind(layer)
+        try:
+            transform = QgsCoordinateTransform(point_crs, layer.crs(), project)
+            if kind is LayerKind.VECTOR:
+                box = transform.transformBoundingBox(area)
+                if not tolerance:  # a rectangle without size can be read as no rectangle at all
+                    box.grow(max(abs(box.xMinimum()), abs(box.yMinimum()), 1.0) * 1e-9)
+                shape = QgsGeometry.fromRect(box) if tolerance else QgsGeometry.fromPointXY(QgsPointXY(box.center()))
+                indexes = _field_indexes(layer, None)
+                request = QgsFeatureRequest().setFilterRect(box).setSubsetOfAttributes(indexes)
+                rows = []
+                for feature in layer.getFeatures(request):
+                    geometry = feature.geometry()
+                    if geometry is None or geometry.isNull() or not geometry.intersects(shape):
+                        continue  # the rectangle filter of a provider is on bounding boxes
+                    rows.append({'fid': feature.id(), 'attributes': _attributes(feature, indexes, layer.fields())})
+                    if len(rows) > limit:
+                        break
+                if rows:
+                    found.append({'layer_name': layer.name(), 'layer_kind': kind.value, 'features': rows[:limit],
+                                  'truncated': len(rows) > limit})
+            elif kind is LayerKind.RASTER:
+                where = transform.transform(QgsPointXY(x, y))
+                provider = layer.dataProvider()
+                values = []
+                for band in range(1, min(_safe(layer.bandCount, 0) or 0, MAX_IDENTIFY_BANDS) + 1):
+                    value, ok = provider.sample(where, band)
+                    if ok and isinstance(value, float) and math.isfinite(value):
+                        values.append({'band': band, 'value': value})
+                if values:
+                    found.append({'layer_name': layer.name(), 'layer_kind': kind.value, 'values': values})
+        except Exception as exc:  # a point outside the domain of a CRS, a provider that cannot answer
+            logger.debug("identify_at: %s left out (%s)", layer.name(), exc)
+            skipped.append(layer.name())
+    return {'x': x, 'y': y, 'crs': _safe(point_crs.authid, '') or '', 'tolerance': tolerance, 'layers': found,
+            'skipped': skipped}

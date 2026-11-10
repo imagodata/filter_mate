@@ -6,11 +6,12 @@ Issue #30. Read-only endpoint, returns the projection from
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
+from pydantic import BaseModel, ConfigDict, Field
 
-from ..accessor import FieldValues, FilterMateAccessor, LayerDetails, LayerSummary
+from ..accessor import FeatureSample, FieldValues, FilterMateAccessor, LayerDetails, LayerStatistics, LayerSummary
 
 router = APIRouter(prefix="/layers", tags=["layers"])
 
@@ -56,3 +57,47 @@ def field_values(
     if values is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer or field not found")
     return values
+
+
+class StatisticsRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Vector layer id or name")
+    field: str = Field("", max_length=_MAX_NAME, description="Field whose values are summed up")
+    group_by: str = Field("", max_length=_MAX_NAME, description="Field whose values make the groups")
+    measure: Literal["", "length", "area"] = Field("", description="Measure the geometries instead of a field")
+    selected_only: bool = Field(False, description="Only the selected features")
+    limit: int = Field(20, ge=1, le=100, description="At most this many groups")
+
+
+@router.post("/statistics", response_model=LayerStatistics)
+def layer_statistics(payload: StatisticsRequest, request: Request) -> LayerStatistics:
+    """Statistics of a field or of the geometries of a vector layer, in all and by group."""
+    statistics = _accessor(request).layer_statistics(
+        payload.layer, field_name=payload.field, group_by=payload.group_by, measure=payload.measure,
+        selected_only=payload.selected_only, limit=payload.limit)
+    if statistics is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer or field not found")
+    return statistics
+
+
+class SampleRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Vector layer id or name")
+    limit: int = Field(5, ge=1, le=20, description="At most this many features")
+    fields: Optional[List[str]] = Field(None, max_length=50, description="Only these fields; all by default")
+    expression: str = Field("", max_length=100_000, description="QGIS expression the features must match")
+    selected_only: bool = Field(False, description="Only the selected features")
+    geometry: bool = Field(False, description="Also the type, centroid and bounding box of each geometry")
+
+
+@router.post("/sample", response_model=FeatureSample)
+def sample_features(payload: SampleRequest, request: Request) -> FeatureSample:
+    """A few features of a vector layer, with their attributes."""
+    sample = _accessor(request).sample_features(
+        payload.layer, limit=payload.limit, fields=payload.fields, expression=payload.expression,
+        selected_only=payload.selected_only, geometry=payload.geometry)
+    if sample is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer not found")
+    return sample

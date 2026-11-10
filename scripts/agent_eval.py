@@ -131,6 +131,48 @@ class SimulatedProject:
                 values = [value for value in values if args["search"].lower() in str(value).lower()]
             return {"layer_name": name, "field": args["field"], "values": values, "truncated": False}
 
+        def layer_statistics(args):
+            name, layer = self._layer(args["layer"])
+            known = layer.get("fields", {})
+            if layer["kind"] != "vector":
+                raise ToolFailure(f"'{name}' is not a vector layer")
+            if any(args.get(key) and args[key] not in known for key in ("field", "group_by")):
+                raise ToolFailure("Layer or field not found.")
+            count = layer.get("count", 0)
+            answer = {"layer_name": name, "field": args.get("field", ""), "measure": args.get("measure", ""),
+                      "unit": {"length": "m", "area": "m2"}.get(args.get("measure", ""), ""), "feature_count": count}
+            values = known.get(args.get("field", ""), [])
+            if args.get("measure"):
+                answer["statistics"] = {"count": count, "nulls": 0, "minimum": 12.0, "maximum": 8400.0,
+                                        "sum": 1250000.0, "mean": round(1250000.0 / max(count, 1), 3)}
+            elif values and not isinstance(values[0], str):
+                answer["statistics"] = {"count": count, "nulls": 0, "minimum": min(values), "maximum": max(values),
+                                        "sum": sum(values) * count / len(values), "mean": sum(values) / len(values)}
+            elif values:
+                answer["statistics"] = {"count": count, "nulls": 0, "minimum": min(values), "maximum": max(values),
+                                        "distinct": len(values)}
+            if args.get("group_by"):
+                groups = known[args["group_by"]]
+                answer.update({"group_by": args["group_by"], "groups_total": len(groups), "truncated": False,
+                               "groups": [{"value": value, "feature_count": count // len(groups)} for value in groups]})
+            return answer
+
+        def sample_features(args):
+            name, layer = self._layer(args["layer"])
+            if layer["kind"] != "vector":
+                raise ToolFailure(f"'{name}' is not a vector layer")
+            rows = [{"fid": index + 1, "attributes": {field: values[index % len(values)]
+                                                      for field, values in layer["fields"].items()}}
+                    for index in range(min(args.get("limit", 5), 2))]
+            return {"layer_name": name, "crs_authid": "EPSG:2154", "features": rows, "truncated": True}
+
+        def identify_at(args):
+            return {"x": args["x"], "y": args["y"], "crs": args.get("crs") or "EPSG:2154", "tolerance": 12.5,
+                    "layers": [{"layer_name": "communes", "layer_kind": "vector", "truncated": False, "features": [
+                        {"fid": 1, "attributes": {field: values[0] for field, values in LAYERS["communes"]["fields"].items()}}]},
+                        {"layer_name": "mnt", "layer_kind": "raster", "values": [{"band": 1, "value": 187.4}]}],
+                    "skipped": []}
+
         def refuse_bad_sql(expression):
             problem = filter_problem(expression)
             if problem:
@@ -245,6 +287,7 @@ class SimulatedProject:
 
         return {
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
+            "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
             "preview_filter": preview_filter, "apply_filter": apply_filter, "cross_filter": relation,
             "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,

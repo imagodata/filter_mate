@@ -239,6 +239,21 @@
         <translation>ካርታውን በማንበብ ላይ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
+        <source>Computing statistics on {}</source>
+        <translation>በ{} ላይ ስታቲስቲክስ በማስላት ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
+        <source>Reading features of {}</source>
+        <translation>የ{} ባህሪያትን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
+        <source>Reading the map at a point</source>
+        <translation>ካርታውን በአንድ ነጥብ ላይ በማንበብ ላይ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>የ{} እሴቶችን በማንበብ ላይ</translation>

@@ -131,5 +131,11 @@
   "prompt": "Parmi ces communes, garde seulement celles du département 31.",
   "expect": [[{"tool": "apply_filter", "args": {"layer_name": "communes", "expression": {"contains": ["dept", "31"]},
     "operator": "AND"},
-    "call_args": {"layer_name": "communes", "expression": "\"dept\" = '31'", "operator": "AND"}}]]}
+    "call_args": {"layer_name": "communes", "expression": "\"dept\" = '31'", "operator": "AND"}}]]},
+ {"id": "stats_count_by_group", "prompt": "Combien y a-t-il de communes par département ?", "expect": [],
+  "forbid": ["export_layers", "apply_filter", "select_features"]},
+ {"id": "stats_total_length", "prompt": "Quelle est la longueur totale des routes du projet ?", "expect": [],
+  "forbid": ["export_layers", "apply_filter", "select_features"]},
+ {"id": "stats_largest", "prompt": "What is the population of the most populated commune?", "expect": [],
+  "forbid": ["export_layers", "apply_filter", "select_features"]}
 ]}
