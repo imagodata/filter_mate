@@ -433,7 +433,8 @@ def check_chat(provider, layer, authcfg, work):
     from filter_mate.adapters.public_api.filter_mate_public_api import FilterMatePublicAPI
     from filter_mate.ui.controllers.agent_chat_controller import AgentChatController, agent_enabled
 
-    check("off by default", agent_enabled({}) is False and agent_enabled({"APP": {"OPTIONS": {}}}) is False)
+    check("on by default", agent_enabled({}) is True and agent_enabled({"APP": {"OPTIONS": {}}}) is True)
+    check("off when the user turns it off", agent_enabled({"APP": {"OPTIONS": {"AGENT": {"enabled": {"value": False}}}}}) is False)
     check("on when asked", agent_enabled({"APP": {"OPTIONS": {"AGENT": {"enabled": {"value": True}}}}}) is True)
 
     class Plugin:

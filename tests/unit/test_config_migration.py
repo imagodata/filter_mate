@@ -678,3 +678,37 @@ class TestRasterSourceMaxPixelsRenamed:
         config_helpers._migrate_config(user, defaults)
         section = user["APP"]["OPTIONS"]["CROSS_FILTER"]
         assert section["raster_source_max_pixels"]["value"] == 50000000 and "raster_selection_max_pixels" not in section
+
+
+class TestAgentOnByDefault:
+    """5.0.4: the AGENT section is on by default, and a configuration from before is turned on once."""
+
+    @staticmethod
+    def _default():
+        return json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+
+    def test_the_defaults_show_it(self):
+        agent = self._default()["APP"]["OPTIONS"]["AGENT"]
+        assert agent["enabled"]["value"] is True and agent["shown_by_default"]["_hidden"] is True
+
+    @pytest.mark.parametrize("enabled", [{"value": False, "choices": [True, False]}, False])
+    def test_an_earlier_off_is_turned_on_once(self, config_helpers, enabled):
+        default = self._default()
+        user = {"APP": {"OPTIONS": {"AGENT": {"enabled": enabled, "open_data_domains": {"value": "x.org"}}}}}
+        assert config_helpers._migrate_config(user, default)
+        agent = user["APP"]["OPTIONS"]["AGENT"]
+        value = agent["enabled"]["value"] if isinstance(agent["enabled"], dict) else agent["enabled"]
+        assert value is True and "shown_by_default" in agent and agent["open_data_domains"]["value"] == "x.org"
+
+    def test_a_later_off_is_kept(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"OPTIONS": {"AGENT": {"enabled": {"value": False}, "shown_by_default": {"value": True}}}}}
+        config_helpers._migrate_config(user, default)
+        assert user["APP"]["OPTIONS"]["AGENT"]["enabled"]["value"] is False
+
+    def test_a_configuration_without_the_section_gets_it_on(self, config_helpers):
+        default = self._default()
+        user = {"APP": {"OPTIONS": {}}}
+        config_helpers._migrate_config(user, default)
+        assert user["APP"]["OPTIONS"]["AGENT"]["enabled"]["value"] is True
+
