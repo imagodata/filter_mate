@@ -827,7 +827,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._fix_toolbox_icons()
         self._setup_backend_indicator()
         from .ui.layout.dock_chrome import install_dock_chrome
-        install_dock_chrome(self)  # favorites in the title bar, EXPLORING that folds away
+        install_dock_chrome(self)  # favorites in the title bar, two stacks of sections
         self._setup_action_bar_layout()
         self._setup_exploring_tab_widgets()
         self._setup_filtering_tab_widgets()
@@ -7097,9 +7097,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             from .ui.layout.mockup_layout import add_agent_section
             if agent_enabled(self.CONFIG_DATA):
                 self._agent_chat = AgentChatController(lambda page: add_agent_section(self, page), plugin, self)
-                folder = getattr(self, '_fm_exploring_folder', None)
-                if folder is not None:
-                    folder.follow_section()  # AGENT may be the open section already
         except Exception:
             logger.exception("Agent panel could not be installed")
 
