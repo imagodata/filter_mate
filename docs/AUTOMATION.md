@@ -240,6 +240,20 @@ curl -s -X POST localhost:8000/export -H "X-API-Key: $KEY" -H "Content-Type: app
 
 ## MCP server
 
+FilterMate has two MCP servers, with the same tool names:
+
+| | Built into the plugin | stdio server |
+|---|---|---|
+| Where it runs | inside QGIS, `http://127.0.0.1:17823/mcp` (port configurable) | outside QGIS, started by the client |
+| Needs | nothing: no Python package, no REST API | the REST API running in QGIS, `pip install mcp` on the client side |
+| Turned on | AGENT settings, tab **Other applications** (off by default) | by the client's configuration |
+| Access | Bearer token, loopback only | API key of the REST API |
+| Rules | those of the chat: same tools and Sources ticks, same SQL allowlist, exports and added or removed layers confirmed in QGIS, each change a step of the AGENT history | those of the REST API |
+
+The built-in server is described in [docs/AGENT_MODE.md](AGENT_MODE.md#other-applications-mcp-server-of-the-plugin): its
+buttons copy the configuration for MCP clients, the Claude Desktop entry (through `mcp-remote`) and the `claude mcp add`
+command. The rest of this section is about the stdio server.
+
 `filtermate_api/mcp/` is a [Model Context Protocol](https://modelcontextprotocol.io) server that lets an AI assistant
 (Claude Code, Claude Desktop, any MCP client) list, filter, undo and export layers of the open QGIS project. It does
 not talk to QGIS itself: it speaks MCP over **stdio**, started by the client *outside* QGIS, and relays each tool call
@@ -328,7 +342,7 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `list_layers` | `GET /layers` | layers with id, name, kind (vector / raster / point cloud), CRS, active filter |
 | `filter_status` | `GET /filters/status` | vector filters active, last change, last error |
 | `filter_state` | `GET /filters/state` | every layer filtered now, of any kind (subset, clipped source) |
-| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer: plain conditions only, a subquery or a function outside the list answers 400 |
+| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer: plain conditions only, a subquery or a function outside the list answers 400. Without `operator` it replaces the current filter; `AND`, `OR` or `AND NOT` combine it with the current one (narrow, widen, remove). The answer gives the filter replaced and the filters active after the call |
 | `describe_layer` | `GET /layers/details` | fields, bands (with the classes of a paletted band) or point attributes of a layer |
 | `field_values` | `GET /layers/field-values` | distinct values of a vector field, minimum and maximum; refused on web services |
 | `layer_statistics` | `POST /layers/statistics` | count, sum, mean, extremes of a field, or lengths and areas of the geometries, in all or by the values of a field; refused on web services and above 500 000 features |

@@ -71,9 +71,18 @@ bash scripts/prepare_plugin_zip.sh
 
 It reads the version from `metadata.txt` and writes `dist/filter_mate_v<VERSION>.zip` without tests, scripts, website, `.ts` files and development folders. Releases are made by pushing a `v<version>` tag; `.github/workflows/release.yml` checks the tag against `metadata.txt`, tests, builds the zip and publishes. The release job also runs `scripts/publish_qgis.py <zip> --validate-only`, which scans the unpacked zip with Bandit, detect-secrets and flake8 (what plugins.qgis.org blocks a version for, whatever the severity; B404 `import subprocess` is not counted). Run it before tagging; it uses the installed tools, else `uvx`, else `pip --target`. Accept a false positive with `# nosec Bxxx - reason`, `# pragma: allowlist secret` or `# noqa: Exxx`, never by skipping the scan. Describe user-visible changes in `CHANGELOG.md`.
 
+Before tagging a release:
+
+1. One section `## [<version>] - <date>` in `CHANGELOG.md`: the release job copies that section alone into the GitHub release, so a version that gathers numbers never published has them in its own section. Keep `## [Unreleased]` above it.
+2. `version=` and the `changelog=` field of `metadata.txt`, then the badge of `README.md`. No `%` in `metadata.txt`: the configuration parser reads it (a test checks this).
+3. `python -m pytest tests/ -o "addopts="`, the headless scripts in the QGIS Docker images (`tests/qgis_headless/`) on 3.22, the LTR and the latest stable, and a real QGIS run of what changed.
+4. `bash scripts/prepare_plugin_zip.sh`, then `python3 scripts/publish_qgis.py dist/filter_mate_v<version>.zip --validate-only`; read its own exit code, not the one of a pipe.
+5. Push the tag `v<version>` on the merge commit. **The tag publishes**: plugins.qgis.org refuses a version number it has already received, even after a failed or manual upload, so never upload a zip by hand before the tag, and use a new number for any other try.
+6. Merge the site changes for the release (`website/`) after the tag: every push to `main` that touches `website/` deploys GitHub Pages.
+
 ## Commits and pull requests
 
-- Branch from `main`; pull requests target `main` and are merged with a merge commit once CI is green.
+- Branch from `main`; pull requests target `main` and are merged with a merge commit once the checks pass. The Tests and QGIS headless workflows are turned off on GitHub for now: run them locally (pytest, flake8, headless scripts in Docker) and say so in the pull request.
 - Write the commit subject in English, as a sentence about the behaviour, not the diff. The history reads, for example, "A removed layer no longer breaks the panel update, and its history goes too" and "REST API: web pages can no longer drive QGIS through the browser". A short prefix for an area is fine (`i18n:`, `Favorites sharing:`).
 - Keep one subject per commit. Explain the cause in the body when the fix is not obvious.
 - In the pull request, say what a user sees before and after, and how you tested (unit tests, headless run, real QGIS version).

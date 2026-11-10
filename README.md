@@ -2,7 +2,7 @@
 
 **🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers in QGIS, from one panel.**
 
-[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.0.5-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.0-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
@@ -12,7 +12,8 @@
 Pick a layer, select what matters on it, and FilterMate filters every other layer of the project by its relation to
 that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM
 clipped around a church. The filters stay on the existing project layers, keep their styles, can be undone, saved as favorites, exported,
-and replayed from Processing or a script.
+and replayed from Processing or a script. Or ask for them in a sentence: the AGENT section filters, selects and
+exports from a request, with the model you choose.
 
 <p align="center">
   <img src="website/img/guide/fm5_vector_multiple.png?v=4" alt="FilterMate panel with a vector layer: several features ticked in the multiple selection, then the layers to filter" width="260">
@@ -33,10 +34,12 @@ and replayed from Processing or a script.
 
 ## ⚙️ How it works
 
-The panel has four sections, used top to bottom.
+The panel has five sections in two stacks, one section open at a time in each: 🤖 AGENT and 🧭 EXPLORING above the
+splitter handle, 🔍 FILTERING, 📦 EXPORTING and 🔧 CONFIGURATION below.
 
 | Section | What you do there |
 |---|---|
+| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, adds open data and exports; each step can be undone. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
 | 🧭 **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
 | 🔍 **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
 | 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
@@ -59,15 +62,25 @@ the original source back, and project files are always saved with the original s
   no reload), with an OGR path for everything else. In the [documented Saint-Gaudens run](https://imagodata.github.io/filter_mate/stories.html#s1),
   12 layers from a 2.9 GB department-wide GeoPackage were filtered in under a second. Timings depend on the data, hardware and cache.
 - 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result.
-- 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, or an object drawn by a segmentation model (SAM 2.1, downloaded on request, runs on your CPU); a value condition on a point cloud attribute.
+- 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, with Claude, Mistral,
+  OpenAI or any compatible server, a local Ollama model, or a few free requests a month to try it. Filters apply at once
+  and each step can be undone; exports and added or removed layers are confirmed. Optional sources: open data portals,
+  WFS services, Sentinel-2 scenes, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
+  your computer use the same tools ([docs/AGENT_MODE.md](docs/AGENT_MODE.md)).
+- 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
+  on a point cloud attribute.
+- 🧩 **Objects drawn by SAM** (experimental): on an orthophoto, a click or a box and the SAM 2.1 model draws the object,
+  locally on your CPU; similar objects are proposed, to keep or reject. The objects filter other layers, become a
+  polygon layer, or are drawn from a layer of points or footprints in Processing ([docs/SEGMENTATION.md](docs/SEGMENTATION.md)).
 - ✏️ **Zone on the map**: draw a rectangle, polygon, freehand shape or circle; on a vector layer it selects the features it touches, on a raster it keeps the pixels inside it, on a point cloud it cuts the targets.
 - 🎨 **Raster bands**: tick the bands that drive the pipette and the value range, and display one in grey or up to three as a colour composite (false colour included).
 - ↩️ **Undo / Redo** of every filter, per layer, and a global history.
 - ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
-- 🤖 **Automation**: nine Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
-  other plugins, an optional REST API and an MCP server for AI assistants ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
-- ⚙️ **Configuration**: search a setting by name; display profile automatic from the screen or chosen (compact, normal, hidpi).
+- ⚙️ **Automation**: ten Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
+  other plugins, an optional REST API, and two MCP servers for AI assistants: one built into the plugin, one over stdio
+  ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+- 🔧 **Configuration**: search a setting by name; display profile automatic from the screen or chosen (compact, normal, hidpi).
 - 🧩 **QGIS 3.22 to 4.x**, Qt5 and Qt6, 🌗 light and dark themes, 🌍 34 languages.
 
 ## 📥 Installation
@@ -86,6 +99,8 @@ Manual install: download a zip from [GitHub Releases](https://github.com/imagoda
 | 🐘 PostgreSQL / PostGIS (optional) | `psycopg2`, shipped with most QGIS installs; otherwise `pip install psycopg2-binary` in the QGIS Python. |
 | ☁️ PDAL (optional) | PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing. Without it, point clouds are clipped by the QGIS exporter. |
 | 🌐 REST API (optional) | `pip install -r requirements-api.txt` (FastAPI, Uvicorn, Pydantic). |
+| 🧩 SAM (optional) | `onnxruntime`, installed into your QGIS profile after one confirmation, and the model (62 MB), downloaded on request. |
+| 🤖 AGENT | An API key of a provider (kept in the QGIS authentication database), a local Ollama model, or the free quota. Nothing else to install. |
 
 ## 🤖 Automation in two lines
 
@@ -106,7 +121,9 @@ The same operation is available as the `filtermate:cross_filter_from_raster` Pro
 |---|---|
 | 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
 | 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Sixteen business questions covering all nine combinations: twelve QGIS recordings and four illustrated recipes, in English and French. |
-| 🤖 [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API. |
+| 🤖 [docs/AGENT_MODE.md](docs/AGENT_MODE.md) | The AGENT section: providers, free quota, tools, undo, sources, the built-in MCP server. |
+| 🧩 [docs/SEGMENTATION.md](docs/SEGMENTATION.md) | Objects drawn by SAM: set up, use, Processing, what it is good at, with measured results. |
+| ⚙️ [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API, MCP servers. |
 | ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
 | 🏗️ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Source tree, code rules, tests and releases, for contributors. |
 | 📝 [CHANGELOG.md](CHANGELOG.md) | Release notes. |
@@ -118,8 +135,8 @@ pip install -r requirements-test.txt
 python -m pytest tests/ -o "addopts="     # unit tests, no QGIS needed (qgis.* is mocked)
 ```
 
-The CI also loads the plugin in the official QGIS Docker images (3.22 → nightly) and drives the dock with its GUI
-(`tests/qgis_headless/`). Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a map of the source tree and
+The scripts of `tests/qgis_headless/` load the plugin in the official QGIS Docker images (3.22 → nightly) and drive
+the dock with its GUI. Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a map of the source tree and
 [CONTRIBUTING.md](CONTRIBUTING.md) for the code rules (Qt5 / Qt6 guards, translations, zip build, pull requests).
 
 🐛 Bugs and 💬 ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues).
