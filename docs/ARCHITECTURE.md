@@ -1,8 +1,8 @@
 # FilterMate architecture
 
-This page is a map of the source tree for a developer who has just cloned the repository. It describes FilterMate 5.0 (QGIS 3.22 to 4.x, Qt5 and Qt6). Paths are relative to the repository root, which is the plugin folder (`filter_mate/`).
+This page is a map of the source tree for a developer who has just cloned the repository. It describes FilterMate 5.1 (QGIS 3.22 to 4.x, Qt5 and Qt6). Paths are relative to the repository root, which is the plugin folder (`filter_mate/`).
 
-Related documents: [AUTOMATION.md](AUTOMATION.md) (Processing, Python API, REST API), [../extensions/README.md](../extensions/README.md) (extension system), [../adapters/backends/README.md](../adapters/backends/README.md) (backends, written for 4.1), [../CONTRIBUTING.md](../CONTRIBUTING.md).
+Related documents: [AUTOMATION.md](AUTOMATION.md) (Processing, Python API, REST API), [AGENT_MODE.md](AGENT_MODE.md) (AGENT section, MCP servers, free quota), [SEGMENTATION.md](SEGMENTATION.md) (objects drawn by SAM), [../filtermate_core/README.md](../filtermate_core/README.md) (host-free core), [../extensions/README.md](../extensions/README.md) (extension system), [../adapters/backends/README.md](../adapters/backends/README.md) (backends, written for 4.1), [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Layout
 
@@ -10,12 +10,14 @@ The code follows a hexagonal layout: `core/` holds the logic and the ports (abst
 
 | Folder | Role |
 |---|---|
-| `core/` | Domain objects, ports, services, the filter task and its handlers. |
-| `adapters/` | Backends (PostgreSQL, Spatialite, OGR, memory), QGIS adapters, repositories, public API. |
+| `filtermate_core/` | The filtering semantics free of any host (no QGIS, Qt nor GDAL): criteria, expression combination, the PostGIS and SpatiaLite SQL of the spatial filters, the geometric filter on shapely. |
+| `core/` | Domain objects, ports, services, the filter task and its handlers; `core/agent/` for the AGENT section. |
+| `adapters/` | Backends (PostgreSQL, Spatialite, OGR, memory), QGIS adapters, repositories, public API; `adapters/agent/` for the network and the history of AGENT. |
 | `infrastructure/` | Cross-cutting code: caches, database helpers, logging, DI container, constants, utilities. |
 | `ui/` | Controllers, managers, widgets, dialogs, styles and layout of the dock widget. |
 | `processing/` | Processing provider, algorithms and shipped models. |
-| `filtermate_api/` | FastAPI REST server. |
+| `filtermate_api/` | FastAPI REST server, the tools of the chat (`agent_tools.py`) and the stdio MCP server (`mcp/`). |
+| `free-quota-proxy/` | Cloudflare Worker that relays the free quota of AGENT. Not shipped in the zip. |
 | `extensions/` | Optional modules discovered at startup (QFieldCloud, favorites sharing). |
 | `config/` | Default configuration and configuration helpers. |
 | `resources/` | Fonts and QSS style sheets. |
@@ -31,8 +33,12 @@ Other top-level items: `icons/` (button icons), `website/` (static site publishe
 __init__.py            classFactory(iface) -> FilterMate(iface)
 filter_mate.py         FilterMate: initGui, menu and toolbar, extensions, Processing provider, unload
 filter_mate_app.py     FilterMateApp: layer state, task management, dock lifecycle
-filter_mate_dockwidget.py   FilterMateDockWidget: the panel (EXPLORING, FILTERING, EXPORTING, configuration)
+filter_mate_dockwidget.py   FilterMateDockWidget: the panel (AGENT, EXPLORING, FILTERING, EXPORTING, configuration)
 ```
+
+The dock has two stacks of sections on either side of a splitter (`ui/layout/dock_chrome.py`): AGENT and EXPLORING
+above, FILTERING, EXPORTING and CONFIGURATION below, one section open at most in each. Opening AGENT folds EXPLORING
+and FILTERING; opening FILTERING opens EXPLORING and folds AGENT. The splitter share is kept in the QGIS settings.
 
 - `FilterMate.initGui` calls `_init_extensions()` and `initProcessing()`. `metadata.txt` declares `hasProcessingProvider=yes`, so `qgis_process` calls `initProcessing()` alone, with no `iface`.
 - `FilterMate.run()` creates `FilterMateApp` and calls `FilterMateApp.run()`, which creates the dock widget (delegated to `AppInitializer` in `core/services/app_initializer.py` when available).
@@ -50,6 +56,9 @@ filter_mate_dockwidget.py   FilterMateDockWidget: the panel (EXPLORING, FILTERIN
 - `tasks/`: `filter_task.py` (`FilterEngineTask`, a `QgsTask`) and the handlers it delegates to (`filtering_orchestrator.py`, `finished_handler.py`, `export_handler.py`, `subset_management_handler.py`, ...), with sub-packages `dispatchers/`, `executors/`, `builders/`, `collectors/`, `connectors/`, `cache/`. `layer_management_task.py` and `expression_evaluation_task.py` are separate tasks.
 - `filter/`: `filter_orchestrator.py` (per-layer backend choice and fallback), `expression_builder.py`, `expression_combiner.py`, `filter_chain.py`.
 - `geometry/`, `optimization/`, `strategies/`, `export/`: buffer and CRS helpers, backend auto-selection and query analysis, multi-step filtering, layer exporters.
+- `agent/`: the conversation of AGENT without QGIS, Qt nor network (provider adapters in `providers/`, `session.py` with its 16-turn limit, `tool_catalog.json`, `tool_executor.py`, `sql_guard.py` the allowlist of filters, `project_summary.py` the map context, `open_data.py` and `sources.py`, `mcp_server.py` the built-in MCP server, `mcp_client.py` the remote connectors). Details in [AGENT_MODE.md](AGENT_MODE.md).
+
+Modules that need neither QGIS, Qt nor GDAL moved to `filtermate_core/` in 5.1; their former paths under `core/` and `infrastructure/` are compatibility shims. `tests/test_filtermate_core_is_host_free.py` keeps the core free of `qgis`, `PyQt`, `osgeo` and of the plugin's other packages.
 
 ### `adapters/`
 
@@ -57,7 +66,8 @@ filter_mate_dockwidget.py   FilterMateDockWidget: the panel (EXPLORING, FILTERIN
 - `backend_registry.py`: `BackendRegistry` returns the executor for a layer's provider type. It is created in `filter_mate_app.py` and injected into `FilterEngineTask`.
 - `qgis/`: QGIS adapters (layers, expressions, signals in `signals/`, `tasks/`) and `coverage_layers/` for rasters and point clouds (see below).
 - `repositories/`: layer and history storage.
-- `public_api/`: `operations.py` and `filter_mate_public_api.py`.
+- `public_api/`: `operations.py` and `filter_mate_public_api.py`; `introspection.py` (fields, values, statistics, samples, identify, map state), `project_control.py` (zoom, selection, visibility, adding and removing layers) and `processing_tools.py` (the Processing algorithms AGENT may find, describe and run, under `core/agent/processing_policy.py`) serve the chat and the MCP servers.
+- `agent/`: `qt_transport.py` (streamed requests), `bounded_http.py` (every network read of the agent: no redirect, time and size capped), `free_quota.py`, `native_mcp.py`, `turn_checkpoint.py` and `turn_effects.py` (undo of a turn and of its steps), `transcript_store.py`.
 - `task_builder.py` (`TaskParameterBuilder`), `filter_result_handler.py`, `undo_redo_handler.py`, `database_manager.py`, `app_bridge.py` (service locator used by the legacy app).
 
 ### `infrastructure/`
@@ -108,11 +118,12 @@ When the current layer is a raster or a point cloud, EXPLORING shows a panel of 
   - `raster_adapter.py`, `point_cloud_footprint.py`, `geometry_tools.py`: raster statistics and pixel selection, footprint of selected points, geometry helpers.
   - `gdal_warp.py`, `pdal_cli.py`, `hag_task.py`: `gdal.Warp` wrapper, the `pdal` executable, height above ground.
   - `exporters.py`, `favorites_bridge.py`.
+  - `sam_model.py`, `segmentation.py`: the SAM 2.1 model (downloaded on request, checked against its SHA-256) run with `onnxruntime`, and the objects it draws. `ui/controllers/segmentation_controller.py` drives the pipette; `processing/algorithms/segmentation_algorithm.py` is `filtermate:segment_from_features`. `onnxruntime` is declared by `python_dependencies` in `metadata.txt` and installed into the QGIS profile after a confirmation. See [SEGMENTATION.md](SEGMENTATION.md).
 - Derived sources: a raster is clipped to a VRT, a point cloud to a COPC file. The layer keeps its id and style; its data source is swapped (`setDataSource`). `snapshots.py` keeps the registry of swapped layers (`DerivedSourceRegistry`): it writes the original source back into the saved project XML and restores every layer when the plugin unloads.
 - Cache: `cache.py` manages the folder of derived files, `<QGIS profile>/filtermate/cache/<session>/` unless `APP.OPTIONS.CROSS_FILTER.cache_dir` is set. `collect_garbage` removes files that no layer or undo step uses. `cache_max_gb` caps the size. A lock file protects a live session from other QGIS instances.
 - When the source is a vector layer, raster and point cloud targets are removed from the vector task and clipped by the same source geometry after it is launched (`delegate_vector_source_coverage_task`).
 
-## Streaming sources: web services and remote files (5.1)
+## Streaming sources: web services and remote files (5.0)
 
 A layer whose data is read over the network (WFS, OGC API Features, ArcGIS Feature / Map Server, WMS / WMTS / XYZ, WCS, vector tiles, remote EPT / COPC, `/vsicurl/` files, MSSQL / Oracle / HANA) follows the same paths as a local one, with three rules: no network read on the main thread, every read bounded, and no result that is wrong or partial without saying so. The plan and its history are in [internal/plans/V5_STREAMING/](internal/plans/V5_STREAMING/README.md).
 
@@ -137,6 +148,7 @@ Three surfaces share it:
 | Processing, `qgis_process`, models | `processing/` |
 | Python API | `adapters/public_api/filter_mate_public_api.py`, returned by `FilterMate.get_public_api()` |
 | REST API | `filtermate_api/` through `QGISFilterMateAccessor` |
+| Chat of AGENT and both MCP servers | `filtermate_api/agent_tools.py` (chat, built-in MCP server), `filtermate_api/mcp/` (stdio, through the REST API) |
 
 Parameters, routes and examples are in [AUTOMATION.md](AUTOMATION.md). Add a new operation in `operations.py` first, then expose it on each surface.
 
@@ -168,5 +180,6 @@ User strings go through `tr()` or `QCoreApplication.translate`. `i18n/FilterMate
 - `tests/qgis_headless/`: scripts run inside QGIS Docker images (fixtures, engine smoke test, dock smoke test under Xvfb). They are not pytest modules. The `check_stream_*.py` scripts check the streaming sources against loopback HTTP fixtures (WFS, OGC API, ArcGIS, COG, MBTiles, COPC / EPT); `FM_STREAM_PUBLIC=1` also runs them, and `check_stream_e2e.py`, against public services.
 - `.github/workflows/test.yml`: flake8, then pytest on Python 3.10 and 3.12.
 - `.github/workflows/qgis-headless.yml`: the headless scripts on `qgis/qgis` images from QGIS 3.22 to nightly.
+- These two workflows are turned off on GitHub since 2026-11-06: run `python -m pytest tests/ -o "addopts="` and the headless scripts in Docker locally before a merge (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
 - `.github/workflows/release.yml`: on a `v*.*.*` tag, runs the tests, checks the tag against `metadata.txt`, builds the zip with `scripts/prepare_plugin_zip.sh`, creates the GitHub release and publishes to plugins.qgis.org.
 - `.github/workflows/deploy-docs.yml`: publishes `website/` to GitHub Pages.

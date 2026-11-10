@@ -1,19 +1,20 @@
 # Agent mode: foundations
 
-Status: the four steps are in the code. The chat is on by default since 5.0.4 (`APP.OPTIONS.AGENT.enabled`, read when the
-panel opens; a configuration written while it was off is turned on once), with a free quota and then the user's own key.
-For developers of FilterMate.
+Status: the seven steps below are in the code, first published in 5.1.0 (experimental). The chat is on by default
+(`APP.OPTIONS.AGENT.enabled`, read when the panel opens; a configuration written while it was off is turned on once), with
+a free quota and then the user's own key. For developers of FilterMate; the user guide has a chapter for users
+(https://imagodata.github.io/filter_mate/guide.html#agent).
 
 ## Goal
 
-An AGENT section, first in the accordion before FILTERING: the user writes "buildings above 1200 m in the selected commune" and the agent filters.
+An AGENT section, first in the upper stack of the dock, before EXPLORING: the user writes "buildings above 1200 m in the selected commune" and the agent filters.
 Any provider, a few free requests through a relay, then the user's own key, and external MCP clients on the same tools.
 
 | Step | Content | State |
 |---|---|---|
 | 1. Foundations | Neutral conversation, provider adapters, tool catalog, read tools, evaluation bench | done |
 | 2. Chat | Panel, Qt transport, key in `QgsAuthManager`, undo of a whole turn | done |
-| 3. Free quota | Relay holding the key, per-install and global limits | done |
+| 3. Free quota | Relay holding the key, limits per token, per address and per month | done |
 | 4. Native MCP | Local MCP server without dependencies, shared activity log | done |
 | 5. Map context | The map, the layer tree and what changed, sent with each request; style, joins, relations on demand | done |
 | 6. Reading the data | Statistics by group, lengths and areas, a sample of features, what lies at a point | done |
@@ -90,7 +91,10 @@ Rules worth keeping:
   - on demand, `describe_layer`: place in the tree, extent, style (renderer, its field, how many classes, labels,
     opacity, scale range), joins and relations. No attribute value is in the style: class values and labels stay out,
     as `field_values` does when values are not shared. The extent of a web service is not read.
-- **Two stacks of sections** (`ui/layout/dock_chrome.py`): EXPLORING / AGENT above the splitter, FILTERING / EXPORTING /
+- **At most 16 model turns per request** (`max_model_turns`, `core/agent/session.py`). Two turns before the limit the
+  model is told so, and a request that reaches it stops with a sentence that says why; what was done stays and can be
+  undone.
+- **Two stacks of sections** (`ui/layout/dock_chrome.py`): AGENT / EXPLORING above the splitter, FILTERING / EXPORTING /
   CONFIGURATION below, one section open at most in each. AGENT folds EXPLORING and FILTERING; FILTERING brings EXPLORING
   back. `tabTools_current_index` stays 0 / 1 / 2 for the lower sections and is -1 when none is open.
 
@@ -305,4 +309,9 @@ one server-side key. It is deployed at https://filtermate-free-quota.filtermate-
 point to another relay with `APP.OPTIONS.AGENT.free_quota_url`. `tests/qgis_headless/check_free_quota_live.py` sends one real
 request through it, the way the plugin does.
 
-See `free-quota-proxy/README.md` for deployment, limits and what happens when the budget is reached.
+Limits by default, all set on the relay: 200 $ a month for the whole service, 0.50 $ a month per access token, 2 $ a month
+per IP address (an IPv6 address counts for its /64), 3 new tokens per address and per day, 300 requests per token and per day,
+Claude Haiku 5.5 only, no image. Once a limit is reached, the panel asks for the user's own key. The relay counts what is spent
+and keeps no conversation.
+
+See `free-quota-proxy/README.md` for deployment, every limit and what happens when the budget is reached.
