@@ -8,7 +8,7 @@ files of the turn alive.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from qgis.core import QgsProject
 
@@ -29,9 +29,12 @@ class TurnCheckpoint:
 
     def __init__(self) -> None:
         self._before: Dict[str, Tuple[LayerSnapshot, LayerKind]] = {}
+        self._steps: List[Tuple[str, Dict[str, LayerSnapshot]]] = []
         self._open = False
         # The request of the turn being run, kept as the description of its operation.
         self.label = ""
+        # Names a step from its tool call (the words the thread shows); None: the tool name.
+        self.describe: Optional[Callable[[Any], str]] = None
 
     @staticmethod
     def _snapshot(layer, kind):
@@ -42,17 +45,44 @@ class TurnCheckpoint:
             logger.info("Agent undo: %s not captured: %s", layer.name(), exc)
             return None
 
-    def begin(self) -> None:
-        """Called before each change of a turn: the first state of each layer, a layer added meanwhile included."""
+    def _label(self, call: Any) -> str:
+        if call is None:
+            return ""
+        try:
+            return self.describe(call) if self.describe is not None else str(getattr(call, "name", ""))
+        except Exception:
+            return str(getattr(call, "name", ""))
+
+    def begin(self, call: Any = None) -> None:
+        """Called before each change of a turn: the state of each layer then, a layer added meanwhile included.
+
+        The first state of a layer is what the turn restores; the state before each change is what "undo back to
+        here" restores, step by step.
+        """
         self._open = True
+        states: Dict[str, LayerSnapshot] = {}
         for layer in QgsProject.instance().mapLayers().values():
-            if layer.id() in self._before:
-                continue
             kind = layer_kind(layer)
-            if kind in _FILTERED_KINDS and layer.isValid():
-                snapshot = self._snapshot(layer, kind)
-                if snapshot is not None:
-                    self._before[layer.id()] = (snapshot, kind)
+            if kind not in _FILTERED_KINDS or not layer.isValid():
+                continue
+            snapshot = self._snapshot(layer, kind)
+            if snapshot is None:
+                continue
+            states[layer.id()] = snapshot
+            if layer.id() not in self._before:
+                self._before[layer.id()] = (snapshot, kind)
+        self._steps.append((self._label(call), states))
+
+    def _step_record(self, after: Dict[str, LayerSnapshot]) -> Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...]:
+        """For each step, the state before it of the layers it changed (next step's state, or the end of the turn)."""
+        steps = []
+        for index, (label, states) in enumerate(self._steps):
+            following = self._steps[index + 1][1] if index + 1 < len(self._steps) else after
+            changed = tuple(before for layer_id, before in states.items()
+                            if layer_id in following and not following[layer_id].same_state(before))
+            if changed:
+                steps.append((label, changed))
+        return tuple(steps)
 
     def commit(self) -> Sequence[str]:
         """Record the turn when it changed something; names of the layers it changed."""
@@ -62,14 +92,20 @@ class TurnCheckpoint:
         project = QgsProject.instance()
         changes = []
         names: List[str] = []
+        final: Dict[str, LayerSnapshot] = {}
         for layer_id, (before, kind) in self._before.items():
             layer = project.mapLayer(layer_id)
             after = self._snapshot(layer, kind) if layer is not None else None
+            if after is not None:
+                final[layer_id] = after
             if after is not None and not after.same_state(before):
                 changes.append((before, after))
                 names.append(layer.name())
+        steps = self._step_record(final)
         self._before = {}
-        _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL]))
+        self._steps = []
+        _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
+                                                   steps=steps if len(steps) > 1 else ()))
         return names
 
     @staticmethod
@@ -84,7 +120,7 @@ class TurnCheckpoint:
                 layer = project.mapLayer(before.layer_id)
                 layers.append(layer.name() if layer is not None else before.layer_id)
             return {"time": operation.timestamp, "request": operation.description, "layers": layers,
-                    "applied": applied}
+                    "applied": applied, "steps": [label for label, _states in getattr(operation, "steps", ())]}
 
         applied = [describe(operation, True) for operation in history.undo_stack(HISTORY_KEY)]
         undone = [describe(operation, False) for operation in reversed(history.redo_stack(HISTORY_KEY))]
@@ -127,6 +163,35 @@ class TurnCheckpoint:
                 left.append(layer.name())
                 refused = True
         return names, left, refused
+
+    def undo_to_step(self, step: int, description: str = "") -> Tuple[List[str], List[str]]:
+        """The layers of the last turn as they were before its step ``step``: a new step of the history, undoable.
+
+        Names of the layers changed, and of those left as they are (changed since, or refused).
+        """
+        history = _api_service().history
+        stack = history.undo_stack(HISTORY_KEY)
+        steps = getattr(stack[-1], "steps", ()) if stack else ()
+        if not 0 <= step < len(steps):
+            return [], []
+        targets: Dict[str, LayerSnapshot] = {}
+        for _label, befores in steps[step:]:
+            for before in befores:
+                targets.setdefault(before.layer_id, before)  # the state before the first change at or after it
+        project = QgsProject.instance()
+        pairs = []
+        for layer_id, target in targets.items():
+            layer = project.mapLayer(layer_id)
+            now = self._snapshot(layer, LayerKind(target.kind)) if layer is not None else None
+            if now is not None and not now.same_state(target):
+                pairs.append((now, target))
+        if not pairs:
+            return [], []
+        operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=(description or steps[step][0])[:MAX_LABEL])
+        names, left, refused = self._apply(operation, use_before=False)
+        if names and not refused:
+            history.push(operation)
+        return names, left
 
     def undo(self) -> Tuple[List[str], List[str]]:
         """Undo the last turn: names of the layers restored, and of those left as they are.

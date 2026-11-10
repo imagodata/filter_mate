@@ -111,6 +111,8 @@ class CrossOperation:
     description: str = ""
     op_id: int = field(default_factory=lambda: next(_op_counter))
     timestamp: float = field(default_factory=time.time)
+    # Steps of a turn of the agent, in order: (label, state before the step of each layer the step changed).
+    steps: Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...] = ()
 
     @property
     def layer_ids(self) -> Tuple[str, ...]:

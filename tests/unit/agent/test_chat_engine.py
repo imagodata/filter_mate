@@ -84,7 +84,7 @@ class Checkpoint:
         self.commits = 0
         self.fail = False
 
-    def begin(self):
+    def begin(self, call=None):
         if self.fail:
             raise RuntimeError("no")
         self.begins += 1

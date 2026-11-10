@@ -91,6 +91,7 @@ class AgentChatController(QObject):
         self._parent_widget = parent_widget
         self._engine: Optional[ChatEngine] = None
         self._checkpoint = TurnCheckpoint()
+        self._checkpoint.describe = self.describe_call
         self._last_request = ""
         self._tools = {tool.name: tool for tool in chat_tools()}
         self._connector_labels = {}
@@ -106,6 +107,7 @@ class AgentChatController(QObject):
         self.panel.redo_requested.connect(self._on_redo)
         self.panel.history_requested.connect(self._show_history)
         self.panel.resend_requested.connect(self._on_resend)
+        self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.settings_requested.connect(self.open_settings)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._restore_transcript()
@@ -223,6 +225,29 @@ class AgentChatController(QObject):
         return {"can_undo": can_undo, "can_redo": can_redo,
                 "undo_tip": _tr("Undo: {}").format(last) if can_undo and last else _tr("Nothing to undo."),
                 "redo_tip": _tr("Redo: {}").format(following) if can_redo and following else _tr("Nothing to redo.")}
+
+    def describe_call(self, call: ToolCallPart) -> str:
+        """A step of a turn, in the words of the thread, on one line."""
+        return one_line(self._describe(call), 120)
+
+    def _on_undo_to_step(self, step: int) -> None:
+        """Back to before a step of the last turn: a step of the history of its own, that Undo takes back."""
+        if self.chat_busy() or self._mcp.busy:
+            return
+        busy = self._checkpoint.busy()
+        if busy:
+            self._say(busy, error=True)
+            return
+        turns = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+        steps = turns[-1].get("steps", []) if turns else []
+        if not 0 <= step < len(steps):
+            return
+        restored, skipped = self._checkpoint.undo_to_step(step, _tr("Back to before: {}").format(steps[step]))
+        message = (_tr("Back to before: {}").format(steps[step]) if restored else _tr("Nothing to restore."))
+        if skipped:
+            message += " " + _tr("Changed since, left as is: {}.").format(", ".join(skipped))
+        self._say(message)
+        self._refresh_history()
 
     def _show_history(self) -> None:
         self._refresh_history()

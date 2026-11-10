@@ -48,8 +48,8 @@ class AsyncTransport(Protocol):
 
 
 class Checkpoint(Protocol):
-    def begin(self) -> None:
-        """Remember the state of the layers, once per request, before its first change."""
+    def begin(self, call: Optional[ToolCallPart] = None) -> None:
+        """Remember the state of the layers before a change: ``call`` names the step."""
 
     def commit(self) -> Sequence[str]:
         """Close the request; names of the layers it really changed."""
@@ -183,7 +183,7 @@ class ChatEngine:
         spec = self._executor.spec(call.name)
         if spec is not None and not spec.read_only:
             try:
-                self._checkpoint.begin()
+                self._checkpoint.begin(call)
             except Exception:
                 logger.exception("Agent undo point failed")
                 return ToolResultPart(call.call_id, _NO_UNDO_POINT, is_error=True)

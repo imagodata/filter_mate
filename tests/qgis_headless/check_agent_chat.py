@@ -840,9 +840,38 @@ def check_chat(provider, layer, authcfg, work):
     dialog.test_button.click()
     check("sources: test shows the answer", dialog.source_result.text() == "12 tools" and len(tested) == 1, dialog.source_result.text())
     dialog.close()
+    check_steps(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
     host.close()
+
+
+def check_steps(chat, provider, settings, ask, layer):
+    """Lot 2 of the undo plan: the steps of a turn, and "undo back to here"."""
+    panel = chat.panel
+    settings()
+    layer.setSubsetString("")
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}, "toolu_a")),
+                   (200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 2000'}, "toolu_b")),
+                   (200, {}, text_turn("Deux filtres.")))
+    ask("deux filtres")
+    turns = [turn for turn in chat._checkpoint.turns() if turn.get("applied")]
+    steps = turns[-1].get("steps", []) if turns else []
+    check("steps: a turn of two changes keeps both", len(steps) == 2 and all("communes" in label for label in steps), steps)
+    chat._show_history()
+    items = [panel.history_list.item(index) for index in range(panel.history_list.count())]
+    step_items = [item for item in items if item.data(Qt.ItemDataRole.UserRole + 1) is not None]
+    check("steps: listed under the last request", len(step_items) == 2, [item.text() for item in items])
+    panel.history_list.setCurrentItem(step_items[1])
+    check("steps: undo back to here is offered on a step, send again is not", panel.step_button.isEnabled()
+          and not panel.resend_button.isEnabled())
+    panel.step_button.click()
+    check("steps: back to before the second step", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    chat._on_undo()
+    check("steps: that is a step of the history too", layer.subsetString() == '"pop" > 2000', layer.subsetString())
+    chat._on_undo()
+    check("steps: and the turn still undoes whole", layer.subsetString() == "", layer.subsetString())
+    panel.show_thread()
 
 
 def check_free_quota(chat, provider, settings, ask):
