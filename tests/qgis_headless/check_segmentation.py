@@ -14,6 +14,7 @@ from pathlib import Path
 import sys
 import tempfile
 import threading
+import time
 import types
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -31,7 +32,8 @@ from qgis.PyQt.QtGui import QColor, QImage
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = "fm_segmentation_check"
-for part in ("", "core", "core.domain", "core.ports", "adapters", "adapters.qgis", "adapters.qgis.coverage_layers",
+for part in ("", "core", "core.agent", "core.domain", "core.ports", "adapters", "adapters.agent", "adapters.public_api",
+             "adapters.qgis", "adapters.qgis.coverage_layers",
              "ui", "ui.controllers", "ui.tools", "ui.widgets", "ui.widgets.coverage_panels",
              "processing", "processing.algorithms"):
     module = types.ModuleType(PACKAGE + ("." + part if part else ""))
@@ -532,6 +534,207 @@ def test_objects_layer(layer):
           messages[-1])
 
 
+def test_agent_objects(layer):
+    """The objects for the agent: those of the dock read and summed up, SAM run from a guide layer as a tool."""
+    from qgis.core import QgsFeature, QgsVectorLayer
+    drawn = importlib.import_module(PACKAGE + ".adapters.public_api.drawn_objects")
+    effects = importlib.import_module(PACKAGE + ".adapters.agent.turn_effects")
+    coverage = importlib.import_module(PACKAGE + ".ui.controllers.coverage_mode_controller")
+    kinds = importlib.import_module(PACKAGE + ".core.domain.layer_kind")
+    project = QgsProject.instance()
+    if project.mapLayer(layer.id()) is None:
+        project.addMapLayer(layer)
+    extent = layer.extent()
+    x, y = extent.xMinimum(), extent.yMinimum()
+    first = QgsGeometry.fromRect(QgsRectangle(x + 10, y + 10, x + 20, y + 30)).asWkt()
+    second = QgsGeometry.fromRect(QgsRectangle(x + 50, y + 50, x + 54, y + 55)).asWkt()
+
+    # The dock: the raster shown from its panel, the others from the state kept when they were left.
+    host = types.SimpleNamespace(
+        _panel_states={layer.id(): {"pipette_segments": ["stale"]}, "left": {"pipette_segments": [first]},
+                       "nothing": {"pipette_segments": []}, "no state": None},
+        _active_layer=layer, _raster_panel=types.SimpleNamespace(_segments=[first, second]),
+        _kind=kinds.LayerKind.RASTER)
+    panel = ready_panel(layer)
+    panel.set_pick_target(panels.PICK_OBJECT)
+    panel.add_segments([first, second])
+    sam_state = dict(panel.state())
+    host = types.SimpleNamespace(
+        _panel_states={layer.id(): {"pipette_segments": ["stale"]}, "left": sam_state,
+                       "colour": dict(sam_state, pipette_engine=panels.ENGINE_COLOR),
+                       "pixels": dict(sam_state, pipette_target=panels.PICK_SIMILAR), "no state": None},
+        _active_layer=layer, _raster_panel=panel, _kind=kinds.LayerKind.RASTER)
+    found = coverage.CoverageModeController.drawn_objects(host)
+    check("the dock tells the objects that select: the panel shown first, then the states kept with SAM",
+          found == {layer.id(): [first, second], "left": [first, second]}, found)
+    panel._engine_combo.setCurrentIndex(panel._engine_combo.findData(panels.ENGINE_COLOR))
+    found = coverage.CoverageModeController.drawn_objects(host)
+    check("with the colour engine the objects wait in the panel and are not offered",
+          panel.object_engine() == panels.ENGINE_COLOR and layer.id() not in found, found)
+    panel._engine_combo.setCurrentIndex(panel._engine_combo.findData(panels.ENGINE_SAM))
+    host._active_layer = QgsRasterLayer(layer.source(), "another", "gdal")
+    found = coverage.CoverageModeController.drawn_objects(host)
+    check("a panel that shows another raster lends it nothing", host._active_layer.id() not in found, found)
+    host._active_layer = layer
+    rows = drawn.summarize_drawn({layer.id(): [first, second, "POLYGON(("], "left": [first]})
+    check("map_context sums them up for each raster of the project",
+          len(rows) == 1 and rows[0]["count"] == 2 and rows[0]["name"] == layer.name(), rows)
+    if rows:
+        box = QgsGeometry.fromWkt(rows[0]["extent_wkt"]).boundingBox()
+        check("with their area on the ground and their extent",
+              abs(rows[0]["area_m2"] - 220.0) < 3 and abs(box.width() - 44) < 1e-6 and abs(box.height() - 45) < 1e-6,
+              (rows[0]["area_m2"], box.toString()))
+
+    # segment_objects: filtermate:segment_from_features run on the main thread, its layer added to the project.
+    model = BrightModel()
+    install_model(model)
+    ready = segmentation.model_state
+    segmentation.model_state = lambda: segmentation.ModelState(True, True)
+    truth = QgsGeometry.fromRect(QgsRectangle(extent.xMinimum() + SQUARE[2] * 0.5, extent.yMaximum() - SQUARE[1] * 0.5,
+                                              extent.xMinimum() + SQUARE[3] * 0.5, extent.yMaximum() - SQUARE[0] * 0.5))
+    guides = QgsVectorLayer("Polygon?crs=EPSG:2154&field=name:string", "footprints", "memory")
+    features = []
+    for name, geometry in (("roof", QgsGeometry.fromRect(truth.boundingBox().buffered(-3.0))),
+                           ("away", QgsGeometry.fromRect(QgsRectangle(extent.xMaximum() + 50, extent.yMaximum() + 50,
+                                                                      extent.xMaximum() + 60, extent.yMaximum() + 60)))):
+        feature = QgsFeature(guides.fields())
+        feature.setAttributes([name])
+        feature.setGeometry(geometry)
+        features.append(feature)
+    guides.dataProvider().addFeatures(features)
+    lines = QgsVectorLayer("LineString?crs=EPSG:2154", "roads", "memory")
+    project.addMapLayers([guides, lines])
+    added = []
+    try:
+        before = set(project.mapLayers())
+        answer = drawn.segment_objects(layer.name(), "footprints", selected_only=True)
+        added = [project.mapLayer(i) for i in set(project.mapLayers()) - before]
+        check("no selection: every footprint is a guide, the one off the raster without object",
+              answer["guide_features"] == 2 and answer["drawn"] == 1 and answer["without_object"] == 1
+              and not answer["stopped_early"], answer)
+        check("one layer added, named after the guide, in the CRS of the raster",
+              len(added) == 1 and added[0].name() == "footprints (SAM)" and added[0].crs() == layer.crs()
+              and answer["layer"]["layer_id"] == added[0].id(), [a.name() for a in added])
+        if added:
+            feature = next(added[0].getFeatures())
+            check("the object on the bright square, with the attributes of its footprint",
+                  feature["name"] == "roof" and segmentation.overlap(feature.geometry(), truth) > 0.97,
+                  (feature["name"], round(segmentation.overlap(feature.geometry(), truth), 3)))
+            check("outlined, the raster stays visible", added[0].renderer().symbol().color().alpha() == 0)
+        check("the score and the overlap summed up", answer.get("sam_score", {}).get("median") == 0.9
+              and 0.8 < answer.get("sam_iou", {}).get("median", 0) < 1.0 and answer["sam_iou"]["below_half"] == 0,
+              (answer.get("sam_score"), answer.get("sam_iou")))
+        guides.selectByIds([next(f.id() for f in guides.getFeatures() if f["name"] == "roof")])
+        answer = drawn.segment_objects(layer.id(), guides.id(), name="toits")
+        added += [project.mapLayer(answer["layer"]["layer_id"])]
+        check("the selection only, by layer ids, under the name asked",
+              answer["guide_features"] == 1 and answer["drawn"] == 1 and answer["layer"]["name"] == "toits", answer)
+
+        def refused(fragment, *args, **kwargs):
+            try:
+                drawn.segment_objects(*args, **kwargs)
+            except ValueError as exc:
+                return fragment in str(exc), str(exc)
+            return False, "not refused"
+
+        guides.removeSelection()
+
+        # The time allowed: the run stops between two windows, and a run that drew them all is not "stopped".
+        class SlowModel(BrightModel):
+            def __init__(self, delay, fail=""):
+                super().__init__()
+                self.delay, self.fail, self.running = delay, fail, []
+
+            def embed(self, rgb):
+                self.running.append(list(operations._RUNNING))
+                time.sleep(self.delay)
+                if self.fail:
+                    raise RuntimeError(self.fail)
+                return super().embed(rgb)
+
+        operations = importlib.import_module(PACKAGE + ".adapters.public_api.operations")
+        large = QgsFeature(guides.fields())
+        large.setAttributes(["field"])
+        large.setGeometry(QgsGeometry.fromRect(QgsRectangle(x + 20, y + 20, x + 380, y + 380)))  # a window of its own
+        guides.dataProvider().addFeatures([large])
+        guides.selectByIds([f.id() for f in guides.getFeatures() if f["name"] in ("roof", "field")])
+        slow = SlowModel(0.6)
+        install_model(slow)
+        budget = drawn.BUDGET_SECONDS
+        drawn.BUDGET_SECONDS = 0.3
+        try:
+            answer = drawn.segment_objects(layer.name(), "footprints")
+            added += [project.mapLayer(answer["layer"]["layer_id"])]
+            check("past the time allowed the run stops between two windows, and says so",
+                  slow.embedded == 1 and answer["drawn"] == 1 and answer["stopped_early"] and answer["guide_features"] == 2,
+                  (slow.embedded, answer))
+            check("other operations are refused while it runs, not after",
+                  slow.running == [["segment_objects"]] and operations._RUNNING == [], (slow.running, operations._RUNNING))
+            guides.selectByIds([next(f.id() for f in guides.getFeatures() if f["name"] == "roof")])
+            answer = drawn.segment_objects(layer.name(), "footprints")
+            added += [project.mapLayer(answer["layer"]["layer_id"])]
+            check("a run that drew every window past the time allowed was not stopped",
+                  answer["drawn"] == 1 and not answer["stopped_early"], answer)
+            install_model(SlowModel(0.0, fail="/home/user/QGIS/profiles/default/filtermate/models/encoder.onnx: bad file"))
+            ok, message = refused("no window of the raster could be drawn", layer.name(), "footprints")
+            check("an error is told in general words, its path stays in the log", ok and "/home" not in message, message)
+        finally:
+            drawn.BUDGET_SECONDS = budget
+            install_model(model)
+            guides.removeSelection()
+            guides.dataProvider().deleteFeatures([f.id() for f in guides.getFeatures() if f["name"] == "field"])
+
+        check("more guide features than the limit: refused, select fewer",
+              *refused("at most 1 are taken", layer.name(), "footprints", limit=1))
+        check("a line frames no object", *refused("neither points nor polygons", layer.name(), "roads"))
+        check("the guide as raster: refused", *refused("is not a raster layer", "footprints", "footprints"))
+        check("an unknown raster: refused", *refused("not found", "ghost", "footprints"))
+        budget = drawn.BUDGET_SECONDS
+        drawn.BUDGET_SECONDS = 0.0
+        try:
+            check("the time allowed spent before any window: nothing drawn, and said so",
+                  *refused("ran out before an object was drawn", layer.name(), "footprints"))
+        finally:
+            drawn.BUDGET_SECONDS = budget
+        segmentation.model_state = lambda: segmentation.ModelState(True, False)
+        check("without SAM: what to tell the user", *refused("installs it from the FilterMate dock", layer.name(), "footprints"))
+        segmentation.model_state = lambda: segmentation.ModelState(True, True)
+
+        # Undo of a turn: the layer, a file, is taken away and Redo opens it again with its objects.
+        recorder = effects.EffectsRecorder()
+        recorder.before_call(types.SimpleNamespace(name="segment_objects", arguments={}))
+        answer = drawn.segment_objects(layer.name(), "footprints")
+        made = answer["layer"]["layer_id"]
+        check("the objects are a file, not a memory layer", project.mapLayer(made).providerType() == "ogr"
+              and project.mapLayer(made).source().lower().split("|")[0].endswith(".gpkg"), project.mapLayer(made).source())
+        recorded = recorder.finish()
+        check("the turn records the layer added, with its definition",
+              [(e[0], e[1]) for e in recorded] == [("added", made)] and recorded[0][2], [e[:2] for e in recorded])
+        done, left = effects.apply_effects(recorded, undo=True)
+        check("undo removes it", project.mapLayer(made) is None and done == ["footprints (SAM)"], (done, left))
+        done, left = effects.apply_effects(recorded, undo=False)
+        back = project.mapLayer(made)
+        check("redo opens it again, objects and style", back is not None and back.featureCount() == 1 and not left
+              and back.renderer().symbol().color().alpha() == 0, (done, left))
+        # A layer held in memory would come back empty: the turn says it cannot.
+        memory = QgsVectorLayer("Polygon?crs=EPSG:2154", "scratch", "memory")
+        memory_id = memory.id()  # the layer object is deleted by the undo below
+        recorder.before_call(types.SimpleNamespace(name="segment_objects", arguments={}))
+        project.addMapLayer(memory)
+        recorded = recorder.finish()
+        check("a memory layer is recorded without a definition",
+              [(e[0], e[1], e[2]) for e in recorded] == [("added", memory_id, "")], [e[:3] for e in recorded])
+        effects.apply_effects(recorded, undo=True)
+        done, left = effects.apply_effects(recorded, undo=False)
+        check("and redo says it cannot come back", left == ["scratch"] and project.mapLayer(memory_id) is None, (done, left))
+    finally:
+        segmentation.model_state = ready
+        for item in added:
+            if item is not None and project.mapLayer(item.id()) is not None:
+                project.removeMapLayer(item.id())
+        project.removeMapLayers([guides.id(), lines.id()])
+
+
 def test_similar_flow(folder):
     """Similar objects with SAM: the colour proposes, the model redraws, the area and the shape judge."""
     layer = make_shapes(folder)
@@ -754,6 +957,7 @@ with tempfile.TemporaryDirectory() as folder:
     test_replay(raster, validated)
     test_objects_layer(raster)
     test_features_algorithm(raster)
+    test_agent_objects(raster)
     test_similar_flow(folder)
     test_web_service()
     test_real_model()

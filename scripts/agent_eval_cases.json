@@ -153,5 +153,17 @@
  {"id": "labels_names", "prompt": "Show the names of the communes on the map.",
   "expect": [[{"tool": "set_labels", "args": {"layer": "communes", "field": "nom"},
     "call_args": {"layer": "communes", "field": "nom"}}]],
-  "forbid": ["export_layers", "apply_filter"]}
+  "forbid": ["export_layers", "apply_filter"]},
+ {"id": "dock_objects_cross", "setup": {"drawn": {"orthophoto": 4}},
+  "prompt": "Garde seulement les bâtiments qui touchent les objets que j'ai dessinés sur l'orthophoto.",
+  "expect": [[{"tool": "cross_filter", "args": {"source_layer": "orthophoto", "target_layers": ["batiments"],
+    "raster_selection": {"dock_objects": true}},
+    "call_args": {"source_layer": "orthophoto", "target_layers": ["batiments"], "raster_selection": {"dock_objects": true}}}]],
+  "forbid": ["segment_objects"]},
+ {"id": "dock_objects_none", "prompt": "Filter the roads with the objects I drew on the orthophoto.",
+  "expect": [], "forbid": ["segment_objects"]},
+ {"id": "sam_from_footprints", "setup": {"selected": ["batiments"]},
+  "prompt": "Redessine avec SAM, sur l'orthophoto, les bâtiments sélectionnés.",
+  "expect": [[{"tool": "segment_objects", "args": {"raster": "orthophoto", "guide_layer": "batiments"},
+    "call_args": {"raster": "orthophoto", "guide_layer": "batiments"}}]]}
 ]}

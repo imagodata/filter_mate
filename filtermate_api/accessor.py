@@ -329,6 +329,9 @@ class MapContext:
     active_layer_name: str = ""
     # {"layer_id", "name", "selected_count"} of the vector layers with a selection.
     selections: List[Dict[str, Any]] = field(default_factory=list)
+    # {"layer_id", "name", "crs_authid", "count", "area_m2", "extent_wkt"} of the rasters with objects drawn
+    # in the dock (the SAM targets of the PIPETTE group): what ``dock_objects`` of a raster selection uses.
+    drawn_objects: List[Dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -344,6 +347,24 @@ class SelectionResult:
     layer_id: str
     layer_name: str
     selected_count: int = 0
+
+
+@dataclass(frozen=True)
+class SegmentResult:
+    """Objects SAM drew on a raster from guide features, added to the project as a polygon layer."""
+    # Summary of the layer added: layer_id, name, layer_kind, provider_type, crs_authid, feature_count.
+    layer: Dict[str, Any] = field(default_factory=dict)
+    # Guide features given (-1 when not counted: a web service); those with an object; those without.
+    guide_features: int = -1
+    drawn: int = 0
+    without_object: int = 0
+    # The time allowed ran out before every feature was tried.
+    stopped_early: bool = False
+    seconds: float = 0.0
+    # {"median", "minimum"} of the score SAM gives its masks.
+    sam_score: Optional[Dict[str, Any]] = None
+    # Polygon guides: {"median", "minimum", "below_half"} of the overlap of each footprint with its object.
+    sam_iou: Optional[Dict[str, Any]] = None
 
 
 @dataclass(frozen=True)
@@ -425,7 +446,15 @@ class FilterMateAccessor(Protocol):
         ...
 
     def map_context(self) -> MapContext:
-        """CRS, extent, active layer and selections of the QGIS window."""
+        """CRS, extent, active layer and selections of the QGIS window, and the objects drawn in the dock."""
+        ...
+
+    def segment_objects(self, raster: str, guide_layer: str, selected_only: bool = True, limit: int = 50,
+                        name: str = "") -> SegmentResult:
+        """SAM draws on a raster one object per guide feature, as a new polygon layer.
+
+        Raises FilterRejected on layers that do not fit, too many features, or SAM not installed.
+        """
         ...
 
     def zoom_to(self, layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: Optional[str] = None,
@@ -554,6 +583,8 @@ class InMemoryAccessor:
     # _redo_stack stores undone steps available for redo.
     _undo_stack: List[HistoryStep] = field(default_factory=list)
     _redo_stack: List[HistoryStep] = field(default_factory=list)
+    # Rows of ``MapContext.drawn_objects``: the rasters that have objects drawn in the dock.
+    drawn_objects: List[Dict[str, Any]] = field(default_factory=list)
 
     def list_layers(self) -> List[LayerSummary]:
         return [self._with_active(layer) for layer in self.layers]
@@ -639,7 +670,25 @@ class InMemoryAccessor:
                              feature_count=found.feature_count)
 
     def map_context(self) -> MapContext:
-        return MapContext()
+        return MapContext(drawn_objects=list(self.drawn_objects))
+
+    def segment_objects(self, raster: str, guide_layer: str, selected_only: bool = True, limit: int = 50,
+                        name: str = "") -> SegmentResult:
+        image, guide = self._find(raster), self._find(guide_layer)
+        if image is None or image.layer_kind != "raster":
+            raise FilterRejected(f"raster layer {raster!r} not found")
+        if guide is None or guide.layer_kind != "vector":
+            raise FilterRejected(f"guide layer {guide_layer!r} not found")
+        count = max(guide.feature_count, 0)
+        if count > limit:
+            raise FilterRejected(f"'{guide.name}' gives {count} guide features and at most {limit} are taken in one call")
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or f"{guide.name} (SAM)",
+                               provider_type="memory", feature_count=count, geometry_type="MultiPolygon",
+                               crs_authid=image.crs_authid)
+        self.layers.append(summary)
+        return SegmentResult(layer={"layer_id": summary.layer_id, "name": summary.name, "layer_kind": "vector",
+                                    "provider_type": "memory", "crs_authid": summary.crs_authid, "feature_count": count},
+                             guide_features=count, drawn=count)
 
     def zoom_to(self, layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: Optional[str] = None,
                 selected_only: bool = False) -> ViewState:
@@ -781,6 +830,9 @@ class InMemoryAccessor:
             return None
         if source.layer_kind == "raster" and not raster_selection:
             return CrossFilterResult(error="a raster source needs a pixel selection")
+        if (raster_selection or {}).get("dock_objects") and not any(
+                source.layer_id == row.get("layer_id") for row in self.drawn_objects):
+            return CrossFilterResult(error=f"no object is drawn on '{source.name}' in the FilterMate dock")
         filtered = [name for name in target_layers if name in names and name != source_layer]
         failed = {name: "layer not found" for name in target_layers if name not in names}
         for name in filtered:

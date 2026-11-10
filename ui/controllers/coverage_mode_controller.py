@@ -1890,16 +1890,10 @@ class CoverageModeController(BaseController):
     @staticmethod
     def _ground_area(geometry: Any, layer: Any) -> Optional[float]:
         """Area of ``geometry`` (layer CRS) in square metres, on the project ellipsoid; None when unknown."""
+        from ...adapters.qgis.coverage_layers.segmentation import ground_area
         try:
-            from qgis.core import Qgis, QgsDistanceArea, QgsProject, QgsUnitTypes
-            measure = QgsDistanceArea()
-            project = QgsProject.instance()
-            measure.setSourceCrs(layer.crs(), project.transformContext())
-            measure.setEllipsoid(project.ellipsoid() or 'NONE')
-            area_unit = getattr(Qgis, 'AreaUnit', None)
-            square_metres = area_unit.SquareMeters if area_unit is not None else QgsUnitTypes.AreaUnit.AreaSquareMeters
-            return float(measure.convertAreaMeasurement(measure.measureArea(geometry), square_metres))
-        except Exception as exc:
+            return ground_area(geometry, layer.crs())
+        except Exception as exc:  # a layer being deleted
             logger.debug(f"[FM5] area of the detected objects unknown: {exc}")
             return None
 
@@ -2249,6 +2243,43 @@ class CoverageModeController(BaseController):
         """The object targets changed engine (chosen, or SAM just installed): the tool on the map follows."""
         if self._color_pick and self._raster_panel is not None:
             self._on_color_pick_toggled(True, self._raster_panel.pick_target())
+
+    def drawn_objects(self) -> Dict[str, List[str]]:
+        """The objects drawn by SAM that select on each raster, as WKT in its CRS, by layer id (agent, API).
+
+        Only those the dock uses as the selection: an object target with the SAM engine. With the colour
+        engine the panel keeps SAM's objects for its return but selects by colour, so they are left out.
+        The raster shown comes from its panel (when it really shows that raster), the others from the
+        panel state kept when they were left.
+        """
+        from ...core.domain.layer_kind import LayerKind
+        from ..widgets.coverage_panels.raster_exploring_panel import ENGINE_SAM, OBJECT_TARGETS, PICK_SEGMENT
+        panel = self._raster_panel
+        try:
+            sam_ready = panel is None or bool(panel.segmentation_ready())
+        except (AttributeError, RuntimeError):
+            sam_ready = False
+        found: Dict[str, List[str]] = {}
+        for layer_id, state in self._panel_states.items():
+            state = state or {}
+            uses_sam = (state.get('pipette_target') in OBJECT_TARGETS + (PICK_SEGMENT,)
+                        and state.get('pipette_engine', ENGINE_SAM) == ENGINE_SAM and sam_ready)
+            wkts = [wkt for wkt in (state.get('pipette_segments') or ()) if wkt] if uses_sam else []
+            if wkts:
+                found[layer_id] = wkts
+        layer = self._active_layer
+        if layer is not None and panel is not None and self._kind is LayerKind.RASTER:
+            try:
+                shows = getattr(panel, '_layer_id', layer.id()) == layer.id()
+                if shows:  # the panel knows better than the state kept at its last leave
+                    found.pop(layer.id(), None)
+                if shows and panel.uses_segmentation():
+                    wkts = [wkt for wkt in (getattr(panel, '_segments', None) or ()) if wkt]
+                    if wkts:
+                        found[layer.id()] = wkts
+            except (AttributeError, RuntimeError) as exc:  # a layer or a panel being deleted
+                logger.debug(f"[FM5] drawn objects of the current raster not read: {exc}")
+        return found
 
     def _on_segments_layer_requested(self) -> None:
         """The objects drawn by SAM, added to the project as a memory polygon layer (outline only, over the raster)."""

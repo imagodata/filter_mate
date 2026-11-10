@@ -9,7 +9,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML.
 
-A layer kept in memory has no definition that holds its features: removing it cannot be undone, and says so.
+A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
+cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
 """
 from __future__ import annotations
 
@@ -185,7 +186,9 @@ class EffectsRecorder:
         for layer_id in sorted(now - self._ids_before):
             layer = project.mapLayer(layer_id)
             if layer is not None:
-                effects.append(("added", layer_id, _definition(layer), _place(project, layer_id), layer.name()))
+                # A layer kept in memory: its definition would bring it back empty.
+                definition = "" if layer.providerType() == "memory" else _definition(layer)
+                effects.append(("added", layer_id, definition, _place(project, layer_id), layer.name()))
         for layer_id, before in self._selection.items():
             layer = project.mapLayer(layer_id)
             after = _selection(layer) if layer is not None else None

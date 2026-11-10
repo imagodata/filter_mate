@@ -29,3 +29,10 @@ def test_segments_are_accepted():
 def test_invalid_segments_are_refused(fields):
     with pytest.raises(ValidationError):
         RasterSelection(**fields)
+
+
+def test_the_objects_of_the_dock_are_a_selection_of_their_own():
+    assert RasterSelection(dock_objects=True).dock_objects is True
+    for fields in ({"segments": [SQUARE]}, {"minimum": 1.0}, {"classes": [6]}, {"derivative": "aspect"}):
+        with pytest.raises(ValidationError):
+            RasterSelection(dock_objects=True, **fields)

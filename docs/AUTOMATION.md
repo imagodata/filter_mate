@@ -158,6 +158,24 @@ processing.run("filtermate:cross_filter_from_raster", {
     "SOURCE": ortho, "SEGMENTS": roofs, "TARGETS": [buildings], "PREDICATES": [0], "OPERATOR": 0})
 ```
 
+`dock_objects` (in `raster_selection`, REST and MCP): `true` makes the objects the user drew on the source raster in
+the dock the selection, read in QGIS when the call runs, without copying their WKT. `GET /map/context` lists the
+rasters that have some as `drawn_objects` (`layer_id`, `name`, `crs_authid`, `count`, `area_m2`, `extent_wkt`).
+Leave `segments` and the pixel values unset; nothing drawn on that raster answers 400. The Python API and Processing
+do not take it: they get the polygons themselves (`segments`, `SEGMENTS`).
+
+`POST /objects/segment` (`segment_objects` for MCP and the agent) runs *Draw objects on a raster with SAM from points or
+polygons* on a raster of the project with a guide layer of the project: `raster`, `guide_layer`, `selected_only`
+(default true: the selected features, or all the guide shows when none is), `limit` (50 by default, 200 at most: a guide
+that gives more is refused, nothing is cut silently) and `name`. The objects are added to the project as a memory
+layer, outlined, and the answer sums them up: `layer`, `guide_features`, `drawn`, `without_object`,
+`sam_score` and, for polygons, `sam_iou` (`median`, `minimum`, `below_half`). It runs on the main thread like the
+other routes: QGIS is held while SAM draws, about 2 s per window of 1024 pixels, and the run stops between two
+windows past 20 s (`stopped_early`; `without_object` then counts the features never tried too), so that with the window
+under way and the first load of the model it stays under the 45 s an MCP client waits. Other changes are refused
+(503) while it runs. A guide whose features cannot be counted (a web service) needs a selection. Errors are told in
+general words, their detail stays in the FilterMate log. SAM must be installed from the dock.
+
 `point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
 `intensity_max`, `return_number`, `expression`.
 
@@ -354,7 +372,7 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `run_algorithm` | `POST /processing/run` | runs it on layers of the project; each layer it makes is a temporary file added to the project |
 | `identify_at` | `POST /map/identify` | features and raster values at a point, on the visible layers or the ones named |
 | `preview_filter` | `POST /filters/preview` | tries an expression on a private copy of the layer and counts what it keeps |
-| `map_context` | `GET /map/context` | CRS, visible extent as WKT, scale, active layer, layers with a selection |
+| `map_context` | `GET /map/context` | CRS, visible extent as WKT, scale, active layer, layers with a selection, rasters with objects drawn in the dock |
 | `undo_filter`, `redo_filter` | `POST /filters/undo`, `/redo` | the dock's vector history (not what the other tools record, see above) |
 | `cross_filter` | `POST /filters/cross` | filters layers of any kind by the selection of a source layer of any kind (selected features, raster pixels, point cloud points) with spatial predicates, buffer, minimum coverage, combine operator |
 | `geometry_filter` | `POST /filters/geometry` | same, by a WKT geometry in a given CRS |
@@ -368,6 +386,7 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `add_layer` | `POST /layers/add` | adds a layer from a path, an https URL or a provider URI (http refused) |
 | `remove_layers` | `POST /layers/remove` | removes layers from the project (files kept) |
 | `search_open_data` | `GET /open-data/search` | datasets of an allowed open data platform, with their geo resources |
+| `segment_objects` | `POST /objects/segment` | SAM draws on a raster the objects that the points or polygons of a guide layer point at, as a new layer |
 
 The tools carry MCP annotations: the four readers are `readOnlyHint`; no filter tool is destructive (a filter changes
 what a layer shows, never its data, and `clear_filters` reverts it); `export_layers` is the only one flagged

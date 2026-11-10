@@ -224,6 +224,23 @@ def busy_reason() -> str:
     return BACKGROUND_BUSY if _background_tasks_running() else ""
 
 
+class running:  # noqa: N801 - used as a context manager, as a function would be
+    """``with running("segment_objects"):`` the operations refuse to start meanwhile (``busy_reason``).
+
+    For work outside this module that holds the main thread while Qt serves events: a REST call
+    queued meanwhile would otherwise run nested inside it.
+    """
+
+    def __init__(self, name: str) -> None:
+        self._name = name
+
+    def __enter__(self) -> None:
+        _RUNNING.append(self._name)
+
+    def __exit__(self, *_exc) -> None:
+        _RUNNING.clear()
+
+
 def _tidy_cache(project=None) -> None:
     """Remove the derived files nothing refers to any more, keep the cache under its limit.
 

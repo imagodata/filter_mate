@@ -4,6 +4,9 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **AGENT reads the objects drawn on a raster and draws some with SAM.** `map_context` and the project summary of each request list the rasters with objects drawn in the dock; `cross_filter` uses them with `raster_selection.dock_objects`, read in QGIS, never sent to the model. `segment_objects` (chat, MCP, `POST /objects/segment`) has SAM draw the objects that the points or footprints of a guide layer point at, adds them as a layer with `sam_score` and `sam_iou`, and stops past 20 s with what it drew; Undo of the turn removes the layer. Checked on QGIS 3.22, LTR and 4.3 with a stub model, and on the agent bench (`docs/SEGMENTATION.md`).
+- **AGENT adds layers again.** `add_layer` and `add_service_layer` failed in QGIS with a `TypeError` (the name of the layer collided with an argument of the call that runs them on the main thread); they work again in the chat, REST and MCP.
+
 ## [5.1.0] - 2026-11-10
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

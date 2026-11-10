@@ -281,6 +281,11 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def set_layers_visibility(args: Dict[str, Any]) -> Dict[str, Any]:
         return _report("Visibility", accessor.set_layers_visibility(args["layers"], args["visible"]))
 
+    def segment_objects(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = asdict(accessor.segment_objects(args["raster"], args["guide_layer"], selected_only=args["selected_only"],
+                                                 limit=args["limit"], name=args["name"]))
+        return {key: value for key, value in answer.items() if value is not None}
+
     def add_layer(args: Dict[str, Any]) -> Dict[str, Any]:
         problem = source_problem(args["source"], allow_remote_sources)
         if problem:
@@ -332,5 +337,6 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "search_imagery": search_imagery,
+        "segment_objects": segment_objects,
     }
     return {name: _guarded(handler) for name, handler in handlers.items()}

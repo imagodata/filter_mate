@@ -187,6 +187,28 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
             written, missing + refused, skipped, time.time() - begin))
         return {self.OUTPUT: sink_id}
 
+    def told_reason(self, errors):
+        """Why nothing was drawn, as a caller may tell it further: this algorithm's own words, never a traceback.
+
+        An unexpected exception reaches the feedback as a whole Python traceback, and a window that
+        could not be drawn carries the text of its exception (the path of the model in the profile, for
+        one): they stay in the log. ``errors`` are the messages the feedback was given, last one last.
+        """
+        own = {
+            self.tr("No point or polygon of the guide layer lies on the raster"):
+                "no point or polygon of the guide layer lies on the raster",
+            self.tr("The raster cannot be read"): "the raster cannot be read",
+            self.tr("The guide features cannot be read"): "the guide features cannot be read",
+        }
+        window = self.tr("No window could be prepared: {0}").split("{0}")[0].strip()
+        for error in reversed(list(errors)):
+            text = (error or "").strip()
+            if text in own:
+                return own[text]
+            if window and text.startswith(window):
+                return "no window of the raster could be drawn (the reason is in the FilterMate log)"
+        return "SAM could not draw these objects (the reason is in the FilterMate log)"
+
     def name(self):
         return "segment_from_features"
 
