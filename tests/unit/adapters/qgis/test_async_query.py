@@ -161,6 +161,22 @@ def test_layer_deleted_signal_cancels_feedback(module):
     task.feedback.cancel.assert_called_once()
 
 
+def test_a_deleted_layer_is_never_disconnected_when_the_read_settles(module):
+    """Its bound signals point at freed memory: disconnecting them crashed QGIS 4.2 (access violation)."""
+    owner, layer = _owner_layer()
+    other = MagicMock()
+    task = module.submit_query(owner, 'query', layer, 'union', lambda _: None, MagicMock(), dependencies=[layer, other])
+    for call in layer.willBeDeleted.connect.call_args_list:  # the layer goes away while the read runs
+        call.args[0]()
+    settled = task.taskTerminated.connect.call_args.args[0]
+    settled()
+    for name in ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged', 'updatedFields',
+                 'crsChanged', 'dataSourceChanged'):
+        getattr(layer, name).disconnect.assert_not_called()
+    other.dataChanged.disconnect.assert_called_once()  # the layer still there is let go as before
+    assert other.willBeDeleted.disconnect.call_count == 2  # its deletion watch and its invalidation
+
+
 def test_cancel_resets_loading_state(module):
     owner, layer = _owner_layer()
     loading = MagicMock()
