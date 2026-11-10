@@ -6,25 +6,33 @@ not a filter, and a layer removed is gone (the chat asks the user first).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
+import time
+import zipfile
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.open_data import (
-    KIND_STAC, KIND_WFS, follow_redirects, gdal_source, parse_results, parse_stac_items, resolve_platform, search_url,
-    source_problem, stac_search_body, valid_day,
+    KIND_STAC, KIND_WFS, RemoteFile, archive_member, follow_redirects, gdal_source, megabytes, parse_results,
+    parse_stac_items, reads_in_place, remote_file, resolve_platform, search_url, source_problem, stac_search_body,
+    valid_day,
 )
 from ...core.agent.sql_guard import expression_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
-from ..agent.bounded_http import HttpFailure, fetch
+from ..agent.bounded_http import STOPPED, TOO_LARGE, TOO_LONG, HttpFailure, fetch
 from .operations import layer_kind, resolve_layer
 
 logger = logging.getLogger('FilterMate.ProjectControl')
 
 MAX_COORDINATE = 1e9
 MAX_PAYLOAD = 5 * 1024 * 1024
+# A file its server only gives whole is copied to the QGIS profile first: what a layer may cost in disk and in time.
+MAX_DOWNLOAD = 512 * 1024 * 1024
+DOWNLOAD_TIMEOUT_MS = 180_000
+_SMALLER = "look for a smaller extract of it (a region, a department) or for the same data as a service layer"
 
 
 def _iface():
@@ -146,13 +154,95 @@ def set_layers_visibility(layers: List[str], visible: bool) -> Dict[str, Any]:
     return {'done': done, 'failed': failed, 'visible': bool(visible)}
 
 
-def _head(url: str):
-    """``(status, location)`` of a URL, without reading it."""
+def _probe(url: str) -> Tuple[str, RemoteFile]:
+    """Where a link ends once its redirects are followed, and what its server says of the file, without reading it."""
+    answers = {}
+
+    def head(link: str):
+        try:
+            answers[link] = fetch(link, headers={'Range': 'bytes=0-0'}, headers_only=True, timeout_ms=20_000)
+        except HttpFailure as exc:
+            raise ValueError(f"this link did not answer: {exc}") from None
+        return answers[link].status, answers[link].headers.get('location', '')
+
+    final = follow_redirects(url, head)
+    return final, remote_file(final, answers[final].status, answers[final].headers)
+
+
+def _discard(path: str) -> None:
+    """Remove a download that makes no layer, and its folder once empty."""
+    for remove, target in ((os.remove, path), (os.rmdir, os.path.dirname(path))):
+        try:
+            remove(target)
+        except OSError as exc:  # already gone, or a folder that holds another copy
+            logger.debug("Download not removed (%s): %s", target, exc)
+
+
+def _download(url: str, found: RemoteFile) -> str:
+    """Copy a file its server only gives whole to the QGIS profile; returns the path of the copy.
+
+    Bounded in size and in time, stopped by Stop, and the interface stays alive meanwhile.
+
+    Raises:
+        ValueError: Too large, too slow, cut, stopped, or refused by the server or the disk; nothing is kept.
+    """
+    from qgis.core import QgsApplication
+    if found.size > MAX_DOWNLOAD:
+        raise ValueError(f"this file weighs {megabytes(found.size)}, more than the {megabytes(MAX_DOWNLOAD)} a layer "
+                         f"can be made of: {_SMALLER}")
+    folder = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data',
+                          hashlib.sha256(url.encode('utf-8')).hexdigest()[:16])
+    part = os.path.join(folder, found.name + '.part')
+    received = [0]
+
+    def keep(chunk: bytes) -> None:
+        out.write(chunk)
+        received[0] += len(chunk)
+
     try:
-        reply = fetch(url, headers={'Range': 'bytes=0-0'}, headers_only=True, timeout_ms=20_000)
+        os.makedirs(folder, exist_ok=True)
+        with open(part, 'wb') as out:
+            reply = fetch(url, max_bytes=MAX_DOWNLOAD, timeout_ms=DOWNLOAD_TIMEOUT_MS, sink=keep)
+        if reply.status != 200:
+            raise ValueError(f"its server answered with an error ({reply.status})")
+        if not received[0]:
+            raise ValueError("its server sent an empty file")
+        path = os.path.join(folder, found.name)
+        try:
+            os.replace(part, path)
+        except OSError:  # Windows: a layer of the project still reads the copy made before
+            path = os.path.join(folder, f"{int(time.time())}-{found.name}")
+            os.replace(part, path)
+        return path
     except HttpFailure as exc:
-        raise ValueError(f"this link did not answer: {exc}") from None
-    return reply.status, reply.headers.get('location', '')
+        _discard(part)
+        if str(exc) == TOO_LARGE:
+            raise ValueError(f"this file weighs more than the {megabytes(MAX_DOWNLOAD)} a layer can be made of: "
+                             f"{_SMALLER}") from None
+        if str(exc) == TOO_LONG:
+            raise ValueError(f"its server sent {megabytes(received[0])} in {DOWNLOAD_TIMEOUT_MS // 1000} s and had not "
+                             f"finished, too slow to make a layer of it: {_SMALLER}") from None
+        raise ValueError("the download was stopped" if str(exc) == STOPPED else f"the download failed: {exc}") from None
+    except OSError:
+        _discard(part)
+        raise ValueError("the file could not be written in the QGIS profile folder") from None
+    except ValueError:
+        _discard(part)
+        raise
+
+
+def _local_source(path: str, kind: str) -> str:
+    """What QGIS opens of a downloaded file: the file, or the data file of a zip archive (read in it, not extracted)."""
+    if not path.lower().endswith('.zip'):
+        return path
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+    except (zipfile.BadZipFile, OSError, ValueError, NotImplementedError):
+        _discard(path)
+        raise ValueError("its server sent something that is not a zip archive") from None
+    member = archive_member(names, kind)
+    return '/vsizip/' + path.replace('\\', '/') + ('/' + member if member else '')
 
 
 @contextmanager
@@ -179,8 +269,12 @@ def _gdal_time_limits(active: bool):
 def add_layer(source: str, name: str = '', kind: str = 'vector') -> Dict[str, Any]:
     """Add a layer from a local data file or a public https URL; returns its summary.
 
+    A remote file is read where it is when its server gives parts of it and GDAL reads the format by parts
+    (GeoPackage, FlatGeobuf, GeoTIFF, zip); any other (an export made on request, GeoJSON, CSV) is copied to the
+    QGIS profile first, where the project finds it again.
+
     Raises:
-        ValueError: Any other source, or one that cannot be opened.
+        ValueError: Any other source, or one that cannot be opened; the message says which step failed.
     """
     from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer
     problem = source_problem(source, allow_remote=True)
@@ -188,15 +282,32 @@ def add_layer(source: str, name: str = '', kind: str = 'vector') -> Dict[str, An
         raise ValueError(problem)
     if kind not in ('vector', 'raster'):
         raise ValueError("kind is vector or raster")
-    if not source.lower().startswith('https://') and not os.path.isfile(source.split('|', 1)[0]):
-        raise ValueError("this file does not exist")
-    title = (name or '').strip() or source.rsplit('/', 1)[-1].split('?', 1)[0][:80] or 'layer'
     remote = source.lower().startswith('https://')
-    opened = gdal_source(follow_redirects(source, _head), kind) if remote else source
-    with _gdal_time_limits(remote):
+    if not remote and not os.path.isfile(source.split('|', 1)[0]):
+        raise ValueError("this file does not exist")
+    title = (name or '').strip()
+    opened, copy = source, ''
+    if remote:
+        url, found = _probe(source)
+        if reads_in_place(url, kind, found):
+            opened = gdal_source(url)
+        else:
+            copy = _download(url, found)
+            opened = _local_source(copy, kind)
+        title = title or found.name.rsplit('.', 1)[0]
+    title = title or source.rsplit('/', 1)[-1].split('?', 1)[0][:80] or 'layer'
+    with _gdal_time_limits(remote and not copy):
         layer = QgsVectorLayer(opened, title, 'ogr') if kind == 'vector' else QgsRasterLayer(opened, title, 'gdal')
     if not layer.isValid():
         # Nothing more is read from an invalid layer: its provider and its error crashed QGIS 3.22.
+        if copy:
+            weight = megabytes(os.path.getsize(copy)) if os.path.isfile(copy) else '?'
+            del layer
+            _discard(copy)
+            raise ValueError(f"the file was read from its server ({os.path.basename(copy)}, {weight}) but it holds no "
+                             f"{kind} layer QGIS can open")
+        if remote:
+            raise ValueError(f"its server answers, but the file could not be opened as a {kind} layer where it is")
         raise ValueError(f"the source could not be opened as a {kind} layer")
     QgsProject.instance().addMapLayer(layer)
     return _summary(layer)

@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import ipaddress
 import re
-from typing import Any, Callable, Dict, List, Tuple
-from urllib.parse import quote, urljoin, urlsplit
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Mapping, Sequence, Tuple
+from urllib.parse import parse_qs, quote, unquote, urljoin, urlsplit
 
 KIND_DATAGOUV = "datagouv"
 KIND_OPENDATASOFT = "opendatasoft"
@@ -41,6 +42,30 @@ GEO_FORMATS = frozenset({
     "tif", "tiff", "geotiff", "cog",
 })
 LOCAL_FORMATS = frozenset({"csv", "fgb", "geojson", "gml", "gpkg", "json", "kml", "shp", "tif", "tiff"})
+# What a link serves, when its address ends with the name of a format instead of a file name (``exports/shp``,
+# ``download?format=shp``) or only its content type tells: the extension GDAL knows it by. A shapefile comes zipped.
+_FORMAT_WORDS = {
+    "geojson": "geojson", "json": "json", "gpkg": "gpkg", "geopackage": "gpkg", "shp": "zip", "shapefile": "zip",
+    "zip": "zip", "kml": "kml", "gml": "gml", "csv": "csv", "fgb": "fgb", "flatgeobuf": "fgb", "tif": "tif",
+    "tiff": "tif", "geotiff": "tif", "cog": "tif",
+}
+_CONTENT_TYPES = {
+    "application/zip": "zip", "application/x-zip-compressed": "zip", "text/csv": "csv", "application/geo+json": "geojson",
+    "application/vnd.geo+json": "geojson", "application/json": "geojson", "application/geopackage+sqlite3": "gpkg",
+    "application/vnd.google-earth.kml+xml": "kml", "application/gml+xml": "gml", "image/tiff": "tif",
+}
+_EXPORT_WORDS = ("download", "export", "exports", "file")
+_WEB_PAGES = ("text/html", "application/xhtml+xml")
+# Formats GDAL reads by parts: worth leaving on a server that gives parts, whatever their size.
+_READ_BY_PARTS = frozenset({"fgb", "gpkg", "shp", "tif", "tiff", "zip"})
+_ARCHIVE_VECTORS = ("shp", "gpkg", "fgb", "geojson", "json", "kml", "gml", "csv")
+_ARCHIVE_RASTERS = ("tif", "tiff")
+_SENT_NAME = re.compile(r"""filename\*?\s*=\s*(?:UTF-8'[^']*')?"?([^";]+)""", re.IGNORECASE)
+_UNSAFE_IN_NAME = re.compile(r"[^A-Za-z0-9._-]+")
+_PLAIN_MEMBER = re.compile(r"[\w .()+/-]+")
+_WINDOWS_DEVICE = re.compile(r"con|prn|aux|nul|com[0-9]|lpt[0-9]", re.IGNORECASE)
+_BYTE_COUNT = re.compile(r"[0-9]{1,15}")
+MAX_NAME = 60
 MAX_SOURCE = 2000
 _LAYER_NAME_SUFFIX = re.compile(r"\|layername=[\w .-]+$")
 _DRIVER_PREFIX = re.compile(r"^[A-Za-z0-9_]+:")
@@ -128,12 +153,23 @@ def _dicts(value: Any) -> List[Dict[str, Any]]:
     return [item for item in value if isinstance(item, dict)] if isinstance(value, list) else []
 
 
+def _link_format(url: str) -> str:
+    """The format the address of a resource ends with: ``exports/geojson``, ``communes.gpkg``."""
+    try:
+        last = urlsplit(url).path.rstrip("/").rsplit("/", 1)[-1].lower()
+    except ValueError:
+        return ""
+    return last if last in GEO_FORMATS else last.rsplit(".", 1)[-1] if "." in last else ""
+
+
 def _geo_resources(items: Any) -> List[Dict[str, str]]:
     resources = []
     for item in _dicts(items):
         url = _link(item.get("url"))
         # Some portals give the EU vocabulary URI (.../file-type/SHP) for the format.
         fmt = str(item.get("format") or "").strip().rstrip("/").rsplit("/", 1)[-1].lower().lstrip(".")
+        if fmt not in GEO_FORMATS:  # data.gouv.fr lists the GeoJSON export of a harvested portal as "json"
+            fmt = _link_format(url)
         if not url.startswith("https://") or fmt not in GEO_FORMATS:
             continue
         resources.append({"title": _text(item.get("title") or item.get("name") or fmt), "format": fmt, "url": url})
@@ -232,17 +268,93 @@ def _url_problem(url: str) -> str:
     return "" if address.is_global else "only a public address can be read"
 
 
-def gdal_source(url: str, kind: str) -> str:
-    """How GDAL reads a public URL without downloading it first. Built here, never written by a model."""
-    path = urlsplit(url).path.lower()
-    extension = path.rsplit(".", 1)[-1]
-    if extension == "zip":
-        return "/vsizip//vsicurl/" + url
-    if path.rsplit("/", 1)[-1] == "csv":  # an export link with no extension: GDAL has to be told
-        return "CSV:/vsicurl/" + url
-    if kind == "raster" or extension in ("gpkg", "fgb", "shp", "tif", "tiff"):
-        return "/vsicurl/" + url
-    return url
+@dataclass(frozen=True)
+class RemoteFile:
+    """What a server says of a file before it is read."""
+    name: str  # for a copy on this machine: plain characters, and the extension GDAL knows the format by
+    by_parts: bool  # the server gives parts of the file: GDAL can read it where it is
+    size: int  # in bytes, -1 when the server does not say
+
+
+def megabytes(size: int) -> str:
+    return f"{size / 1048576:.1f} MB" if size < 10 * 1048576 else f"{size / 1048576:.0f} MB"
+
+
+def _plain_name(text: str) -> str:
+    """A file name with nothing a path or a provider URI would read."""
+    return _UNSAFE_IN_NAME.sub("_", unquote(text).replace("\\", "/").rsplit("/", 1)[-1]).strip("._-")
+
+
+def remote_file(url: str, status: int, headers: Mapping[str, str]) -> RemoteFile:
+    """What the answer to a request for the first byte of ``url`` tells of the file.
+
+    Its format is the extension of the name the server gives it (``Content-Disposition``), else of its address,
+    else the format its address or its content type names: an export link has no file name.
+
+    Raises:
+        ValueError: The answer is an error or a web page; the message can be shown.
+    """
+    if status != 416 and not 200 <= status < 300:  # 416: an empty file, or a server that takes no range
+        raise ValueError(f"its server answered with an error ({status})")
+    content_type = str(headers.get("content-type") or "").split(";", 1)[0].strip().lower()
+    if content_type in _WEB_PAGES:
+        raise ValueError("this link is a web page, not a data file")
+    parts = urlsplit(url)
+    last = parts.path.rstrip("/").rsplit("/", 1)[-1]
+    sent = _SENT_NAME.search(str(headers.get("content-disposition") or ""))
+    names = [_plain_name(sent.group(1))] if sent else []
+    names.append(_plain_name(last))
+    stem, extension = "", ""
+    for name in names:
+        base, dot, tail = name.rpartition(".")
+        if dot and base and tail.lower() in LOCAL_FORMATS | {"zip"}:
+            stem, extension = base, tail.lower()
+            break
+    if not extension:
+        asked = (parse_qs(parts.query).get("format") or [""])[0]
+        extension = (_FORMAT_WORDS.get(last.lower()) or _FORMAT_WORDS.get(asked.lower())
+                     or _CONTENT_TYPES.get(content_type, ""))
+        stem = names[0].rpartition(".")[0] or names[0]
+        if stem.lower() in _FORMAT_WORDS or stem.lower() in _EXPORT_WORDS:  # says the format, not what it is
+            stem = ""
+    stem = stem[:MAX_NAME].strip("._-")
+    if not stem or _WINDOWS_DEVICE.fullmatch(stem.split(".", 1)[0]):
+        stem = "layer"
+    by_parts = status == 206
+    if by_parts:  # "bytes 0-0/1234"
+        told = str(headers.get("content-range") or "").rsplit("/", 1)[-1].strip()
+    else:
+        told = str(headers.get("content-length") or "").strip() if status != 416 else ""
+    return RemoteFile(stem + ("." + extension if extension else ""), by_parts,
+                      int(told) if _BYTE_COUNT.fullmatch(told) else -1)
+
+
+def reads_in_place(url: str, kind: str, found: RemoteFile) -> bool:
+    """Whether GDAL reads the file where it is: its server gives parts of it, and its address says what it is.
+
+    Anything else is downloaded first: an export made on request has no size and cannot be read by parts, and a
+    text format (GeoJSON, CSV, KML) is read whole anyway.
+    """
+    return found.by_parts and (kind == "raster" or urlsplit(url).path.lower().rsplit(".", 1)[-1] in _READ_BY_PARTS)
+
+
+def gdal_source(url: str) -> str:
+    """How GDAL reads a public URL where it is. Built here, never written by a model."""
+    return ("/vsizip//vsicurl/" if urlsplit(url).path.lower().endswith(".zip") else "/vsicurl/") + url
+
+
+def archive_member(names: Sequence[str], kind: str) -> str:
+    """The data file of a zip archive a layer is made of, a shapefile first; "" when none can be named.
+
+    The names come from the archive, and the one returned ends in a source QGIS interprets: only plain ones.
+    """
+    for extension in _ARCHIVE_RASTERS if kind == "raster" else _ARCHIVE_VECTORS:
+        for name in names:
+            folders = name.split("/")
+            if (name.lower().endswith("." + extension) and _PLAIN_MEMBER.fullmatch(name)
+                    and not any(part.startswith((".", "__MACOSX")) or not part for part in folders)):
+                return name
+    return ""
 
 
 def follow_redirects(url: str, head: Callable[[str], Tuple[int, str]], max_hops: int = 4) -> str:

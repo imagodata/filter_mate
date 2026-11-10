@@ -60,6 +60,21 @@ class TestAnswers:
         assert len(found) == 1 and found[0]["publisher"] == "IGN" and len(found[0]["description"]) == 300
         assert found[0]["resources"] == [{"title": "GeoJSON", "format": "geojson", "url": "https://static.data.gouv.fr/c.geojson"}]
 
+    def test_datagouv_exports_of_a_harvested_portal(self):
+        """data.gouv.fr lists the GeoJSON export of an Opendatasoft portal as "json": the only one read at once."""
+        exports = "https://zabal.example.org/api/explore/v2.1/catalog/datasets/communes-france/exports/"
+        payload = {"data": [{"id": "1", "title": "Communes - France", "resources": [
+            {"title": "communes-france.csv", "format": "csv", "url": exports + "csv?use_labels=true"},
+            {"title": "communes-france.json", "format": "json", "url": exports + "json"},
+            {"title": "communes-france.geojson", "format": "json", "url": exports + "geojson"},
+            {"title": "communes-france.zip", "format": "zip", "url": exports + "shp"},
+            {"title": "records", "format": "json", "url": "https://zabal.example.org/records.json"},
+            {"title": "odd", "format": "json", "url": "https://[bad/exports/geojson"},
+            {"title": "named by its file", "format": None, "url": "https://static.data.gouv.fr/a/limites.gpkg"}]}]}
+        found = parse_results("datagouv", payload, "https://www.data.gouv.fr")[0]["resources"]
+        assert [(r["format"], r["url"].rsplit("/", 1)[-1]) for r in found] == [
+            ("csv", "csv?use_labels=true"), ("geojson", "geojson"), ("zip", "shp"), ("gpkg", "limites.gpkg")]
+
     def test_opendatasoft_exports(self):
         payload = {"results": [{"dataset_id": "communes-31", "features": ["analyze", "geo"],
                                 "metas": {"default": {"title": "Communes", "publisher": "Toulouse"}}},

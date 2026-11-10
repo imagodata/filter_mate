@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **AGENT adds the exports of open data portals, and says why when it cannot.** A dataset of data.gouv.fr often comes from an Opendatasoft portal it harvests: its files are made on request, with no size, and GDAL cannot read them where they are. Their shapefile and CSV never opened, the GeoJSON, the only one that did, was not listed, a national shapefile froze QGIS for two minutes, and the only error was "the source could not be opened". Such a file is now copied to the QGIS profile first (512 MB and 3 minutes at most, Stop ends it, the interface stays alive, a zip is read in its archive); a file on a server that gives parts of it (GeoPackage, GeoTIFF, zip) is still read where it is; and each failure says its cause: the status of the server, a web page, a file too large, too slow or cut, an archive with no layer.
+
 ## [5.0.5] - 2026-11-10
 
 - **Better answers from AGENT.** Each filter says how many features it kept and warns when it kept none, with what to check; `apply_filter` narrows, widens or removes with an operator instead of copying the current filter (chat, MCP and REST); the agent knows the SQL dialect of each layer, the state of the project goes with each request, answers are smaller and stay whole, and the agent is told before its last turns (limit 16), its stops said in plain words. The cards and bubbles follow the theme of the dock.

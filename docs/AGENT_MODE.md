@@ -128,6 +128,19 @@ Two allowlists hold, on every path (chat, REST, MCP), because QGIS and GDAL inte
   can read the environment and the disk (`env`, `file_exists`, `aggregate`) and write to SQLite
   (`sqlite_fetch_and_increment`).
 
+A remote file is asked for its first byte before anything is read (`project_control._probe`): the redirects are
+followed, each hop held to the rules above, and the answer tells its format (the name its server gives it, else its
+address, else its content type), its size, and whether the server gives parts of it (`open_data.remote_file`).
+
+- A GeoPackage, FlatGeobuf, GeoTIFF or zip on a server that gives parts is read where it is, through `/vsicurl/`.
+- Anything else is copied to `<QGIS profile>/filtermate/open_data/` first, through `bounded_http`: 512 MB and
+  3 minutes at most, Stop ends it, the interface stays alive, a copy cut before its end is discarded. An export made
+  on request (an Opendatasoft portal, and what data.gouv.fr lists for the portals it harvests) has no size and cannot
+  be read by parts, which is what GDAL needs; its address ends with the name of a format, not of a file. A zip is
+  read in the copy (`/vsizip/`), never extracted, and the name of the file read in it must be plain.
+- Every failure says its step: the status of the server, a web page, a file too large, too slow or cut, an archive
+  with no layer. The error of an invalid layer is never read (it crashed QGIS 3.22).
+
 `search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 
 ## Sources

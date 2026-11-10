@@ -475,8 +475,10 @@ def build_server(client: FilterMateClient) -> Any:
         """Add a layer to the open project from a local file or a public https URL.
 
         Typical use after search_open_data: pick a geojson or gpkg resource url and add it, then filter it like any
-        other layer. A remote layer is read from its server by QGIS. Returns the layer summary (layer_id, name,
-        layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.
+        other layer. A remote file is read where it is when its server gives parts of it (GeoPackage, GeoTIFF, zip);
+        any other is first copied to the QGIS profile (512 MB and 3 minutes at most). When it cannot be added the
+        error says why: try another resource of the dataset, or a service layer. Returns the layer summary (layer_id,
+        name, layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.
         """
         return await call("POST", "/layers/add", _body(source=source, name=name, kind=kind))
 

@@ -13,6 +13,8 @@ import shutil
 import sys
 import tempfile
 import threading
+import time
+import zipfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -451,8 +453,180 @@ def main(introspection):
         server.shutdown()
         server.server_close()
 
+    check_remote_files(project_control, project, work)
     project.removeAllMapLayers()
     shutil.rmtree(work, ignore_errors=True)
+
+
+def check_remote_files(project_control, project, work):
+    """add_layer on public URLs whose transport is sent to a server on this machine, answering as real portals do.
+
+    An Opendatasoft export (what data.gouv.fr lists for a harvested portal) is made on request: no size, no parts,
+    an address that ends with the name of a format. GDAL cannot read it where it is.
+    """
+    from filter_mate.adapters.agent import bounded_http
+    from qgis.PyQt.QtCore import QTimer
+
+    for driver, name in (("ESRI Shapefile", "served.shp"), ("GeoJSON", "served.geojson"), ("CSV", "served.csv")):
+        make_vector(os.path.join(work, name), driver)
+    with zipfile.ZipFile(os.path.join(work, "served.zip"), "w") as archive:
+        for extension in ("shp", "shx", "dbf", "prj", "cpg"):
+            if os.path.exists(os.path.join(work, "served." + extension)):
+                archive.write(os.path.join(work, "served." + extension), "export/communes." + extension)
+    with zipfile.ZipFile(os.path.join(work, "notes.zip"), "w") as archive:
+        archive.writestr("lisez-moi.txt", "rien")
+
+    def served(name):
+        with open(os.path.join(work, name), "rb") as handle:
+            return handle.read()
+
+    exports = {"/exports/shp": ("served.zip", "communes-test.zip", "application/zip"),
+               "/exports/csv": ("served.csv", "communes-test.csv", "text/csv"),
+               "/exports/geojson": ("served.geojson", "communes-test.geojson", "application/json")}
+    public = "https://fm-test.example.org"
+    asked = []
+
+    class Portal(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def log_message(self, *args):
+            pass
+
+        def start(self, status, headers):
+            self.send_response(status)
+            for key, value in headers.items():
+                self.send_header(key, value)
+            self.end_headers()
+
+        def stream(self, pieces):
+            for piece in pieces:
+                self.wfile.write(b"%x\r\n" % len(piece) + piece + b"\r\n")
+                self.wfile.flush()
+            self.wfile.write(b"0\r\n\r\n")
+
+        def whole(self, data, content_type="application/octet-stream"):
+            self.start(200, {"Content-Type": content_type, "Content-Length": str(len(data))})
+            self.wfile.write(data)
+
+        def do_GET(self):
+            route = self.path.split("?", 1)[0]
+            asked.append(route)
+            try:
+                self.route(route)
+            except OSError:  # the probe leaves once it has the headers
+                self.close_connection = True
+
+        def route(self, route):
+            if route in exports:
+                name, sent_name, content_type = exports[route]
+                data = served(name)
+                self.start(200, {"Content-Type": content_type + "; charset=utf-8", "Transfer-Encoding": "chunked",
+                                 "Content-Disposition": f'attachment; filename="{sent_name}"'})
+                self.stream(data[start:start + 4096] for start in range(0, len(data), 4096))
+            elif route == "/moved":
+                self.start(302, {"Location": public + "/exports/geojson", "Content-Length": "0"})
+            elif route == "/missing.geojson":
+                self.start(404, {"Content-Length": "0"})
+            elif route == "/page.geojson":
+                self.whole(b"<html>sign in</html>", "text/html; charset=utf-8")
+            elif route == "/huge.geojson":
+                self.start(200, {"Content-Type": "application/geo+json", "Content-Length": str(10 * 1024 ** 3)})
+                self.close_connection = True
+            elif route == "/endless.geojson":
+                self.start(200, {"Content-Type": "application/geo+json", "Transfer-Encoding": "chunked"})
+                self.stream(b"x" * 65536 for _ in range(32))
+            elif route == "/slow.geojson":
+                self.start(200, {"Content-Type": "application/geo+json", "Transfer-Encoding": "chunked"})
+                self.stream(time.sleep(pause) or b"{" for pause in (0, 4))
+            elif route == "/cut.geojson":
+                self.start(200, {"Content-Type": "application/geo+json", "Content-Length": "5000"})
+                self.wfile.write(b"{" * 100)
+                self.close_connection = True
+            elif route == "/empty.zip":
+                self.whole(b"", "application/zip")
+            elif route == "/broken.zip":
+                self.whole(b"not a zip", "application/zip")
+            elif route == "/notes.zip":
+                self.whole(served("notes.zip"), "application/zip")
+            elif route == "/parts.gpkg":  # a static file server: the first byte, and the size
+                self.start(206, {"Content-Type": "application/geopackage+sqlite3", "Content-Length": "1",
+                                 "Content-Range": "bytes 0-0/98304"})
+                self.wfile.write(b"S")
+            else:
+                self.start(404, {"Content-Length": "0"})
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Portal)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    local = f"http://127.0.0.1:{server.server_address[1]}"
+    real_fetch = project_control.fetch
+    project_control.fetch = lambda url, **options: real_fetch(url.replace(public, local), **options)
+    copies = os.path.join(QgsApplication.qgisSettingsDirPath(), "filtermate", "open_data")
+    limits = project_control.MAX_DOWNLOAD, project_control.DOWNLOAD_TIMEOUT_MS
+
+    def copied():
+        return {os.path.join(folder, name) for folder, _, names in os.walk(copies) for name in names}
+
+    already = copied()  # a profile that is not the one of a container keeps what it has
+
+    def kept():
+        return sorted(os.path.basename(path) for path in copied() - already)
+
+    def refused(label, route, needle):
+        before = kept()
+        try:
+            project_control.add_layer(public + route)
+            check(f"remote: {label}", False, "a layer was added")
+        except ValueError as exc:
+            check(f"remote: {label}", needle in str(exc) and kept() == before, f"{exc} / {kept()}")
+
+    try:
+        added = project_control.add_layer(public + "/exports/shp")
+        source = project.mapLayer(added["layer_id"]).source().replace("\\", "/")
+        check("remote: a zipped shapefile made on request is copied, then read in its archive",
+              added["feature_count"] == 60 and added["name"] == "communes-test" and source.startswith("/vsizip/")
+              and source.endswith("communes-test.zip/export/communes.shp") and "/filtermate/open_data/" in source,
+              f"{added} {source}")
+        added = project_control.add_layer(public + "/exports/csv?use_labels=true", name="table")
+        check("remote: a CSV export", added["feature_count"] == 60 and added["name"] == "table", added)
+        added = project_control.add_layer(public + "/exports/geojson")
+        check("remote: a GeoJSON export", added["feature_count"] == 60 and added["name"] == "communes-test", added)
+        added = project_control.add_layer(public + "/moved", name="moved")
+        check("remote: a redirect is followed to the file", added["feature_count"] == 60, added)
+        added = project_control.add_layer(public + "/exports/geojson", name="again")
+        check("remote: the same file again, while a layer reads the first copy", added["feature_count"] == 60, added)
+        check("remote: one copy per file, nothing half written",
+              kept() == ["communes-test.csv", "communes-test.geojson", "communes-test.zip"], kept())
+        check("remote: the first request asks for one byte, the copy for the file",
+              asked.count("/exports/shp") == 2 and asked.count("/exports/csv") == 2, asked)
+
+        refused("an error of the server is said with its status", "/missing.geojson", "(404)")
+        refused("a web page is not data", "/page.geojson", "web page")
+        asked.clear()
+        refused("a file known to be too large is not started", "/huge.geojson", "10240 MB")
+        check("remote: only its size was asked", asked == ["/huge.geojson"], asked)
+        project_control.MAX_DOWNLOAD = 256 * 1024
+        refused("a file of no known size stops at the limit", "/endless.geojson", "weighs more than the 0.2 MB")
+        project_control.MAX_DOWNLOAD = limits[0]
+        project_control.DOWNLOAD_TIMEOUT_MS = 1500
+        refused("a server too slow is said so", "/slow.geojson", "too slow")
+        project_control.DOWNLOAD_TIMEOUT_MS = limits[1]
+        QTimer.singleShot(1500, bounded_http.abort_active)
+        refused("Stop ends a download", "/slow.geojson", "stopped")
+        refused("a file cut before its end is not a shorter layer", "/cut.geojson", "lost before the end")
+        refused("an empty file", "/empty.zip", "empty file")
+        refused("a zip that is none", "/broken.zip", "not a zip archive")
+        refused("an archive with no layer is said so and not kept", "/notes.zip", "holds no vector layer")
+        asked.clear()
+        refused("a file its server gives by parts is left where it is", "/parts.gpkg", "where it is")
+        check("remote: it was not copied", asked == ["/parts.gpkg"], asked)
+    finally:
+        project_control.fetch = real_fetch
+        project_control.MAX_DOWNLOAD, project_control.DOWNLOAD_TIMEOUT_MS = limits
+        server.shutdown()
+        server.server_close()
+        project.removeAllMapLayers()
+        for path in copied() - already:
+            shutil.rmtree(os.path.dirname(path), ignore_errors=True)
 
 
 if __name__ == "__main__":
