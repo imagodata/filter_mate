@@ -853,6 +853,11 @@ processing.run("filtermate:batch_filter", {
         AGENT est un tchat en haut du panneau. Vous écrivez une phrase, par exemple <em>les bâtiments au-dessus de 1200 m dans la commune sélectionnée</em>, et l'agent filtre, sélectionne, zoome, affiche ou masque des couches et exporte.
         Il utilise les mêmes filtres que le reste de FilterMate. La section est affichée par défaut ; l'option <code>AGENT</code> de l'onglet <a href="#configuration">Configuration</a> la masque.
     </p>
+    <p>
+        Il peut aussi chercher, décrire et lancer des algorithmes Processing de QGIS (<code>find_algorithms</code>, <code>describe_algorithm</code>, <code>run_algorithm</code>, aussi par REST et les deux serveurs MCP), dans des limites :
+        seulement les fournisseurs <code>native</code> et <code>qgis</code>, seulement un algorithme qui produit une couche ou ne renvoie que des statistiques, aucun exécuteur SQL ou Python, et des entrées qui sont des couches du projet, jamais un chemin ni une URL.
+        Chaque couche produite est un fichier temporaire ajouté au projet, retiré si vous annulez le tour, et Stop annule l’exécution.
+    </p>
 
     <h3>Choisir un modèle</h3>
     <ul>

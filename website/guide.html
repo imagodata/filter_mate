@@ -854,6 +854,11 @@ processing.run("filtermate:batch_filter", {
         AGENT is a chat at the top of the panel. You write a sentence, for example <em>buildings above 1200 m in the selected commune</em>, and the agent filters, selects, zooms, shows or hides layers and exports.
         It uses the same filters as the rest of FilterMate. It is shown by default; the <code>AGENT</code> option of the <a href="#configuration">Configuration</a> tab hides it.
     </p>
+    <p>
+        It can also find, describe and run Processing algorithms of QGIS (<code>find_algorithms</code>, <code>describe_algorithm</code>, <code>run_algorithm</code>, also through REST and both MCP servers), within limits:
+        only the <code>native</code> and <code>qgis</code> providers, only an algorithm that makes a layer or only answers statistics, no SQL or Python executor, and inputs that are layers of the project, never a path or a URL.
+        Each layer it makes is a temporary file added to the project, removed if you undo the turn, and Stop cancels the run.
+    </p>
 
     <h3>Choose a model</h3>
     <ul>
