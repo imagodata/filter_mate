@@ -1323,6 +1323,10 @@ def s_agent_panel():
     tag = d.backend_indicator_label
     check('dock: the source tag is in the layer card', tag.parentWidget() is not None and
           tag.parentWidget().objectName() == 'label_exploring_coverage_layer', str(tag.parentWidget()))
+    # A large screen: the dimension managers give the lower zone a minimum taller than its headers.
+    lower = d.splitter_main.widget(1)
+    lower_min = lower.minimumHeight()
+    lower.setMinimumHeight(420)
     agent_header.click()
     QApplication.processEvents()
     check('stacks: AGENT opens, EXPLORING and FILTERING fold', sections.is_open('agent') and
@@ -1330,6 +1334,11 @@ def s_agent_panel():
     check('agent: its own state', d.tabTools_current_index == -1, str(d.tabTools_current_index))
     check('agent: filter button off here', not filter_button.isEnabled())
     check('stacks: the lower headers stay', all(b.isVisible() for b in bottom_headers))
+    QApplication.processEvents()
+    span = max(b.geometry().bottom() for b in bottom_headers) - min(b.geometry().top() for b in bottom_headers)
+    check('stacks: the open AGENT takes the room, the folded stack keeps its headers only',
+          lower.height() <= len(bottom_headers) * 34 + 60 and span <= len(bottom_headers) * 34 + 30,
+          f"lower={lower.height()} span={span} min={lower.minimumHeight()}")
     panel = chat.panel
     panel = chat.panel
     check('agent: the welcome is shown', panel.welcome_title.isVisible())
@@ -1380,6 +1389,8 @@ def s_agent_panel():
     QApplication.processEvents()
     check('stacks: EXPORTING opens beside AGENT', sections.is_open('agent') and toolbox.currentWidget() is d.EXPORTING
           and d.tabTools_current_index == 1, str(d.tabTools_current_index))
+    check('stacks: an open section gets its minimum back', lower.minimumHeight() == 420, str(lower.minimumHeight()))
+    lower.setMinimumHeight(lower_min)
     export_header = next(b for b in bottom_headers if b.text() == 'EXPORTING')
     export_header.click()
     QApplication.processEvents()
