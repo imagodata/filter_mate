@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Brezplačna kvota</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Dostop do brezplačne kvote je bil obnovljen: ponovno pošljite zahtevo.</translation>
@@ -391,6 +395,14 @@ Se strinjate?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>POSKUSITE</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Razveljavi</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Ohranjene točke</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Skrij EXPLORING, da se sprosti prostor za razdelke</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Pokaži EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Zapri</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Odklopi ali zasidraj ploščo</translation>
     </message>
 </context>
 </TS>

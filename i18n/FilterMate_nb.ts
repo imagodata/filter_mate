@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Gratis kvote</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Tilgangen til gratiskvoten er fornyet: send forespørselen din på nytt.</translation>
@@ -391,6 +395,14 @@ Godtar du?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>PRØV</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Angre</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Beholdte punkter</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Skjul EXPLORING for å gi plass til seksjonene</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Vis EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Lukk</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Frigjør eller fest panelet</translation>
     </message>
 </context>
 </TS>

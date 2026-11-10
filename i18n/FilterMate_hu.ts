@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Ingyenes keret</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Az ingyenes keret elérése megújult: küldje el újra a kérését.</translation>
@@ -391,6 +395,14 @@ Elfogadja?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>PRÓBÁLJA KI</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Visszavonás</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Megtartott pontok</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>EXPLORING elrejtése, hogy több hely jusson a szakaszoknak</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>EXPLORING megjelenítése</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Panel leválasztása vagy rögzítése</translation>
     </message>
 </context>
 </TS>

@@ -63,6 +63,13 @@ def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentChat", text)
 
 
+def destination_text(preset: str, model: str) -> str:
+    """Where the requests go, short, as the mockup heads the section: ``Claude · haiku-5-5``."""
+    short = {FREE_PRESET: _tr("Free quota"), "anthropic": "Claude"}.get(preset) or PRESET_LABELS.get(preset, preset)
+    name = model[len("claude-"):] if model.startswith("claude-") else model
+    return f"{short} · {name}" if name else short
+
+
 def agent_enabled(config_data) -> bool:
     """``APP.OPTIONS.AGENT.enabled``; on when the section is absent, as in the default configuration."""
     try:
@@ -119,7 +126,7 @@ class AgentChatController(QObject):
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
         values = load_settings()
-        destination = f"{PRESET_LABELS.get(values.preset, values.preset)} · {values.model}"
+        destination = destination_text(values.preset, values.model)
         if self._mcp.listening:
             destination += " · MCP"
         if self._header_label is not None:
@@ -524,10 +531,12 @@ class AgentChatController(QObject):
 
     def on_tool_start(self, call: ToolCallPart) -> None:
         self.panel.set_status(self._describe(call) + "…")
+        self.panel.add_step(self._describe(call))
 
     def on_tool_end(self, call: ToolCallPart, result: ToolResultPart) -> None:
         if result.is_error:
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
+        self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
         self.panel.set_status(_tr("Thinking…"))
 
@@ -554,6 +563,9 @@ class AgentChatController(QObject):
         if self.chat_busy():
             self._journal_later.append((call, result, client))
             return
+        spec = self._tools.get(call.name)
+        if spec is not None and not spec.read_only:
+            self.panel.begin_step()  # a change of another application is a step of the history on its own
         # No project key: one is closing or opening, and a line kept now would replace what is stored for it.
         self._log_action(call, result, self.label_of(call, client), keep=bool(self._transcript_key))
         self._save_transcript()
@@ -611,6 +623,7 @@ class AgentChatController(QObject):
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         self.panel.set_working(False)
+        self.panel.clear_steps()
         self._flush_answer()
         self.panel.end_answer()
         self._flush_journal()

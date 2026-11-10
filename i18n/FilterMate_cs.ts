@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Bezplatná kvóta</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Přístup k bezplatnému limitu byl obnoven: odešlete svůj požadavek znovu.</translation>
@@ -391,6 +395,14 @@ Souhlasíte?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>ZKUSTE</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Vrátit</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8583,6 +8595,25 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Ponechané body</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Skrýt EXPLORING a uvolnit místo sekcím</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Zobrazit EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Zavřít</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Odpojit nebo ukotvit panel</translation>
     </message>
 </context>
 </TS>

@@ -1272,11 +1272,12 @@ def s_wheel_needs_focus_check():
 
 
 def s_agent_panel():
-    """The AGENT section: absent by default, then first in the accordion when the option is on."""
+    """The AGENT section: shown by default, first in the accordion."""
     d = dock()
     plugin = qgis.utils.plugins[PACKAGE]
     toolbox = d.toolBox_tabTools
-    check('agent: no section by default', getattr(d, '_agent_chat', None) is None and toolbox.count() == 3)
+    check('agent: shown by default', getattr(d, '_agent_chat', None) is not None and toolbox.count() == 4,
+          str(toolbox.count()))
     toolbox.setCurrentWidget(d.FILTERING)
     QApplication.processEvents()
     d.select_tabTools_index()
@@ -1301,8 +1302,17 @@ def s_agent_panel():
     shots = os.environ.get('FM_SHOTS')
     if shots:
         d.grab().save(os.path.join(shots, 'agent_folded.png'))
+    bar_widget = d.titleBarWidget()
+    check('dock: favorites in the title bar', bar_widget is not None and d.favorites_indicator_label.parentWidget() is bar_widget)
+    check('dock: no header row above EXPLORING', d.frame_header is None or d.frame_header.isHidden())
+    tag = d.backend_indicator_label
+    check('dock: the source tag is in the layer card', tag.parentWidget() is not None and
+          tag.parentWidget().objectName() == 'label_exploring_coverage_layer', str(tag.parentWidget()))
+    folder = getattr(d, '_fm_exploring_folder', None)
+    check('dock: EXPLORING open on FILTERING', folder is not None and not d.frame_exploring.isHidden())
     toolbox.setCurrentWidget(chat.panel)
     QApplication.processEvents()
+    check('dock: EXPLORING folds away while AGENT is open', d.frame_exploring.isHidden())
     check('agent: its own state', d.tabTools_current_index == -1, str(d.tabTools_current_index))
     check('agent: filter button off here', not filter_button.isEnabled())
     panel = chat.panel
@@ -1328,14 +1338,23 @@ def s_agent_panel():
     bar = page_scroll.verticalScrollBar() if isinstance(page_scroll, QScrollArea) else None
     check('agent: the input stays in view with a conversation', panel.input.isVisible() and
           (bar is None or not bar.isVisible()), f"input {panel.input.geometry()} panel h={panel.height()}")
-    check('agent: the undo button is in view', panel.undo_button.isVisible() and
-          panel.undo_button.geometry().bottom() <= panel.height(), str(panel.undo_button.geometry()))
+    from qgis.PyQt.QtWidgets import QPushButton as _Button
+    card_undo = [b for b in panel.thread.findChildren(_Button, 'pushButton_agent_card_undo') if b.isVisibleTo(panel)]
+    check('agent: undo is on the change card', panel.undo_offered() and len(card_undo) == 1, str(card_undo))
     if shots:
         d.grab().save(os.path.join(shots, 'agent_open.png'))
     panel.clear_thread()
     toolbox.setCurrentWidget(d.EXPORTING)
     QApplication.processEvents()
     check('agent: EXPORTING is still section 1', d.tabTools_current_index == 1, str(d.tabTools_current_index))
+    check('dock: EXPLORING comes back when AGENT closes', not d.frame_exploring.isHidden())
+    bar_widget.fold_button.click()
+    toolbox.setCurrentWidget(chat.panel)
+    toolbox.setCurrentWidget(d.EXPORTING)
+    QApplication.processEvents()
+    check('dock: folded by the user, it stays folded', d.frame_exploring.isHidden())
+    bar_widget.fold_button.click()
+    check('dock: and comes back on demand', not d.frame_exploring.isHidden())
     toolbox.setCurrentWidget(d.FILTERING)
     QApplication.processEvents()
     if previous is None:

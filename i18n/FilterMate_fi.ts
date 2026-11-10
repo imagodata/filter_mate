@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Ilmainen kiintiö</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Pääsy ilmaiseen kiintiöön on uusittu: lähetä pyyntö uudelleen.</translation>
@@ -391,6 +395,14 @@ Hyväksytkö?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>KOKEILE</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Kumoa</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Säilytetyt pisteet</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Piilota EXPLORING antaaksesi tilaa osioille</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Näytä EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Sulje</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Irrota tai kiinnitä paneeli</translation>
     </message>
 </context>
 </TS>

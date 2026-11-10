@@ -343,6 +343,8 @@ class CoverageDockExtras(QObject):
         card.setVisible(False)
         layout.insertWidget(0, card)
         self._card = card
+        from ..layout.dock_chrome import put_source_tag_in_card
+        put_source_tag_in_card(self.dockwidget, card)  # the source tag at its top right
 
     def ensure_strip(self) -> None:
         """Selection strip at the bottom of EXPLORING, right above the FILTERING header, once (mockup)."""

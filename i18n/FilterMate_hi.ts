@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>निःशुल्क कोटा</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">निःशुल्क कोटे तक पहुँच नवीनीकृत हो गई: अपना अनुरोध फिर से भेजें।</translation>
@@ -391,6 +395,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>आज़माएँ</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>पूर्ववत करें</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">रखे गए बिंदु</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>अनुभागों के लिए जगह बनाने हेतु EXPLORING छिपाएँ</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>EXPLORING दिखाएँ</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>बंद करें</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>पैनल को अलग करें या डॉक करें</translation>
     </message>
 </context>
 </TS>

@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Bepul kvota</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Bepul kvotaga kirish yangilandi: so'rovingizni qayta yuboring.</translation>
@@ -391,6 +395,14 @@ Rozimisiz?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>SINAB KORING</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Bekor qilish</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Saqlangan nuqtalar</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Bo'limlarga joy ochish uchun EXPLORING ni yashirish</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>EXPLORING ni ko'rsatish</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Yopish</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Panelni ajratish yoki biriktirish</translation>
     </message>
 </context>
 </TS>

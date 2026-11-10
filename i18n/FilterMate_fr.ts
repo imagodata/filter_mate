@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Quota gratuit</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>The MCP server could not start: {}</source>
         <translation type="obsolete">Le serveur MCP n'a pas pu démarrer : {}</translation>
@@ -396,6 +400,14 @@ Acceptez-vous ?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>ESSAYEZ</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Annuler</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>The MCP server could not start: {}</source>
@@ -8745,6 +8757,25 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Points retenus</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Masquer EXPLORING pour laisser la place aux sections</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Afficher EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Fermer</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Détacher ou ancrer le panneau</translation>
     </message>
 </context>
 </TS>

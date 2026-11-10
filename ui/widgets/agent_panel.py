@@ -11,13 +11,14 @@ import time
 from typing import Tuple
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, pyqtSignal
-from qgis.PyQt.QtGui import QColor, QFont, QTextBlockFormat, QTextCharFormat, QTextCursor
+from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QMenu,
     QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
-    QTabWidget, QTextEdit, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
+    QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
+from .agent_thread import AgentThread
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
@@ -28,6 +29,7 @@ from ...core.agent.sources import (
 from ..styles.mockup_design import FONT_FAMILY, render_icon, stylesheet_is_dark, tokens
 
 PANEL_NAME = "AGENT"
+INPUT_HEIGHT = 32
 THREAD_MIN_HEIGHT = 60  # the dock has to stay usable on small screens
 BUTTON_SIZE = 26
 ICON_SIZE = 16
@@ -125,19 +127,17 @@ class AgentPanel(QFrame):
             f"max-height: {BUTTON_SIZE}px; padding: 0; margin: 0; }}"
             "QToolButton::menu-indicator { image: none; }"
             f"QTextEdit, QListWidget {{ font-family: '{FONT_FAMILY}', sans-serif; }}"
-            "QPushButton#pushButton_agent_example { text-align: left; padding: 4px 8px; }")
+            "")
 
         self.stack = QStackedWidget(self)
         welcome = QScrollArea(self)  # it must not make the section taller than a small screen allows
+        welcome.setObjectName("scrollArea_agent_welcome")
         welcome.setFrameShape(QFrame.Shape.NoFrame)
         welcome.setWidgetResizable(True)
         welcome.setMinimumHeight(THREAD_MIN_HEIGHT)
         welcome.setWidget(self._build_welcome())
         self.stack.addWidget(welcome)
-        self.thread = QTextEdit(self)
-        self.thread.setObjectName("textEdit_agent_thread")
-        self.thread.setReadOnly(True)
-        self.thread.setAcceptRichText(False)  # nothing is pasted or parsed as HTML; text is inserted as text
+        self.thread = AgentThread(lambda: tokens(self._dark()), self._dark, self.undo_requested.emit, self)
         self.thread.setMinimumHeight(THREAD_MIN_HEIGHT)
         self.stack.addWidget(self.thread)
         self.stack.addWidget(self._build_history())
@@ -184,13 +184,13 @@ class AgentPanel(QFrame):
 
         self.send_button = QToolButton(self)
         self.send_button.setObjectName("toolButton_agent_send")
-        self.send_button.setAutoRaise(True)
+        self.send_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.send_button.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         self.send_button.clicked.connect(self._on_send_or_stop)
 
         self.more_button = QToolButton(self)
         self.more_button.setObjectName("toolButton_agent_more")
-        self.more_button.setAutoRaise(True)
+        self.more_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.more_button.setIconSize(QSize(ICON_SIZE, ICON_SIZE))
         self.more_button.setToolTip(_tr("More"))
         self.more_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
@@ -205,7 +205,7 @@ class AgentPanel(QFrame):
 
         ask = QHBoxLayout()
         ask.setContentsMargins(0, 0, 0, 0)
-        ask.setSpacing(2)
+        ask.setSpacing(6)
         ask.addWidget(self.input, 1)
         ask.addWidget(self.send_button)
         ask.addWidget(self.more_button)
@@ -285,7 +285,7 @@ class AgentPanel(QFrame):
         self.stack.setCurrentIndex(_HISTORY_PAGE)
 
     def show_thread(self) -> None:
-        self.stack.setCurrentIndex(_THREAD_PAGE if not self.thread.document().isEmpty() else _WELCOME_PAGE)
+        self.stack.setCurrentIndex(_THREAD_PAGE if not self.thread.is_empty() else _WELCOME_PAGE)
 
     @property
     def history_shown(self) -> bool:
@@ -330,16 +330,22 @@ class AgentPanel(QFrame):
         font.setBold(True)
         self.welcome_title.setFont(font)
         self.welcome_text = QLabel(page)
+        self.welcome_text.setObjectName("label_agent_welcome_text")
         self.welcome_text.setWordWrap(True)
         self.configure_button = QPushButton(_tr("Set up the agent"), page)
         self.configure_button.setObjectName("pushButton_agent_configure")
         self.configure_button.clicked.connect(self.settings_requested)
+        self.try_label = QLabel(_tr("TRY"), page)
+        self.try_label.setObjectName("label_agent_try")
+        page.setObjectName("widget_agent_welcome")
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(6, 6, 6, 6)
-        layout.setSpacing(6)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
         layout.addWidget(self.welcome_title)
         layout.addWidget(self.welcome_text)
-        layout.addWidget(self.configure_button)
+        layout.addWidget(self.configure_button, 0, Qt.AlignmentFlag.AlignLeft)
+        layout.addSpacing(4)
+        layout.addWidget(self.try_label)
         self.example_buttons = []
         for example in EXAMPLES:
             text = _tr(example)
@@ -361,12 +367,49 @@ class AgentPanel(QFrame):
         return bool(dark)
 
     def _refresh_look(self) -> None:
-        """Icons and colors of the current theme."""
+        """Icons and colors of the current theme, as the mockup draws them."""
         dark = self._dark()
-        muted = tokens(dark)["fm_text_muted"]
+        palette = tokens(dark)
+        muted = palette["fm_text_muted"]
         self.destination.setStyleSheet(f"color: {muted};")
-        self.welcome_text.setStyleSheet(f"color: {muted};")
-        send = render_icon("agent_stop" if self._working else "agent_send", dark)
+        send_color = palette["fm_danger"] if self._working else palette["fm_accent"]
+        sheet = (
+            # Its own sheet wins over the rules of the accordion, which size every tool button as a section tab.
+            f"QToolButton {{ min-width: {BUTTON_SIZE}px; max-width: {BUTTON_SIZE}px; min-height: {BUTTON_SIZE}px; "
+            f"max-height: {BUTTON_SIZE}px; padding: 0; margin: 0; }}"
+            "QToolButton::menu-indicator { image: none; }"
+            f"QListWidget {{ font-family: '{FONT_FAMILY}', sans-serif; }}"
+            f"QLineEdit#lineEdit_agent_input {{ min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT}px;"
+            f" border: 1px solid {palette['fm_field_border']}; border-radius: 6px; padding: 0 10px;"
+            f" background: {palette['fm_field']}; color: {palette['fm_text']}; }}"
+            f"QLineEdit#lineEdit_agent_input:focus {{ border-color: {palette['fm_accent']}; }}"
+            f"QToolButton#toolButton_agent_send {{ min-width: {INPUT_HEIGHT}px; max-width: {INPUT_HEIGHT}px;"
+            f" min-height: {INPUT_HEIGHT}px; max-height: {INPUT_HEIGHT}px; border: none; border-radius: 6px;"
+            f" background: {send_color}; }}"
+            f"QToolButton#toolButton_agent_more {{ min-width: {INPUT_HEIGHT - 2}px; max-width: {INPUT_HEIGHT - 2}px;"
+            f" min-height: {INPUT_HEIGHT - 2}px; max-height: {INPUT_HEIGHT - 2}px; border: 1px solid"
+            f" {palette['fm_field_border']}; border-radius: 6px; background: {palette['fm_field']}; }}"
+            f"QToolButton#toolButton_agent_more:disabled {{ background: {palette['fm_group']}; }}"
+            f"QWidget#widget_agent_welcome {{ background: {palette['fm_list']}; }}"
+            f"QScrollArea#scrollArea_agent_welcome {{ background: {palette['fm_list']}; border: 1px solid"
+            f" {palette['fm_group_border']}; border-radius: 6px; }}"
+            f"QLabel#label_agent_welcome {{ font-size: 14px; font-weight: 600; color: {palette['fm_text']}; }}"
+            f"QLabel#label_agent_welcome_text {{ font-size: 12px; color: {muted}; }}"
+            f"QLabel#label_agent_try {{ font-size: 11px; font-weight: 600; color: {muted}; letter-spacing: 1px; }}"
+            f"QPushButton#pushButton_agent_example {{ text-align: left; padding: 8px 10px; font-size: 13px;"
+            f" border: 1px solid {palette['fm_group_border']}; border-radius: 6px; background: {palette['fm_group']};"
+            f" color: {palette['fm_text']}; }}"
+            f"QPushButton#pushButton_agent_example:hover {{ border-color: {palette['fm_active_border']}; }}"
+            f"QPushButton#pushButton_agent_configure {{ padding: 8px 16px; font-weight: 500; border: none;"
+            f" border-radius: 6px; background: {palette['fm_accent']}; color: {palette['fm_accent_text']}; }}")
+        if sheet != self.styleSheet() and not getattr(self, "_styling", False):
+            self._styling = True  # a new sheet is itself a style change: it must not come back here
+            try:
+                self.setStyleSheet(sheet)
+            finally:
+                self._styling = False
+        self.thread.refresh_look()
+        send = render_icon("agent_stop" if self._working else "agent_send", dark, palette["fm_accent_text"])
         if send is not None:
             self.send_button.setIcon(send)
         more = render_icon("more", dark)
@@ -378,7 +421,8 @@ class AgentPanel(QFrame):
 
     def changeEvent(self, event) -> None:  # noqa: N802 - Qt name
         super().changeEvent(event)
-        if event.type() in (QEvent.Type.PaletteChange, QEvent.Type.StyleChange) and hasattr(self, "more_button"):
+        if (event.type() in (QEvent.Type.PaletteChange, QEvent.Type.StyleChange) and hasattr(self, "more_button")
+                and not getattr(self, "_styling", False)):
             self._refresh_look()
 
     def showEvent(self, event) -> None:  # noqa: N802 - Qt name
@@ -398,6 +442,8 @@ class AgentPanel(QFrame):
             self.welcome_title.setText(_tr("Filter your layers from a sentence"))
             self.welcome_text.setText(_tr("Connect an AI provider to start. Nothing is sent before you agree."))
         self.configure_button.setVisible(not ready)
+        if hasattr(self, "try_label"):
+            self.try_label.setVisible(ready)
         for button in self.example_buttons if hasattr(self, "example_buttons") else ():
             button.setVisible(ready)
         if hasattr(self, "destination"):
@@ -420,8 +466,14 @@ class AgentPanel(QFrame):
         self._refresh_look()
 
     def set_can_undo(self, possible: bool) -> None:
+        """Undo sits on the cards of the last step (mockup); the button below only when no card can hold it."""
+        on_cards = self.thread.set_undo_possible(possible)
         self.undo_button.setEnabled(possible)
-        self.undo_button.setVisible(possible)
+        self.undo_button.setVisible(possible and not on_cards)
+        self._undo_possible = possible
+
+    def undo_offered(self) -> bool:
+        return getattr(self, "_undo_possible", False)
 
     def set_status(self, text: str, error: bool = False, offer_settings: bool = False) -> None:
         danger = tokens(self._dark())["fm_danger"]
@@ -449,6 +501,7 @@ class AgentPanel(QFrame):
 
     def clear_thread(self) -> None:
         self.thread.clear()
+        self.set_can_undo(False)
         self._in_answer = False
         self.set_status("")
         self.stack.setCurrentIndex(_WELCOME_PAGE)
@@ -456,64 +509,52 @@ class AgentPanel(QFrame):
     def end_answer(self) -> None:
         """What comes next starts on its own line."""
         self._in_answer = False
+        self.thread.end_answer()
 
     # --- the conversation -------------------------------------------------------
 
-    def _write(self, text: str, new_block: bool, color: str = "", bold: bool = False, background: str = "",
-               right: bool = False) -> None:
-        """Always through ``insertText``: the text is never interpreted."""
+    def _show_conversation(self) -> None:
         if not self.history_shown:
             self.stack.setCurrentIndex(_THREAD_PAGE)
-        bar = self.thread.verticalScrollBar()
-        stick = bar.value() >= bar.maximum()
-        cursor = QTextCursor(self.thread.document())
-        cursor.movePosition(QTextCursor.MoveOperation.End)
-        if new_block:
-            if not self.thread.document().isEmpty():
-                cursor.insertBlock()
-            block = QTextBlockFormat()
-            block.setTopMargin(4)
-            if background:
-                block.setBackground(QColor(background))
-            if right:
-                block.setAlignment(Qt.AlignmentFlag.AlignRight)
-            cursor.setBlockFormat(block)
-        characters = QTextCharFormat()
-        if color:
-            characters.setForeground(QColor(color))
-        if bold:
-            font = QFont()
-            font.setBold(True)
-            characters.setFont(font)
-        cursor.insertText(text, characters)
-        if stick:
-            bar.setValue(bar.maximum())
 
     def add_user(self, text: str) -> None:
-        """A request of the user, on a tinted band, on the right."""
+        """A request of the user, in a tinted bubble on the right."""
         self.input.remember(text)
-        self._write(text, True, bold=True, background=tokens(self._dark())["fm_active"], right=True)
+        self._show_conversation()
+        self.thread.add_user(text)
         self._in_answer = False
 
     def add_action(self, text: str, succeeded: bool = True, detail: str = "", count: str = "") -> None:
-        """Something the agent changed, or failed to change; ``count`` is what it kept (``12 / 586``)."""
-        palette = tokens(self._dark())
-        mark = "✓" if succeeded else "✗"
-        line = f"{mark} {text}" + (f"  ·  {count}" if count else "")
-        self._write(line, True, color=palette["fm_text_muted"] if succeeded else palette["fm_danger"])
-        if detail:
-            self._write(f"   {detail}", True, color=palette["fm_text_muted"])
+        """Something the agent changed, or failed to change, in a card; ``count`` is what it kept (``12 / 586``)."""
+        self._show_conversation()
+        self.thread.add_card(text, succeeded, detail, count)
         self._in_answer = False
+
+    def begin_step(self) -> None:
+        self.thread.begin_step()
 
     def add_note(self, text: str) -> None:
         """A remark of the panel itself, muted."""
-        self._write(text, True, color=tokens(self._dark())["fm_text_muted"])
+        self._show_conversation()
+        self.thread.add_note(text)
         self._in_answer = False
 
     def add_text(self, text: str) -> None:
         """More of the answer being written."""
-        self._write(text, not self._in_answer)
+        self._show_conversation()
+        self.thread.add_text(text)
         self._in_answer = True
+
+    def add_step(self, text: str) -> None:
+        """What the running request is doing now."""
+        self._show_conversation()
+        self.thread.add_step(text)
+
+    def finish_steps(self, succeeded: bool = True) -> None:
+        self.thread.finish_steps(succeeded)
+
+    def clear_steps(self) -> None:
+        self.thread.clear_steps()
 
 
 class AgentSettingsDialog(QDialog):
