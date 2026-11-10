@@ -1228,7 +1228,7 @@ Hi esteu d'acord?</translation>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>Per vincular l'interval a l'estil, trieu «Estil de la capa» a «Visualització al mapa»</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
@@ -1561,7 +1561,7 @@ Hi esteu d'acord?</translation>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1528"/>
         <source>No valid pixels to display in the selected bands.</source>
-        <translation type="unfinished"></translation>
+        <translation>No hi ha cap píxel vàlid per mostrar a les bandes seleccionades.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1805"/>
@@ -1661,27 +1661,27 @@ Hi esteu d'acord?</translation>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1522"/>
         <source>Preparing band display…</source>
-        <translation type="unfinished"></translation>
+        <translation>S'està preparant la visualització de les bandes…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1538"/>
         <source>The selected bands could not be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>No s'han pogut mostrar les bandes seleccionades.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1610"/>
         <source>Unknown raster layer or band in expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Capa ràster o banda desconeguda a l'expressió</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>The raster histogram could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>No s'ha pogut calcular l'histograma del ràster.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
         <source>The raster preview could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>No s'ha pogut calcular la vista prèvia del ràster.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1155"/>
@@ -4016,7 +4016,7 @@ Eliminar igualment?</translation>
     <message>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
-        <translation type="unfinished"></translation>
+        <translation>L'origen ha canviat durant el filtratge: no s'ha aplicat res</translation>
     </message>
 </context>
 <context>
@@ -5258,167 +5258,171 @@ Voleu continuar?</translation>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
         <source>Favorite name or identifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Nom o identificador del preferit</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
         <source>Provide the name of the favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Indiqueu el nom del preferit</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
         <source>Favorite: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Preferit: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
         <source>Apply a FilterMate favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplica un preferit de FilterMate</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
         <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reprodueix un preferit desat a FilterMate (pel nom o l'identificador): filtres de les capes vectorials i de núvols de punts, retalls dels ràsters i dels núvols de punts. Les capes es troben per signatura, després per identificador i finalment pel nom. Sense el tauler (qgis_process), s'usen els preferits desats al projecte.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="66"/>
         <source>Filter expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressió de filtre</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
         <source>No layer selected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Cap capa seleccionada.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressió no vàlida per a la capa '{0}', ignorada.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra diverses capes (per lots)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplica la mateixa expressió de filtre a diverses capes vectorials en una sola execució.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="79"/>
         <source>Layers to clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Capes a les quals s'ha de treure el filtre</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
         <source>cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>sense filtre</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
         <source>Clear the filters of layers of any type</source>
-        <translation type="unfinished"></translation>
+        <translation>Treu el filtre de capes de qualsevol tipus</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
         <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Treu el filtre de les capes triades: subconjunt buidat en vectors i núvols de punts, origen original restablert en ràsters i núvols de punts retallats. Útil al començament d'un model per tornar a començar amb les dades completes. Es pot desfer des de FilterMate.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Capa d'origen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
-        <translation type="unfinished"></translation>
+        <translation>Només les entitats seleccionades</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Capa d'origen no vàlida</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} entitat(s) d'origen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra capes de qualsevol tipus per una capa vectorial</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra in situ les capes vectorials, ràster i de núvols de punts per les entitats d'una capa vectorial, amb els predicats geomètrics, una àrea d'influència i una cobertura mínima.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
-        <translation type="unfinished"></translation>
+        <translation>Extensió</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
-        <translation type="unfinished"></translation>
+        <translation>Geometria (WKT, preval sobre l'extensió)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Indiqueu una extensió o una geometria</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra capes de qualsevol tipus per una extensió o una geometria</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra les capes de destinació per una extensió (capa, llenç, entrada manual) o una geometria WKT, amb els mateixos predicats, àrea d'influència i cobertura que la pestanya FILTRATGE. L'operació es registra a l'historial de la primera capa de destinació.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Núvol de punts d'origen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinació dels criteris amb el filtre existent de l'origen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Resolució de la petjada dels punts (unitats del núvol)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Núvol de punts d'origen no vàlid</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Criteris: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
-        <translation type="unfinished"></translation>
+        <translation>Petjada calculada a partir d'un nombre limitat de punts: augmenteu la resolució</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra capes de qualsevol tipus pels punts d'un núvol de punts</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
@@ -5429,107 +5433,113 @@ Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = b
 Without criteria, the footprint covers the points displayed by the point cloud.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Aplica criteris al núvol de punts d'origen (classes ASPRS, intervals de Z i intensitat, número de retorn, expressió), calcula la petjada dels punts retinguts i filtra les capes de destinació per aquesta zona.
+
+Exemples: edificis que intersequen punts de classe 6 (cobertura ≥ 10 %); Disjunt = edificis absents del núvol de punts; un MDT limitat a l'extensió dels punts d'aigua (classe 9).
+
+Sense criteris, la petjada abasta els punts mostrats pel núvol de punts.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Ràster d'origen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
-        <translation type="unfinished"></translation>
+        <translation>Píxels a conservar</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
-        <translation type="unfinished"></translation>
+        <translation>Interval de valors</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
-        <translation type="unfinished"></translation>
+        <translation>Classes</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
-        <translation type="unfinished"></translation>
+        <translation>L'interval s'aplica a (banda llegida com un MDT per al pendent, l'orientació…)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
-        <translation type="unfinished"></translation>
+        <translation>Rugositat (TRI)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor mínim (interval)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor màxim (interval)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
-        <translation type="unfinished"></translation>
+        <translation>Valors de classes (p. ex. 6,7)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressió ràster, píxel conservat si no és zero (p. ex. &quot;mdt@1&quot; &gt; 1200)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
         <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
-        <translation type="unfinished"></translation>
+        <translation>Objectes conservats en lloc dels valors de píxel (polígons, per exemple dibuixats amb SAM)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Amaga també el ràster d'origen fora de la selecció</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
-        <translation type="unfinished"></translation>
+        <translation>Màxim de píxels llegits (més enllà: remostratge)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Ràster d'origen no vàlid</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecció: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
         <source>An object cannot be read in the CRS of the raster: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Un objecte no es pot llegir en el SRC del ràster: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
         <source>The objects layer holds no polygon</source>
-        <translation type="unfinished"></translation>
+        <translation>La capa d'objectes no conté cap polígon</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
         <source>{0} object(s) kept instead of pixel values</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} objecte(s) conservat(s) en lloc dels valors de píxel</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} de {1} píxel(s) conservat(s)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra capes de qualsevol tipus pels píxels d'un ràster</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
@@ -5540,171 +5550,181 @@ Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a 
 The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Conserva els píxels d'un ràster (interval de valors d'una banda, classes d'un ràster categoritzat o expressió ràster), els vectoritza a la mida del píxel i filtra les capes de destinació per aquesta zona.
+
+Exemples: parcel·les contingudes a la zona de 1200–1300 m amb una cobertura del 50 %; un MDT limitat a les classes de bosc; punts LiDAR de les zones amb un pendent &lt; 15 % (trieu «Pendent (%)» a «L'interval s'aplica a» amb un MDT com a origen: ja no cal un pas «Pendent» abans).
+
+El ràster d'origen pot ser una sortida de model: es llegeix sense modificar-se. Amb «Amaga també el ràster d'origen fora de la selecció» i un origen del projecte, es filtra el mateix origen.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="149"/>
         <source>Vector format</source>
-        <translation type="unfinished"></translation>
+        <translation>Format vectorial</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="151"/>
         <source>Raster format</source>
-        <translation type="unfinished"></translation>
+        <translation>Format ràster</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="153"/>
         <source>Point cloud format</source>
-        <translation type="unfinished"></translation>
+        <translation>Format de núvol de punts</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
         <source>Output CRS (empty = the layer&apos;s CRS)</source>
-        <translation type="unfinished"></translation>
+        <translation>SRC de sortida (buit = el de la capa)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
         <source>Files written</source>
-        <translation type="unfinished"></translation>
+        <translation>Fitxers escrits</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
         <source>exported</source>
-        <translation type="unfinished"></translation>
+        <translation>exportada</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
         <source>Export filtered layers (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporta les capes filtrades (vector, ràster, núvol de punts)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
         <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
 
 In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Escriu cada capa tal com està filtrada, un fitxer per capa amb el nom de la capa: entitats del subconjunt per als vectors, píxels conservats (NoData a la resta) en GeoTIFF o COG per als ràsters, punts conservats en LAZ, COPC, LAS, GPKG o CSV per als núvols de punts.
+
+En un model, connecteu «Capes processades» d'un filtre de FilterMate a «Capes a exportar». COPC requereix PDAL (inclòs amb QGIS); sense PDAL, s'escriu un LAZ en lloc seu.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="90"/>
         <source>Layers to filter (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Capes a filtrar (vector, ràster, núvol de punts)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="96"/>
         <source>Buffer (source units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Àrea d'influència (unitats de l'origen)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="99"/>
         <source>Minimum coverage of the target polygons (%)</source>
-        <translation type="unfinished"></translation>
+        <translation>Cobertura mínima dels polígons de destinació (%)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="102"/>
         <source>Combine with the existing filter of the targets</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinació amb el filtre existent de les destinacions</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="109"/>
         <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
 
 Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vector: subconjunt de les entitats. Ràster: píxels fora de la zona a NoData (VRT retallat). Núvol de punts: punts fora de la zona eliminats (fitxer COPC derivat, PDAL). Disjunt conserva l'exterior.
+
+Només es filtren les capes del projecte. El filtre es pot desfer des de FilterMate i els orígens originals sempre queden registrats al projecte. La sortida «Capes processades» es pot encadenar en un model, per exemple cap a «Exporta les capes filtrades».</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="117"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Substitueix</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="123"/>
         <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Classes ASPRS a conservar (p. ex. 3,4,5; buit = totes)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z mínim</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Z màxim</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Intensitat mínima</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Intensitat màxima</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="129"/>
         <source>Return number (empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Número de retorn (buit = tots)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="132"/>
         <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressió de núvol de punts (p. ex. ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="137"/>
         <source>Processed layers</source>
-        <translation type="unfinished"></translation>
+        <translation>Capes processades</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="185"/>
         <source>Layer skipped: {0} ({1})</source>
-        <translation type="unfinished"></translation>
+        <translation>Capa ignorada: {0} ({1})</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="188"/>
         <source>filtered</source>
-        <translation type="unfinished"></translation>
+        <translation>filtrada</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
-        <translation type="unfinished"></translation>
+        <translation> ({0:.1f} s)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: {1}{2}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: error — {1}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="42"/>
         <source>Point clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Núvols de punts</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
         <source>Combine with the existing filter of each point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinació amb el filtre existent de cada núvol de punts</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
         <source>Provide classes, a range, a return number or an expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Indiqueu classes, un interval, un número de retorn o una expressió</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
         <source>Filter point clouds by criteria</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtra núvols de punts per criteris</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aplica els mateixos criteris (classes ASPRS, intervals de Z i intensitat, número de retorn, expressió) a un o diversos núvols de punts del projecte, per exemple totes les lloses LiDAR HD d'una obra. El filtre és l'expressió del núvol de punts (subconjunt): és immediat i es pot desfer des de FilterMate.</translation>
     </message>
 </context>
 <context>
@@ -6570,7 +6590,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="349"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor constant: {0}</translation>
     </message>
 </context>
 <context>
@@ -6978,7 +6998,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="887"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostra la primera banda seleccionada en gris o les bandes seleccionades com a composició en color</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
@@ -7243,62 +7263,62 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
         <source>Choose 1 to 3 bands for display.</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccioneu d'1 a 3 bandes per mostrar-les.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1094"/>
         <source>Grey: band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Gris: banda {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Layer style</source>
-        <translation type="unfinished"></translation>
+        <translation>Estil de la capa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>Visualització al mapa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1096"/>
         <source>R: {0} · G: {1} · B: {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>R: {0} · G: {1} · B: {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="967"/>
         <source>Select band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecciona la banda {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>Bandes seleccionades</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2480"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
-        <translation type="unfinished"></translation>
+        <translation>Seleccioneu almenys una banda a BANDES abans d'usar el comptagotes.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>First checked band</source>
-        <translation type="unfinished"></translation>
+        <translation>Primera banda seleccionada</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="956"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
-        <translation type="unfinished"></translation>
+        <translation>Selecciona o desselecciona totes les bandes. L'histograma mostra la primera banda seleccionada.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
-        <translation type="unfinished"></translation>
+        <translation>Usa aquesta banda per al comptagotes, l'interval de valors i la visualització de les bandes seleccionades</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2184"/>
         <source>VALUE RANGE — selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>INTERVAL DE VALORS — bandes seleccionades</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="919"/>
@@ -7343,127 +7363,127 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>Objecte semblant més petit, com a proporció de cada referència clicada</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>Objecte semblant més gran, com a múltiple de cada referència clicada</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separation</source>
-        <translation type="unfinished"></translation>
+        <translation>Separació</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Connected pixels</source>
-        <translation type="unfinished"></translation>
+        <translation>Píxels connexos</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1303"/>
         <source>Bridge removal: {0} px</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminació de ponts: {0} px</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
-        <translation type="unfinished"></translation>
+        <translation>Separa els objectes units per ponts estrets; els valors més alts tallen ponts més amples</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1308"/>
         <source>Fill holes</source>
-        <translation type="unfinished"></translation>
+        <translation>Omple els forats</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
-        <translation type="unfinished"></translation>
+        <translation>Omple els buits tancats dins de l'objecte clicat; desmarqueu per conservar els patis i els anells interiors</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1453"/>
         <source>Custom expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressió personalitzada</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1463"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Fórmula ràster numèrica, p. ex. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
         <source>Custom derived value expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressió del valor derivat personalitzat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1465"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
-        <translation type="unfinished"></translation>
+        <translation>Una expressió numèrica de la calculadora ràster. L'histograma i els llindars usen els seus valors calculats.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
-        <translation type="unfinished"></translation>
+        <translation>Valors calculats per l'expressió. Arrossegueu els ganxos per usar aquesta expressió com a valor derivat amb llindars.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1532"/>
         <source>Use as derived value</source>
-        <translation type="unfinished"></translation>
+        <translation>Usa com a valor derivat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1741"/>
         <source>Computing histogram…</source>
-        <translation type="unfinished"></translation>
+        <translation>S'està calculant l'histograma…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>No histogram available</source>
-        <translation type="unfinished"></translation>
+        <translation>Cap histograma disponible</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor constant: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>{0} sampled pixels · {1} to {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} píxels mostrejats · de {1} a {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2337"/>
         <source>Distribution (approximate)</source>
-        <translation type="unfinished"></translation>
+        <translation>Distribució (aproximada)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 98% (P1–P99)</source>
-        <translation type="unfinished"></translation>
+        <translation>98 % central (P1–P99)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 90% (P5–P95)</source>
-        <translation type="unfinished"></translation>
+        <translation>90 % central (P5–P95)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Interquartile range (P25–P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>Interval interquartílic (P25–P75)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Upper quartile (≥ P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>Quartil superior (≥ P75)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2346"/>
         <source>All values</source>
-        <translation type="unfinished"></translation>
+        <translation>Tots els valors</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2350"/>
         <source>Derived spectral values</source>
-        <translation type="unfinished"></translation>
+        <translation>Valors espectrals derivats</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
@@ -7507,7 +7527,7 @@ Cada fitxer es comprova amb el seu SHA-256. El model s'executa després en local
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2967"/>
         <source>Derived value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Valor derivat: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>

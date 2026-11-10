@@ -1228,7 +1228,7 @@ Gaat u akkoord?</translation>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>Om het bereik aan de stijl te koppelen, kiest u „Laagstijl” bij „Kaartweergave”</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
@@ -1561,7 +1561,7 @@ Gaat u akkoord?</translation>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1528"/>
         <source>No valid pixels to display in the selected bands.</source>
-        <translation type="unfinished"></translation>
+        <translation>Geen geldige pixels om weer te geven in de geselecteerde banden.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1805"/>
@@ -1661,27 +1661,27 @@ Gaat u akkoord?</translation>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1522"/>
         <source>Preparing band display…</source>
-        <translation type="unfinished"></translation>
+        <translation>Weergave van de banden voorbereiden…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1538"/>
         <source>The selected bands could not be displayed.</source>
-        <translation type="unfinished"></translation>
+        <translation>De geselecteerde banden konden niet worden weergegeven.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1610"/>
         <source>Unknown raster layer or band in expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Onbekende rasterlaag of band in de expressie</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>The raster histogram could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het rasterhistogram kon niet worden berekend.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
         <source>The raster preview could not be calculated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Het rastervoorbeeld kon niet worden berekend.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1155"/>
@@ -4016,7 +4016,7 @@ Toch verwijderen?</translation>
     <message>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
-        <translation type="unfinished"></translation>
+        <translation>De bron is gewijzigd tijdens het filteren: er is niets toegepast</translation>
     </message>
 </context>
 <context>
@@ -5258,167 +5258,171 @@ Doorgaan?</translation>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
         <source>Favorite name or identifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Naam of ID van de favoriet</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
         <source>Provide the name of the favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef de naam van de favoriet op</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
         <source>Favorite: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Favoriet: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
         <source>Apply a FilterMate favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Een FilterMate-favoriet toepassen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
         <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Speelt een in FilterMate opgeslagen favoriet opnieuw af (op naam of ID): filters van de vectorlagen en puntenwolken, uitsneden van de rasters en puntenwolken. Lagen worden gevonden op handtekening, dan op ID en vervolgens op naam. Zonder het paneel (qgis_process) worden de in het project opgeslagen favorieten gebruikt.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="66"/>
         <source>Filter expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Filterexpressie</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
         <source>No layer selected.</source>
-        <translation type="unfinished"></translation>
+        <translation>Geen laag geselecteerd.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ongeldige expressie voor laag '{0}', overgeslagen.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
-        <translation type="unfinished"></translation>
+        <translation>Meerdere lagen filteren (batch)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
-        <translation type="unfinished"></translation>
+        <translation>Past dezelfde filterexpressie in één keer toe op meerdere vectorlagen.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="79"/>
         <source>Layers to clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagen waarvan het filter wordt gewist</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
         <source>cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>filter gewist</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
         <source>Clear the filters of layers of any type</source>
-        <translation type="unfinished"></translation>
+        <translation>Het filter van lagen van elk type wissen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
         <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Verwijdert het filter van de gekozen lagen: subset geleegd voor vectoren en puntenwolken, oorspronkelijke bron hersteld voor uitgesneden rasters en puntenwolken. Handig aan het begin van een model om opnieuw met de volledige gegevens te beginnen. Kan ongedaan worden gemaakt vanuit FilterMate.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Bronlaag</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
-        <translation type="unfinished"></translation>
+        <translation>Alleen geselecteerde objecten</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Ongeldige bronlaag</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} bronobject(en)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagen van elk type filteren met een vectorlaag</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Filtert vector-, raster- en puntenwolklagen ter plekke met de objecten van een vectorlaag, met de geometrische predicaten, een buffer en een minimale bedekking.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
-        <translation type="unfinished"></translation>
+        <translation>Extent</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
-        <translation type="unfinished"></translation>
+        <translation>Geometrie (WKT, heeft voorrang op de extent)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef een extent of een geometrie op</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagen van elk type filteren met een extent of een geometrie</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Filtert de doellagen met een extent (laag, kaartvenster, handmatig ingevoerd) of een WKT-geometrie, met dezelfde predicaten, buffer en bedekking als het tabblad FILTEREN. De bewerking wordt vastgelegd in de geschiedenis van de eerste doellaag.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Bronpuntenwolk</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinatie van de criteria met het bestaande filter van de bron</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Resolutie van de voetafdruk van de punten (eenheden van de puntenwolk)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Ongeldige bronpuntenwolk</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Criteria: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
-        <translation type="unfinished"></translation>
+        <translation>Voetafdruk berekend uit een beperkt aantal punten: verhoog de resolutie</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagen van elk type filteren met de punten van een puntenwolk</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
@@ -5429,107 +5433,113 @@ Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = b
 Without criteria, the footprint covers the points displayed by the point cloud.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Past criteria toe op de bronpuntenwolk (ASPRS-klassen, Z- en intensiteitsbereiken, retournummer, expressie), berekent de voetafdruk van de behouden punten en filtert de doellagen met dit gebied.
+
+Voorbeelden: gebouwen die punten van klasse 6 snijden (bedekking ≥ 10 %); Disjunct = gebouwen die niet in de puntenwolk voorkomen; een DTM beperkt tot de extent van de waterpunten (klasse 9).
+
+Zonder criteria omvat de voetafdruk de punten die door de puntenwolk worden weergegeven.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Bronraster</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
-        <translation type="unfinished"></translation>
+        <translation>Te behouden pixels</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
-        <translation type="unfinished"></translation>
+        <translation>Waardebereik</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
-        <translation type="unfinished"></translation>
+        <translation>Klassen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
-        <translation type="unfinished"></translation>
+        <translation>Het bereik is van toepassing op (band gelezen als DTM voor helling, expositie…)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ruwheid (TRI)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimumwaarde (bereik)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximumwaarde (bereik)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
-        <translation type="unfinished"></translation>
+        <translation>Klassewaarden (bijv. 6,7)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
-        <translation type="unfinished"></translation>
+        <translation>Rasterexpressie, pixel behouden indien niet nul (bijv. &quot;dtm@1&quot; &gt; 1200)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
         <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
-        <translation type="unfinished"></translation>
+        <translation>Behouden objecten in plaats van pixelwaarden (polygonen, bijvoorbeeld getekend met SAM)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Ook het bronraster buiten de selectie verbergen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximaal gelezen pixels (daarboven: herbemonstering)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Ongeldig bronraster</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Selectie: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
         <source>An object cannot be read in the CRS of the raster: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Een object kan niet worden gelezen in het CRS van het raster: {0}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
         <source>The objects layer holds no polygon</source>
-        <translation type="unfinished"></translation>
+        <translation>De objectenlaag bevat geen polygoon</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
         <source>{0} object(s) kept instead of pixel values</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} object(en) behouden in plaats van pixelwaarden</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} van {1} pixel(s) behouden</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
-        <translation type="unfinished"></translation>
+        <translation>Lagen van elk type filteren met de pixels van een raster</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
@@ -5540,171 +5550,181 @@ Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a 
 The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Behoudt de pixels van een raster (waardebereik van een band, klassen van een gecategoriseerd raster of rasterexpressie), vectoriseert ze op pixelgrootte en filtert de doellagen met dit gebied.
+
+Voorbeelden: percelen binnen de zone 1200–1300 m met een bedekking van 50 %; een DTM beperkt tot de bosklassen; LiDAR-punten van de gebieden met een helling &lt; 15 % (kies „Helling (%)” bij „Het bereik is van toepassing op” met een DTM als bron: geen aparte stap „Helling” meer nodig).
+
+Het bronraster kan een modeluitvoer zijn: het wordt gelezen zonder te worden gewijzigd. Met „Ook het bronraster buiten de selectie verbergen” en een projectbron wordt de bron zelf gefilterd.
+
+</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="149"/>
         <source>Vector format</source>
-        <translation type="unfinished"></translation>
+        <translation>Vectorformaat</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="151"/>
         <source>Raster format</source>
-        <translation type="unfinished"></translation>
+        <translation>Rasterformaat</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="153"/>
         <source>Point cloud format</source>
-        <translation type="unfinished"></translation>
+        <translation>Puntenwolkformaat</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
         <source>Output CRS (empty = the layer&apos;s CRS)</source>
-        <translation type="unfinished"></translation>
+        <translation>Uitvoer-CRS (leeg = het CRS van de laag)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
         <source>Files written</source>
-        <translation type="unfinished"></translation>
+        <translation>Geschreven bestanden</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
         <source>exported</source>
-        <translation type="unfinished"></translation>
+        <translation>geëxporteerd</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
         <source>Export filtered layers (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Gefilterde lagen exporteren (vector, raster, puntenwolk)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
         <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
 
 In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Schrijft elke laag zoals die gefilterd is, één bestand per laag met de naam van de laag: objecten van de subset voor vectoren, behouden pixels (elders NoData) als GeoTIFF of COG voor rasters, behouden punten als LAZ, COPC, LAS, GPKG of CSV voor puntenwolken.
+
+Koppel in een model „Verwerkte lagen” van een FilterMate-filter aan „Te exporteren lagen”. COPC vereist PDAL (meegeleverd met QGIS); zonder PDAL wordt in plaats daarvan een LAZ geschreven.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="90"/>
         <source>Layers to filter (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
+        <translation>Te filteren lagen (vector, raster, puntenwolk)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="96"/>
         <source>Buffer (source units)</source>
-        <translation type="unfinished"></translation>
+        <translation>Buffer (eenheden van de bron)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="99"/>
         <source>Minimum coverage of the target polygons (%)</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimale bedekking van de doelpolygonen (%)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="102"/>
         <source>Combine with the existing filter of the targets</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinatie met het bestaande filter van de doelen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="109"/>
         <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
 
 Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vector: subset van de objecten. Raster: pixels buiten het gebied op NoData gezet (uitgesneden VRT). Puntenwolk: punten buiten het gebied verwijderd (afgeleid COPC-bestand, PDAL). Disjunct behoudt de buitenkant.
+
+Alleen projectlagen worden gefilterd. Het filter kan ongedaan worden gemaakt vanuit FilterMate en de oorspronkelijke bronnen worden altijd in het project vastgelegd. De uitvoer „Verwerkte lagen” kan in een model worden doorgekoppeld, bijvoorbeeld naar „Gefilterde lagen exporteren”.</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="117"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Vervangen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="123"/>
         <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Te behouden ASPRS-klassen (bijv. 3,4,5; leeg = alle)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimale Z</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum Z</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximale Z</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Minimum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimale intensiteit</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="125"/>
         <source>Maximum intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximale intensiteit</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="129"/>
         <source>Return number (empty = all)</source>
-        <translation type="unfinished"></translation>
+        <translation>Retournummer (leeg = alle)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="132"/>
         <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
-        <translation type="unfinished"></translation>
+        <translation>Puntenwolkexpressie (bijv. ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="137"/>
         <source>Processed layers</source>
-        <translation type="unfinished"></translation>
+        <translation>Verwerkte lagen</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="185"/>
         <source>Layer skipped: {0} ({1})</source>
-        <translation type="unfinished"></translation>
+        <translation>Laag overgeslagen: {0} ({1})</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="188"/>
         <source>filtered</source>
-        <translation type="unfinished"></translation>
+        <translation>gefilterd</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
-        <translation type="unfinished"></translation>
+        <translation> ({0:.1f} s)</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: {1}{2}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0}: mislukt — {1}</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="42"/>
         <source>Point clouds</source>
-        <translation type="unfinished"></translation>
+        <translation>Puntenwolken</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
         <source>Combine with the existing filter of each point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Combinatie met het bestaande filter van elke puntenwolk</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
         <source>Provide classes, a range, a return number or an expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Geef klassen, een bereik, een retournummer of een expressie op</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
         <source>Filter point clouds by criteria</source>
-        <translation type="unfinished"></translation>
+        <translation>Puntenwolken filteren op criteria</translation>
     </message>
     <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
+        <translation>Past dezelfde criteria (ASPRS-klassen, Z- en intensiteitsbereiken, retournummer, expressie) toe op een of meer puntenwolken van het project, bijvoorbeeld alle LiDAR HD-tegels van een werkterrein. Het filter is de expressie van de puntenwolk (subset): het werkt direct en kan ongedaan worden gemaakt vanuit FilterMate.</translation>
     </message>
 </context>
 <context>
@@ -6570,7 +6590,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="349"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Constante waarde: {0}</translation>
     </message>
 </context>
 <context>
@@ -6978,7 +6998,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="887"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
-        <translation type="unfinished"></translation>
+        <translation>De eerste aangevinkte band in grijs weergeven of de aangevinkte banden als kleurencomposiet</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
@@ -7243,62 +7263,62 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
         <source>Choose 1 to 3 bands for display.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vink 1 tot 3 banden aan om weer te geven.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1094"/>
         <source>Grey: band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Grijs: band {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Layer style</source>
-        <translation type="unfinished"></translation>
+        <translation>Laagstijl</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>Map display</source>
-        <translation type="unfinished"></translation>
+        <translation>Kaartweergave</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1096"/>
         <source>R: {0} · G: {1} · B: {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>R: {0} · G: {1} · B: {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="967"/>
         <source>Select band {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Band {0} selecteren</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>Geselecteerde banden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2480"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vink minstens één band aan in BANDEN voordat u de pipet gebruikt.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>First checked band</source>
-        <translation type="unfinished"></translation>
+        <translation>Eerste aangevinkte band</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="956"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle banden aan- of uitvinken. Het histogram toont de eerste aangevinkte band.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
-        <translation type="unfinished"></translation>
+        <translation>Deze band gebruiken voor de pipet, het waardebereik en de weergave van de geselecteerde banden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2184"/>
         <source>VALUE RANGE — selected bands</source>
-        <translation type="unfinished"></translation>
+        <translation>WAARDEBEREIK — geselecteerde banden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="919"/>
@@ -7343,127 +7363,127 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleinste vergelijkbare object, als aandeel van elke aangeklikte referentie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
-        <translation type="unfinished"></translation>
+        <translation>Grootste vergelijkbare object, als veelvoud van elke aangeklikte referentie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separation</source>
-        <translation type="unfinished"></translation>
+        <translation>Scheiding</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Connected pixels</source>
-        <translation type="unfinished"></translation>
+        <translation>Verbonden pixels</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1303"/>
         <source>Bridge removal: {0} px</source>
-        <translation type="unfinished"></translation>
+        <translation>Bruggen verwijderen: {0} px</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
-        <translation type="unfinished"></translation>
+        <translation>Objecten scheiden die door smalle bruggen zijn verbonden; hogere waarden doorbreken bredere bruggen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1308"/>
         <source>Fill holes</source>
-        <translation type="unfinished"></translation>
+        <translation>Gaten vullen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
-        <translation type="unfinished"></translation>
+        <translation>Omsloten openingen in het aangeklikte object vullen; uitvinken om binnenplaatsen en binnenringen te behouden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1453"/>
         <source>Custom expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Aangepaste expressie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1463"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Numerieke rasterformule, bijv. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
         <source>Custom derived value expression</source>
-        <translation type="unfinished"></translation>
+        <translation>Expressie van de aangepaste afgeleide waarde</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1465"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
-        <translation type="unfinished"></translation>
+        <translation>Een numerieke expressie van de rasterberekening. Het histogram en de drempelwaarden gebruiken de berekende waarden ervan.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
-        <translation type="unfinished"></translation>
+        <translation>Door de expressie berekende waarden. Sleep de handvatten om deze expressie als afgeleide waarde met drempelwaarden te gebruiken.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1532"/>
         <source>Use as derived value</source>
-        <translation type="unfinished"></translation>
+        <translation>Gebruiken als afgeleide waarde</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1741"/>
         <source>Computing histogram…</source>
-        <translation type="unfinished"></translation>
+        <translation>Histogram berekenen…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>No histogram available</source>
-        <translation type="unfinished"></translation>
+        <translation>Geen histogram beschikbaar</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>Constant value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Constante waarde: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>{0} sampled pixels · {1} to {2}</source>
-        <translation type="unfinished"></translation>
+        <translation>{0} bemonsterde pixels · van {1} tot {2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2337"/>
         <source>Distribution (approximate)</source>
-        <translation type="unfinished"></translation>
+        <translation>Verdeling (bij benadering)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 98% (P1–P99)</source>
-        <translation type="unfinished"></translation>
+        <translation>Centrale 98 % (P1–P99)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 90% (P5–P95)</source>
-        <translation type="unfinished"></translation>
+        <translation>Centrale 90 % (P5–P95)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Interquartile range (P25–P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>Interkwartielafstand (P25–P75)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Upper quartile (≥ P75)</source>
-        <translation type="unfinished"></translation>
+        <translation>Bovenste kwartiel (≥ P75)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2346"/>
         <source>All values</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle waarden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2350"/>
         <source>Derived spectral values</source>
-        <translation type="unfinished"></translation>
+        <translation>Afgeleide spectrale waarden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
@@ -7507,7 +7527,7 @@ Elk bestand wordt gecontroleerd aan de hand van zijn SHA-256. Het model draait d
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2967"/>
         <source>Derived value: {0}</source>
-        <translation type="unfinished"></translation>
+        <translation>Afgeleide waarde: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
