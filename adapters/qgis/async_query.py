@@ -191,21 +191,33 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
     generation = slot.replace(task, keep_loading=keep_loading)
     slot.loading = loading
     connections = []
+    # Layers deleted while the read runs. A bound signal kept here holds the address of its layer: disconnecting
+    # it once the layer is gone reads freed memory, an access violation no except can catch (QGIS 4.2, 2026-11-11:
+    # a layer removed during a read, then taskTerminated). Qt drops their connections itself when they go.
+    gone = set()
 
     def invalidate(*args):
         if slot.accepts(generation):
             slot.cancel()
 
-    for dependent in dependent_layers:
+    for position, dependent in enumerate(dependent_layers):
+        def forget(*args, position=position):
+            gone.add(position)
+        deleted = getattr(dependent, 'willBeDeleted', None)
+        if deleted is not None:  # first, so the layer counts as gone before anything it triggers runs
+            deleted.connect(forget)
+            connections.append((position, deleted, forget))
         for name in ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged',
                      'updatedFields', 'crsChanged', 'dataSourceChanged'):
             signal = getattr(dependent, name, None)
             if signal is not None:
                 signal.connect(invalidate)
-                connections.append((signal, invalidate))
+                connections.append((position, signal, invalidate))
 
     def settled():
-        for signal, callback in connections:
+        for position, signal, callback in connections:
+            if position in gone:
+                continue
             try:
                 signal.disconnect(callback)
             except (RuntimeError, TypeError):
