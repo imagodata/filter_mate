@@ -746,6 +746,7 @@ class RasterExploringPanel(QWidget):
     proposalsAcceptRequested = pyqtSignal()  # keep every similar object proposed
     proposalsRejectRequested = pyqtSignal()
     segmentRuntimeInstallRequested = pyqtSignal()
+    segmentsLayerRequested = pyqtSignal()  # turn the objects drawn by SAM into a polygon layer
     displayChanged = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -1220,6 +1221,12 @@ class RasterExploringPanel(QWidget):
         self._segment_clear_button.setToolTip(self.tr("Forget the objects drawn by SAM"))
         self._segment_clear_button.clicked.connect(self.clear_segments)
         segment_row.addWidget(self._segment_clear_button)
+        self._segment_layer_button = QPushButton(self.tr("To layer"), self._segment_widget)
+        self._segment_layer_button.setObjectName("pushButton_raster_segment_layer")
+        self._segment_layer_button.setToolTip(self.tr("Add the objects drawn by SAM to the project as a polygon layer, "
+                                                      "for Processing, an export or editing"))
+        self._segment_layer_button.clicked.connect(self.segmentsLayerRequested.emit)
+        segment_row.addWidget(self._segment_layer_button)
         segment_row.addStretch(1)
         # The similar objects SAM proposes, before they join the selection.
         self._proposal_widget = QWidget(self._segment_widget)
@@ -2679,6 +2686,7 @@ class RasterExploringPanel(QWidget):
         self._fill_holes_check.setVisible(target == PICK_OBJECT)
         self._segment_widget.setVisible(objects)
         self._segment_clear_button.setVisible(sam)
+        self._segment_layer_button.setVisible(sam)
         with _signals_blocked(self._engine_combo):
             self._engine_combo.setCurrentIndex(self._engine_combo.findData(self.object_engine()))
 
@@ -2916,6 +2924,7 @@ class RasterExploringPanel(QWidget):
         count = len(self._segments)
         self._segment_clear_button.setEnabled(count > 0)
         self._segment_clear_button.setText(self.tr("Clear ({0})").format(count) if count else self.tr("Clear"))
+        self._segment_layer_button.setEnabled(count > 0)
 
     def _on_tolerance_changed(self, _value: float) -> None:
         # The selection follows at once, its signal once the wheel stops: each one may read the raster.

@@ -21,7 +21,8 @@ os.environ.setdefault("FILTERMATE_LOG_DIR", tempfile.mkdtemp(prefix="fm_seg_logs
 
 import numpy as np
 from osgeo import gdal, ogr, osr
-from qgis.core import (Qgis, QgsApplication, QgsGeometry, QgsPointXY, QgsProject, QgsRasterLayer, QgsRectangle)
+from qgis.core import (Qgis, QgsApplication, QgsCoordinateReferenceSystem, QgsGeometry, QgsPointXY, QgsProject,
+                       QgsRasterLayer, QgsRectangle)
 from qgis.gui import QgsMapCanvas, QgsMapToolPan
 from qgis.PyQt.QtCore import QBuffer, QEventLoop, QIODevice, QSize, QT_VERSION_STR, QTimer
 from qgis.PyQt.QtGui import QColor, QImage
@@ -333,10 +334,59 @@ def test_tool_flow(layer):
     check("damaged files can be repaired", not panel._segment_install_button.isHidden() and panel._segment_install_button.isEnabled())
     panel.set_segmentation_readiness(True, True)
     panel.restore_state(state)
+    asked = []
+    panel.segmentsLayerRequested.connect(lambda: asked.append(True))
+    panel._segment_layer_button.click()
+    check("To layer shows with SAM and asks for the layer", not panel._segment_layer_button.isHidden() and asked == [True])
     panel.clear_segments()
     check("clear forgets the objects", panel.selection() is None and panel._segments == [])
-    check("and the button says so", not panel._segment_clear_button.isEnabled())
+    check("and the buttons say so", not panel._segment_clear_button.isEnabled() and not panel._segment_layer_button.isEnabled())
     return selection
+
+
+def test_objects_layer(layer):
+    extent = layer.extent()
+    x, y = extent.xMinimum(), extent.yMinimum()
+    first = QgsGeometry.fromRect(QgsRectangle(x + 10, y + 10, x + 20, y + 30)).asWkt()
+    second = QgsGeometry.fromRect(QgsRectangle(x + 50, y + 50, x + 54, y + 55)).asWkt()
+    objects, skipped = segmentation.objects_layer([first, "POLYGON((", second], layer.crs(), "ortho objects",
+                                                  lambda geometry: geometry.area())
+    features = list(objects.getFeatures())
+    check("one feature per object, the unreadable one counted", len(features) == 2 and skipped == 1, (len(features), skipped))
+    check("in the CRS of the raster", objects.crs() == layer.crs(), objects.crs().authid())
+    check("multipolygons", all(feature.geometry().isMultipart() for feature in features))
+    check("numbered, with their area", [feature.attributes() for feature in features] == [[1, 200.0], [2, 20.0]],
+          [feature.attributes() for feature in features])
+    custom = QgsCoordinateReferenceSystem.fromProj("+proj=tmerc +lat_0=42 +lon_0=2 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m")
+    objects, _ = segmentation.objects_layer([first], custom, "custom", None)
+    check("a CRS without authid is kept, no area without a measure",
+          objects.crs() == custom and [f.attributes() for f in objects.getFeatures()] == [[1, None]],
+          (objects.crs().toProj(), [f.attributes() for f in objects.getFeatures()]))
+
+    # The controller adds the layer to the project, outlined, with the area on the ellipsoid.
+    coverage = importlib.import_module(PACKAGE + ".ui.controllers.coverage_mode_controller")
+    messages = []
+    bar = types.SimpleNamespace(pushSuccess=lambda *a: messages.append(("ok",) + a),
+                                pushWarning=lambda *a: messages.append(("warning",) + a))
+    host = types.SimpleNamespace(_active_layer=layer, _raster_panel=types.SimpleNamespace(_segments=[first, second]),
+                                 tr=lambda text: text, _iface=lambda: types.SimpleNamespace(messageBar=lambda: bar))
+    host._ground_area = coverage.CoverageModeController._ground_area
+    before = set(QgsProject.instance().mapLayers())
+    coverage.CoverageModeController._on_segments_layer_requested(host)
+    added = [QgsProject.instance().mapLayer(i) for i in set(QgsProject.instance().mapLayers()) - before]
+    check("the controller adds one layer of the objects", len(added) == 1 and added[0].featureCount() == 2
+          and added[0].name() == f"{layer.name()} objects", [a.name() for a in added])
+    if added:
+        areas = [f["area_m2"] for f in added[0].getFeatures()]
+        check("areas in square metres on the ellipsoid", abs(areas[0] - 200.0) < 2 and abs(areas[1] - 20.0) < 0.5, areas)
+        symbol = added[0].renderer().symbol()
+        check("outlined, the raster stays visible", symbol.color().alpha() == 0, symbol.color().name())
+        QgsProject.instance().removeMapLayer(added[0].id())
+    check("and says so", messages and messages[-1][0] == "ok" and "2" in messages[-1][2], messages)
+    host._raster_panel._segments = ["POLYGON(("]
+    coverage.CoverageModeController._on_segments_layer_requested(host)
+    check("nothing readable: a warning, no layer", messages[-1][0] == "warning" and set(QgsProject.instance().mapLayers()) == before,
+          messages[-1])
 
 
 def test_similar_flow(folder):
@@ -559,6 +609,7 @@ with tempfile.TemporaryDirectory() as folder:
     raster = make_raster(folder)
     validated = test_tool_flow(raster)
     test_replay(raster, validated)
+    test_objects_layer(raster)
     test_similar_flow(folder)
     test_web_service()
     test_real_model()

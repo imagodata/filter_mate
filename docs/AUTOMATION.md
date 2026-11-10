@@ -150,7 +150,7 @@ aspect. No `north` exposure: a range cannot wrap around 0 / 360 (use two filters
 list of `POLYGON` or `MULTIPOLYGON` WKT in the CRS of the raster (10 000 at most). They are the selection: leave
 `minimum`, `maximum`, `classes`, `expression` and `derivative` unset. The source is clipped by the polygons, as in
 the dock; the model is not needed. In Processing, the optional `SEGMENTS` parameter takes a polygon layer, in any
-CRS, instead of the pixel values:
+CRS, instead of the pixel values (*To layer*, under the objects of the dock, makes that layer):
 
 ```python
 processing.run("filtermate:cross_filter_from_raster", {

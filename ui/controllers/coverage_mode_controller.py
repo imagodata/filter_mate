@@ -1100,6 +1100,8 @@ class CoverageModeController(BaseController):
                 raster.proposalsAcceptRequested.connect(lambda: self._segmentation_controller().accept_proposals())
                 raster.proposalsRejectRequested.connect(lambda: self._segmentation_controller().reject_proposals())
             raster.segmentRuntimeInstallRequested.connect(self._on_segment_runtime_install_requested)
+            if hasattr(raster, 'segmentsLayerRequested'):
+                raster.segmentsLayerRequested.connect(self._on_segments_layer_requested)
         if hasattr(pc, 'groupChosen'):
             pc.groupChosen.connect(self._on_point_cloud_group_chosen)
         if hasattr(pc, 'objectsChanged'):
@@ -2247,6 +2249,33 @@ class CoverageModeController(BaseController):
         """The object targets changed engine (chosen, or SAM just installed): the tool on the map follows."""
         if self._color_pick and self._raster_panel is not None:
             self._on_color_pick_toggled(True, self._raster_panel.pick_target())
+
+    def _on_segments_layer_requested(self) -> None:
+        """The objects drawn by SAM, added to the project as a memory polygon layer (outline only, over the raster)."""
+        layer, panel = self._active_layer, self._raster_panel
+        wkts = list(getattr(panel, '_segments', None) or ())
+        if layer is None or not wkts:
+            return
+        from qgis.core import QgsFillSymbol, QgsProject
+        from ...adapters.qgis.coverage_layers.segmentation import objects_layer
+        name = self.tr("{0} objects").format(layer.name())
+        objects, skipped = objects_layer(wkts, layer.crs(), name, lambda geometry: self._ground_area(geometry, layer))
+        count = objects.featureCount()
+        if count <= 0:
+            message, success = self.tr("None of the objects could be read"), False
+        else:
+            symbol = QgsFillSymbol.createSimple({'color': '0,0,0,0', 'outline_color': '232,89,12,255',
+                                                 'outline_width': '0.6'})
+            objects.renderer().setSymbol(symbol)
+            QgsProject.instance().addMapLayer(objects)
+            message, success = self.tr("{0} object(s) added as the layer {1}").format(count, name), True
+            if skipped:
+                message += " " + self.tr("({0} could not be read)").format(skipped)
+        try:
+            bar = self._iface().messageBar()
+            (bar.pushSuccess if success else bar.pushWarning)("FilterMate", message)
+        except (AttributeError, RuntimeError):
+            pass  # no message bar (tests) or deleted (QGIS closing)
 
     def _on_segment_tool_requested(self) -> None:
         """Kept for the panels that still emit it: the SAM tool comes back with the object target."""

@@ -1334,137 +1334,137 @@ Do you agree?</source>
         <translation>Επαναφορά των κριτηρίων του νέφους σημείων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1610"/>
         <source>Invalid raster calculator expression</source>
         <translation>Μη έγκυρη έκφραση υπολογιστή ράστερ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1923"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Το PDAL δεν βρέθηκε: το ύψος πάνω από ένα DTM απαιτεί το εκτελέσιμο pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3507"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Μια εργασία του FilterMate εκτελείται ακόμη: περιμένετε να ολοκληρωθεί</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2951"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2980"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Η εργασία του FilterMate απέτυχε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2988"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3017"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Επιλέξτε πρώτα εικονοστοιχεία: ένα εύρος τιμών, κλάσεις ή μια έκφραση ράστερ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3003"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3032"/>
         <source>Raster filtered: {0}</source>
         <translation>Το ράστερ φιλτραρίστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3066"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Η έκφραση του νέφους σημείων απορρίφθηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3040"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3069"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Επιλέξτε πρώτα σημεία: κλάσεις, εύρη χαρακτηριστικών ή μια έκφραση</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3054"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3083"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Το νέφος σημείων φιλτραρίστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3588"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3617"/>
         <source>Filter not applied: {0}</source>
         <translation>Το φίλτρο δεν εφαρμόστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3469"/>
         <source>canceled</source>
         <translation>ακυρώθηκε</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3166"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} στόχος(οι) φιλτραρίστηκε(αν)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3177"/>
         <source>{0} failed: {1}</source>
         <translation>{0} απέτυχε: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3161"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3190"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: φιλτράρισμα από το '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3260"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3289"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Τροποποιήθηκε στο μεταξύ, παραμένει ως έχει: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3266"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3295"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} επίπεδο(α) επαναφέρθηκε(αν)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3300"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3329"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>Το '{0}' δεν εξήχθη: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3343"/>
         <source>Exported: {0}</source>
         <translation>Εξήχθη: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3316"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3345"/>
         <source>Export failed: {0}</source>
         <translation>Η εξαγωγή απέτυχε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3323"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3352"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Εξαγωγή {0} επιπέδου(ων)…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3329"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3358"/>
         <source>Export folder</source>
         <translation>Φάκελος εξαγωγής</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3411"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Παραλείφθηκαν οι στόχοι ράστερ / νέφους σημείων: δεν έχει επιλεγεί οντότητα πηγής στο EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3469"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Οι στόχοι ράστερ / νέφους σημείων δεν φιλτραρίστηκαν: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3442"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3471"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} στόχος(οι) ράστερ / νέφους σημείων φιλτραρίστηκε(αν)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3565"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Επιλέξτε το ράστερ DTM που χρησιμοποιείται για το ύψος πάνω από το έδαφος</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3576"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3605"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Το ύψος πάνω από το έδαφος δεν υπολογίστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3626"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Υπολογισμός του ύψους πάνω από το '{0}' με το PDAL…</translation>
     </message>
@@ -1474,12 +1474,12 @@ Do you agree?</source>
         <translation>Η κρυφή μνήμη του FilterMate καταλαμβάνει {0} GB, πάνω από το όριό της των {1} GB: αφαιρέστε το φίλτρο από τα επίπεδα ράστερ / νέφους σημείων που δεν χρειάζεστε πλέον</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1927"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>Το PDAL {0} είναι πολύ παλιό: το ύψος πάνω από ένα DTM απαιτεί PDAL 2.4 ή νεότερο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1930"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>Δεν ήταν δυνατή η εκτέλεση του PDAL, το ύψος πάνω από ένα DTM δεν είναι διαθέσιμο: {0}</translation>
     </message>
@@ -1499,27 +1499,27 @@ Do you agree?</source>
         <translation>Προεπισκόπηση: απόκρυψη των εικονοστοιχείων εκτός της επιλογής (λευκό πέπλο για κλίση, προσανατολισμό...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1805"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Η προεπισκόπηση κλίσης ή προσανατολισμού απαιτεί τον χάρτη στο CRS του ράστερ ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2480"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2509"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>μόνο τα σημεία που σχεδιάζονται στον χάρτη μπορούν να επιλεγούν: απενεργοποιήστε την προεπισκόπηση για να επιλέξετε μια κλάση που αυτή αποκρύπτει</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2580"/>
         <source>No classified point under the click</source>
         <translation>Κανένα ταξινομημένο σημείο κάτω από το κλικ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2486"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2515"/>
         <source>Class {0} is already checked</source>
         <translation>Η κλάση {0} είναι ήδη επιλεγμένη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2575"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2604"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Η κλάση {0} δεν βρίσκεται στη λίστα κλάσεων του επιπέδου</translation>
     </message>
@@ -1534,159 +1534,179 @@ Do you agree?</source>
         <translation>Σταγονόμετρο κλάσης: κάντε κλικ στον χάρτη και επιλέγεται η κλάση των σημείων που σχεδιάζονται εκεί. Το Ctrl+κλικ προσθέτει άλλη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1121"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1123"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Η προεπισκόπηση και τα στατιστικά χρησιμοποιούν ένα περιορισμένο τοπικό δείγμα της ορατής έκτασης· το φιλτράρισμα διαβάζει την πηγή.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1325"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1327"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Προετοιμασία περιορισμένου στιγμιότυπου χρωμάτων της ορατής έκτασης…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1337"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1339"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>Δεν ήταν δυνατή η προετοιμασία του στιγμιότυπου χρωμάτων. Δοκιμάστε μικρότερη ορατή έκταση.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1341"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1343"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>Η επιλογή χρώματος εφαρμόζεται στην καταγεγραμμένη ορατή έκταση.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1405"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Η δειγματοληψία του ράστερ απέτυχε. Δοκιμάστε μικρότερη ορατή έκταση.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1526"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1528"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1805"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>Η προεπισκόπηση χρώματος ή έκφρασης απαιτεί τον χάρτη στο CRS του ράστερ ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2504"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2533"/>
         <source>No point drawn under the click</source>
         <translation>Κανένα σημείο δεν σχεδιάζεται κάτω από το κλικ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2506"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2535"/>
         <source>This point has no {0}</source>
         <translation>Αυτό το σημείο δεν έχει {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2508"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2537"/>
         <source>{0} cannot be used in a condition</source>
         <translation>Το {0} δεν μπορεί να χρησιμοποιηθεί σε συνθήκη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2565"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2594"/>
         <source>Object not read: {0}</source>
         <translation>Το αντικείμενο δεν διαβάστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2567"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2596"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>Πάρα πολλά σημεία γύρω από το κλικ: το αντικείμενο δεν ήταν δυνατό να διαβαστεί</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2569"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2598"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>Κανένα σημείο κλάσης {0} κάτω από το κλικ: κάντε κλικ στο ίδιο το αντικείμενο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2735"/>
         <source>Similar objects not read: {0}</source>
         <translation>Τα παρόμοια αντικείμενα δεν διαβάστηκαν: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2709"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2738"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>Κανένα παρόμοιο αντικείμενο εντός των λόγων εμβαδού: διευρύνετέ τους</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2778"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2807"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>Προετοιμασία δείγματος για τη νέα ορατή έκταση. Κάντε ξανά κλικ όταν είναι έτοιμο.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2789"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2818"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>Το τοπικό δείγμα ράστερ ετοιμάζεται ακόμη. Δοκιμάστε ξανά όταν είναι έτοιμο.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2995"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3024"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>Προετοιμάστε ένα στιγμιότυπο χρωμάτων πριν φιλτράρετε αυτό το αποδιδόμενο επίπεδο.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3140"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} στόχος(οι) ράστερ επαναδειγματοληπτήθηκε(αν) στο ρυθμισμένο όριο εικονοστοιχείων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3172"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3201"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>η επιλογή χρώματος περιορίζεται στην καταγεγραμμένη έκταση· τα χρώματα εξαρτώνται από το στυλ και την κλίμακα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3174"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3203"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>η πηγή ράστερ επαναδειγματοληπτήθηκε σε {0} κελιά εντός του ορίου εικονοστοιχείων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3205"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>η επιλογή ράστερ διαβάστηκε ανά {0} εικονοστοιχεία: πάνω από το όριο εικονοστοιχείων των ρυθμίσεων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3179"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3208"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>η πυκνή επιλογή ράστερ εξομαλύνθηκε για να παραμείνει ελαφρύ το περίγραμμά της</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3226"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3255"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0}: αδειάστηκε(αν), τίποτα δεν ταιριάζει με την επιλογή: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3210"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3239"/>
         <source>failed</source>
         <translation>απέτυχε</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1520"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1522"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1536"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1538"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1610"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1400"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1749"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1153"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1155"/>
         <source>onnxruntime installed</source>
         <translation>Το onnxruntime εγκαταστάθηκε</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2261"/>
+        <source>{0} objects</source>
+        <translation>{0} – αντικείμενα</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2265"/>
+        <source>None of the objects could be read</source>
+        <translation>Κανένα από τα αντικείμενα δεν ήταν δυνατό να διαβαστεί</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2271"/>
+        <source>{0} object(s) added as the layer {1}</source>
+        <translation>{0} αντικείμενο(α) προστέθηκαν ως το επίπεδο {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2273"/>
+        <source>({0} could not be read)</source>
+        <translation>({0} δεν ήταν δυνατό να διαβαστούν)</translation>
     </message>
 </context>
 <context>
@@ -4173,7 +4193,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="632"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: λήψη του μοντέλου τμηματοποίησης</translation>
     </message>
@@ -6586,27 +6606,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Κάντε κλικ στον χάρτη με τον επιλογέα εικονοστοιχείων. Το Ctrl+κλικ επεκτείνει το εύρος μέχρι την τιμή.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2181"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2188"/>
         <source>VALUE RANGE</source>
         <translation>ΕΥΡΟΣ ΤΙΜΩΝ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1489"/>
         <source>Min</source>
         <translation>Ελάχ.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1489"/>
         <source>Lowest value kept</source>
         <translation>Χαμηλότερη τιμή που διατηρείται</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1489"/>
         <source>Max</source>
         <translation>Μέγ.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1489"/>
         <source>Highest value kept</source>
         <translation>Υψηλότερη τιμή που διατηρείται</translation>
     </message>
@@ -6636,17 +6656,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Καμία</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1502"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1509"/>
         <source>RASTER EXPRESSION</source>
         <translation>ΕΚΦΡΑΣΗ ΡΑΣΤΕΡ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1506"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1513"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Έκφραση υπολογιστή ράστερ· ένα εικονοστοιχείο διατηρείται όπου δεν είναι 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1507"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1514"/>
         <source>Raster expression</source>
         <translation>Έκφραση ράστερ</translation>
     </message>
@@ -6666,12 +6686,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Επιλεγμένα εικονοστοιχεία: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1588"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1595"/>
         <source>Set a value range first</source>
         <translation>Ορίστε πρώτα ένα εύρος τιμών</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2936"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2945"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -6691,22 +6711,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Στατιστικά του τρέχοντος καναλιού στο τελευταίο ορθογώνιο που σχεδιάστηκε στον χάρτη</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1882"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1889"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Κάτω από τον δρομέα: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1899"/>
         <source>Zone: {0}</source>
         <translation>Ζώνη: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1899"/>
         <source>no pixel</source>
         <translation>κανένα εικονοστοιχείο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2963"/>
         <source>LAST PICKS</source>
         <translation>ΤΕΛΕΥΤΑΙΕΣ ΜΕΤΡΗΣΕΙΣ</translation>
     </message>
@@ -6721,37 +6741,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Μέγεθος στο οποίο εφαρμόζεται το εύρος. Η κλίση, ο προσανατολισμός, η σκίαση αναγλύφου και η τραχύτητα διαβάζουν το κανάλι ως DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Pixel value</source>
         <translation>Τιμή εικονοστοιχείου</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Slope (degrees)</source>
         <translation>Κλίση (μοίρες)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Slope (%)</source>
         <translation>Κλίση (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Aspect (degrees)</source>
         <translation>Προσανατολισμός (μοίρες)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Hillshade (0-255)</source>
         <translation>Σκίαση αναγλύφου (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Τραχύτητα (TRI, μέση διαφορά)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1456"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Συνήθη όρια του μεγέθους</translation>
     </message>
@@ -6761,47 +6781,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Συνήθη όρια</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2325"/>
         <source>Flat</source>
         <translation>Επίπεδο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2325"/>
         <source>Gentle</source>
         <translation>Ήπια</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2325"/>
         <source>Moderate</source>
         <translation>Μέτρια</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2326"/>
         <source>Steep</source>
         <translation>Απότομη</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2326"/>
         <source>East</source>
         <translation>Ανατολή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2326"/>
         <source>South</source>
         <translation>Νότος</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2327"/>
         <source>West</source>
         <translation>Δύση</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2327"/>
         <source>Shadow</source>
         <translation>Σκιά</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2327"/>
         <source>Lit</source>
         <translation>Φωτισμένο</translation>
     </message>
@@ -6811,27 +6831,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Συνήθη όρια…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1148"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1149"/>
         <source>PIPETTE</source>
         <translation>ΣΤΑΓΟΝΟΜΕΤΡΟ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
         <source>Tolerance ±</source>
         <translation>Ανοχή ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Ανοχή γύρω από το επιλεγμένο χρώμα ή την τιμή, ως % του εύρους τιμών</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1326"/>
         <source>Pipette tolerance</source>
         <translation>Ανοχή σταγονομέτρου</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1542"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1549"/>
         <source>Bands</source>
         <translation>Κανάλια</translation>
     </message>
@@ -6861,7 +6881,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">RGB + υπέρυθρο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1239"/>
         <source>Add every proposed object to the selection (Enter on the map)</source>
         <translation>Προσθήκη όλων των προτεινόμενων αντικειμένων στην επιλογή (Enter στον χάρτη)</translation>
     </message>
@@ -6876,22 +6896,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Απαιτεί εικόνα τριών καναλιών ή περισσότερων (κόκκινο, πράσινο, μπλε...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1568"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Βλάστηση (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1568"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Χωρίς βλάστηση (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1569"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Νερό (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1569"/>
         <source>Vegetation (excess green)</source>
         <translation>Βλάστηση (περίσσεια πράσινου)</translation>
     </message>
@@ -6901,12 +6921,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Φασματικές προεπιλογές…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2491"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2498"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Αυτό το εικονοστοιχείο δεν έχει τιμή (NoData): επιλέξτε άλλο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2599"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2606"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Η ανοχή καλύπτει όλες τις τιμές: μειώστε την</translation>
     </message>
@@ -6931,12 +6951,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Έκφραση</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="869"/>
         <source>BANDS</source>
         <translation>ΚΑΝΑΛΙΑ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="911"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="912"/>
         <source>Value of the active band under the cursor</source>
         <translation>Τιμή του ενεργού καναλιού κάτω από τον δείκτη</translation>
     </message>
@@ -6946,7 +6966,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Στατιστικά του ενεργού καναλιού στο τελευταίο ορθογώνιο που σχεδιάστηκε στον χάρτη</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="952"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Every band</source>
         <translation>Όλα τα κανάλια</translation>
     </message>
@@ -6956,7 +6976,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Το εύρος τιμών εφαρμόζεται σε όλα τα κανάλια χρώματος ταυτόχρονα (ένα εικονοστοιχείο διατηρείται όταν κάθε κανάλι είναι εντός του εύρους)· το ιστόγραμμα δείχνει το πρώτο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="887"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6966,122 +6986,122 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Το σταγονόμετρο συγκρίνει αυτό το κανάλι</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1063"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1064"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Χρώμα του καναλιού: το χρησιμοποιούν οι φασματικοί δείκτες και τα chips. Κάντε κλικ για να το αλλάξετε</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1074"/>
         <source>Value at the last click of the pipette</source>
         <translation>Τιμή στο τελευταίο κλικ του σταγονομέτρου</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1006"/>
         <source>No colour</source>
         <translation>Χωρίς χρώμα</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>Τα κανάλια 1, 2, 3 είναι κόκκινο, πράσινο, μπλε</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>IRC</source>
         <translation>CIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>Τα κανάλια 1, 2, 3 είναι υπέρυθρο, κόκκινο, πράσινο (έγχρωμο υπέρυθρο ορθοφωτογράφημα IGN)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>Τα κανάλια 1, 2, 3, 4 είναι κόκκινο, πράσινο, μπλε, εγγύς υπέρυθρο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1016"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1017"/>
         <source>Every band: {0}</source>
         <translation>Όλα τα κανάλια: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1063"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Οι ρόλοι εικάστηκαν, προς επιβεβαίωση.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
         <source>Red</source>
         <translation>Κόκκινο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
         <source>Green</source>
         <translation>Πράσινο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
         <source>Blue</source>
         <translation>Μπλε</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1132"/>
         <source>Near infrared</source>
         <translation>Εγγύς υπέρυθρο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1138"/>
         <source>roles guessed, to confirm</source>
         <translation>οι ρόλοι εικάστηκαν, προς επιβεβαίωση</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1154"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1155"/>
         <source>Select</source>
         <translation>Επιλογή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1159"/>
         <source>Similar pixels</source>
         <translation>Παρόμοια εικονοστοιχεία</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1159"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Όλα τα εικονοστοιχεία του ράστερ κοντά στο χρώμα ή την τιμή που επιλέχθηκε (το σταγονόμετρο της μπάρας)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1159"/>
         <source>Clicked object</source>
         <translation>Αντικείμενο του κλικ</translation>
     </message>
@@ -7091,7 +7111,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Μόνο η κηλίδα τέτοιων εικονοστοιχείων στην οποία πέφτει το κλικ: πισίνα, στέγη, χωράφι (ο ανιχνευτής αντικειμένων της μπάρας)· το Ctrl+κλικ προσθέτει άλλο αντικείμενο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1159"/>
         <source>Similar objects</source>
         <translation>Παρόμοια αντικείμενα</translation>
     </message>
@@ -7101,7 +7121,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Όλα τα αντικείμενα του ράστερ που μοιάζουν με αυτό του κλικ: οι κηλίδες τέτοιων εικονοστοιχείων με εμβαδόν εντός των λόγων παρακάτω (το εργαλείο παρόμοιων αντικειμένων της μπάρας)· το Ctrl+κλικ προσθέτει άλλο αντικείμενο αναφοράς</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
         <source>Area ×</source>
         <translation>Εμβαδόν ×</translation>
     </message>
@@ -7116,72 +7136,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Μεγαλύτερο παρόμοιο αντικείμενο, ως πολλαπλάσιο του μεγαλύτερου αντικειμένου του κλικ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1272"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1279"/>
         <source>to ×</source>
         <translation>έως ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1282"/>
         <source>same shape</source>
         <translation>ίδιο σχήμα</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1278"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1285"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Διατήρηση μόνο των αντικειμένων με σχήμα όπως τα επιλεγμένα με κλικ: η συμπάγειά τους (4π × εμβαδόν / περίμετρος², 1 για δίσκο) εντός των ίδιων λόγων· όταν είναι απενεργοποιημένο, ένας δρόμος με το εμβαδόν μιας πισίνας είναι πισίνα</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1352"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1359"/>
         <source>Remove this pick</source>
         <translation>Αφαίρεση αυτής της επιλογής</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1438"/>
         <source>Quantity</source>
         <translation>Μέγεθος</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2384"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Μέγεθος στο οποίο εφαρμόζεται το εύρος. Η κλίση, ο προσανατολισμός, η σκίαση ανάγλυφου και η τραχύτητα διαβάζουν το ενεργό κανάλι ως DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1456"/>
         <source>Thresholds ▾</source>
         <translation>Όρια ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1528"/>
         <source>Insert ▾</source>
         <translation>Εισαγωγή ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1528"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Εισαγωγή αναφοράς καναλιού, συνηθισμένου φασματικού δείκτη ή του τρέχοντος εύρους</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1557"/>
         <source>Spectral indexes</source>
         <translation>Φασματικοί δείκτες</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1555"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Range</source>
         <translation>Εύρος</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1556"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1563"/>
         <source>The current value range</source>
         <translation>Το τρέχον εύρος τιμών</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1674"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Τα αποδιδόμενα χρώματα εξαρτώνται από το στυλ και την κλίμακα.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1674"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Διατίθεται μόνο επιλογή με βάση το χρώμα: οι αριθμητικές ζώνες, οι δείκτες, τα εύρη, οι κλάσεις και τα παράγωγα δεν είναι διαθέσιμα.</translation>
     </message>
@@ -7191,97 +7211,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ΕΥΡΟΣ ΤΙΜΩΝ — όλα τα κανάλια</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2179"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2186"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>ΕΥΡΟΣ ΤΙΜΩΝ — κανάλι {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2373"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2380"/>
         <source>picks on: {0}</source>
         <translation>λαμβάνει τιμές από: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2384"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Η κλίση, ο προσανατολισμός κ.λπ. διαβάζουν ένα κανάλι ως DTM: επιλέξτε πρώτα κανάλι στα ΚΑΝΑΛΙΑ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2634"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2641"/>
         <source>The object could not be read</source>
         <translation>Δεν ήταν δυνατή η ανάγνωση του αντικειμένου</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2636"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2643"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Κανένα αντικείμενο κάτω από το κλικ: αυξήστε την ανοχή ή κάντε κλικ σε άλλο εικονοστοιχείο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2638"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2645"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Ένα αντικείμενο είναι μεγαλύτερο από το παράθυρο ανάγνωσης και περικόπηκε: μειώστε την ανοχή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1094"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="879"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1096"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="967"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2473"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2480"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="956"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="965"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2177"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2184"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="918"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="919"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Στατιστικά του ενεργού καναλιού στην έκταση της τελευταίας ζώνης που σχεδιάστηκε στον χάρτη· επιλέγονται μόνο τα pixel εντός της ζώνης</translation>
     </message>
@@ -7311,7 +7331,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Προσθήκη του σχεδιασμένου αντικειμένου στην επιλογή (Enter στον χάρτη)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2926"/>
         <source>Clear</source>
         <translation>Εκκαθάριση</translation>
     </message>
@@ -7321,137 +7341,137 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Διαγραφή των επικυρωμένων αντικειμένων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1291"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1294"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1303"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1308"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1304"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1453"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1456"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1463"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1457"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1458"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1465"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1525"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1532"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1734"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1741"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2203"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2337"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2346"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2343"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2350"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2760"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>Εγκατάσταση του onnxruntime στο παρασκήνιο…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2764"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2772"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>Δεν ήταν δυνατή η αυτόματη εγκατάσταση του onnxruntime (δείτε το αρχείο καταγραφής του FilterMate). Σε ένα τερματικό (το OSGeo4W Shell στα Windows), εκτελέστε {0} και στη συνέχεια επανεκκινήστε το QGIS.</translation>
     </message>
@@ -7461,7 +7481,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Εγκατάσταση του μοντέλου ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2790"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2798"/>
         <source>Repair the model…</source>
         <translation>Επιδιόρθωση του μοντέλου…</translation>
     </message>
@@ -7480,12 +7500,12 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
 Κάθε αρχείο ελέγχεται με το SHA-256 του. Το μοντέλο εκτελείται στη συνέχεια τοπικά, στη CPU· τίποτα δεν φεύγει από τον υπολογιστή σας.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2926"/>
         <source>Clear ({0})</source>
         <translation>Εκκαθάριση ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2958"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2967"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7500,7 +7520,7 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
         <translation type="obsolete">Εγκατάσταση του onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2808"/>
         <source>Segmentation</source>
         <translation>Τμηματοποίηση</translation>
     </message>
@@ -7514,57 +7534,57 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 Να εγκατασταθεί τώρα από το PyPI με pip στο προφίλ σας του QGIS; Η Python του QGIS δεν τροποποιείται.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1159"/>
         <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
         <translation>Το αντικείμενο κάτω από το κλικ: μια στέγη, μια πισίνα, ένα χωράφι (ο ανιχνευτής αντικειμένων της μπάρας). Με το SAM: ένα κλικ προσθέτει αντικείμενο, το Shift+κλικ επεκτείνει το τελευταίο, το δεξί κλικ το περικόπτει, ένα πλαίσιο οριοθετεί ένα, το Esc το αφαιρεί. Με τη μηχανή χρώματος: η κηλίδα παρόμοιων εικονοστοιχείων, το Ctrl+κλικ προσθέτει μία ακόμη</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1159"/>
         <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
         <translation>Κάθε αντικείμενο παρόμοιο με αυτό που πατήθηκε, του οποίου το εμβαδόν μένει εντός των αναλογιών παρακάτω (το εργαλείο παρόμοιων αντικειμένων της μπάρας). Με το SAM: οι κηλίδες παρόμοιου χρώματος στην ορατή περιοχή ξανασχεδιάζονται από το μοντέλο και μετά συγκρίνονται με το αντικείμενο που πατήθηκε. Με τη μηχανή χρώματος: οι κηλίδες παρόμοιων εικονοστοιχείων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1187"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1188"/>
         <source>Engine</source>
         <translation>Μηχανή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1191"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1192"/>
         <source>Colour</source>
         <translation>Χρώμα</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1192"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1193"/>
         <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
         <translation>Το SAM σχεδιάζει το αντικείμενο από την εικόνα, τοπικά στη CPU· η μηχανή χρώματος επεκτείνει την κηλίδα εικονοστοιχείων του χρώματος που πατήθηκε</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1209"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1210"/>
         <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
         <translation>Εγκαταστήστε το SAM 2.1 tiny μία φορά, στο προφίλ QGIS σας· στη συνέχεια εκτελείται τοπικά, στη CPU</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1220"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
         <source>Forget the objects drawn by SAM</source>
         <translation>Παράβλεψη των αντικειμένων που σχεδίασε το SAM</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2762"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2770"/>
         <source>Downloading the SAM model in the background…</source>
         <translation>Λήψη του μοντέλου SAM στο παρασκήνιο…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
         <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
         <translation>Τα αντικείμενα βρίσκονται από το χρώμα τους. Το SAM τα σχεδιάζει από την εικόνα, πολύ καλύτερα στα κτίρια (περίπου {0} MB προς εγκατάσταση).</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2772"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
         <source>Install SAM ({0} MB)…</source>
         <translation>Εγκατάσταση του SAM ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2808"/>
         <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
 
 onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
@@ -7573,19 +7593,29 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
 Το onnxruntime προέρχεται από το PyPI με pip, το μοντέλο από το huggingface.co/{1}, κάθε αρχείο ελέγχεται με το SHA-256 του. Και τα δύο πηγαίνουν στο προφίλ QGIS σας· η Python του QGIS δεν τροποποιείται και τίποτα δεν φεύγει από τον υπολογιστή σας. Χωρίς το SAM, τα αντικείμενα βρίσκονται από το χρώμα τους.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
         <source>Reject</source>
         <translation>Απόρριψη</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1244"/>
         <source>Forget the proposed objects (Escape on the map)</source>
         <translation>Παράβλεψη των προτεινόμενων αντικειμένων (Esc στον χάρτη)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2842"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2850"/>
         <source>Keep the {0} proposals</source>
         <translation>Διατήρηση των {0} προτάσεων</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1224"/>
+        <source>To layer</source>
+        <translation>Σε επίπεδο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1226"/>
+        <source>Add the objects drawn by SAM to the project as a polygon layer, for Processing, an export or editing</source>
+        <translation>Προσθήκη των αντικειμένων που σχεδιάστηκαν με το SAM στο έργο ως επίπεδο πολυγώνων, για το Processing, μια εξαγωγή ή επεξεργασία</translation>
     </message>
 </context>
 <context>
@@ -8100,7 +8130,7 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="464"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: προετοιμασία της τμηματοποίησης</translation>
     </message>
@@ -8398,7 +8428,7 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="533"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: σχεδίαση των παρόμοιων αντικειμένων</translation>
     </message>

@@ -46,6 +46,7 @@ group. The **Engine** list of the group switches between SAM and the colour engi
 | G (or Tab when QGIS lets it through) | The last object at the next granularity: a part, the object, a group |
 | Escape | Rejects the proposals; otherwise removes the last object, or the last search with its clicked object |
 | *Clear* | Forgets every object drawn by SAM |
+| *To layer* | Adds the objects to the project as a polygon layer (memory layer, area in m² on the project ellipsoid) |
 
 The first click of an area prepares it: about 3 s under QGIS for Windows, then about 0.1 s per gesture.
 
@@ -65,6 +66,8 @@ click to reject it, Enter (or *Keep*) keeps them all, Escape (or *Reject*) rejec
 The objects are polygons in the CRS of the raster, stored with the filter like any other raster selection.
 Processing (the `SEGMENTS` parameter of *Filter layers of any type by the pixels of a raster*, a polygon layer),
 the REST API and the MCP tools (`segments` in `raster_selection`) accept them too: see `docs/AUTOMATION.md`.
+*To layer* turns them into a memory layer of the project, numbered, with their area in m²: the layer to give
+Processing, to export or to edit. It is not saved with the project: *Make Permanent* in QGIS keeps it.
 
 ## What it is good at
 
