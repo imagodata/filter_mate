@@ -115,13 +115,15 @@ The AGENT section, the REST API and the MCP servers reach these objects too (`do
   model.
 - **Drawn from a guide layer.** `segment_objects` runs *Draw objects on a raster with SAM from points or polygons* on a
   raster and a guide layer of the project, the selected features of the guide by default, at most 200 in one call,
-  and adds the objects as a memory layer with `sam_score` and `sam_iou`. "Which footprints no longer match the
-  orthophoto?" is that call, then `select_features` on `"sam_iou" < 0.5`.
+  and adds the objects as a layer with `sam_score` and `sam_iou`, written to a temporary GeoPackage (*Make Permanent*
+  keeps it). "Which footprints no longer match the orthophoto?" is that call, then `select_features` on
+  `"sam_iou" < 0.5`.
 
 SAM holds QGIS while it draws (about 2 s for each window of 1024 pixels): the run stops between two windows past 20 s
 and says how far it went, and other changes from the API are refused meanwhile. Only the objects that select in the
-dock are listed: with the colour engine, the objects SAM drew wait in the panel and are not offered. Undo of the turn removes the layer; held in memory, it cannot be redone. The agent never
-installs SAM: it tells the user to do it from the PIPETTE group.
+dock are listed: with the colour engine, the objects SAM drew wait in the panel and are not offered. Undo of the turn
+removes the layer, Redo opens its file again. The agent never installs SAM: it tells the user to do it from the
+PIPETTE group.
 
 ## What it is good at
 

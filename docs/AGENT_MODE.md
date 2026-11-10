@@ -170,10 +170,12 @@ address, else its content type), its size, and whether the server gives parts of
   stops the run between two windows past 20 s, and marks it as the operation running (`operations.running`): a REST or
   MCP change queued meanwhile is refused instead of running nested. A guide that gives more than `limit` features, or
   whose count is unknown (a web service), is refused, never cut: the model selects fewer. The errors of the algorithm
-  stay in the log; the model reads its own messages only, never a traceback or a path.
+  stay in the log; the model reads its own messages only, never a traceback or a path. The objects are written to a
+  temporary GeoPackage, as the outputs of `run_algorithm`: not confirmed, since it adds a layer and changes none; Undo
+  of the turn removes it and Redo opens the file again. A layer held in memory (none the agent makes) is recorded
+  without a definition, so Redo says it cannot come back instead of bringing back an empty layer.
 - `drawn_objects` only offers the objects that select in the dock: object target and SAM engine. With the colour
-  engine the panel keeps SAM's objects for later, and they are left out. Not confirmed: it adds a layer and changes none, and Undo of the turn removes it. A layer
-  held in memory has no definition worth keeping, so the turn records it without one and Redo says it cannot come back.
+  engine the panel keeps SAM's objects for later, and they are left out.
 - `render_window` waits for the rendering without user input when it runs on the main thread: a click during the run
   must not start another tool.
 - SAM missing: the tool says how the user installs it. The agent cannot install it, on purpose (pip and a download

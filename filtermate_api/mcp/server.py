@@ -658,7 +658,7 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Draw with SAM, on a raster, the object each feature of a guide layer points at; adds them as a layer.
 
-        The new polygon layer is held in memory, in the CRS of the raster, one object per guide feature, with the
+        The new polygon layer is a temporary GeoPackage, in the CRS of the raster, one object per guide feature, with the
         attributes of the feature, sam_score (the confidence of SAM, 0 to 1) and, for a polygon guide, sam_iou (overlap
         of the footprint with the drawn object, 0 to 1: a low value flags a footprint to look at, such as a building
         that changed, it does not prove a change). Then select_features on that layer (e.g. "sam_iou" < 0.5) or

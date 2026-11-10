@@ -146,7 +146,8 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
 
     ``filtermate:segment_from_features`` run here, on the main thread as the other tools: a point is
     a click on the object, a polygon gives its bounding box and a point inside it. The layer added is
-    held in memory, in the CRS of the raster, with the attributes of the guide, ``sam_score`` and,
+    a temporary GeoPackage, as the outputs of ``run_algorithm`` (Redo of the turn opens it again), in
+    the CRS of the raster, with the attributes of the guide, ``sam_score`` and,
     for a polygon guide, ``sam_iou`` (overlap of the footprint with the drawn object).
 
     Args:
@@ -165,7 +166,10 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
     Raises:
         ValueError: A layer that does not fit, too many guide features, SAM not installed, nothing drawn.
     """
-    from qgis.core import QgsFillSymbol, QgsProcessingContext, QgsProcessingFeatureSourceDefinition, QgsProject
+    from qgis.core import (
+        QgsFillSymbol, QgsProcessingContext, QgsProcessingFeatureSourceDefinition, QgsProcessingUtils, QgsProject,
+        QgsVectorLayer,
+    )
     from ...processing.algorithms.segmentation_algorithm import SegmentFromFeaturesAlgorithm
     from ..qgis.coverage_layers.segmentation import _geometry_kinds, model_state
     from .project_control import _summary
@@ -205,13 +209,15 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
     context = QgsProcessingContext()
     context.setProject(project)
     feedback = _budget_feedback(BUDGET_SECONDS)
+    # A file, as the outputs of run_algorithm: Redo of the turn opens it again (a memory layer would come back empty).
+    path = QgsProcessingUtils.generateTempFilename("sam_objects.gpkg")
     begin = time.monotonic()
     # Qt serves events while the windows are drawn: a REST call queued meanwhile is refused, not run nested.
     with running("segment_objects"):
         results, ok = algorithm.run({
             SegmentFromFeaturesAlgorithm.RASTER: image,
             SegmentFromFeaturesAlgorithm.FEATURES: QgsProcessingFeatureSourceDefinition(guide.id(), selected, limit),
-            SegmentFromFeaturesAlgorithm.OUTPUT: 'memory:',
+            SegmentFromFeaturesAlgorithm.OUTPUT: path,
         }, context, feedback)
     seconds = time.monotonic() - begin
     # The algorithm asks once more after its last window: past the time then, nothing was stopped.
@@ -219,7 +225,10 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
     if feedback.errors:
         logger.warning("segment_objects on %s: %s", image_name, " | ".join(feedback.errors))
     output = (results or {}).get(SegmentFromFeaturesAlgorithm.OUTPUT) if ok else None
-    layer = context.takeResultLayer(output) if output else None
+    title = (name or '').strip()[:200] or f"{guide_name} (SAM)"
+    layer = QgsVectorLayer(output if isinstance(output, str) and output else path, title, 'ogr') if ok else None
+    if layer is not None and not layer.isValid():
+        layer = None
     drawn = int(layer.featureCount()) if layer is not None else 0
     if drawn <= 0:
         if stopped_early:
@@ -242,7 +251,6 @@ def segment_objects(raster: str, guide_layer: str, selected_only: bool = True, l
         if overlap is not None:
             overlaps.append(overlap)
 
-    layer.setName((name or '').strip()[:200] or f"{guide_name} (SAM)")
     try:
         layer.renderer().setSymbol(QgsFillSymbol.createSimple(dict(OUTLINE)))  # outlined: the raster stays visible
     except (AttributeError, RuntimeError) as exc:

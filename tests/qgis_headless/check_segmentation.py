@@ -700,18 +700,33 @@ def test_agent_objects(layer):
         check("without SAM: what to tell the user", *refused("installs it from the FilterMate dock", layer.name(), "footprints"))
         segmentation.model_state = lambda: segmentation.ModelState(True, True)
 
-        # Undo of a turn: the layer is taken away, it cannot come back (held in memory), and that is said.
+        # Undo of a turn: the layer, a file, is taken away and Redo opens it again with its objects.
         recorder = effects.EffectsRecorder()
         recorder.before_call(types.SimpleNamespace(name="segment_objects", arguments={}))
         answer = drawn.segment_objects(layer.name(), "footprints")
         made = answer["layer"]["layer_id"]
+        check("the objects are a file, not a memory layer", project.mapLayer(made).providerType() == "ogr"
+              and project.mapLayer(made).source().lower().split("|")[0].endswith(".gpkg"), project.mapLayer(made).source())
         recorded = recorder.finish()
-        check("the turn records the layer added, without a definition to bring it back empty",
-              [(e[0], e[1], e[2]) for e in recorded] == [("added", made, "")], [e[:3] for e in recorded])
+        check("the turn records the layer added, with its definition",
+              [(e[0], e[1]) for e in recorded] == [("added", made)] and recorded[0][2], [e[:2] for e in recorded])
         done, left = effects.apply_effects(recorded, undo=True)
         check("undo removes it", project.mapLayer(made) is None and done == ["footprints (SAM)"], (done, left))
         done, left = effects.apply_effects(recorded, undo=False)
-        check("redo says it cannot come back", project.mapLayer(made) is None and left == ["footprints (SAM)"], (done, left))
+        back = project.mapLayer(made)
+        check("redo opens it again, objects and style", back is not None and back.featureCount() == 1 and not left
+              and back.renderer().symbol().color().alpha() == 0, (done, left))
+        # A layer held in memory would come back empty: the turn says it cannot.
+        memory = QgsVectorLayer("Polygon?crs=EPSG:2154", "scratch", "memory")
+        memory_id = memory.id()  # the layer object is deleted by the undo below
+        recorder.before_call(types.SimpleNamespace(name="segment_objects", arguments={}))
+        project.addMapLayer(memory)
+        recorded = recorder.finish()
+        check("a memory layer is recorded without a definition",
+              [(e[0], e[1], e[2]) for e in recorded] == [("added", memory_id, "")], [e[:3] for e in recorded])
+        effects.apply_effects(recorded, undo=True)
+        done, left = effects.apply_effects(recorded, undo=False)
+        check("and redo says it cannot come back", left == ["scratch"] and project.mapLayer(memory_id) is None, (done, left))
     finally:
         segmentation.model_state = ready
         for item in added:
