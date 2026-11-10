@@ -648,7 +648,7 @@ class AgentChatController(QObject):
         if outcome.status == OUTCOME_STOPPED:
             self._say(_tr("The agent stopped before the end ({}).").format(outcome.reason), error=True)
             return
-        self._say(_tr("Changed: {}.").format(", ".join(outcome.changed_layers)) if outcome.changed_layers else "")
+        self._say("")  # the cards of the turn say what changed (mockup)
 
     def _give_back_request(self) -> None:
         """A request that went nowhere can be sent again without retyping it."""

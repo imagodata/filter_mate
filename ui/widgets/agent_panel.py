@@ -130,6 +130,7 @@ class AgentPanel(QFrame):
             "")
 
         self.stack = QStackedWidget(self)
+        self.stack.setObjectName("stackedWidget_agent")
         welcome = QScrollArea(self)  # it must not make the section taller than a small screen allows
         welcome.setObjectName("scrollArea_agent_welcome")
         welcome.setFrameShape(QFrame.Shape.NoFrame)
@@ -217,10 +218,10 @@ class AgentPanel(QFrame):
         self.destination.setVisible(False)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(6)
+        layout.addWidget(self.progress)  # a thin bar under the header while the agent works (mockup)
         layout.addWidget(self.stack, 1)
-        layout.addWidget(self.progress)
         layout.addLayout(actions)
         layout.addLayout(ask)
         layout.addWidget(self.destination)
@@ -374,6 +375,9 @@ class AgentPanel(QFrame):
         self.destination.setStyleSheet(f"color: {muted};")
         send_color = palette["fm_danger"] if self._working else palette["fm_accent"]
         sheet = (
+            # The dock pads every frame by 6 px: the panel and its pages sit on the edges of the section headers.
+            f"QFrame#{PANEL_NAME}, QStackedWidget#stackedWidget_agent {{ padding: 0px; margin: 0px; border: none;"
+            " background: transparent; }"
             # Its own sheet wins over the rules of the accordion, which size every tool button as a section tab.
             f"QToolButton {{ min-width: {BUTTON_SIZE}px; max-width: {BUTTON_SIZE}px; min-height: {BUTTON_SIZE}px; "
             f"max-height: {BUTTON_SIZE}px; padding: 0; margin: 0; }}"

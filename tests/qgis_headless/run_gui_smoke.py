@@ -1362,6 +1362,19 @@ def s_agent_panel():
     check('agent: undo is on the change card', panel.undo_offered() and len(card_undo) == 1, str(card_undo))
     if shots:
         d.grab().save(os.path.join(shots, 'agent_open.png'))
+    check('agent: the thread is on the edges of the headers (mockup)', abs(panel.thread.mapTo(d, QPoint(0, 0)).x()
+          - agent_header.mapTo(d, QPoint(0, 0)).x()) <= 1 and abs(panel.thread.width() - agent_header.width()) <= 2,
+          f"thread x={panel.thread.mapTo(d, QPoint(0, 0)).x()} w={panel.thread.width()} header w={agent_header.width()}")
+    if os.environ.get('FM_GEOMETRY'):
+        def where(widget):
+            top_left = widget.mapTo(d, QPoint(0, 0))
+            return f"x={top_left.x()} y={top_left.y()} w={widget.width()} h={widget.height()}"
+        for label, widget in (('agent header', agent_header), ('panel', panel), ('stack', panel.stack),
+                              ('thread', panel.thread), ('input', panel.input), ('status', panel.status)):
+            print(f"GEOMETRY {label}: {where(widget)} margins={widget.contentsMargins().left()},"
+                  f"{widget.contentsMargins().top()},{widget.contentsMargins().right()}", flush=True)
+        print(f"GEOMETRY panel layout margins={panel.layout().contentsMargins().left()},"
+              f"{panel.layout().contentsMargins().top()} sheet={panel.styleSheet()[:0]}", flush=True)
     panel.clear_thread()
     toolbox.setCurrentWidget(d.EXPORTING)
     QApplication.processEvents()
