@@ -17,6 +17,9 @@ simple text or number functions. Subqueries and other functions are refused. des
 of a vector layer: postgresql (ILIKE for a case-insensitive match, "field"::text to compare as text), sqlite \
 (GeoPackage, SpatiaLite: LIKE ignores the case of ASCII letters, no ILIKE), ogr_sql (Shapefile and other files: keep to \
 comparisons, IN, LIKE, IS NULL), qgis_expression (QGIS evaluates it: ILIKE and lower() work).
+- apply_filter replaces the filter of the layer. To narrow a layer that is already filtered ("among them", "and \
+also"), pass operator AND with the new condition only; never copy its current filter into the expression. OR widens \
+it, AND NOT takes the new condition out. replaced_filter in the answer says what a replacement removed.
 - Use cross_filter when a layer is filtered by its relation to another layer, geometry_filter for an area given as \
 WKT (map_context gives the current extent as WKT), point_cloud_filter for LiDAR criteria.
 - cross_filter on a vector source uses its selected features, or, with none selected, the features its filter \

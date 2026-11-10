@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
+from .filter_combine import combined
 from .layer_listing import select_layers, short_filter
 from .main_thread import QGISBusy
 
@@ -134,30 +135,42 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         except QGISBusy:
             return {}
 
-    def _resolved_name(reference: str, expression: str) -> Tuple[str, Optional[int]]:
+    def _resolved_name(reference: str, expression: str, operator: Optional[str]) -> Tuple[str, Optional[int], str, str]:
         """Name ``apply_filter`` needs for an id or a name, once the expression passed a trial where one is needed.
 
-        With it, the features of the layer when it had no filter yet (``None`` otherwise): the total to compare with.
+        With it, the features of the layer when it had no filter yet (``None`` otherwise): the total to compare
+        with; the expression to apply (the new condition combined with the current filter when ``operator`` says
+        so), and the filter it replaces.
         """
         try:
             details = accessor.describe_layer(reference)
-            if details is None:
-                return reference, None
-            if details.provider_type in _SILENT_SQL_PROVIDERS:
-                preview = accessor.preview_filter(details.name, expression)
-                if preview is not None and not preview.valid:
-                    raise ToolFailure(f"Nothing was applied, the expression is invalid: {preview.error}")
-            total = details.feature_count if not details.subset and details.feature_count >= 0 else None
-            return details.name, total
         except FilterRejected:  # memory layer, web service behind OGR: not tried, the apply says what it says
-            return reference, None
+            details = None
+        previous = details.subset if details is not None else (accessor.get_active_filters() or {}).get(reference, "")
+        try:
+            applied, replaced = combined(previous, expression, operator)
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        if details is None:
+            return reference, None, applied, replaced
+        if details.provider_type in _SILENT_SQL_PROVIDERS:
+            try:
+                preview = accessor.preview_filter(details.name, applied)
+            except FilterRejected:
+                preview = None
+            if preview is not None and not preview.valid:
+                raise ToolFailure(f"Nothing was applied, the expression is invalid: {preview.error}")
+        total = details.feature_count if not details.subset and details.feature_count >= 0 else None
+        return details.name, total, applied, replaced
 
     def apply_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         expression = _checked_expression(args["expression"])
-        name, total = _resolved_name(args["layer_name"], expression)
-        if not accessor.apply_filter(name, expression, SOURCE):
+        name, total, applied, replaced = _resolved_name(args["layer_name"], expression, args.get("operator"))
+        if not accessor.apply_filter(name, applied, SOURCE):
             raise ToolFailure("Layer not found.")
-        answer = {"success": True, "layer_name": name, "expression": expression, "active_filters": _active_after_change()}
+        answer = {"success": True, "layer_name": name, "expression": applied, "active_filters": _active_after_change()}
+        if replaced and replaced != applied:
+            answer["replaced_filter"] = replaced  # the model sees a filter it may have meant to keep
         try:
             details = accessor.describe_layer(name)
         except (QGISBusy, FilterRejected):

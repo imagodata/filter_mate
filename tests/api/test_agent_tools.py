@@ -432,3 +432,39 @@ class TestLayerListing:
         accessor = Accessor(state=[FilteredLayer("L1", "communes", "vector", subset="a" * 900)])
         error, answer = run(accessor, tmp_path, "filter_state")
         assert not error and answer["layers"][0]["subset_length"] == 900
+
+
+class TestCombinedFilters:
+    """operator on apply_filter: the new condition with the current filter, never a copy of it by the model."""
+
+    def test_the_combination_puts_each_side_in_parentheses(self):
+        from filtermate_api.filter_combine import combined
+        assert combined("a = 1 OR b = 2", "c = 3", "AND") == ("(a = 1 OR b = 2) AND (c = 3)", "")
+        assert combined("a = 1", "c = 3", "AND NOT") == ("(a = 1) AND NOT (c = 3)", "")
+        assert combined("a = 1", "c = 3", None) == ("c = 3", "a = 1")  # replaced, and said so
+        assert combined("", "c = 3", "OR") == ("c = 3", "")
+        with pytest.raises(ValueError):
+            combined("a = 1", "c = 3", "XOR")
+
+    def test_the_chat_narrows_a_filtered_layer(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="\"dept\" = '31'",
+                            operator="AND")
+        assert not error and answer["expression"] == "(\"pop\" > 10) AND (\"dept\" = '31')"
+        assert accessor._active["communes"] == answer["expression"] and "replaced_filter" not in answer
+
+    def test_a_replacement_says_what_it_removed(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="\"dept\" = '31'")
+        assert not error and answer["replaced_filter"] == '"pop" > 10' and answer["expression"] == "\"dept\" = '31'"
+
+    def test_rest_combines_and_checks_only_the_new_condition(self, make_client):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))
+        response = make_client(accessor).post("/filters/apply", json={
+            "layer_name": "communes", "expression": "\"dept\" = '31'", "operator": "AND"})
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["expression"] == "(\"pop\" > 10) AND (\"dept\" = '31')" and body["replaced_filter"] == ""
+        refused = make_client(accessor).post("/filters/apply", json={
+            "layer_name": "communes", "expression": "1=1; DROP TABLE x", "operator": "AND"})
+        assert refused.status_code == 400

@@ -126,5 +126,10 @@
   "prompt": "Garde les bâtiments à moins de 20 mètres d'une route, n'importe laquelle.",
   "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20,
     "selected_only": false},
-    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20, "selected_only": false}}]]}
+    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20, "selected_only": false}}]]},
+ {"id": "narrow_with_and", "setup": {"filters": {"communes": "\"population\" > 10000"}},
+  "prompt": "Parmi ces communes, garde seulement celles du département 31.",
+  "expect": [[{"tool": "apply_filter", "args": {"layer_name": "communes", "expression": {"contains": ["dept", "31"]},
+    "operator": "AND"},
+    "call_args": {"layer_name": "communes", "expression": "\"dept\" = '31'", "operator": "AND"}}]]}
 ]}

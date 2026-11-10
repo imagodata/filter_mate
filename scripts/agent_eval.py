@@ -148,12 +148,18 @@ class SimulatedProject:
             if layer["kind"] != "vector":
                 raise ToolFailure(f"'{name}' is not a vector layer")
             unfiltered = name not in self.filters
-            self.filters[name] = args["expression"]
+            previous = self.filters.get(name, "")
+            operator = args.get("operator")
+            self.filters[name] = (f"({previous}) {operator} ({args['expression']})" if operator and previous
+                                  else args["expression"])
             total = layer.get("count", 30)
             answer = {"success": True, "layer_name": name, "expression": args["expression"],
                       "active_filters": dict(self.filters), "feature_count": max(total // 4, 1)}
             if unfiltered:
                 answer["total_count"] = total
+            if previous and not operator:
+                answer["replaced_filter"] = previous
+            answer["expression"] = self.filters[name]
             return answer
 
         def relation(args):

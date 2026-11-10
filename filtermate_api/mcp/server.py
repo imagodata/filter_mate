@@ -260,10 +260,15 @@ def build_server(client: FilterMateClient) -> Any:
             "function is refused."))],
         source: Annotated[str, Field(max_length=200, description=(
             "Free-text tag shown in the FilterMate log to tell where the filter came from"))] = "mcp",
+        operator: Annotated[Optional[Operator], Field(description=(
+            "Combine with the layer's current filter instead of replacing it: AND narrows it (the new condition "
+            "only, never a copy of the current filter), OR widens it, AND NOT removes the new condition from it"))]
+            = None,
     ) -> Dict[str, Any]:
-        """Set the filter (subset string) of one vector layer; it replaces the layer's previous filter.
+        """Set the filter (subset string) of one vector layer; without operator it replaces the previous filter.
 
-        Returns success and active_filters ({layer name: subset string} after the call). For spatial filtering
+        Returns success, expression (as applied), replaced_filter (the filter the layer had and lost, when no
+        operator was given) and active_filters ({layer name: subset string} after the call). For spatial filtering
         between layers use cross_filter or geometry_filter. Revert with clear_filters.
 
         Caution: some providers (GeoPackage, Shapefile through OGR) accept an invalid SQL expression without any
@@ -271,7 +276,7 @@ def build_server(client: FilterMateClient) -> Any:
         expected matches) and use clear_filters to recover.
         """
         return await call("POST", "/filters/apply",
-                          _body(layer_name=layer_name, expression=expression, source=source))
+                          _body(layer_name=layer_name, expression=expression, source=source, operator=operator))
 
     @mcp.tool(annotations=_write("Undo the last vector filter", idempotent=False))
     async def undo_filter() -> Dict[str, Any]:
