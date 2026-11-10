@@ -165,5 +165,11 @@
  {"id": "sam_from_footprints", "setup": {"selected": ["batiments"]},
   "prompt": "Redessine avec SAM, sur l'orthophoto, les bâtiments sélectionnés.",
   "expect": [[{"tool": "segment_objects", "args": {"raster": "orthophoto", "guide_layer": "batiments"},
-    "call_args": {"raster": "orthophoto", "guide_layer": "batiments"}}]]}
+    "call_args": {"raster": "orthophoto", "guide_layer": "batiments"}}]]},
+ {"id": "note_kept_on_request", "prompt": "Retiens pour la suite que la couche des parcelles s'appelle parcelles et que sa clé est le champ section.",
+  "expect": [[{"tool": "add_project_note", "args": {"text": {"contains": ["parcelles", "section"]}},
+    "call_args": {"text": "La couche des parcelles s'appelle parcelles, clé : champ section."}}]],
+  "forbid": ["export_layers", "apply_filter"]},
+ {"id": "note_not_kept_unasked", "prompt": "Quelles valeurs prend le champ nom des communes ?", "expect": [],
+  "forbid": ["add_project_note", "export_layers"]}
 ]}

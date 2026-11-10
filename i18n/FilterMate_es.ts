@@ -284,6 +284,21 @@
         <translation>Las solicitudes más antiguas de esta conversación ahora se resumen en unas pocas líneas, para mantenerla corta.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>Nota guardada para este proyecto</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>Nota {} olvidada</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>notas del proyecto</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Leyendo los valores de {}</translation>

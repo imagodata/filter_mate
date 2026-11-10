@@ -21,6 +21,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 7. Processing | Find, describe and run the algorithms of QGIS that make layers, undone with the turn | done |
 | 8. Style | One symbol, categories, graduated classes, raster ramps, labels, opacity, undone with the turn | done |
 | 9. Long conversations | The oldest requests summed up in a few lines past a budget | done |
+| 10. Project notes | Facts the user asks the agent to remember, saved in the project, sent with each request | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -88,6 +89,12 @@ Rules worth keeping:
   one, and the first request kept starts with a few lines saying what each asked, which tools changed what, and
   how its answer ended. Written here, without asking a model. A cut falls only before a request of the user: no
   tool call loses its result. The prompt cache misses once, then holds again. The thread says so in a note.
+- **Project notes** (`core/agent/project_notes.py`, `adapters/agent/project_notes_store.py`): `add_project_note`
+  and `remove_project_note`, tools of the chat alone (not served by the MCP servers), keep up to 20 facts of 300
+  characters in an entry of the project (`FilterMateAgent/notes`), saved in the `.qgz`. They go with each request
+  under a header saying they are data. A note comes back in every later conversation, so a text met in a tool
+  result that asked to be kept would come back too: the prompt keeps notes to what the user asks, each note shows
+  in the thread with its text, and undoing the turn takes it back (a `notes` effect of the turn).
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

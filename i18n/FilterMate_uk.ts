@@ -284,6 +284,21 @@
         <translation>Найстаріші запити цієї розмови тепер підсумовано кількома рядками, щоб вона лишалася короткою.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>Нотатку збережено для цього проєкту</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>Нотатку {} забуто</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>нотатки проєкту</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Читання значень {}</translation>

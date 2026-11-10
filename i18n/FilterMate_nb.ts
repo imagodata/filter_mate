@@ -284,6 +284,21 @@
         <translation>De eldste forespørslene i denne samtalen er nå oppsummert i noen få linjer for å holde den kort.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>Notat lagret for dette prosjektet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>Notat {} glemt</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>prosjektnotater</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Leser verdiene i {}</translation>

@@ -394,6 +394,8 @@ class SimulatedProject:
                     {"title": "visual", "format": "visual", "url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif"}]}]},
             "filter_state": filter_state, "list_favorites": lambda _: {"favorites": FAVORITES},
             "apply_favorite": apply_favorite,
+            "add_project_note": lambda args: {"notes": [f"1. {args['text']}"]},
+            "remove_project_note": lambda args: {"notes": []},
             "undo_agent_step": lambda _args: {"undone": "Garde les communes de plus de 10 000 habitants",
                                               "restored": ["communes"], "left": []},
         }

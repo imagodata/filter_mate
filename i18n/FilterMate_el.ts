@@ -284,6 +284,21 @@
         <translation>Τα παλαιότερα αιτήματα αυτής της συζήτησης συνοψίζονται πλέον σε λίγες γραμμές, ώστε να μένει σύντομη.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>Σημείωση που κρατήθηκε για αυτό το έργο</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>Η σημείωση {} ξεχάστηκε</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>σημειώσεις του έργου</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Ανάγνωση των τιμών του {}</translation>

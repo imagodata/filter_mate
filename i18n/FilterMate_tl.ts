@@ -284,6 +284,21 @@
         <translation>Ang pinakalumang mga kahilingan sa usapang ito ay ibinuod na sa ilang linya upang manatiling maikli.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>Naitabing tala para sa proyektong ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>Nakalimutan ang tala {}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>mga tala ng proyekto</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Binabasa ang mga halaga ng {}</translation>

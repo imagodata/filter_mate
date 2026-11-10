@@ -17,6 +17,7 @@ from ...adapters.agent.settings import (
     free_quota_url, target_of,
 )
 from ...adapters.agent import free_quota, transcript_store
+from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.bounded_http import abort_active
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
@@ -34,7 +35,8 @@ from ...core.agent.providers import FREE_PRESET, create_provider
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
-from ...core.agent.tool_catalog import UNDO_AGENT_STEP, chat_tools
+from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
+from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, UNDO_AGENT_STEP, chat_tools
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
 from ...filtermate_api.agent_tools import build_handlers
@@ -366,7 +368,28 @@ class AgentChatController(QObject):
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
+        handlers[ADD_NOTE] = self._add_note_tool
+        handlers[REMOVE_NOTE] = self._remove_note_tool
         return tools, handlers, active
+
+    @staticmethod
+    def _add_note_tool(arguments) -> dict:
+        """add_project_note: a fact kept in the project file for the next conversations."""
+        try:
+            notes = note_added(read_notes(), arguments.get("text", ""))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        write_notes(notes)
+        return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
+
+    @staticmethod
+    def _remove_note_tool(arguments) -> dict:
+        try:
+            notes = note_removed(read_notes(), arguments.get("number", 0))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        write_notes(notes)
+        return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
 
     def _undo_tool(self, _arguments) -> dict:
         """undo_agent_step: the last request of the agent taken back, as the Undo of the panel does it."""
@@ -546,7 +569,13 @@ class AgentChatController(QObject):
         Sent after the request; empty when the project cannot be read.
         """
         read = self._read_project()
-        return "" if read is None else project_summary(*read, before=self._seen)
+        summary = "" if read is None else project_summary(*read, before=self._seen)
+        try:
+            notes = notes_block(read_notes())
+        except Exception:  # the request goes without them
+            logger.debug("Agent: project notes not read", exc_info=True)
+            notes = ""
+        return "\n\n".join(part for part in (summary, notes) if part)
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
@@ -619,6 +648,8 @@ class AgentChatController(QObject):
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
             "set_layer_style": lambda: _tr("Style of {}").format(layer),
             "set_labels": lambda: _tr("Labels of {}").format(layer),
+            ADD_NOTE: lambda: _tr("Note kept for this project"),
+            REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
             "map_context": lambda: _tr("Reading the map"),
             "filter_state": lambda: _tr("Reading the active filters"),
@@ -715,6 +746,8 @@ class AgentChatController(QObject):
     @staticmethod
     def _run_detail(call: ToolCallPart) -> str:
         """The parameters of an algorithm, on one line, for its card."""
+        if call.name == ADD_NOTE and isinstance(call.arguments, dict):
+            return str(call.arguments.get("text", ""))
         if call.name in ("set_layer_style", "set_labels") and isinstance(call.arguments, dict):
             keys = ("mode", "field", "ramp", "classes", "color") if call.name == "set_layer_style" else ("field",)
             return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))

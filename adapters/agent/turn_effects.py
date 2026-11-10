@@ -7,7 +7,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   ``definition`` is the layer definition (QLR) text, ``place`` the names of its groups from the root and its index;
 * ``("selection", layer_id, before, after)``: selected feature ids;
 * ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
-* ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML.
+* ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
+* ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts).
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -26,6 +27,12 @@ MAX_SELECTION = 100_000  # beyond, the selection is not kept: too much to hold f
 Place = Tuple[Tuple[str, ...], int]
 # The tools that change how a layer is drawn: its style is kept before their first call in a turn.
 STYLE_TOOLS = ("set_layer_style", "set_labels")
+NOTE_TOOLS = ("add_project_note", "remove_project_note")
+
+
+def _notes_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "project notes")
 
 
 def _resolve(project: QgsProject, reference: Any) -> Any:
@@ -140,6 +147,7 @@ class EffectsRecorder:
         self._selection: Dict[str, Tuple[int, ...]] = {}
         self._visibility: Dict[str, bool] = {}
         self._styles: Dict[str, str] = {}
+        self._notes: Optional[Tuple[str, ...]] = None
 
     def before_call(self, call: Any) -> None:
         project = QgsProject.instance()
@@ -159,6 +167,10 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
+            elif name in NOTE_TOOLS:
+                if self._notes is None:
+                    from .project_notes_store import read_notes
+                    self._notes = tuple(read_notes(project))
             elif name in STYLE_TOOLS:
                 layer = _resolve(project, arguments.get("layer"))
                 style = _style(layer) if layer is not None and layer.id() not in self._styles else None
@@ -198,6 +210,11 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
+        if self._notes is not None:
+            from .project_notes_store import read_notes
+            after_notes = tuple(read_notes(project))
+            if after_notes != self._notes:
+                effects.append(("notes", "", self._notes, after_notes))
         for layer_id, before in self._styles.items():
             layer = project.mapLayer(layer_id)
             after = _style(layer) if layer is not None else None
@@ -238,6 +255,10 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 if node is not None:
                     node.setItemVisibilityChecked(bool(effect[2] if undo else effect[3]))
                     done.append(node.name())
+            elif kind == "notes":
+                from .project_notes_store import write_notes
+                write_notes(list(effect[2] if undo else effect[3]), project)
+                done.append(_notes_label())
             elif kind == "style":
                 layer = project.mapLayer(layer_id)
                 if layer is not None and _set_style(layer, effect[2] if undo else effect[3]):

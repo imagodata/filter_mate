@@ -284,6 +284,21 @@
         <translation>أقدم طلبات هذه المحادثة ملخّصة الآن في بضعة أسطر لإبقائها قصيرة.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>ملاحظة محفوظة لهذا المشروع</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>نُسيت الملاحظة {}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>ملاحظات المشروع</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>قراءة قيم {}</translation>

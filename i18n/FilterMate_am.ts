@@ -284,6 +284,21 @@
         <translation>የዚህ ውይይት በጣም የቆዩ ጥያቄዎች አሁን በጥቂት መስመሮች ተጠቃለዋል፣ አጭር ለማድረግ።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>ለዚህ ፕሮጀክት የተያዘ ማስታወሻ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>ማስታወሻ {} ተረስቷል</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>የፕሮጀክት ማስታወሻዎች</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>የ{} እሴቶችን በማንበብ ላይ</translation>
