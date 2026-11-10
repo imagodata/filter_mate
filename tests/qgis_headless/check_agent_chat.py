@@ -1368,8 +1368,13 @@ def check_effects(layer_id):
     turn.commit()
     turn.undo()
     check("effects: an added layer goes on undo", project.mapLayer(memory_id) is None)
-    turn.redo()
-    check("effects: and comes back on redo", project.mapLayer(memory_id) is not None)
+    redone = turn.redo()
+    # It would come back empty: a layer held in memory is not brought back on redo, and that is said (#302).
+    check("effects: a layer in memory is not brought back empty on redo, and says so",
+          project.mapLayer(memory_id) is None and "scratch" in redone[1], redone)
+    memory = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "scratch", "memory")
+    project.addMapLayer(memory)
+    memory_id = memory.id()
     turn.label = "remove scratch"
     turn.begin(ToolCallPart("e5", "remove_layers", {"layers": ["scratch"]}))
     project.removeMapLayer(memory_id)
