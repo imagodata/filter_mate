@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Vráceno: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Vrácení posledního požadavku</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Zpět před: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Není co vrátit.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Znovu: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Vrátit: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Bezplatná kvóta</translation>
@@ -396,6 +420,14 @@ Souhlasíte?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Vrstvy tak, jak byly před tímto krokem posledního požadavku</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Vrátit až sem</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

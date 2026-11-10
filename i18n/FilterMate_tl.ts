@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Na-undo: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Pag-undo sa huling kahilingan</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Bumalik sa bago ang: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Walang i-uundo.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>I-redo: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>I-undo: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Libreng quota</translation>
@@ -396,6 +420,14 @@ Sumasang-ayon ka ba?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Ang mga layer ayon sa dati bago ang hakbang na ito ng huling kahilingan</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>I-undo hanggang dito</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

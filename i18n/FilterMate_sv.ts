@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Ångrad: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Ångra den senaste begäran</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Tillbaka till före: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Inget att ångra.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Gör om: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Ångra: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Gratiskvot</translation>
@@ -396,6 +420,14 @@ Godkänner du?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Lagren som de var före det här steget i den senaste begäran</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Ångra hit</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

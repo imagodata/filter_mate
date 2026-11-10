@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Rückgängig gemacht: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Letzte Anfrage rückgängig gemacht</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Zurück zu vor: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Nichts rückgängig zu machen.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Wiederholen: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Rückgängig: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Kostenloses Kontingent</translation>
@@ -396,6 +420,14 @@ Sind Sie einverstanden?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Die Ebenen so, wie sie vor diesem Schritt der letzten Anfrage waren</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Bis hierhin rückgängig machen</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

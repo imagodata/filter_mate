@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Visszavonva: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Az utolsó kérés visszavonása</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Vissza ez elé: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Nincs mit visszavonni.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Újra: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Visszavonás: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Ingyenes keret</translation>
@@ -396,6 +420,14 @@ Elfogadja?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>A rétegek az utolsó kérés e lépése előtti állapotukban</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Visszavonás idáig</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

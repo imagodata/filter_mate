@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Desfet: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Desfer la darrera petició</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Tornar a abans de: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Res a desfer.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Refés: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Desfés: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Quota gratuïta</translation>
@@ -396,6 +420,14 @@ Hi esteu d'acord?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Les capes tal com eren abans d'aquest pas de la darrera petició</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Desfés fins aquí</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

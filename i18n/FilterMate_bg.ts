@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Отменено: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Отмяна на последната заявка</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Назад към състоянието преди: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Няма какво да се отмени.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Повтори: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Отмяна: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Безплатна квота</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Слоевете както бяха преди тази стъпка от последната заявка</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Отмяна до тук</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Annulé : {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Annulation de la dernière demande</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Retour avant : {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Rien à annuler.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Rétablir : {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Annuler : {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Quota gratuit</translation>
@@ -401,6 +425,14 @@ Acceptez-vous ?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Les couches telles qu'elles étaient avant cette étape de la dernière demande</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Annuler jusqu'ici</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

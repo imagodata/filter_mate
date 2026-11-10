@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Geri alındı: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Son isteğin geri alınması</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Şundan önceye dön: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Geri alınacak bir şey yok.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Yinele: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Geri al: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Ücretsiz kota</translation>
@@ -396,6 +420,14 @@ Onaylıyor musunuz?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Son isteğin bu adımından önceki hâliyle katmanlar</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Buraya kadar geri al</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

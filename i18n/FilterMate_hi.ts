@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>पूर्ववत किया गया: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>पिछले अनुरोध को पूर्ववत करना</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>इससे पहले की स्थिति पर लौटें: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>पूर्ववत करने के लिए कुछ नहीं।</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>फिर से करें: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>पूर्ववत करें: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">निःशुल्क कोटा</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>पिछले अनुरोध के इस चरण से पहले की लेयर जैसी थीं</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>यहाँ तक पूर्ववत करें</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

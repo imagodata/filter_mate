@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>已撤销：{}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>撤销上一次请求</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>返回到之前：{}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>没有可撤销的操作。</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>重做：{}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>撤销：{}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">免费额度</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>上一次请求此步骤之前的图层状态</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>撤销到此处</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

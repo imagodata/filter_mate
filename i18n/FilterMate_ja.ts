@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>元に戻しました: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>直前のリクエストの取り消し</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>次の前の状態に戻る: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>元に戻す操作はありません。</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>やり直す: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>元に戻す: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">無料枠</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>直前のリクエストのこのステップより前のレイヤーの状態</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>ここまで元に戻す</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>
