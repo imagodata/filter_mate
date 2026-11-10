@@ -28,7 +28,7 @@ import traceback
 import types
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
-from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
 from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QPushButton, QScrollArea, QToolButton
 try:
@@ -1408,8 +1408,15 @@ def s_agent_panel():
           and smallest_bottom <= splitter.widget(1).minimumHeight() + 2 and d.toolBox_tabTools.maximumHeight() > 10000,
           f"top {smallest_top} (min {sections.top.minimumSizeHint().height()}), bottom {smallest_bottom} "
           f"(min {splitter.widget(1).minimumHeight()}), total {total}")
-    check('stacks: the lower one keeps its three sections in order', [toolbox.itemText(toolbox.indexOf(page)) for page in
-          (d.FILTERING, d.EXPORTING, d.CONFIGURATION)] == ['FILTERING', 'EXPORTING', 'CONFIGURATION'])
+    # The titles of the lower sections come from the .ui and are translated (FILTRAGE, EXPORT in French): compare
+    # with their translation, so that the smoke also passes with --lang fr.
+    lower_titles = {page: QCoreApplication.translate('FilterMateDockWidgetBase', name) for page, name in
+                    ((d.FILTERING, 'FILTERING'), (d.EXPORTING, 'EXPORTING'), (d.CONFIGURATION, 'CONFIGURATION'))}
+    check('stacks: the lower one keeps its three sections in order',
+          [toolbox.indexOf(page) for page in lower_titles] == sorted(toolbox.indexOf(page) for page in lower_titles)
+          and -1 not in [toolbox.indexOf(page) for page in lower_titles]
+          and all(toolbox.itemText(toolbox.indexOf(page)) == title for page, title in lower_titles.items()),
+          str([toolbox.itemText(i) for i in range(toolbox.count())]))
     bottom_headers = [b for b in toolbox.findChildren(QAbstractButton)
                       if b.objectName() == 'qt_toolbox_toolboxbutton' and b.isVisibleTo(toolbox)]
     heights = {b.height() for b in bottom_headers} | {exploring_header.height(), agent_header.height()}
@@ -1507,12 +1514,12 @@ def s_agent_panel():
           and d.tabTools_current_index == 1, str(d.tabTools_current_index))
     check('stacks: an open section gets its minimum back', lower.minimumHeight() == 420, str(lower.minimumHeight()))
     lower.setMinimumHeight(lower_min)
-    export_header = next(b for b in bottom_headers if b.text() == 'EXPORTING')
+    export_header = next(b for b in bottom_headers if b.text() == lower_titles[d.EXPORTING])
     export_header.click()
     QApplication.processEvents()
     check('stacks: a click on the open header folds it', toolbox.currentWidget() not in (d.EXPORTING, d.FILTERING)
           and sections.is_open('agent'))
-    filtering_header = next(b for b in bottom_headers if b.text() == 'FILTERING')
+    filtering_header = next(b for b in bottom_headers if b.text() == lower_titles[d.FILTERING])
     filtering_header.click()
     QApplication.processEvents()
     check('stacks: FILTERING brings EXPLORING back and folds AGENT', toolbox.currentWidget() is d.FILTERING and
