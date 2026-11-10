@@ -1397,6 +1397,38 @@ def s_agent_panel():
     exploring_header.click()
     QApplication.processEvents()
     check('stacks: and opens it again', sections.is_open('exploring'))
+
+    # Lot 1 of the undo plan: AGENT open, the action bar walks the steps of the agent.
+    target = d.current_layer
+    undo_button = d.widgets['ACTION']['UNDO_FILTER']['WIDGET']
+    redo_button = d.widgets['ACTION']['REDO_FILTER']['WIDGET']
+    if target is not None and hasattr(target, 'subsetString'):
+        before = target.subsetString()
+        chat._checkpoint.label = 'keep the first feature'
+        chat._checkpoint.begin()
+        target.setSubsetString('"fid" = 1' if target.fields().indexOf('fid') >= 0 else '1 = 1')
+        chat._checkpoint.commit()
+        chat._refresh_history()
+        changed = target.subsetString()
+        agent_header.click()
+        QApplication.processEvents()
+        check('undo: AGENT open, Undo of the action bar is the step of the agent', undo_button.isEnabled()
+              and 'keep the first feature' in undo_button.toolTip(), undo_button.toolTip())
+        undo_button.click()
+        QApplication.processEvents()
+        check('undo: the step is undone from the action bar', target.subsetString() == before
+              and redo_button.isEnabled(), target.subsetString())
+        d._on_redo_shortcut()
+        QApplication.processEvents()
+        check('undo: Ctrl+Y applies it again', target.subsetString() == changed, target.subsetString())
+        chat._on_undo()
+        filtering_header.click()
+        QApplication.processEvents()
+        check('undo: AGENT folded, the buttons are the dock ones again', 'keep the first feature' not in undo_button.toolTip(),
+              undo_button.toolTip())
+        target.setSubsetString(before)
+    else:
+        report('SKIP', 'undo: the action bar on the steps of the agent', 'no vector layer current')
     toolbox.setCurrentWidget(d.FILTERING)
     QApplication.processEvents()
     if previous is None:

@@ -7243,6 +7243,33 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         task.taskCompleted.connect(settled)
         task.taskTerminated.connect(settled)
 
+    def agent_has_focus(self) -> bool:
+        """AGENT is open: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the agent."""
+        sections = getattr(self, '_fm_sections', None)
+        return getattr(self, '_agent_chat', None) is not None and sections is not None and sections.is_open('agent')
+
+    def restore_undo_tooltips(self, undo_button, redo_button) -> None:
+        """Back to the dock history: the tooltips the buttons had before AGENT named its steps."""
+        saved = getattr(self, '_fm_undo_tooltips', None)
+        if saved:
+            undo_button.setToolTip(saved[0])
+            redo_button.setToolTip(saved[1])
+
+    def show_agent_undo_state(self, undo_button, redo_button) -> None:
+        """The buttons of the action bar as the history of the agent allows, the step named in their tooltip."""
+        if getattr(self, '_fm_undo_tooltips', None) is None:
+            self._fm_undo_tooltips = (undo_button.toolTip(), redo_button.toolTip())
+        chat = getattr(self, '_agent_chat', None)
+        state = chat.undo_state() if chat is not None else None
+        if state is None:
+            undo_button.setEnabled(False)
+            redo_button.setEnabled(False)
+            return
+        undo_button.setEnabled(state['can_undo'])
+        redo_button.setEnabled(state['can_redo'])
+        undo_button.setToolTip(state['undo_tip'])
+        redo_button.setToolTip(state['redo_tip'])
+
     def launchTaskEvent(self, state: str, task_name: str) -> None:
         """Emit signal to launch a FilterMate task.
 
@@ -7259,6 +7286,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             - Attempts to recover current_layer from saved ID or combobox if None
             - Export task syncs HAS_LAYERS_TO_EXPORT flag before execution
         """
+        if task_name in ('undo', 'redo') and self.agent_has_focus():
+            chat = self._agent_chat
+            (chat._on_undo if task_name == 'undo' else chat._on_redo)()  # a step of the agent, not a dock filter
+            return
         if self._controller_integration and self._controller_integration.delegate_point_cloud_task(task_name):
             return
         self._pending_remote_filter = None

@@ -2592,6 +2592,12 @@ class FilterMateApp:
         redo_btn = getattr(self.dockwidget, 'pushButton_action_redo_filter', None)
         if not undo_btn or not redo_btn: return
 
+        # AGENT open: the buttons walk the steps of the agent, whatever section is open below.
+        if self.dockwidget.agent_has_focus():
+            self.dockwidget.show_agent_undo_state(undo_btn, redo_btn)
+            return
+        self.dockwidget.restore_undo_tooltips(undo_btn, redo_btn)
+
         # FIX 2026-02-18: Only update undo/redo on filtering tab (index 0)
         # On other tabs, these buttons must stay disabled per select_tabTools_index()
         tab_index = getattr(self.dockwidget, 'tabTools_current_index', 0)

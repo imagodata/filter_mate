@@ -231,6 +231,12 @@ class DockSections(QObject):
         header.setToolTip(_tr("Hide EXPLORING to give room to the sections") if key == "exploring"
                           else _tr("Show EXPLORING"))
         self._fit()
+        request = getattr(self._dock, "undoRedoStateRequested", None)
+        if request is not None:  # Undo and Redo follow AGENT when it opens or folds
+            try:
+                request.emit()
+            except (RuntimeError, TypeError):
+                pass
 
     def _on_top_header(self, key: str) -> None:
         self.open_top(None if self.is_open(key) else key)

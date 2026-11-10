@@ -204,6 +204,25 @@ class AgentChatController(QObject):
     def _refresh_history(self) -> None:
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
+        request = getattr(self._parent_widget, "undoRedoStateRequested", None)
+        if request is not None:  # the action bar follows the history of the agent while AGENT is open
+            try:
+                request.emit()
+            except (RuntimeError, TypeError):
+                pass
+
+    def undo_state(self) -> dict:
+        """What the action bar shows for the agent: what Undo and Redo would do, named."""
+        turns = TurnCheckpoint.turns()
+        applied = [turn for turn in turns if turn.get("applied")]
+        undone = [turn for turn in turns if not turn.get("applied")]
+        busy = self.chat_busy() or self._mcp.busy
+        can_undo, can_redo = TurnCheckpoint.can_undo() and not busy, TurnCheckpoint.can_redo() and not busy
+        last = one_line(applied[-1].get("request") or "", 80) if applied else ""
+        following = one_line(undone[0].get("request") or "", 80) if undone else ""
+        return {"can_undo": can_undo, "can_redo": can_redo,
+                "undo_tip": _tr("Undo: {}").format(last) if can_undo and last else _tr("Nothing to undo."),
+                "redo_tip": _tr("Redo: {}").format(following) if can_redo and following else _tr("Nothing to redo.")}
 
     def _show_history(self) -> None:
         self._refresh_history()
