@@ -37,13 +37,24 @@ echo ""
 
 # --- Step 1: Clean previous build ---
 echo "[1/7] Cleaning previous build artifacts..."
-rm -rf "$BUILD_DIR"
+rm -rf "$BUILD_DIR" "$DIST_DIR/tracked_files.lst"
 mkdir -p "$BUILD_DIR/$PLUGIN_NAME"
 mkdir -p "$DIST_DIR"
 
 # --- Step 2: Copy plugin files ---
 echo "[2/7] Copying plugin files..."
-rsync -a --quiet \
+# Only what git tracks (the excludes below still apply): files left in the checkout that git does not know
+# (personal notes, reports, scratch outputs) went into the release zip. Outside a git checkout, everything.
+FILES_FROM=()
+if git -C "$PLUGIN_DIR" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    git -C "$PLUGIN_DIR" ls-files -z > "$DIST_DIR/tracked_files.lst"
+    FILES_FROM=(--from0 --files-from="$DIST_DIR/tracked_files.lst" --ignore-missing-args)
+    UNTRACKED=$(git -C "$PLUGIN_DIR" ls-files --others --exclude-standard | wc -l)
+    echo "  Tracked files only ($UNTRACKED untracked left out)"
+else
+    echo "  WARNING: not a git checkout, every file is copied"
+fi
+rsync -a --quiet ${FILES_FROM[@]+"${FILES_FROM[@]}"} \
     --exclude='.git' \
     --exclude='.git/**' \
     --exclude='.github' \
@@ -186,7 +197,7 @@ fi
 
 # --- Step 7: Cleanup and report ---
 echo "[7/7] Cleaning up..."
-rm -rf "$BUILD_DIR"
+rm -rf "$BUILD_DIR" "$DIST_DIR/tracked_files.lst"
 
 # Stats
 ZIP_SIZE=$(du -h "$ZIP_PATH" | cut -f1)
