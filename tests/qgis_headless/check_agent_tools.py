@@ -157,6 +157,132 @@ def check_map_details(introspection, project, gpkg, shp, plain):
     outer.setItemVisibilityChecked(True)
 
 
+def refused(function, *args, **kwargs):
+    """The message of the ValueError ``function`` raises, "" when it raises none."""
+    try:
+        function(*args, **kwargs)
+    except ValueError as exc:
+        return str(exc) or "refused"
+    return ""
+
+
+def check_reading(introspection, project, gpkg, work):
+    """Statistics, a sample of features and what lies at a point, on real layers."""
+    stats = introspection.layer_statistics("communes", "pop")
+    check("statistics of a number", (stats["feature_count"], stats["statistics"]) == (60, {
+        "count": 60, "nulls": 0, "minimum": 100, "maximum": 6000, "sum": 183000.0, "mean": 3050.0,
+        "stdev": stats["statistics"].get("stdev")}) and 1740 < stats["statistics"]["stdev"] < 1750, stats)
+    text = introspection.layer_statistics("communes", "nom")["statistics"]
+    check("statistics of a text: count, nulls, distinct", (text["count"], text["nulls"], text["distinct"]) == (59, 1, 59)
+          and "sum" not in text, text)
+    counted = introspection.layer_statistics("communes")
+    check("no field: features are counted", counted["feature_count"] == 60 and "statistics" not in counted, counted)
+    check("an unknown field is None", introspection.layer_statistics("communes", "nope") is None
+          and introspection.layer_statistics("communes", "pop", group_by="nope") is None
+          and introspection.layer_statistics("nope", "pop") is None)
+    check("a field and a measure are refused", refused(introspection.layer_statistics, "communes", "pop", measure="area"))
+    check("points have no length", "length" in refused(introspection.layer_statistics, "communes", measure="length"))
+    check("nothing selected is said", "selected" in refused(introspection.layer_statistics, "communes", "pop",
+                                                           selected_only=True))
+    gpkg.selectByExpression('"pop" <= 300')
+    chosen = introspection.layer_statistics("communes", "pop", selected_only=True)
+    check("statistics of the selection", (chosen["feature_count"], chosen["statistics"]["sum"]) == (3, 600.0), chosen)
+    gpkg.removeSelection()
+    gpkg.setSubsetString('"pop" > 5000')
+    filtered = introspection.layer_statistics("communes", "pop")
+    check("the filter of the layer applies", (filtered["feature_count"], filtered["statistics"]["minimum"]) == (10, 5100),
+          filtered)
+    gpkg.setSubsetString("")
+    many = introspection.layer_statistics("communes", group_by="pop", limit=5)
+    check("groups are bounded", (len(many["groups"]), many["groups_total"], many["truncated"]) == (5, 60, True)
+          and "statistics" not in many and many["groups"][0]["feature_count"] == 1, many)
+    json.dumps(stats), json.dumps(many)
+
+    zones = QgsVectorLayer("Polygon?crs=EPSG:2154&field=zone:string&field=hab:integer", "zones", "memory")
+    features = []
+    for index, (zone, people) in enumerate((("a", 10), ("a", 30), ("b", 5))):
+        feature = QgsFeature(zones.fields())
+        x = 650000 + index * 200
+        feature.setGeometry(QgsGeometry.fromWkt(f"POLYGON(({x} 6860000, {x + 100} 6860000, {x + 100} 6860100, "
+                                                f"{x} 6860100, {x} 6860000))"))
+        feature.setAttributes([zone, people])
+        features.append(feature)
+    zones.dataProvider().addFeatures(features)
+    project.addMapLayer(zones)
+    area = introspection.layer_statistics("zones", measure="area", group_by="zone")
+    groups = {row["value"]: row for row in area["groups"]}
+    check("areas in square metres, by group", area["unit"] == "m2" and abs(area["statistics"]["sum"] - 30000) < 300
+          and abs(groups["a"]["sum"] - 20000) < 200 and groups["a"]["feature_count"] == 2
+          and [row["value"] for row in area["groups"]] == ["a", "b"], area)
+    length = introspection.layer_statistics("zones", measure="length")
+    check("perimeters in metres", length["unit"] == "m" and abs(length["statistics"]["sum"] - 1200) < 12, length)
+    by_zone = introspection.layer_statistics("zones", "hab", group_by="zone")
+    groups = {row["value"]: row for row in by_zone["groups"]}
+    check("a field summed by group", (groups["a"]["sum"], groups["a"]["mean"], groups["b"]["sum"]) == (40.0, 20.0, 5.0),
+          by_zone)
+    json.dumps(area)
+
+    sample = introspection.sample_features("communes", limit=2)
+    check("sample: two rows, more exist", len(sample["features"]) == 2 and sample["truncated"] and
+          set(sample["features"][0]["attributes"]) >= {"nom", "pop", "taux", "creation"} and
+          "geometry" not in sample["features"][0] and sample["crs_authid"] == "EPSG:2154", sample)
+    only = introspection.sample_features("communes", limit=1, fields=["nom"], geometry=True)["features"][0]
+    check("sample: chosen fields, where the geometry is", list(only["attributes"]) == ["nom"] and
+          only["geometry"]["centroid"] == [650001.0, 6860000.0] and "Point" in only["geometry"]["type"], only)
+    matching = introspection.sample_features("communes", expression='"pop" > 5800')
+    check("sample: by expression", sorted(row["attributes"]["pop"] for row in matching["features"]) == [5900, 6000]
+          and not matching["truncated"], matching)
+    check("sample: dates are text", sample["features"][0]["attributes"]["creation"] == "2020-01-01", sample)
+    for bad in ("env('HOME') = 'x'", '"inconnu" > 3', '"pop" >'):
+        check(f"sample refuses {bad!r}", refused(introspection.sample_features, "communes", expression=bad))
+    check("sample: an unknown field is refused", "nope" in refused(introspection.sample_features, "communes",
+                                                                  fields=["nope"]))
+    check("sample: nothing selected is said", refused(introspection.sample_features, "communes", selected_only=True))
+    check("sample: absent is None", introspection.sample_features("nope") is None)
+    json.dumps(sample), json.dumps(only)
+
+    hit = introspection.identify_at(650001, 6860000, crs="EPSG:2154", tolerance=0.4)
+    names = {row["layer_name"]: row for row in hit["layers"]}
+    check("identify: every visible layer with something there", list(names) == ["zones", "routes", "communes"] and
+          [row["attributes"]["pop"] for row in names["communes"]["features"]] == [100] and hit["skipped"] == [], hit)
+    wide = introspection.identify_at(650003, 6860000, crs="EPSG:2154", tolerance=2.5, layers=["communes"], limit=3)
+    check("identify: tolerance and limit", [row["layer_name"] for row in wide["layers"]] == ["communes"] and
+          len(wide["layers"][0]["features"]) == 3 and wide["layers"][0]["truncated"], wide)
+    inside = introspection.identify_at(650050, 6860050, crs="EPSG:2154")
+    check("identify: a polygon under the point, without tolerance",
+          [(row["layer_name"], row["features"][0]["attributes"]["zone"]) for row in inside["layers"]] == [("zones", "a")]
+          and inside["tolerance"] == 0, inside)
+    check("identify: nothing there", introspection.identify_at(100, 100, crs="EPSG:2154")["layers"] == [])
+    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform
+    to_degrees = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:2154"),
+                                        QgsCoordinateReferenceSystem("EPSG:4326"), project)
+    lonlat = to_degrees.transform(QgsPointXY(650050, 6860050))
+    other = introspection.identify_at(lonlat.x(), lonlat.y(), crs="EPSG:4326")
+    check("identify: a point given in another CRS", [row["layer_name"] for row in other["layers"]] == ["zones"] and
+          other["crs"] == "EPSG:4326", other)
+    check("identify: an unknown CRS is refused", refused(introspection.identify_at, 1, 1, crs="EPSG:999999999"))
+    check("identify: an unknown layer is refused", refused(introspection.identify_at, 1, 1, layers=["nope"]))
+    check("identify: out of range is refused", refused(introspection.identify_at, 1e12, 1))
+    project.layerTreeRoot().findLayer(zones.id()).setItemVisibilityChecked(False)
+    check("identify: a hidden layer is not read", introspection.identify_at(650050, 6860050, crs="EPSG:2154")["layers"] == [])
+    if gdal is not None:
+        raster_path = os.path.join(work, "identify.tif")
+        make_raster(raster_path)
+        raster = QgsRasterLayer(raster_path, "bandes")
+        project.addMapLayer(raster)
+        values = introspection.identify_at(650010, 6859990, crs="EPSG:2154", layers=["bandes"])
+        check("identify: the values of a raster", values["layers"] == [{
+            "layer_name": "bandes", "layer_kind": "raster",
+            "values": [{"band": 1, "value": 1.0}, {"band": 2, "value": 2.0}]}], values)
+        check("identify: outside the raster, nothing", introspection.identify_at(
+            10, 10, crs="EPSG:2154", layers=["bandes"])["layers"] == [])
+        check("a raster has no features to sample", refused(introspection.sample_features, "bandes")
+              and refused(introspection.layer_statistics, "bandes"))
+        project.removeMapLayer(raster.id())
+    json.dumps(hit)
+    project.removeMapLayer(zones.id())
+
+
 def main(introspection):
     work = tempfile.mkdtemp()
     project = QgsProject.instance()
@@ -180,6 +306,7 @@ def main(introspection):
     check("describe: absent is None", introspection.describe_layer("nope") is None)
     json.dumps(details)
     check_map_details(introspection, project, gpkg, shp, details)
+    check_reading(introspection, project, gpkg, work)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")
@@ -353,6 +480,20 @@ def main(introspection):
                              for rank, row in enumerate(json.loads(content)["layers"])}
     check("tool list_layers: order of the tree, groups", not error and rows["routes"][0] < rows["communes"][0] and
           rows["communes"][1:] == ("Fonds / Admin", True) and rows["routes"][1:] == ("", True), content)
+    error, content = tool("layer_statistics", layer="communes", field="pop")
+    check("tool layer_statistics", not error and json.loads(content)["statistics"]["sum"] == 183000.0, content)
+    error, content = tool("layer_statistics", layer="communes", measure="area")
+    check("tool layer_statistics: a refusal the model can read", error and "polygons" in content, content)
+    error, content = tool("layer_statistics", layer="communes", field="nope")
+    check("tool layer_statistics: field not found", error and content == "Layer or field not found.", content)
+    error, content = tool("sample_features", layer="communes", limit=1, fields=["nom", "pop"])
+    check("tool sample_features", not error and json.loads(content)["features"][0]["attributes"] ==
+          {"nom": "Saint-01", "pop": 100}, content)
+    error, content = tool("sample_features", layer="communes", expression="env('HOME') = 'x'")
+    check("tool sample_features refuses a function outside the list", error and "expression" in content, content)
+    error, content = tool("identify_at", x=650002, y=6860000, crs="EPSG:2154", tolerance=0.4, layers=["routes"])
+    check("tool identify_at", not error and json.loads(content)["layers"][0]["features"][0]["attributes"]["pop"] == 200,
+          content)
 
     # --- driving QGIS (adapters.public_api.project_control), without a window
     from filter_mate.adapters.public_api import project_control

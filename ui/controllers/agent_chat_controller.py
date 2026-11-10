@@ -47,7 +47,8 @@ from ..widgets.agent_panel import AgentPanel, AgentSettingsDialog, ask_plain, pr
 
 logger = logging.getLogger("FilterMate.agent")
 
-VALUES_TOOL = "field_values"
+# What reads attribute values: not offered when the user chose not to share them.
+VALUES_TOOLS = ("field_values", "layer_statistics", "sample_features", "identify_at")
 OPEN_DATA_TOOL = "search_open_data"
 SERVICE_TOOL = "add_service_layer"
 IMAGERY_TOOL = "search_imagery"
@@ -57,8 +58,9 @@ FIXED_IN_SETTINGS = (ERROR_AUTH, ERROR_QUOTA)
 MAX_DETAIL_CHARS = 200
 MAX_CONNECTOR_TOOLS = 60  # a provider limits the tools of a request, and each one is paid for at every turn
 MAX_LISTED = 20
-NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values is not available. When you need the "
-                  "exact spelling of a value, ask the user.")
+NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values, layer_statistics, sample_features "
+                  "and identify_at are not available. When you need the exact spelling of a value, ask the user; "
+                  "count what a filter keeps with preview_filter.")
 
 
 def _tr(text: str) -> str:
@@ -350,7 +352,7 @@ class AgentChatController(QObject):
         data_sources = [source for source in active if not source.is_connector]
         left_out = set()
         if not values.send_values:
-            left_out.add(VALUES_TOOL)
+            left_out.update(VALUES_TOOLS)
         if not kinds - {KIND_MCP, KIND_STAC} and not configured_names:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WFS not in kinds:
@@ -603,6 +605,9 @@ class AgentChatController(QObject):
             "list_layers": lambda: _tr("Reading the layers"),
             "describe_layer": lambda: _tr("Reading the fields of {}").format(layer),
             "field_values": lambda: _tr("Reading the values of {}").format(args.get("field", "")),
+            "layer_statistics": lambda: _tr("Computing statistics on {}").format(layer),
+            "sample_features": lambda: _tr("Reading features of {}").format(layer),
+            "identify_at": lambda: _tr("Reading the map at a point"),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
             "map_context": lambda: _tr("Reading the map"),
             "filter_state": lambda: _tr("Reading the active filters"),

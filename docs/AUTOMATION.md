@@ -331,6 +331,9 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer: plain conditions only, a subquery or a function outside the list answers 400 |
 | `describe_layer` | `GET /layers/details` | fields, bands (with the classes of a paletted band) or point attributes of a layer |
 | `field_values` | `GET /layers/field-values` | distinct values of a vector field, minimum and maximum; refused on web services |
+| `layer_statistics` | `POST /layers/statistics` | count, sum, mean, extremes of a field, or lengths and areas of the geometries, in all or by the values of a field; refused on web services and above 500 000 features |
+| `sample_features` | `POST /layers/sample` | up to 20 features with their attributes, optionally matching a QGIS expression (plain conditions only) |
+| `identify_at` | `POST /map/identify` | features and raster values at a point, on the visible layers or the ones named |
 | `preview_filter` | `POST /filters/preview` | tries an expression on a private copy of the layer and counts what it keeps |
 | `map_context` | `GET /map/context` | CRS, visible extent as WKT, scale, active layer, layers with a selection |
 | `undo_filter`, `redo_filter` | `POST /filters/undo`, `/redo` | the dock's vector history (not what the other tools record, see above) |

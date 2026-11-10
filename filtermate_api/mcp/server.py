@@ -227,6 +227,74 @@ def build_server(client: FilterMateClient) -> Any:
         return await call("GET", "/layers/field-values?" + urlencode(
             {"layer": layer, "field": field, "search": search, "limit": limit}))
 
+    @mcp.tool(annotations=ToolAnnotations(title="Statistics of a layer", readOnlyHint=True, openWorldHint=False))
+    async def layer_statistics(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(max_length=1000, description=(
+            "Field to sum up, from describe_layer. Leave empty to count features, or to use measure"))] = "",
+        group_by: Annotated[str, Field(max_length=1000, description=(
+            "Field whose values make the groups: one row of statistics per value"))] = "",
+        measure: Annotated[Literal["", "length", "area"], Field(description=(
+            "Measure the geometries instead of a field: length of lines (perimeter of polygons) in metres, or "
+            "area of polygons in square metres"))] = "",
+        selected_only: Annotated[bool, Field(description="Only the selected features")] = False,
+        limit: Annotated[int, Field(ge=1, le=100, description="At most this many groups, the largest first")] = 20,
+    ) -> Dict[str, Any]:
+        """Count, sum, mean, minimum, maximum of a field or of the geometries of a vector layer, in all or by group.
+
+        Computed on the features the layer shows now (its filter applies), or on its selection: use it to answer
+        "how many", "what total", "which is the largest", and to check what a filter kept. With neither field nor
+        measure it counts features, by group when group_by is given. Returns feature_count (features read),
+        statistics {count, nulls, minimum, maximum, and sum, mean, stdev for numbers or distinct for text}, unit (m or
+        m2 for a measure), and with group_by: groups [{value, feature_count, and the same statistics}], groups_total
+        and truncated. Refused on web services and above 500000 features: filter or select first.
+        """
+        return await call("POST", "/layers/statistics", _body(
+            layer=layer, field=field, group_by=group_by, measure=measure, selected_only=selected_only, limit=limit))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Sample of features", readOnlyHint=True, openWorldHint=False))
+    async def sample_features(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        limit: Annotated[int, Field(ge=1, le=20, description="At most this many features")] = 5,
+        fields: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
+            max_length=50, description="Only these fields; the first 50 fields by default")] = None,
+        expression: Annotated[str, Field(max_length=100_000, description=(
+            'QGIS expression (NOT SQL) the features must match, as for select_features: "population" > 10000'))] = "",
+        selected_only: Annotated[bool, Field(description="Only the selected features")] = False,
+        geometry: Annotated[bool, Field(description=(
+            "Also the type, centroid and bounding box of each geometry, in the layer CRS"))] = False,
+    ) -> Dict[str, Any]:
+        """A few features of a vector layer with their attributes, to see what its rows look like.
+
+        Among the features the layer shows now (its filter applies). Returns crs_authid, features [{fid, attributes
+        {field: value}, geometry {type, centroid, bbox}}], truncated (more features match) and fields_truncated. Long
+        text is cut at 200 characters. Refused on web services.
+        """
+        return await call("POST", "/layers/sample", _body(
+            layer=layer, limit=limit, fields=fields, expression=expression, selected_only=selected_only,
+            geometry=geometry))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Identify at a point", readOnlyHint=True, openWorldHint=False))
+    async def identify_at(
+        x: Annotated[float, Field(ge=-1e9, le=1e9, description="X or longitude of the point")],
+        y: Annotated[float, Field(ge=-1e9, le=1e9, description="Y or latitude of the point")],
+        crs: Annotated[str, Field(max_length=200, description=(
+            "CRS of the point, such as EPSG:4326; the CRS of the map (canvas_crs of map_context) by default"))] = "",
+        layers: Annotated[Optional[List[Annotated[str, Field(min_length=1, max_length=1000)]]], Field(
+            max_length=20, description="Only these layers (ids or names); the visible layers by default")] = None,
+        tolerance: Annotated[Optional[float], Field(ge=0, le=1e9, description=(
+            "Search distance around the point, in the units of crs; five pixels of the map by default"))] = None,
+        limit: Annotated[int, Field(ge=1, le=20, description="At most this many features per layer")] = 5,
+    ) -> Dict[str, Any]:
+        """What lies at a point of the map: the features of the vector layers and the values of the rasters there.
+
+        As the Identify tool of QGIS. Returns layers, only those with something at the point: [{layer_name,
+        layer_kind, features [{fid, attributes}], truncated}] for a vector layer, [{layer_name, layer_kind, values
+        [{band, value}]}] for a raster; and skipped (web services, which are not read).
+        """
+        return await call("POST", "/map/identify", _body(
+            x=x, y=y, crs=crs, layers=layers, tolerance=tolerance, limit=limit))
+
     @mcp.tool(annotations=ToolAnnotations(title="Try a filter", readOnlyHint=True, openWorldHint=False))
     async def preview_filter(
         layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
@@ -522,8 +590,9 @@ def build_server(client: FilterMateClient) -> Any:
     async def remove_layers(
         layers: Annotated[LayerList, Field(description="Layer ids or names to remove from the project")],
     ) -> Dict[str, Any]:
-        """Remove layers from the project. Their files are not deleted, but their styles and filters in this project
-        are lost and this cannot be undone. The chat of FilterMate asks the user first. Returns done and failed."""
+        """Remove layers from the project. Their files are not deleted. The chat of FilterMate asks the user first,
+        and undoing the turn there brings the layers back with their styles and filters, except a layer held in
+        memory, whose features are lost. From another client it cannot be undone. Returns done and failed."""
         return await call("POST", "/layers/remove", _body(layers=layers))
 
     @mcp.tool(annotations=ToolAnnotations(title="Search open data", readOnlyHint=True, openWorldHint=True))

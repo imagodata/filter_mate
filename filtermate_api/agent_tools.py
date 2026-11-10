@@ -121,6 +121,22 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         values = accessor.field_values(args["layer"], args["field"], search=args["search"], limit=args["limit"])
         return asdict(_found(values, "Layer or field not found."))
 
+    def layer_statistics(args: Dict[str, Any]) -> Dict[str, Any]:
+        statistics = accessor.layer_statistics(
+            args["layer"], field_name=args["field"], group_by=args["group_by"], measure=args["measure"],
+            selected_only=args["selected_only"], limit=args["limit"])
+        return asdict(_found(statistics, "Layer or field not found."))
+
+    def sample_features(args: Dict[str, Any]) -> Dict[str, Any]:
+        sample = accessor.sample_features(
+            args["layer"], limit=args["limit"], fields=args.get("fields"), expression=args["expression"],
+            selected_only=args["selected_only"], geometry=args["geometry"])
+        return asdict(_found(sample, "Layer not found."))
+
+    def identify_at(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.identify_at(args["x"], args["y"], crs=args["crs"], layers=args.get("layers"),
+                                           tolerance=args.get("tolerance"), limit=args["limit"]))
+
     def preview_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         preview = accessor.preview_filter(args["layer_name"], _checked_expression(args["expression"]))
         return asdict(_found(preview, "Layer not found."))
@@ -283,6 +299,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     handlers = {
         "list_layers": list_layers, "filter_state": filter_state, "list_favorites": list_favorites,
         "describe_layer": describe_layer, "field_values": field_values, "preview_filter": preview_filter,
+        "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,

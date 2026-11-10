@@ -16,6 +16,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 3. Free quota | Relay holding the key, per-install and global limits | done |
 | 4. Native MCP | Local MCP server without dependencies, shared activity log | done |
 | 5. Map context | The map, the layer tree and what changed, sent with each request; style, joins, relations on demand | done |
+| 6. Reading the data | Statistics by group, lengths and areas, a sample of features, what lies at a point | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -64,7 +65,8 @@ Rules worth keeping:
 ## The chat
 
 - **Consent** is for one server: nothing leaves before the user has chosen a model and agreed, and changing the provider
-  or its address asks again. Without attribute values, `field_values` is not offered; values already written in filters
+  or its address asks again. Without attribute values, `field_values`, `layer_statistics`, `sample_features` and
+  `identify_at` are not offered; values already written in filters
   and favorites are still sent, and the dialog says so.
 - **The key** lives in the QGIS authentication database, which asks for the master password, never in a settings file.
   It is only sent to the server it was typed for, and can be removed from the settings. It shows in the network log of
@@ -195,6 +197,20 @@ What the chat adds to the REST checks, because a model can be steered by what it
 
 `preview_filter` and `field_values` run on the main thread: on a very large PostgreSQL table they hold the interface
 while they run.
+
+Reading the features (`adapters/public_api/introspection.py`), so that a question about the data is computed and not
+estimated:
+
+- `layer_statistics`: count, sum, mean, extremes and standard deviation of a numeric field, count and distinct values of
+  another, or the lengths and areas of the geometries (metres and square metres, on the ellipsoid of the project), in
+  all or by the values of a field. One pass over the features the layer shows, or over its selection, refused above
+  500 000 features: it runs on the main thread;
+- `sample_features`: up to 20 rows, the fields asked for, optionally the features matching a QGIS expression (the same
+  list of accepted functions as `select_features`) and where each geometry is (type, centroid, bounding box: never its
+  vertices);
+- `identify_at`: the features and the raster values at a point, on the visible layers or the ones named.
+
+A web service is not read by any of them.
 
 `apply_filter` and `preview_filter` take the same plain clauses through REST and both MCP servers: a subquery or a function
 outside the list answers 400. A filter still reaches the database with the rights of the user, so an external agent exposed to

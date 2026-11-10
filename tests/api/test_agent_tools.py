@@ -91,6 +91,37 @@ class TestHandlers:
         assert run(accessor, root, "describe_layer", layer="communes")[1]["layer_id"] == "L1"
         assert run(accessor, root, "map_context")[1]["available"] is True
 
+    def test_reading_tools_defaults(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "layer_statistics", layer="communes")
+        assert not error and (answer["layer_name"], answer["field"], answer["measure"]) == ("communes", "", "")
+        error, answer = run(accessor, root, "layer_statistics", layer="communes", field="pop", group_by="dept",
+                            selected_only=True, limit=3)
+        assert not error and (answer["field"], answer["group_by"], answer["selected_only"]) == ("pop", "dept", True)
+        error, answer = run(accessor, root, "sample_features", layer="communes")
+        assert not error and answer["features"] == [] and answer["crs_authid"] == "EPSG:2154"
+        error, answer = run(accessor, root, "identify_at", x=570000.5, y=6270000)
+        assert not error and (answer["x"], answer["layers"], answer["skipped"]) == (570000.5, [], [])
+
+    @pytest.mark.parametrize("tool,arguments", [
+        ("layer_statistics", {"layer": "communes", "measure": "volume"}),
+        ("layer_statistics", {"layer": "communes", "limit": 101}),
+        ("sample_features", {"layer": "communes", "limit": 21}),
+        ("sample_features", {"layer": "communes", "fields": ["a"] * 51}),
+        ("identify_at", {"x": 1e10, "y": 0}),
+        ("identify_at", {"x": 0}),
+        ("identify_at", {"x": 0, "y": 0, "tolerance": -1}),
+    ])
+    def test_reading_tools_refuse_bad_arguments(self, api, tool, arguments):
+        accessor, root = api
+        assert run(accessor, root, tool, **arguments)[0] is True
+
+    def test_reading_tools_nothing_found(self, api):
+        accessor, root = api
+        assert run(accessor, root, "layer_statistics", layer="x") == (True, "Layer or field not found.")
+        assert run(accessor, root, "sample_features", layer="x") == (True, "Layer not found.")
+        assert run(accessor, root, "identify_at", x=0, y=0, layers=["x"])[0] is True
+
     def test_field_values_defaults(self, api):
         accessor, root = api
         assert run(accessor, root, "field_values", layer="communes", field="nom")[1]["values"] == ["x"]
@@ -307,6 +338,21 @@ class TestRoutes:
         response = client.get("/layers/field-values", params={"layer": "communes", "field": "nom"})
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.get("/layers/field-values", params={"layer": "x", "field": "y"}).status_code == 404
+
+    def test_statistics_sample_identify(self, client):
+        response = client.post("/layers/statistics", json={"layer": "communes", "field": "pop", "group_by": "dept"})
+        assert response.status_code == 200 and response.json()["group_by"] == "dept"
+        assert client.post("/layers/statistics", json={"layer": "x"}).status_code == 404
+        assert client.post("/layers/statistics", json={"layer": "communes", "measure": "volume"}).status_code == 422
+        assert client.post("/layers/statistics", json={"layer": "communes", "other": 1}).status_code == 422
+        response = client.post("/layers/sample", json={"layer": "communes", "limit": 2, "fields": ["nom"]})
+        assert response.status_code == 200 and response.json()["layer_name"] == "communes"
+        assert client.post("/layers/sample", json={"layer": "x"}).status_code == 404
+        assert client.post("/layers/sample", json={"layer": "communes", "limit": 21}).status_code == 422
+        response = client.post("/map/identify", json={"x": 1.5, "y": 43.6, "crs": "EPSG:4326"})
+        assert response.status_code == 200 and response.json()["crs"] == "EPSG:4326"
+        assert client.post("/map/identify", json={"x": 1e10, "y": 0}).status_code == 422
+        assert client.post("/map/identify", json={"x": 0, "y": 0, "layers": ["x"]}).status_code in (400, 404, 409, 422)
 
     @pytest.mark.parametrize("limit", [0, 201])
     def test_field_values_limit(self, client, limit):

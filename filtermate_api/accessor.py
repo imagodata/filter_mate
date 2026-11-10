@@ -190,6 +190,58 @@ class FieldValues:
 
 
 @dataclass(frozen=True)
+class LayerStatistics:
+    """Statistics of a field or of the geometries of a vector layer, in all and by the values of another field."""
+    layer_name: str
+    # Empty when features are counted or geometries measured. No default: one would hide ``dataclasses.field`` below.
+    field: str
+    # "length" or "area" when the geometries are measured instead of a field; ``unit`` is then m or m2.
+    measure: str = ""
+    unit: str = ""
+    # The ellipsoid the measure was made on; empty for a planar one.
+    ellipsoid: str = ""
+    selected_only: bool = False
+    # Features read: those the layer shows now, or its selection.
+    feature_count: int = 0
+    # {"count", "nulls", "minimum", "maximum"} and "sum", "mean", "stdev" for numbers, "distinct" otherwise.
+    # Empty when only features are counted.
+    statistics: Dict[str, Any] = field(default_factory=dict)
+    group_by: str = ""
+    # {"value", "feature_count"} and the same statistics, the largest groups first.
+    groups: List[Dict[str, Any]] = field(default_factory=list)
+    groups_total: int = 0
+    # More groups exist than ``groups`` holds.
+    truncated: bool = False
+
+
+@dataclass(frozen=True)
+class FeatureSample:
+    """A few features of a vector layer."""
+    layer_name: str
+    crs_authid: str = ""
+    # {"fid", "attributes": {name: value}, "geometry": {"type", "centroid", "bbox"}}, geometry only when asked.
+    features: List[Dict[str, Any]] = field(default_factory=list)
+    # More features match than ``features`` holds.
+    truncated: bool = False
+    # The layer has more fields than a row holds.
+    fields_truncated: bool = False
+
+
+@dataclass(frozen=True)
+class IdentifyResult:
+    """What lies at a point of the map."""
+    x: float
+    y: float
+    crs: str = ""
+    tolerance: float = 0.0
+    # {"layer_name", "layer_kind", "features": [{"fid", "attributes"}], "truncated"} for a vector layer,
+    # {"layer_name", "layer_kind", "values": [{"band", "value"}]} for a raster; only the layers with something.
+    layers: List[Dict[str, Any]] = field(default_factory=list)
+    # Layers left out: web services, and those that could not answer.
+    skipped: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class FilterPreview:
     """What a filter expression would keep, tried on a private copy of the layer."""
     layer_name: str
@@ -256,6 +308,27 @@ class FilterMateAccessor(Protocol):
 
         Raises FilterRejected on a layer that cannot answer (not vector, web service).
         """
+        ...
+
+    def layer_statistics(self, layer: str, field_name: str = "", group_by: str = "", measure: str = "",
+                         selected_only: bool = False, limit: int = 20) -> Optional[LayerStatistics]:
+        """Statistics of a field or of the geometries, ``None`` when the layer or a field does not resolve.
+
+        Raises FilterRejected on a layer that cannot answer (not vector, web service, too many features).
+        """
+        ...
+
+    def sample_features(self, layer: str, limit: int = 5, fields: Optional[List[str]] = None, expression: str = "",
+                        selected_only: bool = False, geometry: bool = False) -> Optional[FeatureSample]:
+        """A few features with their attributes, ``None`` when the layer does not resolve.
+
+        Raises FilterRejected on a layer that cannot answer, an unknown field or a bad expression.
+        """
+        ...
+
+    def identify_at(self, x: float, y: float, crs: str = "", layers: Optional[List[str]] = None,
+                    tolerance: Optional[float] = None, limit: int = 5) -> IdentifyResult:
+        """Features and raster values at a point; raises FilterRejected on a bad point, CRS or layer."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -414,6 +487,26 @@ class InMemoryAccessor:
     def field_values(self, layer: str, field_name: str, search: str = "", limit: int = 50) -> Optional[FieldValues]:
         found = self._find(layer)
         return None if found is None else FieldValues(layer_name=found.name, field=field_name)
+
+    def layer_statistics(self, layer: str, field_name: str = "", group_by: str = "", measure: str = "",
+                         selected_only: bool = False, limit: int = 20) -> Optional[LayerStatistics]:
+        found = self._find(layer)
+        if found is None:
+            return None
+        return LayerStatistics(layer_name=found.name, field=field_name, measure=measure, group_by=group_by,
+                               selected_only=selected_only, feature_count=max(found.feature_count, 0))
+
+    def sample_features(self, layer: str, limit: int = 5, fields: Optional[List[str]] = None, expression: str = "",
+                        selected_only: bool = False, geometry: bool = False) -> Optional[FeatureSample]:
+        found = self._find(layer)
+        return None if found is None else FeatureSample(layer_name=found.name, crs_authid=found.crs_authid)
+
+    def identify_at(self, x: float, y: float, crs: str = "", layers: Optional[List[str]] = None,
+                    tolerance: Optional[float] = None, limit: int = 5) -> IdentifyResult:
+        for reference in layers or []:
+            if self._find(reference) is None:
+                raise FilterRejected(f"layer {reference!r} not found")
+        return IdentifyResult(x=x, y=y, crs=crs, tolerance=tolerance or 0.0)
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
         found = self._find(layer_name)
