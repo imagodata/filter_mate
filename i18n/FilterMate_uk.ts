@@ -32,58 +32,68 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
         <source>Undone: {}</source>
         <translation>Скасовано: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Undo of the last request</source>
         <translation>Скасування останнього запиту</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
         <source>Back to before: {}</source>
         <translation>Повернутися до стану перед: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Nothing to undo.</source>
         <translation>Нічого скасовувати.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
         <source>Redo: {}</source>
         <translation>Повторити: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Undo: {}</source>
         <translation>Скасувати: {}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
         <source>Free quota</source>
-        <translation type="obsolete">Безкоштовна квота</translation>
+        <translation>Безкоштовна квота</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>Access to the free quota was renewed: send your request again.</source>
-        <translation type="obsolete">Доступ до безкоштовної квоти оновлено: надішліть запит ще раз.</translation>
+        <translation>Доступ до безкоштовної квоти оновлено: надішліть запит ще раз.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
         <source>Another application is changing the project: try again in a moment.</source>
-        <translation type="obsolete">Інша програма змінює проєкт: повторіть спробу за мить.</translation>
+        <translation>Інша програма змінює проєкт: повторіть спробу за мить.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Another application: {}</source>
-        <translation type="obsolete">Інша програма: {}</translation>
+        <translation>Інша програма: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Applied again: {}.</source>
-        <translation type="obsolete">Застосовано повторно: {}.</translation>
+        <translation>Застосовано повторно: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
         <source>Changed since, left as is: {}.</source>
-        <translation type="obsolete">Змінено відтоді, залишено як є: {}.</translation>
+        <translation>Змінено відтоді, залишено як є: {}.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -91,677 +101,687 @@
         <translation type="obsolete">Змінено: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation type="obsolete">Виберіть модель і погодьтеся на надсилання ваших даних, щоб користуватися агентом.</translation>
+        <translation>Виберіть модель і погодьтеся на надсилання ваших даних, щоб користуватися агентом.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
         <source>Connecting to {}…</source>
-        <translation type="obsolete">Підключення до {}…</translation>
+        <translation>Підключення до {}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation type="obsolete">Попередня розмова: звідси агент починає з чистого аркуша.</translation>
+        <translation>Попередня розмова: звідси агент починає з чистого аркуша.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
         <source>Enter your API key in the agent settings.</source>
-        <translation type="obsolete">Введіть ваш ключ API в налаштуваннях агента.</translation>
+        <translation>Введіть ваш ключ API в налаштуваннях агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Export of {}</source>
-        <translation type="obsolete">Експорт {}</translation>
+        <translation>Експорт {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Favorite applied</source>
-        <translation type="obsolete">Обране застосовано</translation>
+        <translation>Обране застосовано</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Filter on the points of {}</source>
-        <translation type="obsolete">Фільтр для точок шару {}</translation>
+        <translation>Фільтр для точок шару {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
         <source>Filter on {}</source>
-        <translation type="obsolete">Фільтр для {}</translation>
+        <translation>Фільтр для {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Filter on {} by an area</source>
-        <translation type="obsolete">Фільтр для {} за зоною</translation>
+        <translation>Фільтр для {} за зоною</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
         <source>Filter on {} by {}</source>
-        <translation type="obsolete">Фільтр для {} за: {}</translation>
+        <translation>Фільтр для {} за: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">Агент FilterMate</translation>
+        <translation>Агент FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Filters removed from {}</source>
-        <translation type="obsolete">Фільтри прибрано з {}</translation>
+        <translation>Фільтри прибрано з {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Hidden: {}</source>
-        <translation type="obsolete">Приховано: {}</translation>
+        <translation>Приховано: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
         <source>It answers.</source>
-        <translation type="obsolete">Джерело відповідає.</translation>
+        <translation>Джерело відповідає.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Layer added: {}</source>
-        <translation type="obsolete">Шар додано: {}</translation>
+        <translation>Шар додано: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Layers removed: {}</source>
-        <translation type="obsolete">Шари вилучено: {}</translation>
+        <translation>Шари вилучено: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
         <source>Not reachable for this conversation: {}</source>
-        <translation type="obsolete">Недоступно для цієї розмови: {}</translation>
+        <translation>Недоступно для цієї розмови: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Nothing to redo.</source>
-        <translation type="obsolete">Нічого повторювати.</translation>
+        <translation>Нічого повторювати.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Nothing to restore.</source>
-        <translation type="obsolete">Нічого відновлювати.</translation>
+        <translation>Нічого відновлювати.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
         <source>Reading the active filters</source>
-        <translation type="obsolete">Читання активних фільтрів</translation>
+        <translation>Читання активних фільтрів</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
         <source>Reading the favorites</source>
-        <translation type="obsolete">Читання обраного</translation>
+        <translation>Читання обраного</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
         <source>Reading the fields of {}</source>
-        <translation type="obsolete">Читання полів шару {}</translation>
+        <translation>Читання полів шару {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
         <source>Reading the layers</source>
-        <translation type="obsolete">Читання шарів</translation>
+        <translation>Читання шарів</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
         <source>Reading the map</source>
-        <translation type="obsolete">Читання карти</translation>
+        <translation>Читання карти</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
         <source>Reading the values of {}</source>
-        <translation type="obsolete">Читання значень {}</translation>
+        <translation>Читання значень {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Restored: {}.</source>
-        <translation type="obsolete">Відновлено: {}.</translation>
+        <translation>Відновлено: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Searching satellite imagery on {}</source>
-        <translation type="obsolete">Пошук супутникових знімків у {}</translation>
+        <translation>Пошук супутникових знімків у {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Searching {} for {}</source>
-        <translation type="obsolete">Пошук у {}: {}</translation>
+        <translation>Пошук у {}: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection cleared on {}</source>
-        <translation type="obsolete">Вибір очищено на {}</translation>
+        <translation>Вибір очищено на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection on {}</source>
-        <translation type="obsolete">Вибір на {}</translation>
+        <translation>Вибір на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Shown: {}</source>
-        <translation type="obsolete">Показано: {}</translation>
+        <translation>Показано: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
         <source>Stopped.</source>
-        <translation type="obsolete">Зупинено.</translation>
+        <translation>Зупинено.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">Не вдалося запустити сервер MCP: {}</translation>
+        <translation>Не вдалося запустити сервер MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="159"/>
         <source>The QGIS authentication database is not available.</source>
-        <translation type="obsolete">База даних автентифікації QGIS недоступна.</translation>
+        <translation>База даних автентифікації QGIS недоступна.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="161"/>
         <source>The QGIS master password is needed to use the stored key.</source>
-        <translation type="obsolete">Для використання збереженого ключа потрібен головний пароль QGIS.</translation>
+        <translation>Для використання збереженого ключа потрібен головний пароль QGIS.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>The agent stopped before the end ({}).</source>
-        <translation type="obsolete">Агент зупинився до завершення ({}).</translation>
+        <translation>Агент зупинився до завершення ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
 Do you agree?</source>
-        <translation type="obsolete">Агент хоче додати до проєкту цей шар вебсервісу:
+        <translation>Агент хоче додати до проєкту цей шар вебсервісу:
 {} · {}
 
 Ви погоджуєтеся?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
         <source>The agent wants to add this layer to the project:
 {}
 
 A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation type="obsolete">Агент хоче додати до проєкту цей шар:
+        <translation>Агент хоче додати до проєкту цей шар:
 {}
 
 Віддалене джерело QGIS читає з його сервера, а вміст шару може бути надіслано провайдеру агента. Ви погоджуєтеся?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
         <source>The agent wants to export these layers to files:
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">Агент хоче експортувати ці шари у файли:
+        <translation>Агент хоче експортувати ці шари у файли:
 {}
 
 Ви погоджуєтеся?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">Агент хоче вилучити ці шари з проєкту (їхні файли залишаються, їхні стилі та фільтри тут буде втрачено):
+        <translation>Агент хоче вилучити ці шари з проєкту (їхні файли залишаються, їхні стилі та фільтри тут буде втрачено):
 {}
 
 Ви погоджуєтеся?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">Агент хоче виконати цю дію на зовнішньому конекторі:
+        <translation>Агент хоче виконати цю дію на зовнішньому конекторі:
 {}
 {}
 
 Ви погоджуєтеся?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The credit or quota of this account is used up.</source>
-        <translation type="obsolete">Кредит або квоту цього облікового запису вичерпано.</translation>
+        <translation>Кредит або квоту цього облікового запису вичерпано.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="44"/>
         <source>The free quota could not be reached: {}</source>
-        <translation type="obsolete">Не вдалося зв'язатися з безкоштовною квотою: {}</translation>
+        <translation>Не вдалося зв'язатися з безкоштовною квотою: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="224"/>
         <source>The free quota is not available.</source>
-        <translation type="obsolete">Безкоштовна квота недоступна.</translation>
+        <translation>Безкоштовна квота недоступна.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="48"/>
+        <location filename="../adapters/agent/free_quota.py" line="54"/>
         <source>The free quota is unavailable for now.</source>
-        <translation type="obsolete">Безкоштовна квота наразі недоступна.</translation>
+        <translation>Безкоштовна квота наразі недоступна.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation type="obsolete">Безкоштовну квоту на цей місяць вичерпано. Введіть власний ключ API в налаштуваннях агента.</translation>
+        <translation>Безкоштовну квоту на цей місяць вичерпано. Введіть власний ключ API в налаштуваннях агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="180"/>
+        <location filename="../adapters/agent/settings.py" line="186"/>
         <source>The key could not be stored.</source>
-        <translation type="obsolete">Не вдалося зберегти ключ.</translation>
+        <translation>Не вдалося зберегти ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
         <source>The provider could not be reached: {}</source>
-        <translation type="obsolete">Не вдалося зв'язатися з провайдером: {}</translation>
+        <translation>Не вдалося зв'язатися з провайдером: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation type="obsolete">Провайдер відхилив ключ API: перевірте його в налаштуваннях агента.</translation>
+        <translation>Провайдер відхилив ключ API: перевірте його в налаштуваннях агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>The provider reported a problem: {}</source>
-        <translation type="obsolete">Провайдер повідомив про проблему: {}</translation>
+        <translation>Провайдер повідомив про проблему: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="208"/>
         <source>The stored key could not be read.</source>
-        <translation type="obsolete">Не вдалося прочитати збережений ключ.</translation>
+        <translation>Не вдалося прочитати збережений ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Thinking…</source>
-        <translation type="obsolete">Роздуми…</translation>
+        <translation>Роздуми…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation type="obsolete">Сьогодні з цієї адреси створено забагато нових облікових записів: спробуйте завтра або введіть власний ключ API.</translation>
+        <translation>Сьогодні з цієї адреси створено забагато нових облікових записів: спробуйте завтра або введіть власний ключ API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
         <source>Too many requests for now: try again in a moment.</source>
-        <translation type="obsolete">Забагато запитів: повторіть спробу за мить.</translation>
+        <translation>Забагато запитів: повторіть спробу за мить.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
         <source>Trying a filter on {}</source>
-        <translation type="obsolete">Пробний фільтр на {}</translation>
+        <translation>Пробний фільтр на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Zoom on {}</source>
-        <translation type="obsolete">Наближення до {}</translation>
+        <translation>Наближення до {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>an area</source>
-        <translation type="obsolete">зона</translation>
+        <translation>зона</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>everything</source>
-        <translation type="obsolete">усе</translation>
+        <translation>усе</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
         <source>{} tools available</source>
-        <translation type="obsolete">Доступно інструментів: {}</translation>
+        <translation>Доступно інструментів: {}</translation>
     </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="269"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Шари такими, якими вони були до цього кроку останнього запиту</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="267"/>
         <source>Undo back to here</source>
         <translation>Скасувати до цього місця</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="364"/>
         <source>TRY</source>
-        <translation type="obsolete">СПРОБУЙТЕ</translation>
+        <translation>СПРОБУЙТЕ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_thread.py" line="111"/>
         <source>Undo</source>
-        <translation type="obsolete">Скасувати</translation>
+        <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="312"/>
         <source>(no request)</source>
-        <translation type="obsolete">(немає запиту)</translation>
+        <translation>(немає запиту)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="611"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation type="obsolete">Кілька безкоштовних запитів на місяць через ретранслятор FilterMate до Claude (Anthropic) на умовах Anthropic. Ретранслятор рахує витрати й не зберігає розмов. Коли квоту вичерпано, виберіть провайдера та введіть власний ключ API.</translation>
+        <translation>Кілька безкоштовних запитів на місяць через ретранслятор FilterMate до Claude (Anthropic) на умовах Anthropic. Ретранслятор рахує витрати й не зберігає розмов. Коли квоту вичерпано, виберіть провайдера та введіть власний ключ API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="616"/>
         <source>API key</source>
-        <translation type="obsolete">Ключ API</translation>
+        <translation>Ключ API</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="770"/>
         <source>Add</source>
-        <translation type="obsolete">Додати</translation>
+        <translation>Додати</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="610"/>
+        <location filename="../ui/widgets/agent_panel.py" line="702"/>
         <source>Address</source>
-        <translation type="obsolete">Адреса</translation>
+        <translation>Адреса</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="205"/>
         <source>Agent settings</source>
-        <translation type="obsolete">Налаштування агента</translation>
+        <translation>Налаштування агента</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="622"/>
         <source>Allow attribute values to be sent</source>
-        <translation type="obsolete">Дозволити надсилання значень атрибутів</translation>
+        <translation>Дозволити надсилання значень атрибутів</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="695"/>
         <source>Applications already set up will have to be set up again.</source>
-        <translation type="obsolete">Уже налаштовані програми доведеться налаштувати знову.</translation>
+        <translation>Уже налаштовані програми доведеться налаштувати знову.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation type="obsolete">Попросіть агента відфільтрувати ваші шари</translation>
+        <translation>Попросіть агента відфільтрувати ваші шари</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="240"/>
         <source>Back to the conversation</source>
-        <translation type="obsolete">Назад до розмови</translation>
+        <translation>Назад до розмови</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="668"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation type="obsolete">Claude Code або інший клієнт MCP на цьому комп'ютері зможе тоді фільтрувати ваші шари після відкриття FilterMate за правилами цієї панелі: ті самі джерела, ті самі підтвердження, а фільтри можна скасувати тут. Ця програма надсилає прочитане своєму власному провайдеру ШІ.</translation>
+        <translation>Claude Code або інший клієнт MCP на цьому комп'ютері зможе тоді фільтрувати ваші шари після відкриття FilterMate за правилами цієї панелі: ті самі джерела, ті самі підтвердження, а фільтри можна скасувати тут. Ця програма надсилає прочитане своєму власному провайдеру ШІ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation type="obsolete">Підключіть провайдера ШІ, щоб почати. Нічого не надсилається без вашої згоди.</translation>
+        <translation>Підключіть провайдера ШІ, щоб почати. Нічого не надсилається без вашої згоди.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation type="obsolete">Скопійовано разом із токеном доступу: не показуйте його нікому. Збережіть ці налаштування, щоб вони набули чинності.</translation>
+        <translation>Скопійовано разом із токеном доступу: не показуйте його нікому. Збережіть ці налаштування, щоб вони набули чинності.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="685"/>
         <source>Copy for Claude Desktop</source>
-        <translation type="obsolete">Копіювати для Claude Desktop</translation>
+        <translation>Копіювати для Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="690"/>
         <source>Copy the Claude Code command</source>
-        <translation type="obsolete">Копіювати команду Claude Code</translation>
+        <translation>Копіювати команду Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="682"/>
         <source>Copy the configuration</source>
-        <translation type="obsolete">Копіювати конфігурацію</translation>
+        <translation>Копіювати конфігурацію</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation type="obsolete">Опишіть це своїми словами. Кожен фільтр можна скасувати.</translation>
+        <translation>Опишіть це своїми словами. Кожен фільтр можна скасувати.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="471"/>
         <source>Filter your layers from a sentence</source>
-        <translation type="obsolete">Фільтруйте шари одним реченням</translation>
+        <translation>Фільтруйте шари одним реченням</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="594"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">Агент FilterMate</translation>
+        <translation>Агент FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="242"/>
         <source>History</source>
-        <translation type="obsolete">Історія</translation>
+        <translation>Історія</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="201"/>
         <source>History…</source>
-        <translation type="obsolete">Історія…</translation>
+        <translation>Історія…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation type="obsolete">Я погоджуюся надсилати ці дані цьому провайдеру</translation>
+        <translation>Я погоджуюся надсилати ці дані цьому провайдеру</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="672"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation type="obsolete">Дозволити іншим програмам на цьому комп'ютері керувати FilterMate (сервер MCP)</translation>
+        <translation>Дозволити іншим програмам на цьому комп'ютері керувати FilterMate (сервер MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
         <source>MCP connector</source>
-        <translation type="obsolete">Конектор MCP</translation>
+        <translation>Конектор MCP</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>MCP connectors</source>
-        <translation type="obsolete">Конектори MCP</translation>
+        <translation>Конектори MCP</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="606"/>
         <source>Model</source>
-        <translation type="obsolete">Модель</translation>
+        <translation>Модель</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="198"/>
         <source>More</source>
-        <translation type="obsolete">Більше</translation>
+        <translation>Більше</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="693"/>
         <source>New access token</source>
-        <translation type="obsolete">Новий токен доступу</translation>
+        <translation>Новий токен доступу</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="203"/>
         <source>New conversation</source>
-        <translation type="obsolete">Нова розмова</translation>
+        <translation>Нова розмова</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>New token: it applies once these settings are saved.</source>
-        <translation type="obsolete">Новий токен: він набуде чинності після збереження цих налаштувань.</translation>
+        <translation>Новий токен: він набуде чинності після збереження цих налаштувань.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="795"/>
         <source>Open data platforms</source>
-        <translation type="obsolete">Платформи відкритих даних</translation>
+        <translation>Платформи відкритих даних</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="166"/>
         <source>Open the settings</source>
-        <translation type="obsolete">Відкрити налаштування</translation>
+        <translation>Відкрити налаштування</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="657"/>
         <source>Other applications</source>
-        <translation type="obsolete">Інші програми</translation>
+        <translation>Інші програми</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="701"/>
         <source>Port</source>
-        <translation type="obsolete">Порт</translation>
+        <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="655"/>
         <source>Provider</source>
-        <translation type="obsolete">Провайдер</translation>
+        <translation>Провайдер</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="264"/>
         <source>Redo</source>
-        <translation type="obsolete">Повторити</translation>
+        <translation>Повторити</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="755"/>
         <source>Remove</source>
-        <translation type="obsolete">Вилучити</translation>
+        <translation>Вилучити</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="619"/>
         <source>Remove the stored key</source>
-        <translation type="obsolete">Видалити збережений ключ</translation>
+        <translation>Видалити збережений ключ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="796"/>
         <source>Satellite imagery</source>
-        <translation type="obsolete">Супутникові знімки</translation>
+        <translation>Супутникові знімки</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Send (Enter)</source>
-        <translation type="obsolete">Надіслати (Enter)</translation>
+        <translation>Надіслати (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
         <source>Send again</source>
-        <translation type="obsolete">Надіслати знову</translation>
+        <translation>Надіслати знову</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="479"/>
         <source>Sent to: {}</source>
-        <translation type="obsolete">Надіслано до: {}</translation>
+        <translation>Надіслано до: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation type="obsolete">Налаштувати агента</translation>
+        <translation>Налаштувати агента</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="656"/>
         <source>Sources</source>
-        <translation type="obsolete">Джерела</translation>
+        <translation>Джерела</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Stop (Esc)</source>
-        <translation type="obsolete">Зупинити (Esc)</translation>
+        <translation>Зупинити (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
         <source>Stored: leave empty to keep it</source>
-        <translation type="obsolete">Збережено: залиште порожнім, щоб зберегти</translation>
+        <translation>Збережено: залиште порожнім, щоб зберегти</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="753"/>
         <source>Test</source>
-        <translation type="obsolete">Перевірити</translation>
+        <translation>Перевірити</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
         <source>Testing…</source>
-        <translation type="obsolete">Перевірка…</translation>
+        <translation>Перевірка…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="659"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">Не вдалося запустити сервер MCP: {}</translation>
+        <translation>Не вдалося запустити сервер MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation type="obsolete">Агент може шукати в джерелах, позначених тут. Їм надсилаються ваші пошуки та те, що агент передає конектору; шар, доданий із них, читається з їхніх серверів.</translation>
+        <translation>Агент може шукати в джерелах, позначених тут. Їм надсилаються ваші пошуки та те, що агент передає конектору; шар, доданий із них, читається з їхніх серверів.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation type="obsolete">Агент надсилає ваш запит, назви ваших шарів і полів, ваші вирази фільтрів і результати своїх інструментів обраному тут провайдеру на умовах цього провайдера. Без опції нижче агент не читає значень ваших полів; значення, уже записані у ваших фільтрах та обраному, усе одно надсилаються. Розмова зберігається на цьому комп'ютері для кожного проєкту, доки ви не почнете нову.</translation>
+        <translation>Агент надсилає ваш запит, назви ваших шарів і полів, ваші вирази фільтрів і результати своїх інструментів обраному тут провайдеру на умовах цього провайдера. Без опції нижче агент не читає значень ваших полів; значення, уже записані у ваших фільтрах та обраному, усе одно надсилаються. Розмова зберігається на цьому комп'ютері для кожного проєкту, доки ви не почнете нову.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="687"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation type="obsolete">Через mcp-remote, якому потрібен Node.js: Claude Desktop запускає локальні сервери як програми.</translation>
+        <translation>Через mcp-remote, якому потрібен Node.js: Claude Desktop запускає локальні сервери як програми.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="846"/>
         <source>Too many sources added: remove one first.</source>
-        <translation type="obsolete">Додано забагато джерел: спершу вилучіть одне.</translation>
+        <translation>Додано забагато джерел: спершу вилучіть одне.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="261"/>
         <source>Undo the last</source>
-        <translation type="obsolete">Скасувати останній</translation>
+        <translation>Скасувати останній</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="170"/>
         <source>Undo this turn</source>
-        <translation type="obsolete">Скасувати цей хід</translation>
+        <translation>Скасувати цей хід</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="468"/>
         <source>What do you want to filter?</source>
-        <translation type="obsolete">Що ви хочете відфільтрувати?</translation>
+        <translation>Що ви хочете відфільтрувати?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
         <source>added by you</source>
-        <translation type="obsolete">додано вами</translation>
+        <translation>додано вами</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>applied</source>
-        <translation type="obsolete">застосовано</translation>
+        <translation>застосовано</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>community</source>
-        <translation type="obsolete">спільнота</translation>
+        <translation>спільнота</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="765"/>
         <source>https://... or a portal address</source>
-        <translation type="obsolete">https://... або адреса порталу</translation>
+        <translation>https://... або адреса порталу</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="310"/>
         <source>no change</source>
-        <translation type="obsolete">без змін</translation>
+        <translation>без змін</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>official</source>
-        <translation type="obsolete">офіційний</translation>
+        <translation>офіційний</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>this computer</source>
-        <translation type="obsolete">цей комп'ютер</translation>
+        <translation>цей комп'ютер</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>undone</source>
-        <translation type="obsolete">скасовано</translation>
+        <translation>скасовано</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation type="obsolete">Ходів: {}</translation>
+        <translation>Ходів: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -1810,24 +1830,24 @@ Do you agree?</source>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="232"/>
         <source>Hide EXPLORING to give room to the sections</source>
-        <translation type="obsolete">Приховати EXPLORING, щоб звільнити місце для розділів</translation>
+        <translation>Приховати EXPLORING, щоб звільнити місце для розділів</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="233"/>
         <source>Show EXPLORING</source>
-        <translation type="obsolete">Показати EXPLORING</translation>
+        <translation>Показати EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="51"/>
         <source>Close</source>
-        <translation type="obsolete">Закрити</translation>
+        <translation>Закрити</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="48"/>
         <source>Detach or dock the panel</source>
-        <translation type="obsolete">Відкріпити або закріпити панель</translation>
+        <translation>Відкріпити або закріпити панель</translation>
     </message>
 </context>
 <context>
@@ -2994,39 +3014,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>Помилка завантаження плагіна: {0}. Перевірте консоль Python QGIS для деталей.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7591"/>
+        <location filename="../filter_mate_dockwidget.py" line="7622"/>
         <source>Current layer: {0}</source>
         <translation>Поточний шар: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7593"/>
+        <location filename="../filter_mate_dockwidget.py" line="7624"/>
         <source>No layer selected</source>
         <translation>Шар не вибрано</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>Selected layers:
 {0}</source>
         <translation>Вибрані шари:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>No layers selected</source>
         <translation>Шари не вибрано</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7623"/>
+        <location filename="../filter_mate_dockwidget.py" line="7654"/>
         <source>No expression defined</source>
         <translation>Вираз не визначено</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7635"/>
+        <location filename="../filter_mate_dockwidget.py" line="7666"/>
         <source>Display expression: {0}</source>
         <translation>Вираз відображення: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7652"/>
+        <location filename="../filter_mate_dockwidget.py" line="7683"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID об'єкта: {0}
@@ -3131,42 +3151,42 @@ First attribute: {1}</source>
         <translation>Неможливо виконати {0}: ініціалізація віджета не вдалася.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2644"/>
+        <location filename="../filter_mate_app.py" line="2650"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Неможливо {0}: шар недійсний або джерело не знайдено.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2798"/>
+        <location filename="../filter_mate_app.py" line="2804"/>
         <source>All filters cleared - </source>
         <translation>Усі фільтри очищено — </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2799"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} об'єктів видимі в основному шарі</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2811"/>
+        <location filename="../filter_mate_app.py" line="2817"/>
         <source>Error: result handler missing</source>
         <translation>Помилка: обробник результату відсутній</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2828"/>
+        <location filename="../filter_mate_app.py" line="2834"/>
         <source>Error during filtering: {0}</source>
         <translation>Помилка під час фільтрації: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2952"/>
+        <location filename="../filter_mate_app.py" line="2958"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Відновлено {0} осиротілих обраних: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3118"/>
+        <location filename="../filter_mate_app.py" line="3124"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Помилка завантаження шару — натисніть для повтору</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3170"/>
+        <location filename="../filter_mate_app.py" line="3176"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} шарів успішно завантажено</translation>
     </message>
@@ -3229,7 +3249,7 @@ What would you like to do?</translation>
         <translation>Шарів, що залишаються відфільтрованими: {0} ({1}). Знову увімкніть параметр, щоб зняти фільтр.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2630"/>
+        <location filename="../filter_mate_app.py" line="2636"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>Серверний фільтр готується. Дочекайтеся його завершення, перш ніж починати іншу операцію.</translation>
     </message>
@@ -3439,11 +3459,13 @@ Drop anyway?</source>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6244"/>
+        <location filename="../ui/controllers/property_controller.py" line="761"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Від'ємний буфер (ерозія): зменшує полігони всередину</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6247"/>
+        <location filename="../ui/controllers/property_controller.py" line="768"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Значення буфера в метрах (додатне=розширити, від'ємне=зменшити полігони)</translation>
     </message>
@@ -3473,7 +3495,7 @@ Drop anyway?</source>
         <translation>Помилка скидання властивостей шару: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>Filter</source>
         <translation>Фільтрувати</translation>
     </message>
@@ -3845,7 +3867,7 @@ Drop anyway?</source>
         <translation>📁 Поточний проєкт</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Фільтр не запущено: його вибір змінився або його не вдалося прочитати. Натисніть «Фільтрувати» ще раз.</translation>
     </message>
@@ -4225,7 +4247,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="818"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: завантаження моделі сегментації</translation>
     </message>
@@ -5757,6 +5779,84 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
         <translation>Застосовує однакові критерії (класи ASPRS, діапазони Z та інтенсивності, номер повернення, вираз) до однієї або кількох хмар точок проєкту, наприклад до всіх тайлів LiDAR HD будівельного майданчика. Фільтр — це вираз хмари точок (підмножина): він застосовується миттєво й може бути скасований з FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="60"/>
+        <source>Raster to draw on (e.g. an orthophoto)</source>
+        <translation>Растр, на якому малювати (наприклад, ортофотоплан)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="61"/>
+        <source>Guide features (points or polygons)</source>
+        <translation>Напрямні об'єкти (точки або полігони)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="64"/>
+        <source>Objects drawn by SAM</source>
+        <translation>Контури, намальовані SAM</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="135"/>
+        <source>The raster cannot be read</source>
+        <translation>Не вдається прочитати растр</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="79"/>
+        <source>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</source>
+        <translation>SAM не встановлено: виберіть Вибраний об'єкт у групі ПІПЕТКА растра на панелі FilterMate та прийміть встановлення</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="100"/>
+        <source>The guide features cannot be read</source>
+        <translation>Не вдається прочитати напрямні об'єкти</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="128"/>
+        <source>No point or polygon of the guide layer lies on the raster</source>
+        <translation>Жодна точка й жоден полігон напрямного шару не лежать на растрі</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="132"/>
+        <source>{0} feature(s) on the raster, {1} window(s) to prepare</source>
+        <translation>{0} об'єкт(ів) на растрі, {1} вікон(о) до підготовки</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="160"/>
+        <source>A window could not be prepared: {0}</source>
+        <translation>Не вдалося підготувати вікно: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="167"/>
+        <source>No window could be prepared: {0}</source>
+        <translation>Не вдалося підготувати жодного вікна: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="183"/>
+        <source>Canceled: {0} of {1} window(s) prepared</source>
+        <translation>Скасовано: підготовлено вікон {0} з {1}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="186"/>
+        <source>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</source>
+        <translation>Намальовано контурів: {0}, об'єктів без контуру: {1}, пропущено: {2}, за {3:.0f} с</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="194"/>
+        <source>Draw objects on a raster with SAM from points or polygons</source>
+        <translation>Малювання контурів на растрі за допомогою SAM за точками або полігонами</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="197"/>
+        <source>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</source>
+        <translation>SAM 2.1 tiny малює на растрі контур об'єкта, на який вказує кожен об'єкт напрямного шару: точка — це клацання на об'єкті, полігон задає свою обмежувальну рамку й точку всередині неї. Один полігон на об'єкт, у СК растра, з атрибутами об'єкта, оцінкою SAM (sam_score) і, для полігона, його перекриттям із намальованим контуром (sam_iou, від 0 до 1).
+
+Приклади: контури будівель, перемальовані на свіжому ортофотоплані (низький sam_iou вказує на будівлю, що змінилася); точки дерев або ставків, перетворені на контури.
+
+Растр малюється так само, як на карті, зі своїм стилем. SAM встановлюється один раз із групи ПІПЕТКА панелі FilterMate; працює на процесорі, кілька секунд на кожне вікно розміром 1024 пікселі.</translation>
     </message>
 </context>
 <context>
@@ -8182,7 +8282,7 @@ onnxruntime завантажується з PyPI за допомогою pip, м
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="650"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: підготовка сегментації</translation>
     </message>
@@ -8480,7 +8580,7 @@ onnxruntime завантажується з PyPI за допомогою pip, м
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="719"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: малювання схожих об'єктів</translation>
     </message>

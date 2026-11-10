@@ -32,58 +32,68 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
         <source>Undone: {}</source>
         <translation>पूर्ववत किया गया: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Undo of the last request</source>
         <translation>पिछले अनुरोध को पूर्ववत करना</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
         <source>Back to before: {}</source>
         <translation>इससे पहले की स्थिति पर लौटें: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Nothing to undo.</source>
         <translation>पूर्ववत करने के लिए कुछ नहीं।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
         <source>Redo: {}</source>
         <translation>फिर से करें: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Undo: {}</source>
         <translation>पूर्ववत करें: {}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
         <source>Free quota</source>
-        <translation type="obsolete">निःशुल्क कोटा</translation>
+        <translation>निःशुल्क कोटा</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>Access to the free quota was renewed: send your request again.</source>
-        <translation type="obsolete">निःशुल्क कोटे तक पहुँच नवीनीकृत हो गई: अपना अनुरोध फिर से भेजें।</translation>
+        <translation>निःशुल्क कोटे तक पहुँच नवीनीकृत हो गई: अपना अनुरोध फिर से भेजें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
         <source>Another application is changing the project: try again in a moment.</source>
-        <translation type="obsolete">कोई अन्य एप्लिकेशन प्रोजेक्ट बदल रहा है: थोड़ी देर बाद पुनः प्रयास करें।</translation>
+        <translation>कोई अन्य एप्लिकेशन प्रोजेक्ट बदल रहा है: थोड़ी देर बाद पुनः प्रयास करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Another application: {}</source>
-        <translation type="obsolete">अन्य एप्लिकेशन: {}</translation>
+        <translation>अन्य एप्लिकेशन: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Applied again: {}.</source>
-        <translation type="obsolete">फिर से लागू किया गया: {}.</translation>
+        <translation>फिर से लागू किया गया: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
         <source>Changed since, left as is: {}.</source>
-        <translation type="obsolete">बाद में बदल गया, जस का तस छोड़ा गया: {}.</translation>
+        <translation>बाद में बदल गया, जस का तस छोड़ा गया: {}.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -91,677 +101,687 @@
         <translation type="obsolete">बदला गया: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation type="obsolete">एजेंट का उपयोग करने के लिए कोई मॉडल चुनें और अपना डेटा भेजने की सहमति दें।</translation>
+        <translation>एजेंट का उपयोग करने के लिए कोई मॉडल चुनें और अपना डेटा भेजने की सहमति दें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
         <source>Connecting to {}…</source>
-        <translation type="obsolete">{} से कनेक्ट हो रहा है…</translation>
+        <translation>{} से कनेक्ट हो रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation type="obsolete">पिछली बातचीत: एजेंट यहाँ से नए सिरे से शुरू करता है।</translation>
+        <translation>पिछली बातचीत: एजेंट यहाँ से नए सिरे से शुरू करता है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
         <source>Enter your API key in the agent settings.</source>
-        <translation type="obsolete">एजेंट सेटिंग्स में अपनी API कुंजी दर्ज करें।</translation>
+        <translation>एजेंट सेटिंग्स में अपनी API कुंजी दर्ज करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Export of {}</source>
-        <translation type="obsolete">{} का निर्यात</translation>
+        <translation>{} का निर्यात</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Favorite applied</source>
-        <translation type="obsolete">पसंदीदा लागू किया गया</translation>
+        <translation>पसंदीदा लागू किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Filter on the points of {}</source>
-        <translation type="obsolete">{} के बिंदुओं पर फ़िल्टर</translation>
+        <translation>{} के बिंदुओं पर फ़िल्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
         <source>Filter on {}</source>
-        <translation type="obsolete">{} पर फ़िल्टर</translation>
+        <translation>{} पर फ़िल्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Filter on {} by an area</source>
-        <translation type="obsolete">{} पर क्षेत्र द्वारा फ़िल्टर</translation>
+        <translation>{} पर क्षेत्र द्वारा फ़िल्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
         <source>Filter on {} by {}</source>
-        <translation type="obsolete">{} पर {} द्वारा फ़िल्टर</translation>
+        <translation>{} पर {} द्वारा फ़िल्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">FilterMate एजेंट</translation>
+        <translation>FilterMate एजेंट</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Filters removed from {}</source>
-        <translation type="obsolete">{} से फ़िल्टर हटाए गए</translation>
+        <translation>{} से फ़िल्टर हटाए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Hidden: {}</source>
-        <translation type="obsolete">छिपाया गया: {}</translation>
+        <translation>छिपाया गया: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
         <source>It answers.</source>
-        <translation type="obsolete">वह उत्तर देता है।</translation>
+        <translation>वह उत्तर देता है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Layer added: {}</source>
-        <translation type="obsolete">परत जोड़ी गई: {}</translation>
+        <translation>परत जोड़ी गई: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Layers removed: {}</source>
-        <translation type="obsolete">परतें हटाई गईं: {}</translation>
+        <translation>परतें हटाई गईं: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
         <source>Not reachable for this conversation: {}</source>
-        <translation type="obsolete">इस बातचीत के लिए पहुँच से बाहर: {}</translation>
+        <translation>इस बातचीत के लिए पहुँच से बाहर: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Nothing to redo.</source>
-        <translation type="obsolete">फिर से करने के लिए कुछ नहीं।</translation>
+        <translation>फिर से करने के लिए कुछ नहीं।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Nothing to restore.</source>
-        <translation type="obsolete">पुनर्स्थापित करने के लिए कुछ नहीं।</translation>
+        <translation>पुनर्स्थापित करने के लिए कुछ नहीं।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
         <source>Reading the active filters</source>
-        <translation type="obsolete">सक्रिय फ़िल्टर पढ़ना</translation>
+        <translation>सक्रिय फ़िल्टर पढ़ना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
         <source>Reading the favorites</source>
-        <translation type="obsolete">पसंदीदा पढ़ना</translation>
+        <translation>पसंदीदा पढ़ना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
         <source>Reading the fields of {}</source>
-        <translation type="obsolete">{} के फ़ील्ड पढ़ना</translation>
+        <translation>{} के फ़ील्ड पढ़ना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
         <source>Reading the layers</source>
-        <translation type="obsolete">परतें पढ़ना</translation>
+        <translation>परतें पढ़ना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
         <source>Reading the map</source>
-        <translation type="obsolete">मानचित्र पढ़ना</translation>
+        <translation>मानचित्र पढ़ना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
         <source>Reading the values of {}</source>
-        <translation type="obsolete">{} के मान पढ़ना</translation>
+        <translation>{} के मान पढ़ना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Restored: {}.</source>
-        <translation type="obsolete">पुनर्स्थापित किया गया: {}.</translation>
+        <translation>पुनर्स्थापित किया गया: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Searching satellite imagery on {}</source>
-        <translation type="obsolete">{} पर उपग्रह इमेजरी खोजना</translation>
+        <translation>{} पर उपग्रह इमेजरी खोजना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Searching {} for {}</source>
-        <translation type="obsolete">{} पर {} खोजना</translation>
+        <translation>{} पर {} खोजना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection cleared on {}</source>
-        <translation type="obsolete">{} पर चयन साफ़ किया गया</translation>
+        <translation>{} पर चयन साफ़ किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection on {}</source>
-        <translation type="obsolete">{} पर चयन</translation>
+        <translation>{} पर चयन</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Shown: {}</source>
-        <translation type="obsolete">दिखाया गया: {}</translation>
+        <translation>दिखाया गया: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
         <source>Stopped.</source>
-        <translation type="obsolete">रोक दिया गया।</translation>
+        <translation>रोक दिया गया।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">MCP सर्वर शुरू नहीं हो सका: {}</translation>
+        <translation>MCP सर्वर शुरू नहीं हो सका: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="159"/>
         <source>The QGIS authentication database is not available.</source>
-        <translation type="obsolete">QGIS का प्रमाणीकरण डेटाबेस उपलब्ध नहीं है।</translation>
+        <translation>QGIS का प्रमाणीकरण डेटाबेस उपलब्ध नहीं है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="161"/>
         <source>The QGIS master password is needed to use the stored key.</source>
-        <translation type="obsolete">संग्रहीत कुंजी का उपयोग करने के लिए QGIS का मास्टर पासवर्ड चाहिए।</translation>
+        <translation>संग्रहीत कुंजी का उपयोग करने के लिए QGIS का मास्टर पासवर्ड चाहिए।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>The agent stopped before the end ({}).</source>
-        <translation type="obsolete">एजेंट अंत से पहले रुक गया ({})।</translation>
+        <translation>एजेंट अंत से पहले रुक गया ({})।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
 Do you agree?</source>
-        <translation type="obsolete">एजेंट इस वेब सेवा की परत को प्रोजेक्ट में जोड़ना चाहता है:
+        <translation>एजेंट इस वेब सेवा की परत को प्रोजेक्ट में जोड़ना चाहता है:
 {} · {}
 
 क्या आप सहमत हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
         <source>The agent wants to add this layer to the project:
 {}
 
 A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation type="obsolete">एजेंट इस परत को प्रोजेक्ट में जोड़ना चाहता है:
+        <translation>एजेंट इस परत को प्रोजेक्ट में जोड़ना चाहता है:
 {}
 
 दूरस्थ स्रोत को QGIS उसके सर्वर से पढ़ता है, और परत की सामग्री एजेंट के प्रदाता को भेजी जा सकती है। क्या आप सहमत हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
         <source>The agent wants to export these layers to files:
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">एजेंट इन परतों को फ़ाइलों में निर्यात करना चाहता है:
+        <translation>एजेंट इन परतों को फ़ाइलों में निर्यात करना चाहता है:
 {}
 
 क्या आप सहमत हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">एजेंट इन परतों को प्रोजेक्ट से हटाना चाहता है (उनकी फ़ाइलें बनी रहती हैं, यहाँ उनकी शैलियाँ और फ़िल्टर खो जाते हैं):
+        <translation>एजेंट इन परतों को प्रोजेक्ट से हटाना चाहता है (उनकी फ़ाइलें बनी रहती हैं, यहाँ उनकी शैलियाँ और फ़िल्टर खो जाते हैं):
 {}
 
 क्या आप सहमत हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">एजेंट इस कार्रवाई को किसी बाहरी कनेक्टर पर चलाना चाहता है:
+        <translation>एजेंट इस कार्रवाई को किसी बाहरी कनेक्टर पर चलाना चाहता है:
 {}
 {}
 
 क्या आप सहमत हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The credit or quota of this account is used up.</source>
-        <translation type="obsolete">इस खाते का क्रेडिट या कोटा समाप्त हो गया है।</translation>
+        <translation>इस खाते का क्रेडिट या कोटा समाप्त हो गया है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="44"/>
         <source>The free quota could not be reached: {}</source>
-        <translation type="obsolete">निःशुल्क कोटे तक नहीं पहुँचा जा सका: {}</translation>
+        <translation>निःशुल्क कोटे तक नहीं पहुँचा जा सका: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="224"/>
         <source>The free quota is not available.</source>
-        <translation type="obsolete">निःशुल्क कोटा उपलब्ध नहीं है।</translation>
+        <translation>निःशुल्क कोटा उपलब्ध नहीं है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="48"/>
+        <location filename="../adapters/agent/free_quota.py" line="54"/>
         <source>The free quota is unavailable for now.</source>
-        <translation type="obsolete">निःशुल्क कोटा फ़िलहाल अनुपलब्ध है।</translation>
+        <translation>निःशुल्क कोटा फ़िलहाल अनुपलब्ध है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation type="obsolete">इस महीने का निःशुल्क कोटा समाप्त हो गया है। एजेंट सेटिंग्स में अपनी API कुंजी दर्ज करें।</translation>
+        <translation>इस महीने का निःशुल्क कोटा समाप्त हो गया है। एजेंट सेटिंग्स में अपनी API कुंजी दर्ज करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="180"/>
+        <location filename="../adapters/agent/settings.py" line="186"/>
         <source>The key could not be stored.</source>
-        <translation type="obsolete">कुंजी संग्रहीत नहीं की जा सकी।</translation>
+        <translation>कुंजी संग्रहीत नहीं की जा सकी।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
         <source>The provider could not be reached: {}</source>
-        <translation type="obsolete">प्रदाता तक नहीं पहुँचा जा सका: {}</translation>
+        <translation>प्रदाता तक नहीं पहुँचा जा सका: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation type="obsolete">प्रदाता ने API कुंजी अस्वीकार कर दी: एजेंट सेटिंग्स में उसे जाँचें।</translation>
+        <translation>प्रदाता ने API कुंजी अस्वीकार कर दी: एजेंट सेटिंग्स में उसे जाँचें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>The provider reported a problem: {}</source>
-        <translation type="obsolete">प्रदाता ने समस्या बताई: {}</translation>
+        <translation>प्रदाता ने समस्या बताई: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="208"/>
         <source>The stored key could not be read.</source>
-        <translation type="obsolete">संग्रहीत कुंजी पढ़ी नहीं जा सकी।</translation>
+        <translation>संग्रहीत कुंजी पढ़ी नहीं जा सकी।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Thinking…</source>
-        <translation type="obsolete">सोच रहा है…</translation>
+        <translation>सोच रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation type="obsolete">आज इस पते से बहुत अधिक नए खाते बने: कल पुनः प्रयास करें, या अपनी API कुंजी दर्ज करें।</translation>
+        <translation>आज इस पते से बहुत अधिक नए खाते बने: कल पुनः प्रयास करें, या अपनी API कुंजी दर्ज करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
         <source>Too many requests for now: try again in a moment.</source>
-        <translation type="obsolete">फ़िलहाल बहुत अधिक अनुरोध: थोड़ी देर बाद पुनः प्रयास करें।</translation>
+        <translation>फ़िलहाल बहुत अधिक अनुरोध: थोड़ी देर बाद पुनः प्रयास करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
         <source>Trying a filter on {}</source>
-        <translation type="obsolete">{} पर फ़िल्टर आज़माना</translation>
+        <translation>{} पर फ़िल्टर आज़माना</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Zoom on {}</source>
-        <translation type="obsolete">{} पर ज़ूम</translation>
+        <translation>{} पर ज़ूम</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>an area</source>
-        <translation type="obsolete">एक क्षेत्र</translation>
+        <translation>एक क्षेत्र</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>everything</source>
-        <translation type="obsolete">सब कुछ</translation>
+        <translation>सब कुछ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
         <source>{} tools available</source>
-        <translation type="obsolete">{} टूल उपलब्ध</translation>
+        <translation>{} टूल उपलब्ध</translation>
     </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="269"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>पिछले अनुरोध के इस चरण से पहले की लेयर जैसी थीं</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="267"/>
         <source>Undo back to here</source>
         <translation>यहाँ तक पूर्ववत करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="364"/>
         <source>TRY</source>
-        <translation type="obsolete">आज़माएँ</translation>
+        <translation>आज़माएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_thread.py" line="111"/>
         <source>Undo</source>
-        <translation type="obsolete">पूर्ववत करें</translation>
+        <translation>पूर्ववत करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="312"/>
         <source>(no request)</source>
-        <translation type="obsolete">(कोई अनुरोध नहीं)</translation>
+        <translation>(कोई अनुरोध नहीं)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="611"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation type="obsolete">हर महीने कुछ निःशुल्क अनुरोध, FilterMate के Claude (Anthropic) तक रिले के माध्यम से, Anthropic की शर्तों के अंतर्गत। रिले केवल खर्च का हिसाब रखता है और कोई बातचीत नहीं रखता। कोटा समाप्त होने पर कोई प्रदाता चुनें और अपनी API कुंजी दर्ज करें।</translation>
+        <translation>हर महीने कुछ निःशुल्क अनुरोध, FilterMate के Claude (Anthropic) तक रिले के माध्यम से, Anthropic की शर्तों के अंतर्गत। रिले केवल खर्च का हिसाब रखता है और कोई बातचीत नहीं रखता। कोटा समाप्त होने पर कोई प्रदाता चुनें और अपनी API कुंजी दर्ज करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="616"/>
         <source>API key</source>
-        <translation type="obsolete">API कुंजी</translation>
+        <translation>API कुंजी</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="770"/>
         <source>Add</source>
-        <translation type="obsolete">जोड़ें</translation>
+        <translation>जोड़ें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="610"/>
+        <location filename="../ui/widgets/agent_panel.py" line="702"/>
         <source>Address</source>
-        <translation type="obsolete">पता</translation>
+        <translation>पता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="205"/>
         <source>Agent settings</source>
-        <translation type="obsolete">एजेंट सेटिंग्स</translation>
+        <translation>एजेंट सेटिंग्स</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="622"/>
         <source>Allow attribute values to be sent</source>
-        <translation type="obsolete">विशेषता मान भेजने की अनुमति दें</translation>
+        <translation>विशेषता मान भेजने की अनुमति दें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="695"/>
         <source>Applications already set up will have to be set up again.</source>
-        <translation type="obsolete">पहले से कॉन्फ़िगर किए गए एप्लिकेशन को दोबारा कॉन्फ़िगर करना होगा।</translation>
+        <translation>पहले से कॉन्फ़िगर किए गए एप्लिकेशन को दोबारा कॉन्फ़िगर करना होगा।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation type="obsolete">एजेंट से अपनी परतें फ़िल्टर करने को कहें</translation>
+        <translation>एजेंट से अपनी परतें फ़िल्टर करने को कहें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="240"/>
         <source>Back to the conversation</source>
-        <translation type="obsolete">बातचीत पर वापस जाएँ</translation>
+        <translation>बातचीत पर वापस जाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="668"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation type="obsolete">FilterMate खुलने के बाद, इस कंप्यूटर पर Claude Code या कोई अन्य MCP क्लाइंट इस पैनल के नियमों के अनुसार आपकी परतें फ़िल्टर कर सकता है: वही स्रोत, वही पुष्टियाँ, और फ़िल्टर यहीं पूर्ववत किए जा सकते हैं। वह एप्लिकेशन जो पढ़ता है उसे अपने AI प्रदाता को भेजता है।</translation>
+        <translation>FilterMate खुलने के बाद, इस कंप्यूटर पर Claude Code या कोई अन्य MCP क्लाइंट इस पैनल के नियमों के अनुसार आपकी परतें फ़िल्टर कर सकता है: वही स्रोत, वही पुष्टियाँ, और फ़िल्टर यहीं पूर्ववत किए जा सकते हैं। वह एप्लिकेशन जो पढ़ता है उसे अपने AI प्रदाता को भेजता है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation type="obsolete">शुरू करने के लिए कोई AI प्रदाता जोड़ें। आपकी सहमति से पहले कुछ नहीं भेजा जाता।</translation>
+        <translation>शुरू करने के लिए कोई AI प्रदाता जोड़ें। आपकी सहमति से पहले कुछ नहीं भेजा जाता।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation type="obsolete">एक्सेस टोकन के साथ कॉपी किया गया: इसे अपने तक रखें। लागू होने के लिए ये सेटिंग्स सहेजें।</translation>
+        <translation>एक्सेस टोकन के साथ कॉपी किया गया: इसे अपने तक रखें। लागू होने के लिए ये सेटिंग्स सहेजें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="685"/>
         <source>Copy for Claude Desktop</source>
-        <translation type="obsolete">Claude Desktop के लिए कॉपी करें</translation>
+        <translation>Claude Desktop के लिए कॉपी करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="690"/>
         <source>Copy the Claude Code command</source>
-        <translation type="obsolete">Claude Code कमांड कॉपी करें</translation>
+        <translation>Claude Code कमांड कॉपी करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="682"/>
         <source>Copy the configuration</source>
-        <translation type="obsolete">कॉन्फ़िगरेशन कॉपी करें</translation>
+        <translation>कॉन्फ़िगरेशन कॉपी करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation type="obsolete">इसे अपने शब्दों में बताएँ। हर फ़िल्टर पूर्ववत किया जा सकता है।</translation>
+        <translation>इसे अपने शब्दों में बताएँ। हर फ़िल्टर पूर्ववत किया जा सकता है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="471"/>
         <source>Filter your layers from a sentence</source>
-        <translation type="obsolete">एक वाक्य से अपनी परतें फ़िल्टर करें</translation>
+        <translation>एक वाक्य से अपनी परतें फ़िल्टर करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="594"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">FilterMate एजेंट</translation>
+        <translation>FilterMate एजेंट</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="242"/>
         <source>History</source>
-        <translation type="obsolete">इतिहास</translation>
+        <translation>इतिहास</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="201"/>
         <source>History…</source>
-        <translation type="obsolete">इतिहास…</translation>
+        <translation>इतिहास…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation type="obsolete">मैं यह डेटा इस प्रदाता को भेजने के लिए सहमत हूँ</translation>
+        <translation>मैं यह डेटा इस प्रदाता को भेजने के लिए सहमत हूँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="672"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation type="obsolete">इस कंप्यूटर के अन्य एप्लिकेशन को FilterMate चलाने दें (MCP सर्वर)</translation>
+        <translation>इस कंप्यूटर के अन्य एप्लिकेशन को FilterMate चलाने दें (MCP सर्वर)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
         <source>MCP connector</source>
-        <translation type="obsolete">MCP कनेक्टर</translation>
+        <translation>MCP कनेक्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>MCP connectors</source>
-        <translation type="obsolete">MCP कनेक्टर</translation>
+        <translation>MCP कनेक्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="606"/>
         <source>Model</source>
-        <translation type="obsolete">मॉडल</translation>
+        <translation>मॉडल</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="198"/>
         <source>More</source>
-        <translation type="obsolete">और</translation>
+        <translation>और</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="693"/>
         <source>New access token</source>
-        <translation type="obsolete">नया एक्सेस टोकन</translation>
+        <translation>नया एक्सेस टोकन</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="203"/>
         <source>New conversation</source>
-        <translation type="obsolete">नई बातचीत</translation>
+        <translation>नई बातचीत</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>New token: it applies once these settings are saved.</source>
-        <translation type="obsolete">नया टोकन: ये सेटिंग्स सहेजने के बाद लागू होगा।</translation>
+        <translation>नया टोकन: ये सेटिंग्स सहेजने के बाद लागू होगा।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="795"/>
         <source>Open data platforms</source>
-        <translation type="obsolete">ओपन डेटा प्लेटफ़ॉर्म</translation>
+        <translation>ओपन डेटा प्लेटफ़ॉर्म</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="166"/>
         <source>Open the settings</source>
-        <translation type="obsolete">सेटिंग्स खोलें</translation>
+        <translation>सेटिंग्स खोलें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="657"/>
         <source>Other applications</source>
-        <translation type="obsolete">अन्य एप्लिकेशन</translation>
+        <translation>अन्य एप्लिकेशन</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="701"/>
         <source>Port</source>
-        <translation type="obsolete">पोर्ट</translation>
+        <translation>पोर्ट</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="655"/>
         <source>Provider</source>
-        <translation type="obsolete">प्रदाता</translation>
+        <translation>प्रदाता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="264"/>
         <source>Redo</source>
-        <translation type="obsolete">फिर से करें</translation>
+        <translation>फिर से करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="755"/>
         <source>Remove</source>
-        <translation type="obsolete">हटाएँ</translation>
+        <translation>हटाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="619"/>
         <source>Remove the stored key</source>
-        <translation type="obsolete">संग्रहीत कुंजी हटाएँ</translation>
+        <translation>संग्रहीत कुंजी हटाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="796"/>
         <source>Satellite imagery</source>
-        <translation type="obsolete">उपग्रह इमेजरी</translation>
+        <translation>उपग्रह इमेजरी</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Send (Enter)</source>
-        <translation type="obsolete">भेजें (Enter)</translation>
+        <translation>भेजें (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
         <source>Send again</source>
-        <translation type="obsolete">फिर से भेजें</translation>
+        <translation>फिर से भेजें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="479"/>
         <source>Sent to: {}</source>
-        <translation type="obsolete">इन्हें भेजा गया: {}</translation>
+        <translation>इन्हें भेजा गया: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation type="obsolete">एजेंट सेट करें</translation>
+        <translation>एजेंट सेट करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="656"/>
         <source>Sources</source>
-        <translation type="obsolete">स्रोत</translation>
+        <translation>स्रोत</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Stop (Esc)</source>
-        <translation type="obsolete">रोकें (Esc)</translation>
+        <translation>रोकें (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
         <source>Stored: leave empty to keep it</source>
-        <translation type="obsolete">संग्रहीत: रखने के लिए खाली छोड़ें</translation>
+        <translation>संग्रहीत: रखने के लिए खाली छोड़ें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="753"/>
         <source>Test</source>
-        <translation type="obsolete">जाँचें</translation>
+        <translation>जाँचें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
         <source>Testing…</source>
-        <translation type="obsolete">जाँच हो रही है…</translation>
+        <translation>जाँच हो रही है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="659"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">MCP सर्वर शुरू नहीं हो सका: {}</translation>
+        <translation>MCP सर्वर शुरू नहीं हो सका: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation type="obsolete">एजेंट यहाँ चुने गए स्रोतों में खोज सकता है। आपकी खोजें, और एजेंट जो कनेक्टर को देता है, उन्हें भेजे जाते हैं; उनसे जोड़ी गई परत उनके सर्वर से पढ़ी जाती है।</translation>
+        <translation>एजेंट यहाँ चुने गए स्रोतों में खोज सकता है। आपकी खोजें, और एजेंट जो कनेक्टर को देता है, उन्हें भेजे जाते हैं; उनसे जोड़ी गई परत उनके सर्वर से पढ़ी जाती है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation type="obsolete">एजेंट आपका अनुरोध, आपकी परतों और फ़ील्ड के नाम, आपके फ़िल्टर व्यंजक और अपने टूल के परिणाम यहाँ चुने गए प्रदाता को उसकी शर्तों के अंतर्गत भेजता है। नीचे दिए विकल्प के बिना एजेंट आपके फ़ील्ड के मान नहीं पढ़ता; आपके फ़िल्टर और पसंदीदा में पहले से लिखे मान फिर भी भेजे जाते हैं। बातचीत इस कंप्यूटर पर हर प्रोजेक्ट के लिए तब तक रखी जाती है जब तक आप नई शुरू न करें।</translation>
+        <translation>एजेंट आपका अनुरोध, आपकी परतों और फ़ील्ड के नाम, आपके फ़िल्टर व्यंजक और अपने टूल के परिणाम यहाँ चुने गए प्रदाता को उसकी शर्तों के अंतर्गत भेजता है। नीचे दिए विकल्प के बिना एजेंट आपके फ़ील्ड के मान नहीं पढ़ता; आपके फ़िल्टर और पसंदीदा में पहले से लिखे मान फिर भी भेजे जाते हैं। बातचीत इस कंप्यूटर पर हर प्रोजेक्ट के लिए तब तक रखी जाती है जब तक आप नई शुरू न करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="687"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation type="obsolete">mcp-remote के माध्यम से, जिसे Node.js चाहिए: Claude Desktop स्थानीय सर्वर को प्रोग्राम के रूप में चलाता है।</translation>
+        <translation>mcp-remote के माध्यम से, जिसे Node.js चाहिए: Claude Desktop स्थानीय सर्वर को प्रोग्राम के रूप में चलाता है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="846"/>
         <source>Too many sources added: remove one first.</source>
-        <translation type="obsolete">बहुत अधिक स्रोत जोड़े गए: पहले एक हटाएँ।</translation>
+        <translation>बहुत अधिक स्रोत जोड़े गए: पहले एक हटाएँ।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="261"/>
         <source>Undo the last</source>
-        <translation type="obsolete">पिछला पूर्ववत करें</translation>
+        <translation>पिछला पूर्ववत करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="170"/>
         <source>Undo this turn</source>
-        <translation type="obsolete">यह टर्न पूर्ववत करें</translation>
+        <translation>यह टर्न पूर्ववत करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="468"/>
         <source>What do you want to filter?</source>
-        <translation type="obsolete">आप क्या फ़िल्टर करना चाहते हैं?</translation>
+        <translation>आप क्या फ़िल्टर करना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
         <source>added by you</source>
-        <translation type="obsolete">आपके द्वारा जोड़ा गया</translation>
+        <translation>आपके द्वारा जोड़ा गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>applied</source>
-        <translation type="obsolete">लागू किया गया</translation>
+        <translation>लागू किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>community</source>
-        <translation type="obsolete">सामुदायिक</translation>
+        <translation>सामुदायिक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="765"/>
         <source>https://... or a portal address</source>
-        <translation type="obsolete">https://... या पोर्टल का पता</translation>
+        <translation>https://... या पोर्टल का पता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="310"/>
         <source>no change</source>
-        <translation type="obsolete">कोई बदलाव नहीं</translation>
+        <translation>कोई बदलाव नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>official</source>
-        <translation type="obsolete">आधिकारिक</translation>
+        <translation>आधिकारिक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>this computer</source>
-        <translation type="obsolete">यह कंप्यूटर</translation>
+        <translation>यह कंप्यूटर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>undone</source>
-        <translation type="obsolete">पूर्ववत किया गया</translation>
+        <translation>पूर्ववत किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation type="obsolete">{} टर्न</translation>
+        <translation>{} टर्न</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -1810,24 +1830,24 @@ Do you agree?</source>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="232"/>
         <source>Hide EXPLORING to give room to the sections</source>
-        <translation type="obsolete">अनुभागों के लिए जगह बनाने हेतु EXPLORING छिपाएँ</translation>
+        <translation>अनुभागों के लिए जगह बनाने हेतु EXPLORING छिपाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="233"/>
         <source>Show EXPLORING</source>
-        <translation type="obsolete">EXPLORING दिखाएँ</translation>
+        <translation>EXPLORING दिखाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="51"/>
         <source>Close</source>
-        <translation type="obsolete">बंद करें</translation>
+        <translation>बंद करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="48"/>
         <source>Detach or dock the panel</source>
-        <translation type="obsolete">पैनल को अलग करें या डॉक करें</translation>
+        <translation>पैनल को अलग करें या डॉक करें</translation>
     </message>
 </context>
 <context>
@@ -2994,39 +3014,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>प्लगइन लोड करने में त्रुटि: {0}। विवरण के लिए QGIS Python कंसोल जांचें।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7591"/>
+        <location filename="../filter_mate_dockwidget.py" line="7622"/>
         <source>Current layer: {0}</source>
         <translation>वर्तमान परत: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7593"/>
+        <location filename="../filter_mate_dockwidget.py" line="7624"/>
         <source>No layer selected</source>
         <translation>कोई परत चयनित नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>Selected layers:
 {0}</source>
         <translation>चयनित परतें:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>No layers selected</source>
         <translation>कोई परत चयनित नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7623"/>
+        <location filename="../filter_mate_dockwidget.py" line="7654"/>
         <source>No expression defined</source>
         <translation>कोई व्यंजक परिभाषित नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7635"/>
+        <location filename="../filter_mate_dockwidget.py" line="7666"/>
         <source>Display expression: {0}</source>
         <translation>प्रदर्शन व्यंजक: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7652"/>
+        <location filename="../filter_mate_dockwidget.py" line="7683"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>फ़ीचर ID: {0}
@@ -3131,42 +3151,42 @@ First attribute: {1}</source>
         <translation>{0} निष्पादित नहीं किया जा सकता: विजेट प्रारंभीकरण विफल।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2644"/>
+        <location filename="../filter_mate_app.py" line="2650"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} नहीं किया जा सकता: परत अमान्य या स्रोत नहीं मिला।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2798"/>
+        <location filename="../filter_mate_app.py" line="2804"/>
         <source>All filters cleared - </source>
         <translation>सभी फ़िल्टर साफ़ किए गए - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2799"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>मुख्य परत में {0}{1} फ़ीचर दृश्यमान</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2811"/>
+        <location filename="../filter_mate_app.py" line="2817"/>
         <source>Error: result handler missing</source>
         <translation>त्रुटि: परिणाम हैंडलर गायब है</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2828"/>
+        <location filename="../filter_mate_app.py" line="2834"/>
         <source>Error during filtering: {0}</source>
         <translation>फ़िल्टरिंग के दौरान त्रुटि: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2952"/>
+        <location filename="../filter_mate_app.py" line="2958"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} अनाथ पसंदीदा पुनर्प्राप्त किए: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3118"/>
+        <location filename="../filter_mate_app.py" line="3124"/>
         <source>Layer loading failed - click to retry</source>
         <translation>परत लोडिंग विफल - पुनः प्रयास के लिए क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3170"/>
+        <location filename="../filter_mate_app.py" line="3176"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} परत(तें) सफलतापूर्वक लोड हुईं</translation>
     </message>
@@ -3229,7 +3249,7 @@ What would you like to do?</translation>
         <translation>{0} परत(ें) फ़िल्टर बनी रहती हैं: {1}. फ़िल्टर हटाने के लिए विकल्प को फिर से चालू करें।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2630"/>
+        <location filename="../filter_mate_app.py" line="2636"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>सर्वर फ़िल्टर तैयार किया जा रहा है। दूसरा ऑपरेशन शुरू करने से पहले इसके पूरा होने तक प्रतीक्षा करें।</translation>
     </message>
@@ -3439,11 +3459,13 @@ Drop anyway?</source>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6244"/>
+        <location filename="../ui/controllers/property_controller.py" line="761"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>ऋणात्मक बफर (अपरदन): बहुभुजों को अंदर की ओर सिकोड़ता है</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6247"/>
+        <location filename="../ui/controllers/property_controller.py" line="768"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>मीटर में बफर मान (धनात्मक=विस्तार, ऋणात्मक=बहुभुज सिकोड़ें)</translation>
     </message>
@@ -3473,7 +3495,7 @@ Drop anyway?</source>
         <translation>परत गुण रीसेट करने में त्रुटि: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>Filter</source>
         <translation>फ़िल्टर</translation>
     </message>
@@ -3845,7 +3867,7 @@ Drop anyway?</source>
         <translation>📁 वर्तमान प्रोजेक्ट</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>फ़िल्टर शुरू नहीं हुआ: इसका चयन बदल गया या पढ़ा नहीं जा सका। फिर से फ़िल्टर पर क्लिक करें।</translation>
     </message>
@@ -4225,7 +4247,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="818"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: सेगमेंटेशन मॉडल डाउनलोड हो रहा है</translation>
     </message>
@@ -5757,6 +5779,84 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
         <translation>प्रोजेक्ट के एक या अधिक पॉइंट क्लाउड पर वही मानदंड (ASPRS वर्ग, Z और तीव्रता की सीमाएँ, रिटर्न संख्या, व्यंजक) लागू करता है, उदाहरण के लिए किसी कार्यस्थल के सभी LiDAR HD टाइल। फ़िल्टर पॉइंट क्लाउड का व्यंजक (उपसमुच्चय) है: यह तुरंत लागू होता है और FilterMate से पूर्ववत किया जा सकता है।</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="60"/>
+        <source>Raster to draw on (e.g. an orthophoto)</source>
+        <translation>जिस रास्टर पर बनाना है (जैसे ऑर्थोफ़ोटो)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="61"/>
+        <source>Guide features (points or polygons)</source>
+        <translation>गाइड फ़ीचर (बिंदु या बहुभुज)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="64"/>
+        <source>Objects drawn by SAM</source>
+        <translation>SAM द्वारा बनाए गए ऑब्जेक्ट</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="135"/>
+        <source>The raster cannot be read</source>
+        <translation>रास्टर पढ़ा नहीं जा सकता</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="79"/>
+        <source>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</source>
+        <translation>SAM स्थापित नहीं है: FilterMate पैनल में किसी रास्टर के पिपेट समूह में क्लिक किया गया ऑब्जेक्ट चुनें और स्थापना स्वीकार करें</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="100"/>
+        <source>The guide features cannot be read</source>
+        <translation>गाइड फ़ीचर पढ़े नहीं जा सकते</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="128"/>
+        <source>No point or polygon of the guide layer lies on the raster</source>
+        <translation>गाइड परत का कोई बिंदु या बहुभुज रास्टर पर नहीं है</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="132"/>
+        <source>{0} feature(s) on the raster, {1} window(s) to prepare</source>
+        <translation>रास्टर पर {0} फ़ीचर, तैयार करने के लिए {1} विंडो</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="160"/>
+        <source>A window could not be prepared: {0}</source>
+        <translation>एक विंडो तैयार नहीं की जा सकी: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="167"/>
+        <source>No window could be prepared: {0}</source>
+        <translation>कोई भी विंडो तैयार नहीं की जा सकी: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="183"/>
+        <source>Canceled: {0} of {1} window(s) prepared</source>
+        <translation>रद्द किया गया: {1} में से {0} विंडो तैयार</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="186"/>
+        <source>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</source>
+        <translation>{0} ऑब्जेक्ट बनाए गए, {1} फ़ीचर बिना ऑब्जेक्ट के, {2} छोड़े गए, {3:.0f} सेकंड में</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="194"/>
+        <source>Draw objects on a raster with SAM from points or polygons</source>
+        <translation>बिंदुओं या बहुभुजों से SAM के साथ रास्टर पर ऑब्जेक्ट बनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="197"/>
+        <source>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</source>
+        <translation>SAM 2.1 tiny रास्टर पर वह ऑब्जेक्ट बनाता है जिसकी ओर गाइड परत का प्रत्येक फ़ीचर इशारा करता है: बिंदु ऑब्जेक्ट पर एक क्लिक है, बहुभुज अपना बाउंडिंग बॉक्स और उसके भीतर एक बिंदु देता है। प्रति फ़ीचर एक बहुभुज, रास्टर के CRS में, फ़ीचर के गुणों, SAM के स्कोर (sam_score) और, बहुभुज के लिए, बनाए गए ऑब्जेक्ट के साथ उसके ओवरलैप (sam_iou, 0 से 1) के साथ।
+
+उदाहरण: हाल की ऑर्थोफ़ोटो पर फिर से बनाए गए इमारतों के फ़ुटप्रिंट (कम sam_iou बदली हुई इमारत को दर्शाता है); पेड़ों या तालाबों के बिंदु रूपरेखा में बदले गए।
+
+रास्टर वैसे ही बनाया जाता है जैसा नक़्शे में है, अपनी शैली के साथ। SAM को FilterMate पैनल के पिपेट समूह से एक बार स्थापित किया जाता है; यह CPU पर चलता है, 1024 पिक्सेल की प्रत्येक विंडो के लिए कुछ सेकंड।</translation>
     </message>
 </context>
 <context>
@@ -8182,7 +8282,7 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="650"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: सेगमेंटेशन तैयार हो रहा है</translation>
     </message>
@@ -8480,7 +8580,7 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="719"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: समान वस्तुएँ बनाई जा रही हैं</translation>
     </message>

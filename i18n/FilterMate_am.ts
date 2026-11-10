@@ -32,58 +32,68 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
         <source>Undone: {}</source>
         <translation>ተቀልብሷል: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Undo of the last request</source>
         <translation>የመጨረሻውን ጥያቄ መቀልበስ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
         <source>Back to before: {}</source>
         <translation>ከዚህ በፊት ወደነበረው ተመለስ: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Nothing to undo.</source>
         <translation>የሚቀለበስ ምንም የለም።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
         <source>Redo: {}</source>
         <translation>እንደገና አድርግ: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Undo: {}</source>
         <translation>ቀልብስ: {}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
         <source>Free quota</source>
-        <translation type="obsolete">ነፃ ኮታ</translation>
+        <translation>ነፃ ኮታ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>Access to the free quota was renewed: send your request again.</source>
-        <translation type="obsolete">የነፃ ኮታ መዳረሻ ታድሷል: ጥያቄዎን እንደገና ይላኩ።</translation>
+        <translation>የነፃ ኮታ መዳረሻ ታድሷል: ጥያቄዎን እንደገና ይላኩ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
         <source>Another application is changing the project: try again in a moment.</source>
-        <translation type="obsolete">ሌላ መተግበሪያ ፕሮጀክቱን እየቀየረ ነው: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
+        <translation>ሌላ መተግበሪያ ፕሮጀክቱን እየቀየረ ነው: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Another application: {}</source>
-        <translation type="obsolete">ሌላ መተግበሪያ: {}</translation>
+        <translation>ሌላ መተግበሪያ: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Applied again: {}.</source>
-        <translation type="obsolete">እንደገና ተተግብሯል: {}።</translation>
+        <translation>እንደገና ተተግብሯል: {}።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
         <source>Changed since, left as is: {}.</source>
-        <translation type="obsolete">ከዚያ በኋላ ተቀይሯል፣ እንዳለ ተተወ: {}።</translation>
+        <translation>ከዚያ በኋላ ተቀይሯል፣ እንዳለ ተተወ: {}።</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -91,677 +101,687 @@
         <translation type="obsolete">ተቀይሯል: {}።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation type="obsolete">ወኪሉን ለመጠቀም ሞዴል ይምረጡ እና ውሂብዎን ለመላክ ይስማሙ።</translation>
+        <translation>ወኪሉን ለመጠቀም ሞዴል ይምረጡ እና ውሂብዎን ለመላክ ይስማሙ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
         <source>Connecting to {}…</source>
-        <translation type="obsolete">ከ{} ጋር በመገናኘት ላይ…</translation>
+        <translation>ከ{} ጋር በመገናኘት ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation type="obsolete">ቀዳሚ ውይይት: ወኪሉ ከዚህ ጀምሮ እንደገና ይጀምራል።</translation>
+        <translation>ቀዳሚ ውይይት: ወኪሉ ከዚህ ጀምሮ እንደገና ይጀምራል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
         <source>Enter your API key in the agent settings.</source>
-        <translation type="obsolete">API ቁልፍዎን በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
+        <translation>API ቁልፍዎን በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Export of {}</source>
-        <translation type="obsolete">{} መላክ</translation>
+        <translation>{} መላክ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Favorite applied</source>
-        <translation type="obsolete">ተወዳጅ ተተግብሯል</translation>
+        <translation>ተወዳጅ ተተግብሯል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Filter on the points of {}</source>
-        <translation type="obsolete">በ{} ነጥቦች ላይ ማጣሪያ</translation>
+        <translation>በ{} ነጥቦች ላይ ማጣሪያ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
         <source>Filter on {}</source>
-        <translation type="obsolete">በ{} ላይ ማጣሪያ</translation>
+        <translation>በ{} ላይ ማጣሪያ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Filter on {} by an area</source>
-        <translation type="obsolete">በ{} ላይ በአካባቢ ማጣሪያ</translation>
+        <translation>በ{} ላይ በአካባቢ ማጣሪያ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
         <source>Filter on {} by {}</source>
-        <translation type="obsolete">በ{} ላይ በ{} ማጣሪያ</translation>
+        <translation>በ{} ላይ በ{} ማጣሪያ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">የFilterMate ወኪል</translation>
+        <translation>የFilterMate ወኪል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Filters removed from {}</source>
-        <translation type="obsolete">ማጣሪያዎች ከ{} ተወግደዋል</translation>
+        <translation>ማጣሪያዎች ከ{} ተወግደዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Hidden: {}</source>
-        <translation type="obsolete">ተደብቋል: {}</translation>
+        <translation>ተደብቋል: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
         <source>It answers.</source>
-        <translation type="obsolete">ምላሽ ይሰጣል።</translation>
+        <translation>ምላሽ ይሰጣል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Layer added: {}</source>
-        <translation type="obsolete">ንብርብር ተጨምሯል: {}</translation>
+        <translation>ንብርብር ተጨምሯል: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Layers removed: {}</source>
-        <translation type="obsolete">ንብርብሮች ተወግደዋል: {}</translation>
+        <translation>ንብርብሮች ተወግደዋል: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
         <source>Not reachable for this conversation: {}</source>
-        <translation type="obsolete">ለዚህ ውይይት ሊደረስበት አይችልም: {}</translation>
+        <translation>ለዚህ ውይይት ሊደረስበት አይችልም: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Nothing to redo.</source>
-        <translation type="obsolete">እንደገና የሚደረግ ምንም የለም።</translation>
+        <translation>እንደገና የሚደረግ ምንም የለም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Nothing to restore.</source>
-        <translation type="obsolete">የሚመለስ ምንም የለም።</translation>
+        <translation>የሚመለስ ምንም የለም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
         <source>Reading the active filters</source>
-        <translation type="obsolete">ንቁ ማጣሪያዎችን በማንበብ ላይ</translation>
+        <translation>ንቁ ማጣሪያዎችን በማንበብ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
         <source>Reading the favorites</source>
-        <translation type="obsolete">ተወዳጆችን በማንበብ ላይ</translation>
+        <translation>ተወዳጆችን በማንበብ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
         <source>Reading the fields of {}</source>
-        <translation type="obsolete">የ{} መስኮችን በማንበብ ላይ</translation>
+        <translation>የ{} መስኮችን በማንበብ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
         <source>Reading the layers</source>
-        <translation type="obsolete">ንብርብሮችን በማንበብ ላይ</translation>
+        <translation>ንብርብሮችን በማንበብ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
         <source>Reading the map</source>
-        <translation type="obsolete">ካርታውን በማንበብ ላይ</translation>
+        <translation>ካርታውን በማንበብ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
         <source>Reading the values of {}</source>
-        <translation type="obsolete">የ{} እሴቶችን በማንበብ ላይ</translation>
+        <translation>የ{} እሴቶችን በማንበብ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Restored: {}.</source>
-        <translation type="obsolete">ተመልሷል: {}።</translation>
+        <translation>ተመልሷል: {}።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Searching satellite imagery on {}</source>
-        <translation type="obsolete">በ{} ላይ የሳተላይት ምስሎችን በመፈለግ ላይ</translation>
+        <translation>በ{} ላይ የሳተላይት ምስሎችን በመፈለግ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Searching {} for {}</source>
-        <translation type="obsolete">በ{} ላይ {} በመፈለግ ላይ</translation>
+        <translation>በ{} ላይ {} በመፈለግ ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection cleared on {}</source>
-        <translation type="obsolete">በ{} ላይ ምርጫ ተጠርጓል</translation>
+        <translation>በ{} ላይ ምርጫ ተጠርጓል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection on {}</source>
-        <translation type="obsolete">በ{} ላይ ምርጫ</translation>
+        <translation>በ{} ላይ ምርጫ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Shown: {}</source>
-        <translation type="obsolete">ታይቷል: {}</translation>
+        <translation>ታይቷል: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
         <source>Stopped.</source>
-        <translation type="obsolete">ቆሟል።</translation>
+        <translation>ቆሟል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
+        <translation>የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="159"/>
         <source>The QGIS authentication database is not available.</source>
-        <translation type="obsolete">የQGIS የማረጋገጫ ዳታቤዝ አይገኝም።</translation>
+        <translation>የQGIS የማረጋገጫ ዳታቤዝ አይገኝም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="161"/>
         <source>The QGIS master password is needed to use the stored key.</source>
-        <translation type="obsolete">የተከማቸውን ቁልፍ ለመጠቀም የQGIS ዋና የይለፍ ቃል ያስፈልጋል።</translation>
+        <translation>የተከማቸውን ቁልፍ ለመጠቀም የQGIS ዋና የይለፍ ቃል ያስፈልጋል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>The agent stopped before the end ({}).</source>
-        <translation type="obsolete">ወኪሉ ከመጨረሻው በፊት ቆሟል ({})።</translation>
+        <translation>ወኪሉ ከመጨረሻው በፊት ቆሟል ({})።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
 Do you agree?</source>
-        <translation type="obsolete">ወኪሉ የዚህን የድር አገልግሎት ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+        <translation>ወኪሉ የዚህን የድር አገልግሎት ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
 {} · {}
 
 ይስማማሉ?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
         <source>The agent wants to add this layer to the project:
 {}
 
 A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation type="obsolete">ወኪሉ ይህን ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+        <translation>ወኪሉ ይህን ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
 {}
 
 የርቀት ምንጭ በQGIS ከአገልጋዩ ይነበባል፣ እና ንብርብሩ የያዘው ለወኪሉ አቅራቢ ሊላክ ይችላል። ይስማማሉ?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
         <source>The agent wants to export these layers to files:
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">ወኪሉ እነዚህን ንብርብሮች ወደ ፋይሎች መላክ ይፈልጋል:
+        <translation>ወኪሉ እነዚህን ንብርብሮች ወደ ፋይሎች መላክ ይፈልጋል:
 {}
 
 ይስማማሉ?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">ወኪሉ እነዚህን ንብርብሮች ከፕሮጀክቱ ማስወገድ ይፈልጋል (ፋይሎቻቸው ይቀራሉ፣ እዚህ ያሉ ቅጦቻቸው እና ማጣሪያዎቻቸው ይጠፋሉ):
+        <translation>ወኪሉ እነዚህን ንብርብሮች ከፕሮጀክቱ ማስወገድ ይፈልጋል (ፋይሎቻቸው ይቀራሉ፣ እዚህ ያሉ ቅጦቻቸው እና ማጣሪያዎቻቸው ይጠፋሉ):
 {}
 
 ይስማማሉ?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">ወኪሉ ይህን ተግባር በውጫዊ አገናኝ ላይ ማስኬድ ይፈልጋል:
+        <translation>ወኪሉ ይህን ተግባር በውጫዊ አገናኝ ላይ ማስኬድ ይፈልጋል:
 {}
 {}
 
 ይስማማሉ?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The credit or quota of this account is used up.</source>
-        <translation type="obsolete">የዚህ መለያ ክሬዲት ወይም ኮታ አልቋል።</translation>
+        <translation>የዚህ መለያ ክሬዲት ወይም ኮታ አልቋል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="44"/>
         <source>The free quota could not be reached: {}</source>
-        <translation type="obsolete">ነፃው ኮታ ሊደረስበት አልቻለም: {}</translation>
+        <translation>ነፃው ኮታ ሊደረስበት አልቻለም: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="224"/>
         <source>The free quota is not available.</source>
-        <translation type="obsolete">ነፃው ኮታ አይገኝም።</translation>
+        <translation>ነፃው ኮታ አይገኝም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="48"/>
+        <location filename="../adapters/agent/free_quota.py" line="54"/>
         <source>The free quota is unavailable for now.</source>
-        <translation type="obsolete">ነፃው ኮታ ለጊዜው አይገኝም።</translation>
+        <translation>ነፃው ኮታ ለጊዜው አይገኝም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation type="obsolete">የዚህ ወር ነፃ ኮታ አልቋል። የራስዎን API ቁልፍ በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
+        <translation>የዚህ ወር ነፃ ኮታ አልቋል። የራስዎን API ቁልፍ በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="180"/>
+        <location filename="../adapters/agent/settings.py" line="186"/>
         <source>The key could not be stored.</source>
-        <translation type="obsolete">ቁልፉ ሊከማች አልቻለም።</translation>
+        <translation>ቁልፉ ሊከማች አልቻለም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
         <source>The provider could not be reached: {}</source>
-        <translation type="obsolete">አቅራቢው ሊደረስበት አልቻለም: {}</translation>
+        <translation>አቅራቢው ሊደረስበት አልቻለም: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation type="obsolete">አቅራቢው API ቁልፉን ውድቅ አደረገ: በወኪል ቅንብሮች ውስጥ ይፈትሹት።</translation>
+        <translation>አቅራቢው API ቁልፉን ውድቅ አደረገ: በወኪል ቅንብሮች ውስጥ ይፈትሹት።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>The provider reported a problem: {}</source>
-        <translation type="obsolete">አቅራቢው ችግር ሪፖርት አደረገ: {}</translation>
+        <translation>አቅራቢው ችግር ሪፖርት አደረገ: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="208"/>
         <source>The stored key could not be read.</source>
-        <translation type="obsolete">የተከማቸው ቁልፍ ሊነበብ አልቻለም።</translation>
+        <translation>የተከማቸው ቁልፍ ሊነበብ አልቻለም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Thinking…</source>
-        <translation type="obsolete">በማሰብ ላይ…</translation>
+        <translation>በማሰብ ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation type="obsolete">ዛሬ ከዚህ አድራሻ ብዙ አዳዲስ መለያዎች ተፈጥረዋል: ነገ እንደገና ይሞክሩ፣ ወይም የራስዎን API ቁልፍ ያስገቡ።</translation>
+        <translation>ዛሬ ከዚህ አድራሻ ብዙ አዳዲስ መለያዎች ተፈጥረዋል: ነገ እንደገና ይሞክሩ፣ ወይም የራስዎን API ቁልፍ ያስገቡ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
         <source>Too many requests for now: try again in a moment.</source>
-        <translation type="obsolete">ለጊዜው ብዙ ጥያቄዎች: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
+        <translation>ለጊዜው ብዙ ጥያቄዎች: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
         <source>Trying a filter on {}</source>
-        <translation type="obsolete">በ{} ላይ ማጣሪያ በመሞከር ላይ</translation>
+        <translation>በ{} ላይ ማጣሪያ በመሞከር ላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Zoom on {}</source>
-        <translation type="obsolete">ወደ {} አጉላ</translation>
+        <translation>ወደ {} አጉላ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>an area</source>
-        <translation type="obsolete">አካባቢ</translation>
+        <translation>አካባቢ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>everything</source>
-        <translation type="obsolete">ሁሉም ነገር</translation>
+        <translation>ሁሉም ነገር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
         <source>{} tools available</source>
-        <translation type="obsolete">{} መሣሪያዎች ይገኛሉ</translation>
+        <translation>{} መሣሪያዎች ይገኛሉ</translation>
     </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="269"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>ከመጨረሻው ጥያቄ ከዚህ ደረጃ በፊት የነበሩ ንብርብሮች</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="267"/>
         <source>Undo back to here</source>
         <translation>እስከዚህ ድረስ ቀልብስ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="364"/>
         <source>TRY</source>
-        <translation type="obsolete">ሞክር</translation>
+        <translation>ሞክር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_thread.py" line="111"/>
         <source>Undo</source>
-        <translation type="obsolete">ቀልብስ</translation>
+        <translation>ቀልብስ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="312"/>
         <source>(no request)</source>
-        <translation type="obsolete">(ጥያቄ የለም)</translation>
+        <translation>(ጥያቄ የለም)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="611"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation type="obsolete">በወር ጥቂት ነፃ ጥያቄዎች፣ በFilterMate ወደ Claude (Anthropic) በሚያደርሰው ማስተላለፊያ በኩል፣ በAnthropic ውሎች መሠረት። ማስተላለፊያው የሚወጣውን ይቆጥራል እንጂ ምንም ውይይት አያስቀምጥም። ሲያልቅ አቅራቢ ይምረጡ እና የራስዎን API ቁልፍ ያስገቡ።</translation>
+        <translation>በወር ጥቂት ነፃ ጥያቄዎች፣ በFilterMate ወደ Claude (Anthropic) በሚያደርሰው ማስተላለፊያ በኩል፣ በAnthropic ውሎች መሠረት። ማስተላለፊያው የሚወጣውን ይቆጥራል እንጂ ምንም ውይይት አያስቀምጥም። ሲያልቅ አቅራቢ ይምረጡ እና የራስዎን API ቁልፍ ያስገቡ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="616"/>
         <source>API key</source>
-        <translation type="obsolete">API ቁልፍ</translation>
+        <translation>API ቁልፍ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="770"/>
         <source>Add</source>
-        <translation type="obsolete">አክል</translation>
+        <translation>አክል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="610"/>
+        <location filename="../ui/widgets/agent_panel.py" line="702"/>
         <source>Address</source>
-        <translation type="obsolete">አድራሻ</translation>
+        <translation>አድራሻ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="205"/>
         <source>Agent settings</source>
-        <translation type="obsolete">የወኪል ቅንብሮች</translation>
+        <translation>የወኪል ቅንብሮች</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="622"/>
         <source>Allow attribute values to be sent</source>
-        <translation type="obsolete">የባህሪ እሴቶች እንዲላኩ ፍቀድ</translation>
+        <translation>የባህሪ እሴቶች እንዲላኩ ፍቀድ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="695"/>
         <source>Applications already set up will have to be set up again.</source>
-        <translation type="obsolete">አስቀድሞ የተዋቀሩ መተግበሪያዎች እንደገና መዋቀር አለባቸው።</translation>
+        <translation>አስቀድሞ የተዋቀሩ መተግበሪያዎች እንደገና መዋቀር አለባቸው።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation type="obsolete">ንብርብሮችዎን እንዲያጣራ ወኪሉን ይጠይቁ</translation>
+        <translation>ንብርብሮችዎን እንዲያጣራ ወኪሉን ይጠይቁ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="240"/>
         <source>Back to the conversation</source>
-        <translation type="obsolete">ወደ ውይይቱ ተመለስ</translation>
+        <translation>ወደ ውይይቱ ተመለስ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="668"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation type="obsolete">FilterMate ከተከፈተ በኋላ፣ በዚህ ኮምፒውተር ላይ ያለ Claude Code ወይም ሌላ MCP ደንበኛ በዚህ ፓነል ደንቦች መሠረት ንብርብሮችዎን ማጣራት ይችላል: ተመሳሳይ ምንጮች፣ ተመሳሳይ ማረጋገጫዎች፣ እና ማጣሪያዎች እዚህ ሊቀለበሱ ይችላሉ። ያ መተግበሪያ የሚያነበውን ለራሱ AI አቅራቢ ይልካል።</translation>
+        <translation>FilterMate ከተከፈተ በኋላ፣ በዚህ ኮምፒውተር ላይ ያለ Claude Code ወይም ሌላ MCP ደንበኛ በዚህ ፓነል ደንቦች መሠረት ንብርብሮችዎን ማጣራት ይችላል: ተመሳሳይ ምንጮች፣ ተመሳሳይ ማረጋገጫዎች፣ እና ማጣሪያዎች እዚህ ሊቀለበሱ ይችላሉ። ያ መተግበሪያ የሚያነበውን ለራሱ AI አቅራቢ ይልካል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation type="obsolete">ለመጀመር AI አቅራቢ ያገናኙ። ከእርስዎ ፈቃድ በፊት ምንም አይላክም።</translation>
+        <translation>ለመጀመር AI አቅራቢ ያገናኙ። ከእርስዎ ፈቃድ በፊት ምንም አይላክም።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation type="obsolete">ከመዳረሻ ቶከን ጋር ተቀድቷል: ለራስዎ ያቆዩት። ተግባራዊ እንዲሆን እነዚህን ቅንብሮች ያስቀምጡ።</translation>
+        <translation>ከመዳረሻ ቶከን ጋር ተቀድቷል: ለራስዎ ያቆዩት። ተግባራዊ እንዲሆን እነዚህን ቅንብሮች ያስቀምጡ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="685"/>
         <source>Copy for Claude Desktop</source>
-        <translation type="obsolete">ለClaude Desktop ቅዳ</translation>
+        <translation>ለClaude Desktop ቅዳ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="690"/>
         <source>Copy the Claude Code command</source>
-        <translation type="obsolete">የClaude Code ትዕዛዝ ቅዳ</translation>
+        <translation>የClaude Code ትዕዛዝ ቅዳ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="682"/>
         <source>Copy the configuration</source>
-        <translation type="obsolete">ውቅሩን ቅዳ</translation>
+        <translation>ውቅሩን ቅዳ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation type="obsolete">በራስዎ ቃላት ይግለጹት። እያንዳንዱ ማጣሪያ ሊቀለበስ ይችላል።</translation>
+        <translation>በራስዎ ቃላት ይግለጹት። እያንዳንዱ ማጣሪያ ሊቀለበስ ይችላል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="471"/>
         <source>Filter your layers from a sentence</source>
-        <translation type="obsolete">ንብርብሮችዎን በአንድ አረፍተ ነገር ያጣሩ</translation>
+        <translation>ንብርብሮችዎን በአንድ አረፍተ ነገር ያጣሩ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="594"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">የFilterMate ወኪል</translation>
+        <translation>የFilterMate ወኪል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="242"/>
         <source>History</source>
-        <translation type="obsolete">ታሪክ</translation>
+        <translation>ታሪክ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="201"/>
         <source>History…</source>
-        <translation type="obsolete">ታሪክ…</translation>
+        <translation>ታሪክ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation type="obsolete">ይህን ውሂብ ለዚህ አቅራቢ ለመላክ እስማማለሁ</translation>
+        <translation>ይህን ውሂብ ለዚህ አቅራቢ ለመላክ እስማማለሁ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="672"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation type="obsolete">በዚህ ኮምፒውተር ላይ ያሉ ሌሎች መተግበሪያዎች FilterMateን እንዲቆጣጠሩ ፍቀድ (MCP አገልጋይ)</translation>
+        <translation>በዚህ ኮምፒውተር ላይ ያሉ ሌሎች መተግበሪያዎች FilterMateን እንዲቆጣጠሩ ፍቀድ (MCP አገልጋይ)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
         <source>MCP connector</source>
-        <translation type="obsolete">MCP አገናኝ</translation>
+        <translation>MCP አገናኝ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>MCP connectors</source>
-        <translation type="obsolete">MCP አገናኞች</translation>
+        <translation>MCP አገናኞች</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="606"/>
         <source>Model</source>
-        <translation type="obsolete">ሞዴል</translation>
+        <translation>ሞዴል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="198"/>
         <source>More</source>
-        <translation type="obsolete">ተጨማሪ</translation>
+        <translation>ተጨማሪ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="693"/>
         <source>New access token</source>
-        <translation type="obsolete">አዲስ የመዳረሻ ቶከን</translation>
+        <translation>አዲስ የመዳረሻ ቶከን</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="203"/>
         <source>New conversation</source>
-        <translation type="obsolete">አዲስ ውይይት</translation>
+        <translation>አዲስ ውይይት</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>New token: it applies once these settings are saved.</source>
-        <translation type="obsolete">አዲስ ቶከን: እነዚህ ቅንብሮች ከተቀመጡ በኋላ ይተገበራል።</translation>
+        <translation>አዲስ ቶከን: እነዚህ ቅንብሮች ከተቀመጡ በኋላ ይተገበራል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="795"/>
         <source>Open data platforms</source>
-        <translation type="obsolete">ክፍት የውሂብ መድረኮች</translation>
+        <translation>ክፍት የውሂብ መድረኮች</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="166"/>
         <source>Open the settings</source>
-        <translation type="obsolete">ቅንብሮችን ክፈት</translation>
+        <translation>ቅንብሮችን ክፈት</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="657"/>
         <source>Other applications</source>
-        <translation type="obsolete">ሌሎች መተግበሪያዎች</translation>
+        <translation>ሌሎች መተግበሪያዎች</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="701"/>
         <source>Port</source>
-        <translation type="obsolete">ወደብ</translation>
+        <translation>ወደብ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="655"/>
         <source>Provider</source>
-        <translation type="obsolete">አቅራቢ</translation>
+        <translation>አቅራቢ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="264"/>
         <source>Redo</source>
-        <translation type="obsolete">እንደገና አድርግ</translation>
+        <translation>እንደገና አድርግ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="755"/>
         <source>Remove</source>
-        <translation type="obsolete">አስወግድ</translation>
+        <translation>አስወግድ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="619"/>
         <source>Remove the stored key</source>
-        <translation type="obsolete">የተከማቸውን ቁልፍ አስወግድ</translation>
+        <translation>የተከማቸውን ቁልፍ አስወግድ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="796"/>
         <source>Satellite imagery</source>
-        <translation type="obsolete">የሳተላይት ምስሎች</translation>
+        <translation>የሳተላይት ምስሎች</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Send (Enter)</source>
-        <translation type="obsolete">ላክ (Enter)</translation>
+        <translation>ላክ (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
         <source>Send again</source>
-        <translation type="obsolete">እንደገና ላክ</translation>
+        <translation>እንደገና ላክ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="479"/>
         <source>Sent to: {}</source>
-        <translation type="obsolete">የተላከው ወደ: {}</translation>
+        <translation>የተላከው ወደ: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation type="obsolete">ወኪሉን አዋቅር</translation>
+        <translation>ወኪሉን አዋቅር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="656"/>
         <source>Sources</source>
-        <translation type="obsolete">ምንጮች</translation>
+        <translation>ምንጮች</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Stop (Esc)</source>
-        <translation type="obsolete">አቁም (Esc)</translation>
+        <translation>አቁም (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
         <source>Stored: leave empty to keep it</source>
-        <translation type="obsolete">የተከማቸ: ለማቆየት ባዶ ይተዉት</translation>
+        <translation>የተከማቸ: ለማቆየት ባዶ ይተዉት</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="753"/>
         <source>Test</source>
-        <translation type="obsolete">ሞክር</translation>
+        <translation>ሞክር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
         <source>Testing…</source>
-        <translation type="obsolete">በመሞከር ላይ…</translation>
+        <translation>በመሞከር ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="659"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
+        <translation>የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation type="obsolete">ወኪሉ እዚህ ምልክት የተደረገባቸውን ምንጮች መፈለግ ይችላል። ፍለጋዎችዎ እና ወኪሉ ለአገናኝ የሚያስተላልፈው ወደ እነሱ ይላካሉ፤ ከእነሱ የተጨመረ ንብርብር ከአገልጋዮቻቸው ይነበባል።</translation>
+        <translation>ወኪሉ እዚህ ምልክት የተደረገባቸውን ምንጮች መፈለግ ይችላል። ፍለጋዎችዎ እና ወኪሉ ለአገናኝ የሚያስተላልፈው ወደ እነሱ ይላካሉ፤ ከእነሱ የተጨመረ ንብርብር ከአገልጋዮቻቸው ይነበባል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation type="obsolete">ወኪሉ ጥያቄዎን፣ የንብርብሮችዎን እና የመስኮችዎን ስሞች፣ የማጣሪያ አገላለጾችዎን እና የመሣሪያዎቹን ውጤቶች እዚህ ለተመረጠው አቅራቢ በዚያ አቅራቢ ውሎች መሠረት ይልካል። ከታች ያለው አማራጭ ከሌለ ወኪሉ የመስኮችዎን እሴቶች አያነብም፤ በማጣሪያዎችዎ እና በተወዳጆችዎ ውስጥ አስቀድመው የተጻፉ እሴቶች አሁንም ይላካሉ። ውይይቱ አዲስ እስኪጀምሩ ድረስ ለእያንዳንዱ ፕሮጀክት በዚህ ኮምፒውተር ላይ ይቀመጣል።</translation>
+        <translation>ወኪሉ ጥያቄዎን፣ የንብርብሮችዎን እና የመስኮችዎን ስሞች፣ የማጣሪያ አገላለጾችዎን እና የመሣሪያዎቹን ውጤቶች እዚህ ለተመረጠው አቅራቢ በዚያ አቅራቢ ውሎች መሠረት ይልካል። ከታች ያለው አማራጭ ከሌለ ወኪሉ የመስኮችዎን እሴቶች አያነብም፤ በማጣሪያዎችዎ እና በተወዳጆችዎ ውስጥ አስቀድመው የተጻፉ እሴቶች አሁንም ይላካሉ። ውይይቱ አዲስ እስኪጀምሩ ድረስ ለእያንዳንዱ ፕሮጀክት በዚህ ኮምፒውተር ላይ ይቀመጣል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="687"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation type="obsolete">በNode.js በሚያስፈልገው mcp-remote በኩል: Claude Desktop የአካባቢ አገልጋዮችን እንደ ፕሮግራሞች ያስነሳል።</translation>
+        <translation>በNode.js በሚያስፈልገው mcp-remote በኩል: Claude Desktop የአካባቢ አገልጋዮችን እንደ ፕሮግራሞች ያስነሳል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="846"/>
         <source>Too many sources added: remove one first.</source>
-        <translation type="obsolete">በጣም ብዙ ምንጮች ተጨምረዋል: መጀመሪያ አንዱን ያስወግዱ።</translation>
+        <translation>በጣም ብዙ ምንጮች ተጨምረዋል: መጀመሪያ አንዱን ያስወግዱ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="261"/>
         <source>Undo the last</source>
-        <translation type="obsolete">የመጨረሻውን ቀልብስ</translation>
+        <translation>የመጨረሻውን ቀልብስ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="170"/>
         <source>Undo this turn</source>
-        <translation type="obsolete">ይህን ዙር ቀልብስ</translation>
+        <translation>ይህን ዙር ቀልብስ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="468"/>
         <source>What do you want to filter?</source>
-        <translation type="obsolete">ምን ማጣራት ይፈልጋሉ?</translation>
+        <translation>ምን ማጣራት ይፈልጋሉ?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
         <source>added by you</source>
-        <translation type="obsolete">በእርስዎ የተጨመረ</translation>
+        <translation>በእርስዎ የተጨመረ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>applied</source>
-        <translation type="obsolete">ተተግብሯል</translation>
+        <translation>ተተግብሯል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>community</source>
-        <translation type="obsolete">የማህበረሰብ</translation>
+        <translation>የማህበረሰብ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="765"/>
         <source>https://... or a portal address</source>
-        <translation type="obsolete">https://... ወይም የፖርታል አድራሻ</translation>
+        <translation>https://... ወይም የፖርታል አድራሻ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="310"/>
         <source>no change</source>
-        <translation type="obsolete">ለውጥ የለም</translation>
+        <translation>ለውጥ የለም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>official</source>
-        <translation type="obsolete">ይፋዊ</translation>
+        <translation>ይፋዊ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>this computer</source>
-        <translation type="obsolete">ይህ ኮምፒውተር</translation>
+        <translation>ይህ ኮምፒውተር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>undone</source>
-        <translation type="obsolete">ተቀልብሷል</translation>
+        <translation>ተቀልብሷል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation type="obsolete">{} ዙር(ዎች)</translation>
+        <translation>{} ዙር(ዎች)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -1810,24 +1830,24 @@ Do you agree?</source>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="232"/>
         <source>Hide EXPLORING to give room to the sections</source>
-        <translation type="obsolete">ክፍሎቹ ቦታ እንዲያገኙ EXPLORING ደብቅ</translation>
+        <translation>ክፍሎቹ ቦታ እንዲያገኙ EXPLORING ደብቅ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="233"/>
         <source>Show EXPLORING</source>
-        <translation type="obsolete">EXPLORING አሳይ</translation>
+        <translation>EXPLORING አሳይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="51"/>
         <source>Close</source>
-        <translation type="obsolete">ዝጋ</translation>
+        <translation>ዝጋ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="48"/>
         <source>Detach or dock the panel</source>
-        <translation type="obsolete">ፓነሉን ንቀል ወይም አስቀምጥ</translation>
+        <translation>ፓነሉን ንቀል ወይም አስቀምጥ</translation>
     </message>
 </context>
 <context>
@@ -2994,39 +3014,39 @@ Please restart QGIS to apply the changes.</translation>
         <translation>ፕለጊን መጫን ስህተት: {0}። ዝርዝር ለማየት QGIS Python ኮንሶል ይመልከቱ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7591"/>
+        <location filename="../filter_mate_dockwidget.py" line="7622"/>
         <source>Current layer: {0}</source>
         <translation>ወቅታዊ ንብርብር: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7593"/>
+        <location filename="../filter_mate_dockwidget.py" line="7624"/>
         <source>No layer selected</source>
         <translation>ንብርብር አልተመረጠም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>Selected layers:
 {0}</source>
         <translation>የተመረጡ ንብርብሮች:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>No layers selected</source>
         <translation>ንብርብሮች አልተመረጡም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7623"/>
+        <location filename="../filter_mate_dockwidget.py" line="7654"/>
         <source>No expression defined</source>
         <translation>አገላለጽ አልተገለጸም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7635"/>
+        <location filename="../filter_mate_dockwidget.py" line="7666"/>
         <source>Display expression: {0}</source>
         <translation>ማሳያ አገላለጽ: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7652"/>
+        <location filename="../filter_mate_dockwidget.py" line="7683"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ባህሪ ID: {0}
@@ -3131,42 +3151,42 @@ First attribute: {1}</source>
         <translation>{0}ን ማስኬድ አይቻልም: ዊጀት ማስጀመር አልተሳካም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2644"/>
+        <location filename="../filter_mate_app.py" line="2650"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} አይቻልም: ንብርብር ልክ ያልሆነ ወይም ምንጭ አልተገኘም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2798"/>
+        <location filename="../filter_mate_app.py" line="2804"/>
         <source>All filters cleared - </source>
         <translation>ሁሉም ማጣሪያዎች ተጽድተዋል - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2799"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>በዋና ንብርብር ውስጥ {0}{1} ባህሪያት ይታያሉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2811"/>
+        <location filename="../filter_mate_app.py" line="2817"/>
         <source>Error: result handler missing</source>
         <translation>ስህተት: የውጤት ተቆጣጣሪ ይጎድላል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2828"/>
+        <location filename="../filter_mate_app.py" line="2834"/>
         <source>Error during filtering: {0}</source>
         <translation>ማጣራት ወቅት ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2952"/>
+        <location filename="../filter_mate_app.py" line="2958"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} ወላጅ-አልባ ተወዳጅ(ዎች) ተመልሰዋል: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3118"/>
+        <location filename="../filter_mate_app.py" line="3124"/>
         <source>Layer loading failed - click to retry</source>
         <translation>ንብርብር መጫን አልተሳካም - እንደገና ለመሞከር ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3170"/>
+        <location filename="../filter_mate_app.py" line="3176"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} ንብርብር(ዎች) በተሳካ ሁኔታ ተጫነ(ኑ)</translation>
     </message>
@@ -3229,7 +3249,7 @@ What would you like to do?</translation>
         <translation>{0} ንብርብር(ዎች) እንደተጣሩ ይቆያሉ፦ {1}። እነሱን ማጣሪያ ለማንሳት አማራጩን እንደገና ያብሩት።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2630"/>
+        <location filename="../filter_mate_app.py" line="2636"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>የአገልጋይ ማጣሪያ እየተዘጋጀ ነው። ሌላ ክንውን ከመጀመርዎ በፊት እስኪጨርስ ይጠብቁ።</translation>
     </message>
@@ -3439,11 +3459,13 @@ Drop anyway?</source>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6244"/>
+        <location filename="../ui/controllers/property_controller.py" line="761"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>አሉታዊ ቋት (መሸርሸር): ብዙ-ጎኖችን ወደ ውስጥ ያሳንሳል</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6247"/>
+        <location filename="../ui/controllers/property_controller.py" line="768"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>በሜትር የቋት ዋጋ (አዎንታዊ=ማስፋት፣ አሉታዊ=ብዙ-ጎኖችን ማሳነስ)</translation>
     </message>
@@ -3473,7 +3495,7 @@ Drop anyway?</source>
         <translation>የንብርብር ባህሪያትን ዳግም ማስጀመር ስህተት: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>Filter</source>
         <translation>አጣራ</translation>
     </message>
@@ -3845,7 +3867,7 @@ Drop anyway?</source>
         <translation>📁 የአሁኑ ፕሮጀክት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>ማጣሪያው አልተጀመረም፦ ምርጫው ተቀይሯል ወይም ሊነበብ አልቻለም። አጣራ የሚለውን እንደገና ጠቅ ያድርጉ።</translation>
     </message>
@@ -4225,7 +4247,7 @@ PostgreSQL ሰንጠረዥ PRIMARY KEY እንዳለው ያረጋግጡ።</trans
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="818"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate፦ የክፍልፋይ ሞዴሉን በማውረድ ላይ</translation>
     </message>
@@ -5757,6 +5779,84 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
         <translation>ተመሳሳይ መስፈርቶችን (የASPRS ምድቦች፣ የZ እና የጥንካሬ ክልሎች፣ የመመለሻ ቁጥር፣ አገላለጽ) በፕሮጀክቱ አንድ ወይም ብዙ የነጥብ ደመናዎች ላይ ይተገብራል፣ ለምሳሌ በአንድ የሥራ ቦታ ሁሉም የLiDAR HD ንጣፎች። ማጣሪያው የነጥብ ደመናው አገላለጽ (ንዑስ ስብስብ) ነው፦ ወዲያውኑ ይተገበራል እና ከFilterMate መቀልበስ ይቻላል።</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="60"/>
+        <source>Raster to draw on (e.g. an orthophoto)</source>
+        <translation>የሚሳልበት ራስተር (ለምሳሌ ኦርቶፎቶ)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="61"/>
+        <source>Guide features (points or polygons)</source>
+        <translation>መመሪያ ባህሪያት (ነጥቦች ወይም ፖሊጎኖች)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="64"/>
+        <source>Objects drawn by SAM</source>
+        <translation>በSAM የተሳሉ ነገሮች</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="135"/>
+        <source>The raster cannot be read</source>
+        <translation>ራስተሩን ማንበብ አይቻልም</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="79"/>
+        <source>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</source>
+        <translation>SAM አልተጫነም፦ በFilterMate ፓነል ውስጥ ባለ ራስተር መራጭ ቡድን ውስጥ የተጫነው ነገር ይምረጡ እና መጫኑን ይቀበሉ</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="100"/>
+        <source>The guide features cannot be read</source>
+        <translation>መመሪያ ባህሪያትን ማንበብ አይቻልም</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="128"/>
+        <source>No point or polygon of the guide layer lies on the raster</source>
+        <translation>የመመሪያ ንብርብሩ ምንም ነጥብ ወይም ፖሊጎን በራስተሩ ላይ አይገኝም</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="132"/>
+        <source>{0} feature(s) on the raster, {1} window(s) to prepare</source>
+        <translation>በራስተሩ ላይ {0} ባህሪ(ያት)፣ ለማዘጋጀት {1} መስኮት(ዎች)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="160"/>
+        <source>A window could not be prepared: {0}</source>
+        <translation>አንድ መስኮት ሊዘጋጅ አልቻለም፦ {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="167"/>
+        <source>No window could be prepared: {0}</source>
+        <translation>ምንም መስኮት ሊዘጋጅ አልቻለም፦ {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="183"/>
+        <source>Canceled: {0} of {1} window(s) prepared</source>
+        <translation>ተሰርዟል፦ ከ{1} መስኮቶች {0} ተዘጋጅተዋል</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="186"/>
+        <source>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</source>
+        <translation>{0} ነገር(ሮች) ተስለዋል፣ ነገር የሌላቸው {1} ባህሪ(ያት)፣ {2} ተዘልለዋል፣ በ{3:.0f} ሰከንድ</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="194"/>
+        <source>Draw objects on a raster with SAM from points or polygons</source>
+        <translation>ከነጥቦች ወይም ከፖሊጎኖች በSAM በራስተር ላይ ነገሮችን ሳል</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="197"/>
+        <source>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</source>
+        <translation>SAM 2.1 tiny የመመሪያ ንብርብሩ እያንዳንዱ ባህሪ የሚጠቁመውን ነገር በራስተሩ ላይ ይስላል፦ ነጥብ በነገሩ ላይ የሚደረግ ጠቅታ ነው፣ ፖሊጎን ደግሞ የሚያጠቃልለውን ሳጥን እና በውስጡ ያለ ነጥብ ይሰጣል። ለእያንዳንዱ ባህሪ አንድ ፖሊጎን፣ በራስተሩ CRS፣ ከባህሪው ባህሪያት፣ ከSAM ውጤት (sam_score) እና ለፖሊጎን ከተሳለው ነገር ጋር ካለው መደራረብ (sam_iou፣ ከ0 እስከ 1) ጋር።
+
+ምሳሌዎች፦ በቅርብ ጊዜ ኦርቶፎቶ ላይ እንደገና የተሳሉ የሕንፃ ዱካዎች (ዝቅተኛ sam_iou የተለወጠ ሕንፃን ያመለክታል)፤ የዛፎች ወይም የኩሬዎች ነጥቦች ወደ ዝርዝር ድንበሮች የተቀየሩ።
+
+ራስተሩ በካርታው ላይ እንዳለው በስታይሉ ይሳላል። SAM አንድ ጊዜ ከFilterMate ፓነል መራጭ ቡድን ይጫናል፤ በሲፒዩ ላይ ይሰራል፣ ለእያንዳንዱ 1024 ፒክሰል መስኮት ጥቂት ሰከንዶች ይወስዳል።</translation>
     </message>
 </context>
 <context>
@@ -8182,7 +8282,7 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="650"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate፦ ክፍልፋዩን በማዘጋጀት ላይ</translation>
     </message>
@@ -8480,7 +8580,7 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="719"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate፦ ተመሳሳይ ነገሮች እየተሳሉ ነው</translation>
     </message>

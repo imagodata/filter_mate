@@ -32,58 +32,68 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
         <source>Undone: {}</source>
         <translation>Deshecho: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Undo of the last request</source>
         <translation>Deshacer la última petición</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
         <source>Back to before: {}</source>
         <translation>Volver a antes de: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Nothing to undo.</source>
         <translation>Nada que deshacer.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
         <source>Redo: {}</source>
         <translation>Rehacer: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Undo: {}</source>
         <translation>Deshacer: {}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
         <source>Free quota</source>
-        <translation type="obsolete">Cuota gratuita</translation>
+        <translation>Cuota gratuita</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>Access to the free quota was renewed: send your request again.</source>
-        <translation type="obsolete">Se ha renovado el acceso a la cuota gratuita: vuelva a enviar su solicitud.</translation>
+        <translation>Se ha renovado el acceso a la cuota gratuita: vuelva a enviar su solicitud.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
         <source>Another application is changing the project: try again in a moment.</source>
-        <translation type="obsolete">Otra aplicación está modificando el proyecto: inténtelo de nuevo en un momento.</translation>
+        <translation>Otra aplicación está modificando el proyecto: inténtelo de nuevo en un momento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Another application: {}</source>
-        <translation type="obsolete">Otra aplicación: {}</translation>
+        <translation>Otra aplicación: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Applied again: {}.</source>
-        <translation type="obsolete">Aplicado de nuevo: {}.</translation>
+        <translation>Aplicado de nuevo: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
         <source>Changed since, left as is: {}.</source>
-        <translation type="obsolete">Modificado desde entonces, se deja tal cual: {}.</translation>
+        <translation>Modificado desde entonces, se deja tal cual: {}.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -91,677 +101,687 @@
         <translation type="obsolete">Modificado: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation type="obsolete">Elija un modelo y acepte el envío de sus datos para usar el agente.</translation>
+        <translation>Elija un modelo y acepte el envío de sus datos para usar el agente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
         <source>Connecting to {}…</source>
-        <translation type="obsolete">Conectando a {}…</translation>
+        <translation>Conectando a {}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation type="obsolete">Conversación anterior: el agente empieza de cero a partir de aquí.</translation>
+        <translation>Conversación anterior: el agente empieza de cero a partir de aquí.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
         <source>Enter your API key in the agent settings.</source>
-        <translation type="obsolete">Introduzca su clave de API en los ajustes del agente.</translation>
+        <translation>Introduzca su clave de API en los ajustes del agente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Export of {}</source>
-        <translation type="obsolete">Exportación de {}</translation>
+        <translation>Exportación de {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Favorite applied</source>
-        <translation type="obsolete">Favorito aplicado</translation>
+        <translation>Favorito aplicado</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Filter on the points of {}</source>
-        <translation type="obsolete">Filtro sobre los puntos de {}</translation>
+        <translation>Filtro sobre los puntos de {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
         <source>Filter on {}</source>
-        <translation type="obsolete">Filtro sobre {}</translation>
+        <translation>Filtro sobre {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Filter on {} by an area</source>
-        <translation type="obsolete">Filtro sobre {} por un área</translation>
+        <translation>Filtro sobre {} por un área</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
         <source>Filter on {} by {}</source>
-        <translation type="obsolete">Filtro sobre {} por {}</translation>
+        <translation>Filtro sobre {} por {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">Agente de FilterMate</translation>
+        <translation>Agente de FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Filters removed from {}</source>
-        <translation type="obsolete">Filtros quitados de {}</translation>
+        <translation>Filtros quitados de {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Hidden: {}</source>
-        <translation type="obsolete">Oculto: {}</translation>
+        <translation>Oculto: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
         <source>It answers.</source>
-        <translation type="obsolete">La fuente responde.</translation>
+        <translation>La fuente responde.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Layer added: {}</source>
-        <translation type="obsolete">Capa añadida: {}</translation>
+        <translation>Capa añadida: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Layers removed: {}</source>
-        <translation type="obsolete">Capas quitadas: {}</translation>
+        <translation>Capas quitadas: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
         <source>Not reachable for this conversation: {}</source>
-        <translation type="obsolete">No accesible para esta conversación: {}</translation>
+        <translation>No accesible para esta conversación: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Nothing to redo.</source>
-        <translation type="obsolete">Nada que rehacer.</translation>
+        <translation>Nada que rehacer.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Nothing to restore.</source>
-        <translation type="obsolete">Nada que restaurar.</translation>
+        <translation>Nada que restaurar.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
         <source>Reading the active filters</source>
-        <translation type="obsolete">Leyendo los filtros activos</translation>
+        <translation>Leyendo los filtros activos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
         <source>Reading the favorites</source>
-        <translation type="obsolete">Leyendo los favoritos</translation>
+        <translation>Leyendo los favoritos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
         <source>Reading the fields of {}</source>
-        <translation type="obsolete">Leyendo los campos de {}</translation>
+        <translation>Leyendo los campos de {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
         <source>Reading the layers</source>
-        <translation type="obsolete">Leyendo las capas</translation>
+        <translation>Leyendo las capas</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
         <source>Reading the map</source>
-        <translation type="obsolete">Leyendo el mapa</translation>
+        <translation>Leyendo el mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
         <source>Reading the values of {}</source>
-        <translation type="obsolete">Leyendo los valores de {}</translation>
+        <translation>Leyendo los valores de {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Restored: {}.</source>
-        <translation type="obsolete">Restaurado: {}.</translation>
+        <translation>Restaurado: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Searching satellite imagery on {}</source>
-        <translation type="obsolete">Buscando imágenes de satélite en {}</translation>
+        <translation>Buscando imágenes de satélite en {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Searching {} for {}</source>
-        <translation type="obsolete">Buscando {} en {}</translation>
+        <translation>Buscando {} en {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection cleared on {}</source>
-        <translation type="obsolete">Selección borrada en {}</translation>
+        <translation>Selección borrada en {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection on {}</source>
-        <translation type="obsolete">Selección en {}</translation>
+        <translation>Selección en {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Shown: {}</source>
-        <translation type="obsolete">Visible: {}</translation>
+        <translation>Visible: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
         <source>Stopped.</source>
-        <translation type="obsolete">Detenido.</translation>
+        <translation>Detenido.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">No se pudo iniciar el servidor MCP: {}</translation>
+        <translation>No se pudo iniciar el servidor MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="159"/>
         <source>The QGIS authentication database is not available.</source>
-        <translation type="obsolete">La base de datos de autenticación de QGIS no está disponible.</translation>
+        <translation>La base de datos de autenticación de QGIS no está disponible.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="161"/>
         <source>The QGIS master password is needed to use the stored key.</source>
-        <translation type="obsolete">Se necesita la contraseña maestra de QGIS para usar la clave guardada.</translation>
+        <translation>Se necesita la contraseña maestra de QGIS para usar la clave guardada.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>The agent stopped before the end ({}).</source>
-        <translation type="obsolete">El agente se detuvo antes del final ({}).</translation>
+        <translation>El agente se detuvo antes del final ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
 Do you agree?</source>
-        <translation type="obsolete">El agente quiere añadir esta capa de un servicio web al proyecto:
+        <translation>El agente quiere añadir esta capa de un servicio web al proyecto:
 {} · {}
 
 ¿Está de acuerdo?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
         <source>The agent wants to add this layer to the project:
 {}
 
 A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation type="obsolete">El agente quiere añadir esta capa al proyecto:
+        <translation>El agente quiere añadir esta capa al proyecto:
 {}
 
 QGIS lee una fuente remota desde su servidor, y el contenido de la capa puede enviarse al proveedor del agente. ¿Está de acuerdo?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
         <source>The agent wants to export these layers to files:
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">El agente quiere exportar estas capas a archivos:
+        <translation>El agente quiere exportar estas capas a archivos:
 {}
 
 ¿Está de acuerdo?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">El agente quiere quitar estas capas del proyecto (sus archivos se conservan, sus estilos y filtros aquí se pierden):
+        <translation>El agente quiere quitar estas capas del proyecto (sus archivos se conservan, sus estilos y filtros aquí se pierden):
 {}
 
 ¿Está de acuerdo?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">El agente quiere ejecutar esta acción en un conector externo:
+        <translation>El agente quiere ejecutar esta acción en un conector externo:
 {}
 {}
 
 ¿Está de acuerdo?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The credit or quota of this account is used up.</source>
-        <translation type="obsolete">El crédito o la cuota de esta cuenta se ha agotado.</translation>
+        <translation>El crédito o la cuota de esta cuenta se ha agotado.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="44"/>
         <source>The free quota could not be reached: {}</source>
-        <translation type="obsolete">No se pudo acceder a la cuota gratuita: {}</translation>
+        <translation>No se pudo acceder a la cuota gratuita: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="224"/>
         <source>The free quota is not available.</source>
-        <translation type="obsolete">La cuota gratuita no está disponible.</translation>
+        <translation>La cuota gratuita no está disponible.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="48"/>
+        <location filename="../adapters/agent/free_quota.py" line="54"/>
         <source>The free quota is unavailable for now.</source>
-        <translation type="obsolete">La cuota gratuita no está disponible por el momento.</translation>
+        <translation>La cuota gratuita no está disponible por el momento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation type="obsolete">La cuota gratuita se ha agotado este mes. Introduzca su propia clave de API en los ajustes del agente.</translation>
+        <translation>La cuota gratuita se ha agotado este mes. Introduzca su propia clave de API en los ajustes del agente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="180"/>
+        <location filename="../adapters/agent/settings.py" line="186"/>
         <source>The key could not be stored.</source>
-        <translation type="obsolete">No se pudo guardar la clave.</translation>
+        <translation>No se pudo guardar la clave.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
         <source>The provider could not be reached: {}</source>
-        <translation type="obsolete">No se pudo acceder al proveedor: {}</translation>
+        <translation>No se pudo acceder al proveedor: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation type="obsolete">El proveedor ha rechazado la clave de API: compruébela en los ajustes del agente.</translation>
+        <translation>El proveedor ha rechazado la clave de API: compruébela en los ajustes del agente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>The provider reported a problem: {}</source>
-        <translation type="obsolete">El proveedor ha notificado un problema: {}</translation>
+        <translation>El proveedor ha notificado un problema: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="208"/>
         <source>The stored key could not be read.</source>
-        <translation type="obsolete">No se pudo leer la clave guardada.</translation>
+        <translation>No se pudo leer la clave guardada.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Thinking…</source>
-        <translation type="obsolete">Pensando…</translation>
+        <translation>Pensando…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation type="obsolete">Demasiadas cuentas nuevas desde esta dirección hoy: inténtelo de nuevo mañana o introduzca su propia clave de API.</translation>
+        <translation>Demasiadas cuentas nuevas desde esta dirección hoy: inténtelo de nuevo mañana o introduzca su propia clave de API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
         <source>Too many requests for now: try again in a moment.</source>
-        <translation type="obsolete">Demasiadas solicitudes por ahora: inténtelo de nuevo en un momento.</translation>
+        <translation>Demasiadas solicitudes por ahora: inténtelo de nuevo en un momento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
         <source>Trying a filter on {}</source>
-        <translation type="obsolete">Probando un filtro sobre {}</translation>
+        <translation>Probando un filtro sobre {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Zoom on {}</source>
-        <translation type="obsolete">Zoom a {}</translation>
+        <translation>Zoom a {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>an area</source>
-        <translation type="obsolete">un área</translation>
+        <translation>un área</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>everything</source>
-        <translation type="obsolete">todo</translation>
+        <translation>todo</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
         <source>{} tools available</source>
-        <translation type="obsolete">{} herramientas disponibles</translation>
+        <translation>{} herramientas disponibles</translation>
     </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="269"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Las capas tal como estaban antes de este paso de la última petición</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="267"/>
         <source>Undo back to here</source>
         <translation>Deshacer hasta aquí</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="364"/>
         <source>TRY</source>
-        <translation type="obsolete">PRUEBE</translation>
+        <translation>PRUEBE</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_thread.py" line="111"/>
         <source>Undo</source>
-        <translation type="obsolete">Deshacer</translation>
+        <translation>Deshacer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="312"/>
         <source>(no request)</source>
-        <translation type="obsolete">(sin solicitud)</translation>
+        <translation>(sin solicitud)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="611"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation type="obsolete">Unas pocas solicitudes gratuitas al mes, a través del relé de FilterMate hacia Claude (Anthropic), según las condiciones de Anthropic. El relé cuenta lo que se gasta y no guarda ninguna conversación. Cuando se agote, elija un proveedor e introduzca su propia clave de API.</translation>
+        <translation>Unas pocas solicitudes gratuitas al mes, a través del relé de FilterMate hacia Claude (Anthropic), según las condiciones de Anthropic. El relé cuenta lo que se gasta y no guarda ninguna conversación. Cuando se agote, elija un proveedor e introduzca su propia clave de API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="616"/>
         <source>API key</source>
-        <translation type="obsolete">Clave de API</translation>
+        <translation>Clave de API</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="770"/>
         <source>Add</source>
-        <translation type="obsolete">Añadir</translation>
+        <translation>Añadir</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="610"/>
+        <location filename="../ui/widgets/agent_panel.py" line="702"/>
         <source>Address</source>
-        <translation type="obsolete">Dirección</translation>
+        <translation>Dirección</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="205"/>
         <source>Agent settings</source>
-        <translation type="obsolete">Ajustes del agente</translation>
+        <translation>Ajustes del agente</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="622"/>
         <source>Allow attribute values to be sent</source>
-        <translation type="obsolete">Permitir el envío de valores de atributos</translation>
+        <translation>Permitir el envío de valores de atributos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="695"/>
         <source>Applications already set up will have to be set up again.</source>
-        <translation type="obsolete">Las aplicaciones ya configuradas deberán configurarse de nuevo.</translation>
+        <translation>Las aplicaciones ya configuradas deberán configurarse de nuevo.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation type="obsolete">Pida al agente que filtre sus capas</translation>
+        <translation>Pida al agente que filtre sus capas</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="240"/>
         <source>Back to the conversation</source>
-        <translation type="obsolete">Volver a la conversación</translation>
+        <translation>Volver a la conversación</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="668"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation type="obsolete">Claude Code u otro cliente MCP de este equipo podrá entonces filtrar sus capas, una vez abierto FilterMate, según las reglas de este panel: las mismas fuentes, las mismas confirmaciones, y los filtros se pueden deshacer aquí. Esa aplicación envía lo que lee a su propio proveedor de IA.</translation>
+        <translation>Claude Code u otro cliente MCP de este equipo podrá entonces filtrar sus capas, una vez abierto FilterMate, según las reglas de este panel: las mismas fuentes, las mismas confirmaciones, y los filtros se pueden deshacer aquí. Esa aplicación envía lo que lee a su propio proveedor de IA.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation type="obsolete">Conecte un proveedor de IA para empezar. No se envía nada sin su consentimiento.</translation>
+        <translation>Conecte un proveedor de IA para empezar. No se envía nada sin su consentimiento.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation type="obsolete">Copiado, con el token de acceso: no lo comparta. Guarde estos ajustes para que se aplique.</translation>
+        <translation>Copiado, con el token de acceso: no lo comparta. Guarde estos ajustes para que se aplique.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="685"/>
         <source>Copy for Claude Desktop</source>
-        <translation type="obsolete">Copiar para Claude Desktop</translation>
+        <translation>Copiar para Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="690"/>
         <source>Copy the Claude Code command</source>
-        <translation type="obsolete">Copiar el comando de Claude Code</translation>
+        <translation>Copiar el comando de Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="682"/>
         <source>Copy the configuration</source>
-        <translation type="obsolete">Copiar la configuración</translation>
+        <translation>Copiar la configuración</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation type="obsolete">Descríbalo con sus propias palabras. Cada filtro se puede deshacer.</translation>
+        <translation>Descríbalo con sus propias palabras. Cada filtro se puede deshacer.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="471"/>
         <source>Filter your layers from a sentence</source>
-        <translation type="obsolete">Filtre sus capas con una frase</translation>
+        <translation>Filtre sus capas con una frase</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="594"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">Agente de FilterMate</translation>
+        <translation>Agente de FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="242"/>
         <source>History</source>
-        <translation type="obsolete">Historial</translation>
+        <translation>Historial</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="201"/>
         <source>History…</source>
-        <translation type="obsolete">Historial…</translation>
+        <translation>Historial…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation type="obsolete">Acepto enviar estos datos a este proveedor</translation>
+        <translation>Acepto enviar estos datos a este proveedor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="672"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation type="obsolete">Permitir que otras aplicaciones de este equipo controlen FilterMate (servidor MCP)</translation>
+        <translation>Permitir que otras aplicaciones de este equipo controlen FilterMate (servidor MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
         <source>MCP connector</source>
-        <translation type="obsolete">Conector MCP</translation>
+        <translation>Conector MCP</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>MCP connectors</source>
-        <translation type="obsolete">Conectores MCP</translation>
+        <translation>Conectores MCP</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="606"/>
         <source>Model</source>
-        <translation type="obsolete">Modelo</translation>
+        <translation>Modelo</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="198"/>
         <source>More</source>
-        <translation type="obsolete">Más</translation>
+        <translation>Más</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="693"/>
         <source>New access token</source>
-        <translation type="obsolete">Nuevo token de acceso</translation>
+        <translation>Nuevo token de acceso</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="203"/>
         <source>New conversation</source>
-        <translation type="obsolete">Nueva conversación</translation>
+        <translation>Nueva conversación</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>New token: it applies once these settings are saved.</source>
-        <translation type="obsolete">Nuevo token: se aplica una vez guardados estos ajustes.</translation>
+        <translation>Nuevo token: se aplica una vez guardados estos ajustes.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="795"/>
         <source>Open data platforms</source>
-        <translation type="obsolete">Plataformas de datos abiertos</translation>
+        <translation>Plataformas de datos abiertos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="166"/>
         <source>Open the settings</source>
-        <translation type="obsolete">Abrir los ajustes</translation>
+        <translation>Abrir los ajustes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="657"/>
         <source>Other applications</source>
-        <translation type="obsolete">Otras aplicaciones</translation>
+        <translation>Otras aplicaciones</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="701"/>
         <source>Port</source>
-        <translation type="obsolete">Puerto</translation>
+        <translation>Puerto</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="655"/>
         <source>Provider</source>
-        <translation type="obsolete">Proveedor</translation>
+        <translation>Proveedor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="264"/>
         <source>Redo</source>
-        <translation type="obsolete">Rehacer</translation>
+        <translation>Rehacer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="755"/>
         <source>Remove</source>
-        <translation type="obsolete">Quitar</translation>
+        <translation>Quitar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="619"/>
         <source>Remove the stored key</source>
-        <translation type="obsolete">Eliminar la clave guardada</translation>
+        <translation>Eliminar la clave guardada</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="796"/>
         <source>Satellite imagery</source>
-        <translation type="obsolete">Imágenes de satélite</translation>
+        <translation>Imágenes de satélite</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Send (Enter)</source>
-        <translation type="obsolete">Enviar (Intro)</translation>
+        <translation>Enviar (Intro)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
         <source>Send again</source>
-        <translation type="obsolete">Reenviar</translation>
+        <translation>Reenviar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="479"/>
         <source>Sent to: {}</source>
-        <translation type="obsolete">Enviado a: {}</translation>
+        <translation>Enviado a: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation type="obsolete">Configurar el agente</translation>
+        <translation>Configurar el agente</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="656"/>
         <source>Sources</source>
-        <translation type="obsolete">Fuentes</translation>
+        <translation>Fuentes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Stop (Esc)</source>
-        <translation type="obsolete">Detener (Esc)</translation>
+        <translation>Detener (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
         <source>Stored: leave empty to keep it</source>
-        <translation type="obsolete">Guardada: dejar vacío para conservarla</translation>
+        <translation>Guardada: dejar vacío para conservarla</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="753"/>
         <source>Test</source>
-        <translation type="obsolete">Probar</translation>
+        <translation>Probar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
         <source>Testing…</source>
-        <translation type="obsolete">Probando…</translation>
+        <translation>Probando…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="659"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">No se pudo iniciar el servidor MCP: {}</translation>
+        <translation>No se pudo iniciar el servidor MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation type="obsolete">El agente puede consultar las fuentes marcadas aquí. Sus búsquedas, y lo que el agente transmite a un conector, se les envían; una capa añadida desde ellas se lee desde sus servidores.</translation>
+        <translation>El agente puede consultar las fuentes marcadas aquí. Sus búsquedas, y lo que el agente transmite a un conector, se les envían; una capa añadida desde ellas se lee desde sus servidores.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation type="obsolete">El agente envía su solicitud, los nombres de sus capas y campos, sus expresiones de filtro y los resultados de sus herramientas al proveedor elegido aquí, según las condiciones de ese proveedor. Sin la opción de abajo, el agente no lee los valores de sus campos; los valores ya escritos en sus filtros y favoritos se envían igualmente. La conversación se conserva en este equipo para cada proyecto, hasta que inicie una nueva.</translation>
+        <translation>El agente envía su solicitud, los nombres de sus capas y campos, sus expresiones de filtro y los resultados de sus herramientas al proveedor elegido aquí, según las condiciones de ese proveedor. Sin la opción de abajo, el agente no lee los valores de sus campos; los valores ya escritos en sus filtros y favoritos se envían igualmente. La conversación se conserva en este equipo para cada proyecto, hasta que inicie una nueva.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="687"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation type="obsolete">Mediante mcp-remote, que requiere Node.js: Claude Desktop inicia los servidores locales como programas.</translation>
+        <translation>Mediante mcp-remote, que requiere Node.js: Claude Desktop inicia los servidores locales como programas.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="846"/>
         <source>Too many sources added: remove one first.</source>
-        <translation type="obsolete">Demasiadas fuentes añadidas: quite una primero.</translation>
+        <translation>Demasiadas fuentes añadidas: quite una primero.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="261"/>
         <source>Undo the last</source>
-        <translation type="obsolete">Deshacer el último</translation>
+        <translation>Deshacer el último</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="170"/>
         <source>Undo this turn</source>
-        <translation type="obsolete">Deshacer este turno</translation>
+        <translation>Deshacer este turno</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="468"/>
         <source>What do you want to filter?</source>
-        <translation type="obsolete">¿Qué desea filtrar?</translation>
+        <translation>¿Qué desea filtrar?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
         <source>added by you</source>
-        <translation type="obsolete">añadida por usted</translation>
+        <translation>añadida por usted</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>applied</source>
-        <translation type="obsolete">aplicado</translation>
+        <translation>aplicado</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>community</source>
-        <translation type="obsolete">comunitaria</translation>
+        <translation>comunitaria</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="765"/>
         <source>https://... or a portal address</source>
-        <translation type="obsolete">https://... o dirección de un portal</translation>
+        <translation>https://... o dirección de un portal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="310"/>
         <source>no change</source>
-        <translation type="obsolete">sin cambios</translation>
+        <translation>sin cambios</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>official</source>
-        <translation type="obsolete">oficial</translation>
+        <translation>oficial</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>this computer</source>
-        <translation type="obsolete">este equipo</translation>
+        <translation>este equipo</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>undone</source>
-        <translation type="obsolete">deshecho</translation>
+        <translation>deshecho</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation type="obsolete">{} turno(s)</translation>
+        <translation>{} turno(s)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -1810,24 +1830,24 @@ Do you agree?</source>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="232"/>
         <source>Hide EXPLORING to give room to the sections</source>
-        <translation type="obsolete">Ocultar EXPLORING para dejar espacio a las secciones</translation>
+        <translation>Ocultar EXPLORING para dejar espacio a las secciones</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="233"/>
         <source>Show EXPLORING</source>
-        <translation type="obsolete">Mostrar EXPLORING</translation>
+        <translation>Mostrar EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="51"/>
         <source>Close</source>
-        <translation type="obsolete">Cerrar</translation>
+        <translation>Cerrar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="48"/>
         <source>Detach or dock the panel</source>
-        <translation type="obsolete">Separar o acoplar el panel</translation>
+        <translation>Separar o acoplar el panel</translation>
     </message>
 </context>
 <context>
@@ -2994,39 +3014,39 @@ Reinicie QGIS para aplicar los cambios.</translation>
         <translation>Error al cargar el complemento: {0}. Consulte la consola Python de QGIS para más detalles.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7591"/>
+        <location filename="../filter_mate_dockwidget.py" line="7622"/>
         <source>Current layer: {0}</source>
         <translation>Capa actual: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7593"/>
+        <location filename="../filter_mate_dockwidget.py" line="7624"/>
         <source>No layer selected</source>
         <translation>Ninguna capa seleccionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>Selected layers:
 {0}</source>
         <translation>Capas seleccionadas:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>No layers selected</source>
         <translation>Ninguna capa seleccionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7623"/>
+        <location filename="../filter_mate_dockwidget.py" line="7654"/>
         <source>No expression defined</source>
         <translation>Ninguna expresión definida</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7635"/>
+        <location filename="../filter_mate_dockwidget.py" line="7666"/>
         <source>Display expression: {0}</source>
         <translation>Expresión de visualización: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7652"/>
+        <location filename="../filter_mate_dockwidget.py" line="7683"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID de entidad: {0}
@@ -3131,42 +3151,42 @@ Primer atributo: {1}</translation>
         <translation>No se puede ejecutar {0}: error en la inicialización del widget.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2644"/>
+        <location filename="../filter_mate_app.py" line="2650"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>No se puede {0}: capa inválida o fuente no encontrada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2798"/>
+        <location filename="../filter_mate_app.py" line="2804"/>
         <source>All filters cleared - </source>
         <translation>Todos los filtros eliminados – </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2799"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} entidades visibles en la capa principal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2811"/>
+        <location filename="../filter_mate_app.py" line="2817"/>
         <source>Error: result handler missing</source>
         <translation>Error: manejador de resultados no encontrado</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2828"/>
+        <location filename="../filter_mate_app.py" line="2834"/>
         <source>Error during filtering: {0}</source>
         <translation>Error durante el filtrado: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2952"/>
+        <location filename="../filter_mate_app.py" line="2958"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorito(s) huérfano(s) recuperado(s): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3118"/>
+        <location filename="../filter_mate_app.py" line="3124"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Error al cargar la capa – clic para reintentar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3170"/>
+        <location filename="../filter_mate_app.py" line="3176"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} capa(s) cargada(s) correctamente</translation>
     </message>
@@ -3229,7 +3249,7 @@ What would you like to do?</translation>
         <translation>{0} capa(s) siguen filtradas: {1}. Vuelva a activar la opción para quitarles el filtro.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2630"/>
+        <location filename="../filter_mate_app.py" line="2636"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>Se está preparando un filtro de servidor. Espere a que termine antes de iniciar otra operación.</translation>
     </message>
@@ -3439,11 +3459,13 @@ Drop anyway?</source>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6244"/>
+        <location filename="../ui/controllers/property_controller.py" line="761"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negativo (erosión): contrae los polígonos hacia el interior</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6247"/>
+        <location filename="../ui/controllers/property_controller.py" line="768"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Valor de buffer en metros (positivo=expandir, negativo=contraer polígonos)</translation>
     </message>
@@ -3473,7 +3495,7 @@ Drop anyway?</source>
         <translation>Error al restablecer las propiedades de la capa: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>Filter</source>
         <translation>Filtrar</translation>
     </message>
@@ -3845,7 +3867,7 @@ Drop anyway?</source>
         <translation>📁 Proyecto actual</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>El filtro no se inició: su selección cambió o no se pudo leer. Haga clic en Filtrar de nuevo.</translation>
     </message>
@@ -4225,7 +4247,7 @@ Asegúrese de que la tabla PostgreSQL tenga un PRIMARY KEY definido.</translatio
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="818"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: descarga del modelo de segmentación</translation>
     </message>
@@ -5757,6 +5779,84 @@ Solo se filtran las capas del proyecto. El filtro se puede deshacer desde Filter
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
         <translation>Aplica los mismos criterios (clases ASPRS, rangos de Z e intensidad, número de retorno, expresión) a una o varias nubes de puntos del proyecto, por ejemplo todas las teselas LiDAR HD de una obra. El filtro es la expresión de la nube de puntos (subconjunto): es inmediato y se puede deshacer desde FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="60"/>
+        <source>Raster to draw on (e.g. an orthophoto)</source>
+        <translation>Ráster sobre el que dibujar (por ejemplo, una ortofoto)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="61"/>
+        <source>Guide features (points or polygons)</source>
+        <translation>Entidades guía (puntos o polígonos)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="64"/>
+        <source>Objects drawn by SAM</source>
+        <translation>Objetos dibujados por SAM</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="135"/>
+        <source>The raster cannot be read</source>
+        <translation>No se puede leer el ráster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="79"/>
+        <source>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</source>
+        <translation>SAM no está instalado: elija Objeto seleccionado con el clic en el grupo CUENTAGOTAS de un ráster del panel de FilterMate y acepte la instalación</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="100"/>
+        <source>The guide features cannot be read</source>
+        <translation>No se pueden leer las entidades guía</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="128"/>
+        <source>No point or polygon of the guide layer lies on the raster</source>
+        <translation>Ningún punto ni polígono de la capa guía se encuentra sobre el ráster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="132"/>
+        <source>{0} feature(s) on the raster, {1} window(s) to prepare</source>
+        <translation>{0} entidad(es) sobre el ráster, {1} ventana(s) por preparar</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="160"/>
+        <source>A window could not be prepared: {0}</source>
+        <translation>No se pudo preparar una ventana: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="167"/>
+        <source>No window could be prepared: {0}</source>
+        <translation>No se pudo preparar ninguna ventana: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="183"/>
+        <source>Canceled: {0} of {1} window(s) prepared</source>
+        <translation>Cancelado: {0} de {1} ventana(s) preparada(s)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="186"/>
+        <source>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</source>
+        <translation>{0} objeto(s) dibujado(s), {1} entidad(es) sin objeto, {2} omitida(s), en {3:.0f} s</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="194"/>
+        <source>Draw objects on a raster with SAM from points or polygons</source>
+        <translation>Dibujar objetos sobre un ráster con SAM a partir de puntos o polígonos</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="197"/>
+        <source>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</source>
+        <translation>SAM 2.1 tiny dibuja sobre el ráster el objeto al que apunta cada entidad de la capa guía: un punto es un clic sobre el objeto, un polígono aporta su recuadro delimitador y un punto en su interior. Un polígono por entidad, en el SRC del ráster, con los atributos de la entidad, la puntuación de SAM (sam_score) y, para un polígono, su solapamiento con el objeto dibujado (sam_iou, de 0 a 1).
+
+Ejemplos: huellas de edificios redibujadas sobre una ortofoto reciente (un sam_iou bajo señala un edificio que ha cambiado); puntos de árboles o de charcas convertidos en contornos.
+
+El ráster se dibuja como en el mapa, con su estilo. SAM se instala una sola vez desde el grupo CUENTAGOTAS del panel de FilterMate; se ejecuta en la CPU, unos segundos por cada ventana de 1024 píxeles.</translation>
     </message>
 </context>
 <context>
@@ -8182,7 +8282,7 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="650"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: preparación de la segmentación</translation>
     </message>
@@ -8480,7 +8580,7 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="719"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: dibujando los objetos similares</translation>
     </message>

@@ -17,11 +17,13 @@ import threading
 import types
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+import faulthandler  # noqa: E402
+faulthandler.enable()
 os.environ.setdefault("FILTERMATE_LOG_DIR", tempfile.mkdtemp(prefix="fm_seg_logs_"))
 
 import numpy as np
 from osgeo import gdal, ogr, osr
-from qgis.core import (Qgis, QgsApplication, QgsCoordinateReferenceSystem, QgsGeometry, QgsPointXY, QgsProject,
+from qgis.core import (NULL, Qgis, QgsApplication, QgsCoordinateReferenceSystem, QgsGeometry, QgsPointXY, QgsProject,
                        QgsRasterLayer, QgsRectangle)
 from qgis.gui import QgsMapCanvas, QgsMapToolPan
 from qgis.PyQt.QtCore import QBuffer, QEventLoop, QIODevice, QSize, QT_VERSION_STR, QTimer
@@ -30,7 +32,8 @@ from qgis.PyQt.QtGui import QColor, QImage
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = "fm_segmentation_check"
 for part in ("", "core", "core.domain", "core.ports", "adapters", "adapters.qgis", "adapters.qgis.coverage_layers",
-             "ui", "ui.controllers", "ui.tools", "ui.widgets", "ui.widgets.coverage_panels"):
+             "ui", "ui.controllers", "ui.tools", "ui.widgets", "ui.widgets.coverage_panels",
+             "processing", "processing.algorithms"):
     module = types.ModuleType(PACKAGE + ("." + part if part else ""))
     module.__path__ = [str(ROOT / part.replace(".", "/"))]
     sys.modules[module.__name__] = module
@@ -344,6 +347,104 @@ def test_tool_flow(layer):
     return selection
 
 
+def test_features_algorithm(layer):
+    """filtermate:segment_from_features with the stub model: a footprint and a point on the bright square."""
+    from qgis.core import (QgsCoordinateTransform, QgsFeature, QgsProcessingContext, QgsProcessingFeedback,
+                           QgsVectorLayer)
+    module = importlib.import_module(PACKAGE + ".processing.algorithms.segmentation_algorithm")
+    model = BrightModel()
+    install_model(model)
+    ready = segmentation.model_state
+    segmentation.model_state = lambda: segmentation.ModelState(True, True)
+    extent = layer.extent()
+    truth = QgsGeometry.fromRect(QgsRectangle(extent.xMinimum() + SQUARE[2] * 0.5, extent.yMaximum() - SQUARE[1] * 0.5,
+                                              extent.xMinimum() + SQUARE[3] * 0.5, extent.yMaximum() - SQUARE[0] * 0.5))
+    wgs84 = QgsCoordinateReferenceSystem("EPSG:4326")
+    to_wgs84 = QgsCoordinateTransform(layer.crs(), wgs84, QgsProject.instance())
+
+    def guide(kind, geometries, extra=""):
+        guides = QgsVectorLayer(f"{kind}?crs=EPSG:4326&field=name:string{extra}", kind, "memory")
+        features = []
+        for name, geometry in geometries:
+            geometry = QgsGeometry(geometry)
+            geometry.transform(to_wgs84)
+            feature = QgsFeature(guides.fields())
+            feature.setAttributes([name] + [7] * (guides.fields().count() - 1))
+            feature.setGeometry(geometry)
+            features.append(feature)
+        guides.dataProvider().addFeatures(features)
+        return guides
+
+    def run(guides):
+        algorithm = module.SegmentFromFeaturesAlgorithm().create()
+        context, feedback = QgsProcessingContext(), QgsProcessingFeedback()
+        context.setProject(QgsProject.instance())
+        results, ok = algorithm.run({"RASTER": layer, "FEATURES": guides, "OUTPUT": "memory:"}, context, feedback)
+        return (context.takeResultLayer(results["OUTPUT"]) if ok else None), feedback
+
+    try:
+        footprint = QgsGeometry.fromRect(truth.boundingBox().buffered(-3.0))  # a footprint a little off the roof
+        off = QgsGeometry.fromRect(QgsRectangle(extent.xMaximum() + 50, extent.yMaximum() + 50,
+                                                extent.xMaximum() + 60, extent.yMaximum() + 60))
+        drawn, feedback = run(guide("Polygon", [("roof", footprint), ("away", off)]))
+        rows = [(f["name"], f["sam_score"], f["sam_iou"], f.geometry()) for f in drawn.getFeatures()] if drawn else []
+        check("the algorithm draws one object per footprint on the raster, the one off it skipped",
+              [r[0] for r in rows] == ["roof"], [r[:3] for r in rows])
+        if rows:
+            check("on the bright square, in the CRS of the raster",
+                  segmentation.overlap(rows[0][3], truth) > 0.97 and drawn.crs() == layer.crs(),
+                  (round(segmentation.overlap(rows[0][3], truth), 3), drawn.crs().authid()))
+            check("with the score and the overlap with the footprint", rows[0][1] == 0.9 and 0.8 < rows[0][2] < 1.0, rows[0][1:3])
+        drawn, _ = run(guide("Point", [("pond", truth.centroid())]))
+        rows = [(f["name"], f["sam_iou"]) for f in drawn.getFeatures()] if drawn else []
+        check("a point is a click: its object, no overlap", len(rows) == 1 and rows[0][1] in (None, NULL), rows)
+        check("one window for the two runs each", model.embedded == 2, model.embedded)
+        segmentation.model_state = lambda: segmentation.ModelState(True, False)
+        drawn, feedback = run(guide("Point", [("pond", truth.centroid())]))
+        check("without SAM the algorithm says how to install it", drawn is None)
+        segmentation.model_state = lambda: segmentation.ModelState(True, True)
+
+        centre = truth.centroid().asPoint()
+        away = QgsPointXY(extent.xMaximum() + 500, extent.yMaximum() + 500)
+        several = QgsGeometry.fromMultiPointXY([away, centre, QgsPointXY(centre.x() + 1, centre.y())])
+        drawn, _ = run(guide("MultiPoint", [("pond", several)]))
+        rows = [f.geometry() for f in drawn.getFeatures()] if drawn else []
+        check("a multipoint whose first point is off the raster is drawn from the others",
+              len(rows) == 1 and segmentation.overlap(rows[0], truth) > 0.97, len(rows))
+
+        drawn, _ = run(guide("Polygon", [("roof", footprint)], "&field=sam_score:integer&field=SAM_IOU:double"))
+        rows = list(drawn.getFeatures()) if drawn else []
+        names = drawn.fields().names() if drawn else []
+        check("source fields named like the outputs give way to them, any case",
+              names == ["name", "sam_score", "sam_iou"] and rows and rows[0]["sam_score"] == 0.9, names)
+
+        bowtie = QgsGeometry.fromWkt("POLYGON(({0} {1}, {2} {3}, {2} {1}, {0} {3}, {0} {1}))".format(
+            *[round(v, 3) for v in (truth.boundingBox().xMinimum() + 2, truth.boundingBox().yMinimum() + 2,
+                                     truth.boundingBox().xMaximum() - 2, truth.boundingBox().yMaximum() - 2)]))
+        tiny = QgsGeometry.fromRect(QgsRectangle(centre.x(), centre.y(), centre.x() + 0.2, centre.y() + 0.2))
+        drawn, _ = run(guide("Polygon", [("bowtie", bowtie), ("tiny", tiny)]))
+        rows = {f["name"]: f["sam_iou"] for f in drawn.getFeatures()} if drawn else {}
+        check("an invalid footprint is compared once made valid, one under a pixel is prompted by its point",
+              set(rows) == {"bowtie", "tiny"} and rows["bowtie"] > 0.3, rows)
+
+        # In the background, as the toolbox runs it: a task of the pool, the window drawn in its thread.
+        from qgis.core import QgsProcessingAlgRunnerTask
+        algorithm = module.SegmentFromFeaturesAlgorithm().create()
+        context, feedback = QgsProcessingContext(), QgsProcessingFeedback()
+        context.setProject(QgsProject.instance())
+        guides = guide("Polygon", [("roof", footprint)])  # held: the task reads it from its thread
+        task = QgsProcessingAlgRunnerTask(algorithm, {"RASTER": layer, "FEATURES": guides, "OUTPUT": "memory:"},
+                                          context, feedback)
+        done = []
+        task.executed.connect(lambda ok, results: done.append((ok, results)))
+        QgsApplication.taskManager().addTask(task)
+        finished = spin(lambda: done, 60000)
+        drawn = context.takeResultLayer(done[0][1]["OUTPUT"]) if finished and done[0][0] else None
+        check("in a background task too", drawn is not None and drawn.featureCount() == 1, done)
+    finally:
+        segmentation.model_state = ready
+
+
 def test_objects_layer(layer):
     extent = layer.extent()
     x, y = extent.xMinimum(), extent.yMinimum()
@@ -610,6 +711,7 @@ with tempfile.TemporaryDirectory() as folder:
     validated = test_tool_flow(raster)
     test_replay(raster, validated)
     test_objects_layer(raster)
+    test_features_algorithm(raster)
     test_similar_flow(folder)
     test_web_service()
     test_real_model()

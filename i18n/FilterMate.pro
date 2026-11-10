@@ -51,6 +51,17 @@ SOURCES = \
     ../processing/algorithms/common.py \
     ../processing/algorithms/cross_filter_algorithm.py \
     ../processing/algorithms/layer_operations_algorithms.py \
+    ../processing/algorithms/segmentation_algorithm.py \
+    ../adapters/agent/free_quota.py \
+    ../adapters/agent/settings.py \
+    ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
+    ../ui/controllers/agent_chat_controller.py \
+    ../ui/controllers/property_controller.py \
+    ../ui/layout/dock_chrome.py \
+    ../ui/styles/mockup_design.py \
+    ../ui/widgets/agent_panel.py \
+    ../ui/widgets/agent_thread.py \
+    ../ui/widgets/selection_strip.py \
     ../ui/controllers/backend_controller.py \
     ../ui/controllers/config_controller.py \
     ../ui/controllers/favorites_controller.py \

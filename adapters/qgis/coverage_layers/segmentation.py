@@ -317,6 +317,160 @@ def point_object(provider: Any, embedding: Any, window: SegmentationWindow, x: f
     return (min(near, key=lambda part: part.distance(where)) if near else None), mask
 
 
+@dataclass(frozen=True)
+class Prompt:
+    """What SAM is given for one feature of a guide layer, in the CRS of the raster."""
+
+    x: float  #: a point inside the object: the feature's point, or the pole of inaccessibility of its polygon
+    y: float
+    box: Optional[Tuple[float, float, float, float]] = None  #: ``(x_min, y_min, x_max, y_max)`` of a polygon, None for a point
+    others: Tuple[Tuple[float, float], ...] = ()  #: the other points of a multipoint, positive too
+
+    def side(self) -> float:
+        """Longest side of the box; 0 for a point."""
+        return max(self.box[2] - self.box[0], self.box[3] - self.box[1]) if self.box else 0.0
+
+
+def _geometry_kinds() -> Tuple[Any, Any]:
+    """Point and polygon geometry types: ``Qgis.GeometryType`` (3.30+), ``QgsWkbTypes`` before."""
+    from qgis.core import Qgis
+    kinds = getattr(Qgis, 'GeometryType', None)
+    if kinds is not None and hasattr(kinds, 'Polygon'):
+        return kinds.Point, kinds.Polygon
+    from qgis.core import QgsWkbTypes
+    return QgsWkbTypes.GeometryType.PointGeometry, QgsWkbTypes.GeometryType.PolygonGeometry
+
+
+def prompt_of(geometry: Any, margin: float = 0.0) -> Optional[Prompt]:
+    """The prompt of a feature (raster CRS): a point, or the bounding box of a polygon grown by ``margin`` of its size.
+
+    A multipoint gives all its points, the one nearest their centre first. A multipolygon is
+    prompted by its largest part (its pieces are far apart, a box over all of them frames none).
+    A polygon smaller than nothing, a point in fact, is prompted by its point. None for an empty
+    geometry or a line: a line frames no object.
+    """
+    if geometry is None or geometry.isNull() or geometry.isEmpty():
+        return None
+    kind = geometry.type()
+    point_kind, polygon_kind = _geometry_kinds()
+    if kind == point_kind:
+        points = [(point.x(), point.y()) for point in (geometry.asMultiPoint() if geometry.isMultipart() else [geometry.asPoint()])]
+        cx, cy = sum(x for x, _y in points) / len(points), sum(y for _x, y in points) / len(points)
+        points.sort(key=lambda point: (point[0] - cx) ** 2 + (point[1] - cy) ** 2)
+        return Prompt(points[0][0], points[0][1], others=tuple(points[1:]))
+    if kind != polygon_kind:
+        return None
+    if not geometry.isGeosValid():
+        geometry = geometry.makeValid()
+    from .raster_adapter import geometry_parts
+    parts = [part for part in geometry_parts(geometry) if part.type() == polygon_kind and part.area() > 0]
+    if not parts:
+        centre = geometry.boundingBox().center()
+        return Prompt(centre.x(), centre.y())
+    geometry = max(parts, key=lambda part: part.area())
+    rectangle = geometry.boundingBox()
+    grow_x, grow_y = rectangle.width() * margin, rectangle.height() * margin
+    inside = geometry.poleOfInaccessibility(max(rectangle.width(), rectangle.height()) / 100.0)[0]
+    point = inside.asPoint() if inside is not None and not inside.isEmpty() else rectangle.center()
+    return Prompt(point.x(), point.y(), (rectangle.xMinimum() - grow_x, rectangle.yMinimum() - grow_y,
+                                         rectangle.xMaximum() + grow_x, rectangle.yMaximum() + grow_y))
+
+
+# A box fills at most this share of its window: SAM sees the object with some ground around it.
+PROMPT_BOX_FILL = 2.0 / 3.0
+# A point prompt sees at least this many metres of ground, as a click in a view of the town.
+PROMPT_POINT_VIEW_METRES = 150.0
+# Without a native cell (a service), no window is finer than this share of a point's view: a speck of a polygon
+# would otherwise make a window of a few centimetres.
+SERVICE_FINEST_SHARE = 1.0 / 8.0
+
+
+def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float], native_cell: float, size: int,
+                 point_view: float = PROMPT_POINT_VIEW_METRES) -> List[Tuple[SegmentationWindow, List[int]]]:
+    """Windows to encode for ``prompts``, each with the indexes of the prompts it holds.
+
+    A prompt needs a cell where its box fills at most :data:`PROMPT_BOX_FILL` of the window (a point:
+    ``point_view`` of ground). Cells are the native one doubled as often as needed, so that nearby
+    objects of one size share a window; a prompt lies inside its window with its box and some ground.
+
+    Args:
+        native_cell: Pixel size of the raster; 0 for a service: the finest cell a prompt needs is then
+            used, no finer than :data:`SERVICE_FINEST_SHARE` of a point's view.
+        point_view: Ground seen around a point prompt, in raster units.
+    """
+    if not prompts:
+        return []
+
+    def needed(prompt: Prompt) -> float:
+        side = prompt.side() / PROMPT_BOX_FILL if prompt.box else point_view
+        return max(native_cell, side / size)
+
+    if native_cell > 0:
+        base = native_cell
+    else:
+        base = max(min(needed(prompt) for prompt in prompts), point_view * SERVICE_FINEST_SHARE / size)
+    if not (math.isfinite(base) and base > 0):
+        raise ValueError('segmentation window without a cell size')
+    levels: dict = {}
+    for index, prompt in enumerate(prompts):
+        level = max(0, math.ceil(math.log2(max(needed(prompt), base) / base) - 1e-9))
+        levels.setdefault(level, []).append(index)
+    planned: List[Tuple[SegmentationWindow, List[int]]] = []
+    for level in sorted(levels):
+        cell = base * (2 ** level)
+        members = levels[level]
+        half_box = max((prompts[i].side() / cell / 2.0 for i in members), default=0.0)
+        margin = int(min(size // 2 - 1, math.ceil(half_box) + 32))
+        centres = [((prompts[i].box[0] + prompts[i].box[2]) / 2.0, (prompts[i].box[1] + prompts[i].box[3]) / 2.0)
+                   if prompts[i].box else (prompts[i].x, prompts[i].y) for i in members]
+        for window, inner in assign_windows(centres, raster, cell, size, margin_pixels=margin):
+            planned.append((window, [members[i] for i in inner]))
+    return planned
+
+
+def prompt_object(provider: Any, embedding: Any, window: SegmentationWindow, prompt: Prompt, crs_wkt: str = '',
+                  with_point: bool = True) -> Tuple[Any, float]:
+    """``(geometry, score)`` of the object SAM draws for ``prompt``; ``(None, 0.0)`` when nothing is drawn.
+
+    With a box, the point inside the polygon is given too when ``with_point``; a box under a pixel
+    is replaced by its point. Only the parts of the mask that touch the box (or a point) are kept:
+    SAM may return detached specks.
+    """
+    from qgis.core import QgsGeometry, QgsPointXY
+    from .geometry_tools import mask_to_geometry
+    from .raster_adapter import geometry_parts
+    session = SegmentationSession(provider, window, embedding)
+    boxed = prompt.box is not None and session.set_box(*prompt.box)
+    anchors = []
+    if boxed:
+        c0, r0, c1, r1 = session.box
+        anchors.append(QgsGeometry.fromRect(window.rectangle_of(c0, r0, c1, r1)))
+    if not boxed or with_point:
+        for x, y in ((prompt.x, prompt.y),) + tuple(prompt.others):
+            if session.add_point(x, y, True) and not boxed:
+                anchors.append(QgsGeometry.fromPointXY(QgsPointXY(x, y)))
+    if not session.has_prompts or not anchors:
+        return None, 0.0
+    session.predict()
+    score = float(session.scores[session.choice]) if session.scores else 0.0
+    geometry = mask_to_geometry(session.mask, window.geotransform(), crs_wkt, sieve_pixels=SIEVE_PIXELS,
+                                simplify_tolerance=window.cell * 0.5)
+    parts = geometry_parts(geometry)
+    if not boxed:  # points: the parts under them, as clicks
+        held = []
+        for anchor in anchors:
+            near = [part for part in parts if part.distance(anchor) <= window.cell * 2.0]
+            if near:
+                nearest = min(near, key=lambda part: part.distance(anchor))
+                if not any(nearest.equals(other) for other in held):
+                    held.append(nearest)
+    else:
+        held = [part for part in parts if part.intersects(anchors[0])]
+    if not held:
+        return None, score
+    return (QgsGeometry.unaryUnion(held) if len(held) < len(parts) else geometry), score
+
+
 def pooled_features(embedding: Any, mask: Any) -> Any:
     """Encoder features of SAM averaged under a mask, on the coarsest feature map, unit length; None without them.
 

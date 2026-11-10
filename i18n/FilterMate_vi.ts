@@ -32,58 +32,68 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
         <source>Undone: {}</source>
         <translation>Đã hoàn tác: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Undo of the last request</source>
         <translation>Hoàn tác yêu cầu gần nhất</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
         <source>Back to before: {}</source>
         <translation>Quay lại trước: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Nothing to undo.</source>
         <translation>Không có gì để hoàn tác.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
         <source>Redo: {}</source>
         <translation>Làm lại: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
         <source>Undo: {}</source>
         <translation>Hoàn tác: {}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
         <source>Free quota</source>
-        <translation type="obsolete">Hạn mức miễn phí</translation>
+        <translation>Hạn mức miễn phí</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>Access to the free quota was renewed: send your request again.</source>
-        <translation type="obsolete">Quyền truy cập hạn mức miễn phí đã được gia hạn: hãy gửi lại yêu cầu của bạn.</translation>
+        <translation>Quyền truy cập hạn mức miễn phí đã được gia hạn: hãy gửi lại yêu cầu của bạn.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
         <source>Another application is changing the project: try again in a moment.</source>
-        <translation type="obsolete">Một ứng dụng khác đang thay đổi dự án: hãy thử lại sau giây lát.</translation>
+        <translation>Một ứng dụng khác đang thay đổi dự án: hãy thử lại sau giây lát.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
         <source>Another application: {}</source>
-        <translation type="obsolete">Ứng dụng khác: {}</translation>
+        <translation>Ứng dụng khác: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Applied again: {}.</source>
-        <translation type="obsolete">Đã áp dụng lại: {}.</translation>
+        <translation>Đã áp dụng lại: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
         <source>Changed since, left as is: {}.</source>
-        <translation type="obsolete">Đã thay đổi từ đó, giữ nguyên: {}.</translation>
+        <translation>Đã thay đổi từ đó, giữ nguyên: {}.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -91,677 +101,687 @@
         <translation type="obsolete">Đã thay đổi: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation type="obsolete">Hãy chọn một mô hình và đồng ý gửi dữ liệu của bạn để dùng tác tử.</translation>
+        <translation>Hãy chọn một mô hình và đồng ý gửi dữ liệu của bạn để dùng tác tử.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
         <source>Connecting to {}…</source>
-        <translation type="obsolete">Đang kết nối với {}…</translation>
+        <translation>Đang kết nối với {}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation type="obsolete">Cuộc trò chuyện trước: tác tử bắt đầu lại từ đây.</translation>
+        <translation>Cuộc trò chuyện trước: tác tử bắt đầu lại từ đây.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
         <source>Enter your API key in the agent settings.</source>
-        <translation type="obsolete">Hãy nhập khóa API của bạn trong cài đặt tác tử.</translation>
+        <translation>Hãy nhập khóa API của bạn trong cài đặt tác tử.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
         <source>Export of {}</source>
-        <translation type="obsolete">Xuất {}</translation>
+        <translation>Xuất {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
         <source>Favorite applied</source>
-        <translation type="obsolete">Đã áp dụng mục yêu thích</translation>
+        <translation>Đã áp dụng mục yêu thích</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
         <source>Filter on the points of {}</source>
-        <translation type="obsolete">Lọc theo các điểm của {}</translation>
+        <translation>Lọc theo các điểm của {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
         <source>Filter on {}</source>
-        <translation type="obsolete">Lọc {}</translation>
+        <translation>Lọc {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
         <source>Filter on {} by an area</source>
-        <translation type="obsolete">Lọc {} theo một vùng</translation>
+        <translation>Lọc {} theo một vùng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
         <source>Filter on {} by {}</source>
-        <translation type="obsolete">Lọc {} theo {}</translation>
+        <translation>Lọc {} theo {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">Tác tử FilterMate</translation>
+        <translation>Tác tử FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
         <source>Filters removed from {}</source>
-        <translation type="obsolete">Đã gỡ bộ lọc khỏi {}</translation>
+        <translation>Đã gỡ bộ lọc khỏi {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Hidden: {}</source>
-        <translation type="obsolete">Đã ẩn: {}</translation>
+        <translation>Đã ẩn: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
         <source>It answers.</source>
-        <translation type="obsolete">Nguồn có phản hồi.</translation>
+        <translation>Nguồn có phản hồi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Layer added: {}</source>
-        <translation type="obsolete">Đã thêm lớp: {}</translation>
+        <translation>Đã thêm lớp: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
         <source>Layers removed: {}</source>
-        <translation type="obsolete">Đã gỡ các lớp: {}</translation>
+        <translation>Đã gỡ các lớp: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
         <source>Not reachable for this conversation: {}</source>
-        <translation type="obsolete">Không truy cập được trong cuộc trò chuyện này: {}</translation>
+        <translation>Không truy cập được trong cuộc trò chuyện này: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
         <source>Nothing to redo.</source>
-        <translation type="obsolete">Không có gì để làm lại.</translation>
+        <translation>Không có gì để làm lại.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Nothing to restore.</source>
-        <translation type="obsolete">Không có gì để khôi phục.</translation>
+        <translation>Không có gì để khôi phục.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
         <source>Reading the active filters</source>
-        <translation type="obsolete">Đang đọc các bộ lọc đang hoạt động</translation>
+        <translation>Đang đọc các bộ lọc đang hoạt động</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
         <source>Reading the favorites</source>
-        <translation type="obsolete">Đang đọc các mục yêu thích</translation>
+        <translation>Đang đọc các mục yêu thích</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
         <source>Reading the fields of {}</source>
-        <translation type="obsolete">Đang đọc các trường của {}</translation>
+        <translation>Đang đọc các trường của {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
         <source>Reading the layers</source>
-        <translation type="obsolete">Đang đọc các lớp</translation>
+        <translation>Đang đọc các lớp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
         <source>Reading the map</source>
-        <translation type="obsolete">Đang đọc bản đồ</translation>
+        <translation>Đang đọc bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
         <source>Reading the values of {}</source>
-        <translation type="obsolete">Đang đọc các giá trị của {}</translation>
+        <translation>Đang đọc các giá trị của {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
         <source>Restored: {}.</source>
-        <translation type="obsolete">Đã khôi phục: {}.</translation>
+        <translation>Đã khôi phục: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
         <source>Searching satellite imagery on {}</source>
-        <translation type="obsolete">Đang tìm ảnh vệ tinh trên {}</translation>
+        <translation>Đang tìm ảnh vệ tinh trên {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
         <source>Searching {} for {}</source>
-        <translation type="obsolete">Đang tìm kiếm trên {}: {}</translation>
+        <translation>Đang tìm kiếm trên {}: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection cleared on {}</source>
-        <translation type="obsolete">Đã bỏ chọn trên {}</translation>
+        <translation>Đã bỏ chọn trên {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
         <source>Selection on {}</source>
-        <translation type="obsolete">Vùng chọn trên {}</translation>
+        <translation>Vùng chọn trên {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
         <source>Shown: {}</source>
-        <translation type="obsolete">Đã hiển thị: {}</translation>
+        <translation>Đã hiển thị: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
         <source>Stopped.</source>
-        <translation type="obsolete">Đã dừng.</translation>
+        <translation>Đã dừng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">Không thể khởi động máy chủ MCP: {}</translation>
+        <translation>Không thể khởi động máy chủ MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="159"/>
         <source>The QGIS authentication database is not available.</source>
-        <translation type="obsolete">Cơ sở dữ liệu xác thực của QGIS không khả dụng.</translation>
+        <translation>Cơ sở dữ liệu xác thực của QGIS không khả dụng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="161"/>
         <source>The QGIS master password is needed to use the stored key.</source>
-        <translation type="obsolete">Cần mật khẩu chính của QGIS để dùng khóa đã lưu.</translation>
+        <translation>Cần mật khẩu chính của QGIS để dùng khóa đã lưu.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
         <source>The agent stopped before the end ({}).</source>
-        <translation type="obsolete">Tác tử đã dừng trước khi kết thúc ({}).</translation>
+        <translation>Tác tử đã dừng trước khi kết thúc ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
 Do you agree?</source>
-        <translation type="obsolete">Tác tử muốn thêm lớp này của một dịch vụ web vào dự án:
+        <translation>Tác tử muốn thêm lớp này của một dịch vụ web vào dự án:
 {} · {}
 
 Bạn có đồng ý không?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
         <source>The agent wants to add this layer to the project:
 {}
 
 A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation type="obsolete">Tác tử muốn thêm lớp này vào dự án:
+        <translation>Tác tử muốn thêm lớp này vào dự án:
 {}
 
 QGIS đọc nguồn từ xa từ máy chủ của nó, và nội dung của lớp có thể được gửi đến nhà cung cấp của tác tử. Bạn có đồng ý không?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
         <source>The agent wants to export these layers to files:
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">Tác tử muốn xuất các lớp này ra tệp:
+        <translation>Tác tử muốn xuất các lớp này ra tệp:
 {}
 
 Bạn có đồng ý không?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">Tác tử muốn gỡ các lớp này khỏi dự án (tệp của chúng được giữ lại, kiểu và bộ lọc ở đây sẽ mất):
+        <translation>Tác tử muốn gỡ các lớp này khỏi dự án (tệp của chúng được giữ lại, kiểu và bộ lọc ở đây sẽ mất):
 {}
 
 Bạn có đồng ý không?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
 
 Do you agree?</source>
-        <translation type="obsolete">Tác tử muốn chạy thao tác này trên một trình kết nối bên ngoài:
+        <translation>Tác tử muốn chạy thao tác này trên một trình kết nối bên ngoài:
 {}
 {}
 
 Bạn có đồng ý không?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The credit or quota of this account is used up.</source>
-        <translation type="obsolete">Tín dụng hoặc hạn mức của tài khoản này đã hết.</translation>
+        <translation>Tín dụng hoặc hạn mức của tài khoản này đã hết.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="44"/>
         <source>The free quota could not be reached: {}</source>
-        <translation type="obsolete">Không truy cập được hạn mức miễn phí: {}</translation>
+        <translation>Không truy cập được hạn mức miễn phí: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="224"/>
         <source>The free quota is not available.</source>
-        <translation type="obsolete">Hạn mức miễn phí không khả dụng.</translation>
+        <translation>Hạn mức miễn phí không khả dụng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="48"/>
+        <location filename="../adapters/agent/free_quota.py" line="54"/>
         <source>The free quota is unavailable for now.</source>
-        <translation type="obsolete">Hạn mức miễn phí tạm thời không khả dụng.</translation>
+        <translation>Hạn mức miễn phí tạm thời không khả dụng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation type="obsolete">Hạn mức miễn phí tháng này đã hết. Hãy nhập khóa API riêng của bạn trong cài đặt tác tử.</translation>
+        <translation>Hạn mức miễn phí tháng này đã hết. Hãy nhập khóa API riêng của bạn trong cài đặt tác tử.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="180"/>
+        <location filename="../adapters/agent/settings.py" line="186"/>
         <source>The key could not be stored.</source>
-        <translation type="obsolete">Không thể lưu khóa.</translation>
+        <translation>Không thể lưu khóa.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
         <source>The provider could not be reached: {}</source>
-        <translation type="obsolete">Không thể kết nối với nhà cung cấp: {}</translation>
+        <translation>Không thể kết nối với nhà cung cấp: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation type="obsolete">Nhà cung cấp đã từ chối khóa API: hãy kiểm tra trong cài đặt tác tử.</translation>
+        <translation>Nhà cung cấp đã từ chối khóa API: hãy kiểm tra trong cài đặt tác tử.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>The provider reported a problem: {}</source>
-        <translation type="obsolete">Nhà cung cấp báo có sự cố: {}</translation>
+        <translation>Nhà cung cấp báo có sự cố: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/settings.py" line="208"/>
         <source>The stored key could not be read.</source>
-        <translation type="obsolete">Không thể đọc khóa đã lưu.</translation>
+        <translation>Không thể đọc khóa đã lưu.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Thinking…</source>
-        <translation type="obsolete">Đang suy nghĩ…</translation>
+        <translation>Đang suy nghĩ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../adapters/agent/free_quota.py" line="46"/>
         <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation type="obsolete">Hôm nay có quá nhiều tài khoản mới từ địa chỉ này: hãy thử lại vào ngày mai, hoặc nhập khóa API riêng của bạn.</translation>
+        <translation>Hôm nay có quá nhiều tài khoản mới từ địa chỉ này: hãy thử lại vào ngày mai, hoặc nhập khóa API riêng của bạn.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
         <source>Too many requests for now: try again in a moment.</source>
-        <translation type="obsolete">Quá nhiều yêu cầu lúc này: hãy thử lại sau giây lát.</translation>
+        <translation>Quá nhiều yêu cầu lúc này: hãy thử lại sau giây lát.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
         <source>Trying a filter on {}</source>
-        <translation type="obsolete">Đang thử một bộ lọc trên {}</translation>
+        <translation>Đang thử một bộ lọc trên {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>Zoom on {}</source>
-        <translation type="obsolete">Thu phóng đến {}</translation>
+        <translation>Thu phóng đến {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>an area</source>
-        <translation type="obsolete">một vùng</translation>
+        <translation>một vùng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
         <source>everything</source>
-        <translation type="obsolete">tất cả</translation>
+        <translation>tất cả</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
         <source>{} tools available</source>
-        <translation type="obsolete">{} công cụ khả dụng</translation>
+        <translation>{} công cụ khả dụng</translation>
     </message>
 </context>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="269"/>
         <source>The layers as they were before this step of the last request</source>
         <translation>Các lớp như trước bước này của yêu cầu gần nhất</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="267"/>
         <source>Undo back to here</source>
         <translation>Hoàn tác đến đây</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="364"/>
         <source>TRY</source>
-        <translation type="obsolete">THỬ</translation>
+        <translation>THỬ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_thread.py" line="111"/>
         <source>Undo</source>
-        <translation type="obsolete">Hoàn tác</translation>
+        <translation>Hoàn tác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="312"/>
         <source>(no request)</source>
-        <translation type="obsolete">(không có yêu cầu)</translation>
+        <translation>(không có yêu cầu)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="611"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation type="obsolete">Một vài yêu cầu miễn phí mỗi tháng, qua máy chuyển tiếp của FilterMate đến Claude (Anthropic), theo điều khoản của Anthropic. Máy chuyển tiếp chỉ đếm mức đã dùng và không lưu cuộc trò chuyện nào. Khi hết hạn mức, hãy chọn nhà cung cấp và nhập khóa API riêng của bạn.</translation>
+        <translation>Một vài yêu cầu miễn phí mỗi tháng, qua máy chuyển tiếp của FilterMate đến Claude (Anthropic), theo điều khoản của Anthropic. Máy chuyển tiếp chỉ đếm mức đã dùng và không lưu cuộc trò chuyện nào. Khi hết hạn mức, hãy chọn nhà cung cấp và nhập khóa API riêng của bạn.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="616"/>
         <source>API key</source>
-        <translation type="obsolete">Khóa API</translation>
+        <translation>Khóa API</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="770"/>
         <source>Add</source>
-        <translation type="obsolete">Thêm</translation>
+        <translation>Thêm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="610"/>
+        <location filename="../ui/widgets/agent_panel.py" line="702"/>
         <source>Address</source>
-        <translation type="obsolete">Địa chỉ</translation>
+        <translation>Địa chỉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="205"/>
         <source>Agent settings</source>
-        <translation type="obsolete">Cài đặt tác tử</translation>
+        <translation>Cài đặt tác tử</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="622"/>
         <source>Allow attribute values to be sent</source>
-        <translation type="obsolete">Cho phép gửi giá trị thuộc tính</translation>
+        <translation>Cho phép gửi giá trị thuộc tính</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="695"/>
         <source>Applications already set up will have to be set up again.</source>
-        <translation type="obsolete">Các ứng dụng đã thiết lập sẽ phải thiết lập lại.</translation>
+        <translation>Các ứng dụng đã thiết lập sẽ phải thiết lập lại.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="184"/>
         <source>Ask the agent to filter your layers</source>
-        <translation type="obsolete">Nhờ tác tử lọc các lớp của bạn</translation>
+        <translation>Nhờ tác tử lọc các lớp của bạn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="240"/>
         <source>Back to the conversation</source>
-        <translation type="obsolete">Quay lại cuộc trò chuyện</translation>
+        <translation>Quay lại cuộc trò chuyện</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="668"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation type="obsolete">Claude Code hoặc một ứng dụng khách MCP khác trên máy tính này khi đó có thể lọc các lớp của bạn, sau khi FilterMate đã mở, theo quy tắc của bảng này: cùng nguồn, cùng xác nhận, và bộ lọc có thể được hoàn tác tại đây. Ứng dụng đó gửi những gì nó đọc được đến nhà cung cấp AI của riêng nó.</translation>
+        <translation>Claude Code hoặc một ứng dụng khách MCP khác trên máy tính này khi đó có thể lọc các lớp của bạn, sau khi FilterMate đã mở, theo quy tắc của bảng này: cùng nguồn, cùng xác nhận, và bộ lọc có thể được hoàn tác tại đây. Ứng dụng đó gửi những gì nó đọc được đến nhà cung cấp AI của riêng nó.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="472"/>
         <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation type="obsolete">Hãy kết nối một nhà cung cấp AI để bắt đầu. Không có gì được gửi đi khi bạn chưa đồng ý.</translation>
+        <translation>Hãy kết nối một nhà cung cấp AI để bắt đầu. Không có gì được gửi đi khi bạn chưa đồng ý.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation type="obsolete">Đã sao chép, kèm mã thông báo truy cập: hãy giữ kín. Hãy lưu các cài đặt này để áp dụng.</translation>
+        <translation>Đã sao chép, kèm mã thông báo truy cập: hãy giữ kín. Hãy lưu các cài đặt này để áp dụng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="685"/>
         <source>Copy for Claude Desktop</source>
-        <translation type="obsolete">Sao chép cho Claude Desktop</translation>
+        <translation>Sao chép cho Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="690"/>
         <source>Copy the Claude Code command</source>
-        <translation type="obsolete">Sao chép lệnh Claude Code</translation>
+        <translation>Sao chép lệnh Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="682"/>
         <source>Copy the configuration</source>
-        <translation type="obsolete">Sao chép cấu hình</translation>
+        <translation>Sao chép cấu hình</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="469"/>
         <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation type="obsolete">Hãy mô tả bằng lời của bạn. Mỗi bộ lọc đều có thể hoàn tác.</translation>
+        <translation>Hãy mô tả bằng lời của bạn. Mỗi bộ lọc đều có thể hoàn tác.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="471"/>
         <source>Filter your layers from a sentence</source>
-        <translation type="obsolete">Lọc các lớp của bạn chỉ bằng một câu</translation>
+        <translation>Lọc các lớp của bạn chỉ bằng một câu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="594"/>
         <source>FilterMate agent</source>
-        <translation type="obsolete">Tác tử FilterMate</translation>
+        <translation>Tác tử FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="242"/>
         <source>History</source>
-        <translation type="obsolete">Lịch sử</translation>
+        <translation>Lịch sử</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="201"/>
         <source>History…</source>
-        <translation type="obsolete">Lịch sử…</translation>
+        <translation>Lịch sử…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="631"/>
         <source>I agree to send this data to this provider</source>
-        <translation type="obsolete">Tôi đồng ý gửi dữ liệu này đến nhà cung cấp này</translation>
+        <translation>Tôi đồng ý gửi dữ liệu này đến nhà cung cấp này</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="672"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation type="obsolete">Cho phép các ứng dụng khác trên máy tính này điều khiển FilterMate (máy chủ MCP)</translation>
+        <translation>Cho phép các ứng dụng khác trên máy tính này điều khiển FilterMate (máy chủ MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
         <source>MCP connector</source>
-        <translation type="obsolete">Trình kết nối MCP</translation>
+        <translation>Trình kết nối MCP</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>MCP connectors</source>
-        <translation type="obsolete">Các trình kết nối MCP</translation>
+        <translation>Các trình kết nối MCP</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="606"/>
         <source>Model</source>
-        <translation type="obsolete">Mô hình</translation>
+        <translation>Mô hình</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="198"/>
         <source>More</source>
-        <translation type="obsolete">Xem thêm</translation>
+        <translation>Xem thêm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="693"/>
         <source>New access token</source>
-        <translation type="obsolete">Mã thông báo truy cập mới</translation>
+        <translation>Mã thông báo truy cập mới</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="203"/>
         <source>New conversation</source>
-        <translation type="obsolete">Cuộc trò chuyện mới</translation>
+        <translation>Cuộc trò chuyện mới</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
         <source>New token: it applies once these settings are saved.</source>
-        <translation type="obsolete">Mã thông báo mới: có hiệu lực sau khi lưu các cài đặt này.</translation>
+        <translation>Mã thông báo mới: có hiệu lực sau khi lưu các cài đặt này.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="795"/>
         <source>Open data platforms</source>
-        <translation type="obsolete">Nền tảng dữ liệu mở</translation>
+        <translation>Nền tảng dữ liệu mở</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="166"/>
         <source>Open the settings</source>
-        <translation type="obsolete">Mở cài đặt</translation>
+        <translation>Mở cài đặt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="657"/>
         <source>Other applications</source>
-        <translation type="obsolete">Ứng dụng khác</translation>
+        <translation>Ứng dụng khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="701"/>
         <source>Port</source>
-        <translation type="obsolete">Cổng</translation>
+        <translation>Cổng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="655"/>
         <source>Provider</source>
-        <translation type="obsolete">Nhà cung cấp</translation>
+        <translation>Nhà cung cấp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="264"/>
         <source>Redo</source>
-        <translation type="obsolete">Làm lại</translation>
+        <translation>Làm lại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="755"/>
         <source>Remove</source>
-        <translation type="obsolete">Gỡ bỏ</translation>
+        <translation>Gỡ bỏ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="619"/>
         <source>Remove the stored key</source>
-        <translation type="obsolete">Xóa khóa đã lưu</translation>
+        <translation>Xóa khóa đã lưu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="796"/>
         <source>Satellite imagery</source>
-        <translation type="obsolete">Ảnh vệ tinh</translation>
+        <translation>Ảnh vệ tinh</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Send (Enter)</source>
-        <translation type="obsolete">Gửi (Enter)</translation>
+        <translation>Gửi (Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
         <source>Send again</source>
-        <translation type="obsolete">Gửi lại</translation>
+        <translation>Gửi lại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="479"/>
         <source>Sent to: {}</source>
-        <translation type="obsolete">Đã gửi đến: {}</translation>
+        <translation>Đã gửi đến: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="361"/>
         <source>Set up the agent</source>
-        <translation type="obsolete">Thiết lập tác tử</translation>
+        <translation>Thiết lập tác tử</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="656"/>
         <source>Sources</source>
-        <translation type="obsolete">Nguồn</translation>
+        <translation>Nguồn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
         <source>Stop (Esc)</source>
-        <translation type="obsolete">Dừng (Esc)</translation>
+        <translation>Dừng (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
         <source>Stored: leave empty to keep it</source>
-        <translation type="obsolete">Đã lưu: để trống để giữ nguyên</translation>
+        <translation>Đã lưu: để trống để giữ nguyên</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="753"/>
         <source>Test</source>
-        <translation type="obsolete">Kiểm tra</translation>
+        <translation>Kiểm tra</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
         <source>Testing…</source>
-        <translation type="obsolete">Đang kiểm tra…</translation>
+        <translation>Đang kiểm tra…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="659"/>
         <source>The MCP server could not start: {}</source>
-        <translation type="obsolete">Không thể khởi động máy chủ MCP: {}</translation>
+        <translation>Không thể khởi động máy chủ MCP: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation type="obsolete">Tác tử có thể tìm kiếm trong các nguồn được đánh dấu ở đây. Các tìm kiếm của bạn, và những gì tác tử chuyển cho một trình kết nối, sẽ được gửi đến các nguồn đó; lớp được thêm từ chúng được đọc từ máy chủ của chúng.</translation>
+        <translation>Tác tử có thể tìm kiếm trong các nguồn được đánh dấu ở đây. Các tìm kiếm của bạn, và những gì tác tử chuyển cho một trình kết nối, sẽ được gửi đến các nguồn đó; lớp được thêm từ chúng được đọc từ máy chủ của chúng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="624"/>
         <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation type="obsolete">Tác tử gửi yêu cầu của bạn, tên các lớp và trường, biểu thức bộ lọc cùng kết quả của các công cụ đến nhà cung cấp được chọn ở đây, theo điều khoản của nhà cung cấp đó. Nếu không bật tùy chọn bên dưới, tác tử không đọc giá trị của các trường; những giá trị đã có trong bộ lọc và mục yêu thích của bạn vẫn được gửi. Cuộc trò chuyện được lưu trên máy tính này theo từng dự án, cho đến khi bạn bắt đầu cuộc mới.</translation>
+        <translation>Tác tử gửi yêu cầu của bạn, tên các lớp và trường, biểu thức bộ lọc cùng kết quả của các công cụ đến nhà cung cấp được chọn ở đây, theo điều khoản của nhà cung cấp đó. Nếu không bật tùy chọn bên dưới, tác tử không đọc giá trị của các trường; những giá trị đã có trong bộ lọc và mục yêu thích của bạn vẫn được gửi. Cuộc trò chuyện được lưu trên máy tính này theo từng dự án, cho đến khi bạn bắt đầu cuộc mới.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="687"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation type="obsolete">Qua mcp-remote, cần Node.js: Claude Desktop khởi chạy các máy chủ cục bộ như chương trình.</translation>
+        <translation>Qua mcp-remote, cần Node.js: Claude Desktop khởi chạy các máy chủ cục bộ như chương trình.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="846"/>
         <source>Too many sources added: remove one first.</source>
-        <translation type="obsolete">Đã thêm quá nhiều nguồn: hãy gỡ bớt một nguồn trước.</translation>
+        <translation>Đã thêm quá nhiều nguồn: hãy gỡ bớt một nguồn trước.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="261"/>
         <source>Undo the last</source>
-        <translation type="obsolete">Hoàn tác mục gần nhất</translation>
+        <translation>Hoàn tác mục gần nhất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="170"/>
         <source>Undo this turn</source>
-        <translation type="obsolete">Hoàn tác lượt này</translation>
+        <translation>Hoàn tác lượt này</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="468"/>
         <source>What do you want to filter?</source>
-        <translation type="obsolete">Bạn muốn lọc gì?</translation>
+        <translation>Bạn muốn lọc gì?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
         <source>added by you</source>
-        <translation type="obsolete">do bạn thêm</translation>
+        <translation>do bạn thêm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>applied</source>
-        <translation type="obsolete">đã áp dụng</translation>
+        <translation>đã áp dụng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>community</source>
-        <translation type="obsolete">cộng đồng</translation>
+        <translation>cộng đồng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="765"/>
         <source>https://... or a portal address</source>
-        <translation type="obsolete">https://... hoặc địa chỉ cổng thông tin</translation>
+        <translation>https://... hoặc địa chỉ cổng thông tin</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="310"/>
         <source>no change</source>
-        <translation type="obsolete">không thay đổi</translation>
+        <translation>không thay đổi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>official</source>
-        <translation type="obsolete">chính thức</translation>
+        <translation>chính thức</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
         <source>this computer</source>
-        <translation type="obsolete">máy tính này</translation>
+        <translation>máy tính này</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
         <source>undone</source>
-        <translation type="obsolete">đã hoàn tác</translation>
+        <translation>đã hoàn tác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="325"/>
         <source>{} turn(s)</source>
-        <translation type="obsolete">{} lượt</translation>
+        <translation>{} lượt</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -1810,24 +1830,24 @@ Bạn có đồng ý không?</translation>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="232"/>
         <source>Hide EXPLORING to give room to the sections</source>
-        <translation type="obsolete">Ẩn EXPLORING để nhường chỗ cho các phần</translation>
+        <translation>Ẩn EXPLORING để nhường chỗ cho các phần</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="233"/>
         <source>Show EXPLORING</source>
-        <translation type="obsolete">Hiện EXPLORING</translation>
+        <translation>Hiện EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="51"/>
         <source>Close</source>
-        <translation type="obsolete">Đóng</translation>
+        <translation>Đóng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/layout/dock_chrome.py" line="48"/>
         <source>Detach or dock the panel</source>
-        <translation type="obsolete">Tách hoặc gắn bảng điều khiển</translation>
+        <translation>Tách hoặc gắn bảng điều khiển</translation>
     </message>
 </context>
 <context>
@@ -2994,39 +3014,39 @@ Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translat
         <translation>Loi tai plugin: {0}. Kiem tra bang dieu khien Python cua QGIS de biet chi tiet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7591"/>
+        <location filename="../filter_mate_dockwidget.py" line="7622"/>
         <source>Current layer: {0}</source>
         <translation>Lop hien tai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7593"/>
+        <location filename="../filter_mate_dockwidget.py" line="7624"/>
         <source>No layer selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>Selected layers:
 {0}</source>
         <translation>Cac lop da chon:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>No layers selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7623"/>
+        <location filename="../filter_mate_dockwidget.py" line="7654"/>
         <source>No expression defined</source>
         <translation>Chua dinh nghia bieu thuc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7635"/>
+        <location filename="../filter_mate_dockwidget.py" line="7666"/>
         <source>Display expression: {0}</source>
         <translation>Bieu thuc hien thi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7652"/>
+        <location filename="../filter_mate_dockwidget.py" line="7683"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID doi tuong: {0}
@@ -3131,42 +3151,42 @@ Thuoc tinh dau tien: {1}</translation>
         <translation>Khong the thuc thi {0}: khoi tao widget that bai.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2644"/>
+        <location filename="../filter_mate_app.py" line="2650"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Khong the {0}: lop khong hop le hoac khong tim thay nguon.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2798"/>
+        <location filename="../filter_mate_app.py" line="2804"/>
         <source>All filters cleared - </source>
         <translation>Tat ca bo loc da xoa - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2799"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} doi tuong hien thi trong lop chinh</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2811"/>
+        <location filename="../filter_mate_app.py" line="2817"/>
         <source>Error: result handler missing</source>
         <translation>Loi: thieu trinh xu ly ket qua</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2828"/>
+        <location filename="../filter_mate_app.py" line="2834"/>
         <source>Error during filtering: {0}</source>
         <translation>Loi trong qua trinh loc: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2952"/>
+        <location filename="../filter_mate_app.py" line="2958"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Da phuc hoi {0} yeu thich mo coi: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3118"/>
+        <location filename="../filter_mate_app.py" line="3124"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Tai lop that bai - nhan de thu lai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3170"/>
+        <location filename="../filter_mate_app.py" line="3176"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lop da tai thanh cong</translation>
     </message>
@@ -3229,7 +3249,7 @@ What would you like to do?</translation>
         <translation>{0} lớp vẫn đang được lọc: {1}. Bật lại tùy chọn để bỏ lọc chúng.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2630"/>
+        <location filename="../filter_mate_app.py" line="2636"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>Một bộ lọc máy chủ đang được chuẩn bị. Hãy đợi hoàn tất trước khi bắt đầu thao tác khác.</translation>
     </message>
@@ -3439,11 +3459,13 @@ Van xoa?</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6244"/>
+        <location filename="../ui/controllers/property_controller.py" line="761"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Vung dem am (xoi mon): thu nho da giac vao trong</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6247"/>
+        <location filename="../ui/controllers/property_controller.py" line="768"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
     </message>
@@ -3473,7 +3495,7 @@ Van xoa?</translation>
         <translation>Loi dat lai thuoc tinh lop: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>Filter</source>
         <translation>Lọc</translation>
     </message>
@@ -3845,7 +3867,7 @@ Van xoa?</translation>
         <translation>📁 Dự án hiện tại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Bộ lọc chưa được khởi chạy: vùng chọn của nó đã thay đổi hoặc không đọc được. Hãy nhấp Lọc lại.</translation>
     </message>
@@ -4225,7 +4247,7 @@ Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="818"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: đang tải xuống mô hình phân đoạn</translation>
     </message>
@@ -5757,6 +5779,84 @@ Chỉ các lớp của dự án được lọc. Có thể hoàn tác bộ lọc 
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
         <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
         <translation>Áp dụng cùng các tiêu chí (lớp ASPRS, khoảng Z và cường độ, số lần phản hồi, biểu thức) cho một hoặc nhiều đám mây điểm của dự án, ví dụ tất cả các ô LiDAR HD của một công trường. Bộ lọc là biểu thức của đám mây điểm (tập con): có hiệu lực ngay và có thể hoàn tác từ FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="60"/>
+        <source>Raster to draw on (e.g. an orthophoto)</source>
+        <translation>Raster để vẽ lên (ví dụ ảnh trực giao)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="61"/>
+        <source>Guide features (points or polygons)</source>
+        <translation>Đối tượng dẫn hướng (điểm hoặc đa giác)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="64"/>
+        <source>Objects drawn by SAM</source>
+        <translation>Các hình do SAM vẽ</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="135"/>
+        <source>The raster cannot be read</source>
+        <translation>Không thể đọc raster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="79"/>
+        <source>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</source>
+        <translation>SAM chưa được cài đặt: hãy chọn Đối tượng đã nhấp trong nhóm BỘ CHỌN của một raster trong bảng điều khiển FilterMate, rồi chấp nhận cài đặt</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="100"/>
+        <source>The guide features cannot be read</source>
+        <translation>Không thể đọc các đối tượng dẫn hướng</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="128"/>
+        <source>No point or polygon of the guide layer lies on the raster</source>
+        <translation>Không có điểm hay đa giác nào của lớp dẫn hướng nằm trên raster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="132"/>
+        <source>{0} feature(s) on the raster, {1} window(s) to prepare</source>
+        <translation>{0} đối tượng trên raster, {1} cửa sổ cần chuẩn bị</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="160"/>
+        <source>A window could not be prepared: {0}</source>
+        <translation>Không thể chuẩn bị một cửa sổ: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="167"/>
+        <source>No window could be prepared: {0}</source>
+        <translation>Không chuẩn bị được cửa sổ nào: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="183"/>
+        <source>Canceled: {0} of {1} window(s) prepared</source>
+        <translation>Đã hủy: đã chuẩn bị {0}/{1} cửa sổ</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="186"/>
+        <source>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</source>
+        <translation>Đã vẽ {0} hình, {1} đối tượng không có hình, {2} bị bỏ qua, trong {3:.0f} giây</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="194"/>
+        <source>Draw objects on a raster with SAM from points or polygons</source>
+        <translation>Vẽ các hình lên raster bằng SAM từ điểm hoặc đa giác</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="197"/>
+        <source>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</source>
+        <translation>SAM 2.1 tiny vẽ lên raster hình mà mỗi đối tượng của lớp dẫn hướng chỉ tới: một điểm là một cú nhấp lên đối tượng, một đa giác cho khung bao của nó và một điểm bên trong. Mỗi đối tượng một đa giác, trong CRS của raster, kèm các thuộc tính của đối tượng, điểm số của SAM (sam_score) và, với đa giác, độ chồng lấp của nó với hình đã vẽ (sam_iou, từ 0 đến 1).
+
+Ví dụ: diện tích chiếm đất của các tòa nhà được vẽ lại trên ảnh trực giao mới (sam_iou thấp báo hiệu một tòa nhà đã thay đổi); điểm cây hoặc ao được chuyển thành đường viền.
+
+Raster được vẽ như trên bản đồ, với kiểu hiển thị của nó. SAM được cài đặt một lần từ nhóm BỘ CHỌN của bảng điều khiển FilterMate; nó chạy trên CPU, vài giây cho mỗi cửa sổ 1024 pixel.</translation>
     </message>
 </context>
 <context>
@@ -8182,7 +8282,7 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="650"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: đang chuẩn bị phân đoạn</translation>
     </message>
@@ -8480,7 +8580,7 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="719"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: đang vẽ các đối tượng tương tự</translation>
     </message>
