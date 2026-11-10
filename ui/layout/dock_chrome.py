@@ -92,9 +92,9 @@ class DockTitleButton(QAbstractButton):
                 side, shift = TITLE_GLYPH - 2, 2
                 left, top = center.x() - half, center.y() - half
                 painter.drawRect(QRectF(left, top + shift, side, side))
-                painter.drawPolyline(QPolygonF([QPointF(left + shift, top + shift), QPointF(left + shift, top),
-                                      QPointF(left + TITLE_GLYPH, top), QPointF(left + TITLE_GLYPH, top + side),
-                                      QPointF(left + side, top + side)]))
+                painter.drawPolyline(QPolygonF([
+                    QPointF(left + shift, top + shift), QPointF(left + shift, top), QPointF(left + TITLE_GLYPH, top),
+                    QPointF(left + TITLE_GLYPH, top + side), QPointF(left + side, top + side)]))
         finally:
             painter.end()
 
