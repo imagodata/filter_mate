@@ -63,7 +63,8 @@ The objects found are **proposals**, outlined in dashes, outside the selection: 
 click to reject it, Enter (or *Keep*) keeps them all, Escape (or *Reject*) rejects them all.
 
 The objects are polygons in the CRS of the raster, stored with the filter like any other raster selection.
-Processing and the REST API do not accept them yet.
+Processing (the `SEGMENTS` parameter of *Filter layers of any type by the pixels of a raster*, a polygon layer),
+the REST API and the MCP tools (`segments` in `raster_selection`) accept them too: see `docs/AUTOMATION.md`.
 
 ## What it is good at
 

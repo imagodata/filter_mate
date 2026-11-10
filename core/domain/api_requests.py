@@ -169,11 +169,54 @@ def normalize_predicates(values: Union[None, str, Iterable]) -> Tuple[str, ...]:
     return tuple(labels) or ("Intersect",)
 
 
+# Objects drawn on a raster (``segments``), as the panel keeps them: polygons, WKT, in the CRS of the raster.
+SEGMENTS_MAX_COUNT = 10000
+SEGMENT_MAX_LENGTH = 2_000_000  # characters of one WKT
+SEGMENTS_MAX_LENGTH = 50_000_000  # characters of all of them
+
+
+def segments_from_values(segments: Union[None, str, Iterable]) -> tuple:
+    """The WKT polygons of a ``segments`` value, checked; an empty tuple for none.
+
+    A segment is a ``POLYGON`` or ``MULTIPOLYGON`` in the CRS of the raster source. The text is
+    only checked here (pure Python); an unreadable polygon is skipped, and reported, by the job.
+
+    Raises:
+        ValueError: For a value that is not a list of polygon WKT, or too many or too long ones.
+    """
+    if segments is None or segments == "":
+        return ()
+    if isinstance(segments, str):
+        segments = [segments]
+    try:
+        items = list(segments)
+    except TypeError:
+        raise ValueError("segments must be a list of WKT polygons") from None
+    if len(items) > SEGMENTS_MAX_COUNT:
+        raise ValueError(f"at most {SEGMENTS_MAX_COUNT} segments, got {len(items)}")
+    kept, total = [], 0
+    for item in items:
+        if not isinstance(item, str):
+            raise ValueError(f"a segment must be a WKT text, got {type(item).__name__}")
+        text = item.strip()
+        if not text.upper().startswith(("POLYGON", "MULTIPOLYGON")):
+            raise ValueError(f"a segment must be a POLYGON or MULTIPOLYGON WKT, got {text[:30]!r}")
+        if len(text) > SEGMENT_MAX_LENGTH:
+            raise ValueError(f"a segment is longer than {SEGMENT_MAX_LENGTH} characters")
+        total += len(text)
+        if total > SEGMENTS_MAX_LENGTH:
+            raise ValueError(f"the segments are longer than {SEGMENTS_MAX_LENGTH} characters in all")
+        if text not in kept:
+            kept.append(text)
+    return tuple(kept)
+
+
 def raster_selection_from_values(band: int = 1, mode: Union[str, int, RasterSelectionMode] = "range",
                                  minimum: Optional[float] = None, maximum: Optional[float] = None,
                                  classes: Union[None, str, Iterable] = None,
                                  expression: str = "",
-                                 derivative: Union[None, str, int, RasterDerivative] = "value") -> RasterSelection:
+                                 derivative: Union[None, str, int, RasterDerivative] = "value",
+                                 segments: Union[None, str, Iterable] = None) -> RasterSelection:
     """Build the pixels selection of a raster source.
 
     Args:
@@ -187,10 +230,22 @@ def raster_selection_from_values(band: int = 1, mode: Union[str, int, RasterSele
         derivative: Quantity the ``range`` applies to: ``"value"`` (default), ``"slope_degrees"``,
             ``"slope_percent"``, ``"aspect"``, ``"hillshade"``, ``"roughness"`` (the band is read as a
             DTM), a :class:`RasterDerivative` or its index in :data:`RASTER_DERIVATIVES`.
+        segments: Objects drawn on the raster (the SAM targets of the panel): WKT polygons in the CRS
+            of the raster. The selection is then these polygons, and ``mode`` and its values must stay
+            unset (:func:`segments_from_values`).
 
     Raises:
         ValueError: When the selection would keep nothing meaningful.
     """
+    drawn = segments_from_values(segments)
+    if drawn:
+        if minimum is not None or maximum is not None or (classes not in (None, "", [], (), frozenset())) \
+                or (expression or "").strip() or _derivative_of(derivative) is not RasterDerivative.VALUE:
+            raise ValueError("segments are a selection of their own: leave the range, classes, expression "
+                             "and derivative unset")
+        if isinstance(band, bool) or float(band) != int(float(band)) or int(float(band)) < 1:
+            raise ValueError(f"band must be a positive integer, got {band!r}")
+        return RasterSelection(band=int(float(band)), segments=drawn)
     if isinstance(mode, RasterSelectionMode):
         selection_mode = mode
     elif isinstance(mode, int) and not isinstance(mode, bool):
@@ -314,7 +369,7 @@ class OperationReport:
         }
 
 
-_RASTER_KEYS = ("band", "mode", "minimum", "maximum", "classes", "expression", "derivative")
+_RASTER_KEYS = ("band", "mode", "minimum", "maximum", "classes", "expression", "derivative", "segments")
 _POINT_CLOUD_KEYS = ("classes", "z_min", "z_max", "intensity_min", "intensity_max", "return_number", "expression")
 
 

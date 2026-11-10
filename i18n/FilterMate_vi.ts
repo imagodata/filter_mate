@@ -32,8 +32,9 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
-        <translation>Hạn mức miễn phí</translation>
+        <translation type="obsolete">Hạn mức miễn phí</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -396,12 +397,14 @@ Bạn có đồng ý không?</translation>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>
-        <translation>THỬ</translation>
+        <translation type="obsolete">THỬ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Undo</source>
-        <translation>Hoàn tác</translation>
+        <translation type="obsolete">Hoàn tác</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -893,17 +896,17 @@ Bạn có đồng ý không?</translation>
         <translation>{0} điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Source geometry: the selected pixels, vectorized</source>
         <translation>Hình học nguồn: các điểm ảnh đã chọn, được vector hóa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="799"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Hình học nguồn: vùng bao của các điểm được giữ lại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="746"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="748"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Hình học nguồn: các đối tượng đã chọn trong EXPLORING</translation>
     </message>
@@ -918,12 +921,12 @@ Bạn có đồng ý không?</translation>
         <translation type="obsolete">Thống kê hình chữ nhật: kéo trên bản đồ để đọc giá trị nhỏ nhất, lớn nhất và trung bình của kênh hiện tại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Mặt cắt độ cao: mở mặt cắt độ cao của QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>Chế độ xem 3D: mở chế độ xem bản đồ 3D mới của QGIS</translation>
     </message>
@@ -958,42 +961,42 @@ Bạn có đồng ý không?</translation>
         <translation>{0} đối tượng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Point cloud</source>
         <translation>Đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="802"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="804"/>
         <source>Kept points</source>
         <translation>Điểm được giữ lại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Selection → source geometry</source>
         <translation>Lựa chọn → hình học nguồn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="386"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Liên kết dải với kiểu: màu của lớp trải trên dải đã chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="387"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Bộ chọn lớp phân loại: nhấp vào bản đồ, lớp của các điểm được vẽ tại đó sẽ được đánh dấu. Ctrl+nhấp để thêm một lớp khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Giá trị dưới con trỏ: theo dõi giá trị điểm ảnh (hoặc độ dốc, hướng dốc... mà khoảng áp dụng) khi di chuyển trên bản đồ</translation>
     </message>
@@ -1003,22 +1006,22 @@ Bạn có đồng ý không?</translation>
         <translation type="obsolete">Thống kê hình chữ nhật: kéo trên bản đồ để đọc giá trị nhỏ nhất, lớn nhất và trung bình của băng hiện tại (hoặc của độ dốc, hướng dốc... mà khoảng áp dụng)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="576"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Liên kết kiểu theo giá trị điểm ảnh: không khả dụng khi khoảng áp dụng cho độ dốc, hướng dốc, đổ bóng địa hình hoặc độ nhám</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="927"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="929"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Bộ chọn lớp phân loại: đám mây điểm này không có thuộc tính Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1490"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1492"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Kiểu không thể theo khoảng: cần kiểu thang xám hoặc giả màu một băng trên băng của bảng điều khiển</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Bộ chọn: nhấp vào bản đồ, các điểm ảnh giống điểm ảnh bạn nhấp sẽ được chọn (một màu trên ảnh, một giá trị trên DTM hoặc chỉ số, một lớp trên raster đã phân loại, theo dung sai của bảng). Ctrl+nhấp để thêm một điểm ảnh khác</translation>
     </message>
@@ -1058,27 +1061,27 @@ Bạn có đồng ý không?</translation>
         <translation>hiển thị như toàn bộ lớp trong khung của chúng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="390"/>
         <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
         <translation>Bộ dò đối tượng: nhấp vào bản đồ để chọn mảng điểm ảnh giống điểm ảnh được nhấp (một bể bơi, một mái nhà, một cánh đồng, với dung sai của bảng), chứ không phải mọi điểm ảnh cùng màu. Ctrl+nhấp để thêm một đối tượng khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
         <translation>Đối tượng tương tự: nhấp vào một đối tượng để chọn mọi đối tượng của raster giống nó (các mảng điểm ảnh như vậy có diện tích nằm trong các tỷ lệ của bảng). Ctrl+nhấp để thêm một đối tượng tham chiếu khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
         <translation>Bộ dò đối tượng: nhấp vào bản đồ để chọn đối tượng nằm dưới điểm nhấp (cụm điểm thuộc lớp của nó: một tòa nhà, một cái cây), không phải toàn bộ lớp; hoặc mọi đối tượng tương tự trong đám mây điểm (nhấp chuột phải vào nút để chọn đích). Ctrl+nhấp để thêm một đối tượng khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
         <translation>Ống hút giá trị: nhấp vào bản đồ để ghi một điều kiện trên thuộc tính chọn trong THUỘC TÍNH (Z, cường độ...), quanh giá trị của điểm tại đó, với dung sai của bảng. Ctrl+nhấp để thêm một điều kiện khác (OR)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
         <translation>Vùng: vẽ hình chữ nhật, đa giác, hình vẽ tay hoặc hình tròn trên bản đồ (nhấp chuột phải vào nút để chọn hình dạng); khung X / Y của nó được đưa vào THUỘC TÍNH, còn chính hình dạng sẽ cắt các đích</translation>
     </message>
@@ -1093,112 +1096,112 @@ Bạn có đồng ý không?</translation>
         <translation type="obsolete">Đối tượng tương tự: nhấp vào một đối tượng để chọn mọi đối tượng của lớp có cùng giá trị của trường nhóm (biểu thức hiển thị của vùng chọn đơn / nhiều). Ctrl+nhấp để thêm một giá trị khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
         <translation>Công cụ khác: các công cụ chọn của QGIS (hình chữ nhật, đa giác, vẽ tay, bán kính), chọn theo biểu thức, đảo ngược hoặc xóa vùng chọn, bảng thuộc tính của vùng chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the elevation profile and the 3D view of QGIS</source>
         <translation>Công cụ khác: mặt cắt độ cao và chế độ xem 3D của QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="540"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="542"/>
         <source>Only color selection is available: rendered colors depend on style and scale.</source>
         <translation>Chỉ có thể chọn theo màu: màu hiển thị phụ thuộc vào kiểu dáng và tỷ lệ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
         <source>The style link follows the VALUE RANGE group: make it the active one first</source>
         <translation>Liên kết kiểu dáng theo nhóm KHOẢNG GIÁ TRỊ: hãy đặt nó làm nhóm đang hoạt động trước</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Current filter: {0}</source>
         <translation>Bộ lọc hiện tại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="837"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="839"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Màu hiển thị phụ thuộc vào kiểu dáng và tỷ lệ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="936"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="938"/>
         <source>Object detector: this point cloud has no Classification attribute</source>
         <translation>Bộ dò đối tượng: đám mây điểm này không có thuộc tính Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="985"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="987"/>
         <source>Object detector</source>
         <translation>Bộ dò đối tượng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Clicked object</source>
         <translation>Đối tượng đã nhấp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Similar objects</source>
         <translation>Đối tượng tương tự</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1099"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1101"/>
         <source>Zone shape</source>
         <translation>Hình dạng vùng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Rectangle</source>
         <translation>Hình chữ nhật</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Polygon</source>
         <translation>Đa giác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Freehand</source>
         <translation>Vẽ tay</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Radius</source>
         <translation>Bán kính</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1205"/>
         <source>The link follows the single and multiple selections: make one of them the active group first</source>
         <translation>Liên kết theo vùng chọn đơn và nhiều: hãy đặt một trong hai làm nhóm đang hoạt động trước</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1213"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
         <source>Select on the map</source>
         <translation>Chọn trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Select by expression…</source>
         <translation>Chọn theo biểu thức…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Invert the selection</source>
         <translation>Đảo ngược vùng chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Clear the selection</source>
         <translation>Xóa vùng chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1228"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1230"/>
         <source>Attribute table of the selection</source>
         <translation>Bảng thuộc tính của vùng chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1267"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1269"/>
         <source>Value under the cursor</source>
         <translation>Giá trị dưới con trỏ</translation>
     </message>
@@ -1208,47 +1211,47 @@ Bạn có đồng ý không?</translation>
         <translation type="obsolete">Thống kê của một hình chữ nhật</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>Elevation profile</source>
         <translation>Mặt cắt độ cao</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>3D view</source>
         <translation>Chế độ xem 3D</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1603"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1605"/>
         <source>This point cloud has no X / Y attribute to filter on</source>
         <translation>Đám mây điểm này không có thuộc tính X / Y để lọc</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="570"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); only the pixels inside it are selected, and the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to) are read in its box</source>
         <translation>Vùng: vẽ hình chữ nhật, đa giác, hình tự do hoặc hình tròn trên bản đồ (nhấp chuột phải vào nút để chọn hình dạng); chỉ các pixel bên trong được chọn, và giá trị nhỏ nhất, lớn nhất và trung bình của băng hiện tại (hoặc của độ dốc, hướng dốc... mà khoảng giá trị áp dụng) được đọc trong phạm vi của vùng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape) and the features it touches are selected</source>
         <translation>Vùng: vẽ hình chữ nhật, đa giác, hình tự do hoặc hình tròn trên bản đồ (nhấp chuột phải vào nút để chọn hình dạng) và các đối tượng mà nó chạm tới sẽ được chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the value under the cursor, the zone</source>
         <translation>Công cụ khác: giá trị dưới con trỏ, vùng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1271"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1273"/>
         <source>Zone</source>
         <translation>Vùng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1279"/>
         <source>Clear the zone</source>
         <translation>Xóa vùng</translation>
     </message>
@@ -1750,6 +1753,29 @@ Bạn có đồng ý không?</translation>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>Đã phát hiện các lớp PostgreSQL nhưng psycopg2 chưa được cài đặt. Sử dụng backend Spatialite cục bộ. Để hiệu suất tốt hơn với tập dữ liệu lớn, hãy cài đặt psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation type="obsolete">Ẩn EXPLORING để nhường chỗ cho các phần</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Show EXPLORING</source>
+        <translation type="obsolete">Hiện EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Close</source>
+        <translation type="obsolete">Đóng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Detach or dock the panel</source>
+        <translation type="obsolete">Tách hoặc gắn bảng điều khiển</translation>
     </message>
 </context>
 <context>
@@ -2916,39 +2942,39 @@ Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translat
         <translation>Loi tai plugin: {0}. Kiem tra bang dieu khien Python cua QGIS de biet chi tiet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7586"/>
+        <location filename="../filter_mate_dockwidget.py" line="7591"/>
         <source>Current layer: {0}</source>
         <translation>Lop hien tai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7588"/>
+        <location filename="../filter_mate_dockwidget.py" line="7593"/>
         <source>No layer selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>Selected layers:
 {0}</source>
         <translation>Cac lop da chon:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>No layers selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7618"/>
+        <location filename="../filter_mate_dockwidget.py" line="7623"/>
         <source>No expression defined</source>
         <translation>Chua dinh nghia bieu thuc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7630"/>
+        <location filename="../filter_mate_dockwidget.py" line="7635"/>
         <source>Display expression: {0}</source>
         <translation>Bieu thuc hien thi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7647"/>
+        <location filename="../filter_mate_dockwidget.py" line="7652"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID doi tuong: {0}
@@ -3229,223 +3255,223 @@ What would you like to do?</translation>
         <translation>Loi khoi tao: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1036"/>
+        <location filename="../filter_mate_dockwidget.py" line="1038"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Cau hinh UI chua hoan thanh - kiem tra nhat ky</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
-        <source>UI dimension error: {}</source>
-        <translation type="obsolete">Loi kich thuoc UI: {}</translation>
+        <source>Zip the export</source>
+        <translation>Nén zip bản xuất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1496"/>
+        <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Trinh quan ly yeu thich khong kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1519"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} yeu thich da luu
 Nhan de ap dung hoac quan ly</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1520"/>
+        <location filename="../filter_mate_dockwidget.py" line="1522"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Chua luu yeu thich nao
 Nhan de them bo loc hien tai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <location filename="../ui/controllers/backend_controller.py" line="822"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Da buoc backend {0} cho {1} lop</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1646"/>
+        <location filename="../filter_mate_dockwidget.py" line="1648"/>
         <source>Backend controller not available</source>
         <translation>Bo dieu khien backend khong kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Tu dong don dep PostgreSQL da bat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget.py" line="1567"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Tu dong don dep PostgreSQL da tat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Da don dep cac view phien PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Khong co view de don dep hoac don dep that bai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget.py" line="1584"/>
         <location filename="../ui/controllers/backend_controller.py" line="1089"/>
         <source>No PostgreSQL connection available</source>
         <translation>Khong co ket noi PostgreSQL kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1608"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schema co {0} view tu cac phien khac.
 Van xoa?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1609"/>
+        <location filename="../filter_mate_dockwidget.py" line="1611"/>
         <source>Other Sessions Active</source>
         <translation>Cac phien khac dang hoat dong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1611"/>
+        <location filename="../filter_mate_dockwidget.py" line="1613"/>
         <source>Schema cleanup cancelled</source>
         <translation>Don dep schema da huy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1616"/>
+        <location filename="../filter_mate_dockwidget.py" line="1618"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schema '{0}' da xoa thanh cong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1618"/>
+        <location filename="../filter_mate_dockwidget.py" line="1620"/>
         <location filename="../ui/controllers/backend_controller.py" line="1090"/>
         <source>Schema cleanup failed</source>
         <translation>Don dep schema that bai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1644"/>
+        <location filename="../filter_mate_dockwidget.py" line="1646"/>
         <source>PostgreSQL Session Info</source>
         <translation>Thong tin phien PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Theme adapted: {0}</source>
         <translation>Giao dien da thich ung: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Dark mode</source>
         <translation>Che do toi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Light mode</source>
         <translation>Che do sang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4155"/>
+        <location filename="../filter_mate_dockwidget.py" line="4157"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Cac doi tuong da chon khong co hinh hoc.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4174"/>
+        <location filename="../filter_mate_dockwidget.py" line="4176"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Chua chon doi tuong. Chon mot doi tuong tu danh sach xo xuong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5349"/>
+        <location filename="../filter_mate_dockwidget.py" line="5351"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lop da chon khong hop le hoac khong tim thay nguon.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6242"/>
+        <location filename="../filter_mate_dockwidget.py" line="6244"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Vung dem am (xoi mon): thu nho da giac vao trong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6245"/>
+        <location filename="../filter_mate_dockwidget.py" line="6247"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6747"/>
+        <location filename="../filter_mate_dockwidget.py" line="6749"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin da kich hoat voi {0} lop vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6866"/>
+        <location filename="../filter_mate_dockwidget.py" line="6868"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Khong the tu dong tai lai plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6871"/>
+        <location filename="../filter_mate_dockwidget.py" line="6873"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Loi tai lai plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6946"/>
+        <location filename="../filter_mate_dockwidget.py" line="6948"/>
         <source>Layer properties reset to defaults</source>
         <translation>Thuoc tinh lop da dat lai ve mac dinh</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6947"/>
+        <location filename="../filter_mate_dockwidget.py" line="6949"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Loi dat lai thuoc tinh lop: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>Filter</source>
         <translation>Lọc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="904"/>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
         <source>Undo the last filter</source>
         <translation>Hoàn tác bộ lọc gần nhất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="905"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Redo the last filter</source>
         <translation>Làm lại bộ lọc gần nhất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Remove the filters</source>
         <translation>Gỡ bỏ các bộ lọc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="907"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Export the layers</source>
         <translation>Xuất các lớp</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="908"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>About FilterMate</source>
         <translation>Giới thiệu về FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="909"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Identify the selected features</source>
         <translation>Nhận dạng các đối tượng đã chọn</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="911"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Zoom to the selected features</source>
         <translation>Phóng tới các đối tượng đã chọn</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="912"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Select the features on the map</source>
         <translation>Chọn các đối tượng trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="913"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Follow the features on the map</source>
         <translation>Theo dõi các đối tượng trên bản đồ</translation>
     </message>
@@ -3455,123 +3481,118 @@ Van xoa?</translation>
         <translation type="obsolete">Liên kết ba chế độ chọn</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="915"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Reset the layer properties</source>
         <translation>Đặt lại thuộc tính lớp</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="916"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Follow the current layer</source>
         <translation>Theo lớp hiện tại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="917"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Layers to filter</source>
         <translation>Các lớp cần lọc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="918"/>
+        <location filename="../filter_mate_dockwidget.py" line="920"/>
         <source>Combine with the existing filter</source>
         <translation>Kết hợp với bộ lọc hiện có</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="919"/>
+        <location filename="../filter_mate_dockwidget.py" line="921"/>
         <source>Geometric predicates</source>
         <translation>Vị từ hình học</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="920"/>
+        <location filename="../filter_mate_dockwidget.py" line="922"/>
         <source>Buffer distance</source>
         <translation>Khoảng cách vùng đệm</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="921"/>
+        <location filename="../filter_mate_dockwidget.py" line="923"/>
         <source>Buffer type</source>
         <translation>Kiểu vùng đệm</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="922"/>
+        <location filename="../filter_mate_dockwidget.py" line="924"/>
         <source>Layers to export</source>
         <translation>Các lớp cần xuất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="923"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>Projection of the export</source>
         <translation>Phép chiếu của bản xuất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="924"/>
+        <location filename="../filter_mate_dockwidget.py" line="926"/>
         <source>Export the styles</source>
         <translation>Xuất kiểu hiển thị</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="927"/>
         <source>Export format</source>
         <translation>Định dạng xuất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="926"/>
+        <location filename="../filter_mate_dockwidget.py" line="928"/>
         <source>Output folder</source>
         <translation>Thư mục đầu ra</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="927"/>
-        <source>Zip the export</source>
-        <translation>Nén zip bản xuất</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="1041"/>
+        <location filename="../filter_mate_dockwidget.py" line="1043"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Không thể áp dụng bố cục bảng điều khiển; dùng kích thước mặc định. Chi tiết trong filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7038"/>
+        <location filename="../filter_mate_dockwidget.py" line="7040"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Link the single and multiple selections</source>
         <translation>Liên kết vùng chọn đơn và nhiều</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1594"/>
+        <location filename="../filter_mate_dockwidget.py" line="1596"/>
         <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
         <translation>Schema '{0}' và {1} đối tượng tạm thời sau sẽ bị xóa:</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1597"/>
+        <location filename="../filter_mate_dockwidget.py" line="1599"/>
         <source>... and {0} more</source>
         <translation>... và {0} mục nữa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1599"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
         <translation>Schema '{0}' trống và sẽ bị xóa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1600"/>
+        <location filename="../filter_mate_dockwidget.py" line="1602"/>
         <source>Drop FilterMate schema</source>
         <translation>Xóa schema FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>Read failed</source>
         <translation>Đọc thất bại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Không đọc được dịch vụ. Vui lòng thử lại.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4628"/>
+        <location filename="../filter_mate_dockwidget.py" line="4630"/>
         <source>Loading filtered extent…</source>
         <translation>Đang tải phạm vi đã lọc…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5214"/>
+        <location filename="../filter_mate_dockwidget.py" line="5216"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -3613,7 +3634,7 @@ Van xoa?</translation>
         <translation>Chỉ hiển thị một tập giá trị giới hạn. Hãy tinh chỉnh tìm kiếm để thấy các giá trị khác.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5149"/>
+        <location filename="../filter_mate_dockwidget.py" line="5151"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3772,7 +3793,7 @@ Van xoa?</translation>
         <translation>📁 Dự án hiện tại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Bộ lọc chưa được khởi chạy: vùng chọn của nó đã thay đổi hoặc không đọc được. Hãy nhấp Lọc lại.</translation>
     </message>
@@ -5149,18 +5170,18 @@ Tiep tuc?</translation>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="57"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="131"/>
         <source>Buffer</source>
         <translation>Vùng đệm</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="107"/>
         <source>Band</source>
         <translation>Băng</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Raster expression</source>
         <translation>Biểu thức raster</translation>
     </message>
@@ -5180,27 +5201,27 @@ Tiep tuc?</translation>
         <translation>Vị từ hình học</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Pixel value</source>
         <translation>Giá trị điểm ảnh</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (degrees)</source>
         <translation>Độ dốc (độ)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (%)</source>
         <translation>Độ dốc (%)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Aspect (degrees)</source>
         <translation>Hướng dốc (độ)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Hillshade (0-255)</source>
         <translation>Đổ bóng địa hình (0-255)</translation>
     </message>
@@ -5285,102 +5306,102 @@ Tiep tuc?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="64"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="67"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="77"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="80"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="250"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="251"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="279"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="282"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="197"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="199"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="203"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="224"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="231"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="234"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
         <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
 
 Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
@@ -5391,87 +5412,107 @@ Without criteria, the footprint covers the points displayed by the point cloud.
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="104"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="123"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
+        <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="128"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="138"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="150"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="162"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
+        <source>An object cannot be read in the CRS of the raster: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
+        <source>The objects layer holds no polygon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
+        <source>{0} object(s) kept instead of pixel values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="169"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="172"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
         <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
 
 Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (choose &quot;Slope (%)&quot; in &quot;Range applies to&quot; with a DEM as the source: no &quot;Slope&quot; step needed before).
@@ -7952,8 +7993,8 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
-        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
-        <translation>Shift+nhấp mở rộng đối tượng, nhấp chuột phải thu nhỏ, Esc gỡ bỏ</translation>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Shift+nhấp mở rộng đối tượng, nhấp chuột phải cắt bớt nó, G đổi mức chi tiết của nó</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
@@ -8004,11 +8045,6 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>Đã gỡ đối tượng cuối</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
-        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
-        <translation>Shift+nhấp mở rộng đối tượng, nhấp chuột phải cắt bớt nó, G đổi mức chi tiết của nó</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
@@ -8683,25 +8719,6 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Điểm được giữ lại</translation>
-    </message>
-</context>
-<context>
-    <name>DockChrome</name>
-    <message>
-        <source>Hide EXPLORING to give room to the sections</source>
-        <translation>Ẩn EXPLORING để nhường chỗ cho các phần</translation>
-    </message>
-    <message>
-        <source>Show EXPLORING</source>
-        <translation>Hiện EXPLORING</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation>Đóng</translation>
-    </message>
-    <message>
-        <source>Detach or dock the panel</source>
-        <translation>Tách hoặc gắn bảng điều khiển</translation>
     </message>
 </context>
 </TS>

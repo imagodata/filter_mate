@@ -16,7 +16,7 @@ import sys
 from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence
 from urllib.parse import urlencode
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 try:  # mcp 2.x
     from mcp.server.mcpserver import MCPServer as _Server
@@ -86,6 +86,18 @@ class RasterSelection(BaseModel):
         default="value",
         description="range only: quantity the bounds apply to. With anything but `value` the band is read as a "
                     "DTM (elevation model) and the bounds are in degrees / percent / etc.")
+    segments: List[str] = Field(
+        default_factory=list, max_length=10000,
+        description="objects drawn on the raster (the SAM targets of the dock): WKT polygons in the CRS of the "
+                    "raster. When given, they are the selection: leave the range, classes and expression unset.")
+
+    @model_validator(mode="after")
+    def _check_segments(self) -> "RasterSelection":
+        if self.segments:
+            from ..routers.filters import check_segments_selection
+            check_segments_selection(self.segments, self.minimum, self.maximum, self.classes, self.expression,
+                                     self.derivative)
+        return self
 
 
 class PointCloudCriteria(BaseModel):

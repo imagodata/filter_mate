@@ -32,8 +32,9 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
-        <translation>Gratis quotum</translation>
+        <translation type="obsolete">Gratis quotum</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -396,12 +397,14 @@ Gaat u akkoord?</translation>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>
-        <translation>PROBEER</translation>
+        <translation type="obsolete">PROBEER</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Undo</source>
-        <translation>Ongedaan maken</translation>
+        <translation type="obsolete">Ongedaan maken</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -893,17 +896,17 @@ Gaat u akkoord?</translation>
         <translation>{0} punten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Source geometry: the selected pixels, vectorized</source>
         <translation>Brongeometrie: de geselecteerde pixels, gevectoriseerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="799"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Brongeometrie: de voetafdruk van de behouden punten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="746"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="748"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Brongeometrie: de in EXPLORING geselecteerde objecten</translation>
     </message>
@@ -918,12 +921,12 @@ Gaat u akkoord?</translation>
         <translation type="obsolete">Statistieken van een rechthoek: sleep op de kaart om minimum, maximum en gemiddelde van de huidige band te lezen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Hoogteprofiel: het QGIS-hoogteprofiel van de kaart openen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D-weergave: een nieuwe QGIS 3D-kaartweergave openen</translation>
     </message>
@@ -958,42 +961,42 @@ Gaat u akkoord?</translation>
         <translation>{0} objecten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Point cloud</source>
         <translation>Puntenwolk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="802"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="804"/>
         <source>Kept points</source>
         <translation>Behouden punten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Selection → source geometry</source>
         <translation>Selectie → brongeometrie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="386"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Bereik aan de stijl koppelen: de kleuren van de laag strekken zich uit over het gekozen bereik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="387"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Klassenpipet: klik op de kaart en de klasse van de daar getekende punten wordt aangevinkt. Ctrl+klik voegt er nog een toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Waarde onder de cursor: de pixelwaarde (of de helling, expositie... waarop het bereik van toepassing is) volgen tijdens het bewegen over de kaart</translation>
     </message>
@@ -1003,22 +1006,22 @@ Gaat u akkoord?</translation>
         <translation type="obsolete">Statistieken van een rechthoek: sleep op de kaart om minimum, maximum en gemiddelde van de huidige band (of van de helling, expositie... waarop het bereik van toepassing is) te lezen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="576"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>De stijlkoppeling volgt de pixelwaarden: niet beschikbaar zolang het bereik van toepassing is op een helling, expositie, reliëfschaduw of ruwheid</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="927"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="929"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Klassenpipet: deze puntenwolk heeft geen attribuut Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1490"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1492"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>De stijl kan het bereik niet volgen: er is een stijl met één band in grijs of pseudokleur nodig op de band van het paneel</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Pipet: klik op de kaart en de pixels die lijken op de aangeklikte worden geselecteerd (een kleur op een afbeelding, een waarde op een DTM of een index, een klasse op een geclassificeerd raster, met de tolerantie van het paneel). Ctrl+klik voegt er nog een toe</translation>
     </message>
@@ -1058,27 +1061,27 @@ Gaat u akkoord?</translation>
         <translation>als de hele klasse in hun kader getoond</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="390"/>
         <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
         <translation>Objectdetector: klik op de kaart en de pixelvlek die lijkt op de aangeklikte pixel wordt geselecteerd (een zwembad, een dak, een veld, met de tolerantie van het paneel), niet elke pixel van die kleur. Ctrl+klik voegt een ander object toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
         <translation>Vergelijkbare objecten: klik op een object en elk vergelijkbaar object van het raster wordt geselecteerd (de pixelvlekken van dergelijke pixels waarvan de oppervlakte binnen de verhoudingen van het paneel valt). Ctrl+klik voegt een ander referentieobject toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
         <translation>Objectdetector: klik op de kaart en het object onder de klik wordt geselecteerd (het cluster punten van zijn klasse: een gebouw, een boom), niet de hele klasse; of elk object van de puntenwolk dat erop lijkt (klik met de rechtermuisknop op de knop voor het doel). Ctrl+klik voegt een ander object toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
         <translation>Waardepipet: klik op de kaart en er wordt een voorwaarde geschreven op het attribuut dat in ATTRIBUTEN is gekozen (Z, intensiteit...), rond de waarde van het punt daar, met de tolerantie van het paneel. Ctrl+klik voegt een andere voorwaarde toe (OR)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
         <translation>Zone: teken een rechthoek, een polygoon, een vrije vorm of een cirkel op de kaart (klik met de rechtermuisknop op de knop voor de vorm); het X/Y-kader gaat naar ATTRIBUTEN, de vorm zelf knipt de doelen bij</translation>
     </message>
@@ -1093,112 +1096,112 @@ Gaat u akkoord?</translation>
         <translation type="obsolete">Vergelijkbare objecten: klik op een object en elk object van de laag met dezelfde waarde van het groepsveld (de weergave-expressie van de enkele/meervoudige selectie) wordt geselecteerd. Ctrl+klik voegt een andere waarde toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
         <translation>Meer hulpmiddelen: de selectiehulpmiddelen van QGIS (rechthoek, polygoon, vrije hand, straal), selecteren op expressie, de selectie omkeren of wissen, de attributentabel van de selectie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the elevation profile and the 3D view of QGIS</source>
         <translation>Meer hulpmiddelen: het hoogteprofiel en de 3D-weergave van QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="540"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="542"/>
         <source>Only color selection is available: rendered colors depend on style and scale.</source>
         <translation>Alleen kleurselectie is beschikbaar: weergegeven kleuren zijn afhankelijk van stijl en schaal.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
         <source>The style link follows the VALUE RANGE group: make it the active one first</source>
         <translation>De stijlkoppeling volgt de groep WAARDEBEREIK: maak deze eerst actief</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Current filter: {0}</source>
         <translation>Huidig filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="837"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="839"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Weergegeven kleuren zijn afhankelijk van stijl en schaal.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="936"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="938"/>
         <source>Object detector: this point cloud has no Classification attribute</source>
         <translation>Objectdetector: deze puntenwolk heeft geen attribuut Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="985"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="987"/>
         <source>Object detector</source>
         <translation>Objectdetector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Clicked object</source>
         <translation>Aangeklikt object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Similar objects</source>
         <translation>Vergelijkbare objecten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1099"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1101"/>
         <source>Zone shape</source>
         <translation>Vorm van de zone</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Rectangle</source>
         <translation>Rechthoek</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Polygon</source>
         <translation>Polygoon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Freehand</source>
         <translation>Vrije hand</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Radius</source>
         <translation>Straal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1205"/>
         <source>The link follows the single and multiple selections: make one of them the active group first</source>
         <translation>De koppeling volgt de enkele en meervoudige selectie: maak er eerst een van actief</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1213"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
         <source>Select on the map</source>
         <translation>Op de kaart selecteren</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Select by expression…</source>
         <translation>Selecteren op expressie…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Invert the selection</source>
         <translation>De selectie omkeren</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Clear the selection</source>
         <translation>De selectie wissen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1228"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1230"/>
         <source>Attribute table of the selection</source>
         <translation>Attributentabel van de selectie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1267"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1269"/>
         <source>Value under the cursor</source>
         <translation>Waarde onder de cursor</translation>
     </message>
@@ -1208,47 +1211,47 @@ Gaat u akkoord?</translation>
         <translation type="obsolete">Statistieken van een rechthoek</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>Elevation profile</source>
         <translation>Hoogteprofiel</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>3D view</source>
         <translation>3D-weergave</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1603"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1605"/>
         <source>This point cloud has no X / Y attribute to filter on</source>
         <translation>Deze puntenwolk heeft geen X/Y-attribuut om op te filteren</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="570"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); only the pixels inside it are selected, and the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to) are read in its box</source>
         <translation>Zone: teken een rechthoek, een veelhoek, een vrije vorm of een cirkel op de kaart (klik met de rechtermuisknop op de knop voor de vorm); alleen de pixels erbinnen worden geselecteerd, en het minimum, maximum en gemiddelde van de huidige band (of van de helling, expositie... waarop het bereik van toepassing is) worden afgelezen in de omvang ervan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape) and the features it touches are selected</source>
         <translation>Zone: teken een rechthoek, een veelhoek, een vrije vorm of een cirkel op de kaart (klik met de rechtermuisknop op de knop voor de vorm) en de objecten die ze raakt worden geselecteerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the value under the cursor, the zone</source>
         <translation>Meer hulpmiddelen: de waarde onder de cursor, de zone</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1271"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1273"/>
         <source>Zone</source>
         <translation>Zone</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1279"/>
         <source>Clear the zone</source>
         <translation>Zone wissen</translation>
     </message>
@@ -1750,6 +1753,29 @@ Gaat u akkoord?</translation>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL-lagen gedetecteerd, maar psycopg2 is niet geïnstalleerd. De lokale Spatialite-backend wordt gebruikt. Installeer psycopg2 voor betere prestaties bij grote datasets.</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation type="obsolete">EXPLORING verbergen om ruimte te maken voor de secties</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Show EXPLORING</source>
+        <translation type="obsolete">EXPLORING tonen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Close</source>
+        <translation type="obsolete">Sluiten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Detach or dock the panel</source>
+        <translation type="obsolete">Paneel loskoppelen of vastzetten</translation>
     </message>
 </context>
 <context>
@@ -2916,39 +2942,39 @@ Start QGIS opnieuw op om de wijzigingen toe te passen.</translation>
         <translation>Fout bij laden van plugin: {0}. Controleer de QGIS Python-console voor details.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7586"/>
+        <location filename="../filter_mate_dockwidget.py" line="7591"/>
         <source>Current layer: {0}</source>
         <translation>Huidige laag: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7588"/>
+        <location filename="../filter_mate_dockwidget.py" line="7593"/>
         <source>No layer selected</source>
         <translation>Geen laag geselecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>Selected layers:
 {0}</source>
         <translation>Geselecteerde lagen:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>No layers selected</source>
         <translation>Geen lagen geselecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7618"/>
+        <location filename="../filter_mate_dockwidget.py" line="7623"/>
         <source>No expression defined</source>
         <translation>Geen expressie gedefinieerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7630"/>
+        <location filename="../filter_mate_dockwidget.py" line="7635"/>
         <source>Display expression: {0}</source>
         <translation>Weergave-expressie: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7647"/>
+        <location filename="../filter_mate_dockwidget.py" line="7652"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Object-ID: {0}
@@ -3229,223 +3255,223 @@ What would you like to do?</translation>
         <translation>Initialisatiefout: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1036"/>
+        <location filename="../filter_mate_dockwidget.py" line="1038"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI-configuratie incompleet - controleer logs</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
-        <source>UI dimension error: {}</source>
-        <translation type="obsolete">UI-dimensiefout: {}</translation>
+        <source>Zip the export</source>
+        <translation>De export zippen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1496"/>
+        <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Favoritenbeheerder niet beschikbaar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1519"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} favorieten opgeslagen
 Klik om toe te passen of te beheren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1520"/>
+        <location filename="../filter_mate_dockwidget.py" line="1522"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Geen favorieten opgeslagen
 Klik om huidig filter toe te voegen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <location filename="../ui/controllers/backend_controller.py" line="822"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} backend geforceerd voor {1} la(a)g(en)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1646"/>
+        <location filename="../filter_mate_dockwidget.py" line="1648"/>
         <source>Backend controller not available</source>
         <translation>Backend-controller niet beschikbaar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automatische opschoning ingeschakeld</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget.py" line="1567"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automatische opschoning uitgeschakeld</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-sessieweergaven opgeschoond</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Geen weergaven om op te schonen of opschoning mislukt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget.py" line="1584"/>
         <location filename="../ui/controllers/backend_controller.py" line="1089"/>
         <source>No PostgreSQL connection available</source>
         <translation>Geen PostgreSQL-verbinding beschikbaar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1608"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schema heeft {0} weergave(n) van andere sessies.
 Toch verwijderen?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1609"/>
+        <location filename="../filter_mate_dockwidget.py" line="1611"/>
         <source>Other Sessions Active</source>
         <translation>Andere sessies actief</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1611"/>
+        <location filename="../filter_mate_dockwidget.py" line="1613"/>
         <source>Schema cleanup cancelled</source>
         <translation>Schema-opschoning geannuleerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1616"/>
+        <location filename="../filter_mate_dockwidget.py" line="1618"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schema '{0}' succesvol verwijderd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1618"/>
+        <location filename="../filter_mate_dockwidget.py" line="1620"/>
         <location filename="../ui/controllers/backend_controller.py" line="1090"/>
         <source>Schema cleanup failed</source>
         <translation>Schema-opschoning mislukt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1644"/>
+        <location filename="../filter_mate_dockwidget.py" line="1646"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL sessie-info</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Theme adapted: {0}</source>
         <translation>Thema aangepast: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Dark mode</source>
         <translation>Donkere modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Light mode</source>
         <translation>Lichte modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4155"/>
+        <location filename="../filter_mate_dockwidget.py" line="4157"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Geselecteerde objecten hebben geen geometrie.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4174"/>
+        <location filename="../filter_mate_dockwidget.py" line="4176"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Geen object geselecteerd. Selecteer een object uit de keuzelijst.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5349"/>
+        <location filename="../filter_mate_dockwidget.py" line="5351"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>De geselecteerde laag is ongeldig of de bron kan niet worden gevonden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6242"/>
+        <location filename="../filter_mate_dockwidget.py" line="6244"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatieve buffer (erosie): verkleint polygonen naar binnen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6245"/>
+        <location filename="../filter_mate_dockwidget.py" line="6247"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Bufferwaarde in meters (positief=uitbreiden, negatief=verkleinen polygonen)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6747"/>
+        <location filename="../filter_mate_dockwidget.py" line="6749"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin geactiveerd met {0} vectorla(a)g(en)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6866"/>
+        <location filename="../filter_mate_dockwidget.py" line="6868"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Kon plugin niet automatisch herladen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6871"/>
+        <location filename="../filter_mate_dockwidget.py" line="6873"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Fout bij herladen van plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6946"/>
+        <location filename="../filter_mate_dockwidget.py" line="6948"/>
         <source>Layer properties reset to defaults</source>
         <translation>Laageigenschappen teruggezet naar standaard</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6947"/>
+        <location filename="../filter_mate_dockwidget.py" line="6949"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Fout bij het resetten van laageigenschappen: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>Filter</source>
         <translation>Filteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="904"/>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
         <source>Undo the last filter</source>
         <translation>Het laatste filter ongedaan maken</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="905"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Redo the last filter</source>
         <translation>Het laatste filter opnieuw toepassen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Remove the filters</source>
         <translation>De filters verwijderen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="907"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Export the layers</source>
         <translation>De lagen exporteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="908"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>About FilterMate</source>
         <translation>Over FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="909"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Identify the selected features</source>
         <translation>De geselecteerde objecten identificeren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="911"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Zoom to the selected features</source>
         <translation>Zoomen naar de geselecteerde objecten</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="912"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Select the features on the map</source>
         <translation>De objecten op de kaart selecteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="913"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Follow the features on the map</source>
         <translation>De objecten op de kaart volgen</translation>
     </message>
@@ -3455,123 +3481,118 @@ Toch verwijderen?</translation>
         <translation type="obsolete">De drie selectiemodi koppelen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="915"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Reset the layer properties</source>
         <translation>De laageigenschappen herstellen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="916"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Follow the current layer</source>
         <translation>De huidige laag volgen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="917"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Layers to filter</source>
         <translation>Te filteren lagen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="918"/>
+        <location filename="../filter_mate_dockwidget.py" line="920"/>
         <source>Combine with the existing filter</source>
         <translation>Combineren met het bestaande filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="919"/>
+        <location filename="../filter_mate_dockwidget.py" line="921"/>
         <source>Geometric predicates</source>
         <translation>Geometrische predicaten</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="920"/>
+        <location filename="../filter_mate_dockwidget.py" line="922"/>
         <source>Buffer distance</source>
         <translation>Bufferafstand</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="921"/>
+        <location filename="../filter_mate_dockwidget.py" line="923"/>
         <source>Buffer type</source>
         <translation>Buffertype</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="922"/>
+        <location filename="../filter_mate_dockwidget.py" line="924"/>
         <source>Layers to export</source>
         <translation>Te exporteren lagen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="923"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>Projection of the export</source>
         <translation>Projectie van de export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="924"/>
+        <location filename="../filter_mate_dockwidget.py" line="926"/>
         <source>Export the styles</source>
         <translation>De stijlen exporteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="927"/>
         <source>Export format</source>
         <translation>Exportformaat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="926"/>
+        <location filename="../filter_mate_dockwidget.py" line="928"/>
         <source>Output folder</source>
         <translation>Uitvoermap</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="927"/>
-        <source>Zip the export</source>
-        <translation>De export zippen</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="1041"/>
+        <location filename="../filter_mate_dockwidget.py" line="1043"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>De paneelindeling kon niet worden toegepast; standaardafmetingen worden gebruikt. Details in filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7038"/>
+        <location filename="../filter_mate_dockwidget.py" line="7040"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Link the single and multiple selections</source>
         <translation>De enkele en meervoudige selectie koppelen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1594"/>
+        <location filename="../filter_mate_dockwidget.py" line="1596"/>
         <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
         <translation>Schema '{0}' en de volgende {1} tijdelijke object(en) worden verwijderd:</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1597"/>
+        <location filename="../filter_mate_dockwidget.py" line="1599"/>
         <source>... and {0} more</source>
         <translation>... en nog {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1599"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
         <translation>Schema '{0}' is leeg en wordt verwijderd.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1600"/>
+        <location filename="../filter_mate_dockwidget.py" line="1602"/>
         <source>Drop FilterMate schema</source>
         <translation>FilterMate-schema verwijderen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>Read failed</source>
         <translation>Lezen mislukt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>The service could not be read. Please retry.</source>
         <translation>De dienst kon niet worden gelezen. Probeer het opnieuw.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4628"/>
+        <location filename="../filter_mate_dockwidget.py" line="4630"/>
         <source>Loading filtered extent…</source>
         <translation>Gefilterd extent laden…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5214"/>
+        <location filename="../filter_mate_dockwidget.py" line="5216"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -3613,7 +3634,7 @@ Toch verwijderen?</translation>
         <translation>Slechts een beperkte set waarden wordt getoond. Verfijn de zoekopdracht om andere waarden te vinden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5149"/>
+        <location filename="../filter_mate_dockwidget.py" line="5151"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3772,7 +3793,7 @@ Toch verwijderen?</translation>
         <translation>📁 Huidig project</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Het filter is niet gestart: de selectie is gewijzigd of kon niet worden gelezen. Klik opnieuw op Filteren.</translation>
     </message>
@@ -5149,18 +5170,18 @@ Doorgaan?</translation>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="57"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="131"/>
         <source>Buffer</source>
         <translation>Buffer</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="107"/>
         <source>Band</source>
         <translation>Band</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Raster expression</source>
         <translation>Rasteruitdrukking</translation>
     </message>
@@ -5180,27 +5201,27 @@ Doorgaan?</translation>
         <translation>Geometrische predicaten</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Pixel value</source>
         <translation>Pixelwaarde</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (degrees)</source>
         <translation>Helling (graden)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (%)</source>
         <translation>Helling (%)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Aspect (degrees)</source>
         <translation>Expositie (graden)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Hillshade (0-255)</source>
         <translation>Reliëfschaduw (0-255)</translation>
     </message>
@@ -5285,102 +5306,102 @@ Doorgaan?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="64"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="67"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="77"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="80"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="250"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="251"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="279"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="282"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="197"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="199"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="203"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="224"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="231"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="234"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
         <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
 
 Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
@@ -5391,87 +5412,107 @@ Without criteria, the footprint covers the points displayed by the point cloud.
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="104"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="123"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
+        <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="128"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="138"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="150"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="162"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
+        <source>An object cannot be read in the CRS of the raster: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
+        <source>The objects layer holds no polygon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
+        <source>{0} object(s) kept instead of pixel values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="169"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="172"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
         <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
 
 Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (choose &quot;Slope (%)&quot; in &quot;Range applies to&quot; with a DEM as the source: no &quot;Slope&quot; step needed before).
@@ -7952,8 +7993,8 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
-        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
-        <translation>Shift+klik vergroot het object, rechtsklik snijdt het bij, Esc verwijdert het</translation>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Shift+klik vergroot het object, rechtsklik snoeit het bij, G wijzigt de granulariteit</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
@@ -8004,11 +8045,6 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>Laatste object verwijderd</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
-        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
-        <translation>Shift+klik vergroot het object, rechtsklik snoeit het bij, G wijzigt de granulariteit</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
@@ -8683,25 +8719,6 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Behouden punten</translation>
-    </message>
-</context>
-<context>
-    <name>DockChrome</name>
-    <message>
-        <source>Hide EXPLORING to give room to the sections</source>
-        <translation>EXPLORING verbergen om ruimte te maken voor de secties</translation>
-    </message>
-    <message>
-        <source>Show EXPLORING</source>
-        <translation>EXPLORING tonen</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation>Sluiten</translation>
-    </message>
-    <message>
-        <source>Detach or dock the panel</source>
-        <translation>Paneel loskoppelen of vastzetten</translation>
     </message>
 </context>
 </TS>

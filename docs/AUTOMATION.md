@@ -35,7 +35,7 @@ Shared rules:
 | Algorithm | Does | Main parameters | Outputs |
 |---|---|---|---|
 | `filtermate:cross_filter` | filters any layers by the features of a vector layer | `SOURCE`, `SELECTED_ONLY`, `TARGETS`, `PREDICATES`, `BUFFER`, `COVERAGE`, `OPERATOR` | `OUTPUT` |
-| `filtermate:cross_filter_from_raster` | … by the pixels of a raster: value range, classes or raster calculator expression | `SOURCE`, `BAND`, `MODE`, `DERIVATIVE`, `MINIMUM`, `MAXIMUM`, `CLASSES`, `EXPRESSION`, `FILTER_SOURCE` + targets | `OUTPUT` |
+| `filtermate:cross_filter_from_raster` | … by the pixels of a raster: value range, classes or raster calculator expression, or objects (polygons) drawn on it | `SOURCE`, `BAND`, `MODE`, `DERIVATIVE`, `MINIMUM`, `MAXIMUM`, `CLASSES`, `EXPRESSION`, `SEGMENTS`, `FILTER_SOURCE` + targets | `OUTPUT` |
 | `filtermate:cross_filter_from_point_cloud` | … by the footprint of the points kept on a point cloud | `SOURCE`, `CLASSES`, `Z_MIN`/`Z_MAX`, `INTENSITY_MIN`/`MAX`, `RETURN_NUMBER`, `EXPRESSION`, `SOURCE_OPERATOR` + targets | `OUTPUT` |
 | `filtermate:cross_filter_from_geometry` | … by an extent or a WKT geometry | `EXTENT`, `GEOMETRY` + targets | `OUTPUT` |
 | `filtermate:filter_point_cloud` | applies the same criteria to several point clouds (LiDAR HD tiles) | `LAYERS`, criteria, `OPERATOR` | `OUTPUT` |
@@ -144,7 +144,20 @@ layers whose source or filter changed while it was running, so newer changes sta
 absolute difference with the 8 neighbours). In the `DERIVATIVE` parameter of the Processing algorithm they are
 indexes 0 to 5, in this order. Slope, aspect and hillshade use the Horn 3 x 3 kernel; degrees and Web Mercator
 cells are converted to ground metres; a pixel next to a NoData has no derivative, nor does a flat pixel have an
-aspect. No `north` exposure: a range cannot wrap around 0 / 360 (use two filters, `OR`ed). `point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
+aspect. No `north` exposure: a range cannot wrap around 0 / 360 (use two filters, `OR`ed).
+
+`segments` (in `raster_selection`): objects drawn on the raster, such as those of the SAM targets of the dock, as a
+list of `POLYGON` or `MULTIPOLYGON` WKT in the CRS of the raster (10 000 at most). They are the selection: leave
+`minimum`, `maximum`, `classes`, `expression` and `derivative` unset. The source is clipped by the polygons, as in
+the dock; the model is not needed. In Processing, the optional `SEGMENTS` parameter takes a polygon layer, in any
+CRS, instead of the pixel values:
+
+```python
+processing.run("filtermate:cross_filter_from_raster", {
+    "SOURCE": ortho, "SEGMENTS": roofs, "TARGETS": [buildings], "PREDICATES": [0], "OPERATOR": 0})
+```
+
+`point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
 `intensity_max`, `return_number`, `expression`.
 
 ### Script: one extraction per commune

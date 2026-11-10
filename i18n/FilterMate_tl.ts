@@ -32,8 +32,9 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
-        <translation>Libreng quota</translation>
+        <translation type="obsolete">Libreng quota</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -396,12 +397,14 @@ Sumasang-ayon ka ba?</translation>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>
-        <translation>SUBUKAN</translation>
+        <translation type="obsolete">SUBUKAN</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Undo</source>
-        <translation>I-undo</translation>
+        <translation type="obsolete">I-undo</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -893,17 +896,17 @@ Sumasang-ayon ka ba?</translation>
         <translation>{0} na punto</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Source geometry: the selected pixels, vectorized</source>
         <translation>Source geometry: ang mga napiling pixel, na-vectorize</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="799"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Pinagmulang heometriya: ang sakop ng mga pinanatiling punto</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="746"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="748"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Source geometry: ang mga feature na napili sa EXPLORING</translation>
     </message>
@@ -918,12 +921,12 @@ Sumasang-ayon ka ba?</translation>
         <translation type="obsolete">Estadistika ng parihaba: mag-drag sa mapa para basahin ang minimum, maximum at average ng kasalukuyang band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Profile ng elevation: buksan ang elevation profile ng QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D na view: magbukas ng bagong QGIS 3D map view</translation>
     </message>
@@ -958,42 +961,42 @@ Sumasang-ayon ka ba?</translation>
         <translation>{0} na feature</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Point cloud</source>
         <translation>Point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="802"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="804"/>
         <source>Kept points</source>
         <translation>Mga napanatiling punto</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Selection → source geometry</source>
         <translation>Pinili → pinagmulang heometriya</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="386"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>I-link ang saklaw sa estilo: lumalawak ang mga kulay ng layer sa piniling saklaw</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="387"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Class picker: mag-click sa mapa at ang klase ng mga punto na iginuhit doon ay mamarkahan. Ctrl+click para magdagdag ng isa pa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Halaga sa ilalim ng cursor: sundan ang halaga ng pixel (o ang dalisdis, direksyon ng dalisdis... na pinaglalapatan ng saklaw) habang gumagalaw sa mapa</translation>
     </message>
@@ -1003,22 +1006,22 @@ Sumasang-ayon ka ba?</translation>
         <translation type="obsolete">Estadistika ng parihaba: mag-drag sa mapa para basahin ang minimum, maximum at average ng kasalukuyang band (o ng dalisdis, direksyon ng dalisdis... na pinaglalapatan ng saklaw)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="576"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Sumusunod ang style link sa mga halaga ng pixel: hindi available habang ang saklaw ay nakalapat sa dalisdis, direksyon ng dalisdis, hillshade o gaspang</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="927"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="929"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Class picker: walang attribute na Classification ang point cloud na ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1490"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1492"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Hindi masundan ng estilo ang saklaw: kailangan nito ng single band na grey o pseudocolor na estilo sa band ng panel</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Picker: mag-click sa mapa at mapipili ang mga pixel na kamukha ng pixel na na-click mo (isang kulay sa larawan, isang halaga sa DTM o index, isang klase sa classified raster, ayon sa tolerance ng panel). Ctrl+click para magdagdag ng isa pa</translation>
     </message>
@@ -1058,27 +1061,27 @@ Sumasang-ayon ka ba?</translation>
         <translation>ipinapakita bilang buong klase sa kanilang box</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="390"/>
         <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
         <translation>Object detector: i-click ang mapa at mapipili ang patch ng mga pixel na kamukha ng na-click mo (isang pool, bubong, bukid, ayon sa tolerance ng panel), hindi lahat ng pixel ng kulay nito. Ang Ctrl+click ay nagdaragdag ng isa pang object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
         <translation>Mga katulad na object: mag-click ng object at mapipili ang bawat object ng raster na katulad nito (ang mga patch ng gayong pixel na nasa loob ng mga ratio ng panel ang area). Ang Ctrl+click ay nagdaragdag ng isa pang reference na object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
         <translation>Object detector: i-click ang mapa at mapipili ang object sa ilalim ng click (ang cluster ng mga punto ng klase nito: gusali, puno), hindi ang buong klase; o bawat object ng cloud na kapareho nito (i-right-click ang button para sa target). Ang Ctrl+click ay nagdaragdag ng isa pang object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
         <translation>Value picker: i-click ang mapa at isusulat ang isang kondisyon sa attribute na pinili sa ATTRIBUTES (Z, intensity...), sa paligid ng halaga ng punto doon, ayon sa tolerance ng panel. Ang Ctrl+click ay nagdaragdag ng isa pang kondisyon (OR)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
         <translation>Zone: gumuhit ng parihaba, polygon, freehand na hugis o bilog sa mapa (i-right-click ang button para sa hugis); mapupunta sa ATTRIBUTES ang X / Y box nito, ang hugis mismo ang pumuputol sa mga target</translation>
     </message>
@@ -1093,112 +1096,112 @@ Sumasang-ayon ka ba?</translation>
         <translation type="obsolete">Mga katulad na feature: mag-click ng feature at mapipili ang bawat feature ng layer na may parehong halaga ng field ng grupo (ang display expression ng single / multiple na pinili). Ang Ctrl+click ay nagdaragdag ng isa pang halaga</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
         <translation>Iba pang tool: ang mga tool sa pagpili ng QGIS (parihaba, polygon, freehand, radius), piliin gamit ang expression, baliktarin o i-clear ang pinili, ang attribute table ng pinili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the elevation profile and the 3D view of QGIS</source>
         <translation>Iba pang tool: ang elevation profile at ang 3D view ng QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="540"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="542"/>
         <source>Only color selection is available: rendered colors depend on style and scale.</source>
         <translation>Pagpili ng kulay lamang ang available: nakadepende sa style at scale ang mga kulay na ipinapakita.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
         <source>The style link follows the VALUE RANGE group: make it the active one first</source>
         <translation>Sinusunod ng style link ang grupong VALUE RANGE: gawin muna itong aktibo</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Current filter: {0}</source>
         <translation>Kasalukuyang filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="837"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="839"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Nakadepende sa style at scale ang mga kulay na ipinapakita.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="936"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="938"/>
         <source>Object detector: this point cloud has no Classification attribute</source>
         <translation>Object detector: walang attribute na Classification ang point cloud na ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="985"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="987"/>
         <source>Object detector</source>
         <translation>Object detector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Clicked object</source>
         <translation>Na-click na object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Similar objects</source>
         <translation>Mga katulad na object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1099"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1101"/>
         <source>Zone shape</source>
         <translation>Hugis ng zone</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Rectangle</source>
         <translation>Parihaba</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Polygon</source>
         <translation>Polygon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Freehand</source>
         <translation>Freehand</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Radius</source>
         <translation>Radius</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1205"/>
         <source>The link follows the single and multiple selections: make one of them the active group first</source>
         <translation>Sinusunod ng link ang single at multiple na pinili: gawing aktibo muna ang isa sa mga ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1213"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
         <source>Select on the map</source>
         <translation>Pumili sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Select by expression…</source>
         <translation>Piliin gamit ang expression…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Invert the selection</source>
         <translation>Baliktarin ang pinili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Clear the selection</source>
         <translation>I-clear ang pinili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1228"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1230"/>
         <source>Attribute table of the selection</source>
         <translation>Attribute table ng pinili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1267"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1269"/>
         <source>Value under the cursor</source>
         <translation>Halaga sa ilalim ng cursor</translation>
     </message>
@@ -1208,47 +1211,47 @@ Sumasang-ayon ka ba?</translation>
         <translation type="obsolete">Mga istatistika ng parihaba</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>Elevation profile</source>
         <translation>Elevation profile</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>3D view</source>
         <translation>3D view</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1603"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1605"/>
         <source>This point cloud has no X / Y attribute to filter on</source>
         <translation>Walang X / Y na attribute ang point cloud na ito na maaaring pag-filter-an</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="570"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); only the pixels inside it are selected, and the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to) are read in its box</source>
         <translation>Zone: gumuhit ng parihaba, polygon, malayang hugis o bilog sa mapa (i-right-click ang button para sa hugis); ang mga pixel lamang sa loob nito ang napipili, at ang minimum, maximum at mean ng kasalukuyang band (o ng slope, aspect... na pinatutungkulan ng saklaw) ay binabasa sa extent nito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape) and the features it touches are selected</source>
         <translation>Zone: gumuhit ng parihaba, polygon, malayang hugis o bilog sa mapa (i-right-click ang button para sa hugis) at mapipili ang mga feature na nahahawakan nito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the value under the cursor, the zone</source>
         <translation>Iba pang tool: ang halaga sa ilalim ng cursor, ang zone</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1271"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1273"/>
         <source>Zone</source>
         <translation>Zone</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1279"/>
         <source>Clear the zone</source>
         <translation>I-clear ang zone</translation>
     </message>
@@ -1750,6 +1753,29 @@ Sumasang-ayon ka ba?</translation>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>May natagpuang mga PostgreSQL layer ngunit hindi naka-install ang psycopg2. Ginagamit ang lokal na Spatialite backend. Para sa mas mahusay na performance sa malalaking dataset, i-install ang psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation type="obsolete">Itago ang EXPLORING para magkaroon ng espasyo ang mga seksyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Show EXPLORING</source>
+        <translation type="obsolete">Ipakita ang EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Close</source>
+        <translation type="obsolete">Isara</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Detach or dock the panel</source>
+        <translation type="obsolete">I-detach o i-dock ang panel</translation>
     </message>
 </context>
 <context>
@@ -2916,39 +2942,39 @@ Please restart QGIS to apply the changes.</translation>
         <translation>Error sa paglo-load ng plugin: {0}. Suriin ang QGIS Python console para sa mga detalye.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7586"/>
+        <location filename="../filter_mate_dockwidget.py" line="7591"/>
         <source>Current layer: {0}</source>
         <translation>Kasalukuyang layer: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7588"/>
+        <location filename="../filter_mate_dockwidget.py" line="7593"/>
         <source>No layer selected</source>
         <translation>Walang napiling layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>Selected layers:
 {0}</source>
         <translation>Mga napiling layer:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>No layers selected</source>
         <translation>Walang napiling layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7618"/>
+        <location filename="../filter_mate_dockwidget.py" line="7623"/>
         <source>No expression defined</source>
         <translation>Walang expression na tinukoy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7630"/>
+        <location filename="../filter_mate_dockwidget.py" line="7635"/>
         <source>Display expression: {0}</source>
         <translation>Display expression: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7647"/>
+        <location filename="../filter_mate_dockwidget.py" line="7652"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Feature ID: {0}
@@ -3229,223 +3255,223 @@ What would you like to do?</translation>
         <translation>Error sa initialization: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1036"/>
+        <location filename="../filter_mate_dockwidget.py" line="1038"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Hindi kumpleto ang UI configuration - suriin ang mga log</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
-        <source>UI dimension error: {}</source>
-        <translation type="obsolete">Error sa dimensyon ng UI: {}</translation>
+        <source>Zip the export</source>
+        <translation>I-zip ang export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1496"/>
+        <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Hindi available ang manager ng mga paborito</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1519"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Paborito ang naka-save
 I-click upang ilapat o pamahalaan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1520"/>
+        <location filename="../filter_mate_dockwidget.py" line="1522"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Walang naka-save na paborito
 I-click upang idagdag ang kasalukuyang filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <location filename="../ui/controllers/backend_controller.py" line="822"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Pinilit ang {0} backend para sa {1} layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1646"/>
+        <location filename="../filter_mate_dockwidget.py" line="1648"/>
         <source>Backend controller not available</source>
         <translation>Hindi available ang backend controller</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Naka-enable ang PostgreSQL auto-cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget.py" line="1567"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Naka-disable ang PostgreSQL auto-cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Na-clean up ang mga PostgreSQL session view</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Walang view na lilinisin o nabigo ang cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget.py" line="1584"/>
         <location filename="../ui/controllers/backend_controller.py" line="1089"/>
         <source>No PostgreSQL connection available</source>
         <translation>Walang available na koneksyon sa PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1608"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Ang schema ay may {0} view mula sa ibang session.
 I-drop pa rin?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1609"/>
+        <location filename="../filter_mate_dockwidget.py" line="1611"/>
         <source>Other Sessions Active</source>
         <translation>May Ibang Aktibong Session</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1611"/>
+        <location filename="../filter_mate_dockwidget.py" line="1613"/>
         <source>Schema cleanup cancelled</source>
         <translation>Nakansela ang schema cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1616"/>
+        <location filename="../filter_mate_dockwidget.py" line="1618"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Matagumpay na na-drop ang schema '{0}'</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1618"/>
+        <location filename="../filter_mate_dockwidget.py" line="1620"/>
         <location filename="../ui/controllers/backend_controller.py" line="1090"/>
         <source>Schema cleanup failed</source>
         <translation>Nabigo ang schema cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1644"/>
+        <location filename="../filter_mate_dockwidget.py" line="1646"/>
         <source>PostgreSQL Session Info</source>
         <translation>Impormasyon ng PostgreSQL Session</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Theme adapted: {0}</source>
         <translation>Na-adapt ang tema: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Dark mode</source>
         <translation>Dark mode</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Light mode</source>
         <translation>Light mode</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4155"/>
+        <location filename="../filter_mate_dockwidget.py" line="4157"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Walang geometry ang mga napiling feature.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4174"/>
+        <location filename="../filter_mate_dockwidget.py" line="4176"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Walang napiling feature. Pumili ng feature mula sa dropdown list.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5349"/>
+        <location filename="../filter_mate_dockwidget.py" line="5351"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Hindi valid ang napiling layer o hindi mahanap ang source nito.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6242"/>
+        <location filename="../filter_mate_dockwidget.py" line="6244"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatibong buffer (erosion): pinaliit ang mga polygon papaloob</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6245"/>
+        <location filename="../filter_mate_dockwidget.py" line="6247"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Halaga ng buffer sa metro (positibo=palakihin, negatibo=paliitin ang mga polygon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6747"/>
+        <location filename="../filter_mate_dockwidget.py" line="6749"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Na-activate ang plugin na may {0} vector layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6866"/>
+        <location filename="../filter_mate_dockwidget.py" line="6868"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Hindi awtomatikong nai-reload ang plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6871"/>
+        <location filename="../filter_mate_dockwidget.py" line="6873"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Error sa pag-reload ng plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6946"/>
+        <location filename="../filter_mate_dockwidget.py" line="6948"/>
         <source>Layer properties reset to defaults</source>
         <translation>Na-reset ang mga property ng layer sa default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6947"/>
+        <location filename="../filter_mate_dockwidget.py" line="6949"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Error sa pag-reset ng mga property ng layer: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>Filter</source>
         <translation>I-filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="904"/>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
         <source>Undo the last filter</source>
         <translation>I-undo ang huling filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="905"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Redo the last filter</source>
         <translation>I-redo ang huling filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Remove the filters</source>
         <translation>Alisin ang mga filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="907"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Export the layers</source>
         <translation>I-export ang mga layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="908"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>About FilterMate</source>
         <translation>Tungkol sa FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="909"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Identify the selected features</source>
         <translation>Tukuyin ang mga napiling feature</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="911"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Zoom to the selected features</source>
         <translation>I-zoom sa mga napiling feature</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="912"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Select the features on the map</source>
         <translation>Piliin ang mga feature sa mapa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="913"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Follow the features on the map</source>
         <translation>Sundan ang mga feature sa mapa</translation>
     </message>
@@ -3455,123 +3481,118 @@ I-drop pa rin?</translation>
         <translation type="obsolete">I-link ang tatlong mode ng pagpili</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="915"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Reset the layer properties</source>
         <translation>I-reset ang mga katangian ng layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="916"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Follow the current layer</source>
         <translation>Sundan ang kasalukuyang layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="917"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Layers to filter</source>
         <translation>Mga layer na ifi-filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="918"/>
+        <location filename="../filter_mate_dockwidget.py" line="920"/>
         <source>Combine with the existing filter</source>
         <translation>Isama sa umiiral na filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="919"/>
+        <location filename="../filter_mate_dockwidget.py" line="921"/>
         <source>Geometric predicates</source>
         <translation>Mga geometric predicate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="920"/>
+        <location filename="../filter_mate_dockwidget.py" line="922"/>
         <source>Buffer distance</source>
         <translation>Distansya ng buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="921"/>
+        <location filename="../filter_mate_dockwidget.py" line="923"/>
         <source>Buffer type</source>
         <translation>Uri ng buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="922"/>
+        <location filename="../filter_mate_dockwidget.py" line="924"/>
         <source>Layers to export</source>
         <translation>Mga layer na ie-export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="923"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>Projection of the export</source>
         <translation>Projection ng export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="924"/>
+        <location filename="../filter_mate_dockwidget.py" line="926"/>
         <source>Export the styles</source>
         <translation>I-export ang mga estilo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="927"/>
         <source>Export format</source>
         <translation>Format ng export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="926"/>
+        <location filename="../filter_mate_dockwidget.py" line="928"/>
         <source>Output folder</source>
         <translation>Output folder</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="927"/>
-        <source>Zip the export</source>
-        <translation>I-zip ang export</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="1041"/>
+        <location filename="../filter_mate_dockwidget.py" line="1043"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Hindi mailapat ang layout ng panel; gagamitin ang mga default na laki. Mga detalye sa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7038"/>
+        <location filename="../filter_mate_dockwidget.py" line="7040"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Link the single and multiple selections</source>
         <translation>I-link ang single at multiple na pinili</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1594"/>
+        <location filename="../filter_mate_dockwidget.py" line="1596"/>
         <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
         <translation>Ido-drop ang schema '{0}' at ang sumusunod na {1} pansamantalang object:</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1597"/>
+        <location filename="../filter_mate_dockwidget.py" line="1599"/>
         <source>... and {0} more</source>
         <translation>... at {0} pa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1599"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
         <translation>Walang laman ang schema '{0}' at ido-drop ito.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1600"/>
+        <location filename="../filter_mate_dockwidget.py" line="1602"/>
         <source>Drop FilterMate schema</source>
         <translation>I-drop ang schema ng FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>Read failed</source>
         <translation>Nabigo ang pagbasa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Hindi nabasa ang serbisyo. Pakisubukan muli.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4628"/>
+        <location filename="../filter_mate_dockwidget.py" line="4630"/>
         <source>Loading filtered extent…</source>
         <translation>Nilo-load ang na-filter na extent…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5214"/>
+        <location filename="../filter_mate_dockwidget.py" line="5216"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -3613,7 +3634,7 @@ I-drop pa rin?</translation>
         <translation>Limitadong hanay lamang ng mga halaga ang ipinapakita. Pinuhin ang paghahanap upang makita ang iba pang halaga.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5149"/>
+        <location filename="../filter_mate_dockwidget.py" line="5151"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3772,7 +3793,7 @@ I-drop pa rin?</translation>
         <translation>📁 Kasalukuyang Project</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Hindi inilunsad ang filter: nagbago ang pinili nito o hindi nabasa. I-click muli ang I-filter.</translation>
     </message>
@@ -5149,18 +5170,18 @@ Magpatuloy?</translation>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="57"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="131"/>
         <source>Buffer</source>
         <translation>Buffer</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="107"/>
         <source>Band</source>
         <translation>Band</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Raster expression</source>
         <translation>Expression ng raster</translation>
     </message>
@@ -5175,27 +5196,27 @@ Magpatuloy?</translation>
         <translation>Mga geometric predicate</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Pixel value</source>
         <translation>Halaga ng pixel</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (degrees)</source>
         <translation>Dalisdis (degree)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (%)</source>
         <translation>Dalisdis (%)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Aspect (degrees)</source>
         <translation>Direksyon ng dalisdis (degree)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Hillshade (0-255)</source>
         <translation>Hillshade (0-255)</translation>
     </message>
@@ -5280,102 +5301,102 @@ Magpatuloy?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="64"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="67"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="77"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="80"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="250"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="251"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="279"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="282"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="197"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="199"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="203"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="224"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="231"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="234"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
         <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
 
 Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
@@ -5386,87 +5407,107 @@ Without criteria, the footprint covers the points displayed by the point cloud.
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="104"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="123"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
+        <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="128"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="138"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="150"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="162"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
+        <source>An object cannot be read in the CRS of the raster: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
+        <source>The objects layer holds no polygon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
+        <source>{0} object(s) kept instead of pixel values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="169"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="172"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
         <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
 
 Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (choose &quot;Slope (%)&quot; in &quot;Range applies to&quot; with a DEM as the source: no &quot;Slope&quot; step needed before).
@@ -7952,8 +7993,8 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
-        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
-        <translation>Pinalalawak ng Shift+click ang bagay, pinaliliit ito ng right click, inaalis ito ng Esc</translation>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Pinapalawak ng Shift+click ang bagay, pinuputol ito ng right click, binabago ng G ang antas ng detalye nito</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
@@ -8004,11 +8045,6 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>Naalis ang huling bagay</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
-        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
-        <translation>Pinapalawak ng Shift+click ang bagay, pinuputol ito ng right click, binabago ng G ang antas ng detalye nito</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
@@ -8683,25 +8719,6 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Mga pinanatiling punto</translation>
-    </message>
-</context>
-<context>
-    <name>DockChrome</name>
-    <message>
-        <source>Hide EXPLORING to give room to the sections</source>
-        <translation>Itago ang EXPLORING para magkaroon ng espasyo ang mga seksyon</translation>
-    </message>
-    <message>
-        <source>Show EXPLORING</source>
-        <translation>Ipakita ang EXPLORING</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation>Isara</translation>
-    </message>
-    <message>
-        <source>Detach or dock the panel</source>
-        <translation>I-detach o i-dock ang panel</translation>
     </message>
 </context>
 </TS>

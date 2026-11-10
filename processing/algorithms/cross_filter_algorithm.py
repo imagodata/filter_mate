@@ -31,6 +31,7 @@ from qgis.core import (
     QgsProcessingParameterDistance,
     QgsProcessingParameterEnum,
     QgsProcessingParameterExtent,
+    QgsProcessingParameterFeatureSource,
     QgsProcessingParameterGeometry,
     QgsProcessingParameterNumber,
     QgsProcessingParameterRasterLayer,
@@ -93,6 +94,7 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
     CLASSES = "CLASSES"
     EXPRESSION = "EXPRESSION"
     DERIVATIVE = "DERIVATIVE"
+    SEGMENTS = "SEGMENTS"
     FILTER_SOURCE = "FILTER_SOURCE"
     MAX_PIXELS = "MAX_PIXELS"
 
@@ -120,6 +122,10 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         self.addParameter(QgsProcessingParameterString(
             self.EXPRESSION, self.tr("Raster expression, pixel kept if non-zero (e.g. \"dem@1\" > 1200)"),
             optional=True))
+        # The objects drawn with SAM in the dock (or any polygons): they are then the selection, not the pixel values.
+        self.addParameter(QgsProcessingParameterFeatureSource(
+            self.SEGMENTS, self.tr("Objects kept instead of pixel values (polygons, e.g. drawn with SAM)"),
+            [QgsProcessing.SourceType.TypeVectorPolygon], optional=True))
         self.addParameter(QgsProcessingParameterBoolean(
             self.FILTER_SOURCE, self.tr("Also hide the source raster outside the selection"), defaultValue=False))
         self.add_target_parameters(QgsProcessingParameterDistance(
@@ -136,6 +142,50 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         source = self.parameterAsRasterLayer(parameters, self.SOURCE, context)
         if source is None:
             raise QgsProcessingException(self.tr("Invalid source raster"))
+        segments = self._segments(parameters, context, source, feedback)
+        try:
+            if segments:
+                selection = raster_selection_from_values(
+                    band=self.parameterAsInt(parameters, self.BAND, context) or 1, segments=segments)
+            else:
+                selection = self._pixel_selection(parameters, context)
+        except ValueError as exc:
+            raise QgsProcessingException(str(exc))
+        feedback.pushInfo(self.tr("Selection: {0}").format(selection.describe()))
+        report = operations.cross_filter(
+            source, self.parameterAsLayerList(parameters, self.TARGETS, context) or [],
+            raster_selection=selection, filter_source=self.parameterAsBoolean(parameters, self.FILTER_SOURCE, context),
+            max_pixels=self.optional_number(self, parameters, self.MAX_PIXELS, context, integer=True),
+            project=context.project(), feedback=feedback, **self.target_settings(parameters, context))
+        self._log_source(report, feedback)
+        return self.finish(report, feedback)
+
+    def _segments(self, parameters, context, source, feedback):
+        """WKT of the polygons of the SEGMENTS layer in the CRS of the raster; empty without the layer."""
+        polygons = self.parameterAsSource(parameters, self.SEGMENTS, context)
+        if polygons is None:
+            return []
+        from qgis.core import QgsCoordinateTransform
+        transform = QgsCoordinateTransform(polygons.sourceCrs(), source.crs(), context.transformContext())
+        wkts = []
+        for feature in polygons.getFeatures():
+            if feedback.isCanceled():
+                break
+            geometry = feature.geometry()
+            if geometry is None or geometry.isEmpty():
+                continue
+            try:
+                geometry.transform(transform)
+            except Exception as exc:  # off the domain of the CRS of the raster
+                raise QgsProcessingException(self.tr("An object cannot be read in the CRS of the raster: {0}").format(exc))
+            wkts.append(geometry.asWkt())
+        if not wkts:
+            raise QgsProcessingException(self.tr("The objects layer holds no polygon"))
+        feedback.pushInfo(self.tr("{0} object(s) kept instead of pixel values").format(len(wkts)))
+        return wkts
+
+    def _pixel_selection(self, parameters, context):
+        from ...core.domain.api_requests import raster_selection_from_values
         try:
             selection = raster_selection_from_values(
                 band=self.parameterAsInt(parameters, self.BAND, context) or 1,
@@ -147,14 +197,7 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
                 derivative=self.parameterAsEnum(parameters, self.DERIVATIVE, context))
         except ValueError as exc:
             raise QgsProcessingException(str(exc))
-        feedback.pushInfo(self.tr("Selection: {0}").format(selection.describe()))
-        report = operations.cross_filter(
-            source, self.parameterAsLayerList(parameters, self.TARGETS, context) or [],
-            raster_selection=selection, filter_source=self.parameterAsBoolean(parameters, self.FILTER_SOURCE, context),
-            max_pixels=self.optional_number(self, parameters, self.MAX_PIXELS, context, integer=True),
-            project=context.project(), feedback=feedback, **self.target_settings(parameters, context))
-        self._log_source(report, feedback)
-        return self.finish(report, feedback)
+        return selection
 
     def _log_source(self, report, feedback):
         details = report.details.get("source") or {}
