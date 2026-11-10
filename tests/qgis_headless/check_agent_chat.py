@@ -28,7 +28,7 @@ from qgis.core import (  # noqa: E402
 )
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
-from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox  # noqa: E402
+from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox, QWidget  # noqa: E402
 
 RESULTS = []
 SECRET = "sk-test-do-not-log-0123456789"
@@ -1321,6 +1321,37 @@ def check_thread_markup():
     check("bold: no name, plain escaped text", strong_markup("a < b", []) == "a &lt; b")
 
 
+def check_thread_theme():
+    """A conversation drawn before the dock had its theme takes the right one afterwards (light dock, dark cards)."""
+    from filter_mate.ui.styles.mockup_design import tokens
+    from filter_mate.ui.widgets.agent_thread import AgentThread
+    dark = [True]
+    thread = AgentThread(lambda: tokens(dark[0]), lambda: dark[0], lambda: None)
+    thread.add_user("mnt 1")
+    thread.add_card("Filter on MNT", True, "", "")
+    thread.add_card("Filter on MNT by MNT", False, "", "")
+    thread.add_step("Reading the layers")
+    thread.finish_steps()
+    thread.add_error("Refused", "Try again", "Settings", lambda: None)
+    thread.add_text("La couche est visible.")
+    thread.add_note("Earlier conversation")
+    dark[0] = False
+    thread.refresh_look()
+    light, night = tokens(False), tokens(True)
+    sheets = " ".join(widget.styleSheet() for widget in thread.widget().findChildren(QWidget))
+    bubble = thread.widget().findChild(QLabel, "label_agent_request")
+    check("theme: the bubble takes the light colors", light["fm_active"] in bubble.styleSheet()
+          and night["fm_active"] not in bubble.styleSheet(), bubble.styleSheet())
+    cards = thread.widget().findChildren(QFrame, "frame_agent_card")
+    check("theme: the cards take the light background", cards and all(light["fm_group"] in card.styleSheet()
+                                                                       for card in cards), [c.styleSheet() for c in cards])
+    check("theme: every text has a light color, none of the dark theme", light["fm_text"] in sheets and not any(
+        night[key] in sheets for key in ("fm_text", "fm_group", "fm_active", "fm_list") if night[key] != light[key]))
+    step = [label for label in thread.widget().findChildren(QLabel) if "Reading the layers" in label.text()]
+    check("theme: a done step keeps its text and takes the light green", step and "#146a55" in step[0].text(),
+          [label.text() for label in step])
+
+
 def check_dialect(layer):
     """The language of a filter, as describe_layer gives it to the model."""
     from filter_mate.adapters.public_api.introspection import sql_dialect
@@ -1332,6 +1363,7 @@ def check_dialect(layer):
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
     check_thread_markup()
+    check_thread_theme()
     work = tempfile.mkdtemp()
     provider = Provider()
     layer = make_layer(os.path.join(work, "communes.gpkg"))

@@ -304,9 +304,11 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
         stray = {name for call in writes for name in _touched(call.arguments, by_ref)} - allowed
         if stray:
             continue  # a correction is fine, a filter left on another layer is not
-        last = writes[-len(steps):] if len(writes) >= len(steps) else []
-        if last and all(any(step["tool"] == call.name and matches(step.get("args", {}), call.arguments, by_ref)
-                            for call in last) for step in steps):
+        # Each expected step is judged on the last write of its tool: a model that corrects a call is not
+        # blamed for the first try, nor for an earlier step that the correction pushed back.
+        latest = {call.name: call for call in writes}
+        if all(step["tool"] in latest and matches(step.get("args", {}), latest[step["tool"]].arguments, by_ref)
+               for step in steps):
             return ""
     return f"writes do not match: {[(call.name, call.arguments) for call in writes]}"
 

@@ -82,13 +82,27 @@ class ElidedLabel(QLabel):
         self.setText(QFontMetrics(self.font()).elidedText(self._full, Qt.TextElideMode.ElideRight, max(self.width(), 10)))
 
 
-class _Item:
-    """One line of the thread, and what it says in plain text."""
+def _sheet(widget: QWidget, text: str) -> None:
+    """A style sheet set only when it changes: setting it again repolishes the widget."""
+    if widget.styleSheet() != text:
+        widget.setStyleSheet(text)
 
-    def __init__(self, widget: QWidget, plain: str, kind: str) -> None:
+
+Look = Callable[[dict, bool], None]
+
+
+class _Item:
+    """One line of the thread, what it says in plain text, and how it takes the colors of the theme.
+
+    Every item draws itself again on a theme change: one drawn before the dock had its theme (a conversation
+    restored when a project opens) must not keep the colors of the other one.
+    """
+
+    def __init__(self, widget: QWidget, plain: str, kind: str, look: Optional[Look] = None) -> None:
         self.widget = widget
         self.plain = plain
         self.kind = kind
+        self.look = look
 
 
 class ChangeCard(QFrame):
@@ -98,18 +112,14 @@ class ChangeCard(QFrame):
                  on_undo: Callable[[], None], parent: QWidget, strong: Sequence[str] = ()) -> None:
         super().__init__(parent)
         self.setObjectName("frame_agent_card")
-        self.setStyleSheet(
-            f"QFrame#frame_agent_card {{ background: {palette['fm_group']}; border: 1px solid {palette['fm_group_border']};"
-            f" border-radius: 6px; }} QFrame#frame_agent_card QLabel {{ background: transparent; border: none; padding: 0px; }}")
-        mark = _plain_label("✓" if succeeded else "✗", self, wrap=False)
-        color = DONE_COLOR["dark" if dark else "light"] if succeeded else palette["fm_danger"]
-        mark.setStyleSheet(f"color: {color}; font-weight: 600;")
+        self._succeeded = succeeded
+        self._mark = mark = _plain_label("✓" if succeeded else "✗", self, wrap=False)
         mark.setAlignment(Qt.AlignmentFlag.AlignTop)
-        title = _plain_label(text, self)
+        self._title = title = _plain_label(text, self)
         if strong:  # the layer names in bold, the rest escaped: a name can hold anything
             title.setTextFormat(Qt.TextFormat.RichText)
             title.setText(strong_markup(text, strong))
-        title.setStyleSheet("font-size: 12px;" if succeeded else f"font-size: 12px; color: {palette['fm_danger']};")
+        self._muted: List[QLabel] = []
         column = QVBoxLayout()
         column.setContentsMargins(0, 0, 0, 0)
         column.setSpacing(2)
@@ -119,7 +129,7 @@ class ChangeCard(QFrame):
             mono = QFont("monospace")
             mono.setStyleHint(QFont.StyleHint.Monospace)
             expression.setFont(mono)
-            expression.setStyleSheet(f"font-size: 11px; color: {palette['fm_text_muted']};")
+            self._muted.append(expression)
             column.addWidget(expression)
         row = QHBoxLayout(self)
         row.setContentsMargins(8, 6, 8, 6)
@@ -128,18 +138,30 @@ class ChangeCard(QFrame):
         row.addLayout(column, 1)
         if count:
             kept = _plain_label(count, self, wrap=False)
-            kept.setStyleSheet(f"font-size: 11px; color: {palette['fm_text_muted']};")
+            self._muted.append(kept)
             row.addWidget(kept, 0, Qt.AlignmentFlag.AlignTop)
         self.undo_button = QPushButton(_tr("Undo"), self)
         self.undo_button.setObjectName("pushButton_agent_card_undo")
         self.undo_button.setFlat(True)
         self.undo_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.undo_button.setStyleSheet(
-            f"QPushButton {{ color: {palette['fm_accent']}; background: none; border: none; padding: 0;"
-            f" font-size: 11px; min-height: 0; }} QPushButton:hover {{ text-decoration: underline; }}")
         self.undo_button.clicked.connect(on_undo)
         self.undo_button.setVisible(False)
         row.addWidget(self.undo_button, 0, Qt.AlignmentFlag.AlignTop)
+        self.restyle(palette, dark)
+
+    def restyle(self, palette: dict, dark: bool) -> None:
+        """The colors of the theme; every text has its own, so none falls back on a palette of the other theme."""
+        _sheet(self, f"QFrame#frame_agent_card {{ background: {palette['fm_group']}; border: 1px solid"
+                     f" {palette['fm_group_border']}; border-radius: 6px; }} QFrame#frame_agent_card QLabel"
+                     " { background: transparent; border: none; padding: 0px; }")
+        mark = DONE_COLOR["dark" if dark else "light"] if self._succeeded else palette["fm_danger"]
+        _sheet(self._mark, f"color: {mark}; font-weight: 600;")
+        _sheet(self._title, f"font-size: 12px; color: {palette['fm_text'] if self._succeeded else palette['fm_danger']};")
+        for label in self._muted:
+            _sheet(label, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        _sheet(self.undo_button, f"QPushButton {{ color: {palette['fm_accent']}; background: none; border: none;"
+                                 " padding: 0; font-size: 11px; min-height: 0; } QPushButton:hover"
+                                 " { text-decoration: underline; }")
 
 
 class AgentThread(QScrollArea):
@@ -188,8 +210,15 @@ class AgentThread(QScrollArea):
             f"QScrollArea#scrollArea_agent_thread {{ background: {palette['fm_list']}; border: 1px solid "
             f"{palette['fm_group_border']}; border-radius: 6px; }} QWidget#widget_agent_thread {{ background: "
             f"{palette['fm_list']}; }} QWidget#widget_agent_thread QLabel {{ padding: 0px; }}")
-        if sheet != self.styleSheet():
-            self.setStyleSheet(sheet)
+        _sheet(self, sheet)
+        dark = self._is_dark()
+        for item in self._items:
+            if item.look is not None:
+                try:
+                    item.look(palette, dark)
+                except RuntimeError:  # dropped meanwhile
+                    pass
+        _sheet(self._hint, f"font-size: 11px; color: {palette['fm_text_muted']};")
 
     def is_empty(self) -> bool:
         return not self._items
@@ -211,7 +240,6 @@ class AgentThread(QScrollArea):
         self._answer_raw = ""
 
     def add_user(self, text: str) -> None:
-        palette = self._palette_of()
         row = QWidget(self._content)
         layout = QHBoxLayout(row)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -219,15 +247,16 @@ class AgentThread(QScrollArea):
         bubble = _plain_label(text, row)
         bubble.setObjectName("label_agent_request")
         bubble.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        bubble.setStyleSheet(
-            f"QLabel#label_agent_request {{ background: {palette['fm_active']}; color: {palette['fm_text']};"
-            " border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius: 10px;"
-            " border-bottom-right-radius: 2px; padding: 6px 10px; }")
+
+        def look(palette: dict, _dark: bool) -> None:
+            _sheet(bubble, f"QLabel#label_agent_request {{ background: {palette['fm_active']}; color: {palette['fm_text']};"
+                           " border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius:"
+                           " 10px; border-bottom-right-radius: 2px; padding: 6px 10px; }")
         layout.addWidget(bubble)
         self._fit_bubble(bubble)
         self._step_cards = []  # a new turn: the cards of the previous one are no longer its last step
         self._refresh_undo()
-        self._append(_Item(row, text, "user"))
+        self._append(_Item(row, text, "user", look))
         self.end_answer()
 
     def begin_step(self) -> None:
@@ -242,51 +271,38 @@ class AgentThread(QScrollArea):
             self._step_cards.append(card)
         mark = "✓" if succeeded else "✗"
         plain = f"{mark} {text}" + (f"  ·  {count}" if count else "") + (f"\n   {detail}" if detail else "")
-        self._append(_Item(card, plain, "card"))
+        self._append(_Item(card, plain, "card", card.restyle))
         self._refresh_undo()
         self.end_answer()
 
     def add_note(self, text: str) -> None:
-        palette = self._palette_of()
         label = _plain_label(text, self._content)
-        label.setStyleSheet(f"font-size: 12px; color: {palette['fm_text_muted']};")
-        self._append(_Item(label, text, "note"))
+        self._append(_Item(label, text, "note",
+                           lambda palette, _dark: _sheet(label, f"font-size: 12px; color: {palette['fm_text_muted']};")))
         self.end_answer()
 
     def add_error(self, title: str, detail: str, action: str = "", on_action: Optional[Callable[[], None]] = None) -> None:
         """A request that failed: what went wrong, what to do, and a button to do it."""
-        palette = self._palette_of()
-        dark = self._is_dark()
         card = QFrame(self._content)
         card.setObjectName("frame_agent_error")
-        card.setStyleSheet(
-            f"QFrame#frame_agent_error {{ background: {ERROR_COLORS['dark' if dark else 'light'][0]}; border: 1px solid"
-            f" {ERROR_COLORS['dark' if dark else 'light'][1]}; border-radius: 6px; }}"
-            " QFrame#frame_agent_error QLabel { background: transparent; border: none; padding: 0px; }")
         mark = _plain_label("!", card, wrap=False)
         mark.setObjectName("label_agent_error_mark")
         mark.setAlignment(Qt.AlignmentFlag.AlignCenter)
         mark.setFixedSize(18, 18)
-        mark.setStyleSheet(f"QLabel#label_agent_error_mark {{ color: {palette['fm_danger']}; border: 2px solid"
-                           f" {palette['fm_danger']}; border-radius: 9px; font-weight: 700; font-size: 11px; padding: 0; }}")
         heading = _plain_label(title, card)
-        heading.setStyleSheet(f"font-weight: 600; color: {ERROR_COLORS['dark' if dark else 'light'][2]};")
         column = QVBoxLayout()
         column.setContentsMargins(0, 0, 0, 0)
         column.setSpacing(6)
         column.addWidget(heading)
+        text = None
         if detail:
             text = _plain_label(detail, card)
-            text.setStyleSheet(f"font-size: 12px; color: {palette['fm_text_muted']};")
             column.addWidget(text)
+        button = None
         if action and on_action is not None:
             button = QPushButton(action, card)
             button.setObjectName("pushButton_agent_error_action")
             button.setCursor(Qt.CursorShape.PointingHandCursor)
-            button.setStyleSheet(
-                f"QPushButton#pushButton_agent_error_action {{ font-size: 12px; font-weight: 500; padding: 4px 12px;"
-                f" border: 1px solid {palette['fm_danger']}; border-radius: 6px; background: {palette['fm_list']};"
-                f" color: {ERROR_COLORS['dark' if dark else 'light'][2]}; }}")
             button.clicked.connect(on_action)
             column.addWidget(button, 0, Qt.AlignmentFlag.AlignLeft)
         row = QHBoxLayout(card)
@@ -294,13 +310,28 @@ class AgentThread(QScrollArea):
         row.setSpacing(10)
         row.addWidget(mark, 0, Qt.AlignmentFlag.AlignTop)
         row.addLayout(column, 1)
-        self._append(_Item(card, f"! {title}" + (f"\n   {detail}" if detail else ""), "error"))
+
+        def look(palette: dict, dark: bool) -> None:
+            background, border, strong = ERROR_COLORS["dark" if dark else "light"]
+            _sheet(card, f"QFrame#frame_agent_error {{ background: {background}; border: 1px solid {border};"
+                         " border-radius: 6px; } QFrame#frame_agent_error QLabel { background: transparent;"
+                         " border: none; padding: 0px; }")
+            _sheet(mark, f"QLabel#label_agent_error_mark {{ color: {palette['fm_danger']}; border: 2px solid"
+                         f" {palette['fm_danger']}; border-radius: 9px; font-weight: 700; font-size: 11px; padding: 0; }}")
+            _sheet(heading, f"font-weight: 600; color: {strong};")
+            if text is not None:
+                _sheet(text, f"font-size: 12px; color: {palette['fm_text_muted']};")
+            if button is not None:
+                _sheet(button, f"QPushButton#pushButton_agent_error_action {{ font-size: 12px; font-weight: 500;"
+                               f" padding: 4px 12px; border: 1px solid {palette['fm_danger']}; border-radius: 6px;"
+                               f" background: {palette['fm_list']}; color: {strong}; }}")
+        self._append(_Item(card, f"! {title}" + (f"\n   {detail}" if detail else ""), "error", look))
         self.end_answer()
 
     def set_hint(self, text: str) -> None:
         """A muted line at the foot of the thread (while the agent works: the next request can be typed)."""
         self._hint.setText(text)
-        self._hint.setStyleSheet(f"font-size: 11px; color: {self._palette_of()['fm_text_muted']};")
+        _sheet(self._hint, f"font-size: 11px; color: {self._palette_of()['fm_text_muted']};")
         self._hint.setVisible(bool(text))
         self._fit_timer.start()
 
@@ -310,8 +341,8 @@ class AgentThread(QScrollArea):
         if self._answer is None:
             label = _plain_label("", self._content)
             label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            label.setStyleSheet("font-size: 13px;")
-            self._answer = _Item(label, "", "text")
+            self._answer = _Item(label, "", "text",
+                                 lambda palette, _dark: _sheet(label, f"font-size: 13px; color: {palette['fm_text']};"))
             self._append(self._answer)
         shown = plain_markdown(self._answer_raw).strip("\n")
         self._answer.widget.setText(shown)
@@ -322,22 +353,31 @@ class AgentThread(QScrollArea):
     def add_step(self, text: str) -> None:
         """A step of the running request; the previous one is marked done."""
         self.finish_steps()
-        palette = self._palette_of()
         label = _plain_label(f"◌  {text}…", self._content)
-        label.setStyleSheet(f"font-size: 12px; color: {palette['fm_accent']};")
-        self._append(_Item(label, "", "step"))
+        item = _Item(label, "", "step")
+        item.step_text = text  # type: ignore[attr-defined]
+        item.look = lambda palette, dark: self._look_step(item, palette, dark)
+        self._append(item)
+
+    def _look_step(self, item: _Item, palette: dict, dark: bool) -> None:
+        label = item.widget
+        if item.kind == "step":
+            _sheet(label, f"font-size: 12px; color: {palette['fm_accent']};")
+            return
+        succeeded = getattr(item, "step_ok", True)
+        color = DONE_COLOR["dark" if dark else "light"] if succeeded else palette["fm_danger"]
+        label.setTextFormat(Qt.TextFormat.RichText)  # only the mark is colored; the text is escaped
+        label.setText(f'<span style="color: {color};">{"✓" if succeeded else "✗"}</span>&nbsp;&nbsp;'
+                      f'{html.escape(getattr(item, "step_text", ""))}')
+        _sheet(label, f"font-size: 12px; color: {palette['fm_text_muted']};")
 
     def finish_steps(self, succeeded: bool = True) -> None:
-        palette = self._palette_of()
+        palette, dark = self._palette_of(), self._is_dark()
         for item in self._items:
             if item.kind == "step":
-                label = item.widget
-                text = html.escape(label.text().lstrip("◌ ").rstrip("…"))
-                color = DONE_COLOR["dark" if self._is_dark() else "light"] if succeeded else palette["fm_danger"]
-                label.setTextFormat(Qt.TextFormat.RichText)  # only the mark is colored; the text is escaped
-                label.setText(f'<span style="color: {color};">{"✓" if succeeded else "✗"}</span>&nbsp;&nbsp;{text}')
-                label.setStyleSheet(f"font-size: 12px; color: {palette['fm_text_muted']};")
                 item.kind = "step_done"
+                item.step_ok = succeeded  # type: ignore[attr-defined]
+                self._look_step(item, palette, dark)
 
     def clear_steps(self) -> None:
         """The request is over: its steps give way to its cards and its answer."""
@@ -375,6 +415,8 @@ class AgentThread(QScrollArea):
         bar = self.verticalScrollBar()
         at_end = bar.value() >= bar.maximum() - 4
         self._items.append(item)
+        if item.look is not None:
+            item.look(self._palette_of(), self._is_dark())
         self._layout.insertWidget(self._layout.count() - 2, item.widget)  # above the stretch and the hint
         item.widget.ensurePolished()
         self._fit_timer.start()
