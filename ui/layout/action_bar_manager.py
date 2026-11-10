@@ -386,7 +386,6 @@ class ActionBarManager(LayoutManagerBase):
         frame = self.dockwidget.frame_actions
         button_height = self._get_button_height()
         UIConfig = self._get_ui_config()
-        action_frame_cfg = (UIConfig.get_config('action_frame') if UIConfig else None) or {}
 
         # Enforce uniform button dimensions
         self._apply_uniform_button_sizes(button_height)
