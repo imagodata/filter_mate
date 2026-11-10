@@ -32,8 +32,9 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
-        <translation>Δωρεάν όριο</translation>
+        <translation type="obsolete">Δωρεάν όριο</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -396,12 +397,14 @@ Do you agree?</source>
 <context>
     <name>AgentPanel</name>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>
-        <translation>ΔΟΚΙΜΑΣΤΕ</translation>
+        <translation type="obsolete">ΔΟΚΙΜΑΣΤΕ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Undo</source>
-        <translation>Αναίρεση</translation>
+        <translation type="obsolete">Αναίρεση</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
@@ -893,17 +896,17 @@ Do you agree?</source>
         <translation>{0} σημεία</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Source geometry: the selected pixels, vectorized</source>
         <translation>Γεωμετρία πηγής: τα επιλεγμένα εικονοστοιχεία, διανυσματοποιημένα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="799"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Γεωμετρία πηγής: το αποτύπωμα των σημείων που διατηρούνται</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="746"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="748"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Γεωμετρία πηγής: οι οντότητες που επιλέχθηκαν στην ΕΞΕΡΕΥΝΗΣΗ</translation>
     </message>
@@ -918,12 +921,12 @@ Do you agree?</source>
         <translation type="obsolete">Στατιστικά ορθογωνίου: σύρετε στον χάρτη για ελάχιστο, μέγιστο και μέσο όρο του τρέχοντος καναλιού</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Προφίλ υψομέτρου: άνοιγμα του προφίλ υψομέτρου του QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>Προβολή 3D: άνοιγμα νέας προβολής χάρτη 3D του QGIS</translation>
     </message>
@@ -958,42 +961,42 @@ Do you agree?</source>
         <translation>{0} στοιχεία</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Vector</source>
         <translation>Διανυσματικό</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Raster</source>
         <translation>Ράστερ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="814"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="816"/>
         <source>Point cloud</source>
         <translation>Νέφος σημείων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="802"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="804"/>
         <source>Kept points</source>
         <translation>Διατηρούμενα σημεία</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="783"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="785"/>
         <source>Selection → source geometry</source>
         <translation>Επιλογή → γεωμετρία πηγής</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="386"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Σύνδεση εύρους με το στυλ: τα χρώματα του επιπέδου απλώνονται στο επιλεγμένο εύρος</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="387"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Σταγονόμετρο κλάσης: κάντε κλικ στον χάρτη και επιλέγεται η κλάση των σημείων που σχεδιάζονται εκεί. Το Ctrl+κλικ προσθέτει μία ακόμη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Τιμή κάτω από τον δρομέα: παρακολούθηση της τιμής εικονοστοιχείου (ή της κλίσης, του προσανατολισμού... στην οποία εφαρμόζεται το εύρος) κατά την κίνηση στον χάρτη</translation>
     </message>
@@ -1003,22 +1006,22 @@ Do you agree?</source>
         <translation type="obsolete">Στατιστικά ορθογωνίου: σύρετε στον χάρτη για ελάχιστο, μέγιστο και μέσο όρο του τρέχοντος καναλιού (ή της κλίσης, του προσανατολισμού... στην οποία εφαρμόζεται το εύρος)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="576"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Η σύνδεση στυλ παρακολουθεί τις τιμές εικονοστοιχείων: μη διαθέσιμη όταν το εύρος εφαρμόζεται σε κλίση, προσανατολισμό, σκίαση αναγλύφου ή τραχύτητα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="927"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="929"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Σταγονόμετρο κλάσης: αυτό το νέφος σημείων δεν έχει χαρακτηριστικό Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1490"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1492"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Το στυλ δεν μπορεί να παρακολουθήσει το εύρος: απαιτεί στυλ γκρι ή ψευδοχρώματος ενός καναλιού στο κανάλι του πίνακα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Σταγονόμετρο: κάντε κλικ στον χάρτη και επιλέγονται τα εικονοστοιχεία που μοιάζουν με αυτό που πατήσατε (ένα χρώμα σε εικόνα, μια τιμή σε DTM ή δείκτη, μια κλάση σε ταξινομημένο ράστερ, με την ανοχή του πίνακα). Το Ctrl+κλικ προσθέτει ένα ακόμη</translation>
     </message>
@@ -1058,27 +1061,27 @@ Do you agree?</source>
         <translation>εμφανίζονται ως ολόκληρη η κλάση στο πλαίσιό τους</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="390"/>
         <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
         <translation>Ανιχνευτής αντικειμένων: κάντε κλικ στον χάρτη και επιλέγεται η κηλίδα εικονοστοιχείων που μοιάζουν με αυτό του κλικ (πισίνα, στέγη, χωράφι, με την ανοχή του πίνακα), όχι όλα τα εικονοστοιχεία του χρώματός του. Το Ctrl+κλικ προσθέτει άλλο αντικείμενο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
         <translation>Παρόμοια αντικείμενα: κάντε κλικ σε ένα αντικείμενο και επιλέγονται όλα τα παρόμοια αντικείμενα του ράστερ (οι κηλίδες τέτοιων εικονοστοιχείων με εμβαδόν εντός των λόγων του πίνακα). Το Ctrl+κλικ προσθέτει άλλο αντικείμενο αναφοράς</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
         <translation>Ανιχνευτής αντικειμένων: κάντε κλικ στον χάρτη και επιλέγεται το αντικείμενο κάτω από το κλικ (το σύμπλεγμα σημείων της κλάσης του: κτίριο, δέντρο), όχι ολόκληρη η κλάση· ή κάθε παρόμοιο αντικείμενο του νέφους (δεξί κλικ στο κουμπί για τον στόχο). Το Ctrl+κλικ προσθέτει άλλο αντικείμενο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
         <translation>Σταγονόμετρο τιμών: κάντε κλικ στον χάρτη και γράφεται μια συνθήκη για το χαρακτηριστικό που επιλέχθηκε στα ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ (Z, ένταση…), γύρω από την τιμή του σημείου εκεί, με την ανοχή του πίνακα. Το Ctrl+κλικ προσθέτει άλλη συνθήκη (OR)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
         <translation>Ζώνη: σχεδιάστε στον χάρτη ορθογώνιο, πολύγωνο, ελεύθερο σχήμα ή κύκλο (δεξί κλικ στο κουμπί για το σχήμα)· το πλαίσιο X / Y πηγαίνει στα ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ, το ίδιο το σχήμα περικόπτει τους στόχους</translation>
     </message>
@@ -1093,112 +1096,112 @@ Do you agree?</source>
         <translation type="obsolete">Παρόμοιες οντότητες: κάντε κλικ σε μια οντότητα και επιλέγονται όλες οι οντότητες του επιπέδου με την ίδια τιμή του πεδίου της ομάδας (η έκφραση εμφάνισης της μονής / πολλαπλής επιλογής). Το Ctrl+κλικ προσθέτει άλλη τιμή</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
         <translation>Άλλα εργαλεία: τα εργαλεία επιλογής του QGIS (ορθογώνιο, πολύγωνο, ελεύθερο σχήμα, ακτίνα), επιλογή με έκφραση, αντιστροφή ή εκκαθάριση της επιλογής, ο πίνακας χαρακτηριστικών της επιλογής</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the elevation profile and the 3D view of QGIS</source>
         <translation>Άλλα εργαλεία: το προφίλ υψομέτρου και η προβολή 3D του QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="540"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="542"/>
         <source>Only color selection is available: rendered colors depend on style and scale.</source>
         <translation>Διατίθεται μόνο επιλογή με βάση το χρώμα: τα αποδιδόμενα χρώματα εξαρτώνται από το στυλ και την κλίμακα.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="574"/>
         <source>The style link follows the VALUE RANGE group: make it the active one first</source>
         <translation>Η σύνδεση στυλ ακολουθεί την ομάδα ΕΥΡΟΣ ΤΙΜΩΝ: κάντε την πρώτα ενεργή</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="801"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Current filter: {0}</source>
         <translation>Τρέχον φίλτρο: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="837"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="839"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Τα αποδιδόμενα χρώματα εξαρτώνται από το στυλ και την κλίμακα.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="936"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="938"/>
         <source>Object detector: this point cloud has no Classification attribute</source>
         <translation>Ανιχνευτής αντικειμένων: αυτό το νέφος σημείων δεν έχει χαρακτηριστικό Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="985"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="987"/>
         <source>Object detector</source>
         <translation>Ανιχνευτής αντικειμένων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Clicked object</source>
         <translation>Αντικείμενο του κλικ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="988"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="990"/>
         <source>Similar objects</source>
         <translation>Παρόμοια αντικείμενα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1099"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1101"/>
         <source>Zone shape</source>
         <translation>Σχήμα ζώνης</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Rectangle</source>
         <translation>Ορθογώνιο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1214"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1216"/>
         <source>Polygon</source>
         <translation>Πολύγωνο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Freehand</source>
         <translation>Ελεύθερο σχέδιο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1217"/>
         <source>Radius</source>
         <translation>Ακτίνα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1205"/>
         <source>The link follows the single and multiple selections: make one of them the active group first</source>
         <translation>Η σύνδεση ακολουθεί τη μονή και την πολλαπλή επιλογή: κάντε πρώτα μία από αυτές ενεργή ομάδα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1213"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1215"/>
         <source>Select on the map</source>
         <translation>Επιλογή στον χάρτη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Select by expression…</source>
         <translation>Επιλογή με έκφραση…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Invert the selection</source>
         <translation>Αντιστροφή της επιλογής</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1221"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1223"/>
         <source>Clear the selection</source>
         <translation>Εκκαθάριση της επιλογής</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1228"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1230"/>
         <source>Attribute table of the selection</source>
         <translation>Πίνακας χαρακτηριστικών της επιλογής</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1267"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1269"/>
         <source>Value under the cursor</source>
         <translation>Τιμή κάτω από τον δείκτη</translation>
     </message>
@@ -1208,47 +1211,47 @@ Do you agree?</source>
         <translation type="obsolete">Στατιστικά ορθογωνίου</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>Elevation profile</source>
         <translation>Προφίλ υψομέτρου</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1292"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1294"/>
         <source>3D view</source>
         <translation>Προβολή 3D</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1603"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1605"/>
         <source>This point cloud has no X / Y attribute to filter on</source>
         <translation>Αυτό το νέφος σημείων δεν έχει χαρακτηριστικό X / Y για φιλτράρισμα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="570"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="572"/>
         <source>To link the range to the style, choose Layer style in Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); only the pixels inside it are selected, and the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to) are read in its box</source>
         <translation>Ζώνη: σχεδιάστε στον χάρτη ένα ορθογώνιο, ένα πολύγωνο, ένα ελεύθερο σχήμα ή έναν κύκλο (δεξί κλικ στο κουμπί για το σχήμα)· επιλέγονται μόνο τα pixel στο εσωτερικό και το ελάχιστο, το μέγιστο και η μέση τιμή της τρέχουσας ζώνης καναλιού (ή της κλίσης, του προσανατολισμού... στα οποία αναφέρεται το εύρος) διαβάζονται στην έκτασή της</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape) and the features it touches are selected</source>
         <translation>Ζώνη: σχεδιάστε στον χάρτη ένα ορθογώνιο, ένα πολύγωνο, ένα ελεύθερο σχήμα ή έναν κύκλο (δεξί κλικ στο κουμπί για το σχήμα) και επιλέγονται τα αντικείμενα που αγγίζει</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="394"/>
         <source>More tools: the value under the cursor, the zone</source>
         <translation>Περισσότερα εργαλεία: η τιμή κάτω από τον δρομέα, η ζώνη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1271"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1273"/>
         <source>Zone</source>
         <translation>Ζώνη</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1279"/>
         <source>Clear the zone</source>
         <translation>Εκκαθάριση της ζώνης</translation>
     </message>
@@ -1750,6 +1753,29 @@ Do you agree?</source>
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>Εντοπίστηκαν επίπεδα PostgreSQL αλλά το psycopg2 δεν είναι εγκατεστημένο. Χρήση του τοπικού Spatialite. Για καλύτερη απόδοση με μεγάλα σύνολα δεδομένων, εγκαταστήστε το psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation type="obsolete">Απόκρυψη του EXPLORING για περισσότερο χώρο στις ενότητες</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Show EXPLORING</source>
+        <translation type="obsolete">Εμφάνιση EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Close</source>
+        <translation type="obsolete">Κλείσιμο</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Detach or dock the panel</source>
+        <translation type="obsolete">Αποσύνδεση ή πρόσδεση του πίνακα</translation>
     </message>
 </context>
 <context>
@@ -2916,39 +2942,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>Σφάλμα φόρτωσης πρόσθετου: {0}. Ελέγξτε την κονσόλα Python του QGIS για λεπτομέρειες.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7586"/>
+        <location filename="../filter_mate_dockwidget.py" line="7591"/>
         <source>Current layer: {0}</source>
         <translation>Τρέχον επίπεδο: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7588"/>
+        <location filename="../filter_mate_dockwidget.py" line="7593"/>
         <source>No layer selected</source>
         <translation>Δεν επιλέχθηκε επίπεδο</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>Selected layers:
 {0}</source>
         <translation>Επιλεγμένα επίπεδα:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7598"/>
+        <location filename="../filter_mate_dockwidget.py" line="7603"/>
         <source>No layers selected</source>
         <translation>Δεν επιλέχθηκαν επίπεδα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7618"/>
+        <location filename="../filter_mate_dockwidget.py" line="7623"/>
         <source>No expression defined</source>
         <translation>Δεν έχει οριστεί έκφραση</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7630"/>
+        <location filename="../filter_mate_dockwidget.py" line="7635"/>
         <source>Display expression: {0}</source>
         <translation>Έκφραση εμφάνισης: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7647"/>
+        <location filename="../filter_mate_dockwidget.py" line="7652"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Αναγνωριστικό οντότητας: {0}
@@ -3229,223 +3255,223 @@ What would you like to do?</translation>
         <translation>Σφάλμα αρχικοποίησης: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1036"/>
+        <location filename="../filter_mate_dockwidget.py" line="1038"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Ελλιπής διαμόρφωση UI - ελέγξτε τα αρχεία καταγραφής</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
-        <source>UI dimension error: {}</source>
-        <translation type="obsolete">Σφάλμα διαστάσεων UI: {}</translation>
+        <source>Zip the export</source>
+        <translation>Συμπίεση της εξαγωγής σε zip</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1496"/>
+        <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Η διαχείριση αγαπημένων δεν είναι διαθέσιμη</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1519"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Αγαπημένα αποθηκευμένα
 Κλικ για εφαρμογή ή διαχείριση</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1520"/>
+        <location filename="../filter_mate_dockwidget.py" line="1522"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Χωρίς αποθηκευμένα αγαπημένα
 Κλικ για προσθήκη τρέχοντος φίλτρου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <location filename="../ui/controllers/backend_controller.py" line="822"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Επιβλήθηκε backend {0} για {1} επίπεδο(-α)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1646"/>
+        <location filename="../filter_mate_dockwidget.py" line="1648"/>
         <source>Backend controller not available</source>
         <translation>Ο ελεγκτής backend δεν είναι διαθέσιμος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Αυτόματος καθαρισμός PostgreSQL ενεργοποιημένος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget.py" line="1567"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Αυτόματος καθαρισμός PostgreSQL απενεργοποιημένος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Οι προβολές συνεδρίας PostgreSQL καθαρίστηκαν</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget.py" line="1573"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Δεν υπάρχουν προβολές για καθαρισμό ή ο καθαρισμός απέτυχε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget.py" line="1584"/>
         <location filename="../ui/controllers/backend_controller.py" line="1089"/>
         <source>No PostgreSQL connection available</source>
         <translation>Δεν υπάρχει διαθέσιμη σύνδεση PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1608"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Το σχήμα έχει {0} προβολή(-ές) από άλλες συνεδρίες.
 Διαγραφή ούτως ή άλλως;</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1609"/>
+        <location filename="../filter_mate_dockwidget.py" line="1611"/>
         <source>Other Sessions Active</source>
         <translation>Άλλες ενεργές συνεδρίες</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1611"/>
+        <location filename="../filter_mate_dockwidget.py" line="1613"/>
         <source>Schema cleanup cancelled</source>
         <translation>Ο καθαρισμός σχήματος ακυρώθηκε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1616"/>
+        <location filename="../filter_mate_dockwidget.py" line="1618"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Το σχήμα '{0}' διαγράφηκε επιτυχώς</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1618"/>
+        <location filename="../filter_mate_dockwidget.py" line="1620"/>
         <location filename="../ui/controllers/backend_controller.py" line="1090"/>
         <source>Schema cleanup failed</source>
         <translation>Ο καθαρισμός σχήματος απέτυχε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1644"/>
+        <location filename="../filter_mate_dockwidget.py" line="1646"/>
         <source>PostgreSQL Session Info</source>
         <translation>Πληροφορίες συνεδρίας PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Theme adapted: {0}</source>
         <translation>Το θέμα προσαρμόστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Dark mode</source>
         <translation>Σκούρο θέμα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2784"/>
+        <location filename="../filter_mate_dockwidget.py" line="2786"/>
         <source>Light mode</source>
         <translation>Φωτεινό θέμα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4155"/>
+        <location filename="../filter_mate_dockwidget.py" line="4157"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Οι επιλεγμένες οντότητες δεν έχουν γεωμετρία.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4174"/>
+        <location filename="../filter_mate_dockwidget.py" line="4176"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Δεν επιλέχθηκε οντότητα. Επιλέξτε μια οντότητα από την αναπτυσσόμενη λίστα.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5349"/>
+        <location filename="../filter_mate_dockwidget.py" line="5351"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Το επιλεγμένο επίπεδο δεν είναι έγκυρο ή η πηγή του δεν βρέθηκε.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6242"/>
+        <location filename="../filter_mate_dockwidget.py" line="6244"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Αρνητικό buffer (διάβρωση): συρρικνώνει τα πολύγωνα προς τα μέσα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6245"/>
+        <location filename="../filter_mate_dockwidget.py" line="6247"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Τιμή buffer σε μέτρα (θετική=επέκταση, αρνητική=σμίκρυνση πολυγώνων)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6747"/>
+        <location filename="../filter_mate_dockwidget.py" line="6749"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Το πρόσθετο ενεργοποιήθηκε με {0} διανυσματικό(-ά) επίπεδο(-α)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6866"/>
+        <location filename="../filter_mate_dockwidget.py" line="6868"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Δεν ήταν δυνατή η αυτόματη επαναφόρτωση του πρόσθετου.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6871"/>
+        <location filename="../filter_mate_dockwidget.py" line="6873"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Σφάλμα επαναφόρτωσης πρόσθετου: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6946"/>
+        <location filename="../filter_mate_dockwidget.py" line="6948"/>
         <source>Layer properties reset to defaults</source>
         <translation>Οι ιδιότητες επιπέδου επαναφέρθηκαν στις προεπιλογές</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6947"/>
+        <location filename="../filter_mate_dockwidget.py" line="6949"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Σφάλμα επαναφοράς ιδιοτήτων επιπέδου: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>Filter</source>
         <translation>Φίλτρο</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="904"/>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
         <source>Undo the last filter</source>
         <translation>Αναίρεση του τελευταίου φίλτρου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="905"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Redo the last filter</source>
         <translation>Επανάληψη του τελευταίου φίλτρου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Remove the filters</source>
         <translation>Αφαίρεση των φίλτρων</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="907"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Export the layers</source>
         <translation>Εξαγωγή των επιπέδων</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="908"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>About FilterMate</source>
         <translation>Σχετικά με το FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="909"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Identify the selected features</source>
         <translation>Αναγνώριση των επιλεγμένων οντοτήτων</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="911"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Zoom to the selected features</source>
         <translation>Εστίαση στις επιλεγμένες οντότητες</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="912"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Select the features on the map</source>
         <translation>Επιλογή των οντοτήτων στον χάρτη</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="913"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Follow the features on the map</source>
         <translation>Παρακολούθηση των οντοτήτων στον χάρτη</translation>
     </message>
@@ -3455,123 +3481,118 @@ Drop anyway?</source>
         <translation type="obsolete">Σύνδεση των τριών τρόπων επιλογής</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="915"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Reset the layer properties</source>
         <translation>Επαναφορά των ιδιοτήτων του επιπέδου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="916"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Follow the current layer</source>
         <translation>Παρακολούθηση του τρέχοντος επιπέδου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="917"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Layers to filter</source>
         <translation>Επίπεδα προς φιλτράρισμα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="918"/>
+        <location filename="../filter_mate_dockwidget.py" line="920"/>
         <source>Combine with the existing filter</source>
         <translation>Συνδυασμός με το υπάρχον φίλτρο</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="919"/>
+        <location filename="../filter_mate_dockwidget.py" line="921"/>
         <source>Geometric predicates</source>
         <translation>Γεωμετρικά κατηγορήματα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="920"/>
+        <location filename="../filter_mate_dockwidget.py" line="922"/>
         <source>Buffer distance</source>
         <translation>Απόσταση ζώνης (buffer)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="921"/>
+        <location filename="../filter_mate_dockwidget.py" line="923"/>
         <source>Buffer type</source>
         <translation>Τύπος ζώνης (buffer)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="922"/>
+        <location filename="../filter_mate_dockwidget.py" line="924"/>
         <source>Layers to export</source>
         <translation>Επίπεδα προς εξαγωγή</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="923"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>Projection of the export</source>
         <translation>Προβολή της εξαγωγής</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="924"/>
+        <location filename="../filter_mate_dockwidget.py" line="926"/>
         <source>Export the styles</source>
         <translation>Εξαγωγή των στυλ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="927"/>
         <source>Export format</source>
         <translation>Μορφή εξαγωγής</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="926"/>
+        <location filename="../filter_mate_dockwidget.py" line="928"/>
         <source>Output folder</source>
         <translation>Φάκελος εξόδου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="927"/>
-        <source>Zip the export</source>
-        <translation>Συμπίεση της εξαγωγής σε zip</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="1041"/>
+        <location filename="../filter_mate_dockwidget.py" line="1043"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Η διάταξη του πίνακα δεν μπόρεσε να εφαρμοστεί· χρησιμοποιούνται τα προεπιλεγμένα μεγέθη. Λεπτομέρειες στο filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7038"/>
+        <location filename="../filter_mate_dockwidget.py" line="7040"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Διανυσματικό</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Link the single and multiple selections</source>
         <translation>Σύνδεση της μονής και της πολλαπλής επιλογής</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1594"/>
+        <location filename="../filter_mate_dockwidget.py" line="1596"/>
         <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
         <translation>Το σχήμα «{0}» και τα ακόλουθα {1} προσωρινά αντικείμενα θα διαγραφούν:</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1597"/>
+        <location filename="../filter_mate_dockwidget.py" line="1599"/>
         <source>... and {0} more</source>
         <translation>… και {0} ακόμη</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1599"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
         <translation>Το σχήμα «{0}» είναι κενό και θα διαγραφεί.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1600"/>
+        <location filename="../filter_mate_dockwidget.py" line="1602"/>
         <source>Drop FilterMate schema</source>
         <translation>Διαγραφή σχήματος FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>Read failed</source>
         <translation>Η ανάγνωση απέτυχε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4286"/>
+        <location filename="../filter_mate_dockwidget.py" line="4288"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Δεν ήταν δυνατή η ανάγνωση της υπηρεσίας. Δοκιμάστε ξανά.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4628"/>
+        <location filename="../filter_mate_dockwidget.py" line="4630"/>
         <source>Loading filtered extent…</source>
         <translation>Φόρτωση φιλτραρισμένης έκτασης…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5214"/>
+        <location filename="../filter_mate_dockwidget.py" line="5216"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -3613,7 +3634,7 @@ Drop anyway?</source>
         <translation>Εμφανίζεται μόνο ένα περιορισμένο σύνολο τιμών. Περιορίστε την αναζήτηση για να βρείτε άλλες τιμές.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5149"/>
+        <location filename="../filter_mate_dockwidget.py" line="5151"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3772,7 +3793,7 @@ Drop anyway?</source>
         <translation>📁 Τρέχον έργο</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7232"/>
+        <location filename="../filter_mate_dockwidget.py" line="7237"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Το φίλτρο δεν ξεκίνησε: η επιλογή του άλλαξε ή δεν ήταν δυνατό να διαβαστεί. Κάντε ξανά κλικ στο «Φίλτρο».</translation>
     </message>
@@ -5149,18 +5170,18 @@ Continue?</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="57"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="131"/>
         <source>Buffer</source>
         <translation>Buffer</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="107"/>
         <source>Band</source>
         <translation>Κανάλι</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Raster expression</source>
         <translation>Έκφραση ράστερ</translation>
     </message>
@@ -5180,27 +5201,27 @@ Continue?</source>
         <translation>Γεωμετρικά κατηγορήματα</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Pixel value</source>
         <translation>Τιμή εικονοστοιχείου</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (degrees)</source>
         <translation>Κλίση (μοίρες)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Slope (%)</source>
         <translation>Κλίση (%)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Aspect (degrees)</source>
         <translation>Προσανατολισμός (μοίρες)</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Hillshade (0-255)</source>
         <translation>Σκίαση αναγλύφου (0-255)</translation>
     </message>
@@ -5285,102 +5306,102 @@ Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="53"/>
         <source>Source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="55"/>
         <source>Selected features only</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="64"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="65"/>
         <source>Invalid source layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="67"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="68"/>
         <source>{0} source feature(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="77"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="78"/>
         <source>Filter layers of any type by a vector layer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="80"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="81"/>
         <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="250"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="293"/>
         <source>Extent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="251"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="294"/>
         <source>Geometry (WKT, takes precedence over the extent)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="310"/>
         <source>Provide an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="279"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="322"/>
         <source>Filter layers of any type by an extent or a geometry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="282"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="325"/>
         <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="197"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="240"/>
         <source>Source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="199"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
         <source>Combine the criteria with the existing filter of the source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="203"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="246"/>
         <source>Point footprint resolution (point cloud units)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="255"/>
         <source>Invalid source point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="258"/>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
         <source>Criteria: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="224"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
         <source>Footprint computed from a limited number of points: increase the resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="231"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
         <source>Filter layers of any type by the points of a point cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="234"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="277"/>
         <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
 
 Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
@@ -5391,87 +5412,107 @@ Without criteria, the footprint covers the points displayed by the point cloud.
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="104"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
         <source>Source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Pixels to keep</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Value range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="108"/>
         <source>Classes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="111"/>
         <source>Roughness (TRI)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
         <source>Minimum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
         <source>Maximum value (range)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
         <source>Class values (e.g. 6,7)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
         <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="123"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="126"/>
+        <source>Objects kept instead of pixel values (polygons, e.g. drawn with SAM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="129"/>
         <source>Also hide the source raster outside the selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="128"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="134"/>
         <source>Maximum pixels read (beyond: resampling)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="138"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="144"/>
         <source>Invalid source raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="150"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
         <source>Selection: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="162"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="180"/>
+        <source>An object cannot be read in the CRS of the raster: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="183"/>
+        <source>The objects layer holds no polygon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
+        <source>{0} object(s) kept instead of pixel values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="205"/>
         <source>{0} of {1} pixel(s) kept</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="169"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
         <source>Filter layers of any type by the pixels of a raster</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="172"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
         <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
 
 Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (choose &quot;Slope (%)&quot; in &quot;Range applies to&quot; with a DEM as the source: no &quot;Slope&quot; step needed before).
@@ -7952,8 +7993,8 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
-        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
-        <translation>Το Shift+κλικ επεκτείνει το αντικείμενο, το δεξί κλικ το περικόπτει, το Esc το αφαιρεί</translation>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Το Shift+κλικ επεκτείνει το αντικείμενο, το δεξί κλικ το περικόπτει, το G αλλάζει το επίπεδο λεπτομέρειάς του</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
@@ -8004,11 +8045,6 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>Το τελευταίο αντικείμενο αφαιρέθηκε</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
-        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
-        <translation>Το Shift+κλικ επεκτείνει το αντικείμενο, το δεξί κλικ το περικόπτει, το G αλλάζει το επίπεδο λεπτομέρειάς του</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
@@ -8683,25 +8719,6 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Σημεία που διατηρούνται</translation>
-    </message>
-</context>
-<context>
-    <name>DockChrome</name>
-    <message>
-        <source>Hide EXPLORING to give room to the sections</source>
-        <translation>Απόκρυψη του EXPLORING για περισσότερο χώρο στις ενότητες</translation>
-    </message>
-    <message>
-        <source>Show EXPLORING</source>
-        <translation>Εμφάνιση EXPLORING</translation>
-    </message>
-    <message>
-        <source>Close</source>
-        <translation>Κλείσιμο</translation>
-    </message>
-    <message>
-        <source>Detach or dock the panel</source>
-        <translation>Αποσύνδεση ή πρόσδεση του πίνακα</translation>
     </message>
 </context>
 </TS>

@@ -166,7 +166,7 @@ def test_cross_filter_raster_and_point_cloud_sources(mcp, fake_api):
     assert body["predicates"] == ["Intersect", "Touch"] and body["filter_source"] is True
     assert body["raster_selection"] == {
         "band": 1, "mode": "range", "minimum": 1200.0, "maximum": 1300.0, "classes": [],
-        "expression": "", "derivative": "slope_degrees"}
+        "expression": "", "derivative": "slope_degrees", "segments": []}
     assert body["point_cloud_criteria"]["classes"] == [6] and body["point_cloud_criteria"]["z_min"] == 1000.0
     assert "z_max" not in body["point_cloud_criteria"]
 

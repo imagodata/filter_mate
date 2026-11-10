@@ -219,3 +219,50 @@ class TestFiniteNumbers:
     def test_point_cloud_bounds_must_be_finite(self, key, value):
         with pytest.raises(ValueError):
             point_cloud_criteria_from_values(**{key: value})
+
+
+class TestRasterSegments:
+    """2026-11-10: the objects drawn with SAM (polygons) are a raster selection of the public interfaces."""
+
+    SQUARE = "POLYGON((0 0,1 0,1 1,0 1,0 0))"
+    OTHER = "MULTIPOLYGON(((5 5,6 5,6 6,5 6,5 5)))"
+
+    def test_segments_are_the_selection(self):
+        selection = raster_selection_from_values(segments=[self.SQUARE, self.OTHER])
+        assert selection.segments == (self.SQUARE, self.OTHER) and not selection.is_empty
+        assert "2 segmented object(s)" in selection.describe()
+
+    def test_from_dict_like_the_panel_saves_them(self):
+        selection = raster_selection_from_dict({"band": 2, "segments": [self.SQUARE, f"  {self.SQUARE} "]})
+        assert selection.band == 2 and selection.segments == (self.SQUARE,)
+
+    def test_an_empty_list_is_no_segment(self):
+        selection = raster_selection_from_dict({"mode": "range", "maximum": 3, "segments": []})
+        assert selection.segments == () and selection.maximum == 3.0
+
+    @pytest.mark.parametrize("kwargs", [
+        {"segments": ["POINT(0 0)"]},
+        {"segments": [12]},
+        {"segments": 12},
+        {"segments": [SQUARE], "minimum": 1},
+        {"segments": [SQUARE], "classes": "6"},
+        {"segments": [SQUARE], "expression": "\"a@1\" > 1"},
+        {"segments": [SQUARE], "derivative": "slope_degrees"},
+        {"segments": [SQUARE], "band": 0},
+    ])
+    def test_rejects(self, kwargs):
+        with pytest.raises(ValueError):
+            raster_selection_from_values(**kwargs)
+
+    def test_limits(self, monkeypatch):
+        from core.domain import api_requests
+        monkeypatch.setattr(api_requests, "SEGMENTS_MAX_COUNT", 2)
+        with pytest.raises(ValueError):
+            raster_selection_from_values(segments=[self.SQUARE, self.OTHER, self.SQUARE])
+        monkeypatch.setattr(api_requests, "SEGMENTS_MAX_LENGTH", 40)
+        with pytest.raises(ValueError):
+            raster_selection_from_values(segments=[self.SQUARE, self.OTHER])
+
+    def test_round_trip_with_the_saved_selection(self):
+        selection = raster_selection_from_values(segments=[self.SQUARE])
+        assert raster_selection_from_dict({"segments": list(selection.to_dict()["segments"])}) == selection

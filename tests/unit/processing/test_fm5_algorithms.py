@@ -97,6 +97,9 @@ class _Algorithm:
     def parameterAsGeometryCrs(self, parameters, name, context):
         return types.SimpleNamespace(isValid=lambda: True)
 
+    def parameterAsSource(self, parameters, name, context):
+        return parameters.get(name)
+
 
 class _Geometry:
     def isEmpty(self):
@@ -106,7 +109,7 @@ class _Geometry:
 def _qgis_core(with_variant_output=True):
     core = types.ModuleType("qgis.core")
     core.QgsProcessing = types.SimpleNamespace(
-        SourceType=types.SimpleNamespace(TypeMapLayer=0, TypeVectorAnyGeometry=1, TypePointCloud=8))
+        SourceType=types.SimpleNamespace(TypeMapLayer=0, TypeVectorAnyGeometry=1, TypeVectorPolygon=2, TypePointCloud=8))
     core.Qgis = types.SimpleNamespace(ProcessingParameterFlag=types.SimpleNamespace(Advanced=2))
     core.QgsProcessingAlgorithm = _Algorithm
     core.QgsGeometry = _Geometry
@@ -114,7 +117,8 @@ def _qgis_core(with_variant_output=True):
     core.QgsProcessingParameterNumber = _Number
     core.QgsProcessingParameterDefinition = types.SimpleNamespace(FlagAdvanced=2)
     for name in ("Boolean", "Enum", "MultipleLayers", "String", "Band", "Distance", "Extent", "Geometry",
-                 "RasterLayer", "VectorLayer", "PointCloudLayer", "Crs", "FolderDestination", "Expression"):
+                 "RasterLayer", "VectorLayer", "PointCloudLayer", "Crs", "FolderDestination", "Expression",
+                 "FeatureSource"):
         setattr(core, f"QgsProcessingParameter{name}", type(name, (_Parameter,), {}))
     core.QgsProcessingOutputMultipleLayers = type("OutputMultipleLayers", (_Parameter,), {})
     core.QgsProcessingProvider = type("QgsProcessingProvider", (), {})

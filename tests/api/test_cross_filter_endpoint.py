@@ -71,6 +71,23 @@ class TestCrossFilter:
         assert response.json()["filtered"] == ["batiment", "lhd"]
         assert {item["name"]: item["has_active_filter"] for item in client.get("/layers").json()}["mnt"] is True
 
+    def test_raster_source_with_segments(self, client_factory, mixed_layers):
+        """2026-11-10: the objects drawn with SAM in the dock are a selection of the API too."""
+        response = client_factory(layers=mixed_layers).post("/filters/cross", json={
+            "source_layer": "mnt", "target_layers": ["batiment"],
+            "raster_selection": {"segments": ["POLYGON((0 0,10 0,10 10,0 10,0 0))"]}})
+        assert response.status_code == 200
+        assert response.json()["filtered"] == ["batiment"]
+
+    @pytest.mark.parametrize("selection", [
+        {"segments": ["POINT(0 0)"]},
+        {"segments": ["POLYGON((0 0,1 0,1 1,0 0))"], "minimum": 1},
+    ])
+    def test_invalid_segments_are_refused(self, client_factory, mixed_layers, selection):
+        response = client_factory(layers=mixed_layers).post("/filters/cross", json={
+            "source_layer": "mnt", "target_layers": ["batiment"], "raster_selection": selection})
+        assert response.status_code in (400, 422)
+
     def test_raster_source_with_a_slope_range(self, client_factory, mixed_layers):
         response = client_factory(layers=mixed_layers).post("/filters/cross", json={
             "source_layer": "mnt", "target_layers": ["batiment"],
