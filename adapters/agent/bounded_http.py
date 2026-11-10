@@ -41,6 +41,19 @@ def abort_active() -> None:
         stop()
 
 
+def on_abort(stop: Callable[[], object]) -> Callable[[], None]:
+    """Call ``stop`` when the user presses Stop, until the returned function is called.
+
+    For another wait of the agent that lets the event loop run (a Processing algorithm).
+    """
+    _ACTIVE.append(stop)
+
+    def forget() -> None:
+        if stop in _ACTIVE:
+            _ACTIVE.remove(stop)
+    return forget
+
+
 def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str, str]] = None,
           max_bytes: int = DEFAULT_MAX_BYTES, timeout_ms: int = DEFAULT_TIMEOUT_MS,
           done: Optional[Callable[[bytes], bool]] = None, headers_only: bool = False,

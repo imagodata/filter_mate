@@ -173,6 +173,44 @@ class SimulatedProject:
                         {"layer_name": "mnt", "layer_kind": "raster", "values": [{"band": 1, "value": 187.4}]}],
                     "skipped": []}
 
+        algorithms = {
+            "native:buffer": ("Buffer", "Vector geometry", [
+                {"name": "INPUT", "type": "source", "description": "Input layer", "optional": False},
+                {"name": "DISTANCE", "type": "distance", "description": "Distance", "optional": False, "default": 10,
+                 "parent": "INPUT"},
+                {"name": "DISSOLVE", "type": "boolean", "description": "Dissolve result", "optional": False,
+                 "default": False},
+                {"name": "OUTPUT", "type": "sink", "description": "Buffered", "optional": False,
+                 "destination": "FilterMate writes it to a temporary layer"}]),
+            "native:centroids": ("Centroids", "Vector geometry", [
+                {"name": "INPUT", "type": "source", "description": "Input layer", "optional": False},
+                {"name": "OUTPUT", "type": "sink", "description": "Centroids", "optional": False,
+                 "destination": "FilterMate writes it to a temporary layer"}]),
+        }
+
+        def find_algorithms(args):
+            words = args["query"].casefold().split()
+            found = [{"id": key, "name": name, "group": group, "summary": name}
+                     for key, (name, group, _) in algorithms.items()
+                     if all(word in f"{key} {name} {group}".casefold() for word in words)]
+            return {"query": args["query"], "algorithms": found, "total": len(found)}
+
+        def describe_algorithm(args):
+            if args["algorithm_id"] not in algorithms:
+                raise ToolFailure(f"no Processing algorithm {args['algorithm_id']!r}: find_algorithms gives the ids")
+            name, group, parameters = algorithms[args["algorithm_id"]]
+            return {"id": args["algorithm_id"], "name": name, "group": group, "help": name, "parameters": parameters,
+                    "outputs": [{"name": "OUTPUT", "type": "outputVector", "description": name}]}
+
+        def run_algorithm(args):
+            name, _, _ = algorithms.get(args["algorithm_id"]) or (None, None, None)
+            if name is None:
+                raise ToolFailure(f"no Processing algorithm {args['algorithm_id']!r}")
+            source, layer = self._layer(str((args.get("parameters") or {}).get("INPUT", "")))
+            return {"algorithm": args["algorithm_id"], "name": name, "layers": [{
+                "output": "OUTPUT", "layer_id": f"{name.lower()}_1", "name": (args.get("names") or {}).get("OUTPUT", name),
+                "layer_kind": "vector", "feature_count": layer.get("count", 0)}]}
+
         def refuse_bad_sql(expression):
             problem = filter_problem(expression)
             if problem:
@@ -288,6 +326,7 @@ class SimulatedProject:
         return {
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
+            "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
             "preview_filter": preview_filter, "apply_filter": apply_filter, "cross_filter": relation,
             "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,

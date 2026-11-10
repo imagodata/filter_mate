@@ -546,6 +546,28 @@ def check_chat(provider, layer, authcfg, work):
     check("undo this turn", layer.subsetString() == "", layer.subsetString())
     check("undo is reported", "communes" in panel.status.text(), panel.status.text())
 
+    try:  # an algorithm of Processing through the chat, its layer undone with the turn
+        sys.path.append("/usr/share/qgis/python/plugins")
+        from processing.core.Processing import Processing
+        Processing.initialize()
+        processing_ready = True
+    except ImportError:
+        processing_ready = False
+    check("processing is there", processing_ready)
+    layers_before = set(QgsProject.instance().mapLayers())
+    provider.reset((200, {}, tool_turn("run_algorithm", {"algorithm_id": "native:buffer",
+                                                         "parameters": {"INPUT": "communes", "DISTANCE": 10}})),
+                   (200, {}, text_turn("Zone faite.")))
+    check("an algorithm through the chat", ask("tampon de 10 m autour des communes"))
+    made = set(QgsProject.instance().mapLayers()) - layers_before
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("its layer is added", len(made) == 1 and not result.get("is_error"), result)
+    check("its card names the algorithm and its parameters", "Processing: native:buffer" in panel.thread.toPlainText()
+          and "DISTANCE=10" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
+    chat._on_undo()
+    check("undoing the turn removes its layer", not set(QgsProject.instance().mapLayers()) - layers_before,
+          set(QgsProject.instance().mapLayers()) - layers_before)
+
     provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
     ask("liste")
     shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]

@@ -298,6 +298,59 @@ def build_server(client: FilterMateClient) -> Any:
         return await call("POST", "/map/identify", _body(
             x=x, y=y, crs=crs, layers=layers, tolerance=tolerance, limit=limit))
 
+    @mcp.tool(annotations=ToolAnnotations(title="Find a Processing algorithm", readOnlyHint=True,
+                                          openWorldHint=False))
+    async def find_algorithms(
+        query: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "Words in English, as QGIS names its algorithms: buffer, centroids, dissolve, clip, join attributes, "
+            "voronoi, heatmap, slope..."))],
+        limit: Annotated[int, Field(ge=1, le=50, description="At most this many algorithms")] = 20,
+    ) -> Dict[str, Any]:
+        """Find the Processing algorithms of QGIS the agent may run, by words of their id, name, group or tags.
+
+        Only the algorithms of QGIS itself that make layers, or answer statistics, are listed: none that runs SQL
+        or code, writes to a data source or a file, or reaches the network. Returns algorithms [{id, name, group,
+        summary}] and total. Then describe_algorithm gives the parameters of one.
+        """
+        return await call("GET", "/processing/algorithms?" + urlencode({"query": query, "limit": limit}))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Describe a Processing algorithm", readOnlyHint=True,
+                                          openWorldHint=False))
+    async def describe_algorithm(
+        algorithm_id: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "Id from find_algorithms, such as native:buffer"))],
+    ) -> Dict[str, Any]:
+        """What a Processing algorithm does, and how to give each of its parameters to run_algorithm.
+
+        Returns help, parameters [{name, type, description, optional, default, options (an enum: give the index or
+        the text), parent (the layer a field or a distance belongs to), minimum, maximum, value (how to give it),
+        destination (an output: FilterMate writes it to a temporary layer)}] and outputs. left_out names parameters
+        that cannot be given (files, folders, connections).
+        """
+        return await call("GET", "/processing/algorithm?" + urlencode({"id": algorithm_id}))
+
+    @mcp.tool(annotations=_write("Run a Processing algorithm", idempotent=False))
+    async def run_algorithm(
+        algorithm_id: Annotated[str, Field(min_length=1, max_length=200, description="Id from find_algorithms")],
+        parameters: Annotated[Optional[Dict[str, Any]], Field(description=(
+            "Values by parameter name, as describe_algorithm says: layers by name or id, "
+            '{"layer": ..., "selected_only": true} for the selected features of a source, numbers, text, the index '
+            "or the text of an option. Outputs are written by FilterMate: leave them out, or pass false to skip an "
+            "optional one."))] = None,
+        names: Annotated[Optional[Dict[str, Annotated[str, Field(min_length=1, max_length=200)]]], Field(
+            description="Name of the layer made by each output, by output name (OUTPUT...)")] = None,
+    ) -> Dict[str, Any]:
+        """Run a Processing algorithm of QGIS on layers of the project; the layers it makes are added to the project.
+
+        Each output layer is a temporary file: export_layers keeps one for good. In the chat of FilterMate, undoing
+        the turn removes them. Returns layers [{output, layer_id, name, layer_kind, feature_count}], values (what the
+        algorithm answers besides layers: statistics...), not_made and messages (its warnings). Inputs are layers
+        of the project only, never a path or a URL; expressions take the functions of select_features and math,
+        text and geometry ones.
+        """
+        return await call("POST", "/processing/run", _body(algorithm_id=algorithm_id, parameters=parameters or {},
+                                                           names=names))
+
     @mcp.tool(annotations=ToolAnnotations(title="Try a filter", readOnlyHint=True, openWorldHint=False))
     async def preview_filter(
         layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],

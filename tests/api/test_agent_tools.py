@@ -103,6 +103,28 @@ class TestHandlers:
         error, answer = run(accessor, root, "identify_at", x=570000.5, y=6270000)
         assert not error and (answer["x"], answer["layers"], answer["skipped"]) == (570000.5, [], [])
 
+    def test_processing_tools(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "find_algorithms", query="buffer")
+        assert not error and answer["algorithms"][0]["id"] == "native:buffer" and answer["total"] == 1
+        error, answer = run(accessor, root, "describe_algorithm", algorithm_id="native:buffer")
+        assert not error and [row["name"] for row in answer["parameters"]] == ["INPUT", "OUTPUT"]
+        error, answer = run(accessor, root, "run_algorithm", algorithm_id="native:buffer",
+                            parameters={"INPUT": "communes"}, names={"OUTPUT": "zone"})
+        assert not error and answer["layers"][0]["name"] == "zone" and answer["feature_count"] == answer["layers"][0]["feature_count"]
+        assert run(accessor, root, "describe_algorithm", algorithm_id="gdal:x")[0] is True
+        assert run(accessor, root, "run_algorithm", algorithm_id="native:buffer", parameters={"INPUT": "x"})[0] is True
+
+    @pytest.mark.parametrize("tool,arguments", [
+        ("find_algorithms", {"query": ""}),
+        ("find_algorithms", {"query": "a", "limit": 51}),
+        ("run_algorithm", {"algorithm_id": "native:buffer", "parameters": [1]}),
+        ("run_algorithm", {"algorithm_id": "native:buffer", "names": {"OUTPUT": ""}}),
+    ])
+    def test_processing_tools_refuse_bad_arguments(self, api, tool, arguments):
+        accessor, root = api
+        assert run(accessor, root, tool, **arguments)[0] is True
+
     @pytest.mark.parametrize("tool,arguments", [
         ("layer_statistics", {"layer": "communes", "measure": "volume"}),
         ("layer_statistics", {"layer": "communes", "limit": 101}),
@@ -338,6 +360,16 @@ class TestRoutes:
         response = client.get("/layers/field-values", params={"layer": "communes", "field": "nom"})
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.get("/layers/field-values", params={"layer": "x", "field": "y"}).status_code == 404
+
+    def test_processing_routes(self, client):
+        response = client.get("/processing/algorithms", params={"query": "buffer"})
+        assert response.status_code == 200 and response.json()["algorithms"][0]["id"] == "native:buffer"
+        assert client.get("/processing/algorithms", params={"query": ""}).status_code == 422
+        assert client.get("/processing/algorithm", params={"id": "native:buffer"}).json()["name"] == "Buffer"
+        assert client.get("/processing/algorithm", params={"id": "gdal:x"}).status_code == 400
+        response = client.post("/processing/run", json={"algorithm_id": "native:buffer", "parameters": {"INPUT": "communes"}})
+        assert response.status_code == 200 and response.json()["layers"][0]["layer_kind"] == "vector"
+        assert client.post("/processing/run", json={"algorithm_id": "native:buffer", "other": 1}).status_code == 422
 
     def test_statistics_sample_identify(self, client):
         response = client.post("/layers/statistics", json={"layer": "communes", "field": "pop", "group_by": "dept"})

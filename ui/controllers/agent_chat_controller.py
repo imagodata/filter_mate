@@ -361,7 +361,8 @@ class AgentChatController(QObject):
             left_out.add(IMAGERY_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
         # A connector alone does not open the web to add_layer: only a data source the user ticked does.
-        handlers = build_handlers(accessor, _default_export_root(), allow_remote_sources=bool(data_sources or configured_names),
+        handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
+                                  allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
@@ -608,6 +609,9 @@ class AgentChatController(QObject):
             "layer_statistics": lambda: _tr("Computing statistics on {}").format(layer),
             "sample_features": lambda: _tr("Reading features of {}").format(layer),
             "identify_at": lambda: _tr("Reading the map at a point"),
+            "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
+            "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
+            "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
             "map_context": lambda: _tr("Reading the map"),
             "filter_state": lambda: _tr("Reading the active filters"),
@@ -659,7 +663,7 @@ class AgentChatController(QObject):
             return
         if spec is not None and (not spec.read_only or spec.open_world):
             self._flush_answer()
-            detail = one_line(call.arguments.get("expression") or "", MAX_DETAIL_CHARS)
+            detail = one_line(call.arguments.get("expression") or self._run_detail(call), MAX_DETAIL_CHARS)
             if call.name in self._connector_labels:
                 detail = json.dumps(call.arguments, ensure_ascii=False, default=str)[:MAX_DETAIL_CHARS]
             count = self._kept_count(result)
@@ -697,6 +701,16 @@ class AgentChatController(QObject):
     def confirm_external(self, call: ToolCallPart, client: str) -> bool:
         """The usual question, under the name of the application that asks."""
         return self._confirm(call, _tr("Another application: {}").format(client))
+
+    @staticmethod
+    def _run_detail(call: ToolCallPart) -> str:
+        """The parameters of an algorithm, on one line, for its card."""
+        if call.name != "run_algorithm":
+            return ""
+        values = call.arguments.get("parameters") if isinstance(call.arguments, dict) else None
+        if not isinstance(values, dict):
+            return ""
+        return ", ".join(f"{name}={json.dumps(value, ensure_ascii=False, default=str)}" for name, value in values.items())
 
     @staticmethod
     def _kept_count(result: ToolResultPart) -> str:

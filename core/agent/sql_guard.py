@@ -22,6 +22,16 @@ EXPRESSION_FUNCTIONS = FUNCTIONS | frozenset({
     "area", "day", "month", "perimeter", "to_date", "to_int", "to_real", "to_string", "x", "y", "year",
 })
 EXPRESSION_VARIABLES = frozenset({"$area", "$geometry", "$id", "$length", "$perimeter", "$x", "$y"})
+# What a Processing formula (field calculator, geometry by expression, extract by expression) needs on top: math,
+# text and the geometry functions that only compute. Still nothing that reads another layer, a file, the
+# environment, or evaluates text as an expression (eval, aggregate, get_feature, env, load_layer...).
+PROCESSING_FUNCTIONS = EXPRESSION_FUNCTIONS | frozenset({
+    "acos", "asin", "atan", "atan2", "azimuth", "bounds", "buffer", "centroid", "clamp", "concat", "convex_hull",
+    "cos", "degrees", "distance", "exp", "format_number", "geom_from_wkt", "geom_to_wkt", "geometry_type", "if",
+    "intersects", "is_valid", "length", "ln", "log", "log10", "lpad", "make_point", "max", "min", "num_points",
+    "pi", "point_on_surface", "power", "radians", "rpad", "scale_linear", "simplify", "sin", "sqrt", "tan", "title",
+    "to_time", "translate", "x_max", "x_min", "y_max", "y_min", "z", "m",
+})
 CAST_TYPES = frozenset({
     "bigint", "boolean", "char", "date", "double", "float", "int", "int4", "int8", "integer", "numeric", "precision",
     "real", "smallint", "text", "time", "timestamp", "timestamptz", "varchar",
@@ -82,6 +92,11 @@ def filter_problem(expression: str) -> str:
 def expression_problem(expression: str) -> str:
     """Why ``expression`` cannot be accepted as a QGIS expression written by a model; "" when it can."""
     return _problem(expression, EXPRESSION_FUNCTIONS, EXPRESSION_VARIABLES)
+
+
+def processing_expression_problem(expression: str) -> str:
+    """Why ``expression`` cannot be accepted as a Processing formula written by a model; "" when it can."""
+    return _problem(expression, PROCESSING_FUNCTIONS, EXPRESSION_VARIABLES)
 
 
 def _problem(expression: str, functions: frozenset, variables: frozenset) -> str:

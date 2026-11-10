@@ -17,6 +17,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 4. Native MCP | Local MCP server without dependencies, shared activity log | done |
 | 5. Map context | The map, the layer tree and what changed, sent with each request; style, joins, relations on demand | done |
 | 6. Reading the data | Statistics by group, lengths and areas, a sample of features, what lies at a point | done |
+| 7. Processing | Find, describe and run the algorithms of QGIS that make layers, undone with the turn | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -218,6 +219,26 @@ estimated:
 - `identify_at`: the features and the raster values at a point, on the visible layers or the ones named.
 
 A web service is not read by any of them.
+
+Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
+
+- `find_algorithms` and `describe_algorithm` list only what may run; `run_algorithm` runs it on layers of the project;
+- what may run is a list of what is accepted: the providers `native` and `qgis` (GDAL, GRASS, SAGA, PDAL, scripts
+  and models start other programs or run code nobody here has read), and an algorithm that makes at least one layer
+  or only answers values (statistics). Selection, style, projection, index, truncation, import into a database,
+  upload and download make no layer: that alone leaves them out. Executors of SQL or Python, and the network
+  requests that make a layer, are refused by name. A parameter that needs a file, a folder, a database connection,
+  a layout or a map theme refuses the algorithm; an optional one stays unset;
+- inputs are layers of the project, never a path, a URI or a URL (QGIS would open them); an extent, a point or a CRS
+  is numbers, an authid or a project layer. Expressions go through a list a little wider than the one of
+  `select_features` (math, text, geometry functions that only compute; nothing that reads another layer, a file or
+  the environment, and no `eval`). Raster calculator expressions have their own parser and are not checked;
+- each layer an algorithm makes is written to a temporary file (GeoPackage, GeoTIFF) and added to the project: the
+  turn checkpoint sees it as added, so undoing the turn removes it and redoing it opens the file again. A temporary
+  file goes when QGIS closes; `export_layers` keeps a layer;
+- it runs in a `QgsProcessingAlgRunnerTask` while the event loop turns, busy for the other operations, and Stop
+  cancels it. An algorithm flagged `NoThreading` (geometry checks) holds QGIS while it runs;
+- without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.
 
 `apply_filter` and `preview_filter` take the same plain clauses through REST and both MCP servers: a subquery or a function
 outside the list answers 400. A filter still reaches the database with the rights of the user, so an external agent exposed to

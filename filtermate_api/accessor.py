@@ -242,6 +242,46 @@ class IdentifyResult:
 
 
 @dataclass(frozen=True)
+class AlgorithmList:
+    """Processing algorithms the agent may run, found by words."""
+    query: str
+    # {"id", "name", "group", "summary"}
+    algorithms: List[Dict[str, Any]] = field(default_factory=list)
+    total: int = 0
+    note: str = ""
+
+
+@dataclass(frozen=True)
+class AlgorithmDescription:
+    """What a Processing algorithm does, its parameters and its outputs."""
+    id: str
+    name: str = ""
+    group: str = ""
+    help: str = ""
+    # {"name", "type", "description", "optional", and when they apply "default", "options", "multiple", "parent",
+    # "minimum", "maximum", "value" (how to give it), "destination" (an output FilterMate writes)}
+    parameters: List[Dict[str, Any]] = field(default_factory=list)
+    # {"name", "type", "description"}
+    outputs: List[Dict[str, Any]] = field(default_factory=list)
+    # Parameters that cannot be given (files, folders, connections): they stay unset.
+    left_out: List[str] = field(default_factory=list)
+    note: str = ""
+
+
+@dataclass(frozen=True)
+class AlgorithmRun:
+    """What a Processing algorithm made: layers added to the project, and the values it answered."""
+    algorithm: str
+    name: str = ""
+    # {"output", "layer_id", "name", "layer_kind", "feature_count"}
+    layers: List[Dict[str, Any]] = field(default_factory=list)
+    # Outputs the algorithm left empty or did not write.
+    not_made: List[str] = field(default_factory=list)
+    values: Dict[str, Any] = field(default_factory=dict)
+    messages: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class FilterPreview:
     """What a filter expression would keep, tried on a private copy of the layer."""
     layer_name: str
@@ -329,6 +369,19 @@ class FilterMateAccessor(Protocol):
     def identify_at(self, x: float, y: float, crs: str = "", layers: Optional[List[str]] = None,
                     tolerance: Optional[float] = None, limit: int = 5) -> IdentifyResult:
         """Features and raster values at a point; raises FilterRejected on a bad point, CRS or layer."""
+        ...
+
+    def find_algorithms(self, query: str, limit: int = 20) -> AlgorithmList:
+        """Processing algorithms the agent may run whose id, name, group or tags hold every word of ``query``."""
+        ...
+
+    def describe_algorithm(self, algorithm_id: str) -> AlgorithmDescription:
+        """Parameters and outputs of an algorithm; raises FilterRejected when it is unknown or may not be run."""
+        ...
+
+    def run_algorithm(self, algorithm_id: str, parameters: Optional[Dict[str, Any]] = None,
+                      names: Optional[Dict[str, str]] = None, share_values: bool = True) -> AlgorithmRun:
+        """Run an algorithm on project layers, its layers added to the project; raises FilterRejected when refused."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -507,6 +560,29 @@ class InMemoryAccessor:
             if self._find(reference) is None:
                 raise FilterRejected(f"layer {reference!r} not found")
         return IdentifyResult(x=x, y=y, crs=crs, tolerance=tolerance or 0.0)
+
+    def find_algorithms(self, query: str, limit: int = 20) -> AlgorithmList:
+        found = [{"id": "native:buffer", "name": "Buffer", "group": "Vector geometry", "summary": "Buffers"}]
+        return AlgorithmList(query=query, algorithms=found if "buffer" in query.lower() else [],
+                             total=1 if "buffer" in query.lower() else 0)
+
+    def describe_algorithm(self, algorithm_id: str) -> AlgorithmDescription:
+        if algorithm_id != "native:buffer":
+            raise FilterRejected(f"no Processing algorithm {algorithm_id!r}")
+        return AlgorithmDescription(id=algorithm_id, name="Buffer", parameters=[
+            {"name": "INPUT", "type": "source", "description": "Input layer", "optional": False},
+            {"name": "OUTPUT", "type": "sink", "description": "Buffered", "optional": False, "destination": "..."}])
+
+    def run_algorithm(self, algorithm_id: str, parameters: Optional[Dict[str, Any]] = None,
+                      names: Optional[Dict[str, str]] = None, share_values: bool = True) -> AlgorithmRun:
+        self.describe_algorithm(algorithm_id)
+        source = self._find(str((parameters or {}).get("INPUT", "")))
+        if source is None:
+            raise FilterRejected("INPUT is not a layer of the project")
+        name = (names or {}).get("OUTPUT") or "Buffer"
+        return AlgorithmRun(algorithm=algorithm_id, name="Buffer", layers=[
+            {"output": "OUTPUT", "layer_id": "buffer_1", "name": name, "layer_kind": "vector",
+             "feature_count": max(source.feature_count, 0)}])
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
         found = self._find(layer_name)
