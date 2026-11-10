@@ -378,12 +378,23 @@ def badge_stylesheet(object_name: str, background: str, text: str = BADGE_TEXT) 
             f"QLabel#{object_name}:hover{{background-color:{background};}}")
 
 
+TITLE_BADGE_RADIUS = 4
+TITLE_BADGE_TEXT = '#555555'
+TITLE_BADGE_PRESSED = '#c8c8c8'
+
+
+def title_badge_colors(dark: bool) -> tuple:
+    """``(background, hover)`` of the grey badges of the title bar: favorites without any, float, close."""
+    return ('#e8e8e8' if dark else '#dcdcdc'), '#ffffff'
+
+
 def favorites_badge_stylesheet(object_name: str, count: int, dark: bool) -> str:
     """Light square star button of the mockup; amber once favorites exist."""
-    background = '#f0b35a' if count > 0 else ('#e8e8e8' if dark else '#dcdcdc')
-    hover = '#f5c47a' if count > 0 else '#ffffff'
-    return (f"QLabel#{object_name}{{color:#555555;background-color:{background};font-size:9pt;font-weight:600;"
-            f"padding:3px 8px;border-radius:4px;border:none;}}"
+    background, hover = title_badge_colors(dark)
+    if count > 0:
+        background, hover = '#f0b35a', '#f5c47a'
+    return (f"QLabel#{object_name}{{color:{TITLE_BADGE_TEXT};background-color:{background};font-size:9pt;"
+            f"font-weight:600;padding:3px 8px;border-radius:{TITLE_BADGE_RADIUS}px;border:none;}}"
             f"QLabel#{object_name}:hover{{background-color:{hover};}}")
 
 
