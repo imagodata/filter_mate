@@ -70,13 +70,21 @@ USER_AGENT = "FilterMate-agent-eval"
 
 
 class SimulatedProject:
-    """The tools of the chat on a project made of dictionaries."""
+    """The tools of the chat on a project made of dictionaries.
 
-    def __init__(self) -> None:
+    It keeps what a change did, as QGIS would: a model that reads ``filter_state`` after a filter must see it,
+    or it rightly believes the filter failed and tries again. ``setup`` is what the request takes for granted:
+    ``{"filters": {layer: description}, "selected": [layer, ...]}``.
+    """
+
+    def __init__(self, setup: Optional[Dict[str, Any]] = None) -> None:
         self.by_ref = {}
         for name, layer in LAYERS.items():
             self.by_ref[name] = name
             self.by_ref[layer["id"]] = name
+        setup = setup or {}
+        self.filters: Dict[str, str] = dict(setup.get("filters", {}))
+        self.selected: List[str] = list(setup.get("selected", ["communes"]))
 
     def _layer(self, reference: str):
         name = self.by_ref.get(reference)
@@ -91,8 +99,13 @@ class SimulatedProject:
         def list_layers(_):
             return {"layers": [{"layer_id": layer["id"], "name": name, "layer_kind": layer["kind"],
                                 "feature_count": layer.get("count", -1), "geometry_type": layer.get("geometry", ""),
-                                "crs_authid": "EPSG:2154", "has_active_filter": False,
-                                "active_filter_expression": ""} for name, layer in LAYERS.items()]}
+                                "crs_authid": "EPSG:2154", "has_active_filter": name in self.filters,
+                                "active_filter_expression": self.filters.get(name, "")} for name, layer in LAYERS.items()]}
+
+        def filter_state(_):
+            return {"layers": [{"layer_id": LAYERS[name]["id"], "name": name, "layer_kind": LAYERS[name]["kind"],
+                                "subset": description, "derived": LAYERS[name]["kind"] != "vector"}
+                               for name, description in self.filters.items()]}
 
         def describe_layer(args):
             name, layer = self._layer(args["layer"])
@@ -129,16 +142,38 @@ class SimulatedProject:
             name, layer = self._layer(args["layer_name"])
             if layer["kind"] != "vector":
                 raise ToolFailure(f"'{name}' is not a vector layer")
-            return {"success": True, "layer_name": name, "expression": args["expression"]}
+            self.filters[name] = args["expression"]
+            return {"success": True, "layer_name": name, "expression": args["expression"],
+                    "active_filters": dict(self.filters)}
 
         def relation(args):
-            self._targets(args.get("target_layers", []))
-            if "source_layer" in args:
-                self._layer(args["source_layer"])
-            return {"filtered": self._targets(args["target_layers"]), "failed": {}, "skipped": {}}
+            targets = self._targets(args.get("target_layers", []))
+            source = self._layer(args["source_layer"])[0] if "source_layer" in args else "an area"
+            for name in targets:
+                self.filters[name] = f"filtered by {source}"
+            return {"filtered": targets, "failed": {}, "skipped": {}}
+
+        def point_cloud_filter(args):
+            done = self._targets(args["layers"])
+            for name in done:
+                self.filters[name] = f"points: {json.dumps(args.get('criteria', {}), ensure_ascii=False)}"
+            return {"done": done, "failed": {}, "skipped": {}}
+
+        def clear_filters(args):
+            done = self._targets(args["layers"])
+            for name in done:
+                self.filters.pop(name, None)
+            return {"done": done, "failed": {}, "skipped": {}}
 
         def operation(args):
             return {"done": self._targets(args["layers"]), "failed": {}, "skipped": {}}
+
+        def apply_favorite(args):
+            favorite = next((item for item in FAVORITES if item["favorite_id"] == args["favorite_id"]), None)
+            if favorite is None:
+                raise ToolFailure("Favorite not found.")
+            self.filters[favorite["layer_name"]] = favorite["expression"]
+            return {"step": {"layer_name": favorite["layer_name"]}, "active_filters": dict(self.filters)}
 
         def export_layers(args):
             done = self._targets(args["layers"])
@@ -153,6 +188,10 @@ class SimulatedProject:
             name, layer = self._layer(args["layer"])
             if layer["kind"] != "vector":
                 raise ToolFailure(f"'{name}' is not a vector layer")
+            if args.get("clear"):
+                self.selected = [item for item in self.selected if item != name]
+            elif name not in self.selected:
+                self.selected.append(name)
             return {"layer_id": layer["id"], "layer_name": name, "selected_count": 0 if args.get("clear") else 1}
 
         def add_layer(args):
@@ -175,12 +214,12 @@ class SimulatedProject:
         def map_context(_):
             return {"available": True, "project_crs": "EPSG:2154", "canvas_crs": "EPSG:2154", "extent_wkt": EXTENT_WKT,
                     "scale": 25000.0, "active_layer_id": "communes_a1", "active_layer_name": "communes",
-                    "selections": [{"layer_id": "communes_a1", "name": "communes", "selected_count": 1}]}
+                    "selections": [{"layer_id": LAYERS[name]["id"], "name": name, "selected_count": 1} for name in self.selected]}
 
         return {
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "preview_filter": preview_filter, "apply_filter": apply_filter, "cross_filter": relation,
-            "geometry_filter": relation, "point_cloud_filter": operation, "clear_filters": operation,
+            "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,
             "select_features": select_features, "set_layers_visibility": operation, "add_layer": add_layer,
             "remove_layers": operation, "search_open_data": search_open_data,
@@ -189,8 +228,8 @@ class SimulatedProject:
                 "id": "S2B_31TCJ_20261031_0_L2A", "title": "S2B_31TCJ_20261031_0_L2A", "publisher": "sentinel-2-l2a",
                 "description": "2026-10-31 · cloud cover 2.1 %", "page": "", "resources": [
                     {"title": "visual", "format": "visual", "url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif"}]}]},
-            "filter_state": lambda _: {"layers": []}, "list_favorites": lambda _: {"favorites": FAVORITES},
-            "apply_favorite": lambda args: {"step": {"layer_name": "communes"}, "active_filters": {}},
+            "filter_state": filter_state, "list_favorites": lambda _: {"favorites": FAVORITES},
+            "apply_favorite": apply_favorite,
         }
 
 
@@ -309,7 +348,7 @@ class UrllibTransport:
 
 def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict."""
-    project = SimulatedProject()
+    project = SimulatedProject(case.get("setup"))
     tools = chat_tools()
     session = AgentSession(provider, tools, SYSTEM_PROMPT, AgentLimits())
     executor = ToolExecutor(tools, project.handlers())
