@@ -29,19 +29,24 @@
         <translation>Управление на хранилищата на Resource Sharing...</translation>
     </message>
     <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation type="obsolete">OptimizationManager</translation>
+    </message>
+    <message>
         <location filename="../ui/managers/optimization_manager.py" line="173"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="175"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="177"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
 </context>
 <context>
@@ -84,7 +89,7 @@
         <translation>Безплатна квота</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Достъпът до безплатната квота беше подновен: изпратете заявката си отново.</translation>
     </message>
@@ -166,7 +171,7 @@
         <translation>Филтър върху {} по {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>FilterMate agent</source>
         <translation>Агент FilterMate</translation>
     </message>
@@ -274,7 +279,7 @@
         <translation>Показано: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="738"/>
         <source>Stopped.</source>
         <translation>Спряно.</translation>
     </message>
@@ -294,12 +299,12 @@
         <translation>Нужна е главната парола на QGIS, за да се използва запазеният ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="757"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Агентът спря преди края ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="699"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +315,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +326,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS чете отдалечен източник от неговия сървър, а съдържанието на слоя може да бъде изпратено на доставчика на агента. Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +337,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="706"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +348,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="695"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +361,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="768"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Кредитът или квотата на този акаунт са изчерпани.</translation>
     </message>
@@ -377,7 +382,7 @@ Do you agree?</source>
         <translation>Безплатната квота временно не е налична.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="728"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Безплатната квота за този месец е изчерпана. Въведете собствен API ключ в настройките на агента.</translation>
     </message>
@@ -388,17 +393,17 @@ Do you agree?</source>
         <translation>Ключът не можа да бъде запазен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The provider could not be reached: {}</source>
         <translation>Доставчикът не можа да бъде достигнат: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Доставчикът отхвърли API ключа: проверете го в настройките на агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="774"/>
         <source>The provider reported a problem: {}</source>
         <translation>Доставчикът съобщи за проблем: {}</translation>
     </message>
@@ -419,7 +424,7 @@ Do you agree?</source>
         <translation>Твърде много нови акаунти от този адрес днес: опитайте утре или въведете собствен API ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Твърде много заявки в момента: опитайте отново след малко.</translation>
     </message>
@@ -449,14 +454,44 @@ Do you agree?</source>
         <translation>Налични инструменти: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>Заявката е отново в реда отдолу: коригирайте настройките и я изпратете пак.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>Заявката е отново в реда отдолу: изпратете я пак, когато сте готови.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>Нищо повече не беше направено. Формулирайте я иначе.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="753"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>Отговорът на модела беше отрязан: беше твърде дълъг.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>The model declined this request.</source>
+        <translation>Моделът отказа тази заявка.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>Заявката изискваше твърде много стъпки: агентът спря.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="754"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>Каквото е променил, остава и може да бъде отменено. Попитайте отново, на по-малки стъпки.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>Каквото е променил, остава и може да бъде отменено. Искайте по-малко наведнъж или кажете какво остава.</translation>
     </message>
 </context>
 <context>

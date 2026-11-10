@@ -29,19 +29,24 @@
         <translation>จัดการที่เก็บ Resource Sharing...</translation>
     </message>
     <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation type="obsolete">OptimizationManager</translation>
+    </message>
+    <message>
         <location filename="../ui/managers/optimization_manager.py" line="173"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="175"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="177"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
 </context>
 <context>
@@ -84,7 +89,7 @@
         <translation>โควตาฟรี</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>สิทธิ์เข้าถึงโควตาฟรีได้รับการต่ออายุแล้ว: โปรดส่งคำขอของคุณอีกครั้ง</translation>
     </message>
@@ -166,7 +171,7 @@
         <translation>กรอง {} ด้วย {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>FilterMate agent</source>
         <translation>เอเจนต์ FilterMate</translation>
     </message>
@@ -274,7 +279,7 @@
         <translation>แสดงแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="738"/>
         <source>Stopped.</source>
         <translation>หยุดแล้ว</translation>
     </message>
@@ -294,12 +299,12 @@
         <translation>ต้องใช้รหัสผ่านหลักของ QGIS เพื่อใช้คีย์ที่จัดเก็บไว้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="757"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>เอเจนต์หยุดก่อนเสร็จสิ้น ({})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="699"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +315,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +326,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS จะอ่านแหล่งข้อมูลระยะไกลจากเซิร์ฟเวอร์ของแหล่งนั้น และเนื้อหาของเลเยอร์อาจถูกส่งไปยังผู้ให้บริการของเอเจนต์ คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +337,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="706"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +348,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="695"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +361,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="768"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>เครดิตหรือโควตาของบัญชีนี้ถูกใช้หมดแล้ว</translation>
     </message>
@@ -377,7 +382,7 @@ Do you agree?</source>
         <translation>โควตาฟรีไม่พร้อมใช้งานในขณะนี้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="728"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>โควตาฟรีของเดือนนี้ถูกใช้หมดแล้ว ป้อนคีย์ API ของคุณเองในการตั้งค่าเอเจนต์</translation>
     </message>
@@ -388,17 +393,17 @@ Do you agree?</source>
         <translation>ไม่สามารถจัดเก็บคีย์ได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The provider could not be reached: {}</source>
         <translation>ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>ผู้ให้บริการปฏิเสธคีย์ API: โปรดตรวจสอบในการตั้งค่าเอเจนต์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="774"/>
         <source>The provider reported a problem: {}</source>
         <translation>ผู้ให้บริการแจ้งว่ามีปัญหา: {}</translation>
     </message>
@@ -419,7 +424,7 @@ Do you agree?</source>
         <translation>วันนี้มีบัญชีใหม่จากที่อยู่นี้มากเกินไป: โปรดลองใหม่พรุ่งนี้ หรือป้อนคีย์ API ของคุณเอง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>มีคำขอมากเกินไปในขณะนี้: โปรดลองใหม่ในอีกสักครู่</translation>
     </message>
@@ -449,14 +454,44 @@ Do you agree?</source>
         <translation>เครื่องมือที่ใช้ได้ {} รายการ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>คำขอกลับไปอยู่ในบรรทัดด้านล่างแล้ว: แก้ไขการตั้งค่า แล้วส่งอีกครั้ง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>คำขอกลับไปอยู่ในบรรทัดด้านล่างแล้ว: ส่งอีกครั้งเมื่อคุณพร้อม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>ไม่ได้ทำอะไรเพิ่มอีก ลองถามด้วยวิธีอื่น</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="753"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>คำตอบของโมเดลถูกตัด: ยาวเกินไป</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>The model declined this request.</source>
+        <translation>โมเดลปฏิเสธคำขอนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>คำขอนี้ใช้ขั้นตอนมากเกินไป: เอเจนต์จึงหยุด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="754"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>สิ่งที่เปลี่ยนแล้วยังคงอยู่และเลิกทำได้ ลองขออีกครั้งเป็นขั้นตอนที่เล็กลง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>สิ่งที่เปลี่ยนแล้วยังคงอยู่และเลิกทำได้ ขอให้น้อยลงในแต่ละครั้ง หรือบอกว่ายังเหลืออะไร</translation>
     </message>
 </context>
 <context>

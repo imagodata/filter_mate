@@ -29,19 +29,24 @@
         <translation>Upravljaj skladišča Resource Sharing...</translation>
     </message>
     <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation type="obsolete">OptimizationManager</translation>
+    </message>
+    <message>
         <location filename="../ui/managers/optimization_manager.py" line="173"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="175"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="177"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
 </context>
 <context>
@@ -84,7 +89,7 @@
         <translation>Brezplačna kvota</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Dostop do brezplačne kvote je bil obnovljen: ponovno pošljite zahtevo.</translation>
     </message>
@@ -166,7 +171,7 @@
         <translation>Filter na {} po {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>FilterMate agent</source>
         <translation>Agent FilterMate</translation>
     </message>
@@ -274,7 +279,7 @@
         <translation>Prikazano: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="738"/>
         <source>Stopped.</source>
         <translation>Ustavljeno.</translation>
     </message>
@@ -294,12 +299,12 @@
         <translation>Za uporabo shranjenega ključa je potrebno glavno geslo QGIS.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="757"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Agent se je ustavil pred koncem ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="699"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +315,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +326,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS oddaljen vir bere z njegovega strežnika, vsebina plasti pa se lahko pošlje ponudniku agenta. Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +337,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="706"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +348,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="695"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +361,7 @@ Do you agree?</source>
 Se strinjate?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="768"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Kredit ali kvota tega računa je porabljena.</translation>
     </message>
@@ -377,7 +382,7 @@ Se strinjate?</translation>
         <translation>Brezplačna kvota trenutno ni na voljo.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="728"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Brezplačna kvota je za ta mesec porabljena. Vnesite svoj ključ API v nastavitvah agenta.</translation>
     </message>
@@ -388,17 +393,17 @@ Se strinjate?</translation>
         <translation>Ključa ni bilo mogoče shraniti.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The provider could not be reached: {}</source>
         <translation>Ponudnika ni bilo mogoče doseči: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Ponudnik je zavrnil ključ API: preverite ga v nastavitvah agenta.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="774"/>
         <source>The provider reported a problem: {}</source>
         <translation>Ponudnik je sporočil težavo: {}</translation>
     </message>
@@ -419,7 +424,7 @@ Se strinjate?</translation>
         <translation>Danes je bilo s tega naslova ustvarjenih preveč novih računov: poskusite jutri ali vnesite svoj ključ API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Trenutno je preveč zahtev: poskusite znova čez trenutek.</translation>
     </message>
@@ -449,14 +454,44 @@ Se strinjate?</translation>
         <translation>Razpoložljiva orodja: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>Zahteva je spet v vrstici spodaj: popravite nastavitve, nato jo pošljite znova.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>Zahteva je spet v vrstici spodaj: pošljite jo znova, ko želite.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>Nič več ni bilo storjeno. Izrazite jo drugače.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="753"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>Odgovor modela je bil odrezan: bil je predolg.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>The model declined this request.</source>
+        <translation>Model je to zahtevo zavrnil.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>Zahteva je zahtevala preveč korakov: agent se je ustavil.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="754"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>Kar je spremenil, ostane in se lahko razveljavi. Vprašajte znova, v manjših korakih.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>Kar je spremenil, ostane in se lahko razveljavi. Zahtevajte manj naenkrat ali povejte, kaj je ostalo.</translation>
     </message>
 </context>
 <context>

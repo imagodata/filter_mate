@@ -29,19 +29,24 @@
         <translation>Zarządzaj repozytoriami Resource Sharing...</translation>
     </message>
     <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation type="obsolete">OptimizationManager</translation>
+    </message>
+    <message>
         <location filename="../ui/managers/optimization_manager.py" line="173"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="175"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="177"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
 </context>
 <context>
@@ -84,7 +89,7 @@
         <translation>Darmowy limit</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Dostęp do bezpłatnego limitu został odnowiony: wyślij zapytanie ponownie.</translation>
     </message>
@@ -166,7 +171,7 @@
         <translation>Filtr dla {} według {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>FilterMate agent</source>
         <translation>Agent FilterMate</translation>
     </message>
@@ -274,7 +279,7 @@
         <translation>Pokazano: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="738"/>
         <source>Stopped.</source>
         <translation>Zatrzymano.</translation>
     </message>
@@ -294,12 +299,12 @@
         <translation>Do użycia zapisanego klucza potrzebne jest hasło główne QGIS.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="757"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Agent zatrzymał się przed końcem ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="699"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +315,7 @@ Do you agree?</source>
 Czy się zgadzasz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +326,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS odczytuje zdalne źródło z jego serwera, a zawartość warstwy może zostać wysłana do dostawcy agenta. Czy się zgadzasz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +337,7 @@ Do you agree?</source>
 Czy się zgadzasz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="706"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +348,7 @@ Do you agree?</source>
 Czy się zgadzasz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="695"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +361,7 @@ Do you agree?</source>
 Czy się zgadzasz?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="768"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Kredyt lub limit tego konta został wyczerpany.</translation>
     </message>
@@ -377,7 +382,7 @@ Czy się zgadzasz?</translation>
         <translation>Bezpłatny limit jest na razie niedostępny.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="728"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Bezpłatny limit na ten miesiąc został wyczerpany. Wpisz własny klucz API w ustawieniach agenta.</translation>
     </message>
@@ -388,17 +393,17 @@ Czy się zgadzasz?</translation>
         <translation>Nie udało się zapisać klucza.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The provider could not be reached: {}</source>
         <translation>Nie udało się połączyć z dostawcą: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Dostawca odrzucił klucz API: sprawdź go w ustawieniach agenta.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="774"/>
         <source>The provider reported a problem: {}</source>
         <translation>Dostawca zgłosił problem: {}</translation>
     </message>
@@ -419,7 +424,7 @@ Czy się zgadzasz?</translation>
         <translation>Dziś z tego adresu utworzono zbyt wiele nowych kont: spróbuj jutro lub wpisz własny klucz API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Zbyt wiele zapytań: spróbuj ponownie za chwilę.</translation>
     </message>
@@ -449,14 +454,44 @@ Czy się zgadzasz?</translation>
         <translation>Dostępne narzędzia: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>Żądanie wraca do wiersza poniżej: popraw ustawienia, a potem wyślij je ponownie.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>Żądanie wraca do wiersza poniżej: wyślij je ponownie, gdy zechcesz.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>Nic więcej nie zrobiono. Sformułuj to inaczej.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="753"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>Odpowiedź modelu została ucięta: była za długa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>The model declined this request.</source>
+        <translation>Model odrzucił to żądanie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>Żądanie wymagało zbyt wielu kroków: agent się zatrzymał.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="754"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>To, co zmienił, zostaje i można to cofnąć. Poproś ponownie, mniejszymi krokami.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>To, co zmienił, zostaje i można to cofnąć. Proś o mniej naraz albo powiedz, co zostało.</translation>
     </message>
 </context>
 <context>

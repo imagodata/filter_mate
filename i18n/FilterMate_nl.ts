@@ -29,19 +29,24 @@
         <translation>Resource Sharing-repository's beheren...</translation>
     </message>
     <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation type="obsolete">OptimizationManager</translation>
+    </message>
+    <message>
         <location filename="../ui/managers/optimization_manager.py" line="173"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="175"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="177"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
 </context>
 <context>
@@ -84,7 +89,7 @@
         <translation>Gratis quotum</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>De toegang tot het gratis tegoed is vernieuwd: verstuur uw verzoek opnieuw.</translation>
     </message>
@@ -166,7 +171,7 @@
         <translation>Filter op {} met {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>FilterMate agent</source>
         <translation>FilterMate-agent</translation>
     </message>
@@ -274,7 +279,7 @@
         <translation>Getoond: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="738"/>
         <source>Stopped.</source>
         <translation>Gestopt.</translation>
     </message>
@@ -294,12 +299,12 @@
         <translation>Het hoofdwachtwoord van QGIS is nodig om de opgeslagen sleutel te gebruiken.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="757"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>De agent is gestopt vóór het einde ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="699"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +315,7 @@ Do you agree?</source>
 Gaat u akkoord?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +326,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 Een externe bron wordt door QGIS van haar server gelezen en de inhoud van de laag kan naar de provider van de agent worden verstuurd. Gaat u akkoord?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +337,7 @@ Do you agree?</source>
 Gaat u akkoord?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="706"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +348,7 @@ Do you agree?</source>
 Gaat u akkoord?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="695"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +361,7 @@ Do you agree?</source>
 Gaat u akkoord?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="768"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Het tegoed of het quotum van dit account is op.</translation>
     </message>
@@ -377,7 +382,7 @@ Gaat u akkoord?</translation>
         <translation>Het gratis quotum is momenteel niet beschikbaar.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="728"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Het gratis quotum is deze maand op. Voer uw eigen API-sleutel in bij de agentinstellingen.</translation>
     </message>
@@ -388,17 +393,17 @@ Gaat u akkoord?</translation>
         <translation>De sleutel kon niet worden opgeslagen.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The provider could not be reached: {}</source>
         <translation>De provider was niet bereikbaar: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>De provider heeft de API-sleutel geweigerd: controleer hem bij de agentinstellingen.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="774"/>
         <source>The provider reported a problem: {}</source>
         <translation>De provider meldde een probleem: {}</translation>
     </message>
@@ -419,7 +424,7 @@ Gaat u akkoord?</translation>
         <translation>Te veel nieuwe accounts vanaf dit adres vandaag: probeer het morgen opnieuw of voer uw eigen API-sleutel in.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Momenteel te veel verzoeken: probeer het zo meteen opnieuw.</translation>
     </message>
@@ -449,14 +454,44 @@ Gaat u akkoord?</translation>
         <translation>{} hulpmiddelen beschikbaar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>Het verzoek staat weer in de regel hieronder: pas de instellingen aan en verstuur het opnieuw.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>Het verzoek staat weer in de regel hieronder: verstuur het opnieuw wanneer u wilt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>Verder is er niets gedaan. Formuleer het anders.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="753"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>Het antwoord van het model is afgekapt: het was te lang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>The model declined this request.</source>
+        <translation>Het model heeft dit verzoek geweigerd.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>Het verzoek vroeg te veel stappen: de agent is gestopt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="754"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>Wat hij heeft gewijzigd, blijft en kan ongedaan worden gemaakt. Vraag het opnieuw, in kleinere stappen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>Wat hij heeft gewijzigd, blijft en kan ongedaan worden gemaakt. Vraag minder tegelijk, of zeg wat er nog over is.</translation>
     </message>
 </context>
 <context>

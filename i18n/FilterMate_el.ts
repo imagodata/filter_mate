@@ -29,19 +29,24 @@
         <translation>Διαχείριση αποθετηρίων Resource Sharing...</translation>
     </message>
     <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation type="obsolete">OptimizationManager</translation>
+    </message>
+    <message>
         <location filename="../ui/managers/optimization_manager.py" line="173"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="175"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
     <message>
         <location filename="../ui/managers/optimization_manager.py" line="177"/>
         <source>OptimizationManager</source>
-        <translation>OptimizationManager</translation>
+        <translation type="unfinished">OptimizationManager</translation>
     </message>
 </context>
 <context>
@@ -84,7 +89,7 @@
         <translation>Δωρεάν όριο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Η πρόσβαση στη δωρεάν ποσόστωση ανανεώθηκε: στείλτε ξανά το αίτημά σας.</translation>
     </message>
@@ -166,7 +171,7 @@
         <translation>Φίλτρο στο {} με βάση: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
         <source>FilterMate agent</source>
         <translation>Πράκτορας FilterMate</translation>
     </message>
@@ -274,7 +279,7 @@
         <translation>Εμφανίζεται: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="738"/>
         <source>Stopped.</source>
         <translation>Διακόπηκε.</translation>
     </message>
@@ -294,12 +299,12 @@
         <translation>Ο κύριος κωδικός πρόσβασης του QGIS απαιτείται για τη χρήση του αποθηκευμένου κλειδιού.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="757"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Ο πράκτορας σταμάτησε πριν από το τέλος ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="699"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +315,7 @@ Do you agree?</source>
 Συμφωνείτε;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +326,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 Μια απομακρυσμένη πηγή διαβάζεται από το QGIS στον διακομιστή της και το περιεχόμενο του επιπέδου μπορεί να σταλεί στον πάροχο του πράκτορα. Συμφωνείτε;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +337,7 @@ Do you agree?</source>
 Συμφωνείτε;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="706"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +348,7 @@ Do you agree?</source>
 Συμφωνείτε;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="695"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +361,7 @@ Do you agree?</source>
 Συμφωνείτε;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="768"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Η πίστωση ή η ποσόστωση αυτού του λογαριασμού έχει εξαντληθεί.</translation>
     </message>
@@ -377,7 +382,7 @@ Do you agree?</source>
         <translation>Η δωρεάν ποσόστωση δεν είναι διαθέσιμη προς το παρόν.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="728"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Η δωρεάν ποσόστωση εξαντλήθηκε για αυτόν τον μήνα. Εισαγάγετε το δικό σας κλειδί API στις ρυθμίσεις του πράκτορα.</translation>
     </message>
@@ -388,17 +393,17 @@ Do you agree?</source>
         <translation>Δεν ήταν δυνατή η αποθήκευση του κλειδιού.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The provider could not be reached: {}</source>
         <translation>Ο πάροχος δεν ήταν προσβάσιμος: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Ο πάροχος απέρριψε το κλειδί API: ελέγξτε το στις ρυθμίσεις του πράκτορα.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="774"/>
         <source>The provider reported a problem: {}</source>
         <translation>Ο πάροχος ανέφερε πρόβλημα: {}</translation>
     </message>
@@ -419,7 +424,7 @@ Do you agree?</source>
         <translation>Πάρα πολλοί νέοι λογαριασμοί από αυτή τη διεύθυνση σήμερα: δοκιμάστε ξανά αύριο ή εισαγάγετε το δικό σας κλειδί API.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Πάρα πολλά αιτήματα προς το παρόν: δοκιμάστε ξανά σε λίγο.</translation>
     </message>
@@ -449,14 +454,44 @@ Do you agree?</source>
         <translation>{} διαθέσιμα εργαλεία</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>Το αίτημα επιστρέφει στη γραμμή παρακάτω: διορθώστε τις ρυθμίσεις και στείλτε το ξανά.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>Το αίτημα επιστρέφει στη γραμμή παρακάτω: στείλτε το ξανά όταν θέλετε.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>Δεν έγινε τίποτε άλλο. Διατυπώστε το διαφορετικά.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="753"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>Η απάντηση του μοντέλου κόπηκε: ήταν πολύ μεγάλη.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="756"/>
+        <source>The model declined this request.</source>
+        <translation>Το μοντέλο αρνήθηκε αυτό το αίτημα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>Το αίτημα χρειάστηκε πάρα πολλά βήματα: ο πράκτορας σταμάτησε.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="754"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>Ό,τι άλλαξε μένει και μπορεί να αναιρεθεί. Ζητήστε το ξανά, σε μικρότερα βήματα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>Ό,τι άλλαξε μένει και μπορεί να αναιρεθεί. Ζητήστε λιγότερα κάθε φορά ή πείτε τι απομένει.</translation>
     </message>
 </context>
 <context>
