@@ -37,6 +37,7 @@ PROGRESS_HEIGHT = 3
 STATUS_MAX_HEIGHT = 48
 _WELCOME_PAGE, _THREAD_PAGE, _HISTORY_PAGE = 0, 1, 2
 _TURN_ROLE = Qt.ItemDataRole.UserRole
+_STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 
 PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
@@ -114,6 +115,7 @@ class AgentPanel(QFrame):
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
     resend_requested = pyqtSignal(str)
+    step_undo_requested = pyqtSignal(int)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -262,6 +264,11 @@ class AgentPanel(QFrame):
         self.history_redo_button = QPushButton(_tr("Redo"), page)
         self.history_redo_button.setObjectName("pushButton_agent_history_redo")
         self.history_redo_button.clicked.connect(self.redo_requested)
+        self.step_button = QPushButton(_tr("Undo back to here"), page)
+        self.step_button.setObjectName("pushButton_agent_history_step")
+        self.step_button.setToolTip(_tr("The layers as they were before this step of the last request"))
+        self.step_button.setEnabled(False)
+        self.step_button.clicked.connect(self._undo_to_selected_step)
         self.resend_button = QPushButton(_tr("Send again"), page)
         self.resend_button.setObjectName("pushButton_agent_resend")
         self.resend_button.setEnabled(False)
@@ -272,6 +279,7 @@ class AgentPanel(QFrame):
         buttons.addWidget(self.history_undo_button)
         buttons.addWidget(self.history_redo_button)
         buttons.addStretch(1)
+        buttons.addWidget(self.step_button)
         buttons.addWidget(self.resend_button)
 
         layout = QVBoxLayout(page)
@@ -296,7 +304,8 @@ class AgentPanel(QFrame):
         """``turns``: dicts with time, request, layers, applied; oldest first."""
         palette = tokens(self._dark())
         self.history_list.clear()
-        for turn in turns:
+        last_applied = max((index for index, turn in enumerate(turns) if turn.get("applied")), default=-1)
+        for position, turn in enumerate(turns):
             when = time.strftime("%H:%M", time.localtime(turn.get("time") or 0))
             layers = ", ".join(turn.get("layers") or ()) or _tr("no change")
             state = _tr("applied") if turn.get("applied") else _tr("undone")
@@ -305,6 +314,13 @@ class AgentPanel(QFrame):
             if not turn.get("applied"):
                 item.setForeground(QColor(palette["fm_text_muted"]))
             self.history_list.addItem(item)
+            if position == last_applied:  # the steps of the last request can be undone one by one
+                for number, label in enumerate(turn.get("steps") or ()):
+                    step = QListWidgetItem(f"    {number + 1}. {label}")
+                    step.setData(_TURN_ROLE, "")
+                    step.setData(_STEP_ROLE, number)
+                    step.setForeground(QColor(palette["fm_text_muted"]))
+                    self.history_list.addItem(step)
         self.history_list.scrollToBottom()
         self.history_count.setText(_tr("{} turn(s)").format(len(turns)))
         self.history_count.setStyleSheet(f"color: {palette['fm_text_muted']};")
@@ -314,8 +330,17 @@ class AgentPanel(QFrame):
 
     def _on_turn_selected(self) -> None:
         items = self.history_list.selectedItems()
-        typed_here = bool(items) and not str(items[0].data(_TURN_ROLE) or "").startswith(EXTERNAL_MARK)
+        step = items[0].data(_STEP_ROLE) if items else None
+        typed_here = (bool(items) and step is None and bool(items[0].data(_TURN_ROLE))
+                      and not str(items[0].data(_TURN_ROLE) or "").startswith(EXTERNAL_MARK))
         self.resend_button.setEnabled(typed_here and not self._working)
+        self.step_button.setEnabled(step is not None and not self._working)
+
+    def _undo_to_selected_step(self) -> None:
+        items = self.history_list.selectedItems()
+        step = items[0].data(_STEP_ROLE) if items else None
+        if step is not None and not self._working:
+            self.step_undo_requested.emit(int(step))
 
     def _resend_selected(self) -> None:
         items = self.history_list.selectedItems()

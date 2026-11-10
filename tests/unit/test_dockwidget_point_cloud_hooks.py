@@ -80,7 +80,12 @@ class TestDockwidgetHooks:
         call = _calls(hook.test, "delegate_point_cloud_task")[0]
         assert [ast.unparse(arg) for arg in call.args] == ["task_name"]
         first_line, first = _first_statement_line(func)
-        assert first is hook, "the point cloud delegation must be the first statement of launchTaskEvent"
+        # Only the undo and redo of the agent may come first: while AGENT is open, they walk its history
+        # (the action bar shows it), whatever kind of layer is current.
+        statements = [node for node in func.body if not (isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant))]
+        if first is not hook:
+            assert "_agent_chat" in ast.unparse(statements[0]) and statements[1] is not hook and statements[2] is hook, \
+                "the point cloud delegation must come first, after the undo of the agent only"
 
     def test_validate_and_prepare_layer_tolerates_a_layer_without_selection_signal(self):
         prepare = _method(_DOCKWIDGET, "FilterMateDockWidget", "_validate_and_prepare_layer")

@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Diurungkan: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Pengurungan permintaan terakhir</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Kembali ke sebelum: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Tidak ada yang bisa diurungkan.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Ulangi: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Urungkan: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Kuota gratis</translation>
@@ -396,6 +420,14 @@ Apakah Anda setuju?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Lapisan seperti sebelum langkah ini dari permintaan terakhir</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Urungkan sampai sini</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

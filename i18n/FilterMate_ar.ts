@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>تم التراجع: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>التراجع عن الطلب الأخير</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>العودة إلى ما قبل: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>لا شيء للتراجع عنه.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>إعادة: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>تراجع: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">حصة مجانية</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>الطبقات كما كانت قبل هذه الخطوة من الطلب الأخير</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>التراجع حتى هنا</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

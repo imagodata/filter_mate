@@ -840,9 +840,63 @@ def check_chat(provider, layer, authcfg, work):
     dialog.test_button.click()
     check("sources: test shows the answer", dialog.source_result.text() == "12 tools" and len(tested) == 1, dialog.source_result.text())
     dialog.close()
+    check_steps(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
     host.close()
+
+
+def check_steps(chat, provider, settings, ask, layer):
+    """Lot 2 of the undo plan: the steps of a turn, and "undo back to here"."""
+    panel = chat.panel
+    settings()
+    layer.setSubsetString("")
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}, "toolu_a")),
+                   (200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 2000'}, "toolu_b")),
+                   (200, {}, text_turn("Deux filtres.")))
+    ask("deux filtres")
+    turns = [turn for turn in chat._checkpoint.turns() if turn.get("applied")]
+    steps = turns[-1].get("steps", []) if turns else []
+    check("steps: a turn of two changes keeps both", len(steps) == 2 and all("communes" in label for label in steps), steps)
+    chat._show_history()
+    items = [panel.history_list.item(index) for index in range(panel.history_list.count())]
+    step_items = [item for item in items if item.data(Qt.ItemDataRole.UserRole + 1) is not None]
+    check("steps: listed under the last request", len(step_items) == 2, [item.text() for item in items])
+    panel.history_list.setCurrentItem(step_items[1])
+    check("steps: undo back to here is offered on a step, send again is not", panel.step_button.isEnabled()
+          and not panel.resend_button.isEnabled())
+    panel.step_button.click()
+    check("steps: back to before the second step", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    chat._on_undo()
+    check("steps: that is a step of the history too", layer.subsetString() == '"pop" > 2000', layer.subsetString())
+    chat._on_undo()
+    check("steps: and the turn still undoes whole", layer.subsetString() == "", layer.subsetString())
+    panel.show_thread()
+
+    # Lot 4: "undo what you just did" in the conversation.
+    settings()
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 3000'}, "toolu_c")),
+                   (200, {}, text_turn("Filtré.")))
+    ask("filtre")
+    check("undo tool: the filter is there", layer.subsetString() == '"pop" > 3000', layer.subsetString())
+    provider.reset((200, {}, tool_turn("undo_agent_step", {}, "toolu_d")), (200, {}, text_turn("Annulé.")))
+    ask("annule ce que tu viens de faire")
+    check("undo tool: the last request is undone from the conversation", layer.subsetString() == "", layer.subsetString())
+    answer = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("undo tool: the model is told what it undid", "filtre" in answer.get("content", "") and not answer.get("is_error"),
+          answer)
+    check("undo tool: the thread says it, no card to undo again", "Undone: filtre" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-200:])
+    chat._on_redo()
+    check("undo tool: the request undone can be redone", layer.subsetString() == '"pop" > 3000', layer.subsetString())
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 10'}, "toolu_e")),
+                   (200, {}, tool_turn("undo_agent_step", {}, "toolu_f")), (200, {}, text_turn("Non.")))
+    ask("filtre puis annule")
+    refused = provider.requests[2]["body"]["messages"][-1]["content"][0]
+    check("undo tool: refused after a change of the same request", refused.get("is_error") is True, refused)
+    chat._on_undo()
+    chat._on_undo()
+    layer.setSubsetString("")
 
 
 def check_free_quota(chat, provider, settings, ask):
@@ -1178,6 +1232,68 @@ def _first_token(dialog_class, target, values_class):
     return len(token) >= 40
 
 
+def check_effects(layer_id):
+    """Lot 3 of the undo plan: what a turn does beside the filters is undone and redone with them."""
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+    from filter_mate.core.agent.messages import ToolCallPart
+
+    project = QgsProject.instance()
+    layer = project.mapLayer(layer_id)
+    group = project.layerTreeRoot().addGroup("effects")
+    node = project.layerTreeRoot().findLayer(layer_id)
+    group.insertChildNode(0, node.clone())
+    node.parent().removeChildNode(node)
+    count = layer.featureCount()
+
+    turn = TurnCheckpoint()
+    turn.label = "selection and visibility"
+    turn.begin(ToolCallPart("e1", "select_features", {"layer": "communes", "expression": '"pop" > 5000'}))
+    layer.selectByIds([1, 2, 3])
+    turn.begin(ToolCallPart("e2", "set_layers_visibility", {"layers": ["communes"], "visible": False}))
+    project.layerTreeRoot().findLayer(layer_id).setItemVisibilityChecked(False)
+    turn.commit()
+    check("effects: a turn of selection and visibility only is a step", TurnCheckpoint.can_undo())
+    turn.undo()
+    check("effects: the selection comes back", layer.selectedFeatureCount() == 0, layer.selectedFeatureIds())
+    check("effects: the visibility comes back", project.layerTreeRoot().findLayer(layer_id).itemVisibilityChecked())
+    turn.redo()
+    check("effects: and both again on redo", layer.selectedFeatureCount() == 3
+          and not project.layerTreeRoot().findLayer(layer_id).itemVisibilityChecked())
+    project.layerTreeRoot().findLayer(layer_id).setItemVisibilityChecked(True)
+
+    turn.label = "remove communes"
+    turn.begin(ToolCallPart("e3", "remove_layers", {"layers": ["communes"]}))
+    project.removeMapLayer(layer_id)
+    names = turn.commit()
+    check("effects: a removed layer is named in the turn", "communes" in names, names)
+    restored, left = turn.undo()
+    back = project.mapLayer(layer_id)
+    check("effects: a removed layer comes back, same id, same features", back is not None and back.featureCount() == count
+          and not left, (restored, left))
+    check("effects: at its place in its group", group.findLayer(layer_id) is not None)
+    turn.redo()
+    check("effects: and goes again on redo", project.mapLayer(layer_id) is None)
+    turn.undo()
+
+    memory = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "scratch", "memory")
+    turn.label = "add a layer"
+    turn.begin(ToolCallPart("e4", "add_layer", {"source": "/data/a.gpkg"}))
+    project.addMapLayer(memory)
+    memory_id = memory.id()
+    turn.commit()
+    turn.undo()
+    check("effects: an added layer goes on undo", project.mapLayer(memory_id) is None)
+    turn.redo()
+    check("effects: and comes back on redo", project.mapLayer(memory_id) is not None)
+    turn.label = "remove scratch"
+    turn.begin(ToolCallPart("e5", "remove_layers", {"layers": ["scratch"]}))
+    project.removeMapLayer(memory_id)
+    turn.commit()
+    restored, left = turn.undo()
+    check("effects: a layer in memory cannot come back, and says so", project.mapLayer(memory_id) is None
+          and "scratch" in left, (restored, left))
+
+
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
     work = tempfile.mkdtemp()
@@ -1188,6 +1304,7 @@ def main():
     authcfg = check_key_store()
     check_checkpoint(layer)
     check_chat(provider, layer, authcfg, work)
+    check_effects(layer.id())
 
 
 if __name__ == "__main__":

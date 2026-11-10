@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Angret: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Angring av den siste forespørselen</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Tilbake til før: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Ingenting å angre.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Gjør om: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Angre: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Gratis kvote</translation>
@@ -396,6 +420,14 @@ Godtar du?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Lagene slik de var før dette trinnet i den siste forespørselen</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Angre til hit</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

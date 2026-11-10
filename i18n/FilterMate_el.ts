@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Αναιρέθηκε: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Αναίρεση του τελευταίου αιτήματος</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Επιστροφή πριν από: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Τίποτα για αναίρεση.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Επανάληψη: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Αναίρεση: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Δωρεάν όριο</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Τα επίπεδα όπως ήταν πριν από αυτό το βήμα του τελευταίου αιτήματος</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Αναίρεση μέχρι εδώ</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

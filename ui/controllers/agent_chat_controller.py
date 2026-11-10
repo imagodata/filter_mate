@@ -32,7 +32,7 @@ from ...core.agent.messages import (
 from ...core.agent.providers import FREE_PRESET, create_provider
 from ...core.agent.session import AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
-from ...core.agent.tool_catalog import chat_tools
+from ...core.agent.tool_catalog import UNDO_AGENT_STEP, chat_tools
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
 from ...filtermate_api.agent_tools import build_handlers
@@ -91,6 +91,7 @@ class AgentChatController(QObject):
         self._parent_widget = parent_widget
         self._engine: Optional[ChatEngine] = None
         self._checkpoint = TurnCheckpoint()
+        self._checkpoint.describe = self.describe_call
         self._last_request = ""
         self._tools = {tool.name: tool for tool in chat_tools()}
         self._connector_labels = {}
@@ -106,6 +107,7 @@ class AgentChatController(QObject):
         self.panel.redo_requested.connect(self._on_redo)
         self.panel.history_requested.connect(self._show_history)
         self.panel.resend_requested.connect(self._on_resend)
+        self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.settings_requested.connect(self.open_settings)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._restore_transcript()
@@ -204,6 +206,48 @@ class AgentChatController(QObject):
     def _refresh_history(self) -> None:
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
+        request = getattr(self._parent_widget, "undoRedoStateRequested", None)
+        if request is not None:  # the action bar follows the history of the agent while AGENT is open
+            try:
+                request.emit()
+            except (RuntimeError, TypeError):
+                pass
+
+    def undo_state(self) -> dict:
+        """What the action bar shows for the agent: what Undo and Redo would do, named."""
+        turns = TurnCheckpoint.turns()
+        applied = [turn for turn in turns if turn.get("applied")]
+        undone = [turn for turn in turns if not turn.get("applied")]
+        busy = self.chat_busy() or self._mcp.busy
+        can_undo, can_redo = TurnCheckpoint.can_undo() and not busy, TurnCheckpoint.can_redo() and not busy
+        last = one_line(applied[-1].get("request") or "", 80) if applied else ""
+        following = one_line(undone[0].get("request") or "", 80) if undone else ""
+        return {"can_undo": can_undo, "can_redo": can_redo,
+                "undo_tip": _tr("Undo: {}").format(last) if can_undo and last else _tr("Nothing to undo."),
+                "redo_tip": _tr("Redo: {}").format(following) if can_redo and following else _tr("Nothing to redo.")}
+
+    def describe_call(self, call: ToolCallPart) -> str:
+        """A step of a turn, in the words of the thread, on one line."""
+        return one_line(self._describe(call), 120)
+
+    def _on_undo_to_step(self, step: int) -> None:
+        """Back to before a step of the last turn: a step of the history of its own, that Undo takes back."""
+        if self.chat_busy() or self._mcp.busy:
+            return
+        busy = self._checkpoint.busy()
+        if busy:
+            self._say(busy, error=True)
+            return
+        turns = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+        steps = turns[-1].get("steps", []) if turns else []
+        if not 0 <= step < len(steps):
+            return
+        restored, skipped = self._checkpoint.undo_to_step(step, _tr("Back to before: {}").format(steps[step]))
+        message = (_tr("Back to before: {}").format(steps[step]) if restored else _tr("Nothing to restore."))
+        if skipped:
+            message += " " + _tr("Changed since, left as is: {}.").format(", ".join(skipped))
+        self._say(message)
+        self._refresh_history()
 
     def _show_history(self) -> None:
         self._refresh_history()
@@ -315,7 +359,22 @@ class AgentChatController(QObject):
         handlers = build_handlers(accessor, _default_export_root(), allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
+        handlers[UNDO_AGENT_STEP] = self._undo_tool
         return tools, handlers, active
+
+    def _undo_tool(self, _arguments) -> dict:
+        """undo_agent_step: the last request of the agent taken back, as the Undo of the panel does it."""
+        busy = self._checkpoint.busy()
+        if busy:
+            raise ToolFailure(busy)
+        if getattr(self._checkpoint, "_open", False):
+            raise ToolFailure("This request already changed something: undo only before any other change.")
+        applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+        if not applied:
+            raise ToolFailure("Nothing of the agent to undo in this project.")
+        request = applied[-1].get("request") or ""
+        restored, left = self._checkpoint.undo()
+        return {"undone": request, "restored": restored, "left": left}
 
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
@@ -527,6 +586,7 @@ class AgentChatController(QObject):
             "search_open_data": lambda: _tr("Searching {} for {}").format(args.get("platform", ""), args.get("query", "")),
             "search_imagery": lambda: _tr("Searching satellite imagery on {}").format(args.get("platform", "")),
             "add_service_layer": lambda: _tr("Layer added: {}").format(args.get("name") or args.get("typename", "")),
+            UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
     def on_tool_start(self, call: ToolCallPart) -> None:
@@ -543,6 +603,17 @@ class AgentChatController(QObject):
     def _log_action(self, call: ToolCallPart, result: ToolResultPart, label: str, keep: bool = True) -> None:
         """What changes something, or leaves the machine, stays in the thread."""
         spec = self._tools.get(call.name)
+        if call.name == UNDO_AGENT_STEP:  # not a change to undo again: a note says what came back
+            if not result.is_error:
+                try:
+                    undone = json.loads(result.content).get("undone", "")
+                except (ValueError, AttributeError):
+                    undone = ""
+                self._flush_answer()
+                self.panel.add_note(_tr("Undone: {}").format(one_line(undone, 200)))
+                if keep:
+                    self._record("note", _tr("Undone: {}").format(one_line(undone, 200)))
+            return
         if spec is not None and (not spec.read_only or spec.open_world):
             self._flush_answer()
             detail = one_line(call.arguments.get("expression") or "", MAX_DETAIL_CHARS)

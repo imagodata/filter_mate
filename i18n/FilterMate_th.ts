@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>เลิกทำแล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>การเลิกทำคำขอล่าสุด</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>กลับไปก่อน: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>ไม่มีสิ่งที่ต้องเลิกทำ</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>ทำซ้ำ: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>เลิกทำ: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">โควตาฟรี</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>เลเยอร์ตามที่เป็นก่อนขั้นตอนนี้ของคำขอล่าสุด</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>เลิกทำถึงตรงนี้</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

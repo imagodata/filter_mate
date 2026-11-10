@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Anulado: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Anulação do último pedido</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Voltar a antes de: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Nada para anular.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Refazer: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Anular: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Quota gratuita</translation>
@@ -396,6 +420,14 @@ Concorda?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>As camadas como estavam antes deste passo do último pedido</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Anular até aqui</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

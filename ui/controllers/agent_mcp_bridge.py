@@ -70,7 +70,7 @@ class AgentMcpBridge:
             self.error = str(exc)[:200]
             self._server.close()
             return
-        self._tools = tuple(tools)
+        self._tools = tuple(tool for tool in tools if not tool.manages_history)  # the history of the chat stays its own
         self._executor = ToolExecutor(self._tools, handlers)
         if not self._server.serves(values.mcp_port, values.mcp_token):
             self.error = self._server.listen(values.mcp_port, values.mcp_token)
@@ -117,11 +117,12 @@ class AgentMcpBridge:
     def _change(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """One change of another application is one step of the history of the panel."""
         checkpoint = TurnCheckpoint()
+        checkpoint.describe = self._host.describe_call
         checkpoint.label = EXTERNAL_MARK + self._host.label_of(call, client)
         self.busy = True
         try:
             try:
-                checkpoint.begin()
+                checkpoint.begin(call)
             except Exception:
                 logger.exception("MCP undo point failed")
                 return ToolResultPart(call.call_id, NO_UNDO_POINT, is_error=True)

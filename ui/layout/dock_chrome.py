@@ -193,6 +193,7 @@ class DockSections(QObject):
             holder.setMaximumHeight(0)
             holder = holder.parentWidget()
         self._watched = set()
+        self._bottom_limits = None
         self._current_before_press = -1
         self._watch_bottom_headers()
         self._toolbox.currentChanged.connect(self._on_bottom_changed)
@@ -231,6 +232,12 @@ class DockSections(QObject):
         header.setToolTip(_tr("Hide EXPLORING to give room to the sections") if key == "exploring"
                           else _tr("Show EXPLORING"))
         self._fit()
+        request = getattr(self._dock, "undoRedoStateRequested", None)
+        if request is not None:  # Undo and Redo follow AGENT when it opens or folds
+            try:
+                request.emit()
+            except (RuntimeError, TypeError):
+                pass
 
     def _on_top_header(self, key: str) -> None:
         self.open_top(None if self.is_open(key) else key)
@@ -275,7 +282,17 @@ class DockSections(QObject):
             bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
             if bottom is not None:
                 nothing = self._toolbox.currentWidget() is self._nothing
-                bottom.setMaximumHeight(self._bottom_headers_height(bottom) if nothing else QWIDGETSIZE_MAX)
+                if nothing:
+                    if self._bottom_limits is None:  # what the dimension managers set: given back when a section opens
+                        self._bottom_limits = (bottom.minimumHeight(), bottom.maximumHeight())
+                    height = self._bottom_headers_height(bottom)
+                    # The minimum first: Qt keeps the larger of the two, and the headers would spread over it.
+                    bottom.setMinimumHeight(min(self._bottom_limits[0], height))
+                    bottom.setMaximumHeight(height)
+                elif self._bottom_limits is not None:
+                    bottom.setMaximumHeight(self._bottom_limits[1])
+                    bottom.setMinimumHeight(self._bottom_limits[0])
+                    self._bottom_limits = None
                 sizes = self._splitter.sizes()
                 total = sum(sizes)
                 if len(sizes) == 2 and total > 0:

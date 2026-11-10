@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>실행 취소됨: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>마지막 요청 실행 취소</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>다음 이전으로 되돌리기: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>실행 취소할 항목이 없습니다.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>다시 실행: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>실행 취소: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">무료 할당량</translation>
@@ -396,6 +420,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>마지막 요청의 이 단계 이전의 레이어 상태</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>여기까지 실행 취소</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

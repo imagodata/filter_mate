@@ -12,7 +12,7 @@ touched together.
 This is a PURE PYTHON module with NO QGIS dependencies.
 """
 from dataclasses import dataclass, field, asdict, replace
-from typing import Callable, Dict, List, NamedTuple, Optional, Tuple
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 import itertools
 import time
 
@@ -111,6 +111,11 @@ class CrossOperation:
     description: str = ""
     op_id: int = field(default_factory=lambda: next(_op_counter))
     timestamp: float = field(default_factory=time.time)
+    # Steps of a turn of the agent, in order: (label, state before the step of each layer the step changed).
+    steps: Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...] = ()
+    # What a turn of the agent did beside the filters (layers added or removed, selections, visibility), as plain
+    # tuples the host reads back: see adapters/agent/turn_effects.py.
+    effects: Tuple[Tuple[Any, ...], ...] = ()
 
     @property
     def layer_ids(self) -> Tuple[str, ...]:
@@ -138,7 +143,7 @@ class CrossOperationHistory:
 
     def push(self, operation: CrossOperation) -> None:
         """Record a new operation; it clears the redo stack of its source."""
-        if not operation.changes:
+        if not operation.changes and not operation.effects:
             return
         stack = self._undo.setdefault(operation.source_layer_id, [])
         stack.append(operation)

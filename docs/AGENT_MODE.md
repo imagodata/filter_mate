@@ -76,8 +76,9 @@ Rules worth keeping:
   derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
 - **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
 - A conversation does not survive a change of project or of provider.
-- **The accordion.** `tabTools_current_index` stays 0 / 1 / 2 for FILTERING / EXPORTING / CONFIGURATION with the section in
-  front of them, and is -1 on AGENT: the action bar and the undo buttons read that number.
+- **Two stacks of sections** (`ui/layout/dock_chrome.py`): EXPLORING / AGENT above the splitter, FILTERING / EXPORTING /
+  CONFIGURATION below, one section open at most in each. AGENT folds EXPLORING and FILTERING; FILTERING brings EXPLORING
+  back. `tabTools_current_index` stays 0 / 1 / 2 for the lower sections and is -1 when none is open.
 
 ## History
 
@@ -86,8 +87,17 @@ Rules worth keeping:
   order, and sends a request again. A layer that refuses a restore (being edited) keeps the turn undoable.
 - The transcript (requests, actions, answers) is kept per project in the QGIS settings, keyed by the project path, and
   shown again when the project opens. The model does not get it back: a conversation starts afresh.
-- Zooms, selections, layers added or removed are not undone by a turn and a turn made only of those is not listed; the
-  last two are confirmed first. A filter set on a layer added in the same turn is undone with the turn.
+- A turn also records what it does beside the filters (`adapters/agent/turn_effects.py`): layers added or removed,
+  selections, visibility in the layer tree. Undo and redo apply them with the filters. A removed layer comes back from
+  its definition, same id, at its place in its group; a layer kept in memory cannot, and the panel says so. Zooms and
+  exports are not undone.
+- **Steps.** The undo point takes the state of the layers before each change of a turn. The History page lists the steps
+  of the last request; "Undo back to here" puts its layers as they were before the chosen step, as a step of its own
+  that Undo takes back.
+- **The action bar.** While AGENT is open, Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk this history; their
+  tooltip names the request. Folded, they are the dock ones again.
+- **In the conversation.** `undo_agent_step`, a tool of the chat alone (not in REST nor in the MCP servers), takes back the
+  last request when the user asks for it, before any other change of the request; it can be redone.
 - New conversation forgets what was kept for the project; only the 20 latest projects are kept.
 
 ## Driving QGIS and open data

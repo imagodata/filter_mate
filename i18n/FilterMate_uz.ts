@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Bekor qilindi: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Oxirgi so'rovni bekor qilish</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Oldingi holatga qaytish: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Bekor qilinadigan narsa yo'q.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Qayta bajarish: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Bekor qilish: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Bepul kvota</translation>
@@ -396,6 +420,14 @@ Rozimisiz?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Oxirgi so'rovning shu bosqichidan oldingi qatlamlar holati</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Shu yergacha bekor qilish</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

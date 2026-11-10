@@ -33,6 +33,8 @@ class ToolSpec:
     idempotent: bool = False
     # Reaches outside QGIS (the network): a read is logged, a change is confirmed by the user.
     open_world: bool = False
+    # Walks the history of the agent itself: no undo point is taken for it, or it would undo itself.
+    manages_history: bool = False
 
     @property
     def requires_confirmation(self) -> bool:
@@ -54,6 +56,21 @@ def load_catalog(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
         return tuple(tool_from_entry(entry) for entry in json.load(stream)["tools"])
 
 
+UNDO_AGENT_STEP = "undo_agent_step"
+# Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
+CHAT_ONLY = (
+    ToolSpec(
+        name=UNDO_AGENT_STEP, title="Undo the last change of the agent",
+        description=("Undo the last request the agent carried out in this project, as a whole: its filters, the layers "
+                     "it added or removed, its selections and visibility changes. Use it when the user asks to undo or "
+                     "cancel what you just did, before any other change. Never for filters the user set by hand. "
+                     "Returns undone (that request), restored (layers put back) and left (layers changed since, left "
+                     "as they are)."),
+        input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+        manages_history=True),
+)
+
+
 def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     """The tools the chat offers."""
-    return tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT)
+    return tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + CHAT_ONLY

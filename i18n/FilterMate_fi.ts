@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Kumottu: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Viimeisen pyynnön kumoaminen</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Takaisin ennen: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Ei mitään kumottavaa.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Tee uudelleen: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Kumoa: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Ilmainen kiintiö</translation>
@@ -396,6 +420,14 @@ Hyväksytkö?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Tasot sellaisina kuin ne olivat ennen viimeisen pyynnön tätä vaihetta</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Kumoa tähän asti</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Đã hoàn tác: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Hoàn tác yêu cầu gần nhất</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Quay lại trước: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Không có gì để hoàn tác.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Làm lại: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Hoàn tác: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Hạn mức miễn phí</translation>
@@ -396,6 +420,14 @@ Bạn có đồng ý không?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Các lớp như trước bước này của yêu cầu gần nhất</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Hoàn tác đến đây</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

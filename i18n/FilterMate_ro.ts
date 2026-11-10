@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Anulat: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Anularea ultimei cereri</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Înapoi la înainte de: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Nimic de anulat.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Refă: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Anulează: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Cotă gratuită</translation>
@@ -396,6 +420,14 @@ Sunteți de acord?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Straturile așa cum erau înainte de acest pas al ultimei cereri</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Anulează până aici</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>

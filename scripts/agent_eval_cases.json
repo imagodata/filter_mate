@@ -110,5 +110,10 @@
     "call_args": {"source": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif", "kind": "raster", "name": "Sentinel-2"}}]]},
  {"id": "wfs_layer", "prompt": "Ajoute les communes de la Géoplateforme IGN.",
   "expect": [[{"tool": "add_service_layer", "args": {"platform": "ign_wfs", "typename": {"contains": ["commune"]}},
-    "call_args": {"platform": "ign_wfs", "typename": "ADMINEXPRESS-COG-CARTO.LATEST:commune"}}]]}
+    "call_args": {"platform": "ign_wfs", "typename": "ADMINEXPRESS-COG-CARTO.LATEST:commune"}}]]},
+ {"id": "undo_asked", "prompt": "Annule ce que tu viens de faire.",
+  "expect": [[{"tool": "undo_agent_step", "args": {}, "call_args": {}}]], "forbid": ["clear_filters"]},
+ {"id": "undo_not_for_a_new_filter", "prompt": "Garde seulement les routes nationales.",
+  "expect": [[{"tool": "apply_filter", "args": {"layer_name": "routes", "expression": {"contains": ["nature", "Nationale"]}},
+    "call_args": {"layer_name": "routes", "expression": "\"nature\" = 'Nationale'"}}]], "forbid": ["undo_agent_step"]}
 ]}

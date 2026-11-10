@@ -32,6 +32,30 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Undone: {}</source>
+        <translation>Cofnięto: {}</translation>
+    </message>
+    <message>
+        <source>Undo of the last request</source>
+        <translation>Cofnięcie ostatniego żądania</translation>
+    </message>
+    <message>
+        <source>Back to before: {}</source>
+        <translation>Wróć do stanu sprzed: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to undo.</source>
+        <translation>Nie ma czego cofnąć.</translation>
+    </message>
+    <message>
+        <source>Redo: {}</source>
+        <translation>Ponów: {}</translation>
+    </message>
+    <message>
+        <source>Undo: {}</source>
+        <translation>Cofnij: {}</translation>
+    </message>
+    <message>
         <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Free quota</source>
         <translation type="obsolete">Darmowy limit</translation>
@@ -396,6 +420,14 @@ Czy się zgadzasz?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>Warstwy takie, jakie były przed tym krokiem ostatniego żądania</translation>
+    </message>
+    <message>
+        <source>Undo back to here</source>
+        <translation>Cofnij do tego miejsca</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>TRY</source>
