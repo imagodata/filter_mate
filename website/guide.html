@@ -743,7 +743,7 @@ processing.run("filtermate:batch_filter", {
     </div>
     <p>
         SAM suits buildings and other well delimited objects. Parcels did not reach the improvement we required, since a cadastral limit is often invisible on the image, and trees were not validated: hedges tend to merge.
-        Use the colour engine or a vector layer for them. Similar objects are a start, not a finished tool: on ten buildings never used to set the appearance threshold, the median precision (found objects that are buildings) is 0.35 and the recall 0.26.
+        Use the colour engine or a vector layer for them. Similar objects are a start, not a finished tool: on ten buildings never used to set them, the median precision (found objects that are buildings) is 0.36 and the recall 0.32. Keeping and rejecting proposals sorts the rest: from the third choice, the proposals that look like the rejected ones are taken away (median precision of those left 0.21 to 0.33, no building lost).
         Full figures and the method: <a href="https://github.com/imagodata/filter_mate/blob/main/docs/SEGMENTATION.md" target="_blank" rel="noopener">docs/SEGMENTATION.md</a>.
     </p>
     <figure class="video-figure">
