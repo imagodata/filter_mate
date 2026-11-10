@@ -273,6 +273,9 @@ def _gdal_time_limits(active: bool):
 def add_layer(source: str, name: str = '', kind: str = 'vector') -> Dict[str, Any]:
     """Add a layer from a local data file or a public https URL; returns its summary.
 
+    Whatever fails unexpectedly is logged with its traceback and reported by its type, so that a client reads a
+    cause (a REST client would only read "unexpected error in QGIS") instead of a bare internal error.
+
     A remote file is read where it is when its server gives parts of it and GDAL reads the format by parts
     (GeoPackage, FlatGeobuf, GeoTIFF, zip); any other (an export made on request, GeoJSON, CSV) is copied to the
     QGIS profile first, where the project finds it again.
@@ -280,6 +283,16 @@ def add_layer(source: str, name: str = '', kind: str = 'vector') -> Dict[str, An
     Raises:
         ValueError: Any other source, or one that cannot be opened; the message says which step failed.
     """
+    try:
+        return _add_layer(source, name, kind)
+    except ValueError:
+        raise
+    except Exception as exc:  # a Qt or GDAL failure no step above expected: say which, the traceback is in the log
+        logger.exception("add_layer failed on %s", source)
+        raise ValueError(f"unexpected {type(exc).__name__} while adding this layer (details in the FilterMate log)") from None
+
+
+def _add_layer(source: str, name: str, kind: str) -> Dict[str, Any]:
     from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer
     problem = source_problem(source, allow_remote=True)
     if problem:

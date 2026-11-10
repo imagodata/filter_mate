@@ -4,5 +4,12 @@
       "command": "/home/agent/.local/bin/uvx",
       "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
     }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git fetch *)",
+      "mcp__claude_ai_Claude_Docs__read",
+      "mcp__claude_ai_Claude_Docs__guide"
+    ]
   }
 }

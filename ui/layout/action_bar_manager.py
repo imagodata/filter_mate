@@ -393,8 +393,11 @@ class ActionBarManager(LayoutManagerBase):
 
         if self._position in ('top', 'bottom'):
             # Horizontal mode - use UIConfig action_frame dimensions
-            frame_height = action_frame_cfg.get('min_height') or button_height + 12
-            frame_max = action_frame_cfg.get('max_height') or (frame_height + 4)
+            # Frame hugs the buttons: button height + vertical layout margins
+            margins = (UIConfig.get_config('layout', 'margins_actions') if UIConfig else None) or {}
+            v_margins = (margins.get('top', 2) + margins.get('bottom', 2)) if isinstance(margins, dict) else 4
+            frame_height = button_height + v_margins
+            frame_max = frame_height
             frame.setMinimumHeight(frame_height)
             frame.setMaximumHeight(frame_max)
             frame.setMinimumWidth(0)

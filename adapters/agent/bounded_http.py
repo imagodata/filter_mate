@@ -140,6 +140,7 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
         message = reply.errorString()
         broken = reply.isFinished() and reply.error() != QNetworkReply.NetworkError.NoError
         no_answer = not status and broken
+        tls_refused = no_answer and reply.error() == QNetworkReply.NetworkError.SslHandshakeFailedError
         cut = sink is not None and 200 <= status < 300 and (broken or not reply.isFinished())
     finally:
         _ACTIVE.remove(on_stop)
@@ -151,6 +152,9 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
     if state["failure"]:
         raise HttpFailure(str(state["failure"]))
     if no_answer:
+        if tls_refused:
+            raise HttpFailure("its security certificate is not valid for this address, so the connection was refused "
+                              "(" + (message or "TLS error") + ")")
         raise HttpFailure(message or "network error")
     if cut:
         raise HttpFailure("the connection was lost before the end of the file")
