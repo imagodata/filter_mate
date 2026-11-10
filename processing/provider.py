@@ -21,6 +21,7 @@ from .algorithms.layer_operations_algorithms import (
     ExportFilteredLayersAlgorithm,
     FilterPointCloudAlgorithm,
 )
+from .algorithms.segmentation_algorithm import SegmentFromFeaturesAlgorithm
 
 logger = get_logger(__name__)
 
@@ -68,7 +69,7 @@ class FilterMateProcessingProvider(QgsProcessingProvider):
         for algorithm in (BatchFilterAlgorithm(), CrossFilterAlgorithm(), CrossFilterFromRasterAlgorithm(),
                           CrossFilterFromPointCloudAlgorithm(), CrossFilterFromGeometryAlgorithm(),
                           FilterPointCloudAlgorithm(), ClearFiltersAlgorithm(), ApplyFavoriteAlgorithm(),
-                          ExportFilteredLayersAlgorithm()):
+                          ExportFilteredLayersAlgorithm(), SegmentFromFeaturesAlgorithm()):
             self.addAlgorithm(algorithm)
         registry = QgsApplication.processingRegistry()
         if registry.providerById(self.id()) is not None:

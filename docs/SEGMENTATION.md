@@ -69,6 +69,41 @@ the REST API and the MCP tools (`segments` in `raster_selection`) accept them to
 *To layer* turns them into a memory layer of the project, numbered, with their area in m²: the layer to give
 Processing, to export or to edit. It is not saved with the project: *Make Permanent* in QGIS keeps it.
 
+## From a vector layer (Processing)
+
+*Draw objects on a raster with SAM from points or polygons* (`filtermate:segment_from_features`) draws one object
+per feature of a guide layer, with no click: a point is a click on the object, a polygon gives its bounding box and
+a point inside it. The output is a polygon layer in the CRS of the raster, with the attributes of the feature,
+`sam_score` (the score SAM gives its mask) and, for a polygon, `sam_iou` (overlap of the footprint with the drawn
+object, from 0 to 1). It runs in the background and changes no layer of the project.
+
+A multipoint gives all its points to one object. A multipolygon is prompted by its largest part. An invalid
+footprint is made valid before `sam_iou` is computed. A footprint under a pixel is prompted by its point. Source
+fields named `sam_score` or `sam_iou` (any case) are replaced. A window that cannot be drawn, such as a tile of a
+service, is reported and loses its objects only; the run fails only when no window could be drawn.
+
+Nearby objects of one size share a window of 1024 pixels, encoded once. The cell is the native one, doubled as
+often as needed for a box to fill at most two thirds of the window. A point sees at least 150 m of ground.
+
+Measured 2026-11-10 on 40 buildings of the BD TOPO (50 to 2000 m²) on the 25 cm Cerdagne orthophoto, median
+overlap with the footprint (`scripts/sam_feature_bench.py`, rule set before the run):
+
+| Prompt | Median IoU |
+|---|---|
+| Box of the footprint and a point inside it (kept) | 0.81 |
+| Box only | 0.80 |
+| Box grown by 10 % and the point | 0.78 |
+| Point only (a point layer) | 0.73 |
+
+Neither other prompt met the rule (+0.02, at most 4 of 40 buildings losing more than 0.05). The 40 buildings
+took 8 windows of about 1.8 s each under QGIS for Windows. The BD TOPO footprint is not the roof seen from above:
+a low `sam_iou` points at a building to look at, it does not prove a change.
+
+```python
+processing.run("filtermate:segment_from_features", {
+    "RASTER": ortho, "FEATURES": footprints, "OUTPUT": "memory:"})
+```
+
 ## What it is good at
 
 **Buildings and other well delimited objects.** Measured with this model on a 25 cm orthophoto, 2026-11-09,

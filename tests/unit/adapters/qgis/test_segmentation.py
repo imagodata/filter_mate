@@ -76,6 +76,52 @@ class TestPlanWindow:
             segmentation.plan_window(1.0, 1.0, self.RASTER, 0.0, visible, 1024)
 
 
+class TestPlanPrompts:
+    RASTER = (0.0, 0.0, 10000.0, 10000.0)
+
+    @staticmethod
+    def box(x, y, side):
+        return segmentation.Prompt(x, y, (x - side / 2, y - side / 2, x + side / 2, y + side / 2))
+
+    def test_neighbours_of_one_size_share_a_window(self):
+        prompts = [self.box(5000, 5000, 10), self.box(5040, 5030, 12), self.box(9000, 9000, 10)]
+        planned = segmentation.plan_prompts(prompts, self.RASTER, 0.25, 1024)
+        assert sorted(sorted(members) for _w, members in planned) == [[0, 1], [2]]
+        assert all(w.cell == 0.25 for w, _m in planned)
+
+    def test_a_large_object_gets_a_coarser_window_that_holds_its_box(self):
+        prompts = [self.box(5000, 5000, 10), self.box(5000, 5000, 600)]
+        planned = dict((tuple(m), w) for w, m in segmentation.plan_prompts(prompts, self.RASTER, 0.25, 1024))
+        big = planned[(1,)]
+        assert big.cell == 0.25 * 4  # 600 m / (2/3) = 900 m: 0.88 m per pixel, the native cell doubled twice
+        x0, y0, x1, y1 = prompts[1].box
+        assert big.contains(x0, y0) and big.contains(x1, y1)
+
+    def test_every_prompt_lies_inside_its_window_with_its_box(self):
+        prompts = [self.box(100 + 37 * i, 9900 - 53 * i, 5 + i) for i in range(60)]
+        planned = segmentation.plan_prompts(prompts, self.RASTER, 0.25, 1024)
+        assert sorted(i for _w, m in planned for i in m) == list(range(60))
+        for w, members in planned:
+            for i in members:
+                x0, y0, x1, y1 = prompts[i].box
+                assert w.contains(x0, y0) and w.contains(x1, y1)
+
+    def test_a_point_sees_the_view_of_a_click(self):
+        (w, members), = segmentation.plan_prompts([segmentation.Prompt(5000, 5000)], self.RASTER, 0.05, 1024)
+        assert members == [0] and w.side >= segmentation.PROMPT_POINT_VIEW_METRES
+
+    def test_a_service_without_cell_uses_the_finest_needed(self):
+        (w, _m), = segmentation.plan_prompts([self.box(5000, 5000, 64)], self.RASTER, 0.0, 1024)
+        assert w.cell == pytest.approx(64 / segmentation.PROMPT_BOX_FILL / 1024)
+
+    def test_a_speck_on_a_service_does_not_make_a_window_of_centimetres(self):
+        (w, _m), = segmentation.plan_prompts([self.box(5000, 5000, 0.01)], self.RASTER, 0.0, 1024)
+        assert w.cell == pytest.approx(segmentation.PROMPT_POINT_VIEW_METRES * segmentation.SERVICE_FINEST_SHARE / 1024)
+
+    def test_nothing_to_plan(self):
+        assert segmentation.plan_prompts([], self.RASTER, 0.25, 1024) == []
+
+
 class TestSession:
     def session(self, model=None):
         return segmentation.SegmentationSession(model or FakeModel(), window(), 'embedding')

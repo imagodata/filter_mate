@@ -109,7 +109,8 @@ class _Geometry:
 def _qgis_core(with_variant_output=True):
     core = types.ModuleType("qgis.core")
     core.QgsProcessing = types.SimpleNamespace(
-        SourceType=types.SimpleNamespace(TypeMapLayer=0, TypeVectorAnyGeometry=1, TypeVectorPolygon=2, TypePointCloud=8))
+        SourceType=types.SimpleNamespace(TypeMapLayer=0, TypeVectorAnyGeometry=1, TypeVectorPolygon=2, TypePointCloud=8,
+                                     TypeVectorPoint=5))
     core.Qgis = types.SimpleNamespace(ProcessingParameterFlag=types.SimpleNamespace(Advanced=2))
     core.QgsProcessingAlgorithm = _Algorithm
     core.QgsGeometry = _Geometry
@@ -118,7 +119,7 @@ def _qgis_core(with_variant_output=True):
     core.QgsProcessingParameterDefinition = types.SimpleNamespace(FlagAdvanced=2)
     for name in ("Boolean", "Enum", "MultipleLayers", "String", "Band", "Distance", "Extent", "Geometry",
                  "RasterLayer", "VectorLayer", "PointCloudLayer", "Crs", "FolderDestination", "Expression",
-                 "FeatureSource"):
+                 "FeatureSource", "FeatureSink"):
         setattr(core, f"QgsProcessingParameter{name}", type(name, (_Parameter,), {}))
     core.QgsProcessingOutputMultipleLayers = type("OutputMultipleLayers", (_Parameter,), {})
     core.QgsProcessingProvider = type("QgsProcessingProvider", (), {})
@@ -260,6 +261,18 @@ class TestNamesOutputsDeclared:
         algorithm, _, result = _run(cross.CrossFilterAlgorithm, {"SOURCE": _VectorSource(), "TARGETS": ["t"]})
         assert set(algorithm.outputs_declared) == {"OUTPUT"}
         assert result["LAYERS_FILTERED"] == ["parcelle"]
+
+
+class TestSegmentFromFeatures:
+    def test_declared_in_the_background(self, load):
+        load()
+        module = importlib.import_module(f"{_PKG}.processing.algorithms.segmentation_algorithm")
+        algorithm = module.SegmentFromFeaturesAlgorithm()
+        algorithm.initAlgorithm()
+        assert set(algorithm.parameters_declared) == {"RASTER", "FEATURES", "OUTPUT"}
+        assert algorithm.parameters_declared["FEATURES"].args[0] == [5, 2]  # points and polygons
+        assert not algorithm.flags() & 4  # no FlagNoThreading: the project is not changed
+        assert algorithm.name() == "segment_from_features" and algorithm.groupId() == "filtermate"
 
 
 class TestQgisProcessExit:

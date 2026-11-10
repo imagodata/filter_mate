@@ -42,6 +42,7 @@ Shared rules:
 | `filtermate:clear_filters` | back to the original source, no filter | `LAYERS` | `OUTPUT` |
 | `filtermate:apply_favorite` | replays a favorite (subsets, raster / point cloud clips) | `FAVORITE` (name or id) | `OUTPUT` |
 | `filtermate:export_filtered_layers` | writes each layer as filtered now: GPKG / GeoJSON / SHP / FlatGeobuf / CSV, COG / GeoTIFF, LAZ / COPC / LAS / GPKG / CSV | `LAYERS`, `VECTOR_FORMAT`, `RASTER_FORMAT`, `POINT_CLOUD_FORMAT`, `CRS`, `OUTPUT_FOLDER` | `OUTPUT_FILES`, `OUTPUT_FOLDER` |
+| `filtermate:segment_from_features` | SAM draws on a raster one object per point or polygon of a guide layer (runs in the background, changes no layer) | `RASTER`, `FEATURES` | `OUTPUT` (polygons, `sam_score`, `sam_iou`) |
 | `filtermate:batch_filter` | one expression on several vector layers (4.8) | `INPUT_LAYERS`, `EXPRESSION` | counts |
 
 Target parameters, shared by the four cross filters: `TARGETS` (any kind), `PREDICATES` (indexes of `Intersect`,

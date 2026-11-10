@@ -30,6 +30,756 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="709"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Access to the free quota was renewed: send your request again.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Another application is changing the project: try again in a moment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Another application: {}</source>
+        <translation>Another application: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <source>Applied again: {}.</source>
+        <translation>Applied again: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <source>Back to before: {}</source>
+        <translation>Back to before: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Changed since, left as is: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Choose a model and agree to send your data to use the agent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
+        <source>Connecting to {}…</source>
+        <translation>Connecting to {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Earlier conversation: the agent starts afresh from here.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Enter your API key in the agent settings.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <source>Export of {}</source>
+        <translation>Export of {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <source>Favorite applied</source>
+        <translation>Favorite applied</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <source>Filter on the points of {}</source>
+        <translation>Filter on the points of {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="572"/>
+        <source>Filter on {}</source>
+        <translation>Filter on {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <source>Filter on {} by an area</source>
+        <translation>Filter on {} by an area</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="573"/>
+        <source>Filter on {} by {}</source>
+        <translation>Filter on {} by {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="672"/>
+        <source>FilterMate agent</source>
+        <translation>FilterMate agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <source>Filters removed from {}</source>
+        <translation>Filters removed from {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
+        <source>Free quota</source>
+        <translation>Free quota</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <source>Hidden: {}</source>
+        <translation>Hidden: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
+        <source>It answers.</source>
+        <translation>It answers.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="584"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <source>Layer added: {}</source>
+        <translation>Layer added: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>Layers removed: {}</source>
+        <translation>Layers removed: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Not reachable for this conversation: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <source>Nothing to redo.</source>
+        <translation>Nothing to redo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <source>Nothing to restore.</source>
+        <translation>Nothing to restore.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <source>Nothing to undo.</source>
+        <translation>Nothing to undo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="570"/>
+        <source>Reading the active filters</source>
+        <translation>Reading the active filters</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="571"/>
+        <source>Reading the favorites</source>
+        <translation>Reading the favorites</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="566"/>
+        <source>Reading the fields of {}</source>
+        <translation>Reading the fields of {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="565"/>
+        <source>Reading the layers</source>
+        <translation>Reading the layers</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="569"/>
+        <source>Reading the map</source>
+        <translation>Reading the map</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="567"/>
+        <source>Reading the values of {}</source>
+        <translation>Reading the values of {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <source>Redo: {}</source>
+        <translation>Redo: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <source>Restored: {}.</source>
+        <translation>Restored: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Searching satellite imagery on {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <source>Searching {} for {}</source>
+        <translation>Searching {} for {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <source>Selection cleared on {}</source>
+        <translation>Selection cleared on {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <source>Selection on {}</source>
+        <translation>Selection on {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <source>Shown: {}</source>
+        <translation>Shown: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="717"/>
+        <source>Stopped.</source>
+        <translation>Stopped.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
+        <source>The MCP server could not start: {}</source>
+        <translation>The MCP server could not start: {}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/settings.py" line="159"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>The QGIS authentication database is not available.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/settings.py" line="161"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>The QGIS master password is needed to use the stored key.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>The agent stopped before the end ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="685"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="692"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>The agent wants to export these layers to files:
+{}
+
+Do you agree?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="678"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="733"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>The credit or quota of this account is used up.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/free_quota.py" line="44"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation>The free quota could not be reached: {}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/settings.py" line="224"/>
+        <source>The free quota is not available.</source>
+        <translation>The free quota is not available.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/free_quota.py" line="48"/>
+        <location filename="../adapters/agent/free_quota.py" line="54"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation>The free quota is unavailable for now.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="711"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>The free quota is used up for this month. Enter your own API key in the agent settings.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/settings.py" line="180"/>
+        <location filename="../adapters/agent/settings.py" line="186"/>
+        <source>The key could not be stored.</source>
+        <translation>The key could not be stored.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="735"/>
+        <source>The provider could not be reached: {}</source>
+        <translation>The provider could not be reached: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>The provider refused the API key: check it in the agent settings.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
+        <source>The provider reported a problem: {}</source>
+        <translation>The provider reported a problem: {}</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/settings.py" line="208"/>
+        <source>The stored key could not be read.</source>
+        <translation>The stored key could not be read.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
+        <source>Thinking…</source>
+        <translation>Thinking…</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/free_quota.py" line="46"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="734"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Too many requests for now: try again in a moment.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="568"/>
+        <source>Trying a filter on {}</source>
+        <translation>Trying a filter on {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <source>Undo of the last request</source>
+        <translation>Undo of the last request</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <source>Undo: {}</source>
+        <translation>Undo: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <source>Undone: {}</source>
+        <translation>Undone: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <source>Zoom on {}</source>
+        <translation>Zoom on {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <source>an area</source>
+        <translation>an area</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <source>everything</source>
+        <translation>everything</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>{} tools available</source>
+        <translation>{} tools available</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="312"/>
+        <source>(no request)</source>
+        <translation>(no request)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="611"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="616"/>
+        <source>API key</source>
+        <translation>API key</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="770"/>
+        <source>Add</source>
+        <translation>Add</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="610"/>
+        <location filename="../ui/widgets/agent_panel.py" line="702"/>
+        <source>Address</source>
+        <translation>Address</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="205"/>
+        <source>Agent settings</source>
+        <translation>Agent settings</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="622"/>
+        <source>Allow attribute values to be sent</source>
+        <translation>Allow attribute values to be sent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="695"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Applications already set up will have to be set up again.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="184"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Ask the agent to filter your layers</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="240"/>
+        <source>Back to the conversation</source>
+        <translation>Back to the conversation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="668"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="472"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Connect an AI provider to start. Nothing is sent before you agree.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="736"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="685"/>
+        <source>Copy for Claude Desktop</source>
+        <translation>Copy for Claude Desktop</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="690"/>
+        <source>Copy the Claude Code command</source>
+        <translation>Copy the Claude Code command</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="682"/>
+        <source>Copy the configuration</source>
+        <translation>Copy the configuration</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="469"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Describe it in your own words. Each filter can be undone.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="471"/>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filter your layers from a sentence</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="594"/>
+        <source>FilterMate agent</source>
+        <translation>FilterMate agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="242"/>
+        <source>History</source>
+        <translation>History</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="201"/>
+        <source>History…</source>
+        <translation>History…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="631"/>
+        <source>I agree to send this data to this provider</source>
+        <translation>I agree to send this data to this provider</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="672"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Let other applications on this computer drive FilterMate (MCP server)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="767"/>
+        <source>MCP connector</source>
+        <translation>MCP connector</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
+        <source>MCP connectors</source>
+        <translation>MCP connectors</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="606"/>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="198"/>
+        <source>More</source>
+        <translation>More</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="693"/>
+        <source>New access token</source>
+        <translation>New access token</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="203"/>
+        <source>New conversation</source>
+        <translation>New conversation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>New token: it applies once these settings are saved.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="795"/>
+        <source>Open data platforms</source>
+        <translation>Open data platforms</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="166"/>
+        <source>Open the settings</source>
+        <translation>Open the settings</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="657"/>
+        <source>Other applications</source>
+        <translation>Other applications</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="701"/>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="638"/>
+        <location filename="../ui/widgets/agent_panel.py" line="655"/>
+        <source>Provider</source>
+        <translation>Provider</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="264"/>
+        <source>Redo</source>
+        <translation>Redo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="755"/>
+        <source>Remove</source>
+        <translation>Remove</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="619"/>
+        <source>Remove the stored key</source>
+        <translation>Remove the stored key</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="796"/>
+        <source>Satellite imagery</source>
+        <translation>Satellite imagery</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <source>Send (Enter)</source>
+        <translation>Send (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="272"/>
+        <source>Send again</source>
+        <translation>Send again</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="479"/>
+        <source>Sent to: {}</source>
+        <translation>Sent to: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="361"/>
+        <source>Set up the agent</source>
+        <translation>Set up the agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="656"/>
+        <source>Sources</source>
+        <translation>Sources</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="494"/>
+        <source>Stop (Esc)</source>
+        <translation>Stop (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="886"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Stored: leave empty to keep it</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="364"/>
+        <source>TRY</source>
+        <translation>TRY</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="753"/>
+        <source>Test</source>
+        <translation>Test</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="834"/>
+        <source>Testing…</source>
+        <translation>Testing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="659"/>
+        <source>The MCP server could not start: {}</source>
+        <translation>The MCP server could not start: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="624"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="269"/>
+        <source>The layers as they were before this step of the last request</source>
+        <translation>The layers as they were before this step of the last request</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="687"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="846"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Too many sources added: remove one first.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="111"/>
+        <source>Undo</source>
+        <translation>Undo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="267"/>
+        <source>Undo back to here</source>
+        <translation>Undo back to here</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="261"/>
+        <source>Undo the last</source>
+        <translation>Undo the last</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="170"/>
+        <source>Undo this turn</source>
+        <translation>Undo this turn</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="468"/>
+        <source>What do you want to filter?</source>
+        <translation>What do you want to filter?</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="786"/>
+        <source>added by you</source>
+        <translation>added by you</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <source>applied</source>
+        <translation>applied</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>community</source>
+        <translation>community</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="765"/>
+        <source>https://... or a portal address</source>
+        <translation>https://... or a portal address</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="310"/>
+        <source>no change</source>
+        <translation>no change</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>official</source>
+        <translation>official</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="785"/>
+        <source>this computer</source>
+        <translation>this computer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="311"/>
+        <source>undone</source>
+        <translation>undone</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="325"/>
+        <source>{} turn(s)</source>
+        <translation>{} turn(s)</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -1055,6 +1805,29 @@
         <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <location filename="../ui/layout/dock_chrome.py" line="51"/>
+        <source>Close</source>
+        <translation>Close</translation>
+    </message>
+    <message>
+        <location filename="../ui/layout/dock_chrome.py" line="48"/>
+        <source>Detach or dock the panel</source>
+        <translation>Detach or dock the panel</translation>
+    </message>
+    <message>
+        <location filename="../ui/layout/dock_chrome.py" line="232"/>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Hide EXPLORING to give room to the sections</translation>
+    </message>
+    <message>
+        <location filename="../ui/layout/dock_chrome.py" line="233"/>
+        <source>Show EXPLORING</source>
+        <translation>Show EXPLORING</translation>
     </message>
 </context>
 <context>
@@ -2221,39 +2994,39 @@ Please restart QGIS to apply the changes.</translation>
         <translation>Error loading plugin: {0}. Check QGIS Python console for details.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7591"/>
+        <location filename="../filter_mate_dockwidget.py" line="7622"/>
         <source>Current layer: {0}</source>
         <translation>Current layer: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7593"/>
+        <location filename="../filter_mate_dockwidget.py" line="7624"/>
         <source>No layer selected</source>
         <translation>No layer selected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>Selected layers:
 {0}</source>
         <translation>Selected layers:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7603"/>
+        <location filename="../filter_mate_dockwidget.py" line="7634"/>
         <source>No layers selected</source>
         <translation>No layers selected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7623"/>
+        <location filename="../filter_mate_dockwidget.py" line="7654"/>
         <source>No expression defined</source>
         <translation>No expression defined</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7635"/>
+        <location filename="../filter_mate_dockwidget.py" line="7666"/>
         <source>Display expression: {0}</source>
         <translation>Display expression: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7652"/>
+        <location filename="../filter_mate_dockwidget.py" line="7683"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Feature ID: {0}
@@ -2358,42 +3131,42 @@ First attribute: {1}</translation>
         <translation>Cannot execute {0}: widget initialization failed.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2644"/>
+        <location filename="../filter_mate_app.py" line="2650"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Cannot {0}: layer invalid or source not found.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2798"/>
+        <location filename="../filter_mate_app.py" line="2804"/>
         <source>All filters cleared - </source>
         <translation>All filters cleared - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2799"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} features visible in main layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2811"/>
+        <location filename="../filter_mate_app.py" line="2817"/>
         <source>Error: result handler missing</source>
         <translation>Error: result handler missing</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2828"/>
+        <location filename="../filter_mate_app.py" line="2834"/>
         <source>Error during filtering: {0}</source>
         <translation>Error during filtering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2952"/>
+        <location filename="../filter_mate_app.py" line="2958"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Recovered {0} orphan favorite(s): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3118"/>
+        <location filename="../filter_mate_app.py" line="3124"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Layer loading failed - click to retry</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3170"/>
+        <location filename="../filter_mate_app.py" line="3176"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} layer(s) loaded successfully</translation>
     </message>
@@ -2456,7 +3229,7 @@ What would you like to do?</translation>
         <translation>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2630"/>
+        <location filename="../filter_mate_app.py" line="2636"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>A server filter is being prepared. Wait for it to finish before starting another operation.</translation>
     </message>
@@ -2666,11 +3439,13 @@ Drop anyway?</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6244"/>
+        <location filename="../ui/controllers/property_controller.py" line="761"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negative buffer (erosion): shrinks polygons inward</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="6247"/>
+        <location filename="../ui/controllers/property_controller.py" line="768"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Buffer value in meters (positive=expand, negative=shrink polygons)</translation>
     </message>
@@ -2700,7 +3475,7 @@ Drop anyway?</translation>
         <translation>Error resetting layer properties: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
@@ -3072,7 +3847,7 @@ Drop anyway?</translation>
         <translation>📁 Current Project</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7237"/>
+        <location filename="../filter_mate_dockwidget.py" line="7234"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>The filter was not launched: its selection changed or could not be read. Click Filter again.</translation>
     </message>
@@ -3452,7 +4227,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</translation>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="664"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="818"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: downloading the segmentation model</translation>
     </message>
@@ -4984,6 +5759,84 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="184"/>
         <source>{0} object(s) kept instead of pixel values</source>
         <translation>{0} object(s) kept instead of pixel values</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="60"/>
+        <source>Raster to draw on (e.g. an orthophoto)</source>
+        <translation>Raster to draw on (e.g. an orthophoto)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="61"/>
+        <source>Guide features (points or polygons)</source>
+        <translation>Guide features (points or polygons)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="64"/>
+        <source>Objects drawn by SAM</source>
+        <translation>Objects drawn by SAM</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="135"/>
+        <source>The raster cannot be read</source>
+        <translation>The raster cannot be read</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="79"/>
+        <source>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</source>
+        <translation>SAM is not installed: choose Clicked object in the PIPETTE group of a raster in the FilterMate dock, and accept the installation</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="100"/>
+        <source>The guide features cannot be read</source>
+        <translation>The guide features cannot be read</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="128"/>
+        <source>No point or polygon of the guide layer lies on the raster</source>
+        <translation>No point or polygon of the guide layer lies on the raster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="132"/>
+        <source>{0} feature(s) on the raster, {1} window(s) to prepare</source>
+        <translation>{0} feature(s) on the raster, {1} window(s) to prepare</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="160"/>
+        <source>A window could not be prepared: {0}</source>
+        <translation>A window could not be prepared: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="167"/>
+        <source>No window could be prepared: {0}</source>
+        <translation>No window could be prepared: {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="183"/>
+        <source>Canceled: {0} of {1} window(s) prepared</source>
+        <translation>Canceled: {0} of {1} window(s) prepared</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="186"/>
+        <source>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</source>
+        <translation>{0} object(s) drawn, {1} feature(s) without an object, {2} skipped, in {3:.0f} s</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="194"/>
+        <source>Draw objects on a raster with SAM from points or polygons</source>
+        <translation>Draw objects on a raster with SAM from points or polygons</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/segmentation_algorithm.py" line="197"/>
+        <source>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</source>
+        <translation>SAM 2.1 tiny draws on the raster the object each feature of the guide layer points at: a point is a click on the object, a polygon gives its bounding box and a point inside it. One polygon per feature, in the CRS of the raster, with the attributes of the feature, the score of SAM (sam_score) and, for a polygon, its overlap with the drawn object (sam_iou, from 0 to 1).
+
+Examples: building footprints redrawn on a recent orthophoto (a low sam_iou flags a building that changed); points of trees or ponds turned into outlines.
+
+The raster is drawn as in the map, with its style. SAM is installed once from the PIPETTE group of the FilterMate dock; it runs on the CPU, a few seconds for each window of 1024 pixels.</translation>
     </message>
 </context>
 <context>
@@ -7419,7 +8272,7 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="496"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="650"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: preparing the segmentation</translation>
     </message>
@@ -7717,7 +8570,7 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="565"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="719"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: drawing the similar objects</translation>
     </message>
