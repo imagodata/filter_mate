@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Безкоштовна квота</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Доступ до безкоштовної квоти оновлено: надішліть запит ще раз.</translation>
@@ -391,6 +395,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>СПРОБУЙТЕ</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Скасувати</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Збережені точки</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Приховати EXPLORING, щоб звільнити місце для розділів</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Показати EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрити</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Відкріпити або закріпити панель</translation>
     </message>
 </context>
 </TS>

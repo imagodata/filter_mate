@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Quota gratuïta</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">L'accés a la quota gratuïta s'ha renovat: torneu a enviar la sol·licitud.</translation>
@@ -391,6 +395,14 @@ Hi esteu d'acord?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>PROVEU</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Desfés</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Punts conservats</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Amaga EXPLORING per deixar lloc a les seccions</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Mostra EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Tanca</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Separa o ancora el tauler</translation>
     </message>
 </context>
 </TS>

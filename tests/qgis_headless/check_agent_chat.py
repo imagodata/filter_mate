@@ -456,7 +456,7 @@ def check_chat(provider, layer, authcfg, work):
     check("the welcome shows first", panel.stack.currentIndex() == 0 and panel.welcome_title.isVisible())
     check("not set up: a way to set it up, no examples",
           panel.configure_button.isVisible() and not panel.example_buttons[0].isVisible())
-    check("nothing to undo: no button", not panel.undo_button.isVisible())
+    check("nothing to undo: no button", not panel.undo_offered() and not panel.undo_button.isVisible())
 
     def settings(**changes):
         values = dict(preset="anthropic", model="test-model", base_url=provider.url, consent=True, authcfg=authcfg,
@@ -504,7 +504,13 @@ def check_chat(provider, layer, authcfg, work):
     check("the question is shown", "garde les communes" in panel.thread.toPlainText())
     check("the change is reported", "communes" in panel.status.text(), panel.status.text())
     check("the input was emptied", panel.input.text() == "")
-    check("undo is offered", panel.undo_button.isVisible())
+    check("undo is offered", panel.undo_offered())
+    from qgis.PyQt.QtWidgets import QPushButton as _Button
+    card_undo = [b for b in panel.thread.findChildren(_Button, "pushButton_agent_card_undo") if b.isVisibleTo(panel)]
+    check("undo sits on the change card (mockup)", len(card_undo) == 1 and not panel.undo_button.isVisibleTo(panel), card_undo)
+    check("the request is a bubble", panel.thread.findChild(QLabel, "label_agent_request") is not None)
+    check("the steps give way to the cards", "Reading the layers" not in " ".join(
+        label.text() for label in panel.thread.findChildren(QLabel)))
     check("the conversation replaced the welcome", panel.stack.currentIndex() == 1)
     check("the applied filter is listed with its expression", '"pop" > 1000' in panel.thread.toPlainText() and
           "✓" in panel.thread.toPlainText(), panel.thread.toPlainText())
@@ -517,6 +523,11 @@ def check_chat(provider, layer, authcfg, work):
     check("undo this turn", layer.subsetString() == "", layer.subsetString())
     check("undo is reported", "communes" in panel.status.text(), panel.status.text())
 
+    provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
+    ask("liste")
+    shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]
+    check("Markdown marks are taken out", shown and "**" not in shown[-1] and "• routes" in shown[-1]
+          and "##" not in shown[-1], shown)
     provider.reset((200, {}, text_turn('<img src="http://evil.example/x.png"> <a href="x">lien</a>')))
     ask("montre")
     check("what the model writes stays plain text", '<img src="http://evil.example/x.png">' in panel.thread.toPlainText())
@@ -1013,7 +1024,7 @@ def check_native_mcp(chat, settings, answers, layer):
     check("mcp: filters at once", done["isError"] is False and layer.subsetString() == '"pop" > 5000', (done, layer.subsetString()))
     check("mcp: the thread says who", "Test Client: " in panel.thread.toPlainText(), panel.thread.toPlainText()[-200:])
     check("mcp: the history has it", any("Test Client" in turn["request"] for turn in chat._checkpoint.turns()))
-    check("mcp: it can be undone here", panel.undo_button.isVisible() or chat._checkpoint.can_undo())
+    check("mcp: it can be undone here", panel.undo_offered() or chat._checkpoint.can_undo())
     chat._on_undo()
     check("mcp: undone from the panel", layer.subsetString() == "", layer.subsetString())
 

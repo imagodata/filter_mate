@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Kuota gratis</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Akses ke kuota gratis telah diperbarui: kirim ulang permintaan Anda.</translation>
@@ -391,6 +395,14 @@ Apakah Anda setuju?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>COBA</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Urungkan</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Titik yang dipertahankan</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Sembunyikan EXPLORING untuk memberi ruang bagi bagian lain</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Tampilkan EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Tutup</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Lepas atau sematkan panel</translation>
     </message>
 </context>
 </TS>

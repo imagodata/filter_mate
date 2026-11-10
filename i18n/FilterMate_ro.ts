@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Cotă gratuită</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Accesul la cota gratuită a fost reînnoit: trimiteți din nou cererea.</translation>
@@ -391,6 +395,14 @@ Sunteți de acord?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>ÎNCERCAȚI</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Anulează</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Puncte păstrate</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Ascunde EXPLORING pentru a lăsa loc secțiunilor</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Afișează EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Închide</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Detașează sau ancorează panoul</translation>
     </message>
 </context>
 </TS>

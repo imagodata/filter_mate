@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>ነፃ ኮታ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">የነፃ ኮታ መዳረሻ ታድሷል: ጥያቄዎን እንደገና ይላኩ።</translation>
@@ -391,6 +395,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>ሞክር</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>ቀልብስ</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">የተያዙ ነጥቦች</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>ክፍሎቹ ቦታ እንዲያገኙ EXPLORING ደብቅ</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>EXPLORING አሳይ</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>ዝጋ</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>ፓነሉን ንቀል ወይም አስቀምጥ</translation>
     </message>
 </context>
 </TS>

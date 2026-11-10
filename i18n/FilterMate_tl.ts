@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Libreng quota</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Na-renew ang access sa libreng quota: ipadala ulit ang iyong kahilingan.</translation>
@@ -391,6 +395,14 @@ Sumasang-ayon ka ba?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>SUBUKAN</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>I-undo</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Mga pinanatiling punto</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Itago ang EXPLORING para magkaroon ng espasyo ang mga seksyon</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Ipakita ang EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Isara</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>I-detach o i-dock ang panel</translation>
     </message>
 </context>
 </TS>

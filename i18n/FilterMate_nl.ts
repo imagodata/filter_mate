@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Gratis quotum</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">De toegang tot het gratis tegoed is vernieuwd: verstuur uw verzoek opnieuw.</translation>
@@ -391,6 +395,14 @@ Gaat u akkoord?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>PROBEER</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Ongedaan maken</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Behouden punten</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>EXPLORING verbergen om ruimte te maken voor de secties</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>EXPLORING tonen</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Sluiten</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Paneel loskoppelen of vastzetten</translation>
     </message>
 </context>
 </TS>

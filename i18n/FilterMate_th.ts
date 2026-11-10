@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>โควตาฟรี</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">สิทธิ์เข้าถึงโควตาฟรีได้รับการต่ออายุแล้ว: โปรดส่งคำขอของคุณอีกครั้ง</translation>
@@ -391,6 +395,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>ลองดู</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>เลิกทำ</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">จุดที่เก็บไว้</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>ซ่อน EXPLORING เพื่อเพิ่มพื้นที่ให้ส่วนอื่น</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>แสดง EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>ปิด</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>แยกหรือยึดแผงเข้ากับหน้าต่าง</translation>
     </message>
 </context>
 </TS>

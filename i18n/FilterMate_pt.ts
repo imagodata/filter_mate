@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Quota gratuita</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">O acesso à quota gratuita foi renovado: envie novamente o seu pedido.</translation>
@@ -391,6 +395,14 @@ Concorda?</translation>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>EXPERIMENTE</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Anular</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Pontos mantidos</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Ocultar EXPLORING para dar espaço às secções</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Mostrar EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Fechar</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Destacar ou acoplar o painel</translation>
     </message>
 </context>
 </TS>

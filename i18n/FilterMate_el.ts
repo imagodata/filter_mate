@@ -32,6 +32,10 @@
 <context>
     <name>AgentChat</name>
     <message>
+        <source>Free quota</source>
+        <translation>Δωρεάν όριο</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation type="obsolete">Η πρόσβαση στη δωρεάν ποσόστωση ανανεώθηκε: στείλτε ξανά το αίτημά σας.</translation>
@@ -391,6 +395,14 @@ Do you agree?</source>
 </context>
 <context>
     <name>AgentPanel</name>
+    <message>
+        <source>TRY</source>
+        <translation>ΔΟΚΙΜΑΣΤΕ</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Αναίρεση</translation>
+    </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>(no request)</source>
@@ -8601,6 +8613,25 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Σημεία που διατηρούνται</translation>
+    </message>
+</context>
+<context>
+    <name>DockChrome</name>
+    <message>
+        <source>Hide EXPLORING to give room to the sections</source>
+        <translation>Απόκρυψη του EXPLORING για περισσότερο χώρο στις ενότητες</translation>
+    </message>
+    <message>
+        <source>Show EXPLORING</source>
+        <translation>Εμφάνιση EXPLORING</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Κλείσιμο</translation>
+    </message>
+    <message>
+        <source>Detach or dock the panel</source>
+        <translation>Αποσύνδεση ή πρόσδεση του πίνακα</translation>
     </message>
 </context>
 </TS>
