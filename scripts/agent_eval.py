@@ -33,7 +33,7 @@ from agent.providers.base import ProviderConfig, error_from_response  # noqa: E4
 from agent.sql_guard import filter_problem  # noqa: E402
 from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import chat_tools, load_catalog  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, chat_tools, load_catalog  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -230,6 +230,8 @@ class SimulatedProject:
                     {"title": "visual", "format": "visual", "url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif"}]}]},
             "filter_state": filter_state, "list_favorites": lambda _: {"favorites": FAVORITES},
             "apply_favorite": apply_favorite,
+            "undo_agent_step": lambda _args: {"undone": "Garde les communes de plus de 10 000 habitants",
+                                              "restored": ["communes"], "left": []},
         }
 
 
@@ -353,7 +355,7 @@ def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     session = AgentSession(provider, tools, SYSTEM_PROMPT, AgentLimits())
     executor = ToolExecutor(tools, project.handlers())
     exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True)
-    write_tools = [tool.name for tool in load_catalog() if not tool.read_only]
+    write_tools = [tool.name for tool in load_catalog() + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):
         reason = f"stopped: {exchange.decision.reason}"

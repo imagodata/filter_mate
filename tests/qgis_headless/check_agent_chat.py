@@ -873,6 +873,31 @@ def check_steps(chat, provider, settings, ask, layer):
     check("steps: and the turn still undoes whole", layer.subsetString() == "", layer.subsetString())
     panel.show_thread()
 
+    # Lot 4: "undo what you just did" in the conversation.
+    settings()
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 3000'}, "toolu_c")),
+                   (200, {}, text_turn("Filtré.")))
+    ask("filtre")
+    check("undo tool: the filter is there", layer.subsetString() == '"pop" > 3000', layer.subsetString())
+    provider.reset((200, {}, tool_turn("undo_agent_step", {}, "toolu_d")), (200, {}, text_turn("Annulé.")))
+    ask("annule ce que tu viens de faire")
+    check("undo tool: the last request is undone from the conversation", layer.subsetString() == "", layer.subsetString())
+    answer = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("undo tool: the model is told what it undid", "filtre" in answer.get("content", "") and not answer.get("is_error"),
+          answer)
+    check("undo tool: the thread says it, no card to undo again", "Undone: filtre" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-200:])
+    chat._on_redo()
+    check("undo tool: the request undone can be redone", layer.subsetString() == '"pop" > 3000', layer.subsetString())
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 10'}, "toolu_e")),
+                   (200, {}, tool_turn("undo_agent_step", {}, "toolu_f")), (200, {}, text_turn("Non.")))
+    ask("filtre puis annule")
+    refused = provider.requests[2]["body"]["messages"][-1]["content"][0]
+    check("undo tool: refused after a change of the same request", refused.get("is_error") is True, refused)
+    chat._on_undo()
+    chat._on_undo()
+    layer.setSubsetString("")
+
 
 def check_free_quota(chat, provider, settings, ask):
     """The relay that offers free requests, with a fake of it: no model is called."""

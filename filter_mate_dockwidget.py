@@ -7246,7 +7246,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def agent_has_focus(self) -> bool:
         """AGENT is open: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the agent."""
         sections = getattr(self, '_fm_sections', None)
-        return getattr(self, '_agent_chat', None) is not None and sections is not None and sections.is_open('agent')
+        # Read with getattr: tests call the methods of the dock on plain objects.
+        return (getattr(self, '_agent_chat', None) is not None and sections is not None
+                and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
 
     def restore_undo_tooltips(self, undo_button, redo_button) -> None:
         """Back to the dock history: the tooltips the buttons had before AGENT named its steps."""
@@ -7286,9 +7288,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             - Attempts to recover current_layer from saved ID or combobox if None
             - Export task syncs HAS_LAYERS_TO_EXPORT flag before execution
         """
-        if task_name in ('undo', 'redo') and self.agent_has_focus():
-            chat = self._agent_chat
-            (chat._on_undo if task_name == 'undo' else chat._on_redo)()  # a step of the agent, not a dock filter
+        chat, sections = getattr(self, '_agent_chat', None), getattr(self, '_fm_sections', None)
+        if task_name in ('undo', 'redo') and chat is not None and sections is not None and sections.is_open('agent'):
+            # AGENT open: a step of the agent, not a dock or coverage filter (the buttons show its history).
+            (chat._on_undo if task_name == 'undo' else chat._on_redo)()
             return
         if self._controller_integration and self._controller_integration.delegate_point_cloud_task(task_name):
             return

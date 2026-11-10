@@ -17,7 +17,7 @@ from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
 from core.agent.session import AgentLimits, AgentSession, run_exchange
 from core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
-from core.agent.tool_catalog import NOT_IN_CHAT, ToolSpec, chat_tools, load_catalog
+from core.agent.tool_catalog import CHAT_ONLY, NOT_IN_CHAT, ToolSpec, chat_tools, load_catalog
 from core.agent.tool_executor import MAX_RESULT_CHARS, ToolExecutor, ToolFailure, bounded_json
 
 pytestmark = pytest.mark.unit
@@ -304,7 +304,7 @@ class TestCatalog:
 
     def test_chat_subset(self):
         names = {tool.name for tool in chat_tools()}
-        assert names == {tool.name for tool in load_catalog()} - NOT_IN_CHAT
+        assert names == ({tool.name for tool in load_catalog()} - NOT_IN_CHAT) | {tool.name for tool in CHAT_ONLY}
         assert {"describe_layer", "field_values", "preview_filter", "map_context"} <= names
 
     def test_what_needs_confirmation(self):

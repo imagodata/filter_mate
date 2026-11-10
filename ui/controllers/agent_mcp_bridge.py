@@ -70,7 +70,7 @@ class AgentMcpBridge:
             self.error = str(exc)[:200]
             self._server.close()
             return
-        self._tools = tuple(tools)
+        self._tools = tuple(tool for tool in tools if not tool.manages_history)  # the history of the chat stays its own
         self._executor = ToolExecutor(self._tools, handlers)
         if not self._server.serves(values.mcp_port, values.mcp_token):
             self.error = self._server.listen(values.mcp_port, values.mcp_token)
