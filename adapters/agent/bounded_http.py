@@ -17,6 +17,9 @@ from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRe
 
 DEFAULT_MAX_BYTES = 8 * 1024 * 1024
 DEFAULT_TIMEOUT_MS = 60_000
+TOO_LARGE = "the server answered with too much data"
+TOO_LONG = "the server took too long to answer"
+STOPPED = "stopped"
 _USER_AGENT = b"FilterMate-QGIS-plugin"
 _ACTIVE = []
 
@@ -40,11 +43,15 @@ def abort_active() -> None:
 
 def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str, str]] = None,
           max_bytes: int = DEFAULT_MAX_BYTES, timeout_ms: int = DEFAULT_TIMEOUT_MS,
-          done: Optional[Callable[[bytes], bool]] = None, headers_only: bool = False) -> BoundedReply:
+          done: Optional[Callable[[bytes], bool]] = None, headers_only: bool = False,
+          sink: Optional[Callable[[bytes], object]] = None) -> BoundedReply:
     """GET, or POST with ``body``. ``done`` ends the wait early, for a stream a server does not close.
 
+    ``sink`` receives the answer piece by piece (a file being written) instead of the reply holding it: the
+    content of the reply is then empty, and an answer cut before its end is a failure, never a shorter file.
+
     Raises:
-        HttpFailure: No answer, too long, too large, or stopped.
+        HttpFailure: No answer, too long, too large, cut, or stopped.
     """
     manager = QNetworkAccessManager()
     manager.setProxy(QgsNetworkAccessManager.instance().fallbackProxy())
@@ -56,6 +63,7 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
                          QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
     reply = manager.post(request, QByteArray(body)) if body is not None else manager.get(request)
     buffer = bytearray()
+    received = [0]
     state: Dict[str, Optional[str]] = {"failure": None}
     loop = QEventLoop()
 
@@ -67,12 +75,25 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
         state["failure"] = state["failure"] or message
         loop.quit()
 
+    def keep(chunk: bytes) -> None:
+        received[0] += len(chunk)
+        if received[0] > max_bytes:
+            fail(TOO_LARGE)
+        elif sink is None:
+            buffer.extend(chunk)
+        else:
+            try:
+                sink(chunk)
+            except OSError:  # raised from a Qt slot it would end QGIS
+                fail("what the server sent could not be written to disk")
+
     def on_data() -> None:
+        if state["failure"]:
+            return
         chunk = bytes(reply.readAll())
-        buffer.extend(chunk)
-        if len(buffer) > max_bytes:
-            fail("the server answered with too much data")
-        elif done is not None and (b"\n\n" in chunk or b"\r\n\r\n" in chunk) and done(bytes(buffer)):
+        keep(chunk)
+        if not state["failure"] and done is not None and (b"\n\n" in chunk or b"\r\n\r\n" in chunk) \
+                and done(bytes(buffer)):
             loop.quit()
 
     def on_headers() -> None:
@@ -80,11 +101,11 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
             loop.quit()
 
     def on_stop() -> None:
-        fail("stopped")
+        fail(STOPPED)
 
     timer = QTimer()
     timer.setSingleShot(True)
-    timer.timeout.connect(lambda: fail("the server took too long to answer"))
+    timer.timeout.connect(lambda: fail(TOO_LONG))
     reply.readyRead.connect(on_data)
     reply.metaDataChanged.connect(on_headers)
     reply.finished.connect(loop.quit)
@@ -94,13 +115,15 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
         if not reply.isFinished():
             loop.exec()
         timer.stop()
-        on_finished_data = bytes(reply.readAll()) if reply.isOpen() else b""
-        buffer.extend(on_finished_data)
+        if reply.isOpen() and not state["failure"]:
+            keep(bytes(reply.readAll()))
         status = status_code()
         pairs = {bytes(name).decode("latin-1").lower(): bytes(value).decode("latin-1")
                  for name, value in reply.rawHeaderPairs()}
         message = reply.errorString()
-        no_answer = not status and reply.isFinished() and reply.error() != QNetworkReply.NetworkError.NoError
+        broken = reply.isFinished() and reply.error() != QNetworkReply.NetworkError.NoError
+        no_answer = not status and broken
+        cut = sink is not None and 200 <= status < 300 and (broken or not reply.isFinished())
     finally:
         _ACTIVE.remove(on_stop)
         reply.readyRead.disconnect(on_data)
@@ -110,8 +133,8 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
         manager.deleteLater()
     if state["failure"]:
         raise HttpFailure(str(state["failure"]))
-    if len(buffer) > max_bytes:
-        raise HttpFailure("the server answered with too much data")
     if no_answer:
         raise HttpFailure(message or "network error")
+    if cut:
+        raise HttpFailure("the connection was lost before the end of the file")
     return BoundedReply(status, pairs, bytes(buffer))

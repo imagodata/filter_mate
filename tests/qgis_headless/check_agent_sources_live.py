@@ -42,6 +42,28 @@ def main():
         found = project_control.search_open_data("communes" if platform in ("datagouv", "opendatasoft") else "road", platform=platform, limit=3)
         check(f"{platform}: search", found["count"] > 0, found)
 
+    # What data.gouv.fr lists for a portal it harvests are exports made on request: no size, no parts, and an
+    # address that ends with the name of a format. GDAL cannot read them where they are.
+    found = project_control.search_open_data("communes", platform="datagouv", limit=10)
+    exports = [resource for dataset in found["datasets"] for resource in dataset["resources"]
+               if resource["url"].endswith("/exports/geojson")]
+    check("data.gouv: the GeoJSON export of a harvested portal is listed as geojson",
+          exports and all(resource["format"] == "geojson" for resource in exports), found)
+    toulouse = "https://data.toulouse-metropole.fr/api/explore/v2.1/catalog/datasets/communes/exports/"
+    for export, spatial in (("geojson", True), ("shp", True), ("csv?use_labels=true", False)):
+        label = f"Opendatasoft: the {export.split('?')[0]} export is copied and opened"
+        try:
+            summary = project_control.add_layer(toulouse + export, name="communes_" + export[:3])
+            layer = QgsProject.instance().mapLayer(summary["layer_id"])
+            check(label, summary["feature_count"] > 30 and layer.isSpatial() is spatial, summary)
+        except ValueError as exc:
+            check(label, False, exc)
+    try:
+        project_control.add_layer("https://www.data.gouv.fr/datasets/communes-france-1/")
+        check("data.gouv: the page of a dataset is refused with its reason", False)
+    except ValueError as exc:
+        check("data.gouv: the page of a dataset is refused with its reason", "web page" in str(exc) or "error (" in str(exc), exc)
+
     found = project_control.search_open_data("commune admin express", platform="ign_wfs", limit=5)
     check("IGN: finds communes", found["count"] > 0 and ":commune" in " ".join(d["id"].lower() for d in found["datasets"]), found)
     typename = next(d["id"] for d in found["datasets"] if d["id"].lower().endswith(":commune"))

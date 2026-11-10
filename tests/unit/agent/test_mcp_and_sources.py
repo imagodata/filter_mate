@@ -10,7 +10,8 @@ from core.agent.mcp_client import (
 )
 from core.agent.json_schema import validate
 from core.agent.open_data import (
-    follow_redirects, gdal_source, parse_results, parse_stac_items, resolve_platform, stac_search_body, valid_day,
+    RemoteFile, archive_member, follow_redirects, gdal_source, megabytes, parse_results, parse_stac_items, reads_in_place,
+    remote_file, resolve_platform, stac_search_body, valid_day,
 )
 from core.agent.sources import (
     BUILT_IN, KIND_MCP, all_sources, custom_from_json, custom_to_json, describe_enabled, enabled, make_source,
@@ -233,13 +234,106 @@ class TestDays:
 
 
 class TestGdalSource:
-    @pytest.mark.parametrize("url,kind,expected", [
-        ("https://x.org/a.tif", "raster", "/vsicurl/https://x.org/a.tif"),
-        ("https://x.org/a.gpkg", "vector", "/vsicurl/https://x.org/a.gpkg"),
-        ("https://x.org/a.zip", "vector", "/vsizip//vsicurl/https://x.org/a.zip"),
-        ("https://x.org/a.geojson", "vector", "https://x.org/a.geojson"),
-        ("https://x.org/exports/geojson", "vector", "https://x.org/exports/geojson"),
-        ("https://x.org/exports/csv", "vector", "CSV:/vsicurl/https://x.org/exports/csv"),
+    @pytest.mark.parametrize("url,expected", [
+        ("https://x.org/a.tif", "/vsicurl/https://x.org/a.tif"),
+        ("https://x.org/a.gpkg", "/vsicurl/https://x.org/a.gpkg"),
+        ("https://x.org/a.ZIP?v=2", "/vsizip//vsicurl/https://x.org/a.ZIP?v=2"),
     ])
-    def test_shapes(self, url, kind, expected):
-        assert gdal_source(url, kind) == expected
+    def test_shapes(self, url, expected):
+        assert gdal_source(url) == expected
+
+
+ODS = "https://d.org/api/explore/v2.1/catalog/datasets/communes-france/exports/"
+
+
+def export_headers(name, content_type):
+    return {"content-type": f"{content_type}; charset=utf-8", "content-disposition": f'attachment; filename="{name}"'}
+
+
+class TestRemoteFile:
+    """What the first answer of a server tells; the exports are those data.gouv.fr lists for an Opendatasoft portal."""
+
+    @pytest.mark.parametrize("url,headers,name", [
+        (ODS + "shp", export_headers("communes-france.zip", "application/zip"), "communes-france.zip"),
+        (ODS + "csv?use_labels=true", export_headers("communes-france.csv", "text/csv"), "communes-france.csv"),
+        (ODS + "geojson", export_headers("communes-france.geojson", "application/json"), "communes-france.geojson"),
+        (ODS + "shp", {}, "layer.zip"),  # the address alone: a shapefile comes zipped
+        (ODS + "geojson", {"content-type": "application/octet-stream"}, "layer.geojson"),
+        ("https://d.org/explore/dataset/c/download/?format=shp&timezone=Europe/Berlin", {}, "layer.zip"),
+        ("https://d.org/r/8f2c", {"content-type": "application/geo+json"}, "8f2c.geojson"),
+        ("https://d.org/r/8f2c", {"content-type": "application/zip"}, "8f2c.zip"),
+        ("https://d.org/r/8f2c", {}, "8f2c"),  # nothing tells: GDAL reads the content
+        ("https://static.d.org/a/Communes%20d'ici.GeoJSON", {}, "Communes_d_ici.geojson"),
+        ("https://d.org/x.json", {}, "x.json"),
+        ("https://d.org/r/1", {"content-disposition": "attachment; filename*=UTF-8''limites%20admin.gpkg"}, "limites_admin.gpkg"),
+        ("https://d.org/r/1", {"content-disposition": 'attachment; filename="../../etc/cron.d/x.geojson"'}, "x.geojson"),
+        ("https://d.org/r/1", {"content-disposition": 'attachment; filename="a|subset=1=1.gpkg"'}, "a_subset_1_1.gpkg"),
+        ("https://d.org/r/1", {"content-disposition": 'attachment; filename="NUL.geojson"'}, "layer.geojson"),
+        ("https://d.org/r/1", {"content-disposition": 'attachment; filename=".geojson"'}, "layer"),
+        ("https://d.org/" + "a" * 300 + ".kml", {}, "a" * 60 + ".kml"),
+    ])
+    def test_the_name_of_the_copy_says_the_format(self, url, headers, name):
+        assert remote_file(url, 200, headers).name == name
+
+    def test_a_server_that_gives_parts(self):
+        found = remote_file("https://d.org/a.gpkg", 206, {"content-range": "bytes 0-0/1048576", "content-length": "1"})
+        assert found == RemoteFile("a.gpkg", True, 1048576)
+        assert remote_file("https://d.org/a.gpkg", 206, {"content-range": "bytes 0-0/*"}).size == -1
+
+    def test_a_server_that_gives_the_whole_file(self):
+        assert remote_file("https://d.org/a.gpkg", 200, {"content-length": "2048"}) == RemoteFile("a.gpkg", False, 2048)
+        assert remote_file(ODS + "shp", 200, {}).size == -1  # an export made on request has no size
+        assert remote_file("https://d.org/a.gpkg", 416, {"content-length": "20"}) == RemoteFile("a.gpkg", False, -1)
+
+    @pytest.mark.parametrize("length", ["", "abc", "-5", "1e9", "9" * 5000, "²"])
+    def test_an_odd_size_is_no_size(self, length):
+        assert remote_file("https://d.org/a.gpkg", 200, {"content-length": length}).size == -1
+
+    @pytest.mark.parametrize("status", [0, 401, 403, 404, 500, 503])
+    def test_an_error_is_said_with_its_status(self, status):
+        with pytest.raises(ValueError, match=str(status)):
+            remote_file("https://d.org/a.gpkg", status, {})
+
+    def test_a_web_page_is_no_data(self):
+        with pytest.raises(ValueError, match="web page"):
+            remote_file("https://d.org/a.geojson", 200, {"content-type": "text/html; charset=utf-8"})
+
+    @pytest.mark.parametrize("url,kind,by_parts,expected", [
+        ("https://d.org/a.gpkg", "vector", True, True),
+        ("https://d.org/a.zip", "vector", True, True),
+        ("https://d.org/a.tif", "raster", True, True),
+        ("https://d.org/assets/visual?sig=1", "raster", True, True),
+        ("https://d.org/a.gpkg", "vector", False, False),  # read whole or not at all
+        ("https://d.org/a.tif", "raster", False, False),
+        ("https://d.org/a.geojson", "vector", True, False),  # a text format is read whole anyway
+        (ODS + "shp", "vector", False, False),
+        (ODS + "shp", "vector", True, False),  # its address does not tell GDAL it is a zip
+    ])
+    def test_in_place_or_downloaded(self, url, kind, by_parts, expected):
+        assert reads_in_place(url, kind, RemoteFile("x", by_parts, -1)) is expected
+
+    def test_sizes_as_read(self):
+        assert megabytes(300 * 1024) == "0.3 MB" and megabytes(287212698) == "274 MB"
+
+
+class TestArchiveMember:
+    def test_a_shapefile_first(self):
+        names = ["lisez-moi.txt", "communes.csv", "communes.dbf", "communes.shp", "communes.shx", "autres.gpkg"]
+        assert archive_member(names, "vector") == "communes.shp"
+
+    def test_in_a_folder_and_with_accents(self):
+        assert archive_member(["__MACOSX/._zones.shp", "données 2026/zones (v2).shp"], "vector") == "données 2026/zones (v2).shp"
+
+    def test_a_raster(self):
+        assert archive_member(["a.shp", "dalle.TIF"], "raster") == "dalle.TIF"
+        assert archive_member(["a.shp"], "raster") == ""
+
+    @pytest.mark.parametrize("name", [
+        "a.shp|subset=1=1", "a|layername=x.shp", "../../etc/x.shp", "/etc/x.shp", "dir//x.shp", ".hidden/x.shp",
+        "a\\b.shp", "a?.shp", 'a".shp', "a\n.shp", "a=b.shp", "a&b.gpkg", "a%2e.shp", "a:b.shp",
+    ])
+    def test_a_name_qgis_would_interpret_is_not_used(self, name):
+        assert archive_member([name], "vector") == ""
+
+    def test_nothing_to_open(self):
+        assert archive_member(["notice.pdf", "data.xlsx"], "vector") == ""
