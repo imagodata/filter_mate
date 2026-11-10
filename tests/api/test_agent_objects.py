@@ -20,7 +20,9 @@ from fastapi.testclient import TestClient  # noqa: E402
 from core.agent.messages import ToolCallPart  # noqa: E402
 from core.agent.tool_catalog import chat_tools  # noqa: E402
 from core.agent.tool_executor import ToolExecutor  # noqa: E402
-from filtermate_api.accessor import FilterRejected, InMemoryAccessor, LayerSummary, SegmentResult  # noqa: E402
+from filtermate_api.accessor import (  # noqa: E402
+    FilterRejected, InMemoryAccessor, LayerSummary, SegmentResult, SimilarResult,
+)
 from filtermate_api.agent_tools import build_handlers  # noqa: E402
 from filtermate_api.main_thread import QGISBusy  # noqa: E402
 from filtermate_api.qgis_accessor import QGISFilterMateAccessor  # noqa: E402
@@ -255,3 +257,67 @@ class TestRoutes:
         response = client.post("/filters/cross", json={"source_layer": "ortho", "target_layers": ["bati"],
                                                        "raster_selection": selection})
         assert response.status_code == 422
+
+    def test_similar(self, client):
+        response = client.post("/objects/similar", json={"raster": "ortho", "use_dock_object": True, "name": "toits"})
+        assert response.status_code == 200, response.text
+        assert response.json()["layer"]["name"] == "toits" and response.json()["objects"] == 3
+
+    @pytest.mark.parametrize("body", [{"raster": "ortho"}, {"raster": "ortho", "example_layer": "bati", "use_dock_object": True},
+                                      {"raster": "ortho", "use_dock_object": True, "unknown": 1}])
+    def test_similar_needs_one_example(self, client, body):
+        assert client.post("/objects/similar", json=body).status_code == 422
+
+    def test_similar_refused_is_a_400(self, client):
+        response = client.post("/objects/similar", json={"raster": "bati", "example_layer": "bati"})
+        assert response.status_code == 400 and "raster layer" in response.json()["detail"]
+
+
+# --- objects like an example (2026-11-11) -------------------------------------------------------------------------
+
+class TestSimilarObjects:
+    def test_the_chat_tool_is_offered_and_needs_one_example(self, tmp_path):
+        tool = next(tool for tool in chat_tools() if tool.name == "similar_objects")
+        assert not tool.read_only and not tool.requires_confirmation
+        accessor = InMemoryAccessor(layers=_layers(), drawn_objects=[DRAWN_ROW])
+        failed, message = _run(accessor, tmp_path, "similar_objects", raster="ortho")
+        assert failed and "Give an example" in message
+        failed, message = _run(accessor, tmp_path, "similar_objects", raster="ortho", example_layer="bati",
+                               use_dock_object=True)
+        assert failed and "one of them" in message
+
+    def test_the_chat_tool_answers_without_nulls(self, tmp_path):
+        accessor = InMemoryAccessor(layers=_layers(), drawn_objects=[DRAWN_ROW])
+        failed, answer = _run(accessor, tmp_path, "similar_objects", raster="ortho", use_dock_object=True)
+        assert not failed and answer["objects"] == 3 and "appearance" not in answer
+
+    def test_the_accessor_reads_the_dock_on_the_main_thread(self, plugin_modules, monkeypatch):
+        import filtermate_api.qgis_accessor as qgis_accessor
+        dispatched = []
+        monkeypatch.setattr(qgis_accessor, "run_on_main_thread", lambda fn, *a, **k: dispatched.append(fn) or fn(*a, **k))
+        module = plugin_modules["adapters.public_api.drawn_objects"]
+        module.similar_objects.return_value = {"layer": None, "objects": 0, "examined": 5, "windows": 1,
+                                               "windows_planned": 2, "stopped_early": False, "seconds": 2.0,
+                                               "example": {"sam_score": 0.9, "area_m2": 120.0}}
+        result = _accessor({"R1": [ROOF]}).similar_objects("ortho", use_dock_object=True, extent_wkt="POLYGON((0 0))")
+        assert isinstance(result, SimilarResult) and result.examined == 5 and result.layer is None
+        kwargs = module.similar_objects.call_args.kwargs
+        assert kwargs["dock_objects"] == {"R1": [ROOF]} and kwargs["use_dock_object"] is True
+        assert kwargs["extent_wkt"] == "POLYGON((0 0))" and len(dispatched) == 1
+
+    def test_without_the_dock_object_the_dock_is_not_read(self, plugin_modules):
+        module = plugin_modules["adapters.public_api.drawn_objects"]
+        module.similar_objects.return_value = {"objects": 0}
+        _accessor({"R1": [ROOF]}).similar_objects("ortho", example_layer="bati")
+        assert module.similar_objects.call_args.kwargs["dock_objects"] is None
+
+    def test_a_refusal_is_a_filter_rejected_and_busy_is_busy(self, plugin_modules):
+        module = plugin_modules["adapters.public_api.drawn_objects"]
+        module.similar_objects.side_effect = ValueError("no object is drawn on 'ortho'")
+        with pytest.raises(FilterRejected, match="no object is drawn"):
+            _accessor({}).similar_objects("ortho", use_dock_object=True)
+        plugin_modules["adapters.public_api.operations"].busy_reason.return_value = "a filter is running"
+        module.similar_objects.reset_mock()
+        with pytest.raises(QGISBusy):
+            _accessor({}).similar_objects("ortho", use_dock_object=True)
+        module.similar_objects.assert_not_called()

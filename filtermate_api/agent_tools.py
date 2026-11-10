@@ -303,6 +303,16 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
                                                  limit=args["limit"], name=args["name"]))
         return {key: value for key, value in answer.items() if value is not None}
 
+    def similar_objects(args: Dict[str, Any]) -> Dict[str, Any]:
+        if bool(args["example_layer"]) == bool(args["use_dock_object"]):
+            raise ToolFailure("Give an example: example_layer (with its one feature selected) or use_dock_object, "
+                              "one of them.")
+        answer = asdict(accessor.similar_objects(
+            args["raster"], example_layer=args["example_layer"], use_dock_object=args["use_dock_object"],
+            extent_wkt=args["extent_wkt"], extent_crs=args["extent_crs"], same_shape=args["same_shape"],
+            name=args["name"]))
+        return {key: value for key, value in answer.items() if value is not None}
+
     def add_layer(args: Dict[str, Any]) -> Dict[str, Any]:
         problem = source_problem(args["source"], allow_remote_sources)
         if problem:
@@ -355,6 +365,6 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "search_imagery": search_imagery,
-        "segment_objects": segment_objects,
+        "segment_objects": segment_objects, "similar_objects": similar_objects,
     }
     return {name: _guarded(handler) for name, handler in handlers.items()}

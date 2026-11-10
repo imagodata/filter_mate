@@ -446,6 +446,13 @@ def prompt_object(provider: Any, embedding: Any, window: SegmentationWindow, pro
     is replaced by its point. Only the parts of the mask that touch the box (or a point) are kept:
     SAM may return detached specks.
     """
+    geometry, score, _mask = prompt_object_mask(provider, embedding, window, prompt, crs_wkt, with_point)
+    return geometry, score
+
+
+def prompt_object_mask(provider: Any, embedding: Any, window: SegmentationWindow, prompt: Prompt, crs_wkt: str = '',
+                       with_point: bool = True) -> Tuple[Any, float, Any]:
+    """:func:`prompt_object` and the whole mask SAM drew (None without one): its features describe the object."""
     from qgis.core import QgsGeometry, QgsPointXY
     from .geometry_tools import mask_to_geometry
     from .raster_adapter import geometry_parts
@@ -460,7 +467,7 @@ def prompt_object(provider: Any, embedding: Any, window: SegmentationWindow, pro
             if session.add_point(x, y, True) and not boxed:
                 anchors.append(QgsGeometry.fromPointXY(QgsPointXY(x, y)))
     if not session.has_prompts or not anchors:
-        return None, 0.0
+        return None, 0.0, None
     session.predict()
     score = float(session.scores[session.choice]) if session.scores else 0.0
     geometry = mask_to_geometry(session.mask, window.geotransform(), crs_wkt, sieve_pixels=SIEVE_PIXELS,
@@ -477,8 +484,8 @@ def prompt_object(provider: Any, embedding: Any, window: SegmentationWindow, pro
     else:
         held = [part for part in parts if part.intersects(anchors[0])]
     if not held:
-        return None, score
-    return (QgsGeometry.unaryUnion(held) if len(held) < len(parts) else geometry), score
+        return None, score, session.mask
+    return (QgsGeometry.unaryUnion(held) if len(held) < len(parts) else geometry), score, session.mask
 
 
 def coarse_features(embedding: Any) -> Any:

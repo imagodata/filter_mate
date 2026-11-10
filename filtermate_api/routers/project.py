@@ -5,10 +5,11 @@ from __future__ import annotations
 from typing import List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    FilterRejected, LayerSummary, OpenDataResult, OperationResult, SegmentResult, SelectionResult, ViewState,
+    FilterRejected, LayerSummary, OpenDataResult, OperationResult, SegmentResult, SelectionResult, SimilarResult,
+    ViewState,
 )
 from .filters import LayerName
 
@@ -123,6 +124,41 @@ def segment_objects(payload: SegmentObjectsBody, request: Request) -> SegmentRes
     try:
         return _accessor(request).segment_objects(payload.raster, payload.guide_layer, selected_only=payload.selected_only,
                                                   limit=payload.limit, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class SimilarObjectsBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    raster: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Raster layer id or name (e.g. an orthophoto)")
+    example_layer: str = Field(default="", max_length=_MAX_NAME,
+                               description="Vector layer id or name whose one selected feature is the example")
+    use_dock_object: bool = Field(default=False,
+                                  description="The example is the last object drawn on this raster in the FilterMate dock")
+    extent_wkt: str = Field(default="", max_length=100_000, description="Area searched as WKT (default: the visible map)")
+    extent_crs: str = Field(default="", max_length=64, description="CRS of extent_wkt, e.g. EPSG:2154 (default: the raster's)")
+    same_shape: bool = Field(default=True, description="Keep only objects shaped like the example (compactness)")
+    name: str = Field(default="", max_length=200, description="Name of the layer added")
+
+    @model_validator(mode="after")
+    def _one_example(self) -> "SimilarObjectsBody":
+        if bool(self.example_layer) == bool(self.use_dock_object):
+            raise ValueError("give an example: example_layer or use_dock_object, one of them")
+        return self
+
+
+@router.post("/objects/similar", response_model=SimilarResult)
+def similar_objects(payload: SimilarObjectsBody, request: Request) -> SimilarResult:
+    """SAM finds on a raster the objects that look like an example, added to the project as a polygon layer.
+
+    QGIS is held while it searches; past 20 s the search stops between two windows and answers with what it found.
+    """
+    try:
+        return _accessor(request).similar_objects(
+            payload.raster, example_layer=payload.example_layer, use_dock_object=payload.use_dock_object,
+            extent_wkt=payload.extent_wkt, extent_crs=payload.extent_crs, same_shape=payload.same_shape,
+            name=payload.name)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

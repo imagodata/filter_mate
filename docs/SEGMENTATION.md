@@ -120,6 +120,13 @@ The AGENT section, the REST API and the MCP servers reach these objects too (`do
   and adds the objects as a layer with `sam_score` and `sam_iou`, written to a temporary GeoPackage (*Make Permanent*
   keeps it). "Which footprints no longer match the orthophoto?" is that call, then `select_features` on
   `"sam_iou" < 0.5`.
+- **Like an example.** `similar_objects` takes an example (one selected feature of a layer, or the last object drawn
+  in the dock), has SAM draw it, then looks window by window over the area searched (the extent given, or the visible
+  map) for the places whose encoder features look like it, draws them, and keeps those of 0.5 to 2 times its area and
+  shape whose features look like it (cosine at least 0.8). No colour is read, so it needs no values of the raster.
+  That is the *feature peaks only* setting measured below: on buildings of the 25 cm Cerdagne orthophoto, about half
+  of what it finds is right and it finds about a fifth of what is there. The layer is to be checked, not counted; the
+  agent is told so.
 
 SAM holds QGIS while it draws (about 2 s for each window of 1024 pixels): the run stops between two windows past 20 s
 and says how far it went, and other changes from the API are refused meanwhile. Only the objects that select in the

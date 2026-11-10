@@ -53,6 +53,7 @@ from .accessor import (
     OpenDataResult,
     OperationResult,
     SegmentResult,
+    SimilarResult,
     SelectionResult,
     ViewState,
 )
@@ -387,6 +388,21 @@ class QGISFilterMateAccessor:
         return SegmentResult(**self._control(
             "segment_objects", raster, guide_layer, selected_only=bool(selected_only), limit=int(limit), name=name,
             module="adapters.public_api.drawn_objects"))
+
+    def similar_objects(self, raster: str, example_layer: str = "", use_dock_object: bool = False,
+                        extent_wkt: str = "", extent_crs: str = "", same_shape: bool = True,
+                        name: str = "") -> SimilarResult:
+        """``drawn_objects.similar_objects`` on the main thread, the objects of the dock read there too."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.drawn_objects"), "similar_objects")
+            dock = self._dock_objects() if use_dock_object else None
+            try:
+                return _unless_busy(function, raster, example_layer=example_layer, use_dock_object=bool(use_dock_object),
+                                    dock_objects=dock, extent_wkt=extent_wkt, extent_crs=extent_crs,
+                                    same_shape=bool(same_shape), name=name)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return SimilarResult(**run_on_main_thread(call))
 
     # ------------------------------------------------------------------
     # Driving QGIS (agent mode)

@@ -383,6 +383,25 @@ class SegmentResult:
 
 
 @dataclass(frozen=True)
+class SimilarResult:
+    """Objects that look like an example, found by SAM on a raster and added to the project as a polygon layer."""
+    # Summary of the layer added; None when nothing was found (no layer added).
+    layer: Optional[Dict[str, Any]] = None
+    objects: int = 0
+    # Places drawn by SAM; windows of 1024 pixels searched, and planned for the area.
+    examined: int = 0
+    windows: int = 0
+    windows_planned: int = 0
+    # The time allowed ran out before every window was searched.
+    stopped_early: bool = False
+    seconds: float = 0.0
+    # {"sam_score", "area_m2"} of the example as SAM drew it.
+    example: Dict[str, Any] = field(default_factory=dict)
+    # {"median", "minimum"} of the appearance (cosine of the features with the example's) of the objects found.
+    appearance: Optional[Dict[str, Any]] = None
+
+
+@dataclass(frozen=True)
 class OpenDataResult:
     """Datasets an open data platform answered with; each has id, title, publisher, description, page, resources."""
     platform: str
@@ -483,6 +502,15 @@ class FilterMateAccessor(Protocol):
         """SAM draws on a raster one object per guide feature, as a new polygon layer.
 
         Raises FilterRejected on layers that do not fit, too many features, or SAM not installed.
+        """
+        ...
+
+    def similar_objects(self, raster: str, example_layer: str = "", use_dock_object: bool = False,
+                        extent_wkt: str = "", extent_crs: str = "", same_shape: bool = True,
+                        name: str = "") -> SimilarResult:
+        """SAM finds on a raster the objects that look like an example, as a new polygon layer.
+
+        Raises FilterRejected on layers or an example that do not fit, an area too large, or SAM not installed.
         """
         ...
 
@@ -737,6 +765,26 @@ class InMemoryAccessor:
         return SegmentResult(layer={"layer_id": summary.layer_id, "name": summary.name, "layer_kind": "vector",
                                     "provider_type": "memory", "crs_authid": summary.crs_authid, "feature_count": count},
                              guide_features=count, drawn=count)
+
+    def similar_objects(self, raster: str, example_layer: str = "", use_dock_object: bool = False,
+                        extent_wkt: str = "", extent_crs: str = "", same_shape: bool = True,
+                        name: str = "") -> SimilarResult:
+        image = self._find(raster)
+        if image is None or image.layer_kind != "raster":
+            raise FilterRejected(f"raster layer {raster!r} not found")
+        if bool(example_layer) == bool(use_dock_object):
+            raise FilterRejected("give an example: example_layer or use_dock_object, one of them")
+        if use_dock_object and not any(image.layer_id == row.get("layer_id") for row in self.drawn_objects):
+            raise FilterRejected(f"no object is drawn on '{image.name}' in the FilterMate dock")
+        if example_layer and (self._find(example_layer) is None or self._find(example_layer).layer_kind != "vector"):
+            raise FilterRejected(f"example layer {example_layer!r} not found among the vector layers")
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or f"{image.name} (similar objects)",
+                               provider_type="ogr", feature_count=3, geometry_type="MultiPolygon",
+                               crs_authid=image.crs_authid)
+        self.layers.append(summary)
+        return SimilarResult(layer={"layer_id": summary.layer_id, "name": summary.name, "layer_kind": "vector",
+                                    "provider_type": "ogr", "crs_authid": summary.crs_authid, "feature_count": 3},
+                             objects=3, examined=12, windows=1, windows_planned=1, example={"sam_score": 0.9})
 
     def zoom_to(self, layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: Optional[str] = None,
                 selected_only: bool = False) -> ViewState:

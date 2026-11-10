@@ -167,14 +167,23 @@ do not take it: they get the polygons themselves (`segments`, `SEGMENTS`).
 `POST /objects/segment` (`segment_objects` for MCP and the agent) runs *Draw objects on a raster with SAM from points or
 polygons* on a raster of the project with a guide layer of the project: `raster`, `guide_layer`, `selected_only`
 (default true: the selected features, or all the guide shows when none is), `limit` (50 by default, 200 at most: a guide
-that gives more is refused, nothing is cut silently) and `name`. The objects are added to the project as a memory
-layer, outlined, and the answer sums them up: `layer`, `guide_features`, `drawn`, `without_object`,
+that gives more is refused, nothing is cut silently) and `name`. The objects are added to the project as a layer
+written to a temporary GeoPackage, outlined, and the answer sums them up: `layer`, `guide_features`, `drawn`, `without_object`,
 `sam_score` and, for polygons, `sam_iou` (`median`, `minimum`, `below_half`). It runs on the main thread like the
 other routes: QGIS is held while SAM draws, about 2 s per window of 1024 pixels, and the run stops between two
 windows past 20 s (`stopped_early`; `without_object` then counts the features never tried too), so that with the window
 under way and the first load of the model it stays under the 45 s an MCP client waits. Other changes are refused
 (503) while it runs. A guide whose features cannot be counted (a web service) needs a selection. Errors are told in
 general words, their detail stays in the FilterMate log. SAM must be installed from the dock.
+
+`POST /objects/similar` (`similar_objects`) finds on `raster` the objects that look like an example: `example_layer`
+(a vector layer with exactly one feature selected) or `use_dock_object` (the last object drawn on that raster in the
+dock), one of them; `extent_wkt` and `extent_crs` (default: the visible map), `same_shape` (default true) and `name`.
+The area is searched window by window (1024 pixels at the cell of the example, at most 64 windows, 20 s), by the
+encoder features alone: it needs no values of the raster. The objects found are added as a temporary GeoPackage
+with `appearance` and `area_m2`; the answer gives `layer` (null when nothing was found), `objects`, `examined`,
+`windows`, `windows_planned`, `stopped_early`, `seconds`, `example` and `appearance`. Measured on buildings of a 25 cm
+orthophoto: about half of what it finds is right, and it finds about a fifth of what is there (`docs/SEGMENTATION.md`).
 
 `point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
 `intensity_max`, `return_number`, `expression`.
@@ -387,6 +396,7 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `remove_layers` | `POST /layers/remove` | removes layers from the project (files kept) |
 | `search_open_data` | `GET /open-data/search` | datasets of an allowed open data platform, with their geo resources |
 | `segment_objects` | `POST /objects/segment` | SAM draws on a raster the objects that the points or polygons of a guide layer point at, as a new layer |
+| `similar_objects` | `POST /objects/similar` | SAM finds on a raster the objects that look like an example (a selected feature, or the last object drawn in the dock), as a new layer to check |
 
 The tools carry MCP annotations: the four readers are `readOnlyHint`; no filter tool is destructive (a filter changes
 what a layer shows, never its data, and `clear_filters` reverts it); `export_layers` is the only one flagged

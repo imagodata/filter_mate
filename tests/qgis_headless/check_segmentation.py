@@ -942,6 +942,103 @@ def test_feature_candidates_and_sorting(folder):
     QgsProject.instance().removeMapLayer(layer.id())
 
 
+def test_agent_similar_objects(folder):
+    """2026-11-11: the agent finds the objects like an example, by the features alone, as a layer."""
+    from qgis.core import QgsFeature, QgsVectorLayer
+    drawn = importlib.import_module(PACKAGE + ".adapters.public_api.drawn_objects")
+    layer = make_shapes(folder)
+    project = QgsProject.instance()
+    project.addMapLayer(layer)
+    install_model(FeatureModel())
+    ready = segmentation.model_state
+    segmentation.model_state = lambda: segmentation.ModelState(True, True)
+    clicked = shape_geometry(layer, "clicked")
+    everywhere = layer.extent().asWktPolygon()
+    points = QgsVectorLayer("Point?crs=EPSG:2154", "examples", "memory")
+    features = []
+    for name in ("clicked", "alike"):
+        feature = QgsFeature(points.fields())
+        feature.setGeometry(QgsGeometry.fromPointXY(shape_geometry(layer, name).centroid().asPoint()))
+        features.append(feature)
+    points.dataProvider().addFeatures(features)
+    project.addMapLayer(points)
+    added = []
+
+    def names_of(answer):
+        found = project.mapLayer(answer["layer"]["layer_id"]) if answer.get("layer") else None
+        if found is None:
+            return []
+        added.append(found)
+        return sorted(max(SHAPES, key=lambda name: segmentation.overlap(f.geometry(), shape_geometry(layer, name)))
+                      for f in found.getFeatures())
+
+    def refused(fragment, **kwargs):
+        try:
+            drawn.similar_objects(layer.id(), **kwargs)
+        except ValueError as exc:
+            return fragment in str(exc), str(exc)
+        return False, "not refused"
+    try:
+        answer = drawn.similar_objects(layer.id(), use_dock_object=True, dock_objects={layer.id(): [clicked.asWkt()]},
+                                       extent_wkt=everywhere)
+        found = names_of(answer)
+        check("like the object drawn in the dock: the alike square, not the large one nor the strip",
+              found == ["alike"] and answer["objects"] == 1 and answer["windows"] == 1 and not answer["stopped_early"],
+              (found, answer))
+        written = project.mapLayer(answer["layer"]["layer_id"]) if answer.get("layer") else None
+        row = next(written.getFeatures()) if written is not None else None
+        check("a file with the appearance and the area of each object",
+              written is not None and written.providerType() == "ogr" and row["appearance"] >= drawn.SIMILAR_APPEARANCE_MIN
+              and 800 < row["area_m2"] < 1000 and written.crs() == layer.crs(),
+              (written and written.source(), row and row.attributes()))
+        check("and the example as SAM drew it", answer["example"]["sam_score"] == 0.9 and 800 < answer["example"]["area_m2"] < 1000,
+              answer["example"])
+        points.selectByIds([next(f.id() for f in points.getFeatures())])
+        # The east half: the alike square and the strip, not the large square, whose uniform cells would fill the
+        # 40 candidates of the window first (the best 40 peaks of the features, as measured).
+        extent = layer.extent()
+        east = QgsRectangle(extent.xMinimum() + 200, extent.yMinimum(), extent.xMaximum(), extent.yMaximum()).asWktPolygon()
+        answer = drawn.similar_objects(layer.name(), example_layer="examples", extent_wkt=east, same_shape=False)
+        found = names_of(answer)
+        check("a selected point as example; without the shape the strip of the same area joins",
+              found == ["alike", "strip"], found)
+        found = names_of(drawn.similar_objects(layer.name(), example_layer="examples", extent_wkt=east))
+        check("with the shape it does not", found == ["alike"], found)
+        check("outside the extent given, nothing (and no layer)", drawn.similar_objects(
+            layer.id(), example_layer="examples", extent_wkt=clicked.boundingBox().asWktPolygon())["layer"] is None)
+        check("no example: refused", *refused("give an example"))
+        points.selectAll()
+        check("two features selected: refused", *refused("select exactly the one example", example_layer="examples"))
+        check("nothing drawn in the dock: refused", *refused("no object is drawn", use_dock_object=True, dock_objects={}))
+        check("an example and the dock: refused",
+              *refused("not both", example_layer="examples", use_dock_object=True, dock_objects={}))
+        limit = drawn.MAX_SEARCH_WINDOWS
+        drawn.MAX_SEARCH_WINDOWS = 0
+        try:
+            check("an area of more windows than allowed: refused",
+                  *refused("give a smaller extent", use_dock_object=True, dock_objects={layer.id(): [clicked.asWkt()]},
+                           extent_wkt=everywhere))
+        finally:
+            drawn.MAX_SEARCH_WINDOWS = limit
+        segmentation.model_state = lambda: segmentation.ModelState(True, False)
+        check("without SAM: what to tell the user",
+              *refused("installs it from the FilterMate dock", use_dock_object=True, dock_objects={layer.id(): [clicked.asWkt()]}))
+    finally:
+        segmentation.model_state = ready
+        for item in added:
+            if project.mapLayer(item.id()) is not None:
+                project.removeMapLayer(item.id())
+        project.removeMapLayers([points.id(), layer.id()])
+
+    # The windows over a large area: the example's first, then nearest first, overlapping, none twice.
+    first = segmentation.SegmentationWindow(0.0, 1024.0, 1.0, 1024)
+    windows = drawn.search_windows(first, QgsRectangle(0, 0, 3000, 2000), (0.0, 0.0, 3000.0, 2000.0), 1.0, 1024)
+    keys = [(w.x_min, w.y_max) for w in windows]
+    check("search windows: the example's first, each once, the area covered",
+          keys[0] == (0.0, 1024.0) and len(keys) == len(set(keys))
+          and max(w.x_min + w.side for w in windows) >= 3000 and min(w.y_max - w.side for w in windows) <= 0, keys)
+
+
 class _TileHandler(BaseHTTPRequestHandler):
     """A web map where every tile is bright."""
 
@@ -1052,6 +1149,7 @@ with tempfile.TemporaryDirectory() as folder:
     test_agent_objects(raster)
     test_similar_flow(folder)
     test_feature_candidates_and_sorting(folder)
+    test_agent_similar_objects(folder)
     test_web_service()
     test_real_model()
     QgsProject.instance().removeAllMapLayers()
