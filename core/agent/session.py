@@ -30,7 +30,13 @@ REASON_REFUSED = "refused"
 class AgentLimits:
     """Bounds of one user request."""
 
-    max_model_turns: int = 12
+    max_model_turns: int = 16
+    # This many model turns before the end, the tool results say so: the model finishes instead of being cut.
+    warn_turns_left: int = 2
+
+
+TURNS_LEFT_NOTE = ("{} model turns left for this request: finish what is under way and answer now. If something "
+                   "cannot be done in time, say what is left.")
 
 
 @dataclass(frozen=True)
@@ -61,10 +67,11 @@ class AgentSession:
     def messages(self) -> Tuple[Message, ...]:
         return tuple(self._messages)
 
-    def add_user_text(self, text: str) -> None:
-        """Start a new request of the user."""
+    def add_user_text(self, text: str, context: str = "") -> None:
+        """Start a new request of the user; ``context`` (the state of the project) follows it in the same message."""
         self._request_start = len(self._messages)
-        self._messages.append(Message(ROLE_USER, (TextPart(text),)))
+        parts = (TextPart(text),) + ((TextPart(context),) if context else ())
+        self._messages.append(Message(ROLE_USER, parts))
         self._turns = 0
 
     def abandon_request(self) -> None:
@@ -103,8 +110,12 @@ class AgentSession:
         return TurnDecision(STATUS_STOPPED if reason else STATUS_DONE, text=turn.message.text, reason=reason)
 
     def add_tool_results(self, results: Sequence[ToolResultPart]) -> None:
-        """Answer every call of the last turn, in one message."""
-        self._messages.append(Message(ROLE_USER, tuple(results)))
+        """Answer every call of the last turn, in one message; near the limit, with a note saying so."""
+        parts = tuple(results)
+        left = self._limits.max_model_turns - self._turns
+        if 0 < left <= self._limits.warn_turns_left:
+            parts += (TextPart(TURNS_LEFT_NOTE.format(left)),)
+        self._messages.append(Message(ROLE_USER, parts))
 
     def assistant_text(self) -> str:
         """Text of the last answer of the model."""
@@ -132,10 +143,10 @@ class ExchangeResult:
 
 
 def run_exchange(session: AgentSession, text: str, transport: Transport, executor: ToolExecutor,
-                 confirm: Callable[[ToolCallPart], bool] = lambda call: False) -> ExchangeResult:
-    """Run one user request to its end, tools included, blocking."""
+                 confirm: Callable[[ToolCallPart], bool] = lambda call: False, context: str = "") -> ExchangeResult:
+    """Run one user request to its end, tools included, blocking; ``context`` goes with the request."""
     result = ExchangeResult()
-    session.add_user_text(text)
+    session.add_user_text(text, context)
     while True:
         turn = None
         for event in transport.send(session.next_request(), session):

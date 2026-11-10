@@ -19,6 +19,7 @@ except ImportError:  # Python 3.8 (QGIS 3.22): pydantic 2 depends on typing_exte
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ..filter_combine import combined, current_filter
 from ..accessor import (
     CrossFilterResult,
     FilteredLayer,
@@ -86,6 +87,13 @@ class ApplyFilterRequest(BaseModel):
             "logs / signals so end users can tell where a filter came from"
         ),
     )
+    operator: Optional[Literal["AND", "OR", "AND NOT"]] = Field(
+        default=None,
+        description=(
+            "Combine with the layer's current filter: AND narrows it, OR widens it, AND NOT removes the new "
+            "condition from it. None replaces it."
+        ),
+    )
 
 
 class ApplyFilterResponse(BaseModel):
@@ -96,6 +104,10 @@ class ApplyFilterResponse(BaseModel):
     active_filters: Dict[str, str] = Field(
         default_factory=dict,
         description="Snapshot of all active filters after this apply call",
+    )
+    replaced_filter: str = Field(
+        default="",
+        description="The filter the layer had and no longer has (no operator given); empty otherwise",
     )
 
 
@@ -127,7 +139,12 @@ def apply_filter(
 ) -> ApplyFilterResponse:
     """Apply a QGIS filter expression to the named layer."""
     accessor = _accessor(request)
-    expression = _plain_filter(payload.expression)
+    expression = _plain_filter(payload.expression)  # the new condition; the current filter is already in place
+    replaced = ""
+    if payload.operator:
+        expression, replaced = combined(current_filter(accessor, payload.layer_name), expression, payload.operator)
+    else:
+        replaced = current_filter(accessor, payload.layer_name)
 
     try:
         success = accessor.apply_filter(
@@ -151,9 +168,10 @@ def apply_filter(
     return ApplyFilterResponse(
         success=True,
         layer_name=payload.layer_name,
-        expression=payload.expression,
+        expression=expression,
         source=payload.source,
         active_filters=active_filters_after_change(accessor),
+        replaced_filter=replaced if replaced != expression else "",
     )
 
 

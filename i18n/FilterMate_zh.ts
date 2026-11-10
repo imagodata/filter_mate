@@ -47,66 +47,66 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="636"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="638"/>
         <source>Undone: {}</source>
         <translation>已撤销：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>撤销上一次请求</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="247"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
         <source>Back to before: {}</source>
         <translation>返回到之前：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>没有可撤销的操作。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
         <source>Redo: {}</source>
         <translation>重做：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Undo: {}</source>
         <translation>撤销：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="70"/>
         <source>Free quota</source>
         <translation>免费额度</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>免费额度的访问权限已续期：请重新发送您的请求。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="501"/>
         <source>Another application is changing the project: try again in a moment.</source>
         <translation>另一个应用程序正在修改项目：请稍后再试。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="679"/>
         <source>Another application: {}</source>
         <translation>其他应用程序：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Applied again: {}.</source>
         <translation>已重新应用：{}。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="250"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="271"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="548"/>
         <source>Changed since, left as is: {}.</source>
         <translation>此后已被更改，保持原样：{}。</translation>
     </message>
@@ -116,170 +116,170 @@
         <translation type="obsolete">已更改：{}。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="389"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
         <translation>请选择模型并同意发送数据，以使用智能体。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="426"/>
         <source>Connecting to {}…</source>
         <translation>正在连接 {}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="206"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
         <translation>之前的对话：智能体将从此处重新开始。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="397"/>
         <source>Enter your API key in the agent settings.</source>
         <translation>请在智能体设置中输入您的 API 密钥。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="602"/>
         <source>Export of {}</source>
         <translation>{} 的导出</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Favorite applied</source>
         <translation>已应用收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Filter on the points of {}</source>
         <translation>对 {} 的点过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Filter on {}</source>
         <translation>对 {} 过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Filter on {} by an area</source>
         <translation>对 {} 按区域过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Filter on {} by {}</source>
         <translation>对 {} 按 {} 过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>FilterMate agent</source>
         <translation>FilterMate 智能体</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="600"/>
         <source>Filters removed from {}</source>
         <translation>已移除 {} 的过滤器</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="605"/>
         <source>Hidden: {}</source>
         <translation>已隐藏：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="480"/>
         <source>It answers.</source>
         <translation>来源有响应。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>已添加图层：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
         <source>Layers removed: {}</source>
         <translation>已移除图层：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
         <source>Not reachable for this conversation: {}</source>
         <translation>此对话无法访问：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Nothing to redo.</source>
         <translation>没有可重做的操作。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="546"/>
         <source>Nothing to restore.</source>
         <translation>没有可恢复的内容。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>正在读取当前过滤器</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
         <source>Reading the favorites</source>
         <translation>正在读取收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Reading the fields of {}</source>
         <translation>正在读取 {} 的字段</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Reading the layers</source>
         <translation>正在读取图层</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Reading the map</source>
         <translation>正在读取地图</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>正在读取 {} 的值</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="546"/>
         <source>Restored: {}.</source>
         <translation>已恢复：{}。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>正在 {} 上搜索卫星影像</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>正在 {} 上搜索：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="604"/>
         <source>Selection cleared on {}</source>
         <translation>已清除 {} 上的选择</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="604"/>
         <source>Selection on {}</source>
         <translation>{} 上的选择</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="605"/>
         <source>Shown: {}</source>
         <translation>已显示：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>Stopped.</source>
         <translation>已停止。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP 服务器无法启动：{}</translation>
     </message>
@@ -294,12 +294,12 @@
         <translation>使用已保存的密钥需要 QGIS 主密码。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>智能体在结束前已停止（{}）。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="712"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +310,7 @@ Do you agree?</source>
 是否同意？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +321,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 远程来源由 QGIS 从其服务器读取，图层所含内容可能会发送给智能体的提供者。是否同意？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +332,7 @@ Do you agree?</source>
 是否同意？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="719"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +343,7 @@ Do you agree?</source>
 是否同意？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="708"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +356,7 @@ Do you agree?</source>
 是否同意？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>此账户的额度或配额已用完。</translation>
     </message>
@@ -377,7 +377,7 @@ Do you agree?</source>
         <translation>免费额度暂时不可用。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="741"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>本月免费额度已用完。请在智能体设置中输入您自己的 API 密钥。</translation>
     </message>
@@ -388,17 +388,17 @@ Do you agree?</source>
         <translation>无法保存密钥。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="783"/>
         <source>The provider could not be reached: {}</source>
         <translation>无法连接提供者：{}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="780"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>提供者拒绝了 API 密钥：请在智能体设置中检查。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="787"/>
         <source>The provider reported a problem: {}</source>
         <translation>提供者报告了问题：{}</translation>
     </message>
@@ -408,8 +408,8 @@ Do you agree?</source>
         <translation>无法读取已保存的密钥。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="517"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="624"/>
         <source>Thinking…</source>
         <translation>思考中…</translation>
     </message>
@@ -419,44 +419,74 @@ Do you agree?</source>
         <translation>今天此地址创建的新账户过多：请明天再试，或输入您自己的 API 密钥。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="782"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>请求过多：请稍后再试。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Trying a filter on {}</source>
         <translation>正在尝试对 {} 的过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>Zoom on {}</source>
         <translation>缩放到 {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>an area</source>
         <translation>一个区域</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>everything</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="473"/>
         <source>{} tools available</source>
         <translation>{} 个可用工具</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="745"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>请求已放回下面的输入行：修正设置后再次发送。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="746"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>请求已放回下面的输入行：准备好后再次发送。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>没有再做其他操作。请换一种方式提问。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="766"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>模型的回答被截断了：内容太长。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
+        <source>The model declined this request.</source>
+        <translation>模型拒绝了此请求。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="763"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>请求所需步骤过多：代理已停止。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>它所做的更改会保留，并可撤销。请分成更小的步骤再试一次。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="764"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>它所做的更改会保留，并可撤销。请一次少要求一些，或说明剩下的部分。</translation>
     </message>
 </context>
 <context>
@@ -477,7 +507,7 @@ Do you agree?</source>
         <translation>试试</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="133"/>
+        <location filename="../ui/widgets/agent_thread.py" line="143"/>
         <source>Undo</source>
         <translation>撤销</translation>
     </message>
@@ -487,23 +517,23 @@ Do you agree?</source>
         <translation>（无请求）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="721"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>每月提供少量免费请求，经由 FilterMate 到 Claude（Anthropic）的中继，适用 Anthropic 的条款。中继只统计消耗量，不保留任何对话。用完后，请选择提供者并输入您自己的 API 密钥。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <location filename="../ui/widgets/agent_panel.py" line="726"/>
         <source>API key</source>
         <translation>API 密钥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="946"/>
+        <location filename="../ui/widgets/agent_panel.py" line="945"/>
         <source>Add</source>
         <translation>添加</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="720"/>
-        <location filename="../ui/widgets/agent_panel.py" line="874"/>
+        <location filename="../ui/widgets/agent_panel.py" line="719"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Address</source>
         <translation>地址</translation>
     </message>
@@ -513,12 +543,12 @@ Do you agree?</source>
         <translation>智能体设置</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="738"/>
+        <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>允许发送属性值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="867"/>
+        <location filename="../ui/widgets/agent_panel.py" line="866"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>已设置的应用程序需要重新设置。</translation>
     </message>
@@ -533,7 +563,7 @@ Do you agree?</source>
         <translation>返回对话</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="840"/>
+        <location filename="../ui/widgets/agent_panel.py" line="839"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>此计算机上的 Claude Code 或其他 MCP 客户端随后可在 FilterMate 打开后过滤您的图层，遵循本面板的规则：相同的来源、相同的确认，过滤可在此撤销。该应用程序会将其读取的内容发送给其自己的 AI 提供者。</translation>
     </message>
@@ -543,22 +573,22 @@ Do you agree?</source>
         <translation type="obsolete">连接 AI 提供者即可开始。未经您同意，不会发送任何内容。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="908"/>
+        <location filename="../ui/widgets/agent_panel.py" line="907"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>已复制（含访问令牌）：请妥善保管。保存这些设置后才会生效。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="857"/>
+        <location filename="../ui/widgets/agent_panel.py" line="856"/>
         <source>Copy for Claude Desktop</source>
         <translation>复制给 Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="862"/>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
         <source>Copy the Claude Code command</source>
         <translation>复制 Claude Code 命令</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <location filename="../ui/widgets/agent_panel.py" line="853"/>
         <source>Copy the configuration</source>
         <translation>复制配置</translation>
     </message>
@@ -568,12 +598,12 @@ Do you agree?</source>
         <translation type="obsolete">用您自己的话描述。每个过滤都可以撤销。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="558"/>
+        <location filename="../ui/widgets/agent_panel.py" line="557"/>
         <source>Filter your layers from a sentence</source>
         <translation>一句话过滤您的图层</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="704"/>
+        <location filename="../ui/widgets/agent_panel.py" line="703"/>
         <source>FilterMate agent</source>
         <translation>FilterMate 智能体</translation>
     </message>
@@ -593,22 +623,22 @@ Do you agree?</source>
         <translation type="obsolete">我同意将这些数据发送给此提供者</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="844"/>
+        <location filename="../ui/widgets/agent_panel.py" line="843"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>允许此计算机上的其他应用程序控制 FilterMate（MCP 服务器）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="943"/>
+        <location filename="../ui/widgets/agent_panel.py" line="942"/>
         <source>MCP connector</source>
         <translation>MCP 连接器</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="983"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP 连接器</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="716"/>
+        <location filename="../ui/widgets/agent_panel.py" line="715"/>
         <source>Model</source>
         <translation>模型</translation>
     </message>
@@ -618,7 +648,7 @@ Do you agree?</source>
         <translation>更多</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="865"/>
+        <location filename="../ui/widgets/agent_panel.py" line="864"/>
         <source>New access token</source>
         <translation>新的访问令牌</translation>
     </message>
@@ -628,34 +658,34 @@ Do you agree?</source>
         <translation>新对话</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="904"/>
+        <location filename="../ui/widgets/agent_panel.py" line="903"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>新令牌：保存这些设置后生效。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="981"/>
+        <location filename="../ui/widgets/agent_panel.py" line="980"/>
         <source>Open data platforms</source>
         <translation>开放数据平台</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="177"/>
-        <location filename="../ui/widgets/agent_panel.py" line="667"/>
+        <location filename="../ui/widgets/agent_panel.py" line="666"/>
         <source>Open the settings</source>
         <translation>打开设置</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>其他应用程序</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="873"/>
+        <location filename="../ui/widgets/agent_panel.py" line="872"/>
         <source>Port</source>
         <translation>端口</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="773"/>
-        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <location filename="../ui/widgets/agent_panel.py" line="772"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>Provider</source>
         <translation>提供者</translation>
     </message>
@@ -665,23 +695,23 @@ Do you agree?</source>
         <translation>重做</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="730"/>
-        <location filename="../ui/widgets/agent_panel.py" line="931"/>
+        <location filename="../ui/widgets/agent_panel.py" line="729"/>
+        <location filename="../ui/widgets/agent_panel.py" line="930"/>
         <source>Remove</source>
         <translation>移除</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="731"/>
         <source>Remove the stored key</source>
         <translation>删除已保存的密钥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="982"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>卫星影像</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="589"/>
+        <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Send (Enter)</source>
         <translation>发送（Enter）</translation>
     </message>
@@ -691,7 +721,7 @@ Do you agree?</source>
         <translation>重新发送</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="574"/>
+        <location filename="../ui/widgets/agent_panel.py" line="573"/>
         <source>Sent to: {}</source>
         <translation>发送至：{}</translation>
     </message>
@@ -701,37 +731,37 @@ Do you agree?</source>
         <translation type="obsolete">设置智能体</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="799"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Sources</source>
         <translation>来源</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="589"/>
+        <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Stop (Esc)</source>
         <translation>停止（Esc）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
         <source>Stored: leave empty to keep it</source>
         <translation>已保存：留空则保留</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="929"/>
+        <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>测试</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1021"/>
         <source>Testing…</source>
         <translation>测试中…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="802"/>
+        <location filename="../ui/widgets/agent_panel.py" line="801"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP 服务器无法启动：{}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="917"/>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>智能体可以搜索此处勾选的来源。您的搜索内容以及智能体传给连接器的内容会发送给这些来源；从中添加的图层将从其服务器读取。</translation>
     </message>
@@ -741,12 +771,12 @@ Do you agree?</source>
         <translation type="obsolete">智能体会将您的请求、图层和字段的名称、过滤表达式以及其工具的结果发送给此处选择的提供者，适用该提供者的条款。未启用下方选项时，智能体不会读取字段的值；但已写入您的过滤器和收藏中的值仍会被发送。对话按项目保存在此计算机上，直到您开始新的对话。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="859"/>
+        <location filename="../ui/widgets/agent_panel.py" line="858"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>通过 mcp-remote（需要 Node.js）：Claude Desktop 会将本地服务器作为程序启动。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1033"/>
         <source>Too many sources added: remove one first.</source>
         <translation>添加的来源过多：请先移除一个。</translation>
     </message>
@@ -761,12 +791,12 @@ Do you agree?</source>
         <translation>撤销本轮</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="554"/>
+        <location filename="../ui/widgets/agent_panel.py" line="553"/>
         <source>What do you want to filter?</source>
         <translation>您想过滤什么？</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>added by you</source>
         <translation>由您添加</translation>
     </message>
@@ -776,12 +806,12 @@ Do you agree?</source>
         <translation>已应用</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>community</source>
         <translation>社区</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="941"/>
+        <location filename="../ui/widgets/agent_panel.py" line="940"/>
         <source>https://... or a portal address</source>
         <translation>https://... 或门户网站地址</translation>
     </message>
@@ -792,12 +822,12 @@ Do you agree?</source>
         <translation>无更改</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>official</source>
         <translation>官方</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>this computer</source>
         <translation>此计算机</translation>
     </message>
@@ -833,12 +863,12 @@ Do you agree?</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
-        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
         <translation>请求一个筛选…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>更换提供方或地址时会再次征求此同意。</translation>
     </message>
@@ -848,12 +878,12 @@ Do you agree?</source>
         <translation>连接提供方</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Connect a provider to start</source>
         <translation>连接一个提供方以开始</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
         <translation>用您自己的话描述。代理会读取项目、试用筛选，然后应用它。每一轮都可以撤销。</translation>
     </message>
@@ -863,7 +893,7 @@ Do you agree?</source>
         <translation>FilterMate（免费额度）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1078"/>
         <source>I agree to send this data to {}</source>
         <translation>我同意将这些数据发送给 {}</translation>
     </message>
@@ -878,32 +908,32 @@ Do you agree?</source>
         <translation>Ollama（本地）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
         <translation>代理读取您项目的图层，编写筛选并应用它们。每一轮都可以撤销。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <location filename="../ui/widgets/agent_panel.py" line="733"/>
         <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
         <translation>密钥保存在 QGIS 的认证数据库中，绝不写入设置文件。它只会发送到此地址。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <location filename="../ui/widgets/agent_panel.py" line="743"/>
         <source>WHAT LEAVES THIS MACHINE</source>
         <translation>离开本机的内容</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <location filename="../ui/widgets/agent_panel.py" line="739"/>
         <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
         <translation>不勾选时，代理不会读取您字段中的值。已写在筛选和收藏中的值仍会发送。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <location filename="../ui/widgets/agent_panel.py" line="590"/>
         <source>You can already type the next request.</source>
         <translation>您现在就可以输入下一个请求。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
         <translation>您的请求、图层和字段的名称、筛选表达式以及代理工具的结果，发送给此提供方并遵守其条款。对话按项目保存在本计算机上，直到您开始新的对话。</translation>
     </message>

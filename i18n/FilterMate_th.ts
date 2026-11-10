@@ -47,66 +47,66 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="636"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="638"/>
         <source>Undone: {}</source>
         <translation>เลิกทำแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>การเลิกทำคำขอล่าสุด</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="247"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
         <source>Back to before: {}</source>
         <translation>กลับไปก่อน: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>ไม่มีสิ่งที่ต้องเลิกทำ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
         <source>Redo: {}</source>
         <translation>ทำซ้ำ: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Undo: {}</source>
         <translation>เลิกทำ: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="70"/>
         <source>Free quota</source>
         <translation>โควตาฟรี</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>สิทธิ์เข้าถึงโควตาฟรีได้รับการต่ออายุแล้ว: โปรดส่งคำขอของคุณอีกครั้ง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="501"/>
         <source>Another application is changing the project: try again in a moment.</source>
         <translation>แอปพลิเคชันอื่นกำลังแก้ไขโปรเจกต์: โปรดลองใหม่อีกครั้งในอีกสักครู่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="679"/>
         <source>Another application: {}</source>
         <translation>แอปพลิเคชันอื่น: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Applied again: {}.</source>
         <translation>ใช้อีกครั้งแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="250"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="271"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="548"/>
         <source>Changed since, left as is: {}.</source>
         <translation>มีการเปลี่ยนแปลงแล้ว คงไว้ตามเดิม: {}</translation>
     </message>
@@ -116,170 +116,170 @@
         <translation type="obsolete">เปลี่ยนแปลงแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="389"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
         <translation>เลือกโมเดลและยอมรับการส่งข้อมูลของคุณเพื่อใช้เอเจนต์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="426"/>
         <source>Connecting to {}…</source>
         <translation>กำลังเชื่อมต่อกับ {}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="206"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
         <translation>บทสนทนาก่อนหน้า: เอเจนต์จะเริ่มใหม่ตั้งแต่จุดนี้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="397"/>
         <source>Enter your API key in the agent settings.</source>
         <translation>ป้อนคีย์ API ของคุณในการตั้งค่าเอเจนต์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="602"/>
         <source>Export of {}</source>
         <translation>การส่งออก {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Favorite applied</source>
         <translation>ใช้รายการโปรดแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Filter on the points of {}</source>
         <translation>กรองตามจุดของ {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Filter on {}</source>
         <translation>กรอง {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Filter on {} by an area</source>
         <translation>กรอง {} ด้วยพื้นที่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Filter on {} by {}</source>
         <translation>กรอง {} ด้วย {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>FilterMate agent</source>
         <translation>เอเจนต์ FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="600"/>
         <source>Filters removed from {}</source>
         <translation>ลบตัวกรองออกจาก {} แล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="605"/>
         <source>Hidden: {}</source>
         <translation>ซ่อนแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="480"/>
         <source>It answers.</source>
         <translation>มีการตอบกลับ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>เพิ่มเลเยอร์แล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
         <source>Layers removed: {}</source>
         <translation>ลบเลเยอร์แล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
         <source>Not reachable for this conversation: {}</source>
         <translation>ไม่สามารถเข้าถึงได้สำหรับบทสนทนานี้: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Nothing to redo.</source>
         <translation>ไม่มีสิ่งที่ต้องทำซ้ำ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="546"/>
         <source>Nothing to restore.</source>
         <translation>ไม่มีสิ่งที่ต้องกู้คืน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>กำลังอ่านตัวกรองที่ใช้งานอยู่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
         <source>Reading the favorites</source>
         <translation>กำลังอ่านรายการโปรด</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Reading the fields of {}</source>
         <translation>กำลังอ่านฟิลด์ของ {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Reading the layers</source>
         <translation>กำลังอ่านเลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Reading the map</source>
         <translation>กำลังอ่านแผนที่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>กำลังอ่านค่าของ {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="546"/>
         <source>Restored: {}.</source>
         <translation>กู้คืนแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>กำลังค้นหาภาพถ่ายดาวเทียมบน {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>กำลังค้นหาบน {}: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="604"/>
         <source>Selection cleared on {}</source>
         <translation>ล้างการเลือกบน {} แล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="604"/>
         <source>Selection on {}</source>
         <translation>การเลือกบน {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="605"/>
         <source>Shown: {}</source>
         <translation>แสดงแล้ว: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>Stopped.</source>
         <translation>หยุดแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
     </message>
@@ -294,12 +294,12 @@
         <translation>ต้องใช้รหัสผ่านหลักของ QGIS เพื่อใช้คีย์ที่จัดเก็บไว้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>เอเจนต์หยุดก่อนเสร็จสิ้น ({})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="712"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +310,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +321,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS จะอ่านแหล่งข้อมูลระยะไกลจากเซิร์ฟเวอร์ของแหล่งนั้น และเนื้อหาของเลเยอร์อาจถูกส่งไปยังผู้ให้บริการของเอเจนต์ คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +332,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="719"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +343,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="708"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +356,7 @@ Do you agree?</source>
 คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>เครดิตหรือโควตาของบัญชีนี้ถูกใช้หมดแล้ว</translation>
     </message>
@@ -377,7 +377,7 @@ Do you agree?</source>
         <translation>โควตาฟรีไม่พร้อมใช้งานในขณะนี้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="741"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>โควตาฟรีของเดือนนี้ถูกใช้หมดแล้ว ป้อนคีย์ API ของคุณเองในการตั้งค่าเอเจนต์</translation>
     </message>
@@ -388,17 +388,17 @@ Do you agree?</source>
         <translation>ไม่สามารถจัดเก็บคีย์ได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="783"/>
         <source>The provider could not be reached: {}</source>
         <translation>ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="780"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>ผู้ให้บริการปฏิเสธคีย์ API: โปรดตรวจสอบในการตั้งค่าเอเจนต์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="787"/>
         <source>The provider reported a problem: {}</source>
         <translation>ผู้ให้บริการแจ้งว่ามีปัญหา: {}</translation>
     </message>
@@ -408,8 +408,8 @@ Do you agree?</source>
         <translation>ไม่สามารถอ่านคีย์ที่จัดเก็บไว้ได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="517"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="624"/>
         <source>Thinking…</source>
         <translation>กำลังคิด…</translation>
     </message>
@@ -419,44 +419,74 @@ Do you agree?</source>
         <translation>วันนี้มีบัญชีใหม่จากที่อยู่นี้มากเกินไป: โปรดลองใหม่พรุ่งนี้ หรือป้อนคีย์ API ของคุณเอง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="782"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>มีคำขอมากเกินไปในขณะนี้: โปรดลองใหม่ในอีกสักครู่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Trying a filter on {}</source>
         <translation>กำลังทดลองตัวกรองบน {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>Zoom on {}</source>
         <translation>ซูมไปที่ {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>an area</source>
         <translation>พื้นที่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>everything</source>
         <translation>ทั้งหมด</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="473"/>
         <source>{} tools available</source>
         <translation>เครื่องมือที่ใช้ได้ {} รายการ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="745"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>คำขอกลับไปอยู่ในบรรทัดด้านล่างแล้ว: แก้ไขการตั้งค่า แล้วส่งอีกครั้ง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="746"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>คำขอกลับไปอยู่ในบรรทัดด้านล่างแล้ว: ส่งอีกครั้งเมื่อคุณพร้อม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>ไม่ได้ทำอะไรเพิ่มอีก ลองถามด้วยวิธีอื่น</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="766"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>คำตอบของโมเดลถูกตัด: ยาวเกินไป</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
+        <source>The model declined this request.</source>
+        <translation>โมเดลปฏิเสธคำขอนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="763"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>คำขอนี้ใช้ขั้นตอนมากเกินไป: เอเจนต์จึงหยุด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>สิ่งที่เปลี่ยนแล้วยังคงอยู่และเลิกทำได้ ลองขออีกครั้งเป็นขั้นตอนที่เล็กลง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="764"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>สิ่งที่เปลี่ยนแล้วยังคงอยู่และเลิกทำได้ ขอให้น้อยลงในแต่ละครั้ง หรือบอกว่ายังเหลืออะไร</translation>
     </message>
 </context>
 <context>
@@ -477,7 +507,7 @@ Do you agree?</source>
         <translation>ลองดู</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="133"/>
+        <location filename="../ui/widgets/agent_thread.py" line="143"/>
         <source>Undo</source>
         <translation>เลิกทำ</translation>
     </message>
@@ -487,23 +517,23 @@ Do you agree?</source>
         <translation>(ไม่มีคำขอ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="721"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>คำขอฟรีจำนวนหนึ่งต่อเดือน ผ่านรีเลย์ของ FilterMate ไปยัง Claude (Anthropic) ภายใต้เงื่อนไขของ Anthropic รีเลย์จะนับเฉพาะปริมาณที่ใช้และไม่เก็บบทสนทนาใดไว้ เมื่อโควตาหมด ให้เลือกผู้ให้บริการและป้อนคีย์ API ของคุณเอง</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <location filename="../ui/widgets/agent_panel.py" line="726"/>
         <source>API key</source>
         <translation>คีย์ API</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="946"/>
+        <location filename="../ui/widgets/agent_panel.py" line="945"/>
         <source>Add</source>
         <translation>เพิ่ม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="720"/>
-        <location filename="../ui/widgets/agent_panel.py" line="874"/>
+        <location filename="../ui/widgets/agent_panel.py" line="719"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Address</source>
         <translation>ที่อยู่</translation>
     </message>
@@ -513,12 +543,12 @@ Do you agree?</source>
         <translation>การตั้งค่าเอเจนต์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="738"/>
+        <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>อนุญาตให้ส่งค่าแอตทริบิวต์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="867"/>
+        <location filename="../ui/widgets/agent_panel.py" line="866"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>แอปพลิเคชันที่ตั้งค่าไว้แล้วจะต้องตั้งค่าใหม่</translation>
     </message>
@@ -533,7 +563,7 @@ Do you agree?</source>
         <translation>กลับไปที่บทสนทนา</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="840"/>
+        <location filename="../ui/widgets/agent_panel.py" line="839"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>Claude Code หรือไคลเอนต์ MCP อื่นบนคอมพิวเตอร์เครื่องนี้จะสามารถกรองเลเยอร์ของคุณได้ หลังจากเปิด FilterMate แล้ว ตามกฎของแผงนี้: แหล่งข้อมูลเดียวกัน การยืนยันเดียวกัน และเลิกทำตัวกรองได้ที่นี่ แอปพลิเคชันนั้นจะส่งสิ่งที่อ่านไปยังผู้ให้บริการ AI ของตัวเอง</translation>
     </message>
@@ -543,22 +573,22 @@ Do you agree?</source>
         <translation type="obsolete">เชื่อมต่อผู้ให้บริการ AI เพื่อเริ่มต้น จะไม่มีการส่งสิ่งใดก่อนที่คุณจะยินยอม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="908"/>
+        <location filename="../ui/widgets/agent_panel.py" line="907"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>คัดลอกพร้อมโทเค็นการเข้าถึงแล้ว: โปรดเก็บเป็นความลับ บันทึกการตั้งค่านี้เพื่อให้มีผล</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="857"/>
+        <location filename="../ui/widgets/agent_panel.py" line="856"/>
         <source>Copy for Claude Desktop</source>
         <translation>คัดลอกสำหรับ Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="862"/>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
         <source>Copy the Claude Code command</source>
         <translation>คัดลอกคำสั่ง Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <location filename="../ui/widgets/agent_panel.py" line="853"/>
         <source>Copy the configuration</source>
         <translation>คัดลอกการกำหนดค่า</translation>
     </message>
@@ -568,12 +598,12 @@ Do you agree?</source>
         <translation type="obsolete">อธิบายด้วยคำพูดของคุณเอง ตัวกรองแต่ละรายการเลิกทำได้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="558"/>
+        <location filename="../ui/widgets/agent_panel.py" line="557"/>
         <source>Filter your layers from a sentence</source>
         <translation>กรองเลเยอร์ของคุณด้วยประโยคเดียว</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="704"/>
+        <location filename="../ui/widgets/agent_panel.py" line="703"/>
         <source>FilterMate agent</source>
         <translation>เอเจนต์ FilterMate</translation>
     </message>
@@ -593,22 +623,22 @@ Do you agree?</source>
         <translation type="obsolete">ฉันยินยอมให้ส่งข้อมูลนี้ไปยังผู้ให้บริการรายนี้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="844"/>
+        <location filename="../ui/widgets/agent_panel.py" line="843"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>อนุญาตให้แอปพลิเคชันอื่นบนคอมพิวเตอร์เครื่องนี้ควบคุม FilterMate (เซิร์ฟเวอร์ MCP)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="943"/>
+        <location filename="../ui/widgets/agent_panel.py" line="942"/>
         <source>MCP connector</source>
         <translation>คอนเนคเตอร์ MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="983"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>คอนเนคเตอร์ MCP</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="716"/>
+        <location filename="../ui/widgets/agent_panel.py" line="715"/>
         <source>Model</source>
         <translation>โมเดล</translation>
     </message>
@@ -618,7 +648,7 @@ Do you agree?</source>
         <translation>เพิ่มเติม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="865"/>
+        <location filename="../ui/widgets/agent_panel.py" line="864"/>
         <source>New access token</source>
         <translation>โทเค็นการเข้าถึงใหม่</translation>
     </message>
@@ -628,34 +658,34 @@ Do you agree?</source>
         <translation>บทสนทนาใหม่</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="904"/>
+        <location filename="../ui/widgets/agent_panel.py" line="903"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>โทเค็นใหม่: จะมีผลเมื่อบันทึกการตั้งค่านี้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="981"/>
+        <location filename="../ui/widgets/agent_panel.py" line="980"/>
         <source>Open data platforms</source>
         <translation>แพลตฟอร์มข้อมูลเปิด</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="177"/>
-        <location filename="../ui/widgets/agent_panel.py" line="667"/>
+        <location filename="../ui/widgets/agent_panel.py" line="666"/>
         <source>Open the settings</source>
         <translation>เปิดการตั้งค่า</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>แอปพลิเคชันอื่น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="873"/>
+        <location filename="../ui/widgets/agent_panel.py" line="872"/>
         <source>Port</source>
         <translation>พอร์ต</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="773"/>
-        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <location filename="../ui/widgets/agent_panel.py" line="772"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>Provider</source>
         <translation>ผู้ให้บริการ</translation>
     </message>
@@ -665,23 +695,23 @@ Do you agree?</source>
         <translation>ทำซ้ำ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="730"/>
-        <location filename="../ui/widgets/agent_panel.py" line="931"/>
+        <location filename="../ui/widgets/agent_panel.py" line="729"/>
+        <location filename="../ui/widgets/agent_panel.py" line="930"/>
         <source>Remove</source>
         <translation>ลบออก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="731"/>
         <source>Remove the stored key</source>
         <translation>ลบคีย์ที่จัดเก็บไว้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="982"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>ภาพถ่ายดาวเทียม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="589"/>
+        <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Send (Enter)</source>
         <translation>ส่ง (Enter)</translation>
     </message>
@@ -691,7 +721,7 @@ Do you agree?</source>
         <translation>ส่งอีกครั้ง</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="574"/>
+        <location filename="../ui/widgets/agent_panel.py" line="573"/>
         <source>Sent to: {}</source>
         <translation>ส่งไปยัง: {}</translation>
     </message>
@@ -701,37 +731,37 @@ Do you agree?</source>
         <translation type="obsolete">ตั้งค่าเอเจนต์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="799"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Sources</source>
         <translation>แหล่งข้อมูล</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="589"/>
+        <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Stop (Esc)</source>
         <translation>หยุด (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
         <source>Stored: leave empty to keep it</source>
         <translation>จัดเก็บแล้ว: เว้นว่างไว้เพื่อคงไว้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="929"/>
+        <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>ทดสอบ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1021"/>
         <source>Testing…</source>
         <translation>กำลังทดสอบ…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="802"/>
+        <location filename="../ui/widgets/agent_panel.py" line="801"/>
         <source>The MCP server could not start: {}</source>
         <translation>ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="917"/>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>เอเจนต์สามารถค้นหาแหล่งข้อมูลที่ทำเครื่องหมายไว้ที่นี่ได้ คำค้นหาของคุณ และสิ่งที่เอเจนต์ส่งให้คอนเนคเตอร์ จะถูกส่งไปยังแหล่งเหล่านั้น เลเยอร์ที่เพิ่มจากแหล่งเหล่านั้นจะถูกอ่านจากเซิร์ฟเวอร์ของแหล่งนั้น</translation>
     </message>
@@ -741,12 +771,12 @@ Do you agree?</source>
         <translation type="obsolete">เอเจนต์ส่งคำขอของคุณ ชื่อเลเยอร์และฟิลด์ นิพจน์ตัวกรอง และผลลัพธ์จากเครื่องมือของเอเจนต์ ไปยังผู้ให้บริการที่เลือกไว้ที่นี่ ภายใต้เงื่อนไขของผู้ให้บริการนั้น หากไม่เปิดตัวเลือกด้านล่าง เอเจนต์จะไม่อ่านค่าของฟิลด์ แต่ค่าที่เขียนอยู่ในตัวกรองและรายการโปรดของคุณแล้วจะยังคงถูกส่ง บทสนทนาจะถูกเก็บไว้บนคอมพิวเตอร์เครื่องนี้ แยกตามโปรเจกต์ จนกว่าคุณจะเริ่มบทสนทนาใหม่</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="859"/>
+        <location filename="../ui/widgets/agent_panel.py" line="858"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>ผ่าน mcp-remote ซึ่งต้องใช้ Node.js: Claude Desktop เรียกใช้เซิร์ฟเวอร์ภายในเครื่องเป็นโปรแกรม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1033"/>
         <source>Too many sources added: remove one first.</source>
         <translation>เพิ่มแหล่งข้อมูลมากเกินไป: โปรดลบออกหนึ่งรายการก่อน</translation>
     </message>
@@ -761,12 +791,12 @@ Do you agree?</source>
         <translation>เลิกทำรอบนี้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="554"/>
+        <location filename="../ui/widgets/agent_panel.py" line="553"/>
         <source>What do you want to filter?</source>
         <translation>คุณต้องการกรองอะไร</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>added by you</source>
         <translation>เพิ่มโดยคุณ</translation>
     </message>
@@ -776,12 +806,12 @@ Do you agree?</source>
         <translation>ใช้แล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>community</source>
         <translation>ชุมชน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="941"/>
+        <location filename="../ui/widgets/agent_panel.py" line="940"/>
         <source>https://... or a portal address</source>
         <translation>https://... หรือที่อยู่ของพอร์ทัล</translation>
     </message>
@@ -792,12 +822,12 @@ Do you agree?</source>
         <translation>ไม่มีการเปลี่ยนแปลง</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>official</source>
         <translation>ทางการ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>this computer</source>
         <translation>คอมพิวเตอร์เครื่องนี้</translation>
     </message>
@@ -833,12 +863,12 @@ Do you agree?</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
-        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
         <translation>ขอตัวกรอง…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>การเปลี่ยนผู้ให้บริการหรือที่อยู่จะขอความยินยอมนี้อีกครั้ง</translation>
     </message>
@@ -848,12 +878,12 @@ Do you agree?</source>
         <translation>เชื่อมต่อผู้ให้บริการ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Connect a provider to start</source>
         <translation>เชื่อมต่อผู้ให้บริการเพื่อเริ่มต้น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
         <translation>อธิบายด้วยคำพูดของคุณเอง เอเจนต์จะอ่านโปรเจกต์ ลองตัวกรอง แล้วจึงนำไปใช้ ทุกรอบสามารถเลิกทำได้</translation>
     </message>
@@ -863,7 +893,7 @@ Do you agree?</source>
         <translation>FilterMate (โควตาฟรี)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1078"/>
         <source>I agree to send this data to {}</source>
         <translation>ฉันยินยอมให้ส่งข้อมูลนี้ไปยัง {}</translation>
     </message>
@@ -878,32 +908,32 @@ Do you agree?</source>
         <translation>Ollama (ในเครื่อง)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
         <translation>เอเจนต์อ่านเลเยอร์ในโปรเจกต์ของคุณ เขียนตัวกรอง และนำไปใช้ ทุกรอบสามารถเลิกทำได้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <location filename="../ui/widgets/agent_panel.py" line="733"/>
         <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
         <translation>คีย์ถูกเก็บไว้ในฐานข้อมูลการยืนยันตัวตนของ QGIS ไม่เคยเก็บในไฟล์การตั้งค่า และจะถูกส่งไปยังที่อยู่นี้เท่านั้น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <location filename="../ui/widgets/agent_panel.py" line="743"/>
         <source>WHAT LEAVES THIS MACHINE</source>
         <translation>สิ่งที่ออกจากเครื่องนี้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <location filename="../ui/widgets/agent_panel.py" line="739"/>
         <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
         <translation>หากไม่เปิดใช้ เอเจนต์จะไม่อ่านค่าในฟิลด์ของคุณ ค่าที่เขียนไว้แล้วในตัวกรองและรายการโปรดของคุณจะยังถูกส่งไป</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <location filename="../ui/widgets/agent_panel.py" line="590"/>
         <source>You can already type the next request.</source>
         <translation>คุณพิมพ์คำขอถัดไปได้เลย</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
         <translation>คำขอของคุณ ชื่อเลเยอร์และฟิลด์ นิพจน์ตัวกรอง และผลลัพธ์จากเครื่องมือของเอเจนต์ ไปยังผู้ให้บริการรายนี้และตามเงื่อนไขของผู้ให้บริการ บทสนทนาจะถูกเก็บไว้ในคอมพิวเตอร์เครื่องนี้สำหรับแต่ละโปรเจกต์ จนกว่าคุณจะเริ่มบทสนทนาใหม่</translation>
     </message>

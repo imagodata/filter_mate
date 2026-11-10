@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from dataclasses import asdict
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
@@ -30,7 +31,8 @@ from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import FREE_PRESET, create_provider
-from ...core.agent.session import AgentSession
+from ...core.agent.project_summary import project_summary
+from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.tool_catalog import UNDO_AGENT_STEP, chat_tools
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
@@ -515,7 +517,18 @@ class AgentChatController(QObject):
         self.panel.set_status(_tr("Thinking…"))
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
-        self._engine.send(text)
+        self._engine.send(text, self._project_context())
+
+    def _project_context(self) -> str:
+        """The layers, their filters and the selections now, sent after the request; empty when they cannot be read."""
+        try:
+            accessor = self._accessor()
+            layers = [asdict(layer) for layer in accessor.list_layers()]
+            selections = accessor.map_context().selections
+        except Exception:  # the request goes without it: the model reads the project with its tools
+            logger.debug("Agent: project summary not read", exc_info=True)
+            return ""
+        return project_summary(layers, selections)
 
     def _on_stop(self) -> None:
         abort_active()  # a connector or a platform being waited for
@@ -674,7 +687,13 @@ class AgentChatController(QObject):
             data = json.loads(result.content)
         except ValueError:
             return ""
-        if not isinstance(data, dict) or not isinstance(data.get("feature_count"), int) or data["feature_count"] < 0:
+        if not isinstance(data, dict):
+            return ""
+        kept = data.get("kept")
+        if isinstance(kept, dict) and kept and all(isinstance(count, int) for count in kept.values()):
+            # A cross filter: what each target keeps, summed when there are several.
+            return f"{sum(kept.values()):,}"
+        if not isinstance(data.get("feature_count"), int) or data["feature_count"] < 0:
             return ""
         total = data.get("total_count")
         return f"{data['feature_count']:,} / {total:,}" if isinstance(total, int) and total >= 0 else f"{data['feature_count']:,}"
@@ -733,9 +752,22 @@ class AgentChatController(QObject):
             return
         if outcome.status == OUTCOME_STOPPED:
             self._say("")
-            self.panel.show_error(_tr("The agent stopped before the end ({}).").format(outcome.reason))
+            self.panel.show_error(*self._stop_words(outcome.reason))
             return
         self._say("")  # the cards of the turn say what changed (mockup)
+
+    @staticmethod
+    def _stop_words(reason: str) -> Tuple[str, str]:
+        """Why the agent stopped before its answer, and what the user can do, in plain words."""
+        if reason == REASON_TURN_LIMIT:
+            return (_tr("The request took too many steps: the agent stopped."),
+                    _tr("What it changed stays and can be undone. Ask for less at once, or say what is left."))
+        if reason == REASON_TRUNCATED:
+            return (_tr("The answer of the model was cut: it was too long."),
+                    _tr("What it changed stays and can be undone. Ask again, in smaller steps."))
+        if reason == REASON_REFUSED:
+            return _tr("The model declined this request."), _tr("Nothing more was done. Ask it differently.")
+        return _tr("The agent stopped before the end ({}).").format(reason), ""
 
     def _give_back_request(self) -> None:
         """A request that went nowhere can be sent again without retyping it."""

@@ -47,66 +47,66 @@
 <context>
     <name>AgentChat</name>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="623"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="625"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="636"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="638"/>
         <source>Undone: {}</source>
         <translation>Отменено: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>Отмяна на последната заявка</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="245"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="247"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
         <source>Back to before: {}</source>
         <translation>Назад към състоянието преди: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Няма какво да се отмени.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
         <source>Redo: {}</source>
         <translation>Повтори: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="226"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Undo: {}</source>
         <translation>Отмяна: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="68"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="70"/>
         <source>Free quota</source>
         <translation>Безплатна квота</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="720"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="739"/>
         <source>Access to the free quota was renewed: send your request again.</source>
         <translation>Достъпът до безплатната квота беше подновен: изпратете заявката си отново.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="499"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="501"/>
         <source>Another application is changing the project: try again in a moment.</source>
         <translation>Друго приложение променя проекта: опитайте отново след малко.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="666"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="679"/>
         <source>Another application: {}</source>
         <translation>Друго приложение: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Applied again: {}.</source>
         <translation>Приложено отново: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="535"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="250"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="271"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="548"/>
         <source>Changed since, left as is: {}.</source>
         <translation>Променено междувременно, оставено както е: {}.</translation>
     </message>
@@ -116,170 +116,170 @@
         <translation type="obsolete">Променено: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="389"/>
         <source>Choose a model and agree to send your data to use the agent.</source>
         <translation>Изберете модел и се съгласете с изпращането на данните си, за да използвате агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="424"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="426"/>
         <source>Connecting to {}…</source>
         <translation>Свързване с {}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="204"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="206"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
         <translation>По-ранен разговор: оттук агентът започва начисто.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="395"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="397"/>
         <source>Enter your API key in the agent settings.</source>
         <translation>Въведете своя API ключ в настройките на агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="602"/>
         <source>Export of {}</source>
         <translation>Експорт на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="601"/>
         <source>Favorite applied</source>
         <translation>Любимият е приложен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="586"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="599"/>
         <source>Filter on the points of {}</source>
         <translation>Филтър върху точките на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="582"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
         <source>Filter on {}</source>
         <translation>Филтър върху {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="585"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
         <source>Filter on {} by an area</source>
         <translation>Филтър върху {} по област</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="583"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
         <source>Filter on {} by {}</source>
         <translation>Филтър върху {} по {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="702"/>
         <source>FilterMate agent</source>
         <translation>Агент FilterMate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="587"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="600"/>
         <source>Filters removed from {}</source>
         <translation>Филтрите са премахнати от {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="605"/>
         <source>Hidden: {}</source>
         <translation>Скрито: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="478"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="480"/>
         <source>It answers.</source>
         <translation>Източникът отговаря.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="598"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Слоят е добавен: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="595"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
         <source>Layers removed: {}</source>
         <translation>Слоевете са премахнати: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="410"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
         <source>Not reachable for this conversation: {}</source>
         <translation>Недостъпно за този разговор: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="227"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="267"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Nothing to redo.</source>
         <translation>Няма какво да се повтори.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="246"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="546"/>
         <source>Nothing to restore.</source>
         <translation>Няма какво да се възстанови.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="580"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Четене на активните филтри</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="581"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="594"/>
         <source>Reading the favorites</source>
         <translation>Четене на любимите</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="576"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="589"/>
         <source>Reading the fields of {}</source>
         <translation>Четене на полетата на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="575"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="588"/>
         <source>Reading the layers</source>
         <translation>Четене на слоевете</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="579"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
         <source>Reading the map</source>
         <translation>Четене на картата</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="577"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Четене на стойностите на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="533"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="546"/>
         <source>Restored: {}.</source>
         <translation>Възстановено: {}.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="597"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Търсене на сателитни изображения в {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="596"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Търсене в {} на {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="604"/>
         <source>Selection cleared on {}</source>
         <translation>Изборът е изчистен в {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="604"/>
         <source>Selection on {}</source>
         <translation>Избор в {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="592"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="605"/>
         <source>Shown: {}</source>
         <translation>Показано: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="732"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
         <source>Stopped.</source>
         <translation>Спряно.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="338"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP сървърът не можа да стартира: {}</translation>
     </message>
@@ -294,12 +294,12 @@
         <translation>Нужна е главната парола на QGIS, за да се използва запазеният ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="736"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="770"/>
         <source>The agent stopped before the end ({}).</source>
         <translation>Агентът спря преди края ({}).</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="693"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="712"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}
 
@@ -310,7 +310,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="696"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
         <source>The agent wants to add this layer to the project:
 {}
 
@@ -321,7 +321,7 @@ A remote source is read from its server by QGIS, and what the layer holds can be
 QGIS чете отдалечен източник от неговия сървър, а съдържанието на слоя може да бъде изпратено на доставчика на агента. Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="703"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
         <source>The agent wants to export these layers to files:
 {}
 
@@ -332,7 +332,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="700"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="719"/>
         <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
 {}
 
@@ -343,7 +343,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="708"/>
         <source>The agent wants to run this action on an external connector:
 {}
 {}
@@ -356,7 +356,7 @@ Do you agree?</source>
 Съгласни ли сте?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="749"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Кредитът или квотата на този акаунт са изчерпани.</translation>
     </message>
@@ -377,7 +377,7 @@ Do you agree?</source>
         <translation>Безплатната квота временно не е налична.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="722"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="741"/>
         <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
         <translation>Безплатната квота за този месец е изчерпана. Въведете собствен API ключ в настройките на агента.</translation>
     </message>
@@ -388,17 +388,17 @@ Do you agree?</source>
         <translation>Ключът не можа да бъде запазен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="751"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="783"/>
         <source>The provider could not be reached: {}</source>
         <translation>Доставчикът не можа да бъде достигнат: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="748"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="780"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Доставчикът отхвърли API ключа: проверете го в настройките на агента.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="755"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="787"/>
         <source>The provider reported a problem: {}</source>
         <translation>Доставчикът съобщи за проблем: {}</translation>
     </message>
@@ -408,8 +408,8 @@ Do you agree?</source>
         <translation>Запазеният ключ не можа да бъде прочетен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="515"/>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="517"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="624"/>
         <source>Thinking…</source>
         <translation>Мислене…</translation>
     </message>
@@ -419,44 +419,74 @@ Do you agree?</source>
         <translation>Твърде много нови акаунти от този адрес днес: опитайте утре или въведете собствен API ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="750"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="782"/>
         <source>Too many requests for now: try again in a moment.</source>
         <translation>Твърде много заявки в момента: опитайте отново след малко.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="578"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="591"/>
         <source>Trying a filter on {}</source>
         <translation>Изпробване на филтър върху {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>Zoom on {}</source>
         <translation>Мащабиране към {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>an area</source>
         <translation>област</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="603"/>
         <source>everything</source>
         <translation>всичко</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="471"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="473"/>
         <source>{} tools available</source>
         <translation>Налични инструменти: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="726"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="745"/>
         <source>The request is back in the line below: fix the settings, then send it again.</source>
         <translation>Заявката е отново в реда отдолу: коригирайте настройките и я изпратете пак.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="727"/>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="746"/>
         <source>The request is back in the line below: send it again when you are ready.</source>
         <translation>Заявката е отново в реда отдолу: изпратете я пак, когато сте готови.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
+        <source>Nothing more was done. Ask it differently.</source>
+        <translation>Нищо повече не беше направено. Формулирайте я иначе.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="766"/>
+        <source>The answer of the model was cut: it was too long.</source>
+        <translation>Отговорът на модела беше отрязан: беше твърде дълъг.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="769"/>
+        <source>The model declined this request.</source>
+        <translation>Моделът отказа тази заявка.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="763"/>
+        <source>The request took too many steps: the agent stopped.</source>
+        <translation>Заявката изискваше твърде много стъпки: агентът спря.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
+        <source>What it changed stays and can be undone. Ask again, in smaller steps.</source>
+        <translation>Каквото е променил, остава и може да бъде отменено. Попитайте отново, на по-малки стъпки.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="764"/>
+        <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
+        <translation>Каквото е променил, остава и може да бъде отменено. Искайте по-малко наведнъж или кажете какво остава.</translation>
     </message>
 </context>
 <context>
@@ -477,7 +507,7 @@ Do you agree?</source>
         <translation>ОПИТАЙТЕ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_thread.py" line="133"/>
+        <location filename="../ui/widgets/agent_thread.py" line="143"/>
         <source>Undo</source>
         <translation>Отмяна</translation>
     </message>
@@ -487,23 +517,23 @@ Do you agree?</source>
         <translation>(без заявка)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="721"/>
+        <location filename="../ui/widgets/agent_panel.py" line="720"/>
         <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
         <translation>Няколко безплатни заявки на месец през релето на FilterMate към Claude (Anthropic), при условията на Anthropic. Релето отчита изразходваното и не пази разговори. Когато квотата се изчерпи, изберете доставчик и въведете собствен API ключ.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="727"/>
+        <location filename="../ui/widgets/agent_panel.py" line="726"/>
         <source>API key</source>
         <translation>API ключ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="946"/>
+        <location filename="../ui/widgets/agent_panel.py" line="945"/>
         <source>Add</source>
         <translation>Добавяне</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="720"/>
-        <location filename="../ui/widgets/agent_panel.py" line="874"/>
+        <location filename="../ui/widgets/agent_panel.py" line="719"/>
+        <location filename="../ui/widgets/agent_panel.py" line="873"/>
         <source>Address</source>
         <translation>Адрес</translation>
     </message>
@@ -513,12 +543,12 @@ Do you agree?</source>
         <translation>Настройки на агента</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="738"/>
+        <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Разрешаване на изпращането на стойности на атрибути</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="867"/>
+        <location filename="../ui/widgets/agent_panel.py" line="866"/>
         <source>Applications already set up will have to be set up again.</source>
         <translation>Вече настроените приложения ще трябва да бъдат настроени отново.</translation>
     </message>
@@ -533,7 +563,7 @@ Do you agree?</source>
         <translation>Обратно към разговора</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="840"/>
+        <location filename="../ui/widgets/agent_panel.py" line="839"/>
         <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
         <translation>Claude Code или друг MCP клиент на този компютър може тогава да филтрира слоевете ви, след като FilterMate е отворен, по правилата на този панел: същите източници, същите потвърждения, а филтрите могат да бъдат отменени тук. Това приложение изпраща прочетеното до собствения си доставчик на ИИ.</translation>
     </message>
@@ -543,22 +573,22 @@ Do you agree?</source>
         <translation type="obsolete">Свържете доставчик на ИИ, за да започнете. Нищо не се изпраща без вашето съгласие.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="908"/>
+        <location filename="../ui/widgets/agent_panel.py" line="907"/>
         <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
         <translation>Копирано заедно с токена за достъп: не го споделяйте. Запазете тези настройки, за да се приложи.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="857"/>
+        <location filename="../ui/widgets/agent_panel.py" line="856"/>
         <source>Copy for Claude Desktop</source>
         <translation>Копиране за Claude Desktop</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="862"/>
+        <location filename="../ui/widgets/agent_panel.py" line="861"/>
         <source>Copy the Claude Code command</source>
         <translation>Копиране на командата за Claude Code</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="854"/>
+        <location filename="../ui/widgets/agent_panel.py" line="853"/>
         <source>Copy the configuration</source>
         <translation>Копиране на конфигурацията</translation>
     </message>
@@ -568,12 +598,12 @@ Do you agree?</source>
         <translation type="obsolete">Опишете го със свои думи. Всеки филтър може да бъде отменен.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="558"/>
+        <location filename="../ui/widgets/agent_panel.py" line="557"/>
         <source>Filter your layers from a sentence</source>
         <translation>Филтрирайте слоевете си с едно изречение</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="704"/>
+        <location filename="../ui/widgets/agent_panel.py" line="703"/>
         <source>FilterMate agent</source>
         <translation>Агент FilterMate</translation>
     </message>
@@ -593,22 +623,22 @@ Do you agree?</source>
         <translation type="obsolete">Съгласен съм да изпратя тези данни на този доставчик</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="844"/>
+        <location filename="../ui/widgets/agent_panel.py" line="843"/>
         <source>Let other applications on this computer drive FilterMate (MCP server)</source>
         <translation>Разрешаване на други приложения на този компютър да управляват FilterMate (MCP сървър)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="943"/>
+        <location filename="../ui/widgets/agent_panel.py" line="942"/>
         <source>MCP connector</source>
         <translation>MCP конектор</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="983"/>
+        <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP конектори</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="716"/>
+        <location filename="../ui/widgets/agent_panel.py" line="715"/>
         <source>Model</source>
         <translation>Модел</translation>
     </message>
@@ -618,7 +648,7 @@ Do you agree?</source>
         <translation>Още</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="865"/>
+        <location filename="../ui/widgets/agent_panel.py" line="864"/>
         <source>New access token</source>
         <translation>Нов токен за достъп</translation>
     </message>
@@ -628,34 +658,34 @@ Do you agree?</source>
         <translation>Нов разговор</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="904"/>
+        <location filename="../ui/widgets/agent_panel.py" line="903"/>
         <source>New token: it applies once these settings are saved.</source>
         <translation>Нов токен: прилага се след запазване на тези настройки.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="981"/>
+        <location filename="../ui/widgets/agent_panel.py" line="980"/>
         <source>Open data platforms</source>
         <translation>Платформи за отворени данни</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="177"/>
-        <location filename="../ui/widgets/agent_panel.py" line="667"/>
+        <location filename="../ui/widgets/agent_panel.py" line="666"/>
         <source>Open the settings</source>
         <translation>Отваряне на настройките</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="800"/>
+        <location filename="../ui/widgets/agent_panel.py" line="799"/>
         <source>Other applications</source>
         <translation>Други приложения</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="873"/>
+        <location filename="../ui/widgets/agent_panel.py" line="872"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="773"/>
-        <location filename="../ui/widgets/agent_panel.py" line="798"/>
+        <location filename="../ui/widgets/agent_panel.py" line="772"/>
+        <location filename="../ui/widgets/agent_panel.py" line="797"/>
         <source>Provider</source>
         <translation>Доставчик</translation>
     </message>
@@ -665,23 +695,23 @@ Do you agree?</source>
         <translation>Повтори</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="730"/>
-        <location filename="../ui/widgets/agent_panel.py" line="931"/>
+        <location filename="../ui/widgets/agent_panel.py" line="729"/>
+        <location filename="../ui/widgets/agent_panel.py" line="930"/>
         <source>Remove</source>
         <translation>Премахване</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="732"/>
+        <location filename="../ui/widgets/agent_panel.py" line="731"/>
         <source>Remove the stored key</source>
         <translation>Изтриване на запазения ключ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="982"/>
+        <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Сателитни изображения</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="589"/>
+        <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Send (Enter)</source>
         <translation>Изпращане (Enter)</translation>
     </message>
@@ -691,7 +721,7 @@ Do you agree?</source>
         <translation>Изпращане отново</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="574"/>
+        <location filename="../ui/widgets/agent_panel.py" line="573"/>
         <source>Sent to: {}</source>
         <translation>Изпратено до: {}</translation>
     </message>
@@ -701,37 +731,37 @@ Do you agree?</source>
         <translation type="obsolete">Настройване на агента</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="799"/>
+        <location filename="../ui/widgets/agent_panel.py" line="798"/>
         <source>Sources</source>
         <translation>Източници</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="589"/>
+        <location filename="../ui/widgets/agent_panel.py" line="588"/>
         <source>Stop (Esc)</source>
         <translation>Спиране (Esc)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
         <source>Stored: leave empty to keep it</source>
         <translation>Запазен: оставете празно, за да го запазите</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="929"/>
+        <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>Тест</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1022"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1021"/>
         <source>Testing…</source>
         <translation>Тестване…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="802"/>
+        <location filename="../ui/widgets/agent_panel.py" line="801"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP сървърът не можа да стартира: {}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="917"/>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
         <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
         <translation>Агентът може да търси в източниците, отметнати тук. Вашите търсения и това, което агентът предава на конектор, им се изпращат; слой, добавен от тях, се чете от техните сървъри.</translation>
     </message>
@@ -741,12 +771,12 @@ Do you agree?</source>
         <translation type="obsolete">Агентът изпраща заявката ви, имената на слоевете и полетата ви, филтърните ви изрази и резултатите от своите инструменти до доставчика, избран тук, при условията на този доставчик. Без опцията по-долу агентът не чете стойностите на полетата ви; стойностите, вече записани във филтрите и любимите ви, все пак се изпращат. Разговорът се пази на този компютър за всеки проект, докато не започнете нов.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="859"/>
+        <location filename="../ui/widgets/agent_panel.py" line="858"/>
         <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
         <translation>Чрез mcp-remote, който изисква Node.js: Claude Desktop стартира локалните сървъри като програми.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1034"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1033"/>
         <source>Too many sources added: remove one first.</source>
         <translation>Добавени са твърде много източници: първо премахнете един.</translation>
     </message>
@@ -761,12 +791,12 @@ Do you agree?</source>
         <translation>Отмяна на този ход</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="554"/>
+        <location filename="../ui/widgets/agent_panel.py" line="553"/>
         <source>What do you want to filter?</source>
         <translation>Какво искате да филтрирате?</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <location filename="../ui/widgets/agent_panel.py" line="962"/>
         <source>added by you</source>
         <translation>добавено от вас</translation>
     </message>
@@ -776,12 +806,12 @@ Do you agree?</source>
         <translation>приложено</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>community</source>
         <translation>общностен</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="941"/>
+        <location filename="../ui/widgets/agent_panel.py" line="940"/>
         <source>https://... or a portal address</source>
         <translation>https://... или адрес на портал</translation>
     </message>
@@ -792,12 +822,12 @@ Do you agree?</source>
         <translation>без промяна</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>official</source>
         <translation>официален</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="962"/>
+        <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>this computer</source>
         <translation>този компютър</translation>
     </message>
@@ -833,12 +863,12 @@ Do you agree?</source>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="195"/>
-        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Ask for a filter…</source>
         <translation>Поискайте филтър…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="752"/>
+        <location filename="../ui/widgets/agent_panel.py" line="751"/>
         <source>Choosing another provider or address asks for this agreement again.</source>
         <translation>Смяната на доставчика или адреса изисква това съгласие отново.</translation>
     </message>
@@ -848,12 +878,12 @@ Do you agree?</source>
         <translation>Свързване на доставчик</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="567"/>
+        <location filename="../ui/widgets/agent_panel.py" line="566"/>
         <source>Connect a provider to start</source>
         <translation>Свържете доставчик, за да започнете</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="555"/>
+        <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
         <translation>Опишете го със свои думи. Агентът чете проекта, пробва филтъра и след това го прилага. Всеки ход може да бъде отменен.</translation>
     </message>
@@ -863,7 +893,7 @@ Do you agree?</source>
         <translation>FilterMate (безплатна квота)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="1079"/>
+        <location filename="../ui/widgets/agent_panel.py" line="1078"/>
         <source>I agree to send this data to {}</source>
         <translation>Съгласен съм тези данни да бъдат изпратени до {}</translation>
     </message>
@@ -878,32 +908,32 @@ Do you agree?</source>
         <translation>Ollama (локално)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="559"/>
+        <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
         <translation>Агентът чете слоевете на проекта, пише филтрите и ги прилага. Всеки ход може да бъде отменен.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="734"/>
+        <location filename="../ui/widgets/agent_panel.py" line="733"/>
         <source>The key is kept in the authentication database of QGIS, never in a settings file. It is only sent to this address.</source>
         <translation>Ключът се пази в базата за удостоверяване на QGIS, никога във файл с настройки. Изпраща се само до този адрес.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="744"/>
+        <location filename="../ui/widgets/agent_panel.py" line="743"/>
         <source>WHAT LEAVES THIS MACHINE</source>
         <translation>КАКВО НАПУСКА ТОЗИ КОМПЮТЪР</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="740"/>
+        <location filename="../ui/widgets/agent_panel.py" line="739"/>
         <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
         <translation>Без това агентът не чете стойностите на полетата ви. Вече записаните във филтрите и любимите се изпращат така или иначе.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="591"/>
+        <location filename="../ui/widgets/agent_panel.py" line="590"/>
         <source>You can already type the next request.</source>
         <translation>Вече можете да пишете следващата заявка.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/agent_panel.py" line="746"/>
+        <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
         <translation>Вашата заявка, имената на слоевете и полетата, изразите на филтрите и резултатите от инструментите на агента, към този доставчик и при неговите условия. Разговорът се пази на този компютър за всеки проект, докато не започнете нов.</translation>
     </message>

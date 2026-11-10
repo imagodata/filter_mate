@@ -102,6 +102,53 @@ class TestHandlers:
         assert not error and answer["active_filters"] == {"communes": "a = 1"}
         assert accessor._last_applied_source == "agent_chat"
 
+    def test_apply_filter_says_the_total_when_the_layer_had_no_filter(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", feature_count=12))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")
+        assert not error and answer["feature_count"] == 12 and answer["total_count"] == 12 and "warning" not in answer
+
+    def test_apply_filter_has_no_total_on_a_layer_already_filtered(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", feature_count=3,
+                                                  subset="b = 2"))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")
+        assert not error and answer["feature_count"] == 3 and "total_count" not in answer
+
+    def test_apply_filter_that_keeps_nothing_says_so(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", feature_count=0))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")
+        assert not error and "No feature kept" in answer["warning"]
+
+    def test_cross_filter_says_what_each_target_keeps_and_warns_on_none(self, tmp_path):
+        accessor = Accessor(cross_filter=CrossFilterResult(filtered=["b", "c"], kept={"b": 0, "c": 7}))
+        error, answer = run(accessor, tmp_path, "cross_filter", source_layer="a", target_layers=["b", "c"],
+                            predicates=["Intersect"])
+        assert not error, answer
+        assert answer["kept"] == {"b": 0, "c": 7}
+        assert "direction of the predicate" in answer["warnings"]["b"] and "c" not in answer["warnings"]
+
+    @pytest.mark.parametrize("subset, selections, selected_only, refused", [
+        ("", [], True, True),  # nothing selected, no filter: the whole layer would be used
+        ("", [{"layer_id": "S1", "name": "routes", "selected_count": 3}], True, False),
+        ("nature = 'A'", [], True, False),  # its filter says which features: "the roads I kept"
+        ("", [], False, False),  # every feature, on purpose
+    ])
+    def test_a_source_with_nothing_selected_is_not_used_whole_by_mistake(self, tmp_path, subset, selections,
+                                                                        selected_only, refused):
+        accessor = Accessor(describe=LayerDetails("S1", "routes", "vector", subset=subset),
+                            map=MapContext(available=True, selections=selections))
+        error, answer = run(accessor, tmp_path, "cross_filter", source_layer="routes", target_layers=["b"],
+                            selected_only=selected_only)
+        assert error is refused, answer
+        if refused:
+            assert "select_features" in answer and "selected_only false" in answer
+            assert not [name for name, _ in accessor.calls if name == "cross_filter"]
+
+    def test_geometry_filter_warns_on_an_emptied_target(self, tmp_path):
+        accessor = Accessor(geometry=CrossFilterResult(filtered=["b"], kept={"b": 0}))
+        error, answer = run(accessor, tmp_path, "geometry_filter", wkt="POINT(0 0)", crs="EPSG:2154",
+                            target_layers=["b"], predicates=["Intersect"])
+        assert not error and "No feature kept" in answer["warnings"]["b"]
+
     @pytest.mark.parametrize("provider", ["ogr", "spatialite"])
     def test_invalid_sql_is_not_applied_where_the_provider_would_accept_it(self, tmp_path, provider):
         accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type=provider),
@@ -353,3 +400,71 @@ class TestRestFiltersArePlainClauses:
     def test_a_plain_filter_passes(self, make_client):
         response = make_client(Accessor()).post("/filters/apply", json={"layer_name": "communes", "expression": '"pop" > 1000 AND "nom" LIKE \'A%\''})
         assert response.status_code != 400, response.text
+
+
+class TestLayerListing:
+    """What list_layers and filter_state give the model: what it asked for, long filters cut."""
+
+    def test_kind_name_and_limit(self):
+        from filtermate_api.layer_listing import select_layers
+        rows = [{"name": "Routes A", "layer_kind": "vector"}, {"name": "MNT", "layer_kind": "raster"},
+                {"name": "routes B", "layer_kind": "vector"}]
+        assert [row["name"] for row in select_layers(rows, kind="vector")["layers"]] == ["Routes A", "routes B"]
+        assert [row["name"] for row in select_layers(rows, name_contains="ROUTES")["layers"]] == ["Routes A", "routes B"]
+        cut = select_layers(rows, limit=1)
+        assert len(cut["layers"]) == 1 and cut["more"] == 2 and "limit" in cut["note"]
+        assert "more" not in select_layers(rows)
+
+    def test_a_long_filter_is_cut_with_its_length(self):
+        from filtermate_api.layer_listing import MAX_FILTER_CHARS, select_layers
+        long = "x = 1 OR " * 100
+        row = select_layers([{"name": "a", "active_filter_expression": long}])["layers"][0]
+        assert len(row["active_filter_expression"]) == MAX_FILTER_CHARS + 1 and row["active_filter_expression_length"] == len(long)
+
+    def test_the_chat_tools_take_the_same_arguments(self, tmp_path):
+        accessor = Accessor()
+        error, answer = run(accessor, tmp_path, "list_layers", kind="raster")
+        assert not error and answer == {"layers": []}
+        error, answer = run(accessor, tmp_path, "list_layers", name_contains="commu")
+        assert not error and [row["name"] for row in answer["layers"]] == ["communes"]
+
+    def test_filter_state_cuts_a_long_subset(self, tmp_path):
+        accessor = Accessor(state=[FilteredLayer("L1", "communes", "vector", subset="a" * 900)])
+        error, answer = run(accessor, tmp_path, "filter_state")
+        assert not error and answer["layers"][0]["subset_length"] == 900
+
+
+class TestCombinedFilters:
+    """operator on apply_filter: the new condition with the current filter, never a copy of it by the model."""
+
+    def test_the_combination_puts_each_side_in_parentheses(self):
+        from filtermate_api.filter_combine import combined
+        assert combined("a = 1 OR b = 2", "c = 3", "AND") == ("(a = 1 OR b = 2) AND (c = 3)", "")
+        assert combined("a = 1", "c = 3", "AND NOT") == ("(a = 1) AND NOT (c = 3)", "")
+        assert combined("a = 1", "c = 3", None) == ("c = 3", "a = 1")  # replaced, and said so
+        assert combined("", "c = 3", "OR") == ("c = 3", "")
+        with pytest.raises(ValueError):
+            combined("a = 1", "c = 3", "XOR")
+
+    def test_the_chat_narrows_a_filtered_layer(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="\"dept\" = '31'",
+                            operator="AND")
+        assert not error and answer["expression"] == "(\"pop\" > 10) AND (\"dept\" = '31')"
+        assert accessor._active["communes"] == answer["expression"] and "replaced_filter" not in answer
+
+    def test_a_replacement_says_what_it_removed(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="\"dept\" = '31'")
+        assert not error and answer["replaced_filter"] == '"pop" > 10' and answer["expression"] == "\"dept\" = '31'"
+
+    def test_rest_combines_and_checks_only_the_new_condition(self, make_client):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))
+        response = make_client(accessor).post("/filters/apply", json={
+            "layer_name": "communes", "expression": "\"dept\" = '31'", "operator": "AND"})
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["expression"] == "(\"pop\" > 10) AND (\"dept\" = '31')" and body["replaced_filter"] == ""
+        refused = make_client(accessor).post("/filters/apply", json={
+            "layer_name": "communes", "expression": "1=1; DROP TABLE x", "operator": "AND"})
+        assert refused.status_code == 400

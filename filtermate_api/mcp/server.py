@@ -26,6 +26,7 @@ except ImportError:  # mcp 1.x
     from mcp.server.fastmcp.exceptions import ResourceError, ToolError
 from mcp.types import ToolAnnotations
 
+from ..layer_listing import DEFAULT_LIMIT, MAX_LIMIT, select_layers, short_filter
 from .rest_client import FilterMateAPIError, FilterMateClient, quote_segment
 from .settings import ConfigError, parse_settings
 
@@ -144,14 +145,21 @@ def build_server(client: FilterMateClient) -> Any:
     # -- read-only tools -------------------------------------------------------
 
     @mcp.tool(annotations=ToolAnnotations(title="List layers", readOnlyHint=True, openWorldHint=False))
-    async def list_layers() -> Dict[str, Any]:
+    async def list_layers(
+        kind: Annotated[Optional[Literal["vector", "raster", "point_cloud"]], Field(
+            description="Only the layers of this kind")] = None,
+        name_contains: Annotated[Optional[str], Field(max_length=200, description=(
+            "Only the layers whose name holds this text (case ignored)"))] = None,
+        limit: Annotated[int, Field(ge=1, le=MAX_LIMIT, description="At most this many layers")] = DEFAULT_LIMIT,
+    ) -> Dict[str, Any]:
         """List the layers of the open QGIS project that FilterMate knows, as {"layers": [...]}.
 
         Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid,
-        layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression.
-        Call this first: the other tools take layer names or ids from it.
+        layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression (cut past 200
+        characters, with active_filter_expression_length: describe_layer gives it whole). "more" says how many
+        matching layers were left out by limit. Call this first: the other tools take layer names or ids from it.
         """
-        return {"layers": await call("GET", "/layers")}
+        return select_layers(await call("GET", "/layers"), kind, name_contains, limit)
 
     @mcp.tool(annotations=ToolAnnotations(title="Filter status", readOnlyHint=True, openWorldHint=False))
     async def filter_status() -> Dict[str, Any]:
@@ -166,11 +174,12 @@ def build_server(client: FilterMateClient) -> Any:
     async def filter_state() -> Dict[str, Any]:
         """Every layer FilterMate filters right now, of any kind, as {"layers": [...]}.
 
-        Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster) and
-        derived (true when the layer reads a clipped copy of its source). Use it to check what a filter did, and to
-        find out what a previous call did when a request timed out.
+        Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster; cut past 200
+        characters, with subset_length: describe_layer gives it whole) and derived (true when the layer reads a
+        clipped copy of its source). Use it to check what a filter did, and to find out what a previous call did
+        when a request timed out.
         """
-        return {"layers": await call("GET", "/filters/state")}
+        return {"layers": [short_filter(row, "subset") for row in await call("GET", "/filters/state")]}
 
     @mcp.tool(annotations=ToolAnnotations(title="List favorites", readOnlyHint=True, openWorldHint=False))
     async def list_favorites() -> Dict[str, Any]:
@@ -187,7 +196,8 @@ def build_server(client: FilterMateClient) -> Any:
         """What a filter can test on a layer: its fields, bands or point attributes.
 
         Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its
-        current filter), and by kind: fields [{name, type, alias, filterable}] for a vector layer (filterable is
+        current filter), and by kind: sql_dialect (postgresql, sqlite, ogr_sql or qgis_expression: the language of
+        its filter) and fields [{name, type, alias, filterable}] for a vector layer (filterable is
         false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}]
         and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point
         cloud.
@@ -250,10 +260,15 @@ def build_server(client: FilterMateClient) -> Any:
             "function is refused."))],
         source: Annotated[str, Field(max_length=200, description=(
             "Free-text tag shown in the FilterMate log to tell where the filter came from"))] = "mcp",
+        operator: Annotated[Optional[Operator], Field(description=(
+            "Combine with the layer's current filter instead of replacing it: AND narrows it (the new condition "
+            "only, never a copy of the current filter), OR widens it, AND NOT removes the new condition from it"))]
+            = None,
     ) -> Dict[str, Any]:
-        """Set the filter (subset string) of one vector layer; it replaces the layer's previous filter.
+        """Set the filter (subset string) of one vector layer; without operator it replaces the previous filter.
 
-        Returns success and active_filters ({layer name: subset string} after the call). For spatial filtering
+        Returns success, expression (as applied), replaced_filter (the filter the layer had and lost, when no
+        operator was given) and active_filters ({layer name: subset string} after the call). For spatial filtering
         between layers use cross_filter or geometry_filter. Revert with clear_filters.
 
         Caution: some providers (GeoPackage, Shapefile through OGR) accept an invalid SQL expression without any
@@ -261,7 +276,7 @@ def build_server(client: FilterMateClient) -> Any:
         expected matches) and use clear_filters to recover.
         """
         return await call("POST", "/filters/apply",
-                          _body(layer_name=layer_name, expression=expression, source=source))
+                          _body(layer_name=layer_name, expression=expression, source=source, operator=operator))
 
     @mcp.tool(annotations=_write("Undo the last vector filter", idempotent=False))
     async def undo_filter() -> Dict[str, Any]:
@@ -300,10 +315,9 @@ def build_server(client: FilterMateClient) -> Any:
             "Polygon targets only: minimum share (%) of the target that must lie inside the source"))] = 0.0,
         operator: Annotated[Optional[Operator], Field(description=_OPERATOR_DOC)] = None,
         selected_only: Annotated[bool, Field(description=(
-            "Vector source: use the features currently selected in QGIS (all features when none is selected; "
-            "a web service source such as WFS must be selected or already filtered, it is never read whole). "
-            "You cannot change the QGIS selection with these tools: ask the user to select the features, "
-            "or use geometry_filter with a WKT geometry."))] = True,
+            "Vector source: use the features currently selected in QGIS; with none selected, the features its "
+            "filter keeps. A web service source such as WFS must be selected or already filtered, it is never read "
+            "whole. select_features changes the selection; false uses all the features the source shows."))] = True,
         raster_selection: Annotated[Optional[RasterSelection], Field(description=(
             "REQUIRED when the source is a raster: which pixels are the source area"))] = None,
         point_cloud_criteria: Annotated[Optional[PointCloudCriteria], Field(description=(

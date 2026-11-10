@@ -27,7 +27,7 @@ from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
     custom_to_json, make_source,
 )
-from ..styles.mockup_design import FONT_FAMILY, render_icon, stylesheet_is_dark, tokens
+from ..styles.mockup_design import FONT_FAMILY, plugin_is_dark, render_icon, tokens
 from ..styles.theme_manager import OWN_STYLE_PROPERTY
 
 PANEL_NAME = "AGENT"
@@ -456,10 +456,9 @@ class AgentPanel(QFrame):
     # --- look -----------------------------------------------------------------
 
     def _dark(self) -> bool:
-        dark = stylesheet_is_dark(self)
-        if dark is None:
-            dark = self.palette().window().color().lightness() < 128
-        return bool(dark)
+        # The theme of the dock (its sheet, then its icon manager) before the palette, which can be the other
+        # theme: QGIS may run a dark system palette under the light FilterMate theme, and the reverse.
+        return bool(plugin_is_dark(self))
 
     def _refresh_look(self) -> None:
         """Icons and colors of the current theme, as the mockup draws them."""

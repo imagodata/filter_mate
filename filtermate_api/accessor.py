@@ -72,6 +72,8 @@ class CrossFilterResult:
     # Layers filtered with a reservation, also in ``filtered``: a web service read up to its
     # feature or time budget keeps exact features only, some may be missing (partial result).
     warnings: Dict[str, str] = field(default_factory=dict)
+    # Features each filtered layer keeps, when it was counted.
+    kept: Dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -147,6 +149,8 @@ class LayerDetails:
     geometry_type: str = ""
     feature_count: int = -1
     subset: str = ""
+    # Vector: the language its filter is written in: postgresql, sqlite, ogr_sql or qgis_expression.
+    sql_dialect: str = ""
     # Vector: {"name", "type", "alias", "filterable"}; virtual and joined fields are not filterable.
     fields: List[Dict[str, Any]] = field(default_factory=list)
     # Raster: {"band", "name", "classes": [{"value", "label"}]}, classes only on a paletted band.

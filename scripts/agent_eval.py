@@ -30,7 +30,12 @@ sys.path.insert(0, str(ROOT / "core"))
 from agent.messages import ERROR_NETWORK, ProviderError, StreamFailure  # noqa: E402
 from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import ProviderConfig, error_from_response  # noqa: E402
+from agent.project_summary import project_summary  # noqa: E402
 from agent.sql_guard import filter_problem  # noqa: E402
+
+# As filtermate_api/agent_tools.py words it (not imported: it needs QGIS).
+NOTHING_KEPT = ("No feature kept. Check the direction of the predicate (the target is tested against the source), "
+                "the buffer, and that the source holds the features meant (its selection, its filter).")
 from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import CHAT_ONLY, chat_tools, load_catalog  # noqa: E402
@@ -85,6 +90,7 @@ class SimulatedProject:
         setup = setup or {}
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
+        self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
 
     def _layer(self, reference: str):
         name = self.by_ref.get(reference)
@@ -142,16 +148,36 @@ class SimulatedProject:
             name, layer = self._layer(args["layer_name"])
             if layer["kind"] != "vector":
                 raise ToolFailure(f"'{name}' is not a vector layer")
-            self.filters[name] = args["expression"]
-            return {"success": True, "layer_name": name, "expression": args["expression"],
-                    "active_filters": dict(self.filters)}
+            unfiltered = name not in self.filters
+            previous = self.filters.get(name, "")
+            operator = args.get("operator")
+            self.filters[name] = (f"({previous}) {operator} ({args['expression']})" if operator and previous
+                                  else args["expression"])
+            total = layer.get("count", 30)
+            answer = {"success": True, "layer_name": name, "expression": args["expression"],
+                      "active_filters": dict(self.filters), "feature_count": max(total // 4, 1)}
+            if unfiltered:
+                answer["total_count"] = total
+            if previous and not operator:
+                answer["replaced_filter"] = previous
+            answer["expression"] = self.filters[name]
+            return answer
 
         def relation(args):
             targets = self._targets(args.get("target_layers", []))
             source = self._layer(args["source_layer"])[0] if "source_layer" in args else "an area"
+            if ("source_layer" in args and args.get("selected_only", True) and LAYERS[source]["kind"] == "vector"
+                    and source not in self.selected and source not in self.filters
+                    and not args.get("raster_selection") and not args.get("point_cloud_criteria")):
+                raise ToolFailure(  # as filtermate_api/agent_tools.py refuses it
+                    f"Nothing is selected on '{source}' and it has no filter, so every feature would be used. Select "
+                    "the features meant with select_features first, or call again with selected_only false to use "
+                    "them all.")
             for name in targets:
                 self.filters[name] = f"filtered by {source}"
-            return {"filtered": targets, "failed": {}, "skipped": {}}
+            kept = {name: 0 if name in self.empty else max(LAYERS[name].get("count", 30) // 3, 1) for name in targets}
+            warnings = {name: NOTHING_KEPT for name, count in kept.items() if count == 0}
+            return {"filtered": targets, "failed": {}, "skipped": {}, "kept": kept, "warnings": warnings}
 
         def point_cloud_filter(args):
             done = self._targets(args["layers"])
@@ -285,9 +311,11 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
         stray = {name for call in writes for name in _touched(call.arguments, by_ref)} - allowed
         if stray:
             continue  # a correction is fine, a filter left on another layer is not
-        last = writes[-len(steps):] if len(writes) >= len(steps) else []
-        if last and all(any(step["tool"] == call.name and matches(step.get("args", {}), call.arguments, by_ref)
-                            for call in last) for step in steps):
+        # Each expected step is judged on the last write of its tool: a model that corrects a call is not
+        # blamed for the first try, nor for an earlier step that the correction pushed back.
+        latest = {call.name: call for call in writes}
+        if all(step["tool"] in latest and matches(step.get("args", {}), latest[step["tool"]].arguments, by_ref)
+               for step in steps):
             return ""
     return f"writes do not match: {[(call.name, call.arguments) for call in writes]}"
 
@@ -354,7 +382,11 @@ def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     tools = chat_tools()
     session = AgentSession(provider, tools, SYSTEM_PROMPT, AgentLimits())
     executor = ToolExecutor(tools, project.handlers())
-    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True)
+    # As the chat sends it: the state of the project after the request.
+    handlers = project.handlers()
+    context = project_summary(handlers["list_layers"]({})["layers"],
+                              [{"name": name, "selected_count": 1} for name in project.selected])
+    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True, context=context)
     write_tools = [tool.name for tool in load_catalog() + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):

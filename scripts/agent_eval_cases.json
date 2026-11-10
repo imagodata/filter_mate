@@ -57,7 +57,8 @@
   "expect": [[{"tool": "point_cloud_filter", "args": {"layers": ["lidar_hd"], "criteria": {"classes": [6]}},
     "call_args": {"layers": ["lidar_hd"], "criteria": {"classes": [6]}}}]]},
  {"id": "lidar_ground_z", "prompt": "Show ground points below 800 m in the point cloud.",
-  "expect": [[{"tool": "point_cloud_filter", "args": {"layers": ["lidar_hd"], "criteria": {"classes": [2], "z_max": 800}},
+  "expect": [[{"tool": "point_cloud_filter", "args": {"layers": ["lidar_hd"], "criteria": {"any_of": [
+      {"classes": [2], "z_max": 800}, {"classes": [2], "expression": {"contains": ["Z", "800"]}}]}},
     "call_args": {"layers": ["lidar_hd"], "criteria": {"classes": [2], "z_max": 800}}}]]},
  {"id": "lidar_by_commune", "prompt": "Découpe le nuage de points sur la commune sélectionnée.",
   "expect": [[{"tool": "cross_filter", "args": {"source_layer": "communes", "target_layers": ["lidar_hd"]},
@@ -115,5 +116,20 @@
   "expect": [[{"tool": "undo_agent_step", "args": {}, "call_args": {}}]], "forbid": ["clear_filters"]},
  {"id": "undo_not_for_a_new_filter", "prompt": "Garde seulement les routes nationales.",
   "expect": [[{"tool": "apply_filter", "args": {"layer_name": "routes", "expression": {"contains": ["nature", "Nationale"]}},
-    "call_args": {"layer_name": "routes", "expression": "\"nature\" = 'Nationale'"}}]], "forbid": ["undo_agent_step"]}
+    "call_args": {"layer_name": "routes", "expression": "\"nature\" = 'Nationale'"}}]], "forbid": ["undo_agent_step"]},
+ {"id": "cross_nothing_kept", "setup": {"selected": ["routes"], "empty": ["batiments"]},
+  "prompt": "Garde les bâtiments qui touchent les routes sélectionnées.",
+  "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"]},
+    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "predicates": ["Touch"]}}],
+   [{"tool": "clear_filters", "args": {"layers": ["batiments"]}, "call_args": {"layers": ["batiments"]}}]]},
+ {"id": "cross_every_source_feature", "setup": {"selected": []},
+  "prompt": "Garde les bâtiments à moins de 20 mètres d'une route, n'importe laquelle.",
+  "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20,
+    "selected_only": false},
+    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20, "selected_only": false}}]]},
+ {"id": "narrow_with_and", "setup": {"filters": {"communes": "\"population\" > 10000"}},
+  "prompt": "Parmi ces communes, garde seulement celles du département 31.",
+  "expect": [[{"tool": "apply_filter", "args": {"layer_name": "communes", "expression": {"contains": ["dept", "31"]},
+    "operator": "AND"},
+    "call_args": {"layer_name": "communes", "expression": "\"dept\" = '31'", "operator": "AND"}}]]}
 ]}
