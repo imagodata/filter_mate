@@ -13,8 +13,9 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 |---|---|---|
 | 1. Foundations | Neutral conversation, provider adapters, tool catalog, read tools, evaluation bench | done |
 | 2. Chat | Panel, Qt transport, key in `QgsAuthManager`, undo of a whole turn | done |
-| 3. Free quota | Relay holding the key, per-install and global limits | to do |
-| 4. Native MCP | Local MCP server without dependencies, shared activity log | to do |
+| 3. Free quota | Relay holding the key, per-install and global limits | done |
+| 4. Native MCP | Local MCP server without dependencies, shared activity log | done |
+| 5. Map context | The map, the layer tree and what changed, sent with each request; style, joins, relations on demand | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -76,6 +77,16 @@ Rules worth keeping:
   derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
 - **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
 - A conversation does not survive a change of project or of provider.
+- **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
+  message, so the cached prefix does not change. Three levels:
+  - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer
+    tree with kind, feature count, CRS when it is not the project's, group, hidden, filter; the selections;
+  - what changed since the last answer, when something did: layers added or removed, filters, visibility, selections,
+    active layer, view. The project is read when an answer ends and compared at the next request, so these are changes
+    made outside the conversation (the user, or another application through the MCP server);
+  - on demand, `describe_layer`: place in the tree, extent, style (renderer, its field, how many classes, labels,
+    opacity, scale range), joins and relations. No attribute value is in the style: class values and labels stay out,
+    as `field_values` does when values are not shared. The extent of a web service is not read.
 - **Two stacks of sections** (`ui/layout/dock_chrome.py`): EXPLORING / AGENT above the splitter, FILTERING / EXPORTING /
   CONFIGURATION below, one section open at most in each. AGENT folds EXPLORING and FILTERING; FILTERING brings EXPLORING
   back. `tabTools_current_index` stays 0 / 1 / 2 for the lower sections and is -1 when none is open.

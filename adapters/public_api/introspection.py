@@ -21,6 +21,9 @@ MAX_CLASSES = 100
 MAX_VALUE_CHARS = 200
 MAX_VALUES = 200
 MAX_SELECTIONS = 50
+MAX_JOINS = 20
+MAX_RELATIONS = 20
+MAX_GROUP_CHARS = 200
 # SQLite reads an unknown "name" as the text 'name': no error, and a filter that keeps the wrong features.
 _UNKNOWN_NAME_IS_TEXT = ('ogr', 'spatialite')
 _IMPLICIT_COLUMNS = frozenset({'fid', 'ogc_fid', 'rowid', 'geom', 'geometry', 'the_geom', 'wkb_geometry'})
@@ -101,18 +104,122 @@ def describe_layer(reference: str) -> Optional[Dict[str, Any]]:
         return None
     kind = layer_kind(layer)
     crs = _safe(layer.crs)
+    _, group, visible = tree_places().get(layer.id(), (0, '', True))
     details: Dict[str, Any] = {
         'layer_id': layer.id(), 'name': layer.name(), 'layer_kind': kind.value,
         'provider_type': _safe(layer.providerType, '') or '',
         'crs_authid': (_safe(crs.authid, '') if crs is not None else '') or '',
+        'visible': visible, 'group': group, 'extent': _layer_extent(layer), 'style': _style(layer, kind),
     }
     if kind is LayerKind.VECTOR:
         details.update(_vector_details(layer))
+        details.update({'joins': _joins(layer), 'relations': _relations(layer)})
     elif kind is LayerKind.RASTER:
         details.update(_raster_details(layer))
     elif kind is LayerKind.POINT_CLOUD:
         details.update(_point_cloud_details(layer))
     return details
+
+
+def tree_places() -> Dict[str, Any]:
+    """``{layer id: (rank, groups, visible)}`` of the layer tree, top first.
+
+    ``groups`` are the groups above the layer, outermost first, joined by " / "; ``visible`` is the layer checked
+    with every group above it.
+    """
+    from qgis.core import QgsProject
+    root = QgsProject.instance().layerTreeRoot()
+    places: Dict[str, Any] = {}
+    for rank, node in enumerate(_safe(root.findLayers, []) or []):
+        names: List[str] = []
+        parent = _safe(node.parent)
+        while parent is not None and parent is not root and _safe(parent.parent) is not None:
+            names.append(_safe(parent.name, '') or '')
+            parent = _safe(parent.parent)
+        places[node.layerId()] = (rank, ' / '.join(reversed(names))[:MAX_GROUP_CHARS],
+                                  bool(_safe(node.isVisible, True)))
+    return places
+
+
+def _rectangle(rectangle) -> List[float]:
+    """``[xmin, ymin, xmax, ymax]``; empty for a rectangle that is null or not finite.
+
+    A rectangle without width or height is kept: it is the extent of a single point, or of points in a row.
+    """
+    if rectangle is None or _safe(rectangle.isNull, True):
+        return []
+    numbers = [rectangle.xMinimum(), rectangle.yMinimum(), rectangle.xMaximum(), rectangle.yMaximum()]
+    return numbers if all(math.isfinite(item) for item in numbers) else []
+
+
+def _is_web_service(layer) -> bool:
+    from ..qgis.source_capability_probe import capability_for_layer
+    capability = _safe(lambda: capability_for_layer(layer))
+    return capability is not None and bool(capability.is_remote_service)
+
+
+def _layer_extent(layer) -> List[float]:
+    """Extent in the layer CRS; a web service is not asked, it could read its features to answer."""
+    return [] if _is_web_service(layer) else _rectangle(_safe(layer.extent))
+
+
+def _style(layer, kind: LayerKind) -> Dict[str, Any]:
+    """How the layer is drawn, without any attribute value: renderer, its field, how many classes, labels, scales."""
+    style: Dict[str, Any] = {}
+    renderer = _safe(layer.renderer)
+    renderer_type = _safe(renderer.type) if renderer is not None else None
+    if renderer_type:
+        style['renderer'] = str(renderer_type)
+    if kind is LayerKind.VECTOR and renderer is not None:
+        attribute = _safe(renderer.classAttribute) if hasattr(renderer, 'classAttribute') else None
+        if attribute:
+            style['field'] = str(attribute)[:MAX_VALUE_CHARS]
+        for classes in ('categories', 'ranges'):
+            if hasattr(renderer, classes):
+                style['classes'] = len(_safe(getattr(renderer, classes), []) or [])
+        if _safe(layer.labelsEnabled, False):
+            labeling = _safe(layer.labeling)
+            settings = _safe(labeling.settings) if labeling is not None and _safe(labeling.type) == 'simple' else None
+            style['labels'] = (str(_safe(lambda: settings.fieldName, '') or '')[:MAX_VALUE_CHARS]
+                               if settings is not None else 'rules')
+    opacity = _safe(layer.opacity)
+    if isinstance(opacity, (int, float)) and opacity < 1:
+        style['opacity'] = round(float(opacity), 2)
+    if _safe(layer.hasScaleBasedVisibility, False):
+        # QGIS names them the other way round: minimumScale is the most zoomed out the layer still shows at.
+        style.update({'min_scale': _safe(layer.minimumScale), 'max_scale': _safe(layer.maximumScale)})
+    return style
+
+
+def _joins(layer) -> List[Dict[str, Any]]:
+    from qgis.core import QgsProject
+    joins: List[Dict[str, Any]] = []
+    for join in (_safe(layer.vectorJoins, []) or [])[:MAX_JOINS]:
+        other = QgsProject.instance().mapLayer(_safe(join.joinLayerId, '') or '')
+        joins.append({'layer': other.name() if other is not None else '',
+                      'field': _safe(join.joinFieldName, '') or '',
+                      'target_field': _safe(join.targetFieldName, '') or '',
+                      'prefix': _safe(join.prefix, '') or ''})
+    return joins
+
+
+def _relations(layer) -> List[Dict[str, Any]]:
+    """The relations of the project this layer takes part in, as the child (it holds the key) or the parent."""
+    from qgis.core import QgsProject
+    manager = _safe(QgsProject.instance().relationManager)
+    if manager is None:
+        return []
+    relations: List[Dict[str, Any]] = []
+    for role, getter, other_layer in (('child', manager.referencingRelations, 'referencedLayer'),
+                                      ('parent', manager.referencedRelations, 'referencingLayer')):
+        for relation in _safe(lambda: getter(layer), []) or []:
+            pairs = _safe(relation.fieldPairs, {}) or {}  # {field of the child: field of the parent}
+            other = _safe(getattr(relation, other_layer))
+            relations.append({
+                'name': _safe(relation.name, '') or '', 'role': role, 'layer': other.name() if other is not None else '',
+                'fields': [{'field': child if role == 'child' else parent,
+                            'other_field': parent if role == 'child' else child} for child, parent in pairs.items()]})
+    return relations[:MAX_RELATIONS]
 
 
 # OGR files whose filter is run by SQLite rather than by the OGR SQL engine.
@@ -284,6 +391,7 @@ def map_context() -> Dict[str, Any]:
         'available': True,
         'canvas_crs': _safe(lambda: canvas.mapSettings().destinationCrs().authid(), '') or '',
         'extent_wkt': _safe(lambda: canvas.extent().asWktPolygon(), '') or '',
+        'extent': _rectangle(_safe(canvas.extent)),
         'scale': _safe(canvas.scale),
     })
     active = _safe(iface.activeLayer)

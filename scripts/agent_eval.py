@@ -239,6 +239,7 @@ class SimulatedProject:
 
         def map_context(_):
             return {"available": True, "project_crs": "EPSG:2154", "canvas_crs": "EPSG:2154", "extent_wkt": EXTENT_WKT,
+                    "extent": [570000.0, 6270000.0, 580000.0, 6280000.0],
                     "scale": 25000.0, "active_layer_id": "communes_a1", "active_layer_name": "communes",
                     "selections": [{"layer_id": LAYERS[name]["id"], "name": name, "selected_count": 1} for name in self.selected]}
 
@@ -385,7 +386,8 @@ def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     # As the chat sends it: the state of the project after the request.
     handlers = project.handlers()
     context = project_summary(handlers["list_layers"]({})["layers"],
-                              [{"name": name, "selected_count": 1} for name in project.selected])
+                              [{"name": name, "selected_count": 1} for name in project.selected],
+                              handlers["map_context"]({}))
     exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True, context=context)
     write_tools = [tool.name for tool in load_catalog() + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)

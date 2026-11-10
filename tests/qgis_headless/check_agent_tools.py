@@ -76,6 +76,85 @@ def make_raster(path):
     del dataset
 
 
+def check_map_details(introspection, project, gpkg, shp, plain):
+    """Where a layer sits in the tree, its extent, how it is drawn, its joins and relations."""
+    from qgis.core import (
+        QgsCategorizedSymbolRenderer, QgsPalLayerSettings, QgsRelation, QgsRendererCategory, QgsSymbol,
+        QgsVectorLayerJoinInfo, QgsVectorLayerSimpleLabeling,
+    )
+    check("describe: at the root, visible, nothing joined", (plain["visible"], plain["group"], plain["joins"],
+                                                             plain["relations"]) == (True, "", [], []), plain)
+    check("describe: extent in the layer CRS", plain["extent"] == [650001.0, 6860000.0, 650060.0, 6860000.0],
+          plain["extent"])
+    check("describe: single symbol, no label", plain["style"] == {"renderer": "singleSymbol"}, plain["style"])
+    root = project.layerTreeRoot()
+    places = introspection.tree_places()
+    check("tree: both layers, ranked", sorted(rank for rank, _, _ in places.values()) == [0, 1] and
+          set(places) == {gpkg.id(), shp.id()}, places)
+
+    outer = root.addGroup("Fonds")
+    inner = outer.addGroup("Admin")
+    node = root.findLayer(gpkg.id())
+    inner.addChildNode(node.clone())
+    root.removeChildNode(node)
+    outer.setItemVisibilityChecked(False)
+    renderer = QgsCategorizedSymbolRenderer("nom", [
+        QgsRendererCategory(name, QgsSymbol.defaultSymbol(gpkg.geometryType()), name) for name in ("Saint-01", "Muret-02")])
+    previous = gpkg.renderer().clone()
+    gpkg.setRenderer(renderer)
+    settings = QgsPalLayerSettings()
+    settings.fieldName = "nom"
+    gpkg.setLabeling(QgsVectorLayerSimpleLabeling(settings))
+    gpkg.setLabelsEnabled(True)
+    gpkg.setOpacity(0.5)
+    gpkg.setScaleBasedVisibility(True)
+    gpkg.setMinimumScale(50000)
+    gpkg.setMaximumScale(1000)
+    join = QgsVectorLayerJoinInfo()
+    join.setJoinLayer(shp)
+    join.setJoinFieldName("nom")
+    join.setTargetFieldName("nom")
+    join.setPrefix("r_")
+    gpkg.addJoin(join)
+    relation = QgsRelation()
+    relation.setId("communes_routes")
+    relation.setName("routes des communes")
+    relation.setReferencingLayer(shp.id())
+    relation.setReferencedLayer(gpkg.id())
+    relation.addFieldPair("pop", "taux")
+    project.relationManager().addRelation(relation)
+
+    details = introspection.describe_layer("communes")
+    check("describe: its groups, hidden with them", (details["group"], details["visible"]) == ("Fonds / Admin", False),
+          details)
+    check("describe: categorized on a field, labelled, scales", details["style"] == {
+        "renderer": "categorizedSymbol", "field": "nom", "classes": 2, "labels": "nom", "opacity": 0.5,
+        "min_scale": 50000.0, "max_scale": 1000.0}, details["style"])
+    check("describe: no attribute value in the style", "Saint-01" not in json.dumps(details["style"]))
+    check("describe: the join", details["joins"] == [
+        {"layer": "routes", "field": "nom", "target_field": "nom", "prefix": "r_"}], details["joins"])
+    check("describe: parent of a relation", details["relations"] == [{
+        "name": "routes des communes", "role": "parent", "layer": "routes",
+        "fields": [{"field": "taux", "other_field": "pop"}]}], details["relations"])
+    child = introspection.describe_layer("routes")["relations"]
+    check("describe: child of a relation", child == [{
+        "name": "routes des communes", "role": "child", "layer": "communes",
+        "fields": [{"field": "pop", "other_field": "taux"}]}], child)
+    places = introspection.tree_places()
+    check("tree: order of the tree, groups and visibility", (places[shp.id()], places[gpkg.id()]) ==
+          ((0, "", True), (1, "Fonds / Admin", False)), places)
+    json.dumps(details)
+
+    # the rest of the checks runs on the layers as they were
+    project.relationManager().removeRelation("communes_routes")
+    gpkg.removeJoin(shp.id())
+    gpkg.setRenderer(previous)
+    gpkg.setLabelsEnabled(False)
+    gpkg.setOpacity(1.0)
+    gpkg.setScaleBasedVisibility(False)
+    outer.setItemVisibilityChecked(True)
+
+
 def main(introspection):
     work = tempfile.mkdtemp()
     project = QgsProject.instance()
@@ -98,6 +177,7 @@ def main(introspection):
     check("describe by id", introspection.describe_layer(gpkg.id())["name"] == "communes")
     check("describe: absent is None", introspection.describe_layer("nope") is None)
     json.dumps(details)
+    check_map_details(introspection, project, gpkg, shp, details)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")
@@ -237,7 +317,9 @@ def main(introspection):
     from filter_mate.core.agent.tool_executor import ToolExecutor
 
     class PublicApi:
-        pass
+        @staticmethod
+        def get_active_filters():  # what list_layers asks the plugin
+            return {}
 
     accessor = QGISFilterMateAccessor(PublicApi(), None)
     executor = ToolExecutor(chat_tools(), build_handlers(accessor, os.path.join(work, "exports")))
@@ -264,6 +346,11 @@ def main(introspection):
     check("tool: layer not found", error and content == "Layer not found.", content)
     error, content = tool("map_context")
     check("tool map_context", not error and json.loads(content)["available"] is False, content)
+    error, content = tool("list_layers")
+    rows = {} if error else {row["name"]: (rank, row["group"], row["visible"])
+                             for rank, row in enumerate(json.loads(content)["layers"])}
+    check("tool list_layers: order of the tree, groups", not error and rows["routes"][0] < rows["communes"][0] and
+          rows["communes"][1:] == ("Fonds / Admin", True) and rows["routes"][1:] == ("", True), content)
 
     # --- driving QGIS (adapters.public_api.project_control), without a window
     from filter_mate.adapters.public_api import project_control
