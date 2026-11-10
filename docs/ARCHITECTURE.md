@@ -66,7 +66,7 @@ Modules that need neither QGIS, Qt nor GDAL moved to `filtermate_core/` in 5.1; 
 - `backend_registry.py`: `BackendRegistry` returns the executor for a layer's provider type. It is created in `filter_mate_app.py` and injected into `FilterEngineTask`.
 - `qgis/`: QGIS adapters (layers, expressions, signals in `signals/`, `tasks/`) and `coverage_layers/` for rasters and point clouds (see below).
 - `repositories/`: layer and history storage.
-- `public_api/`: `operations.py` and `filter_mate_public_api.py`; `introspection.py` (fields, values, statistics, samples, identify, map state) and `project_control.py` (zoom, selection, visibility, adding and removing layers) serve the chat and the MCP servers.
+- `public_api/`: `operations.py` and `filter_mate_public_api.py`; `introspection.py` (fields, values, statistics, samples, identify, map state), `project_control.py` (zoom, selection, visibility, adding and removing layers) and `processing_tools.py` (the Processing algorithms AGENT may find, describe and run, under `core/agent/processing_policy.py`) serve the chat and the MCP servers.
 - `agent/`: `qt_transport.py` (streamed requests), `bounded_http.py` (every network read of the agent: no redirect, time and size capped), `free_quota.py`, `native_mcp.py`, `turn_checkpoint.py` and `turn_effects.py` (undo of a turn and of its steps), `transcript_store.py`.
 - `task_builder.py` (`TaskParameterBuilder`), `filter_result_handler.py`, `undo_redo_handler.py`, `database_manager.py`, `app_bridge.py` (service locator used by the legacy app).
 

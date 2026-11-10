@@ -39,7 +39,7 @@ splitter handle, 🔍 FILTERING, 📦 EXPORTING and 🔧 CONFIGURATION below.
 
 | Section | What you do there |
 |---|---|
-| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, adds open data and exports; each step can be undone. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
+| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, adds open data, runs Processing algorithms of QGIS and exports; each step can be undone. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
 | 🧭 **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
 | 🔍 **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
 | 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
@@ -62,7 +62,7 @@ the original source back, and project files are always saved with the original s
   no reload), with an OGR path for everything else. In the [documented Saint-Gaudens run](https://imagodata.github.io/filter_mate/stories.html#s1),
   12 layers from a 2.9 GB department-wide GeoPackage were filtered in under a second. Timings depend on the data, hardware and cache.
 - 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result.
-- 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, with Claude, Mistral,
+- 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, Processing algorithms included, with Claude, Mistral,
   OpenAI or any compatible server, a local Ollama model, or a few free requests a month to try it. Filters apply at once
   and each step can be undone; exports and added or removed layers are confirmed. Optional sources: open data portals,
   WFS services, Sentinel-2 scenes, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
