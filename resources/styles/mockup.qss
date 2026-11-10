@@ -539,6 +539,31 @@
 #dockWidgetContents QToolBox#toolBox_tabTools::tab:hover {
     border-color: {fm_field_hover};
 }
+/* EXPLORING and AGENT headers: push buttons with the look of the sections above (ui/layout/dock_chrome.py). */
+#dockWidgetContents QPushButton#pushButton_section_exploring,
+#dockWidgetContents QPushButton#pushButton_section_agent {
+    background-color: {fm_section};
+    color: {fm_text};
+    border: 1px solid {fm_section_border};
+    border-radius: 6px;
+    padding: 0px 10px 0px 38px;
+    margin: 0px;
+    font-weight: 600;
+    text-align: left;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    min-height: 32px;  /* 34 px with the borders, as the QToolBox headers */
+    max-height: 32px;
+}
+#dockWidgetContents QPushButton#pushButton_section_exploring:checked,
+#dockWidgetContents QPushButton#pushButton_section_agent:checked {
+    border-color: {fm_section_on};
+    background-color: {fm_section};
+}
+#dockWidgetContents QPushButton#pushButton_section_exploring:hover,
+#dockWidgetContents QPushButton#pushButton_section_agent:hover {
+    border-color: {fm_field_hover};
+}
 /* The section headers are QToolBox buttons (not QToolButton), styled by ::tab above.
    A QToolButton rule here would hit the tool buttons inside the sections. */
 

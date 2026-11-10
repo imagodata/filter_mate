@@ -1271,13 +1271,20 @@ def s_wheel_needs_focus_check():
         report('SKIP', 'wheel over a list with the focus', 'no focus under Xvfb')
 
 
+def headers_height(toolbox):
+    heights = {b.height() for b in toolbox.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton'}
+    return heights.pop() if len(heights) == 1 else -1
+
+
 def s_agent_panel():
-    """The AGENT section: shown by default, first in the accordion."""
+    """Two stacks: EXPLORING / AGENT above, FILTERING / EXPORTING / CONFIGURATION below, and their rules."""
     d = dock()
     plugin = qgis.utils.plugins[PACKAGE]
     toolbox = d.toolBox_tabTools
-    check('agent: shown by default', getattr(d, '_agent_chat', None) is not None and toolbox.count() == 4,
-          str(toolbox.count()))
+    sections = getattr(d, '_fm_sections', None)
+    if not check('stacks: set up', sections is not None):
+        return
+    check('agent: shown by default', getattr(d, '_agent_chat', None) is not None and 'agent' in sections._headers)
     toolbox.setCurrentWidget(d.FILTERING)
     QApplication.processEvents()
     d.select_tabTools_index()
@@ -1290,12 +1297,20 @@ def s_agent_panel():
         return
     first = chat
     d.install_agent_panel(plugin)
-    check('agent: installed once', d._agent_chat is first and toolbox.count() == 4)
-    check('agent: first, under its name', toolbox.widget(0) is chat.panel and toolbox.itemText(0) == 'AGENT')
-    check('agent: the others keep their order', [toolbox.itemText(i) for i in range(1, 4)] ==
-          [toolbox.itemText(toolbox.indexOf(page)) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)])
-    check('agent: the open section stays open', toolbox.currentWidget() is d.FILTERING)
-    QApplication.processEvents()
+    agent_header = sections._headers['agent']
+    exploring_header = sections.exploring_header
+    check('agent: installed once', d._agent_chat is first and
+          len([h for h in sections.top.findChildren(QPushButton) if h.objectName() == 'pushButton_section_agent']) == 1)
+    check('stacks: AGENT shares the top stack with EXPLORING', chat.panel.parentWidget() is sections.top and
+          d.frame_exploring.parentWidget() is sections.top)
+    check('stacks: the lower one keeps its three sections in order', [toolbox.itemText(toolbox.indexOf(page)) for page in
+          (d.FILTERING, d.EXPORTING, d.CONFIGURATION)] == ['FILTERING', 'EXPORTING', 'CONFIGURATION'])
+    bottom_headers = [b for b in toolbox.findChildren(QAbstractButton)
+                      if b.objectName() == 'qt_toolbox_toolboxbutton' and b.isVisibleTo(toolbox)]
+    heights = {b.height() for b in bottom_headers} | {exploring_header.height(), agent_header.height()}
+    check('stacks: one header height everywhere', len(heights) == 1, str(heights))
+    check('stacks: FILTERING open, EXPLORING open, AGENT folded', toolbox.currentWidget() is d.FILTERING and
+          sections.is_open('exploring') and not sections.is_open('agent') and exploring_header.isChecked())
     check('agent: FILTERING is still section 0', d.tabTools_current_index == 0, str(d.tabTools_current_index))
     filter_button = d.widgets['ACTION']['FILTER']['WIDGET']
     check('agent: filter button on FILTERING', filter_button.isEnabled())
@@ -1308,20 +1323,24 @@ def s_agent_panel():
     tag = d.backend_indicator_label
     check('dock: the source tag is in the layer card', tag.parentWidget() is not None and
           tag.parentWidget().objectName() == 'label_exploring_coverage_layer', str(tag.parentWidget()))
-    folder = getattr(d, '_fm_exploring_folder', None)
-    check('dock: EXPLORING open on FILTERING', folder is not None and not d.frame_exploring.isHidden())
-    toolbox.setCurrentWidget(chat.panel)
+    agent_header.click()
     QApplication.processEvents()
-    check('dock: EXPLORING folds away while AGENT is open', d.frame_exploring.isHidden())
+    check('stacks: AGENT opens, EXPLORING and FILTERING fold', sections.is_open('agent') and
+          not sections.is_open('exploring') and toolbox.currentWidget() not in (d.FILTERING, d.EXPORTING, d.CONFIGURATION))
     check('agent: its own state', d.tabTools_current_index == -1, str(d.tabTools_current_index))
     check('agent: filter button off here', not filter_button.isEnabled())
+    check('stacks: the lower headers stay', all(b.isVisible() for b in bottom_headers))
+    panel = chat.panel
     panel = chat.panel
     check('agent: the welcome is shown', panel.welcome_title.isVisible())
     check('agent: the input is below it', panel.input.geometry().top() > panel.stack.geometry().bottom())
     check('agent: the input takes the width', panel.input.width() > panel.width() * 0.7,
           f"{panel.input.width()} of {panel.width()}")
-    headers = [b for b in toolbox.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
-    check('agent: same header height', len({b.height() for b in headers}) == 1, str([b.height() for b in headers]))
+    headers = [b for b in toolbox.findChildren(QAbstractButton)
+               if b.objectName() == 'qt_toolbox_toolboxbutton' and not b.isHidden()]
+    headers += [sections.exploring_header, agent_header]
+    check('agent: same header height, the lower stack folded too', len({b.height() for b in headers}) == 1,
+          str([b.height() for b in headers]))
     if shots:
         d.grab().save(os.path.join(shots, 'agent_welcome.png'))
     panel.set_ready(True, 'Claude (Anthropic) · claude-haiku-5-5')
@@ -1346,15 +1365,25 @@ def s_agent_panel():
     panel.clear_thread()
     toolbox.setCurrentWidget(d.EXPORTING)
     QApplication.processEvents()
-    check('agent: EXPORTING is still section 1', d.tabTools_current_index == 1, str(d.tabTools_current_index))
-    check('dock: EXPLORING comes back when AGENT closes', not d.frame_exploring.isHidden())
-    bar_widget.fold_button.click()
-    toolbox.setCurrentWidget(chat.panel)
-    toolbox.setCurrentWidget(d.EXPORTING)
+    check('stacks: EXPORTING opens beside AGENT', sections.is_open('agent') and toolbox.currentWidget() is d.EXPORTING
+          and d.tabTools_current_index == 1, str(d.tabTools_current_index))
+    export_header = next(b for b in bottom_headers if b.text() == 'EXPORTING')
+    export_header.click()
     QApplication.processEvents()
-    check('dock: folded by the user, it stays folded', d.frame_exploring.isHidden())
-    bar_widget.fold_button.click()
-    check('dock: and comes back on demand', not d.frame_exploring.isHidden())
+    check('stacks: a click on the open header folds it', toolbox.currentWidget() not in (d.EXPORTING, d.FILTERING)
+          and sections.is_open('agent'))
+    filtering_header = next(b for b in bottom_headers if b.text() == 'FILTERING')
+    filtering_header.click()
+    QApplication.processEvents()
+    check('stacks: FILTERING brings EXPLORING back and folds AGENT', toolbox.currentWidget() is d.FILTERING and
+          sections.is_open('exploring') and not sections.is_open('agent'))
+    exploring_header.click()
+    QApplication.processEvents()
+    check('stacks: a click on the open EXPLORING folds it', not sections.is_open('exploring') and
+          not sections.is_open('agent') and sections.top.maximumHeight() < 200, str(sections.top.maximumHeight()))
+    exploring_header.click()
+    QApplication.processEvents()
+    check('stacks: and opens it again', sections.is_open('exploring'))
     toolbox.setCurrentWidget(d.FILTERING)
     QApplication.processEvents()
     if previous is None:

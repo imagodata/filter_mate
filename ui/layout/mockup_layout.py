@@ -445,6 +445,12 @@ def add_agent_section(dw: Any, page: Any) -> Any:
 
     Returns the label at the right of its header (where the requests go), None when the header stays plain.
     """
+    sections = getattr(dw, '_fm_sections', None)
+    if sections is not None:  # the stack it shares with EXPLORING (ui/layout/dock_chrome.py)
+        trailer = sections.add_agent(page)
+        dw._fm_agent_icon_label = sections._headers['agent'].icon_label
+        update_section_icons(dw)
+        return trailer
     from qgis.PyQt.QtCore import Qt
     from qgis.PyQt.QtWidgets import QAbstractButton, QHBoxLayout, QLabel
     toolbox = dw.toolBox_tabTools
@@ -490,6 +496,17 @@ def update_section_icons(dw: Any, dark: Any = None) -> bool:
         if icon is not None:
             label.setPixmap(icon.pixmap(64, 64))
             drawn = True
+    for attribute, key in (('_fm_exploring_icon_label', 'zoom'), ('_fm_agent_icon_label', 'agent')):
+        label = getattr(dw, attribute, None)
+        if label is None:
+            continue
+        try:
+            icon = render_icon(key, dark)
+            label.setVisible(icon is not None)
+            if icon is not None:
+                label.setPixmap(icon.pixmap(64, 64))
+        except RuntimeError:  # the dock went away
+            pass
     return drawn
 
 

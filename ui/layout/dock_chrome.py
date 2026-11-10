@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-"""The top of the dock, with more room for the layers.
+"""The top of the dock, and two stacks of sections.
 
-* Favorites sit in the title bar of the dock, at the right of its title, with the button that folds EXPLORING.
-* The source tag (``Vector · OGR``) sits in the layer card, at its top right.
-* The row that held both is gone.
-* EXPLORING folds away on demand, and by itself while AGENT is the open section; it comes back when another one
-  opens, unless the user folded it.
+* Favorites sit in the title bar of the dock, at the right of its title.
+* The source tag (``Vector · OGR``) sits in the layer card, at its top right; the row that held both is gone.
+* Two stacks, each an accordion with the same headers: EXPLORING / AGENT above the splitter handle, FILTERING /
+  EXPORTING / CONFIGURATION below. In each, one section is open at most, and a click on an open header folds it.
+* AGENT and FILTERING do not go together: FILTERING works on what EXPLORING selects. Opening AGENT folds EXPLORING
+  and FILTERING; opening FILTERING opens EXPLORING and folds AGENT. EXPORTING and CONFIGURATION stay as they are.
+* A stack with nothing open shrinks to its headers, so the other one takes the room.
 """
 from __future__ import annotations
 
@@ -13,11 +15,14 @@ import logging
 from typing import Any, Optional
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QSize, Qt
-from qgis.PyQt.QtWidgets import QDockWidget, QHBoxLayout, QLabel, QStyle, QToolButton, QWidget
+from qgis.PyQt.QtWidgets import (
+    QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QStyle, QToolButton, QVBoxLayout, QWidget,
+)
 
 logger = logging.getLogger("FilterMate")
 
 AGENT_PAGE = "AGENT"
+EXPLORING_TITLE = "EXPLORING"  # a section name, never translated, as FILTERING
 TITLE_BUTTON = 20
 TAG_GAP = 8
 
@@ -39,7 +44,6 @@ class DockTitleBar(QWidget):
         self.title.setStyleSheet("font-weight: normal;")  # as the title of every other dock of QGIS
         self.title.setFont(dock.font())
         dock.windowTitleChanged.connect(self.title.setText)
-        self.fold_button = self._button("toolButton_fold_exploring")
         self.float_button = self._button("toolButton_dock_float", QStyle.StandardPixmap.SP_TitleBarNormalButton,
                                          _tr("Detach or dock the panel"))
         self.float_button.clicked.connect(lambda: dock.setFloating(not dock.isFloating()))
@@ -52,7 +56,6 @@ class DockTitleBar(QWidget):
         self._row.addWidget(self.title)
         self._row.addStretch(1)
         self._slot = self._row.count()  # favorites go here
-        self._row.addWidget(self.fold_button)
         self._row.addWidget(self.float_button)
         self._row.addWidget(self.close_button)
         dock.featuresChanged.connect(self._follow_features)
@@ -116,54 +119,202 @@ class SourceTag(QObject):
             pass
 
 
-class ExploringFolder(QObject):
-    """Folds EXPLORING away and back; folds it by itself while AGENT is open."""
+QWIDGETSIZE_MAX = 16777215
+STACK_GAP = 8
 
-    def __init__(self, dock: Any, button: QToolButton) -> None:
+
+class SectionHeader(QPushButton):
+    """A header with the look of the FILTERING one: icon on the left, name in bold, red outline when open."""
+
+    def __init__(self, key: str, title: str, parent: QWidget) -> None:
+        super().__init__(title, parent)
+        self.setObjectName(f"pushButton_section_{key}")
+        self.setCheckable(True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.icon_label = None
+        self.trailer = None
+        try:
+            from .mockup_layout import SECTION_ICON_LEFT, SECTION_TAB_HEIGHT, _section_icon_label
+            self.setFixedHeight(SECTION_TAB_HEIGHT)
+            self.icon_label = _section_icon_label(self)
+            self._right = SECTION_ICON_LEFT
+        except Exception:
+            logger.debug("Section header icon not drawn", exc_info=True)
+            self._right = 12
+
+    def add_trailer(self) -> QLabel:
+        """A muted label at the right of the header (where the requests of AGENT go)."""
+        row = QHBoxLayout(self)
+        row.setContentsMargins(0, 0, self._right, 0)
+        row.addStretch(1)
+        self.trailer = QLabel(self)
+        self.trailer.setObjectName(f"{self.objectName()}_trailer")
+        self.trailer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self.trailer.setTextFormat(Qt.TextFormat.PlainText)
+        row.addWidget(self.trailer)
+        return self.trailer
+
+
+class DockSections(QObject):
+    """EXPLORING / AGENT above, FILTERING / EXPORTING / CONFIGURATION below, and the rules between them."""
+
+    def __init__(self, dock: Any) -> None:
         super().__init__(dock)
-        self._frame = dock.frame_exploring
+        self._dock = dock
         self._toolbox = dock.toolBox_tabTools
-        self._button = button
-        self._by_itself = False
-        button.clicked.connect(self.toggle)
-        self._toolbox.currentChanged.connect(self._on_section)
-        self._show_state()
+        self._splitter = dock.splitter_main
+        exploring = dock.frame_exploring
+        index = self._splitter.indexOf(exploring)
+        self.top = QWidget()
+        self.top.setObjectName("widget_section_stack_top")
+        self._top_layout = QVBoxLayout(self.top)
+        self._top_layout.setContentsMargins(0, 0, 0, 0)
+        self._top_layout.setSpacing(STACK_GAP)
+        sizes = self._splitter.sizes()
+        self.top.setSizePolicy(exploring.sizePolicy())
+        self._splitter.replaceWidget(index, self.top)
+        if len(sizes) == self._splitter.count() and sum(sizes) > 0:
+            self._splitter.setSizes(sizes)  # the manager sized the splitter for EXPLORING: the stack takes its place
+        self.exploring_header = SectionHeader("exploring", EXPLORING_TITLE, self.top)
+        self._top_layout.addWidget(self.exploring_header)
+        self._top_layout.addWidget(exploring, 1)
+        exploring.show()
+        self.top.show()  # QSplitter.replaceWidget leaves the new widget hidden
+        self._pages = {"exploring": exploring}
+        self._headers = {"exploring": self.exploring_header}
+        self.exploring_header.clicked.connect(lambda: self._on_top_header("exploring"))
+        # "Nothing open" below: QToolBox always has a current page, so an empty one, its header never shown.
+        self._nothing = QWidget()
+        self._nothing.setObjectName("page_no_section")
+        self._toolbox.addItem(self._nothing, "")
+        holder = self._nothing
+        while holder is not None and holder is not self._toolbox:  # QToolBox wraps each page in a scroll area
+            holder.setMaximumHeight(0)
+            holder = holder.parentWidget()
+        self._watched = set()
+        self._current_before_press = -1
+        self._watch_bottom_headers()
+        self._toolbox.currentChanged.connect(self._on_bottom_changed)
+        self._open_top("exploring")
 
-    @property
-    def folded(self) -> bool:
-        return self._frame.isHidden()
+    # --- the top stack ---------------------------------------------------------------
 
-    def set_folded(self, folded: bool) -> None:
-        self._frame.setVisible(not folded)
-        self._show_state()
+    def add_agent(self, page: QWidget) -> QLabel:
+        """AGENT after EXPLORING, folded: the label at the right of its header."""
+        header = SectionHeader("agent", AGENT_PAGE, self.top)
+        trailer = header.add_trailer()
+        self._top_layout.addWidget(header)
+        self._top_layout.addWidget(page, 1)
+        page.hide()
+        self._pages["agent"] = page
+        self._headers["agent"] = header
+        header.clicked.connect(lambda: self._on_top_header("agent"))
+        self._fit()
+        return trailer
 
-    def toggle(self) -> None:
-        """The user decides: AGENT will not bring it back."""
-        self._by_itself = False
-        self.set_folded(not self.folded)
+    def is_open(self, key: str) -> bool:
+        page = self._pages.get(key)
+        return page is not None and not page.isHidden()
 
-    def follow_section(self) -> None:
-        self._on_section(self._toolbox.currentIndex())
+    def open_top(self, key: Optional[str]) -> None:
+        """Open ``key`` in the top stack and apply the rules (None folds both)."""
+        if key == "agent" and self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None):
+            self._toolbox.setCurrentWidget(self._nothing)  # FILTERING works on EXPLORING, which AGENT folds
+        self._open_top(key)
 
-    def _on_section(self, index: int) -> None:
-        page = self._toolbox.widget(index) if index >= 0 else None
-        agent = page is not None and page.objectName() == AGENT_PAGE
-        if agent and not self.folded:
-            self._by_itself = True
-            self.set_folded(True)
-        elif not agent and self._by_itself:
-            self._by_itself = False
-            self.set_folded(False)
+    def _open_top(self, key: Optional[str]) -> None:
+        for name, page in self._pages.items():
+            page.setVisible(name == key)
+            self._headers[name].setChecked(name == key)
+        header = self._headers["exploring"]
+        header.setToolTip(_tr("Hide EXPLORING to give room to the sections") if key == "exploring"
+                          else _tr("Show EXPLORING"))
+        self._fit()
 
-    def _show_state(self) -> None:
-        folded = self.folded
-        pixmap = QStyle.StandardPixmap.SP_TitleBarUnshadeButton if folded else QStyle.StandardPixmap.SP_TitleBarShadeButton
-        self._button.setIcon(self._button.style().standardIcon(pixmap))
-        self._button.setToolTip(_tr("Show EXPLORING") if folded else _tr("Hide EXPLORING to give room to the sections"))
+    def _on_top_header(self, key: str) -> None:
+        self.open_top(None if self.is_open(key) else key)
+
+    # --- the bottom stack ------------------------------------------------------------
+
+    def _watch_bottom_headers(self) -> None:
+        for button in self._toolbox.findChildren(QAbstractButton):
+            if button.objectName() != "qt_toolbox_toolboxbutton" or button in self._watched:
+                continue
+            self._watched.add(button)
+            if button.text() == "":
+                button.hide()  # the header of "nothing open"
+                continue
+            button.pressed.connect(lambda: setattr(self, "_current_before_press", self._toolbox.currentIndex()))
+            button.clicked.connect(lambda _checked=False, item=button: self._on_bottom_header(item))
+
+    def _on_bottom_header(self, button: QAbstractButton) -> None:
+        """A click on the open header folds the stack."""
+        index = self._index_of(button)
+        if index >= 0 and index == self._current_before_press:
+            self._toolbox.setCurrentWidget(self._nothing)
+
+    def _index_of(self, button: QAbstractButton) -> int:
+        for index in range(self._toolbox.count()):
+            if self._toolbox.itemText(index) == button.text():
+                return index
+        return -1
+
+    def _on_bottom_changed(self, _index: int) -> None:
+        if self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None) and not self.is_open("exploring"):
+            self._open_top("exploring")  # FILTERING works on what EXPLORING selects
+        self._fit()
+
+    # --- room ------------------------------------------------------------------------
+
+    def _fit(self) -> None:
+        """A stack with nothing open keeps its headers only, and the other one takes the room."""
+        try:
+            top_open = any(self.is_open(key) for key in self._pages)
+            self.top.setMaximumHeight(QWIDGETSIZE_MAX if top_open else self._headers_height())
+            bottom = self._splitter.widget(1) if self._splitter.count() > 1 else None
+            if bottom is not None:
+                nothing = self._toolbox.currentWidget() is self._nothing
+                bottom.setMaximumHeight(self._bottom_headers_height(bottom) if nothing else QWIDGETSIZE_MAX)
+                sizes = self._splitter.sizes()
+                total = sum(sizes)
+                if len(sizes) == 2 and total > 0:
+                    # A stack held to its headers gives the rest to the other one at once.
+                    if not top_open:
+                        self._splitter.setSizes([self.top.maximumHeight(), total - self.top.maximumHeight()])
+                    elif nothing:
+                        self._splitter.setSizes([total - bottom.maximumHeight(), bottom.maximumHeight()])
+        except RuntimeError:  # the dock went away
+            pass
+
+    def _bottom_headers_height(self, bottom: QWidget) -> int:
+        """The lower stack with nothing open: its headers, the gaps between them and the margins around."""
+        buttons = [button for button in self._toolbox.findChildren(QAbstractButton)
+                   if button.objectName() == "qt_toolbox_toolboxbutton" and not button.isHidden()]
+        try:
+            from .mockup_layout import SECTION_TAB_HEIGHT
+        except Exception:
+            SECTION_TAB_HEIGHT = 34
+        for button in buttons:
+            button.setMaximumHeight(SECTION_TAB_HEIGHT)  # QToolBox would stretch them over the room left
+        spacing = self._toolbox.layout().spacing() if self._toolbox.layout() is not None else 0
+        height = len(buttons) * SECTION_TAB_HEIGHT + max(0, spacing) * len(buttons)
+        widget = self._toolbox
+        while widget is not None and widget is not bottom.parentWidget():
+            layout = widget.layout()
+            if layout is not None:
+                margins = layout.contentsMargins()
+                height += margins.top() + margins.bottom()
+            widget = widget.parentWidget()
+        return height
+
+    def _headers_height(self) -> int:
+        headers = [header for header in self._headers.values() if not header.isHidden()]
+        return sum(header.height() for header in headers) + STACK_GAP * max(0, len(headers) - 1)
 
 
 def install_dock_chrome(dock: Any) -> Optional[DockTitleBar]:
-    """Title bar with favorites and the EXPLORING fold; the header row goes. None when it could not be set up."""
+    """Title bar with favorites, the two stacks of sections; the header row goes. None when it could not be set up."""
     try:
         bar = DockTitleBar(dock)
         dock.setTitleBarWidget(bar)
@@ -174,15 +325,17 @@ def install_dock_chrome(dock: Any) -> Optional[DockTitleBar]:
         header = getattr(dock, "frame_header", None)
         if header is not None:
             header.setVisible(False)
-        if getattr(dock, "frame_exploring", None) is not None and getattr(dock, "toolBox_tabTools", None) is not None:
-            dock._fm_exploring_folder = ExploringFolder(dock, bar.fold_button)
-        else:
-            bar.fold_button.setVisible(False)
         dock._fm_title_bar = bar
-        return bar
     except Exception:  # the dock keeps its usual title bar
         logger.exception("Dock title bar could not be set up")
-        return None
+        bar = None
+    try:
+        if all(getattr(dock, name, None) is not None for name in ("frame_exploring", "toolBox_tabTools", "splitter_main")):
+            dock._fm_sections = DockSections(dock)
+            dock._fm_exploring_icon_label = dock._fm_sections.exploring_header.icon_label
+    except Exception:
+        logger.exception("Section stacks could not be set up")
+    return bar
 
 
 def put_source_tag_in_card(dock: Any, card: QLabel) -> None:
