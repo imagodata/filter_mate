@@ -631,6 +631,9 @@ class AgentChatController(QObject):
             "set_layers_visibility": lambda: (_tr("Shown: {}") if args.get("visible") else _tr("Hidden: {}")).format(
                 self._names(args.get("layers"))),
             "add_layer": lambda: _tr("Layer added: {}").format(args.get("name") or str(args.get("source", ""))[-60:]),
+            # The objects SAM draws are a layer added: the same words, already in every language.
+            "segment_objects": lambda: _tr("Layer added: {}").format(
+                args.get("name") or "{} (SAM)".format(args.get("guide_layer", ""))),
             "remove_layers": lambda: _tr("Layers removed: {}").format(self._names(args.get("layers"))),
             "search_open_data": lambda: _tr("Searching {} for {}").format(args.get("platform", ""), args.get("query", "")),
             "search_imagery": lambda: _tr("Searching satellite imagery on {}").format(args.get("platform", "")),

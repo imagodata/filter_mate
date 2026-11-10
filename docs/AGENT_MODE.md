@@ -158,6 +158,27 @@ address, else its content type), its size, and whether the server gives parts of
 
 `search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 
+## Objects on a raster
+
+`adapters/public_api/drawn_objects.py`, with `POST /objects/segment` and `GET /map/context`:
+
+- `map_context` adds `drawn_objects`, read from the dock (`CoverageModeController.drawn_objects`: the panel of the raster
+  shown, the state kept for the others). Only counts, areas and extents go to the model; `raster_selection.dock_objects`
+  makes `cross_filter` read the polygons in QGIS (`QGISFilterMateAccessor._dock_selection`). The project summary of each
+  request has a line for them.
+- `segment_objects` runs `filtermate:segment_from_features` on the main thread, as every tool, with a feedback that
+  stops the run between two windows past 20 s, and marks it as the operation running (`operations.running`): a REST or
+  MCP change queued meanwhile is refused instead of running nested. A guide that gives more than `limit` features, or
+  whose count is unknown (a web service), is refused, never cut: the model selects fewer. The errors of the algorithm
+  stay in the log; the model reads its own messages only, never a traceback or a path.
+- `drawn_objects` only offers the objects that select in the dock: object target and SAM engine. With the colour
+  engine the panel keeps SAM's objects for later, and they are left out. Not confirmed: it adds a layer and changes none, and Undo of the turn removes it. A layer
+  held in memory has no definition worth keeping, so the turn records it without one and Redo says it cannot come back.
+- `render_window` waits for the rendering without user input when it runs on the main thread: a click during the run
+  must not start another tool.
+- SAM missing: the tool says how the user installs it. The agent cannot install it, on purpose (pip and a download
+  of 160 MB after a confirmation in the dock).
+
 ## Sources
 
 `core/agent/sources.py` is one list, in the Sources tab of the settings, nothing ticked by default:

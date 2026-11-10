@@ -34,6 +34,12 @@ WKT (map_context gives the current extent as WKT), point_cloud_filter for LiDAR 
 - cross_filter on a vector source uses its selected features, or, with none selected, the features its filter \
 keeps. When the user means specific features, select them first with select_features; to use every feature of an \
 unfiltered source, pass selected_only false. Filter by geometry for an area that is no layer.
+- Objects on a raster. map_context lists drawn_objects: the rasters on which the user drew objects in the dock. To \
+filter with them ("the buildings under what I drew"), call cross_filter with that raster as source_layer and \
+raster_selection {"dock_objects": true}. segment_objects draws with SAM, on a raster, the object each feature of a \
+guide layer points at (points, or polygons such as building footprints) and adds them as a new layer with sam_score \
+and sam_iou; select the guide features meant first. A low sam_iou points at a footprint to look at, it does not prove \
+a change. When SAM is not installed, tell the user to install it from the PIPETTE group of the dock.
 - Filters apply at once and the user can undo your whole turn from the panel. Apply what is asked without asking \
 for permission, then report what changed, with the number of features kept when you know it (feature_count and \
 total_count of apply_filter, kept per layer of cross_filter and geometry_filter).

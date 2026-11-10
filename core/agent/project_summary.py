@@ -148,6 +148,7 @@ def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Ma
         layers: Rows of ``list_layers``, in the order of the layer tree.
         selections: ``selections`` of ``map_context``.
         view: The rest of ``map_context`` (CRS, extent, scale, active layer); nothing is said of the map without it.
+            Its ``drawn_objects`` adds a line when objects drawn in the dock select on a raster.
         before: ``project_state`` when the previous answer ended; what differs now is listed as changed since.
     """
     rows = list(layers)
@@ -168,6 +169,10 @@ def project_summary(layers: Iterable[Mapping[str, Any]], selections: Iterable[Ma
                                               for item in chosen[:MAX_SELECTIONS]))
     else:
         lines.append("Selected: nothing")
+    drawn = [item for item in (view.get("drawn_objects") or ()) if isinstance(item, Mapping) and item.get("count")]
+    if drawn:
+        lines.append("Objects drawn in the dock: " + ", ".join(
+            f"{_cut(item.get('name', ''), 100)} ({item.get('count', 0)})" for item in drawn[:MAX_SELECTIONS]))
     if before is not None:
         changes = project_changes(before, project_state(rows, chosen, view))
         if changes:

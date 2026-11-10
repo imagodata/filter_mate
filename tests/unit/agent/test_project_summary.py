@@ -21,6 +21,18 @@ def test_layers_counts_filters_and_selection():
                                  "- MNT (raster)", "Selected: routes (3)"]
 
 
+def test_objects_drawn_in_the_dock_get_a_line():
+    view = {"drawn_objects": [{"name": "ortho", "count": 4}, {"name": "empty", "count": 0}, "not a row"]}
+    text = project_summary([{"name": "ortho", "layer_kind": "raster"}], [], view)
+    assert text.splitlines()[-1] == "Objects drawn in the dock: ortho (4)"
+    assert "Objects drawn" not in project_summary([{"name": "ortho", "layer_kind": "raster"}])
+    # before what changed since the last answer, which stays last
+    before = project_state([{"layer_id": "o", "name": "ortho"}])
+    lines = project_summary([{"layer_id": "o", "name": "ortho"}, {"layer_id": "n", "name": "bati"}], [], view,
+                            before=before).splitlines()
+    assert lines[-3:] == ["Objects drawn in the dock: ortho (4)", CHANGES_HEADER, "- layers added: bati"]
+
+
 def test_bounded():
     rows = [{"name": f"l{n}", "layer_kind": "vector", "active_filter_expression": "x" * 500} for n in range(80)]
     text = project_summary(rows)

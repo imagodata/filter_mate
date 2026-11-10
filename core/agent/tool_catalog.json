@@ -492,7 +492,7 @@
   {
    "name": "map_context",
    "title": "Map context",
-   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source). available is false when QGIS has no map canvas.",
+   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name, selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source) and drawn_objects [{layer_id, name, crs_authid, count, area_m2, extent_wkt}] (the rasters on which the user drew objects in the FilterMate dock: cross_filter uses them with that raster as source_layer and raster_selection {\"dock_objects\": true}). available is false when QGIS has no map canvas.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -742,6 +742,11 @@
           },
           "maxItems": 10000,
           "type": "array"
+         },
+         "dock_objects": {
+          "default": false,
+          "description": "true: the objects the user drew on this raster in the FilterMate dock are the selection (map_context lists them as drawn_objects). Leave everything else unset, segments included.",
+          "type": "boolean"
          }
         },
         "type": "object"
@@ -1429,6 +1434,54 @@
     "required": [
      "layers",
      "visible"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "segment_objects",
+   "title": "Draw objects with SAM",
+   "description": "Draw with SAM, on a raster, the object each feature of a guide layer points at; adds them as a layer. The new polygon layer is held in memory, in the CRS of the raster, one object per guide feature, with the attributes of the feature, sam_score (the confidence of SAM, 0 to 1) and, for a polygon guide, sam_iou (overlap of the footprint with the drawn object, 0 to 1: a low value flags a footprint to look at, such as a building that changed, it does not prove a change). Then select_features on that layer (e.g. \"sam_iou\" < 0.5) or cross_filter with it as the source. No other layer is changed. Returns layer (layer_id, name, feature_count...), guide_features, drawn, without_object (features with no object: off the raster, nothing found by SAM, or never tried when stopped_early), sam_score {median, minimum}, sam_iou {median, minimum, below_half}, seconds and stopped_early (true when the 20 s allowed ran out before every window was drawn: call again with fewer features). QGIS is held while SAM draws, about 2 s for each window of 1024 pixels; other changes are refused meanwhile. A guide whose features cannot be counted (a web service) needs a selection. SAM (the model and its runtime) is installed by the user from the FilterMate dock; without it the call fails and says so. Good on buildings and other well delimited objects; parcels and trees are not reliable.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "raster": {
+      "description": "Raster to draw on, as it shows on the map (an orthophoto): layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "guide_layer": {
+      "description": "Vector layer whose features point at the objects: points (each a click on an object) or polygons (each a footprint: its bounding box and a point inside it). Layer id or name.",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "selected_only": {
+      "default": true,
+      "description": "Use the selected features of the guide; with none selected, the features it shows",
+      "type": "boolean"
+     },
+     "limit": {
+      "default": 50,
+      "description": "The most guide features taken in one call; a guide that gives more is refused, select fewer",
+      "maximum": 200,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer added (default: the name of the guide followed by (SAM))",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "raster",
+     "guide_layer"
     ],
     "type": "object"
    }

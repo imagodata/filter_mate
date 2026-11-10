@@ -1,4 +1,4 @@
-"""Driving QGIS beyond filters (agent mode): view, selection, layer tree, layers, open data."""
+"""Driving QGIS beyond filters (agent mode): view, selection, layer tree, layers, objects drawn by SAM, open data."""
 
 from __future__ import annotations
 
@@ -7,7 +7,9 @@ from typing import List, Literal, Optional
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from ..accessor import FilterRejected, LayerSummary, OpenDataResult, OperationResult, SelectionResult, ViewState
+from ..accessor import (
+    FilterRejected, LayerSummary, OpenDataResult, OperationResult, SegmentResult, SelectionResult, ViewState,
+)
 from .filters import LayerName
 
 router = APIRouter(tags=["project"])
@@ -101,6 +103,28 @@ class RemoveBody(BaseModel):
 def remove_layers(payload: RemoveBody, request: Request) -> OperationResult:
     """Remove layers from the project; their files stay."""
     return _accessor(request).remove_layers(payload.layers)
+
+
+class SegmentObjectsBody(BaseModel):
+    raster: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Raster layer id or name (e.g. an orthophoto)")
+    guide_layer: str = Field(..., min_length=1, max_length=_MAX_NAME,
+                             description="Vector layer id or name: points (clicks) or polygons (footprints)")
+    selected_only: bool = Field(default=True, description="Use the selected guide features (all it shows when none is selected)")
+    limit: int = Field(default=50, ge=1, le=200, description="The most guide features taken in one call")
+    name: str = Field(default="", max_length=200, description="Name of the layer added (default: the guide name and (SAM))")
+
+
+@router.post("/objects/segment", response_model=SegmentResult)
+def segment_objects(payload: SegmentObjectsBody, request: Request) -> SegmentResult:
+    """SAM draws on a raster one object per guide feature, added to the project as a polygon layer.
+
+    QGIS is held while it draws; past 20 s the run stops and answers with what it drew.
+    """
+    try:
+        return _accessor(request).segment_objects(payload.raster, payload.guide_layer, selected_only=payload.selected_only,
+                                                  limit=payload.limit, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
 
 class OpenDataBody(BaseModel):

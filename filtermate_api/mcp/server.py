@@ -41,6 +41,9 @@ Typical workflow: list_layers (names, ids, kinds), describe_layer and field_valu
 preview_filter (try an expression), then cross_filter / select_features / zoom_to / geometry_filter / point_cloud_filter / \
 apply_filter to filter, filter_state to see what is filtered now, export_layers to write the filtered layers, \
 clear_filters to put layers back on their original source.
+Objects on a raster: map_context lists those the user drew in the dock (cross_filter uses them with \
+raster_selection dock_objects); segment_objects draws with SAM the objects that points or footprints point at, as a \
+new layer.
 undo_filter / redo_filter are not idempotent: after one (also after an error or a timeout), read filter_state \
 before calling it again.
 
@@ -93,13 +96,17 @@ class RasterSelection(BaseModel):
         default_factory=list, max_length=10000,
         description="objects drawn on the raster (the SAM targets of the dock): WKT polygons in the CRS of the "
                     "raster. When given, they are the selection: leave the range, classes and expression unset.")
+    dock_objects: bool = Field(
+        default=False,
+        description="true: the objects the user drew on this raster in the FilterMate dock are the selection "
+                    "(map_context lists them as drawn_objects). Leave everything else unset, segments included.")
 
     @model_validator(mode="after")
     def _check_segments(self) -> "RasterSelection":
-        if self.segments:
+        if self.segments or self.dock_objects:
             from ..routers.filters import check_segments_selection
             check_segments_selection(self.segments, self.minimum, self.maximum, self.classes, self.expression,
-                                     self.derivative)
+                                     self.derivative, self.dock_objects)
         return self
 
 
@@ -370,9 +377,11 @@ def build_server(client: FilterMateClient) -> Any:
         """What the user is looking at in QGIS.
 
         Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and
-        canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}]
-        (the layers with selected features, which cross_filter uses as its source). available is false when QGIS
-        has no map canvas.
+        canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name,
+        selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as
+        its source) and drawn_objects [{layer_id, name, crs_authid, count, area_m2, extent_wkt}] (the rasters on which
+        the user drew objects in the FilterMate dock: cross_filter uses them with that raster as source_layer and
+        raster_selection {"dock_objects": true}). available is false when QGIS has no map canvas.
         """
         return await call("GET", "/map/context")
 
@@ -632,6 +641,40 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed."""
         return await call("POST", "/layers/visibility", _body(layers=layers, visible=visible))
+
+    @mcp.tool(annotations=_write("Draw objects with SAM", idempotent=False))
+    async def segment_objects(
+        raster: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Raster to draw on, as it shows on the map (an orthophoto): layer id or name"))],
+        guide_layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Vector layer whose features point at the objects: points (each a click on an object) or polygons "
+            "(each a footprint: its bounding box and a point inside it). Layer id or name."))],
+        selected_only: Annotated[bool, Field(description=(
+            "Use the selected features of the guide; with none selected, the features it shows"))] = True,
+        limit: Annotated[int, Field(ge=1, le=200, description=(
+            "The most guide features taken in one call; a guide that gives more is refused, select fewer"))] = 50,
+        name: Annotated[str, Field(max_length=200, description=(
+            "Name of the layer added (default: the name of the guide followed by (SAM))"))] = "",
+    ) -> Dict[str, Any]:
+        """Draw with SAM, on a raster, the object each feature of a guide layer points at; adds them as a layer.
+
+        The new polygon layer is held in memory, in the CRS of the raster, one object per guide feature, with the
+        attributes of the feature, sam_score (the confidence of SAM, 0 to 1) and, for a polygon guide, sam_iou (overlap
+        of the footprint with the drawn object, 0 to 1: a low value flags a footprint to look at, such as a building
+        that changed, it does not prove a change). Then select_features on that layer (e.g. "sam_iou" < 0.5) or
+        cross_filter with it as the source. No other layer is changed.
+
+        Returns layer (layer_id, name, feature_count...), guide_features, drawn, without_object (features with no
+        object: off the raster, nothing found by SAM, or never tried when stopped_early), sam_score {median, minimum},
+        sam_iou {median, minimum, below_half}, seconds and stopped_early (true when the 20 s allowed ran out before
+        every window was drawn: call again with fewer features). QGIS is held while SAM draws, about 2 s for each
+        window of 1024 pixels; other changes are refused meanwhile. A guide whose features cannot be counted (a web
+        service) needs a selection. SAM (the model and its runtime) is installed by the user from the FilterMate
+        dock; without it the call fails and says so. Good on buildings and other well delimited objects; parcels and
+        trees are not reliable.
+        """
+        return await call("POST", "/objects/segment", _body(
+            raster=raster, guide_layer=guide_layer, selected_only=selected_only, limit=limit, name=name))
 
     @mcp.tool(annotations=ToolAnnotations(title="Add a layer", readOnlyHint=False, destructiveHint=False,
                                           idempotentHint=False, openWorldHint=True))

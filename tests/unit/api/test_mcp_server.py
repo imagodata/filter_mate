@@ -27,7 +27,7 @@ EXPECTED_TOOLS = {
     "layer_statistics", "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm",
     "set_layer_style", "set_labels",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
-    "add_service_layer", "search_imagery",
+    "add_service_layer", "search_imagery", "segment_objects",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
              "preview_filter", "map_context", "search_open_data", "search_imagery", "layer_statistics",
@@ -171,9 +171,28 @@ def test_cross_filter_raster_and_point_cloud_sources(mcp, fake_api):
     assert body["predicates"] == ["Intersect", "Touch"] and body["filter_source"] is True
     assert body["raster_selection"] == {
         "band": 1, "mode": "range", "minimum": 1200.0, "maximum": 1300.0, "classes": [],
-        "expression": "", "derivative": "slope_degrees", "segments": []}
+        "expression": "", "derivative": "slope_degrees", "segments": [], "dock_objects": False}
     assert body["point_cloud_criteria"]["classes"] == [6] and body["point_cloud_criteria"]["z_min"] == 1000.0
     assert "z_max" not in body["point_cloud_criteria"]
+
+
+def test_cross_filter_with_the_objects_drawn_in_the_dock(mcp, fake_api):
+    fake_api.respond("POST", "/filters/cross", {"filtered": ["batiments"], "failed": {}, "skipped": {}})
+    mcp.call("cross_filter", {"source_layer": "ortho", "target_layers": ["batiments"],
+                              "raster_selection": {"dock_objects": True}})
+    assert last(fake_api)["body"]["raster_selection"]["dock_objects"] is True
+
+
+def test_segment_objects(mcp, fake_api):
+    answer = {"layer": {"layer_id": "L9", "name": "bati (SAM)"}, "guide_features": 3, "drawn": 3, "without_object": 0,
+              "stopped_early": False, "seconds": 4.2}
+    fake_api.respond("POST", "/objects/segment", answer)
+    result = mcp.call("segment_objects", {"raster": "ortho", "guide_layer": "bati"})
+    assert not is_error(result) and json.loads(text_of(result))["drawn"] == 3
+    request = last(fake_api)
+    assert (request["method"], request["path"]) == ("POST", "/objects/segment")
+    assert request["body"] == {"raster": "ortho", "guide_layer": "bati", "selected_only": True, "limit": 50, "name": ""}
+    assert is_error(mcp.call("segment_objects", {"raster": "ortho", "guide_layer": "bati", "limit": 201}))
 
 
 def test_geometry_filter(mcp, fake_api):

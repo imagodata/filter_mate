@@ -105,6 +105,24 @@ processing.run("filtermate:segment_from_features", {
     "RASTER": ortho, "FEATURES": footprints, "OUTPUT": "memory:"})
 ```
 
+## With the agent
+
+The AGENT section, the REST API and the MCP servers reach these objects too (`docs/AUTOMATION.md`):
+
+- **Objects drawn in the dock.** `map_context` lists the rasters that have some (`drawn_objects`: count, area, extent),
+  and the project summary sent with each request says so. "The buildings under what I drew" becomes a `cross_filter`
+  from that raster with `raster_selection: {"dock_objects": true}`: the polygons are read in QGIS, they never go to the
+  model.
+- **Drawn from a guide layer.** `segment_objects` runs *Draw objects on a raster with SAM from points or polygons* on a
+  raster and a guide layer of the project, the selected features of the guide by default, at most 200 in one call,
+  and adds the objects as a memory layer with `sam_score` and `sam_iou`. "Which footprints no longer match the
+  orthophoto?" is that call, then `select_features` on `"sam_iou" < 0.5`.
+
+SAM holds QGIS while it draws (about 2 s for each window of 1024 pixels): the run stops between two windows past 20 s
+and says how far it went, and other changes from the API are refused meanwhile. Only the objects that select in the
+dock are listed: with the colour engine, the objects SAM drew wait in the panel and are not offered. Undo of the turn removes the layer; held in memory, it cannot be redone. The agent never
+installs SAM: it tells the user to do it from the PIPETTE group.
+
 ## What it is good at
 
 **Buildings and other well delimited objects.** Measured with this model on a 25 cm orthophoto, 2026-11-09,

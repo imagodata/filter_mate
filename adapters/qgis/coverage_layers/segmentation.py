@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from typing import Any, List, Optional, Tuple
 
 from qgis.core import QgsMapRendererSequentialJob, QgsMapSettings, QgsRasterLayer, QgsRectangle, QgsTask
-from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QSize, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QSize, QThread, QTimer
 from qgis.PyQt.QtGui import QColor, QImage
 
 logger = logging.getLogger(__name__)
@@ -570,6 +570,41 @@ def is_similar(geometry: Any, reference_area: float, reference_compactness: floa
     return shapes is None or shapes[0] <= compactness(geometry) <= shapes[1]
 
 
+def area_measure(crs: Any) -> Any:
+    """A function giving the area of a geometry in ``crs`` in square metres (None when unknown), set up once.
+
+    On the ellipsoid of the project; with none set and a geographic CRS, on the ellipsoid of the CRS:
+    a planar area in square degrees would be wrong by tens of percent away from the equator.
+    """
+    from qgis.core import Qgis, QgsDistanceArea, QgsProject, QgsUnitTypes
+    measure = QgsDistanceArea()
+    project = QgsProject.instance()
+    measure.setSourceCrs(crs, project.transformContext())
+    ellipsoid = project.ellipsoid() or 'NONE'
+    if ellipsoid == 'NONE' and crs is not None and crs.isGeographic():
+        ellipsoid = crs.ellipsoidAcronym() or 'EPSG:7030'
+    measure.setEllipsoid(ellipsoid)
+    area_unit = getattr(Qgis, 'AreaUnit', None)
+    square_metres = area_unit.SquareMeters if area_unit is not None else QgsUnitTypes.AreaUnit.AreaSquareMeters
+
+    def area(geometry: Any) -> Optional[float]:
+        try:
+            return float(measure.convertAreaMeasurement(measure.measureArea(geometry), square_metres))
+        except Exception as exc:  # noqa: BLE001 - an area is a convenience: the objects are still told
+            logger.debug(f"[FM5] area of an object unknown: {exc}")
+            return None
+    return area
+
+
+def ground_area(geometry: Any, crs: Any) -> Optional[float]:
+    """Area of ``geometry`` (in ``crs``) in square metres, on the project ellipsoid; None when unknown."""
+    try:
+        return area_measure(crs)(geometry)
+    except Exception as exc:  # noqa: BLE001 - an area is a convenience: the objects are still told
+        logger.debug(f"[FM5] area of the objects unknown: {exc}")
+        return None
+
+
 def objects_layer(wkts: List[str], crs: Any, name: str, area: Optional[Any] = None) -> Tuple[Any, int]:
     """A memory layer of the objects (WKT, ``crs``): one multipolygon each, numbered from 1, with its area.
 
@@ -603,7 +638,11 @@ def objects_layer(wkts: List[str], crs: Any, name: str, area: Optional[Any] = No
 
 
 def render_window(settings: Any, layer: Any, window: SegmentationWindow, is_canceled: Any) -> QImage:
-    """``layer`` alone, drawn in ``window``. Worker thread only (it waits for the job)."""
+    """``layer`` alone, drawn in ``window``; it waits for the job.
+
+    Made for a worker thread. On the main thread (a script, a tool of the agent) the wait takes no
+    user input: a click must not start something else in the middle of the run.
+    """
     settings.setOutputSize(QSize(window.size, window.size))
     settings.setExtent(window.rectangle())
     settings.setLayers([layer])
@@ -616,7 +655,11 @@ def render_window(settings: Any, layer: Any, window: SegmentationWindow, is_canc
     job.start()
     timer.start()
     if job.isActive():
-        loop.exec()
+        application = QCoreApplication.instance()
+        if application is not None and QThread.currentThread() is application.thread():
+            loop.exec(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
+        else:
+            loop.exec()
     timer.stop()
     job.waitForFinished()
     if not is_canceled() and job.errors():

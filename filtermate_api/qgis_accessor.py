@@ -51,6 +51,7 @@ from .accessor import (
     MapContext,
     OpenDataResult,
     OperationResult,
+    SegmentResult,
     SelectionResult,
     ViewState,
 )
@@ -341,16 +342,62 @@ class QGISFilterMateAccessor:
         return None if preview is None else FilterPreview(**preview)
 
     def map_context(self) -> MapContext:
-        return MapContext(**self._introspect("map_context"))
+        def call():
+            context = _plugin_module("adapters.public_api.introspection").map_context()
+            try:
+                drawn = _plugin_module("adapters.public_api.drawn_objects").summarize_drawn(self._dock_objects())
+            except Exception:  # the map is told without them
+                logger.debug("objects drawn in the dock not read", exc_info=True)
+                drawn = []
+            return {**context, "drawn_objects": drawn}
+        return MapContext(**run_on_main_thread(call))
+
+    # ------------------------------------------------------------------
+    # Objects drawn on a raster (agent mode)
+    # ------------------------------------------------------------------
+
+    def _dock_objects(self) -> Dict[str, List[str]]:
+        """WKT of the objects drawn in the dock (SAM), by raster layer id; ``{}`` without a dock. Main thread."""
+        dock = getattr(getattr(self._plugin, "app", None), "dockwidget", None)
+        integration = getattr(dock, "_controller_integration", None)
+        read = getattr(getattr(integration, "_point_cloud_ui_controller", None), "drawn_objects", None)
+        found = read() if callable(read) else None
+        return found if isinstance(found, dict) else {}
+
+    def _dock_selection(self, source, selection: Dict) -> Dict:
+        """``selection`` with the objects drawn in the dock on ``source`` in place of ``dock_objects``.
+
+        Raises:
+            ValueError: Nothing is drawn on this raster, or segments were given too.
+        """
+        if selection.get("segments"):
+            raise ValueError("give either segments or dock_objects, not both")
+        try:
+            wkts = list(self._dock_objects().get(source.id()) or ())
+        except RuntimeError:  # a dock being deleted
+            wkts = []
+        if not wkts:
+            raise ValueError(f"no object is drawn on '{source.name()}' in the FilterMate dock: "
+                             "map_context lists the rasters that have some (drawn_objects)")
+        return {**{key: value for key, value in selection.items() if key != "dock_objects"}, "segments": wkts}
+
+    def segment_objects(self, raster: str, guide_layer: str, selected_only: bool = True, limit: int = 50,
+                        name: str = "") -> SegmentResult:
+        return SegmentResult(**self._control(
+            "segment_objects", raster, guide_layer, selected_only=bool(selected_only), limit=int(limit), name=name,
+            module="adapters.public_api.drawn_objects"))
 
     # ------------------------------------------------------------------
     # Driving QGIS (agent mode)
     # ------------------------------------------------------------------
 
-    def _control(self, name: str, *args, **kwargs):
-        """Call ``adapters.public_api.project_control.<name>`` on the main thread, refused while FilterMate is busy."""
+    def _control(self, function_name: str, /, *args, module: str = "adapters.public_api.project_control", **kwargs):
+        """Call ``<module>.<function_name>`` of the plugin on the main thread, refused while FilterMate is busy.
+
+        ``function_name`` is positional only: the function may take a ``name`` of its own (the layer it adds).
+        """
         def call():
-            function = getattr(_plugin_module("adapters.public_api.project_control"), name)
+            function = getattr(_plugin_module(module), function_name)
             try:
                 return _unless_busy(function, *args, **kwargs)
             except ValueError as exc:
@@ -445,6 +492,11 @@ class QGISFilterMateAccessor:
         if source is None or _layer_kind(source) == "other":
             return None
         try:
+            if isinstance(raster_selection, dict) and "dock_objects" in raster_selection:
+                if raster_selection["dock_objects"]:
+                    raster_selection = self._dock_selection(source, raster_selection)
+                else:
+                    raster_selection = {key: value for key, value in raster_selection.items() if key != "dock_objects"}
             report = operations.cross_filter(
                 source, list(target_layers), predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
                 coverage_min=coverage_min, operator=operator, selected_only=selected_only,

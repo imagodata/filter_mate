@@ -249,17 +249,22 @@ _PREDICATES = ("Intersect", "Contain", "Disjoint", "Equal", "Touch", "Overlap", 
 _OPERATORS = ("AND", "OR", "AND NOT")
 
 
-def check_segments_selection(segments, minimum, maximum, classes, expression, derivative) -> None:
+def check_segments_selection(segments, minimum, maximum, classes, expression, derivative, dock_objects=False) -> None:
     """Segments are polygons and a selection of their own (shared by the REST and MCP models).
 
+    ``dock_objects`` stands for the objects drawn in the dock: the same selection, read in QGIS.
+
     Raises:
-        ValueError: For a segment that is no polygon WKT, or segments mixed with a pixel selection.
+        ValueError: For a segment that is no polygon WKT, or objects mixed with a pixel selection or given twice.
     """
     for item in segments:
         if not item.strip().upper().startswith(("POLYGON", "MULTIPOLYGON")):
             raise ValueError(f"a segment must be a POLYGON or MULTIPOLYGON WKT, got {item.strip()[:30]!r}")
+    if dock_objects and segments:
+        raise ValueError("give either segments or dock_objects, not both")
     if minimum is not None or maximum is not None or classes or (expression or "").strip() or derivative != "value":
-        raise ValueError("segments are a selection of their own: leave the range, classes, expression and derivative unset")
+        what = "dock_objects" if dock_objects else "segments"
+        raise ValueError(f"{what} are a selection of their own: leave the range, classes, expression and derivative unset")
 
 
 class RasterSelectionBody(BaseModel):
@@ -278,12 +283,15 @@ class RasterSelectionBody(BaseModel):
     segments: List[str] = Field(default_factory=list, max_length=10000,
                                 description="objects drawn on the raster (SAM): WKT polygons in the CRS of the raster; "
                                             "they are the selection, the range, classes and expression stay unset")
+    dock_objects: bool = Field(default=False,
+                               description="true: the objects drawn on this raster in the FilterMate dock are the "
+                                           "selection (GET /map/context lists them as drawn_objects), instead of segments")
 
     @model_validator(mode="after")
     def _check_mode(self) -> "RasterSelectionBody":
-        if self.segments:
+        if self.segments or self.dock_objects:
             check_segments_selection(self.segments, self.minimum, self.maximum, self.classes, self.expression,
-                                     self.derivative)
+                                     self.derivative, self.dock_objects)
             return self
         if self.derivative != "value" and self.mode != "range":
             raise ValueError("a terrain derivative only works with the range mode")

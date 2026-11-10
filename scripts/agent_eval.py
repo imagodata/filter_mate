@@ -66,7 +66,11 @@ LAYERS = {
         {"value": 3, "label": "Bâti"}, {"value": 4, "label": "Eau"}]}]},
     "lidar_hd": {"id": "lidar_hd_h8", "kind": "point_cloud", "count": 91000000,
                  "attributes": ["X", "Y", "Z", "Classification", "Intensity", "ReturnNumber"]},
+    "orthophoto": {"id": "orthophoto_i9", "kind": "raster", "bands": [
+        {"band": 1, "name": "red"}, {"band": 2, "name": "green"}, {"band": 3, "name": "blue"}]},
 }
+# As adapters/public_api/drawn_objects.py words and bounds it (not imported: it needs QGIS).
+SAM_GUIDE_LIMIT = 200
 FAVORITES = [{"favorite_id": "fav-1", "name": "Communes denses", "description": "Plus de 10 000 habitants",
               "layer_name": "communes", "expression": "\"population\" > 10000"}]
 EXTENT_WKT = "POLYGON((570000 6270000, 580000 6270000, 580000 6280000, 570000 6280000, 570000 6270000))"
@@ -79,15 +83,17 @@ class SimulatedProject:
 
     It keeps what a change did, as QGIS would: a model that reads ``filter_state`` after a filter must see it,
     or it rightly believes the filter failed and tries again. ``setup`` is what the request takes for granted:
-    ``{"filters": {layer: description}, "selected": [layer, ...]}``.
+    ``{"filters": {layer: description}, "selected": [layer, ...], "drawn": {raster: number of objects}}``.
     """
 
     def __init__(self, setup: Optional[Dict[str, Any]] = None) -> None:
+        self.layers: Dict[str, Dict[str, Any]] = dict(LAYERS)  # a layer the model adds joins them
         self.by_ref = {}
-        for name, layer in LAYERS.items():
+        for name, layer in self.layers.items():
             self.by_ref[name] = name
             self.by_ref[layer["id"]] = name
         setup = setup or {}
+        self.drawn: Dict[str, int] = dict(setup.get("drawn", {}))  # objects drawn in the dock, by raster
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
@@ -96,7 +102,7 @@ class SimulatedProject:
         name = self.by_ref.get(reference)
         if name is None:
             raise ToolFailure("Layer not found.")
-        return name, LAYERS[name]
+        return name, self.layers[name]
 
     def _targets(self, references: Sequence[str]) -> List[str]:
         return [self._layer(reference)[0] for reference in references]
@@ -106,11 +112,11 @@ class SimulatedProject:
             return {"layers": [{"layer_id": layer["id"], "name": name, "layer_kind": layer["kind"],
                                 "feature_count": layer.get("count", -1), "geometry_type": layer.get("geometry", ""),
                                 "crs_authid": "EPSG:2154", "has_active_filter": name in self.filters,
-                                "active_filter_expression": self.filters.get(name, "")} for name, layer in LAYERS.items()]}
+                                "active_filter_expression": self.filters.get(name, "")} for name, layer in self.layers.items()]}
 
         def filter_state(_):
-            return {"layers": [{"layer_id": LAYERS[name]["id"], "name": name, "layer_kind": LAYERS[name]["kind"],
-                                "subset": description, "derived": LAYERS[name]["kind"] != "vector"}
+            return {"layers": [{"layer_id": self.layers[name]["id"], "name": name, "layer_kind": self.layers[name]["kind"],
+                                "subset": description, "derived": self.layers[name]["kind"] != "vector"}
                                for name, description in self.filters.items()]}
 
         def describe_layer(args):
@@ -259,7 +265,11 @@ class SimulatedProject:
         def relation(args):
             targets = self._targets(args.get("target_layers", []))
             source = self._layer(args["source_layer"])[0] if "source_layer" in args else "an area"
-            if ("source_layer" in args and args.get("selected_only", True) and LAYERS[source]["kind"] == "vector"
+            if (args.get("raster_selection") or {}).get("dock_objects") and source not in self.drawn:
+                raise ToolFailure(  # as filtermate_api/qgis_accessor.py refuses it
+                    f"Cross filter failed: no object is drawn on '{source}' in the FilterMate dock: map_context lists "
+                    "the rasters that have some (drawn_objects)")
+            if ("source_layer" in args and args.get("selected_only", True) and self.layers[source]["kind"] == "vector"
                     and source not in self.selected and source not in self.filters
                     and not args.get("raster_selection") and not args.get("point_cloud_criteria")):
                 raise ToolFailure(  # as filtermate_api/agent_tools.py refuses it
@@ -268,7 +278,7 @@ class SimulatedProject:
                     "them all.")
             for name in targets:
                 self.filters[name] = f"filtered by {source}"
-            kept = {name: 0 if name in self.empty else max(LAYERS[name].get("count", 30) // 3, 1) for name in targets}
+            kept = {name: 0 if name in self.empty else max(self.layers[name].get("count", 30) // 3, 1) for name in targets}
             warnings = {name: NOTHING_KEPT for name, count in kept.items() if count == 0}
             return {"filtered": targets, "failed": {}, "skipped": {}, "kept": kept, "warnings": warnings}
 
@@ -334,7 +344,37 @@ class SimulatedProject:
             return {"available": True, "project_crs": "EPSG:2154", "canvas_crs": "EPSG:2154", "extent_wkt": EXTENT_WKT,
                     "extent": [570000.0, 6270000.0, 580000.0, 6280000.0],
                     "scale": 25000.0, "active_layer_id": "communes_a1", "active_layer_name": "communes",
-                    "selections": [{"layer_id": LAYERS[name]["id"], "name": name, "selected_count": 1} for name in self.selected]}
+                    "selections": [{"layer_id": self.layers[name]["id"], "name": name, "selected_count": 1}
+                                   for name in self.selected],
+                    "drawn_objects": [{"layer_id": self.layers[name]["id"], "name": name, "crs_authid": "EPSG:2154",
+                                       "count": count, "area_m2": 140.0 * count, "extent_wkt": EXTENT_WKT}
+                                      for name, count in self.drawn.items()]}
+
+        def segment_objects(args):
+            raster, image = self._layer(args["raster"])
+            if image["kind"] != "raster":
+                raise ToolFailure(f"'{raster}' is not a raster layer")
+            guide, layer = self._layer(args["guide_layer"])
+            if layer["kind"] != "vector":
+                raise ToolFailure(f"'{guide}' is not a vector layer")
+            if "Line" in layer.get("geometry", ""):
+                raise ToolFailure(f"'{guide}' holds neither points nor polygons: a line frames no object")
+            limit = args.get("limit", 50)
+            count = 12 if args.get("selected_only", True) and guide in self.selected else layer.get("count", 30)
+            if count > limit:
+                raise ToolFailure(
+                    f"'{guide}' gives {count} guide features and at most {limit} are taken in one call (limit, up to "
+                    f"{SAM_GUIDE_LIMIT}): select fewer with select_features, for example those of the visible map")
+            name = args.get("name") or f"{guide} (SAM)"
+            added = {"id": f"sam_{len(self.layers)}", "kind": "vector", "geometry": "MultiPolygon", "count": count,
+                     "fields": {**layer.get("fields", {}), "sam_score": [0.61, 0.97], "sam_iou": [0.12, 0.93]}}
+            self.layers[name] = added
+            self.by_ref[name] = self.by_ref[added["id"]] = name
+            return {"layer": {"layer_id": added["id"], "name": name, "layer_kind": "vector", "provider_type": "memory",
+                              "crs_authid": "EPSG:2154", "feature_count": count},
+                    "guide_features": count, "drawn": count, "without_object": 0, "stopped_early": False, "seconds": 6.4,
+                    "sam_score": {"median": 0.93, "minimum": 0.61},
+                    "sam_iou": {"median": 0.81, "minimum": 0.12, "below_half": 2}}
 
         return {
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
@@ -345,6 +385,7 @@ class SimulatedProject:
             "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,
             "select_features": select_features, "set_layers_visibility": operation, "add_layer": add_layer,
+            "segment_objects": segment_objects,
             "remove_layers": operation, "search_open_data": search_open_data,
             "add_service_layer": lambda args: {"layer_id": "wfs_1", "name": args.get("name") or args["typename"], "layer_kind": "vector"},
             "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{
