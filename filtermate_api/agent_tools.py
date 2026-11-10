@@ -90,11 +90,12 @@ def _guarded(handler: Handler) -> Handler:
 
 
 def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False,
-                   platforms: Sequence[str] = (), extra_domains: str = "") -> Dict[str, Handler]:
+                   platforms: Sequence[str] = (), extra_domains: str = "", share_values: bool = True) -> Dict[str, Handler]:
     """One handler per tool of the chat (see ``core.agent.tool_catalog.chat_tools``).
 
     ``allow_remote_sources`` False: no layer is read over the network. ``platforms``: the only ones that can be
     searched, each as the user enabled it; ``extra_domains`` says where the user's own portals are.
+    ``share_values`` False: what an algorithm answers besides its layers (statistics) is not sent.
     """
     enabled_platforms = {name.lower() for name in platforms}
 
@@ -136,6 +137,20 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def identify_at(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.identify_at(args["x"], args["y"], crs=args["crs"], layers=args.get("layers"),
                                            tolerance=args.get("tolerance"), limit=args["limit"]))
+
+    def find_algorithms(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.find_algorithms(args["query"], limit=args["limit"]))
+
+    def describe_algorithm(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.describe_algorithm(args["algorithm_id"]))
+
+    def run_algorithm(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = asdict(accessor.run_algorithm(args["algorithm_id"], parameters=args.get("parameters") or {},
+                                               names=args.get("names"), share_values=share_values))
+        counts = [row.get("feature_count") for row in answer["layers"]]
+        if len(counts) == 1 and isinstance(counts[0], int):
+            answer["feature_count"] = counts[0]  # what the card of the chat shows
+        return answer
 
     def preview_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         preview = accessor.preview_filter(args["layer_name"], _checked_expression(args["expression"]))
@@ -300,6 +315,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "list_layers": list_layers, "filter_state": filter_state, "list_favorites": list_favorites,
         "describe_layer": describe_layer, "field_values": field_values, "preview_filter": preview_filter,
         "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
+        "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,

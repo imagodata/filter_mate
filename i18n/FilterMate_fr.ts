@@ -314,6 +314,21 @@ Acceptez-vous ?</translation>
         <translation>Lecture de la carte en un point</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
+        <source>Looking for a Processing algorithm</source>
+        <translation>Recherche d'un algorithme de traitement</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <source>Reading the algorithm {}</source>
+        <translation>Lecture de l'algorithme {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="614"/>
+        <source>Processing: {}</source>
+        <translation>Traitement : {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lecture des filtres actifs</translation>

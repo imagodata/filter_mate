@@ -331,7 +331,7 @@ class TestCatalog:
         names = {tool.name for tool in chat_tools()}
         assert names == ({tool.name for tool in load_catalog()} - NOT_IN_CHAT) | {tool.name for tool in CHAT_ONLY}
         assert {"describe_layer", "field_values", "preview_filter", "map_context", "layer_statistics",
-                "sample_features", "identify_at"} <= names
+                "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm"} <= names
 
     def test_what_needs_confirmation(self):
         assert {tool.name for tool in load_catalog() if tool.requires_confirmation} == {

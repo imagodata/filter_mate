@@ -283,6 +283,100 @@ def check_reading(introspection, project, gpkg, work):
     project.removeMapLayer(zones.id())
 
 
+def check_processing(project, gpkg):
+    """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
+    try:
+        sys.path.append("/usr/share/qgis/python/plugins")
+        from processing.core.Processing import Processing
+        Processing.initialize()
+    except ImportError:
+        check("processing: the plugin is there", False)
+        return
+    from qgis.PyQt.QtCore import QTimer
+    from filter_mate.adapters.public_api import processing_tools as tools
+    from filter_mate.adapters.public_api import operations
+    from filter_mate.adapters.agent.bounded_http import abort_active
+
+    found = tools.find_algorithms("buffer")
+    check("processing: buffer is found", "native:buffer" in [row["id"] for row in found["algorithms"]], found)
+    listed = {row["id"] for row in tools.find_algorithms("a", limit=50)["algorithms"]}
+    everything = set()
+    for word in ("select", "sql", "truncate", "import", "download", "upload", "style", "projection", "index", "package"):
+        everything |= {row["id"] for row in tools.find_algorithms(word, limit=50)["algorithms"]}
+    leaked = sorted(item for item in everything | listed if item.split(":")[0] not in ("native", "qgis")
+                    or any(word in item for word in ("selectby", "executesql", "truncate", "importinto", "download",
+                                                    "setstyle", "definecurrentprojection", "createspatialindex",
+                                                    "package", "python")))
+    check("processing: nothing that acts in place, runs code or leaves QGIS is listed", not leaked, leaked)
+    described = tools.describe_algorithm("native:buffer")
+    names = [row["name"] for row in described["parameters"]]
+    check("processing: describe", names[0] == "INPUT" and "OUTPUT" in names and "destination" in
+          described["parameters"][names.index("OUTPUT")], described)
+    for algorithm in ("native:truncatetable", "qgis:executesql", "native:selectbyexpression", "gdal:buffervectors",
+                      "native:package", "nope:nope"):
+        check(f"processing: {algorithm} is refused", refused(tools.describe_algorithm, algorithm)
+              and refused(tools.run_algorithm, algorithm, {}))
+
+    before = set(project.mapLayers())
+    made = tools.run_algorithm("native:buffer", {"INPUT": "communes", "DISTANCE": 10})
+    added = set(project.mapLayers()) - before
+    layer = project.mapLayer(made["layers"][0]["layer_id"]) if made["layers"] else None
+    check("processing: one layer added, from a temporary GeoPackage", len(added) == 1 and layer is not None
+          and layer.providerType() == "ogr" and ".gpkg" in layer.source() and made["layers"][0]["feature_count"] == 60
+          and layer.name() == "Buffer", made)
+    check("processing: the input is untouched", gpkg.featureCount() == 60 and gpkg.subsetString() == "")
+    gpkg.selectByExpression('"pop" <= 300')
+    chosen = tools.run_algorithm("native:buffer", {"INPUT": {"layer": "communes", "selected_only": True}},
+                                 names={"OUTPUT": "zone choisie"})
+    check("processing: the selection, a chosen name", chosen["layers"][0]["feature_count"] == 3 and
+          chosen["layers"][0]["name"] == "zone choisie", chosen)
+    gpkg.removeSelection()
+    calc = tools.run_algorithm("native:fieldcalculator", {"INPUT": "communes", "FIELD_NAME": "double",
+                                                          "FIELD_TYPE": "Integer", "FORMULA": '"pop" * 2'})
+    out = project.mapLayer(calc["layers"][0]["layer_id"])
+    check("processing: a formula, an option given by its text", out is not None and
+          sorted(feature["double"] for feature in out.getFeatures())[:2] == [200, 400], calc)
+    for parameters, label in (({"INPUT": gpkg.source(), "DISTANCE": 1}, "a path as input"),
+                              ({"INPUT": "https://example.org/a.geojson"}, "a URL as input"),
+                              ({"INPUT": "communes", "OUTPUT": "/tmp/out.gpkg"}, "a path as output"),
+                              ({"INPUT": "communes", "NOPE": 1}, "an unknown parameter"),
+                              ({"INPUT": "communes", "DISTANCE": "abc"}, "a bad value"),
+                              ({"INPUT": {"layer": "communes", "selected_only": True}}, "an empty selection")):
+        check(f"processing: refuses {label}", refused(tools.run_algorithm, "native:buffer", parameters))
+    check("processing: refuses a formula that reads the environment", "env" in refused(
+        tools.run_algorithm, "native:fieldcalculator", {"INPUT": "communes", "FIELD_NAME": "h", "FORMULA": "env('HOME')"}))
+    check("processing: refuses an extent that names a file", refused(
+        tools.run_algorithm, "native:extractbyextent", {"INPUT": "communes", "EXTENT": gpkg.source()}))
+    clipped = tools.run_algorithm("native:extractbyextent", {"INPUT": "communes",
+                                                             "EXTENT": [650000.5, 6859999, 650010.5, 6860001]})
+    check("processing: an extent as four numbers", clipped["layers"][0]["feature_count"] == 10, clipped)
+    stats_id = "native:basicstatisticsforfields" if tools._registry().algorithmById(
+        "native:basicstatisticsforfields") else "qgis:basicstatisticsforfields"
+    stats = tools.run_algorithm(stats_id, {"INPUT_LAYER": "communes", "FIELD_NAME": "pop"})
+    check("processing: the values an algorithm answers", stats.get("values", {}).get("SUM") == 183000.0, stats)
+    quiet = tools.run_algorithm(stats_id, {"INPUT_LAYER": "communes", "FIELD_NAME": "pop"}, share_values=False)
+    check("processing: values left out when they are not shared", "values" not in quiet, quiet)
+
+    operations._RUNNING.append("something")
+    check("processing: refused while FilterMate is busy", "already running" in refused(
+        tools.run_algorithm, "native:buffer", {"INPUT": "communes"}))
+    operations._RUNNING.clear()
+    seen = {}
+    QTimer.singleShot(0, lambda: seen.update(busy=operations.busy_reason()))
+    tools.run_algorithm("native:buffer", {"INPUT": "communes", "DISTANCE": 1, "SEGMENTS": 50})
+    check("processing: busy while it runs, free after", "Processing" in seen.get("busy", "") and
+          not operations.busy_reason(), seen)
+    count = len(project.mapLayers())
+    QTimer.singleShot(300, abort_active)
+    stopped = refused(tools.run_algorithm, "native:randompointsinextent", {
+        "EXTENT": "0,100000,0,100000 [EPSG:2154]", "POINTS_NUMBER": 3000000, "MIN_DISTANCE": 0,
+        "TARGET_CRS": "EPSG:2154"})
+    check("processing: Stop ends a long algorithm, nothing added", stopped == "stopped" and
+          len(project.mapLayers()) == count and not operations.busy_reason(), stopped)
+    for layer_id in set(project.mapLayers()) - before:
+        project.removeMapLayer(layer_id)
+
+
 def main(introspection):
     work = tempfile.mkdtemp()
     project = QgsProject.instance()
@@ -307,6 +401,7 @@ def main(introspection):
     json.dumps(details)
     check_map_details(introspection, project, gpkg, shp, details)
     check_reading(introspection, project, gpkg, work)
+    check_processing(project, gpkg)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

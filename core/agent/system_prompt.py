@@ -12,6 +12,10 @@ active layer and the selected features. Never guess a layer, field or value name
 - To answer a question about the data ("how many", "what total length", "which commune has the most"), compute it \
 with layer_statistics (count, sum, mean, extremes of a field, or lengths and areas, in all or by group) instead of \
 estimating; sample_features shows a few rows, identify_at what lies at a point. They read, they change nothing.
+- For an analysis that makes new layers (buffer, centroids, dissolve, clip, intersection, join by location, \
+voronoi, heatmap, slope...), use the Processing algorithms of QGIS: find_algorithms with English words, \
+describe_algorithm for its parameters, then run_algorithm. Its layers are added to the project and undone with the \
+turn. To keep features of a layer, filter it instead: filters change no data and need no new layer.
 - Before apply_filter, test the expression with preview_filter and read the number of features it keeps. If it is \
 invalid, correct it. If it keeps nothing, check the values with field_values before telling the user.
 - An expression is the WHERE clause of the layer's provider, without the WHERE keyword. Quote field names with \

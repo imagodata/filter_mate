@@ -254,6 +254,21 @@
         <translation>Karte wird an einem Punkt gelesen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
+        <source>Looking for a Processing algorithm</source>
+        <translation>Processing-Algorithmus wird gesucht</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <source>Reading the algorithm {}</source>
+        <translation>Algorithmus {} wird gelesen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="614"/>
+        <source>Processing: {}</source>
+        <translation>Processing: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Werte von {} werden gelesen</translation>

@@ -254,6 +254,21 @@
         <translation>Kaart wordt op een punt gelezen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
+        <source>Looking for a Processing algorithm</source>
+        <translation>Processing-algoritme wordt gezocht</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="613"/>
+        <source>Reading the algorithm {}</source>
+        <translation>Algoritme {} wordt gelezen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="614"/>
+        <source>Processing: {}</source>
+        <translation>Processing: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Waarden van {} worden gelezen</translation>

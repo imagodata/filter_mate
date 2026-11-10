@@ -32,6 +32,9 @@ from .accessor import (
     CrossFilterResult,
     Favorite,
     FavoritesUnavailable,
+    AlgorithmDescription,
+    AlgorithmList,
+    AlgorithmRun,
     FilterRejected,
     FeatureSample,
     FieldValues,
@@ -308,6 +311,28 @@ class QGISFilterMateAccessor:
                     tolerance: Optional[float] = None, limit: int = 5) -> IdentifyResult:
         return IdentifyResult(**self._introspect("identify_at", x, y, crs=crs, layers=layers, tolerance=tolerance,
                                                  limit=limit))
+
+    @staticmethod
+    def _processing(name: str, *args, **kwargs):
+        """Call ``adapters.public_api.processing_tools.<name>`` on the main thread."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.processing_tools"), name)
+            try:
+                return function(*args, **kwargs)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
+    def find_algorithms(self, query: str, limit: int = 20) -> AlgorithmList:
+        return AlgorithmList(**self._processing("find_algorithms", query, limit=limit))
+
+    def describe_algorithm(self, algorithm_id: str) -> AlgorithmDescription:
+        return AlgorithmDescription(**self._processing("describe_algorithm", algorithm_id))
+
+    def run_algorithm(self, algorithm_id: str, parameters: Optional[Dict[str, Any]] = None,
+                      names: Optional[Dict[str, str]] = None, share_values: bool = True) -> AlgorithmRun:
+        return AlgorithmRun(**self._processing("run_algorithm", algorithm_id, parameters=parameters, names=names,
+                                               share_values=share_values))
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
         preview = self._introspect("preview_filter", layer_name, expression)

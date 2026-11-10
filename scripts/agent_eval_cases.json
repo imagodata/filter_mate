@@ -137,5 +137,13 @@
  {"id": "stats_total_length", "prompt": "Quelle est la longueur totale des routes du projet ?", "expect": [],
   "forbid": ["export_layers", "apply_filter", "select_features"]},
  {"id": "stats_largest", "prompt": "What is the population of the most populated commune?", "expect": [],
-  "forbid": ["export_layers", "apply_filter", "select_features"]}
+  "forbid": ["export_layers", "apply_filter", "select_features"]},
+ {"id": "processing_buffer_layer", "prompt": "Crée une nouvelle couche avec une zone tampon de 500 m autour des routes.",
+  "expect": [[{"tool": "run_algorithm", "args": {"algorithm_id": "native:buffer", "parameters": {"INPUT": "routes",
+    "DISTANCE": 500}}, "call_args": {"algorithm_id": "native:buffer", "parameters": {"INPUT": "routes", "DISTANCE": 500}}}]],
+  "forbid": ["export_layers", "remove_layers"]},
+ {"id": "processing_centroids", "prompt": "Make a layer of the centroids of the communes.",
+  "expect": [[{"tool": "run_algorithm", "args": {"algorithm_id": "native:centroids", "parameters": {"INPUT": "communes"}},
+    "call_args": {"algorithm_id": "native:centroids", "parameters": {"INPUT": "communes"}}}]],
+  "forbid": ["export_layers", "remove_layers"]}
 ]}

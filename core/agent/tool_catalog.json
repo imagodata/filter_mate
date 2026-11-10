@@ -354,6 +354,112 @@
    }
   },
   {
+   "name": "find_algorithms",
+   "title": "Find a Processing algorithm",
+   "description": "Find the Processing algorithms of QGIS the agent may run, by words of their id, name, group or tags. Only the algorithms of QGIS itself that make layers, or answer statistics, are listed: none that runs SQL or code, writes to a data source or a file, or reaches the network. Returns algorithms [{id, name, group, summary}] and total. Then describe_algorithm gives the parameters of one.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "query": {
+      "description": "Words in English, as QGIS names its algorithms: buffer, centroids, dissolve, clip, join attributes, voronoi, heatmap, slope...",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "limit": {
+      "default": 20,
+      "description": "At most this many algorithms",
+      "maximum": 50,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "describe_algorithm",
+   "title": "Describe a Processing algorithm",
+   "description": "What a Processing algorithm does, and how to give each of its parameters to run_algorithm. Returns help, parameters [{name, type, description, optional, default, options (an enum: give the index or the text), parent (the layer a field or a distance belongs to), minimum, maximum, value (how to give it), destination (an output: FilterMate writes it to a temporary layer)}] and outputs. left_out names parameters that cannot be given (files, folders, connections).",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "algorithm_id": {
+      "description": "Id from find_algorithms, such as native:buffer",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "algorithm_id"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "run_algorithm",
+   "title": "Run a Processing algorithm",
+   "description": "Run a Processing algorithm of QGIS on layers of the project; the layers it makes are added to the project. Each output layer is a temporary file: export_layers keeps one for good. In the chat of FilterMate, undoing the turn removes them. Returns layers [{output, layer_id, name, layer_kind, feature_count}], values (what the algorithm answers besides layers: statistics...), not_made and messages (its warnings). Inputs are layers of the project only, never a path or a URL; expressions take the functions of select_features and math, text and geometry ones.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "algorithm_id": {
+      "description": "Id from find_algorithms",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "parameters": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Values by parameter name, as describe_algorithm says: layers by name or id, {\"layer\": ..., \"selected_only\": true} for the selected features of a source, numbers, text, the index or the text of an option. Outputs are written by FilterMate: leave them out, or pass false to skip an optional one."
+     },
+     "names": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "maxLength": 200,
+         "minLength": 1,
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Name of the layer made by each output, by output name (OUTPUT...)"
+     }
+    },
+    "required": [
+     "algorithm_id"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "preview_filter",
    "title": "Try a filter",
    "description": "Try a filter expression on a private copy of the layer: nothing changes in the project. It is what apply_filter would do, and it replaces the layer's current filter in the same way. Returns valid, feature_count (features kept, -1 when unknown) and error (the reason when valid is false). Refused on web services and memory layers, and for anything but a plain condition (subqueries, most functions).",
