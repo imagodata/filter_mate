@@ -75,7 +75,8 @@ Processing, to export or to edit. It is not saved with the project: *Make Perman
 per feature of a guide layer, with no click: a point is a click on the object, a polygon gives its bounding box and
 a point inside it. The output is a polygon layer in the CRS of the raster, with the attributes of the feature,
 `sam_score` (the score SAM gives its mask) and, for a polygon, `sam_iou` (overlap of the footprint with the drawn
-object, from 0 to 1). It runs in the background and changes no layer of the project.
+object, from 0 to 1). It runs in the background and changes no layer of the project; it can be a step of a
+model, for example before *Filter layers of any type by the pixels of a raster* with its `SEGMENTS`.
 
 A multipoint gives all its points to one object. A multipolygon is prompted by its largest part. An invalid
 footprint is made valid before `sam_iou` is computed. A footprint under a pixel is prompted by its point. Source
