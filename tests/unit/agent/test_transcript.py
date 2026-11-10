@@ -31,3 +31,11 @@ def test_trim_keeps_the_newest_whole_entries():
 def test_unknown_kind_is_refused():
     with pytest.raises(ValueError):
         entry("other", "x")
+
+
+def test_the_layer_names_in_bold_are_kept_and_bounded():
+    item = entry("action", "Filter on communes by roads", strong=["communes", "roads", 3, ""] + ["x"] * 20)
+    assert item["strong"][:2] == ["communes", "roads"] and len(item["strong"]) == 8
+    assert "strong" not in entry("action", "Filter on communes")  # the stored form stays as it was without them
+    assert from_json(to_json([item]))[0]["strong"] == item["strong"]
+    assert "strong" not in from_json('[{"kind": "action", "text": "t", "strong": "communes"}]')[0]

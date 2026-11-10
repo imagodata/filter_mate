@@ -86,7 +86,13 @@ SOURCES = \
     ../ui/widgets/coverage_panels/histogram_widget.py \
     ../ui/widgets/coverage_panels/raster_exploring_panel.py \
     ../ui/widgets/coverage_panels/point_cloud_exploring_panel.py \
-    ../ui/controllers/exploring_controller.py
+    ../ui/controllers/exploring_controller.py \
+    ../adapters/agent/free_quota.py \
+    ../adapters/agent/settings.py \
+    ../ui/controllers/agent_chat_controller.py \
+    ../ui/layout/dock_chrome.py \
+    ../ui/widgets/agent_panel.py \
+    ../ui/widgets/agent_thread.py
 
 TRANSLATIONS = \
     FilterMate_am.ts \

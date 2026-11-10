@@ -7,8 +7,9 @@ repeat what it read in a layer, and nothing of it is ever interpreted as HTML.
 """
 from __future__ import annotations
 
+import html
 import re
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Sequence
 
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer
 from qgis.PyQt.QtGui import QFont, QFontMetrics
@@ -18,6 +19,8 @@ from qgis.PyQt.QtWidgets import (
 
 BUBBLE_SHARE = 0.88  # of the width of the thread
 DONE_COLOR = {"light": "#146a55", "dark": "#4fd1b0"}
+# Background, border, title of an error card (mockup: Error board).
+ERROR_COLORS = {"light": ("#fdf3f3", "#f0c2c2", "#8c1d1d"), "dark": ("#3a2224", "#6b3236", "#f2b8b8")}
 _HEADING = re.compile(r"^\s{0,3}#{1,6}\s+")
 _BULLET = re.compile(r"^(\s*)[-*+]\s+")
 _EMPHASIS = re.compile(r"(\*\*|__)(.+?)\1")
@@ -37,6 +40,22 @@ def plain_markdown(text: str) -> str:
         line = _EMPHASIS.sub(lambda match: match.group(2), line)
         lines.append(_CODE.sub(lambda match: match.group(1), line))
     return "\n".join(lines)
+
+
+def strong_markup(text: str, strong: Sequence[str]) -> str:
+    """``text`` as rich text whose only markup is the bold of the ``strong`` names: everything else is escaped."""
+    names = sorted({name for name in strong if name and name in text}, key=len, reverse=True)
+    if not names:
+        return html.escape(text)
+    # Whole names only: a layer called "a" must not put every "a" of the sentence in bold.
+    pattern = re.compile("|".join(rf"(?<!\w){re.escape(name)}(?!\w)" for name in names))
+    out, start = [], 0
+    for match in pattern.finditer(text):
+        out.append(html.escape(text[start:match.start()]))
+        out.append(f"<b>{html.escape(match.group(0))}</b>")
+        start = match.end()
+    out.append(html.escape(text[start:]))
+    return "".join(out)
 
 
 def _plain_label(text: str, parent: QWidget, wrap: bool = True) -> QLabel:
@@ -76,17 +95,20 @@ class ChangeCard(QFrame):
     """A change: ✓ or ✗, what, the expression, what was kept, and Undo while it is the last step."""
 
     def __init__(self, text: str, succeeded: bool, detail: str, count: str, palette: dict, dark: bool,
-                 on_undo: Callable[[], None], parent: QWidget) -> None:
+                 on_undo: Callable[[], None], parent: QWidget, strong: Sequence[str] = ()) -> None:
         super().__init__(parent)
         self.setObjectName("frame_agent_card")
         self.setStyleSheet(
             f"QFrame#frame_agent_card {{ background: {palette['fm_group']}; border: 1px solid {palette['fm_group_border']};"
-            f" border-radius: 6px; }} QFrame#frame_agent_card QLabel {{ background: transparent; border: none; }}")
+            f" border-radius: 6px; }} QFrame#frame_agent_card QLabel {{ background: transparent; border: none; padding: 0px; }}")
         mark = _plain_label("✓" if succeeded else "✗", self, wrap=False)
         color = DONE_COLOR["dark" if dark else "light"] if succeeded else palette["fm_danger"]
         mark.setStyleSheet(f"color: {color}; font-weight: 600;")
         mark.setAlignment(Qt.AlignmentFlag.AlignTop)
         title = _plain_label(text, self)
+        if strong:  # the layer names in bold, the rest escaped: a name can hold anything
+            title.setTextFormat(Qt.TextFormat.RichText)
+            title.setText(strong_markup(text, strong))
         title.setStyleSheet("font-size: 12px;" if succeeded else f"font-size: 12px; color: {palette['fm_danger']};")
         column = QVBoxLayout()
         column.setContentsMargins(0, 0, 0, 0)
@@ -143,7 +165,19 @@ class AgentThread(QScrollArea):
         self._layout.setContentsMargins(10, 10, 10, 10)
         self._layout.setSpacing(10)
         self._layout.addStretch(1)
+        self._hint = QLabel(self._content)
+        self._hint.setObjectName("label_agent_thread_hint")
+        self._hint.setTextFormat(Qt.TextFormat.PlainText)
+        self._hint.setWordWrap(True)
+        self._hint.setVisible(False)
+        self._layout.addWidget(self._hint)
         self.setWidget(self._content)
+        # The scroll area sizes its widget from the size hints, which a wrapped label computes for a width of its
+        # own: at the real width, the labels need more height than that. The content asks for it (see _fit_height).
+        self._fit_timer = QTimer(self)
+        self._fit_timer.setSingleShot(True)
+        self._fit_timer.setInterval(0)
+        self._fit_timer.timeout.connect(self._fit_height)
         self.refresh_look()
 
     # --- what the panel asks ---------------------------------------------------------
@@ -153,7 +187,7 @@ class AgentThread(QScrollArea):
         sheet = (
             f"QScrollArea#scrollArea_agent_thread {{ background: {palette['fm_list']}; border: 1px solid "
             f"{palette['fm_group_border']}; border-radius: 6px; }} QWidget#widget_agent_thread {{ background: "
-            f"{palette['fm_list']}; }}")
+            f"{palette['fm_list']}; }} QWidget#widget_agent_thread QLabel {{ padding: 0px; }}")
         if sheet != self.styleSheet():
             self.setStyleSheet(sheet)
 
@@ -170,6 +204,7 @@ class AgentThread(QScrollArea):
         self._answer = None
         self._answer_raw = ""
         self._step_cards = []
+        self._fit_timer.start()
 
     def end_answer(self) -> None:
         self._answer = None
@@ -200,9 +235,9 @@ class AgentThread(QScrollArea):
         self._step_cards = []
         self._refresh_undo()
 
-    def add_card(self, text: str, succeeded: bool, detail: str, count: str) -> None:
+    def add_card(self, text: str, succeeded: bool, detail: str, count: str, strong: Sequence[str] = ()) -> None:
         card = ChangeCard(text, succeeded, detail, count, self._palette_of(), self._is_dark(), self._on_undo,
-                          self._content)
+                          self._content, strong)
         if succeeded:
             self._step_cards.append(card)
         mark = "✓" if succeeded else "✗"
@@ -218,6 +253,57 @@ class AgentThread(QScrollArea):
         self._append(_Item(label, text, "note"))
         self.end_answer()
 
+    def add_error(self, title: str, detail: str, action: str = "", on_action: Optional[Callable[[], None]] = None) -> None:
+        """A request that failed: what went wrong, what to do, and a button to do it."""
+        palette = self._palette_of()
+        dark = self._is_dark()
+        card = QFrame(self._content)
+        card.setObjectName("frame_agent_error")
+        card.setStyleSheet(
+            f"QFrame#frame_agent_error {{ background: {ERROR_COLORS['dark' if dark else 'light'][0]}; border: 1px solid"
+            f" {ERROR_COLORS['dark' if dark else 'light'][1]}; border-radius: 6px; }}"
+            " QFrame#frame_agent_error QLabel { background: transparent; border: none; padding: 0px; }")
+        mark = _plain_label("!", card, wrap=False)
+        mark.setObjectName("label_agent_error_mark")
+        mark.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        mark.setFixedSize(18, 18)
+        mark.setStyleSheet(f"QLabel#label_agent_error_mark {{ color: {palette['fm_danger']}; border: 2px solid"
+                           f" {palette['fm_danger']}; border-radius: 9px; font-weight: 700; font-size: 11px; padding: 0; }}")
+        heading = _plain_label(title, card)
+        heading.setStyleSheet(f"font-weight: 600; color: {ERROR_COLORS['dark' if dark else 'light'][2]};")
+        column = QVBoxLayout()
+        column.setContentsMargins(0, 0, 0, 0)
+        column.setSpacing(6)
+        column.addWidget(heading)
+        if detail:
+            text = _plain_label(detail, card)
+            text.setStyleSheet(f"font-size: 12px; color: {palette['fm_text_muted']};")
+            column.addWidget(text)
+        if action and on_action is not None:
+            button = QPushButton(action, card)
+            button.setObjectName("pushButton_agent_error_action")
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.setStyleSheet(
+                f"QPushButton#pushButton_agent_error_action {{ font-size: 12px; font-weight: 500; padding: 4px 12px;"
+                f" border: 1px solid {palette['fm_danger']}; border-radius: 6px; background: {palette['fm_list']};"
+                f" color: {ERROR_COLORS['dark' if dark else 'light'][2]}; }}")
+            button.clicked.connect(on_action)
+            column.addWidget(button, 0, Qt.AlignmentFlag.AlignLeft)
+        row = QHBoxLayout(card)
+        row.setContentsMargins(10, 10, 10, 10)
+        row.setSpacing(10)
+        row.addWidget(mark, 0, Qt.AlignmentFlag.AlignTop)
+        row.addLayout(column, 1)
+        self._append(_Item(card, f"! {title}" + (f"\n   {detail}" if detail else ""), "error"))
+        self.end_answer()
+
+    def set_hint(self, text: str) -> None:
+        """A muted line at the foot of the thread (while the agent works: the next request can be typed)."""
+        self._hint.setText(text)
+        self._hint.setStyleSheet(f"font-size: 11px; color: {self._palette_of()['fm_text_muted']};")
+        self._hint.setVisible(bool(text))
+        self._fit_timer.start()
+
     def add_text(self, text: str) -> None:
         """More of the answer being written: one label per answer, its Markdown marks taken out."""
         self._answer_raw += text
@@ -230,6 +316,7 @@ class AgentThread(QScrollArea):
         shown = plain_markdown(self._answer_raw).strip("\n")
         self._answer.widget.setText(shown)
         self._answer.plain = self._answer_raw
+        self._fit_timer.start()
         self._follow_end()
 
     def add_step(self, text: str) -> None:
@@ -245,8 +332,10 @@ class AgentThread(QScrollArea):
         for item in self._items:
             if item.kind == "step":
                 label = item.widget
-                text = label.text().lstrip("◌ ").rstrip("…")
-                label.setText(("✓  " if succeeded else "✗  ") + text)
+                text = html.escape(label.text().lstrip("◌ ").rstrip("…"))
+                color = DONE_COLOR["dark" if self._is_dark() else "light"] if succeeded else palette["fm_danger"]
+                label.setTextFormat(Qt.TextFormat.RichText)  # only the mark is colored; the text is escaped
+                label.setText(f'<span style="color: {color};">{"✓" if succeeded else "✗"}</span>&nbsp;&nbsp;{text}')
                 label.setStyleSheet(f"font-size: 12px; color: {palette['fm_text_muted']};")
                 item.kind = "step_done"
 
@@ -255,6 +344,7 @@ class AgentThread(QScrollArea):
         for item in [item for item in self._items if item.kind in ("step", "step_done")]:
             self._drop(item.widget)
             self._items.remove(item)
+        self._fit_timer.start()
 
     def set_undo_possible(self, possible: bool) -> bool:
         """Undo on the cards of the last step; False when no card can offer it."""
@@ -285,7 +375,20 @@ class AgentThread(QScrollArea):
         bar = self.verticalScrollBar()
         at_end = bar.value() >= bar.maximum() - 4
         self._items.append(item)
-        self._layout.insertWidget(self._layout.count() - 1, item.widget)
+        self._layout.insertWidget(self._layout.count() - 2, item.widget)  # above the stretch and the hint
+        item.widget.ensurePolished()
+        self._fit_timer.start()
+        if at_end:
+            self._follow_end()
+
+    def _fit_height(self) -> None:
+        """Room for every wrapped line at the width the thread has now."""
+        bar = self.verticalScrollBar()
+        at_end = bar.value() >= bar.maximum() - 4
+        layout = self._content.layout()
+        layout.invalidate()
+        width = self.viewport().width()
+        self._content.setMinimumHeight(layout.heightForWidth(width) if layout.hasHeightForWidth() else 0)
         if at_end:
             self._follow_end()
 
@@ -297,6 +400,7 @@ class AgentThread(QScrollArea):
 
     def resizeEvent(self, event) -> None:  # noqa: N802 - Qt name
         super().resizeEvent(event)
+        self._fit_timer.start()
         for item in self._items:
             if item.kind == "user":
                 bubble = item.widget.findChild(QLabel, "label_agent_request")
