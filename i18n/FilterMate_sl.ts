@@ -279,6 +279,11 @@
         <translation>Oznake plasti {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Najstarejše zahteve tega pogovora so zdaj povzete v nekaj vrsticah, da ostane kratek.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Branje vrednosti {}</translation>

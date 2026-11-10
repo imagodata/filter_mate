@@ -279,6 +279,11 @@
         <translation>{} のラベル</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>この会話の古い依頼は、短く保つために数行に要約されました。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} の値を読み取り中</translation>

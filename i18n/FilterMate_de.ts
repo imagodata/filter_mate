@@ -279,6 +279,11 @@
         <translation>Beschriftungen von {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Die ältesten Anfragen dieses Gesprächs sind jetzt in wenigen Zeilen zusammengefasst, damit es kurz bleibt.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Werte von {} werden gelesen</translation>

@@ -582,6 +582,17 @@ def check_chat(provider, layer, authcfg, work):
     check("undoing the turn brings the style back", layer.renderer().type() == renderer_before
           and not layer.labelsEnabled(), (layer.renderer().type(), layer.labelsEnabled()))
 
+    from filter_mate.core.agent.compaction import SUMMARY_HEADER
+    from filter_mate.core.agent.session import AgentLimits
+    chat._engine._session._limits = AgentLimits(max_history_chars=2000)  # the conversation is long by now
+    provider.reset((200, {}, text_turn("Bien.")))
+    check("a long conversation is sent shorter", ask("et maintenant ?"))
+    sent = provider.requests[0]["body"]["messages"]
+    check("its oldest requests are summed up at its start", sent[0]["content"][0]["text"].startswith(SUMMARY_HEADER)
+          and sent[-1]["content"][0]["text"] == "et maintenant ?", sent[0]["content"][0]["text"][:300])
+    check("the thread says so", "summed up in a few lines" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
+    chat._engine._session._limits = AgentLimits()
+
     provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
     ask("liste")
     shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]

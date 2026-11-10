@@ -20,6 +20,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 6. Reading the data | Statistics by group, lengths and areas, a sample of features, what lies at a point | done |
 | 7. Processing | Find, describe and run the algorithms of QGIS that make layers, undone with the turn | done |
 | 8. Style | One symbol, categories, graduated classes, raster ramps, labels, opacity, undone with the turn | done |
+| 9. Long conversations | The oldest requests summed up in a few lines past a budget | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -82,6 +83,11 @@ Rules worth keeping:
   derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
 - **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
 - A conversation does not survive a change of project or of provider.
+- **A long conversation is summed up** (`core/agent/compaction.py`): every request sends the whole conversation
+  again, so past 120 000 characters (about 30 000 tokens) the oldest requests are dropped, whole, before a new
+  one, and the first request kept starts with a few lines saying what each asked, which tools changed what, and
+  how its answer ended. Written here, without asking a model. A cut falls only before a request of the user: no
+  tool call loses its result. The prompt cache misses once, then holds again. The thread says so in a note.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

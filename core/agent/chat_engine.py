@@ -94,6 +94,11 @@ class ChatEngine:
     def busy(self) -> bool:
         return self._busy
 
+    @property
+    def summarized(self) -> int:
+        """Requests of this conversation summed up so far, to keep what is sent short."""
+        return self._session.summarized
+
     def send(self, text: str, context: str = "") -> bool:
         """Start a request; False when one is running or there is nothing to send. ``context`` goes with it."""
         if self._busy or not text.strip():

@@ -339,6 +339,11 @@ Acceptez-vous ?</translation>
         <translation>Étiquettes de {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Les plus anciennes demandes de cette conversation sont maintenant résumées en quelques lignes, pour la garder courte.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lecture des filtres actifs</translation>
