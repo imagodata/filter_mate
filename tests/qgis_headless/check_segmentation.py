@@ -441,6 +441,48 @@ def test_features_algorithm(layer):
         finished = spin(lambda: done, 60000)
         drawn = context.takeResultLayer(done[0][1]["OUTPUT"]) if finished and done[0][0] else None
         check("in a background task too", drawn is not None and drawn.featureCount() == 1, done)
+
+        # As a step of a model run in the background: the step is prepared on the thread of the model.
+        from qgis.core import (QgsProcessingModelAlgorithm, QgsProcessingModelChildAlgorithm,
+                               QgsProcessingModelChildParameterSource, QgsProcessingModelOutput,
+                               QgsProcessingModelParameter, QgsProcessingParameterFeatureSource,
+                               QgsProcessingParameterRasterLayer, QgsProcessingProvider)
+
+        class Provider(QgsProcessingProvider):
+            def loadAlgorithms(self):
+                self.addAlgorithm(module.SegmentFromFeaturesAlgorithm())
+
+            def id(self):
+                return "filtermate"
+
+            def name(self):
+                return "FilterMate"
+
+        provider = Provider()
+        QgsApplication.processingRegistry().addProvider(provider)
+        model = QgsProcessingModelAlgorithm("objects", "checks")
+        model.addModelParameter(QgsProcessingParameterRasterLayer("ortho", "ortho"), QgsProcessingModelParameter("ortho"))
+        model.addModelParameter(QgsProcessingParameterFeatureSource("guides", "guides"), QgsProcessingModelParameter("guides"))
+        child = QgsProcessingModelChildAlgorithm("filtermate:segment_from_features")
+        child.setChildId("sam")
+        child.addParameterSources("RASTER", [QgsProcessingModelChildParameterSource.fromModelParameter("ortho")])
+        child.addParameterSources("FEATURES", [QgsProcessingModelChildParameterSource.fromModelParameter("guides")])
+        output = QgsProcessingModelOutput("objects", "objects")
+        output.setChildOutputName("OUTPUT")
+        child.setModelOutputs({"objects": output})
+        model.addChildAlgorithm(child)
+        context, feedback = QgsProcessingContext(), QgsProcessingFeedback()
+        context.setProject(QgsProject.instance())
+        task = QgsProcessingAlgRunnerTask(model, {"ortho": layer, "guides": guides, "sam:objects": "memory:"}, context, feedback)
+        done = []
+        task.executed.connect(lambda ok, results: done.append((ok, results)))
+        QgsApplication.taskManager().addTask(task)
+        finished = spin(lambda: done, 60000)
+        output_id = next((value for key, value in (done[0][1] if done else {}).items() if "objects" in key), None)
+        drawn = context.takeResultLayer(output_id) if finished and done[0][0] and output_id else None
+        check("as a step of a model run in the background", drawn is not None and drawn.featureCount() == 1,
+              (done, feedback.textLog()[-300:] if hasattr(feedback, "textLog") else ""))
+        QgsApplication.processingRegistry().removeProvider(provider)
     finally:
         segmentation.model_state = ready
 
