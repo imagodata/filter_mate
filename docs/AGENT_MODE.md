@@ -1,6 +1,6 @@
 # Agent mode: foundations
 
-Status: the seven steps below are in the code, first published in 5.1.0 (experimental). The chat is on by default
+Status: the steps below are in the code, first published in 5.1.0 (experimental). The chat is on by default
 (`APP.OPTIONS.AGENT.enabled`, read when the panel opens; a configuration written while it was off is turned on once), with
 a free quota and then the user's own key. For developers of FilterMate; the user guide has a chapter for users
 (https://imagodata.github.io/filter_mate/guide.html#agent).
