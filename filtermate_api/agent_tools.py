@@ -278,6 +278,24 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return asdict(accessor.set_labels(args["layer"], field=args["field"], enabled=args["enabled"],
                                           size=args.get("size"), color=args["color"], buffer=args["buffer"]))
 
+    def create_layout(args: Dict[str, Any]) -> Dict[str, Any]:
+        options = {key: args[key] for key in ("title", "page", "orientation", "extent_layer", "legend", "scale_bar",
+                                              "north_arrow")}
+        options.update({key: args.get(key) for key in ("layers", "extent")})
+        return asdict(accessor.create_layout(args["name"], **options))
+
+    def export_layout(args: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            folder = resolve_export_folder(prepare_export_root(export_root), args["subfolder"])
+        except ExportRootError as exc:
+            logger.error("Agent export refused: %s (%s)", exc, export_root)
+            raise ToolFailure("The export folder is not available.") from None
+        except ValueError:
+            raise ToolFailure("Invalid subfolder.") from None
+        answer = asdict(accessor.export_layout(args["name"], str(folder), file_format=args["format"], dpi=args["dpi"]))
+        answer["path"] = os.path.relpath(answer["path"], str(folder))  # the paths of this machine are not sent
+        return answer
+
     def _edit_answer(result) -> Dict[str, Any]:
         answer = asdict(result)
         answer["feature_count"] = answer["changed"] + answer["deleted"] + answer["added"]  # what the card shows
@@ -359,6 +377,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
+        "create_layout": create_layout, "export_layout": export_layout,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,

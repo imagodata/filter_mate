@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 تبقى في ذاكرة التحرير حتى تحفظ تعديلات الطبقة، والتراجع عن الدورة يعيدها. هل توافق؟</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>التخطيط {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>تم تصدير التخطيط {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>يريد الوكيل تصدير التخطيط {} كملف {} إلى مجلد التصدير ({}). يُستبدل أي ملف بالاسم نفسه هناك. هل توافق؟</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>قراءة قيم {}</translation>

@@ -651,6 +651,8 @@ class AgentChatController(QObject):
             "update_features": lambda: _tr("Edit of {} (not saved)").format(layer),
             "delete_features": lambda: _tr("Features deleted from {} (not saved)").format(layer),
             "add_features": lambda: _tr("Features added to {} (not saved)").format(layer),
+            "create_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
+            "export_layout": lambda: _tr("Layout {} exported").format(args.get("name", "")),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
@@ -759,6 +761,9 @@ class AgentChatController(QObject):
         if call.name in ("delete_features",) and isinstance(call.arguments, dict):
             return _tr("selection") if call.arguments.get("selected_only") and not call.arguments.get("expression") \
                 else ""
+        if call.name in ("create_layout", "export_layout") and isinstance(call.arguments, dict):
+            keys = ("title", "page", "orientation") if call.name == "create_layout" else ("format", "dpi", "subfolder")
+            return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))
         if call.name == ADD_NOTE and isinstance(call.arguments, dict):
             return str(call.arguments.get("text", ""))
         if call.name in ("set_layer_style", "set_labels") and isinstance(call.arguments, dict):
@@ -808,6 +813,11 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
                        "server by QGIS, and what the layer holds can be sent to the provider of the agent. "
                        "Do you agree?").format(display_source(str(call.arguments.get("source", ""))))
+        elif call.name == "export_layout":
+            text = _tr("The agent wants to export the layout {} as a {} file into the export folder ({}). A file of "
+                       "the same name there is replaced. Do you agree?").format(
+                one_line(str(call.arguments.get("name", "")), 100), str(call.arguments.get("format", "pdf")).upper(),
+                one_line(str(call.arguments.get("subfolder", "layouts")), 100))
         elif call.name == "delete_features":
             chosen = str(call.arguments.get("expression") or "")
             if call.arguments.get("selected_only"):

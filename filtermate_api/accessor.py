@@ -321,6 +321,32 @@ class EditResult:
 
 
 @dataclass(frozen=True)
+class LayoutResult:
+    """A print layout added to the project."""
+    name: str
+    page: str = ""
+    orientation: str = ""
+    # map, title, legend, scale_bar, north_arrow: what it holds.
+    items: List[str] = field(default_factory=list)
+    # given, layer, view or layers: where the extent of its map comes from.
+    extent_from: str = ""
+    scale: Optional[float] = None
+    layers: Any = None
+    note: str = ""
+
+
+@dataclass(frozen=True)
+class LayoutExport:
+    """A layout written to a file."""
+    name: str
+    format: str = ""
+    dpi: int = 0
+    # Relative to the export folder: the paths of this machine are not given out.
+    path: str = ""
+    bytes: int = 0
+
+
+@dataclass(frozen=True)
 class FilterPreview:
     """What a filter expression would keep, tried on a private copy of the layer."""
     layer_name: str
@@ -344,6 +370,8 @@ class MapContext:
     active_layer_name: str = ""
     # {"layer_id", "name", "selected_count"} of the vector layers with a selection.
     selections: List[Dict[str, Any]] = field(default_factory=list)
+    # Names of the print layouts of the project.
+    layouts: List[str] = field(default_factory=list)
     # {"layer_id", "name", "crs_authid", "count", "area_m2", "extent_wkt"} of the rasters with objects drawn
     # in the dock (the SAM targets of the PIPETTE group): what ``dock_objects`` of a raster selection uses.
     drawn_objects: List[Dict[str, Any]] = field(default_factory=list)
@@ -484,6 +512,14 @@ class FilterMateAccessor(Protocol):
 
     def add_features(self, layer: str, features: List[Dict[str, Any]], crs: str = "") -> EditResult:
         """Add features from WKT in the edit buffer; raises FilterRejected when refused."""
+        ...
+
+    def create_layout(self, name: str, **options: Any) -> LayoutResult:
+        """A print layout of the map added to the project; raises FilterRejected when refused."""
+        ...
+
+    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
+        """Write a layout of the project into ``folder`` (resolved by the route); raises FilterRejected."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -718,6 +754,16 @@ class InMemoryAccessor:
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
         return LabelsResult(layer_name=found.name, labels=enabled, field=field if enabled else "")
+
+    def create_layout(self, name: str, **options: Any) -> LayoutResult:
+        if not name.strip():
+            raise FilterRejected("a layout needs a name")
+        return LayoutResult(name=name, page=options.get("page", "A4"), items=["map"])
+
+    def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
+        import os
+        path = os.path.join(folder, f"{name}.{file_format}")
+        return LayoutExport(name=name, format=file_format, dpi=dpi, path=path, bytes=1)
 
     def _edited(self, layer: str, **counts: int) -> EditResult:
         found = self._find(layer)

@@ -23,6 +23,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 9. Long conversations | The oldest requests summed up in a few lines past a budget | done |
 | 10. Project notes | Facts the user asks the agent to remember, saved in the project, sent with each request | done |
 | 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
+| 12. Layouts | A print layout of the map added to the project, exported as PDF or PNG (confirmed) | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -105,6 +106,12 @@ Rules worth keeping:
   The turn keeps the index of the undo stack before its first edit of a layer; undoing the turn steps back over its
   commands, and is refused on a layer saved, discarded or edited by the user since. `describe_layer` says whether
   a layer is being edited and holds unsaved changes.
+- **Layouts** (`adapters/public_api/layouts.py`): `create_layout` adds a print layout to the project (A4, A3, A5
+  or Letter, landscape or portrait): a map of the layers checked in the tree or of those given, framed on an
+  extent, a layer, the map view or the layers shown, with a title, a legend, a scale bar and a north arrow. The
+  user finishes it in the layout designer; undoing the turn removes it (a `layout` effect keeps its XML, redoing
+  reads it again). `export_layout` writes one as PDF or PNG into a sub-folder of the export root, never a path
+  of the model, and is confirmed by the user like `export_layers`. `map_context` lists the layouts.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

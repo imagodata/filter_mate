@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 A szerkesztési pufferben maradnak, amíg nem menti a réteg szerkesztéseit, és a kör visszavonása visszahozza őket. Egyetért?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>{} nyomtatási elrendezés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>{} elrendezés exportálva</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>Az ügynök a(z) {} elrendezést {} fájlként akarja exportálni az exportmappába ({}). Az ott lévő azonos nevű fájl lecserélődik. Egyetért?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} értékeinek beolvasása</translation>

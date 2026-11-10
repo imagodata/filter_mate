@@ -72,10 +72,10 @@ def api(tmp_path):
     return Accessor(), tmp_path
 
 
-def run(accessor, root, name, **arguments):
+def run(accessor, root, tool_name, **arguments):
     tools = chat_tools()
     result = ToolExecutor(tools, build_handlers(accessor, root, platforms=("datagouv", "ign_wfs", "earth_search"))).execute(
-        ToolCallPart("c", name, arguments))
+        ToolCallPart("c", tool_name, arguments))
     return result.is_error, (result.content if result.is_error else json.loads(result.content))
 
 
@@ -102,6 +102,16 @@ class TestHandlers:
         assert not error and answer["features"] == [] and answer["crs_authid"] == "EPSG:2154"
         error, answer = run(accessor, root, "identify_at", x=570000.5, y=6270000)
         assert not error and (answer["x"], answer["layers"], answer["skipped"]) == (570000.5, [], [])
+
+    def test_layout_tools(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "create_layout", name="Carte", title="Communes")
+        assert not error and answer["name"] == "Carte" and answer["items"] == ["map"]
+        error, answer = run(accessor, root, "export_layout", name="Carte", format="png")
+        assert not error and answer["path"] == "Carte.png" and answer["format"] == "png"  # relative: no host path
+        assert run(accessor, root, "export_layout", name="Carte", subfolder="../out")[0] is True
+        assert run(accessor, root, "create_layout", name="Carte", page="B0")[0] is True
+        assert run(accessor, root, "create_layout", name="Carte", extent=[1, 2, 3])[0] is True
 
     def test_edit_tools(self, api):
         accessor, root = api
@@ -390,6 +400,14 @@ class TestRoutes:
         response = client.get("/layers/field-values", params={"layer": "communes", "field": "nom"})
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.get("/layers/field-values", params={"layer": "x", "field": "y"}).status_code == 404
+
+    def test_layout_routes(self, client):
+        response = client.post("/layouts", json={"name": "Carte", "page": "A3", "orientation": "portrait"})
+        assert response.status_code == 200 and response.json()["page"] == "A3"
+        assert client.post("/layouts", json={"name": "Carte", "page": "B0"}).status_code == 422
+        assert client.post("/layouts", json={"name": ""}).status_code == 422
+        assert client.post("/layouts/export", json={"name": "Carte", "subfolder": "../x"}).status_code == 422
+        assert client.post("/layouts/export", json={"name": "Carte", "dpi": 1000}).status_code == 422
 
     def test_edit_routes(self, client):
         response = client.post("/layers/features/update", json={"layer": "communes", "values": {"a": 1}, "expression": "true"})

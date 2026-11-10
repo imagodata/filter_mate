@@ -26,6 +26,7 @@ EXPECTED_TOOLS = {
     "describe_layer", "field_values", "preview_filter", "map_context",
     "layer_statistics", "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm",
     "set_layer_style", "set_labels", "update_features", "delete_features", "add_features",
+    "create_layout", "export_layout",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
     "add_service_layer", "search_imagery", "segment_objects", "similar_objects",
 }
@@ -33,7 +34,7 @@ READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "
              "preview_filter", "map_context", "search_open_data", "search_imagery", "layer_statistics",
              "sample_features", "identify_at", "find_algorithms", "describe_algorithm"}
 OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "search_imagery"}
-DESTRUCTIVE = {"export_layers", "remove_layers", "delete_features"}
+DESTRUCTIVE = {"export_layers", "remove_layers", "delete_features", "export_layout"}
 
 
 @pytest.fixture(scope="module")

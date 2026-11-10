@@ -337,6 +337,21 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
 जब तक आप लेयर के संपादन नहीं सहेजते, वे संपादन बफ़र में रहती हैं, और चरण को पूर्ववत करने से वे लौट आती हैं। क्या आप सहमत हैं?</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Layout {}</source>
+        <translation>लेआउट {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="655"/>
+        <source>Layout {} exported</source>
+        <translation>लेआउट {} निर्यात किया गया</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
+        <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
+        <translation>एजेंट लेआउट {} को {} फ़ाइल के रूप में निर्यात फ़ोल्डर ({}) में निर्यात करना चाहता है। वहाँ उसी नाम की फ़ाइल बदल दी जाएगी। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} के मान पढ़ना</translation>

@@ -190,5 +190,13 @@
   "prompt": "Find on the orthophoto the buildings that look like the selected one.",
   "expect": [[{"tool": "similar_objects", "args": {"raster": "orthophoto", "example_layer": "batiments"},
     "call_args": {"raster": "orthophoto", "example_layer": "batiments"}}]],
-  "forbid": ["export_layers"]}
+  "forbid": ["export_layers"]},
+ {"id": "layout_made", "prompt": "Prépare une mise en page A3 de la carte des communes, avec le titre Communes de Haute-Garonne.",
+  "expect": [[{"tool": "create_layout", "args": {"page": "A3", "title": {"contains": ["Communes"]}},
+    "call_args": {"name": "Communes de Haute-Garonne", "page": "A3", "title": "Communes de Haute-Garonne"}}]],
+  "forbid": ["export_layers", "remove_layers", "delete_features"]},
+ {"id": "layout_exported", "prompt": "Exporte la mise en page Carte des communes en PDF.",
+  "expect": [[{"tool": "export_layout", "args": {"name": "Carte des communes", "format": "pdf"},
+    "call_args": {"name": "Carte des communes", "format": "pdf"}}]],
+  "forbid": ["export_layers", "create_layout"]}
 ]}
