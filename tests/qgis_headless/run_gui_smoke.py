@@ -1359,7 +1359,7 @@ def capture_boards(d, chat, folder):
 
 
 def s_agent_panel():
-    """Two stacks: EXPLORING / AGENT above, FILTERING / EXPORTING / CONFIGURATION below, and their rules."""
+    """Two stacks: AGENT / EXPLORING above, FILTERING / EXPORTING / CONFIGURATION below, and their rules."""
     d = dock()
     plugin = qgis.utils.plugins[PACKAGE]
     toolbox = d.toolBox_tabTools
@@ -1385,6 +1385,29 @@ def s_agent_panel():
           len([h for h in sections.top.findChildren(QPushButton) if h.objectName() == 'pushButton_section_agent']) == 1)
     check('stacks: AGENT shares the top stack with EXPLORING', chat.panel.parentWidget() is sections.top and
           d.frame_exploring.parentWidget() is sections.top)
+    top_layout = sections.top.layout()
+    check('stacks: AGENT first, EXPLORING second', top_layout.indexOf(agent_header) < top_layout.indexOf(chat.panel)
+          < top_layout.indexOf(exploring_header) < top_layout.indexOf(d.frame_exploring),
+          str([top_layout.indexOf(w) for w in (agent_header, chat.panel, exploring_header, d.frame_exploring)]))
+    # The handle reaches from one stack at its minimum to the other: no size hint floor above (the Minimum policy
+    # of EXPLORING held it at 396 px of 905), no cap below (the tool box stopped at 650 px).
+    splitter = d.splitter_main
+    saved_sizes, total = splitter.sizes(), sum(splitter.sizes())
+    collapsible = splitter.childrenCollapsible()
+    splitter.setChildrenCollapsible(False)  # the compact profile lets a stack collapse to nothing
+    splitter.setSizes([0, total])
+    QApplication.processEvents()
+    smallest_top = splitter.sizes()[0]
+    splitter.setSizes([total, 0])
+    QApplication.processEvents()
+    smallest_bottom = splitter.sizes()[1]
+    splitter.setChildrenCollapsible(collapsible)
+    splitter.setSizes(saved_sizes)
+    QApplication.processEvents()
+    check('splitter: each stack goes down to its minimum', smallest_top <= sections.top.minimumSizeHint().height() + 2
+          and smallest_bottom <= splitter.widget(1).minimumHeight() + 2 and d.toolBox_tabTools.maximumHeight() > 10000,
+          f"top {smallest_top} (min {sections.top.minimumSizeHint().height()}), bottom {smallest_bottom} "
+          f"(min {splitter.widget(1).minimumHeight()}), total {total}")
     check('stacks: the lower one keeps its three sections in order', [toolbox.itemText(toolbox.indexOf(page)) for page in
           (d.FILTERING, d.EXPORTING, d.CONFIGURATION)] == ['FILTERING', 'EXPORTING', 'CONFIGURATION'])
     bottom_headers = [b for b in toolbox.findChildren(QAbstractButton)

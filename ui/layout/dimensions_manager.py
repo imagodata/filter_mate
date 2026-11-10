@@ -263,7 +263,7 @@ class DimensionsManager(LayoutManagerBase):
         # Get frame exploring configuration
         exploring_config = UIConfig.get_config('frame_exploring')
         exploring_min = exploring_config.get('min_height', 120) if exploring_config else 120
-        exploring_max = exploring_config.get('max_height', 350) if exploring_config else 350
+        exploring_max = exploring_config.get('max_height', 16777215) if exploring_config else 16777215
         exploring_h_policy = exploring_config.get('size_policy_h', 'Preferred') if exploring_config else 'Preferred'
         exploring_v_policy = exploring_config.get('size_policy_v', 'Minimum') if exploring_config else 'Minimum'
 
