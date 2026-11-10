@@ -279,6 +279,11 @@
         <translation>Подписи слоя {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Самые старые запросы этого разговора теперь сведены к нескольким строкам, чтобы он оставался коротким.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Чтение значений {}</translation>

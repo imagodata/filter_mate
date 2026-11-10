@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, List, Optional, Protocol, Sequence, Tuple
 
+from .compaction import compact
 from .messages import (
     ROLE_ASSISTANT, ROLE_USER, STOP_MAX_TOKENS, STOP_REFUSAL, STOP_TOOL_USE, Message, ProviderError, StreamFailure,
     TextPart, ToolCallPart, ToolResultPart, TurnComplete, Usage,
@@ -33,6 +34,9 @@ class AgentLimits:
     max_model_turns: int = 16
     # This many model turns before the end, the tool results say so: the model finishes instead of being cut.
     warn_turns_left: int = 2
+    # Past this many characters (about a quarter as many tokens), the oldest requests are summed up in a few lines
+    # (core/agent/compaction.py) before a new one is sent.
+    max_history_chars: int = 120_000
 
 
 TURNS_LEFT_NOTE = ("{} model turns left for this request: finish what is under way and answer now. If something "
@@ -62,13 +66,21 @@ class AgentSession:
         self._turns = 0
         self._request_start = 0
         self.usage = Usage()
+        # Requests summed up so far, to say so in the interface.
+        self.summarized = 0
 
     @property
     def messages(self) -> Tuple[Message, ...]:
         return tuple(self._messages)
 
     def add_user_text(self, text: str, context: str = "") -> None:
-        """Start a new request of the user; ``context`` (the state of the project) follows it in the same message."""
+        """Start a new request of the user; ``context`` (the state of the project) follows it in the same message.
+
+        A conversation past ``max_history_chars`` first loses its oldest requests, summed up in their place.
+        """
+        writes = [tool.name for tool in self._tools if not tool.read_only]
+        self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
+        self.summarized += summarized
         self._request_start = len(self._messages)
         parts = (TextPart(text),) + ((TextPart(context),) if context else ())
         self._messages.append(Message(ROLE_USER, parts))

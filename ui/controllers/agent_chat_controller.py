@@ -522,7 +522,12 @@ class AgentChatController(QObject):
         self.panel.set_status(_tr("Thinking…"))
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
+        summarized = self._engine.summarized
         self._engine.send(text, self._project_context())
+        if self._engine.summarized > summarized:
+            note = _tr("The oldest requests of this conversation are now summed up in a few lines, to keep it short.")
+            self.panel.add_note(note)
+            self._record("note", note)
 
     def _read_project(self):
         """``(layers, selections, view)`` now, as plain dicts; None when they cannot be read."""

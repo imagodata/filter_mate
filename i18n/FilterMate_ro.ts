@@ -279,6 +279,11 @@
         <translation>Etichetele {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Cele mai vechi cereri din această conversație sunt acum rezumate în câteva rânduri, pentru a o păstra scurtă.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Citirea valorilor din {}</translation>

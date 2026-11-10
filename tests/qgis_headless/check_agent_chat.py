@@ -582,6 +582,17 @@ def check_chat(provider, layer, authcfg, work):
     check("undoing the turn brings the style back", layer.renderer().type() == renderer_before
           and not layer.labelsEnabled(), (layer.renderer().type(), layer.labelsEnabled()))
 
+    from filter_mate.core.agent.compaction import SUMMARY_HEADER
+    from filter_mate.core.agent.session import AgentLimits
+    chat._engine._session._limits = AgentLimits(max_history_chars=2000)  # the conversation is long by now
+    provider.reset((200, {}, text_turn("Bien.")))
+    check("a long conversation is sent shorter", ask("et maintenant ?"))
+    sent = provider.requests[0]["body"]["messages"]
+    check("its oldest requests are summed up at its start", sent[0]["content"][0]["text"].startswith(SUMMARY_HEADER)
+          and sent[-1]["content"][0]["text"] == "et maintenant ?", sent[0]["content"][0]["text"][:300])
+    check("the thread says so", "summed up in a few lines" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
+    chat._engine._session._limits = AgentLimits()
+
     provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
     ask("liste")
     shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]
@@ -1357,8 +1368,13 @@ def check_effects(layer_id):
     turn.commit()
     turn.undo()
     check("effects: an added layer goes on undo", project.mapLayer(memory_id) is None)
-    turn.redo()
-    check("effects: and comes back on redo", project.mapLayer(memory_id) is not None)
+    redone = turn.redo()
+    # It would come back empty: a layer held in memory is not brought back on redo, and that is said (#302).
+    check("effects: a layer in memory is not brought back empty on redo, and says so",
+          project.mapLayer(memory_id) is None and "scratch" in redone[1], redone)
+    memory = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "scratch", "memory")
+    project.addMapLayer(memory)
+    memory_id = memory.id()
     turn.label = "remove scratch"
     turn.begin(ToolCallPart("e5", "remove_layers", {"layers": ["scratch"]}))
     project.removeMapLayer(memory_id)

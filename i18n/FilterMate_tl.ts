@@ -279,6 +279,11 @@
         <translation>Mga label ng {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Ang pinakalumang mga kahilingan sa usapang ito ay ibinuod na sa ilang linya upang manatiling maikli.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Binabasa ang mga halaga ng {}</translation>

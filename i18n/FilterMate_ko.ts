@@ -279,6 +279,11 @@
         <translation>{}의 레이블</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>이 대화의 가장 오래된 요청은 짧게 유지하기 위해 이제 몇 줄로 요약되었습니다.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{}의 값 읽는 중</translation>

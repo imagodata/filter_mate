@@ -279,6 +279,11 @@
         <translation>Label {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Permintaan tertua dalam perbualan ini kini diringkaskan dalam beberapa baris supaya ia kekal ringkas.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Membaca nilai {}</translation>

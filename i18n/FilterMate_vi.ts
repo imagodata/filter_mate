@@ -279,6 +279,11 @@
         <translation>Nhãn của {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>Các yêu cầu cũ nhất của cuộc trò chuyện này giờ được tóm tắt trong vài dòng để giữ nó ngắn gọn.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Đang đọc các giá trị của {}</translation>

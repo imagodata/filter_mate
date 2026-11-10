@@ -279,6 +279,11 @@
         <translation>{} के लेबल</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="528"/>
+        <source>The oldest requests of this conversation are now summed up in a few lines, to keep it short.</source>
+        <translation>इस बातचीत के सबसे पुराने अनुरोध अब कुछ पंक्तियों में सारांशित हैं, ताकि यह छोटी रहे।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} के मान पढ़ना</translation>
