@@ -83,7 +83,15 @@ A found object counts when it overlaps a BD TOPO building with an IoU of at leas
 
 SAM finds roughly half of the buildings of the same size in the view, where the colour engine finds almost
 none. About two found objects out of three are not buildings, though: check the result before filtering
-with it, and remove the wrong ones with Escape or *Clear*.
+with it, and remove the wrong ones with Escape or *Clear*. On ten other buildings of the same orthophoto
+(`scripts/sam_similar_features.py`), SAM did less well: median precision 0.24, recall 0.31.
+
+**A filter tried and not adopted** (2026-11-10, rule set before the run). The objects that are not buildings
+have a lower SAM score (median 0.75 against 0.88) and a colour further from the clicked object (largest
+difference of the mean R, G, B: 25.6 against 11.4). Thresholds chosen on the first ten buildings (score at
+least 0.42, colour distance at most 30) raised the median precision on the ten others from 0.24 to 0.31 for a
+recall from 0.31 to 0.29 (`scripts/sam_similar_analysis.py`). The gain required was 0.10: the search is
+unchanged.
 
 ## Model
 
