@@ -159,6 +159,13 @@ class SimulatedProject:
         def relation(args):
             targets = self._targets(args.get("target_layers", []))
             source = self._layer(args["source_layer"])[0] if "source_layer" in args else "an area"
+            if ("source_layer" in args and args.get("selected_only", True) and LAYERS[source]["kind"] == "vector"
+                    and source not in self.selected and source not in self.filters
+                    and not args.get("raster_selection") and not args.get("point_cloud_criteria")):
+                raise ToolFailure(  # as filtermate_api/agent_tools.py refuses it
+                    f"Nothing is selected on '{source}' and it has no filter, so every feature would be used. Select "
+                    "the features meant with select_features first, or call again with selected_only false to use "
+                    "them all.")
             for name in targets:
                 self.filters[name] = f"filtered by {source}"
             kept = {name: 0 if name in self.empty else max(LAYERS[name].get("count", 30) // 3, 1) for name in targets}

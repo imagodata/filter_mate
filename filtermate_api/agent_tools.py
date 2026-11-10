@@ -56,6 +56,7 @@ def _report(operation: str, result: Any) -> Dict[str, Any]:
     return asdict(result)
 
 
+MAX_LISTED_SELECTIONS = 50  # map_context lists at most this many layers with a selection (introspection.py)
 NOTHING_KEPT = ("No feature kept. Check the direction of the predicate (the target is tested against the source), "
                 "the buffer, and that the source holds the features meant (its selection, its filter).")
 
@@ -167,7 +168,26 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
                 answer["warning"] = "No feature kept: check the values and the field names (describe_layer, field_values)."
         return answer
 
+    def _check_source_selection(source: str) -> None:
+        """A vector source with no selection and no filter would be used whole: the model must mean it."""
+        try:
+            details = accessor.describe_layer(source)
+            if details is None or details.layer_kind != "vector" or details.subset:
+                return
+            selections = accessor.map_context().selections
+        except (QGISBusy, FilterRejected):
+            return
+        if len(selections) >= MAX_LISTED_SELECTIONS:  # the list is cut: it cannot tell
+            return
+        if not any(source in (item.get("layer_id"), item.get("name")) or details.layer_id == item.get("layer_id")
+                   for item in selections):
+            raise ToolFailure(
+                f"Nothing is selected on '{details.name}' and it has no filter, so every feature would be used. Select "
+                "the features meant with select_features first, or call again with selected_only false to use them all.")
+
     def cross_filter(args: Dict[str, Any]) -> Dict[str, Any]:
+        if args["selected_only"] and not args.get("raster_selection") and not args.get("point_cloud_criteria"):
+            _check_source_selection(args["source_layer"])
         result = accessor.cross_filter(
             source_layer=args["source_layer"], target_layers=args["target_layers"], predicates=args["predicates"],
             buffer=args["buffer"], coverage_min=args["coverage_min"], operator=args.get("operator"),

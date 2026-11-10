@@ -119,5 +119,10 @@
  {"id": "cross_nothing_kept", "setup": {"selected": ["routes"], "empty": ["batiments"]},
   "prompt": "Garde les bâtiments qui touchent les routes sélectionnées.",
   "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"]},
-    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "predicates": ["Touch"]}}]]}
+    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "predicates": ["Touch"]}}]]},
+ {"id": "cross_every_source_feature", "setup": {"selected": []},
+  "prompt": "Garde les bâtiments à moins de 20 mètres d'une route, n'importe laquelle.",
+  "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20,
+    "selected_only": false},
+    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "buffer": 20, "selected_only": false}}]]}
 ]}

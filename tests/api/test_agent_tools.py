@@ -126,6 +126,23 @@ class TestHandlers:
         assert answer["kept"] == {"b": 0, "c": 7}
         assert "direction of the predicate" in answer["warnings"]["b"] and "c" not in answer["warnings"]
 
+    @pytest.mark.parametrize("subset, selections, selected_only, refused", [
+        ("", [], True, True),  # nothing selected, no filter: the whole layer would be used
+        ("", [{"layer_id": "S1", "name": "routes", "selected_count": 3}], True, False),
+        ("nature = 'A'", [], True, False),  # its filter says which features: "the roads I kept"
+        ("", [], False, False),  # every feature, on purpose
+    ])
+    def test_a_source_with_nothing_selected_is_not_used_whole_by_mistake(self, tmp_path, subset, selections,
+                                                                        selected_only, refused):
+        accessor = Accessor(describe=LayerDetails("S1", "routes", "vector", subset=subset),
+                            map=MapContext(available=True, selections=selections))
+        error, answer = run(accessor, tmp_path, "cross_filter", source_layer="routes", target_layers=["b"],
+                            selected_only=selected_only)
+        assert error is refused, answer
+        if refused:
+            assert "select_features" in answer and "selected_only false" in answer
+            assert not [name for name, _ in accessor.calls if name == "cross_filter"]
+
     def test_geometry_filter_warns_on_an_emptied_target(self, tmp_path):
         accessor = Accessor(geometry=CrossFilterResult(filtered=["b"], kept={"b": 0}))
         error, answer = run(accessor, tmp_path, "geometry_filter", wkt="POINT(0 0)", crs="EPSG:2154",
