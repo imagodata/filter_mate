@@ -16,7 +16,7 @@ import logging
 from typing import Any, Optional
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
-from qgis.PyQt.QtGui import QColor, QPainter, QPen
+from qgis.PyQt.QtGui import QColor, QPainter, QPen, QPolygonF
 from qgis.PyQt.QtWidgets import (
     QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
 )
@@ -92,9 +92,9 @@ class DockTitleButton(QAbstractButton):
                 side, shift = TITLE_GLYPH - 2, 2
                 left, top = center.x() - half, center.y() - half
                 painter.drawRect(QRectF(left, top + shift, side, side))
-                painter.drawPolyline([QPointF(left + shift, top + shift), QPointF(left + shift, top),
+                painter.drawPolyline(QPolygonF([QPointF(left + shift, top + shift), QPointF(left + shift, top),
                                       QPointF(left + TITLE_GLYPH, top), QPointF(left + TITLE_GLYPH, top + side),
-                                      QPointF(left + side, top + side)])
+                                      QPointF(left + side, top + side)]))
         finally:
             painter.end()
 
