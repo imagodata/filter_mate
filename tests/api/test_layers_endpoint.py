@@ -35,6 +35,8 @@ class TestListLayers:
             "has_active_filter": False,
             "active_filter_expression": "",
             "layer_kind": "vector",
+            "visible": True,
+            "group": "",
         }
 
     def test_empty_accessor_returns_empty_list(self, client_factory):

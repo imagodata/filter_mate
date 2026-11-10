@@ -59,6 +59,10 @@ class LayerSummary:
     # FilterMate 5: "vector", "raster" or "point_cloud" (vector by default so
     # older clients and accessors keep working).
     layer_kind: str = "vector"
+    # Checked in the layer tree, with every group above it. The rows come in the order of the tree, top first.
+    visible: bool = True
+    # The groups it sits in, outermost first, joined by " / "; empty at the root.
+    group: str = ""
 
 
 @dataclass(frozen=True)
@@ -159,6 +163,18 @@ class LayerDetails:
     pixel_size: Optional[float] = None
     # Point cloud: attribute names (Z, Classification, Intensity...).
     attributes: List[str] = field(default_factory=list)
+    # Where it sits in the layer tree: checked with its groups, and those groups joined by " / ".
+    visible: bool = True
+    group: str = ""
+    # [xmin, ymin, xmax, ymax] in the layer CRS; empty when unknown, and for a web service (not read to answer).
+    extent: List[float] = field(default_factory=list)
+    # How it is drawn: {"renderer", "field", "classes", "labels", "opacity", "min_scale", "max_scale"}, each only
+    # when it applies. No attribute value is given.
+    style: Dict[str, Any] = field(default_factory=dict)
+    # Vector: {"layer", "field", "target_field", "prefix"} of each join; joined fields are not filterable.
+    joins: List[Dict[str, Any]] = field(default_factory=list)
+    # Vector: {"name", "role" (parent or child), "layer", "fields": [{"field", "other_field"}]} of the project.
+    relations: List[Dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -191,6 +207,8 @@ class MapContext:
     canvas_crs: str = ""
     extent_wkt: str = ""
     scale: Optional[float] = None
+    # [xmin, ymin, xmax, ymax] of ``extent_wkt``, in ``canvas_crs``.
+    extent: List[float] = field(default_factory=list)
     active_layer_id: str = ""
     active_layer_name: str = ""
     # {"layer_id", "name", "selected_count"} of the vector layers with a selection.

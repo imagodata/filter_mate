@@ -31,7 +31,7 @@ from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import FREE_PRESET, create_provider
-from ...core.agent.project_summary import project_summary
+from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.tool_catalog import UNDO_AGENT_STEP, chat_tools
@@ -99,6 +99,7 @@ class AgentChatController(QObject):
         self._connector_labels = {}
         self._building = False
         self._transcript = []
+        self._seen = None  # project_state when the last answer ended
         self._transcript_key = ""
         self._answer = []
         self._header_label = None
@@ -483,6 +484,7 @@ class AgentChatController(QObject):
 
     def _reset_view(self) -> None:
         self._engine = None
+        self._seen = None  # another conversation has seen nothing yet
         self.panel.clear_thread()
 
     def new_conversation(self) -> None:
@@ -519,16 +521,29 @@ class AgentChatController(QObject):
         self.panel.set_can_undo(False)
         self._engine.send(text, self._project_context())
 
-    def _project_context(self) -> str:
-        """The layers, their filters and the selections now, sent after the request; empty when they cannot be read."""
+    def _read_project(self):
+        """``(layers, selections, view)`` now, as plain dicts; None when they cannot be read."""
         try:
             accessor = self._accessor()
             layers = [asdict(layer) for layer in accessor.list_layers()]
-            selections = accessor.map_context().selections
+            view = asdict(accessor.map_context())
         except Exception:  # the request goes without it: the model reads the project with its tools
             logger.debug("Agent: project summary not read", exc_info=True)
-            return ""
-        return project_summary(layers, selections)
+            return None
+        return layers, view.get("selections") or [], view
+
+    def _project_context(self) -> str:
+        """The map, the layers, their filters, the selections now and what the user changed since the last answer.
+
+        Sent after the request; empty when the project cannot be read.
+        """
+        read = self._read_project()
+        return "" if read is None else project_summary(*read, before=self._seen)
+
+    def _remember_project(self) -> None:
+        """The project as the agent leaves it: what differs at the next request is the user's doing."""
+        read = self._read_project()
+        self._seen = None if read is None else project_state(*read)
 
     def _on_stop(self) -> None:
         abort_active()  # a connector or a platform being waited for
@@ -730,6 +745,7 @@ class AgentChatController(QObject):
         self._flush_journal()
         self._save_transcript()
         self._refresh_history()
+        self._remember_project()
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             self._give_back_request()
             free = load_settings().preset == FREE_PRESET

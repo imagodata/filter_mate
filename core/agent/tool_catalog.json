@@ -4,7 +4,7 @@
   {
    "name": "list_layers",
    "title": "List layers",
-   "description": "List the layers of the open QGIS project that FilterMate knows, as {\"layers\": [...]}. Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid, layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression (cut past 200 characters, with active_filter_expression_length: describe_layer gives it whole). \"more\" says how many matching layers were left out by limit. Call this first: the other tools take layer names or ids from it.",
+   "description": "List the layers of the open QGIS project that FilterMate knows, as {\"layers\": [...]}. Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid, layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression (cut past 200 characters, with active_filter_expression_length: describe_layer gives it whole), visible (checked in the layer tree, with its groups) and group (the groups above it, joined by \" / \"). The layers come in the order of the layer tree, the one drawn on top first. \"more\" says how many matching layers were left out by limit. Call this first: the other tools take layer names or ids from it.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -94,7 +94,7 @@
   {
    "name": "describe_layer",
    "title": "Describe a layer",
-   "description": "What a filter can test on a layer: its fields, bands or point attributes. Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its current filter), and by kind: sql_dialect (postgresql, sqlite, ogr_sql or qgis_expression: the language of its filter) and fields [{name, type, alias, filterable}] for a vector layer (filterable is false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}] and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point cloud.",
+   "description": "What a layer is and what a filter can test on it: its fields, bands or point attributes. Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its current filter), visible and group (its place in the layer tree), extent ([xmin, ymin, xmax, ymax] in its own CRS, empty for a web service), style (how it is drawn: renderer, and when they apply field, classes (how many), labels (the field labelled), opacity, min_scale and max_scale (it only shows between these scale denominators)), and by kind: joins [{layer, field, target_field, prefix}] and relations [{name, role (parent or child), layer, fields}] for a vector layer, with sql_dialect (postgresql, sqlite, ogr_sql or qgis_expression: the language of its filter) and fields [{name, type, alias, filterable}] for a vector layer (filterable is false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}] and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point cloud.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -190,7 +190,7 @@
   {
    "name": "map_context",
    "title": "Map context",
-   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source). available is false when QGIS has no map canvas.",
+   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), extent (the same as [xmin, ymin, xmax, ymax]), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source). available is false when QGIS has no map canvas.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,

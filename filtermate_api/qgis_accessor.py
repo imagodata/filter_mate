@@ -216,9 +216,13 @@ class QGISFilterMateAccessor:
 
         project = QgsProject.instance()
         active_filters = self._active_filters_main_thread()
+        # {layer id: (rank in the tree, groups, visible)}; a layer outside the tree comes last.
+        places = _safe(lambda: _plugin_module("adapters.public_api.introspection").tree_places(), {}) or {}
+        layers = sorted(project.mapLayers().values(),
+                        key=lambda item: places.get(_safe(item.id, ""), (len(places), "", True))[0])
 
         out: List[LayerSummary] = []
-        for layer in project.mapLayers().values():
+        for layer in layers:
             kind = "vector" if isinstance(layer, QgsVectorLayer) else _layer_kind(layer)
             if kind not in ("vector", "raster", "point_cloud"):
                 continue
@@ -239,9 +243,12 @@ class QGISFilterMateAccessor:
                 count = -1
                 geometry = "Raster"
             derived = _derived_marker(layer)
+            _, group, visible = places.get(_safe(layer.id, ""), (0, "", True))
 
             out.append(
                 LayerSummary(
+                    visible=visible,
+                    group=group,
                     layer_id=_safe(layer.id, ""),
                     name=name,
                     provider_type=_safe(layer.providerType, ""),
