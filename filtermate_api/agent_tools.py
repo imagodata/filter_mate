@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
+from .layer_listing import select_layers, short_filter
 from .main_thread import QGISBusy
 
 try:
@@ -102,11 +103,12 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
                               f"{', '.join(sorted(enabled_platforms)) or 'none'}.")
         return name
 
-    def list_layers(_: Dict[str, Any]) -> Dict[str, Any]:
-        return {"layers": [asdict(layer) for layer in accessor.list_layers()]}
+    def list_layers(args: Dict[str, Any]) -> Dict[str, Any]:
+        return select_layers((asdict(layer) for layer in accessor.list_layers()), args.get("kind"),
+                             args.get("name_contains"), args.get("limit"))
 
     def filter_state(_: Dict[str, Any]) -> Dict[str, Any]:
-        return {"layers": [asdict(layer) for layer in accessor.get_filter_state()]}
+        return {"layers": [short_filter(asdict(layer), "subset") for layer in accessor.get_filter_state()]}
 
     def list_favorites(_: Dict[str, Any]) -> Dict[str, Any]:
         return {"favorites": [asdict(favorite) for favorite in accessor.list_favorites()]}

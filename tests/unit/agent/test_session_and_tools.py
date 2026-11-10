@@ -297,6 +297,18 @@ class TestExecutor:
         text = bounded_json('"' * (MAX_RESULT_CHARS * 2))
         assert json.loads(text)["truncated"] is True and len(text) < MAX_RESULT_CHARS + 200
 
+    def test_a_long_list_loses_whole_rows_and_stays_json(self):
+        rows = [{"name": f"layer {number}", "note": "x" * 200} for number in range(400)]
+        text = bounded_json({"layers": rows, "count": 400})
+        answer = json.loads(text)
+        kept = answer["layers"]
+        assert len(text) <= MAX_RESULT_CHARS and 0 < len(kept) < 400 and kept == rows[:len(kept)]
+        assert answer["layers_omitted"] == 400 - len(kept) and answer["count"] == 400 and "fewer" in answer["note"]
+
+    def test_a_single_huge_row_is_still_cut(self):
+        text = bounded_json({"layers": ["x" * (MAX_RESULT_CHARS * 2)], "values": []})
+        assert json.loads(text)["truncated"] is True
+
     def test_a_result_that_cannot_be_serialized_is_an_answer(self):
         loop = {}
         loop["self"] = loop

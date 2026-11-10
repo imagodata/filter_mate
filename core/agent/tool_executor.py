@@ -30,11 +30,40 @@ def _with_defaults(arguments: Dict[str, Any], schema: Dict[str, Any]) -> Dict[st
     return filled
 
 
+def _dumps(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, default=str)
+
+
+def _fewer_rows(value: Any, limit: int) -> Optional[str]:
+    """A long list of a result loses its last rows, whole, and says how many: the rest stays valid JSON."""
+    if not isinstance(value, dict):
+        return None
+    lists = [key for key, item in value.items() if isinstance(item, list) and len(item) > 1]
+    if not lists:
+        return None
+    key = max(lists, key=lambda name: len(_dumps(value[name])))
+    rows = value[key]
+    low, high = 0, len(rows) - 1  # the most rows that fit, at least none
+    best = None
+    while low <= high:
+        middle = (low + high) // 2
+        text = _dumps({**value, key: rows[:middle], f"{key}_omitted": len(rows) - middle,
+                       "note": f"{len(rows) - middle} of {len(rows)} {key} left out: ask for fewer (filters, limit)."})
+        if len(text) <= limit:
+            best, low = text, middle + 1
+        else:
+            high = middle - 1
+    return best
+
+
 def bounded_json(value: Any, limit: int = MAX_RESULT_CHARS) -> str:
     """``value`` as JSON text; a long answer is cut and says so, it never fills the conversation."""
-    text = json.dumps(value, ensure_ascii=False, default=str)
+    text = _dumps(value)
     if len(text) <= limit:
         return text
+    fewer = _fewer_rows(value, limit)
+    if fewer is not None:
+        return fewer
     # Half: the quotes of the JSON text are escaped when it is quoted again.
     return json.dumps({"truncated": True, "total_characters": len(text), "start_of_result": text[:limit // 2]},
                       ensure_ascii=False)

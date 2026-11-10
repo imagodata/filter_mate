@@ -400,3 +400,35 @@ class TestRestFiltersArePlainClauses:
     def test_a_plain_filter_passes(self, make_client):
         response = make_client(Accessor()).post("/filters/apply", json={"layer_name": "communes", "expression": '"pop" > 1000 AND "nom" LIKE \'A%\''})
         assert response.status_code != 400, response.text
+
+
+class TestLayerListing:
+    """What list_layers and filter_state give the model: what it asked for, long filters cut."""
+
+    def test_kind_name_and_limit(self):
+        from filtermate_api.layer_listing import select_layers
+        rows = [{"name": "Routes A", "layer_kind": "vector"}, {"name": "MNT", "layer_kind": "raster"},
+                {"name": "routes B", "layer_kind": "vector"}]
+        assert [row["name"] for row in select_layers(rows, kind="vector")["layers"]] == ["Routes A", "routes B"]
+        assert [row["name"] for row in select_layers(rows, name_contains="ROUTES")["layers"]] == ["Routes A", "routes B"]
+        cut = select_layers(rows, limit=1)
+        assert len(cut["layers"]) == 1 and cut["more"] == 2 and "limit" in cut["note"]
+        assert "more" not in select_layers(rows)
+
+    def test_a_long_filter_is_cut_with_its_length(self):
+        from filtermate_api.layer_listing import MAX_FILTER_CHARS, select_layers
+        long = "x = 1 OR " * 100
+        row = select_layers([{"name": "a", "active_filter_expression": long}])["layers"][0]
+        assert len(row["active_filter_expression"]) == MAX_FILTER_CHARS + 1 and row["active_filter_expression_length"] == len(long)
+
+    def test_the_chat_tools_take_the_same_arguments(self, tmp_path):
+        accessor = Accessor()
+        error, answer = run(accessor, tmp_path, "list_layers", kind="raster")
+        assert not error and answer == {"layers": []}
+        error, answer = run(accessor, tmp_path, "list_layers", name_contains="commu")
+        assert not error and [row["name"] for row in answer["layers"]] == ["communes"]
+
+    def test_filter_state_cuts_a_long_subset(self, tmp_path):
+        accessor = Accessor(state=[FilteredLayer("L1", "communes", "vector", subset="a" * 900)])
+        error, answer = run(accessor, tmp_path, "filter_state")
+        assert not error and answer["layers"][0]["subset_length"] == 900

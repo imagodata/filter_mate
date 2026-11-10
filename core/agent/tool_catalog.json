@@ -4,13 +4,51 @@
   {
    "name": "list_layers",
    "title": "List layers",
-   "description": "List the layers of the open QGIS project that FilterMate knows, as {\"layers\": [...]}. Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid, layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression. Call this first: the other tools take layer names or ids from it.",
+   "description": "List the layers of the open QGIS project that FilterMate knows, as {\"layers\": [...]}. Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid, layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression (cut past 200 characters, with active_filter_expression_length: describe_layer gives it whole). \"more\" says how many matching layers were left out by limit. Call this first: the other tools take layer names or ids from it.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
    "open_world": false,
    "input_schema": {
-    "properties": {},
+    "properties": {
+     "kind": {
+      "anyOf": [
+       {
+        "enum": [
+         "vector",
+         "raster",
+         "point_cloud"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Only the layers of this kind"
+     },
+     "name_contains": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Only the layers whose name holds this text (case ignored)"
+     },
+     "limit": {
+      "default": 200,
+      "description": "At most this many layers",
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
     "type": "object"
    }
   },
@@ -30,7 +68,7 @@
   {
    "name": "filter_state",
    "title": "Filter state",
-   "description": "Every layer FilterMate filters right now, of any kind, as {\"layers\": [...]}. Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster) and derived (true when the layer reads a clipped copy of its source). Use it to check what a filter did, and to find out what a previous call did when a request timed out.",
+   "description": "Every layer FilterMate filters right now, of any kind, as {\"layers\": [...]}. Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster; cut past 200 characters, with subset_length: describe_layer gives it whole) and derived (true when the layer reads a clipped copy of its source). Use it to check what a filter did, and to find out what a previous call did when a request timed out.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,

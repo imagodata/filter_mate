@@ -26,6 +26,7 @@ except ImportError:  # mcp 1.x
     from mcp.server.fastmcp.exceptions import ResourceError, ToolError
 from mcp.types import ToolAnnotations
 
+from ..layer_listing import DEFAULT_LIMIT, MAX_LIMIT, select_layers, short_filter
 from .rest_client import FilterMateAPIError, FilterMateClient, quote_segment
 from .settings import ConfigError, parse_settings
 
@@ -144,14 +145,21 @@ def build_server(client: FilterMateClient) -> Any:
     # -- read-only tools -------------------------------------------------------
 
     @mcp.tool(annotations=ToolAnnotations(title="List layers", readOnlyHint=True, openWorldHint=False))
-    async def list_layers() -> Dict[str, Any]:
+    async def list_layers(
+        kind: Annotated[Optional[Literal["vector", "raster", "point_cloud"]], Field(
+            description="Only the layers of this kind")] = None,
+        name_contains: Annotated[Optional[str], Field(max_length=200, description=(
+            "Only the layers whose name holds this text (case ignored)"))] = None,
+        limit: Annotated[int, Field(ge=1, le=MAX_LIMIT, description="At most this many layers")] = DEFAULT_LIMIT,
+    ) -> Dict[str, Any]:
         """List the layers of the open QGIS project that FilterMate knows, as {"layers": [...]}.
 
         Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid,
-        layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression.
-        Call this first: the other tools take layer names or ids from it.
+        layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression (cut past 200
+        characters, with active_filter_expression_length: describe_layer gives it whole). "more" says how many
+        matching layers were left out by limit. Call this first: the other tools take layer names or ids from it.
         """
-        return {"layers": await call("GET", "/layers")}
+        return select_layers(await call("GET", "/layers"), kind, name_contains, limit)
 
     @mcp.tool(annotations=ToolAnnotations(title="Filter status", readOnlyHint=True, openWorldHint=False))
     async def filter_status() -> Dict[str, Any]:
@@ -166,11 +174,12 @@ def build_server(client: FilterMateClient) -> Any:
     async def filter_state() -> Dict[str, Any]:
         """Every layer FilterMate filters right now, of any kind, as {"layers": [...]}.
 
-        Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster) and
-        derived (true when the layer reads a clipped copy of its source). Use it to check what a filter did, and to
-        find out what a previous call did when a request timed out.
+        Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster; cut past 200
+        characters, with subset_length: describe_layer gives it whole) and derived (true when the layer reads a
+        clipped copy of its source). Use it to check what a filter did, and to find out what a previous call did
+        when a request timed out.
         """
-        return {"layers": await call("GET", "/filters/state")}
+        return {"layers": [short_filter(row, "subset") for row in await call("GET", "/filters/state")]}
 
     @mcp.tool(annotations=ToolAnnotations(title="List favorites", readOnlyHint=True, openWorldHint=False))
     async def list_favorites() -> Dict[str, Any]:
