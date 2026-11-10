@@ -50,7 +50,8 @@ _FORMAT_WORDS = {
     "tiff": "tif", "geotiff": "tif", "cog": "tif",
 }
 _CONTENT_TYPES = {
-    "application/zip": "zip", "application/x-zip-compressed": "zip", "text/csv": "csv", "application/geo+json": "geojson",
+    "application/zip": "zip", "application/x-zip-compressed": "zip", "application/x-zip": "zip", "text/csv": "csv",
+    "application/geo+json": "geojson",
     "application/vnd.geo+json": "geojson", "application/json": "geojson", "application/geopackage+sqlite3": "gpkg",
     "application/vnd.google-earth.kml+xml": "kml", "application/gml+xml": "gml", "image/tiff": "tif",
 }
@@ -58,9 +59,12 @@ _EXPORT_WORDS = ("download", "export", "exports", "file")
 _WEB_PAGES = ("text/html", "application/xhtml+xml")
 # Formats GDAL reads by parts: worth leaving on a server that gives parts, whatever their size.
 _READ_BY_PARTS = frozenset({"fgb", "gpkg", "shp", "tif", "tiff", "zip"})
-_ARCHIVE_VECTORS = ("shp", "gpkg", "fgb", "geojson", "json", "kml", "gml", "csv")
+# A .json or a .csv next to the data is often its metadata (datapackage.json): they come last.
+_ARCHIVE_VECTORS = ("shp", "gpkg", "fgb", "geojson", "kml", "gml", "json", "csv")
 _ARCHIVE_RASTERS = ("tif", "tiff")
-_SENT_NAME = re.compile(r"""filename\*?\s*=\s*(?:UTF-8'[^']*')?"?([^";]+)""", re.IGNORECASE)
+_SENT_NAME = re.compile(r"""filename\*?\s*=\s*(?:[\w-]+'[^']*')?"?([^";]+)""", re.IGNORECASE)
+# Formats a resource is named by while its address ends with a format word (an Opendatasoft export listed as json).
+_VAGUE_FORMATS = ("", "json")
 _UNSAFE_IN_NAME = re.compile(r"[^A-Za-z0-9._-]+")
 _PLAIN_MEMBER = re.compile(r"[\w .()+/-]+")
 _WINDOWS_DEVICE = re.compile(r"con|prn|aux|nul|com[0-9]|lpt[0-9]", re.IGNORECASE)
@@ -168,8 +172,8 @@ def _geo_resources(items: Any) -> List[Dict[str, str]]:
         url = _link(item.get("url"))
         # Some portals give the EU vocabulary URI (.../file-type/SHP) for the format.
         fmt = str(item.get("format") or "").strip().rstrip("/").rsplit("/", 1)[-1].lower().lstrip(".")
-        if fmt not in GEO_FORMATS:  # data.gouv.fr lists the GeoJSON export of a harvested portal as "json"
-            fmt = _link_format(url)
+        if fmt in _VAGUE_FORMATS:  # data.gouv.fr lists the GeoJSON export of a harvested portal as "json"
+            fmt = _link_format(url) or fmt
         if not url.startswith("https://") or fmt not in GEO_FORMATS:
             continue
         resources.append({"title": _text(item.get("title") or item.get("name") or fmt), "format": fmt, "url": url})
@@ -282,7 +286,15 @@ def megabytes(size: int) -> str:
 
 def _plain_name(text: str) -> str:
     """A file name with nothing a path or a provider URI would read."""
-    return _UNSAFE_IN_NAME.sub("_", unquote(text).replace("\\", "/").rsplit("/", 1)[-1]).strip("._-")
+    return _UNSAFE_IN_NAME.sub("_", text).strip("._-")
+
+
+def _last_part(text: str) -> str:
+    return unquote(text).replace("\\", "/").rsplit("/", 1)[-1]
+
+
+def is_web_page(headers: Mapping[str, str]) -> bool:
+    return str(headers.get("content-type") or "").split(";", 1)[0].strip().lower() in _WEB_PAGES
 
 
 def remote_file(url: str, status: int, headers: Mapping[str, str]) -> RemoteFile:
@@ -297,24 +309,25 @@ def remote_file(url: str, status: int, headers: Mapping[str, str]) -> RemoteFile
     if status != 416 and not 200 <= status < 300:  # 416: an empty file, or a server that takes no range
         raise ValueError(f"its server answered with an error ({status})")
     content_type = str(headers.get("content-type") or "").split(";", 1)[0].strip().lower()
-    if content_type in _WEB_PAGES:
+    if status != 416 and is_web_page(headers):  # a 416 comes with the error page of the server
         raise ValueError("this link is a web page, not a data file")
     parts = urlsplit(url)
     last = parts.path.rstrip("/").rsplit("/", 1)[-1]
     sent = _SENT_NAME.search(str(headers.get("content-disposition") or ""))
-    names = [_plain_name(sent.group(1))] if sent else []
-    names.append(_plain_name(last))
+    names = [_last_part(sent.group(1))] if sent else []
+    names.append(_last_part(last))
     stem, extension = "", ""
-    for name in names:
+    for name in names:  # the extension is read before the name is made plain: 市区町村.zip is a zip
         base, dot, tail = name.rpartition(".")
-        if dot and base and tail.lower() in LOCAL_FORMATS | {"zip"}:
-            stem, extension = base, tail.lower()
+        if dot and tail.lower() in LOCAL_FORMATS | {"zip"}:
+            stem, extension = _plain_name(base), tail.lower()
             break
     if not extension:
-        asked = (parse_qs(parts.query).get("format") or [""])[0]
+        query = {key.lower(): values for key, values in parse_qs(parts.query).items()}
+        asked = (query.get("format") or [""])[0]
         extension = (_FORMAT_WORDS.get(last.lower()) or _FORMAT_WORDS.get(asked.lower())
                      or _CONTENT_TYPES.get(content_type, ""))
-        stem = names[0].rpartition(".")[0] or names[0]
+        stem = _plain_name(names[0].rpartition(".")[0] or names[0])
         if stem.lower() in _FORMAT_WORDS or stem.lower() in _EXPORT_WORDS:  # says the format, not what it is
             stem = ""
     stem = stem[:MAX_NAME].strip("._-")

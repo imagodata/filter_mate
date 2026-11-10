@@ -31,6 +31,8 @@ from .rest_client import FilterMateAPIError, FilterMateClient, quote_segment
 from .settings import ConfigError, parse_settings
 
 SERVER_NAME = "filtermate"
+# add_layer may follow redirects (4 x 20 s), download for 180 s, then open the copy: wait for all of it.
+ADD_LAYER_TIMEOUT = 330.0
 
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
@@ -135,9 +137,10 @@ def build_server(client: FilterMateClient) -> Any:
     """Build the MCP server whose tools call the REST API through ``client``."""
     mcp = _Server(SERVER_NAME, instructions=INSTRUCTIONS)
 
-    async def call(method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Any:
+    async def call(method: str, path: str, body: Optional[Dict[str, Any]] = None,
+                   timeout: Optional[float] = None) -> Any:
         try:
-            return await asyncio.to_thread(client.request, method, path, body)
+            return await asyncio.to_thread(client.request, method, path, body, timeout)
         except FilterMateAPIError as exc:
             # ToolError is the one exception whose message the SDK (2.x) shows the model.
             raise ToolError(str(exc)) from None
@@ -548,7 +551,7 @@ def build_server(client: FilterMateClient) -> Any:
         error says why: try another resource of the dataset, or a service layer. Returns the layer summary (layer_id,
         name, layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.
         """
-        return await call("POST", "/layers/add", _body(source=source, name=name, kind=kind))
+        return await call("POST", "/layers/add", _body(source=source, name=name, kind=kind), timeout=ADD_LAYER_TIMEOUT)
 
     @mcp.tool(annotations=ToolAnnotations(title="Add a layer of a WFS service", readOnlyHint=False, destructiveHint=False,
                                           idempotentHint=False, openWorldHint=True))

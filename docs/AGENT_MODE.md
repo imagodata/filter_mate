@@ -139,9 +139,16 @@ address, else its content type), its size, and whether the server gives parts of
   3 minutes at most, Stop ends it, the interface stays alive, a copy cut before its end is discarded. An export made
   on request (an Opendatasoft portal, and what data.gouv.fr lists for the portals it harvests) has no size and cannot
   be read by parts, which is what GDAL needs; its address ends with the name of a format, not of a file. A zip is
-  read in the copy (`/vsizip/`), never extracted, and the name of the file read in it must be plain.
-- Every failure says its step: the status of the server, a web page, a file too large, too slow or cut, an archive
-  with no layer. The error of an invalid layer is never read (it crashed QGIS 3.22).
+  read in the copy (`/vsizip/`), never extracted, and the name of the file read in it must be plain; an archive
+  that would unpack to more than 2 GB is refused, since QGIS reads it on the main thread.
+- Each download has a folder of its own and is written under its final name: a copy a layer reads is never
+  replaced or removed, by a second download of the same link or by a failure, and nothing is renamed (an antivirus
+  holds a new file on Windows). Copies stay in the folder when their layers are removed.
+- Every failure says its step: the status of the server, a web page (at the probe or for the file itself), a file
+  too large, too slow or cut, an archive with no layer. The error of an invalid layer is never read (it crashed QGIS
+  3.22).
+- The stdio MCP server waits 330 s for `add_layer` (redirects, download, opening) instead of its usual 45 s: a
+  client that gave up earlier would retry a download QGIS is still making.
 
 `search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 

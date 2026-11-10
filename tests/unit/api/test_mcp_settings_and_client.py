@@ -292,6 +292,15 @@ def test_timeout_on_a_write_warns_it_may_have_applied(fake_api, api_key):
         make_client(fake_api, api_key, timeout=0.3).post("/filters/clear", {"layers": ["a"]})
 
 
+def test_a_call_known_to_be_long_waits_longer(fake_api, api_key):
+    """add_layer may download for minutes: its wait is longer, never shorter, than the one of the client."""
+    fake_api.respond("POST", "/layers/add", {"layer_id": "a"})
+    fake_api.delay = 0.6
+    assert make_client(fake_api, api_key, timeout=0.2).request("POST", "/layers/add", {}, timeout=3) == {"layer_id": "a"}
+    with pytest.raises(FilterMateAPIError, match="within 0 s"):
+        make_client(fake_api, api_key, timeout=0.2).request("POST", "/layers/add", {}, timeout=0.1)
+
+
 def test_timeout_on_a_read(fake_api, api_key):
     fake_api.respond("GET", "/layers", [])
     fake_api.delay = 1.5

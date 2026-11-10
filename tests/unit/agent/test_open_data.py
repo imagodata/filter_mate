@@ -70,7 +70,9 @@ class TestAnswers:
             {"title": "communes-france.zip", "format": "zip", "url": exports + "shp"},
             {"title": "records", "format": "json", "url": "https://zabal.example.org/records.json"},
             {"title": "odd", "format": "json", "url": "https://[bad/exports/geojson"},
-            {"title": "named by its file", "format": None, "url": "https://static.data.gouv.fr/a/limites.gpkg"}]}]}
+            {"title": "named by its file", "format": None, "url": "https://static.data.gouv.fr/a/limites.gpkg"},
+            {"title": "a page", "format": "html", "url": "https://zabal.example.org/page/shp"},
+            {"title": "a notice", "format": "pdf", "url": "https://zabal.example.org/notice.zip"}]}]}
         found = parse_results("datagouv", payload, "https://www.data.gouv.fr")[0]["resources"]
         assert [(r["format"], r["url"].rsplit("/", 1)[-1]) for r in found] == [
             ("csv", "csv?use_labels=true"), ("geojson", "geojson"), ("zip", "shp"), ("gpkg", "limites.gpkg")]
