@@ -64,6 +64,7 @@ SOURCES = \
     ../adapters/agent/settings.py \
     ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
     ../ui/controllers/agent_chat_controller.py \
+    ../adapters/agent/turn_effects.py \
     ../ui/controllers/property_controller.py \
     ../ui/layout/dock_chrome.py \
     ../ui/styles/mockup_design.py \

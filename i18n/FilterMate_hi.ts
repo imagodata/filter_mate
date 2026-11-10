@@ -284,6 +284,21 @@
         <translation>इस बातचीत के सबसे पुराने अनुरोध अब कुछ पंक्तियों में सारांशित हैं, ताकि यह छोटी रहे।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>इस प्रोजेक्ट के लिए रखा गया नोट</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>नोट {} भुला दिया गया</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>प्रोजेक्ट नोट</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} के मान पढ़ना</translation>

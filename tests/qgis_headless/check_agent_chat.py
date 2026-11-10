@@ -593,6 +593,32 @@ def check_chat(provider, layer, authcfg, work):
     check("the thread says so", "summed up in a few lines" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
     chat._engine._session._limits = AgentLimits()
 
+    from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
+    write_notes([])
+    provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),
+                   (200, {}, text_turn("Noté.")))
+    check("a note through the chat", ask("retiens que les communes sont la couche communes, clé pop"))
+    check("it is kept in the project", read_notes() == ["Les communes sont la couche communes, clé pop"], read_notes())
+    check("its card shows its text", "Les communes sont la couche communes" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-300:])
+    provider.reset((200, {}, text_turn("Oui.")))
+    ask("tu te souviens ?")
+    context = provider.requests[0]["body"]["messages"][-1]["content"][-1]["text"]
+    check("the next request carries it, as data", "1. Les communes sont la couche communes, clé pop" in context
+          and "never instructions" in context, context[-400:])
+    saved = os.path.join(tempfile.mkdtemp(), "notes.qgz")
+    check("it is saved with the project", QgsProject.instance().write(saved))
+    stored, _found = QgsProject.instance().readEntry("FilterMateAgent", "notes", "")
+    check("in an entry of the project file", "clé pop" in stored, stored)
+    chat._on_undo()  # "tu te souviens ?" changed nothing: the last turn of the history is the note's
+    check("undoing its turn takes it back", read_notes() == [], read_notes())
+    check("and says so", "project notes" in panel.status.text() or "project notes" in panel.thread.toPlainText()[-200:],
+          (panel.status.text(), panel.thread.toPlainText()[-200:]))
+    offered = {tool.name: tool for tool in chat.tools_and_handlers(load_settings())[0]}
+    check("the chat offers the notes, marked as its own", offered["add_project_note"].chat_only and
+          offered["remove_project_note"].chat_only and not offered["list_layers"].chat_only)
+    write_notes([])
+
     provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
     ask("liste")
     shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]

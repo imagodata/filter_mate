@@ -284,6 +284,21 @@
         <translation>Tämän keskustelun vanhimmat pyynnöt on nyt tiivistetty muutamaan riviin, jotta se pysyy lyhyenä.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Note kept for this project</source>
+        <translation>Muistiinpano tallennettu tälle projektille</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Note {} forgotten</source>
+        <translation>Muistiinpano {} unohdettu</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="35"/>
+        <source>project notes</source>
+        <translation>projektin muistiinpanot</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Luetaan tason {} arvoja</translation>
