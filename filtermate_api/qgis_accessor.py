@@ -391,8 +391,11 @@ class QGISFilterMateAccessor:
         error, failed = _client_messages(report)
         warnings = {name: info["partial"] for name, info in (report.details.get("layers") or {}).items()
                     if isinstance(info, dict) and info.get("partial")}
+        kept = {name: info["kept"] for name, info in (report.details.get("layers") or {}).items()
+                if isinstance(info, dict) and isinstance(info.get("kept"), int) and not isinstance(info["kept"], bool)
+                and info["kept"] >= 0}
         return CrossFilterResult(filtered=report.done_names, failed=failed, skipped=dict(report.skipped), error=error,
-                                 warnings=warnings)
+                                 warnings=warnings, kept=kept)
 
     @staticmethod
     def _operation_result(report) -> OperationResult:

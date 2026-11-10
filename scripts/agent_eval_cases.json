@@ -115,5 +115,9 @@
   "expect": [[{"tool": "undo_agent_step", "args": {}, "call_args": {}}]], "forbid": ["clear_filters"]},
  {"id": "undo_not_for_a_new_filter", "prompt": "Garde seulement les routes nationales.",
   "expect": [[{"tool": "apply_filter", "args": {"layer_name": "routes", "expression": {"contains": ["nature", "Nationale"]}},
-    "call_args": {"layer_name": "routes", "expression": "\"nature\" = 'Nationale'"}}]], "forbid": ["undo_agent_step"]}
+    "call_args": {"layer_name": "routes", "expression": "\"nature\" = 'Nationale'"}}]], "forbid": ["undo_agent_step"]},
+ {"id": "cross_nothing_kept", "setup": {"selected": ["routes"], "empty": ["batiments"]},
+  "prompt": "Garde les bâtiments qui touchent les routes sélectionnées.",
+  "expect": [[{"tool": "cross_filter", "args": {"source_layer": "routes", "target_layers": ["batiments"]},
+    "call_args": {"source_layer": "routes", "target_layers": ["batiments"], "predicates": ["Touch"]}}]]}
 ]}

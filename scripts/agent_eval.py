@@ -31,6 +31,10 @@ from agent.messages import ERROR_NETWORK, ProviderError, StreamFailure  # noqa: 
 from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import ProviderConfig, error_from_response  # noqa: E402
 from agent.sql_guard import filter_problem  # noqa: E402
+
+# As filtermate_api/agent_tools.py words it (not imported: it needs QGIS).
+NOTHING_KEPT = ("No feature kept. Check the direction of the predicate (the target is tested against the source), "
+                "the buffer, and that the source holds the features meant (its selection, its filter).")
 from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import CHAT_ONLY, chat_tools, load_catalog  # noqa: E402
@@ -85,6 +89,7 @@ class SimulatedProject:
         setup = setup or {}
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
+        self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
 
     def _layer(self, reference: str):
         name = self.by_ref.get(reference)
@@ -142,16 +147,23 @@ class SimulatedProject:
             name, layer = self._layer(args["layer_name"])
             if layer["kind"] != "vector":
                 raise ToolFailure(f"'{name}' is not a vector layer")
+            unfiltered = name not in self.filters
             self.filters[name] = args["expression"]
-            return {"success": True, "layer_name": name, "expression": args["expression"],
-                    "active_filters": dict(self.filters)}
+            total = layer.get("count", 30)
+            answer = {"success": True, "layer_name": name, "expression": args["expression"],
+                      "active_filters": dict(self.filters), "feature_count": max(total // 4, 1)}
+            if unfiltered:
+                answer["total_count"] = total
+            return answer
 
         def relation(args):
             targets = self._targets(args.get("target_layers", []))
             source = self._layer(args["source_layer"])[0] if "source_layer" in args else "an area"
             for name in targets:
                 self.filters[name] = f"filtered by {source}"
-            return {"filtered": targets, "failed": {}, "skipped": {}}
+            kept = {name: 0 if name in self.empty else max(LAYERS[name].get("count", 30) // 3, 1) for name in targets}
+            warnings = {name: NOTHING_KEPT for name, count in kept.items() if count == 0}
+            return {"filtered": targets, "failed": {}, "skipped": {}, "kept": kept, "warnings": warnings}
 
         def point_cloud_filter(args):
             done = self._targets(args["layers"])

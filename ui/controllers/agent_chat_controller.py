@@ -674,7 +674,13 @@ class AgentChatController(QObject):
             data = json.loads(result.content)
         except ValueError:
             return ""
-        if not isinstance(data, dict) or not isinstance(data.get("feature_count"), int) or data["feature_count"] < 0:
+        if not isinstance(data, dict):
+            return ""
+        kept = data.get("kept")
+        if isinstance(kept, dict) and kept and all(isinstance(count, int) for count in kept.values()):
+            # A cross filter: what each target keeps, summed when there are several.
+            return f"{sum(kept.values()):,}"
+        if not isinstance(data.get("feature_count"), int) or data["feature_count"] < 0:
             return ""
         total = data.get("total_count")
         return f"{data['feature_count']:,} / {total:,}" if isinstance(total, int) and total >= 0 else f"{data['feature_count']:,}"

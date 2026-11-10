@@ -102,6 +102,36 @@ class TestHandlers:
         assert not error and answer["active_filters"] == {"communes": "a = 1"}
         assert accessor._last_applied_source == "agent_chat"
 
+    def test_apply_filter_says_the_total_when_the_layer_had_no_filter(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", feature_count=12))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")
+        assert not error and answer["feature_count"] == 12 and answer["total_count"] == 12 and "warning" not in answer
+
+    def test_apply_filter_has_no_total_on_a_layer_already_filtered(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", feature_count=3,
+                                                  subset="b = 2"))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")
+        assert not error and answer["feature_count"] == 3 and "total_count" not in answer
+
+    def test_apply_filter_that_keeps_nothing_says_so(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", feature_count=0))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")
+        assert not error and "No feature kept" in answer["warning"]
+
+    def test_cross_filter_says_what_each_target_keeps_and_warns_on_none(self, tmp_path):
+        accessor = Accessor(cross_filter=CrossFilterResult(filtered=["b", "c"], kept={"b": 0, "c": 7}))
+        error, answer = run(accessor, tmp_path, "cross_filter", source_layer="a", target_layers=["b", "c"],
+                            predicates=["Intersect"])
+        assert not error, answer
+        assert answer["kept"] == {"b": 0, "c": 7}
+        assert "direction of the predicate" in answer["warnings"]["b"] and "c" not in answer["warnings"]
+
+    def test_geometry_filter_warns_on_an_emptied_target(self, tmp_path):
+        accessor = Accessor(geometry=CrossFilterResult(filtered=["b"], kept={"b": 0}))
+        error, answer = run(accessor, tmp_path, "geometry_filter", wkt="POINT(0 0)", crs="EPSG:2154",
+                            target_layers=["b"], predicates=["Intersect"])
+        assert not error and "No feature kept" in answer["warnings"]["b"]
+
     @pytest.mark.parametrize("provider", ["ogr", "spatialite"])
     def test_invalid_sql_is_not_applied_where_the_provider_would_accept_it(self, tmp_path, provider):
         accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type=provider),

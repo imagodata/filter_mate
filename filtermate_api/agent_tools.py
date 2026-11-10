@@ -10,7 +10,7 @@ import logging
 import os
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Sequence
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
@@ -54,6 +54,18 @@ def _report(operation: str, result: Any) -> Dict[str, Any]:
     if result.error:
         raise ToolFailure(f"{operation} failed: {result.error}")
     return asdict(result)
+
+
+NOTHING_KEPT = ("No feature kept. Check the direction of the predicate (the target is tested against the source), "
+                "the buffer, and that the source holds the features meant (its selection, its filter).")
+
+
+def _with_nothing_kept(answer: Dict[str, Any]) -> Dict[str, Any]:
+    """A layer the filter emptied is said so: the model then checks its call instead of reporting success."""
+    for name, count in (answer.get("kept") or {}).items():
+        if count == 0:
+            answer.setdefault("warnings", {})[name] = NOTHING_KEPT
+    return answer
 
 
 def _found(value: Any, message: str) -> Any:
@@ -119,23 +131,27 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         except QGISBusy:
             return {}
 
-    def _resolved_name(reference: str, expression: str) -> str:
-        """Name ``apply_filter`` needs for an id or a name, once the expression passed a trial where one is needed."""
+    def _resolved_name(reference: str, expression: str) -> Tuple[str, Optional[int]]:
+        """Name ``apply_filter`` needs for an id or a name, once the expression passed a trial where one is needed.
+
+        With it, the features of the layer when it had no filter yet (``None`` otherwise): the total to compare with.
+        """
         try:
             details = accessor.describe_layer(reference)
             if details is None:
-                return reference
+                return reference, None
             if details.provider_type in _SILENT_SQL_PROVIDERS:
                 preview = accessor.preview_filter(details.name, expression)
                 if preview is not None and not preview.valid:
                     raise ToolFailure(f"Nothing was applied, the expression is invalid: {preview.error}")
-            return details.name
+            total = details.feature_count if not details.subset and details.feature_count >= 0 else None
+            return details.name, total
         except FilterRejected:  # memory layer, web service behind OGR: not tried, the apply says what it says
-            return reference
+            return reference, None
 
     def apply_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         expression = _checked_expression(args["expression"])
-        name = _resolved_name(args["layer_name"], expression)
+        name, total = _resolved_name(args["layer_name"], expression)
         if not accessor.apply_filter(name, expression, SOURCE):
             raise ToolFailure("Layer not found.")
         answer = {"success": True, "layer_name": name, "expression": expression, "active_filters": _active_after_change()}
@@ -145,6 +161,10 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             details = None
         if details is not None and details.feature_count >= 0:
             answer["feature_count"] = details.feature_count
+            if total is not None:
+                answer["total_count"] = total
+            if details.feature_count == 0:
+                answer["warning"] = "No feature kept: check the values and the field names (describe_layer, field_values)."
         return answer
 
     def cross_filter(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -154,12 +174,12 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             selected_only=args["selected_only"], raster_selection=args.get("raster_selection"),
             point_cloud_criteria=_point_cloud_criteria(args.get("point_cloud_criteria")),
             filter_source=args["filter_source"])
-        return _report("Cross filter", _found(result, "Source layer not found."))
+        return _with_nothing_kept(_report("Cross filter", _found(result, "Source layer not found.")))
 
     def geometry_filter(args: Dict[str, Any]) -> Dict[str, Any]:
-        return _report("Geometry filter", accessor.cross_filter_by_geometry(
+        return _with_nothing_kept(_report("Geometry filter", accessor.cross_filter_by_geometry(
             wkt=args["wkt"], crs=args["crs"], target_layers=args["target_layers"], predicates=args["predicates"],
-            buffer=args["buffer"], coverage_min=args["coverage_min"], operator=args.get("operator")))
+            buffer=args["buffer"], coverage_min=args["coverage_min"], operator=args.get("operator"))))
 
     def point_cloud_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         criteria = _point_cloud_criteria(args["criteria"])
