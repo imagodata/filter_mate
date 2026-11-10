@@ -1159,7 +1159,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     w.layout().setSpacing(0)
         exp_cfg = UIConfig.get_config('frame_exploring') or {}
         exp_min = exp_cfg.get('min_height', 120)
-        exp_max = exp_cfg.get('max_height', 350)
+        exp_max = exp_cfg.get('max_height', 16777215)
         exp_v_policy = exp_cfg.get('size_policy_v', 'Minimum')
         if hasattr(self, 'frame_exploring'):
             self.frame_exploring.setMinimumHeight(exp_min)

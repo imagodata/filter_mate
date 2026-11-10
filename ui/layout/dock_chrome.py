@@ -4,11 +4,13 @@
 * Favorites sit in the title bar of the dock, at the right of its title; float and close are badges of the same look
   and height, drawn here rather than taken from the style (their pixmaps sat lower than the star on Windows).
 * The source tag (``Vector · OGR``) sits in the layer card, at its top right; the row that held both is gone.
-* Two stacks, each an accordion with the same headers: EXPLORING / AGENT above the splitter handle, FILTERING /
+* Two stacks, each an accordion with the same headers: AGENT / EXPLORING above the splitter handle, FILTERING /
   EXPORTING / CONFIGURATION below. In each, one section is open at most, and a click on an open header folds it.
 * AGENT and FILTERING do not go together: FILTERING works on what EXPLORING selects. Opening AGENT folds EXPLORING
   and FILTERING; opening FILTERING opens EXPLORING and folds AGENT. EXPORTING and CONFIGURATION stay as they are.
 * A stack with nothing open shrinks to its headers, so the other one takes the room.
+* Between them, the splitter handle goes from one stack held to its headers and its smallest open section to the
+  other: no cap on either stack (EXPLORING stopped at 700 px, the tool box at 650 px).
 """
 from __future__ import annotations
 
@@ -18,7 +20,7 @@ from typing import Any, Optional
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
 from qgis.PyQt.QtGui import QColor, QPainter, QPen, QPolygonF
 from qgis.PyQt.QtWidgets import (
-    QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
+    QAbstractButton, QDockWidget, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
 )
 
 logger = logging.getLogger("FilterMate")
@@ -177,6 +179,33 @@ class SourceTag(QObject):
 
 QWIDGETSIZE_MAX = 16777215
 STACK_GAP = 8
+SHARE_KEY = "FilterMate/splitter_top_share"  # share of the splitter the upper stack gets when both are open
+
+
+def _default_share() -> float:
+    try:
+        from ..config import UIConfig
+        return float((UIConfig.get_config("splitter") or {}).get("initial_exploring_ratio", 0.5))
+    except Exception:
+        return 0.5
+
+
+def _saved_share() -> float:
+    """The share the user left the handle at, else the one of the display profile."""
+    try:
+        from qgis.PyQt.QtCore import QSettings
+        value = float(QSettings().value(SHARE_KEY, -1.0))
+    except (TypeError, ValueError):
+        value = -1.0
+    return value if 0.05 <= value <= 0.95 else _default_share()
+
+
+def _save_share(share: float) -> None:
+    try:
+        from qgis.PyQt.QtCore import QSettings
+        QSettings().setValue(SHARE_KEY, round(share, 4))
+    except Exception:  # not worth a message: the share is only a convenience
+        pass
 
 
 class SectionHeader(QPushButton):
@@ -213,7 +242,7 @@ class SectionHeader(QPushButton):
 
 
 class DockSections(QObject):
-    """EXPLORING / AGENT above, FILTERING / EXPORTING / CONFIGURATION below, and the rules between them."""
+    """AGENT / EXPLORING above, FILTERING / EXPORTING / CONFIGURATION below, and the rules between them."""
 
     def __init__(self, dock: Any) -> None:
         super().__init__(dock)
@@ -228,7 +257,13 @@ class DockSections(QObject):
         self._top_layout.setContentsMargins(0, 0, 0, 0)
         self._top_layout.setSpacing(STACK_GAP)
         sizes = self._splitter.sizes()
-        self.top.setSizePolicy(exploring.sizePolicy())
+        # Preferred, not the Minimum of EXPLORING: with Minimum the splitter cannot take the stack below its size
+        # hint (396 px of a 905 px splitter on 1920x1200), only down to its minimum (its headers and EXPLORING's).
+        policy = exploring.sizePolicy()
+        policy.setVerticalPolicy(QSizePolicy.Policy.Preferred)
+        self.top.setSizePolicy(policy)
+        # No cap on the lower stack either (the .ui held the tool box at 650 px: a taller zone stayed empty).
+        self._toolbox.setMaximumHeight(QWIDGETSIZE_MAX)
         self._splitter.replaceWidget(index, self.top)
         if len(sizes) == self._splitter.count() and sum(sizes) > 0:
             self._splitter.setSizes(sizes)  # the manager sized the splitter for EXPLORING: the stack takes its place
@@ -251,18 +286,21 @@ class DockSections(QObject):
         self._watched = set()
         self._bottom_limits = None
         self._current_before_press = -1
+        self._share = _saved_share()
         self._watch_bottom_headers()
         self._toolbox.currentChanged.connect(self._on_bottom_changed)
+        self._splitter.splitterMoved.connect(self._on_handle_moved)
+        self._splitter.installEventFilter(self)
         self._open_top("exploring")
 
     # --- the top stack ---------------------------------------------------------------
 
     def add_agent(self, page: QWidget) -> QLabel:
-        """AGENT after EXPLORING, folded: the label at the right of its header."""
+        """AGENT before EXPLORING, folded: the label at the right of its header."""
         header = SectionHeader("agent", AGENT_PAGE, self.top)
         trailer = header.add_trailer()
-        self._top_layout.addWidget(header)
-        self._top_layout.addWidget(page, 1)
+        self._top_layout.insertWidget(0, header)
+        self._top_layout.insertWidget(1, page, 1)
         page.hide()
         self._pages["agent"] = page
         self._headers["agent"] = header
@@ -357,8 +395,43 @@ class DockSections(QObject):
                         self._splitter.setSizes([self.top.maximumHeight(), total - self.top.maximumHeight()])
                     elif nothing:
                         self._splitter.setSizes([total - bottom.maximumHeight(), bottom.maximumHeight()])
+                    else:
+                        self._share_room()  # both open again: the share the handle was left at
         except RuntimeError:  # the dock went away
             pass
+
+    def _both_open(self) -> bool:
+        return any(self.is_open(key) for key in self._pages) and self._toolbox.currentWidget() is not self._nothing
+
+    def _share_room(self) -> None:
+        """Both stacks open: the top one gets ``self._share`` of the room (Qt keeps each one above its minimum)."""
+        sizes = self._splitter.sizes()
+        total = sum(sizes)
+        if len(sizes) == 2 and total > 0:
+            top = int(round(total * self._share))
+            self._splitter.setSizes([top, total - top])
+
+    def _on_handle_moved(self, _pos: int, _index: int) -> None:
+        """The user dragged the handle: that share is kept, in this session and the next ones."""
+        try:
+            sizes = self._splitter.sizes()
+            if len(sizes) != 2 or sum(sizes) <= 0 or not self._both_open():
+                return
+            self._share = sizes[0] / sum(sizes)
+            _save_share(self._share)
+        except RuntimeError:
+            pass
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:  # noqa: N802 - Qt name
+        # A taller or shorter dock keeps the share (QSplitter gave the difference to the upper stack: at startup,
+        # on 1920x1200, FILTERING was held to its minimum and scrolled).
+        if watched is self._splitter and event.type() == QEvent.Type.Resize:
+            try:
+                if self._both_open():
+                    self._share_room()
+            except RuntimeError:
+                pass
+        return False
 
     def _bottom_headers_height(self, bottom: QWidget) -> int:
         """The lower stack with nothing open: its headers, the gaps between them and the margins around."""
