@@ -1207,6 +1207,68 @@ def _first_token(dialog_class, target, values_class):
     return len(token) >= 40
 
 
+def check_effects(layer_id):
+    """Lot 3 of the undo plan: what a turn does beside the filters is undone and redone with them."""
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+    from filter_mate.core.agent.messages import ToolCallPart
+
+    project = QgsProject.instance()
+    layer = project.mapLayer(layer_id)
+    group = project.layerTreeRoot().addGroup("effects")
+    node = project.layerTreeRoot().findLayer(layer_id)
+    group.insertChildNode(0, node.clone())
+    node.parent().removeChildNode(node)
+    count = layer.featureCount()
+
+    turn = TurnCheckpoint()
+    turn.label = "selection and visibility"
+    turn.begin(ToolCallPart("e1", "select_features", {"layer": "communes", "expression": '"pop" > 5000'}))
+    layer.selectByIds([1, 2, 3])
+    turn.begin(ToolCallPart("e2", "set_layers_visibility", {"layers": ["communes"], "visible": False}))
+    project.layerTreeRoot().findLayer(layer_id).setItemVisibilityChecked(False)
+    turn.commit()
+    check("effects: a turn of selection and visibility only is a step", TurnCheckpoint.can_undo())
+    turn.undo()
+    check("effects: the selection comes back", layer.selectedFeatureCount() == 0, layer.selectedFeatureIds())
+    check("effects: the visibility comes back", project.layerTreeRoot().findLayer(layer_id).itemVisibilityChecked())
+    turn.redo()
+    check("effects: and both again on redo", layer.selectedFeatureCount() == 3
+          and not project.layerTreeRoot().findLayer(layer_id).itemVisibilityChecked())
+    project.layerTreeRoot().findLayer(layer_id).setItemVisibilityChecked(True)
+
+    turn.label = "remove communes"
+    turn.begin(ToolCallPart("e3", "remove_layers", {"layers": ["communes"]}))
+    project.removeMapLayer(layer_id)
+    names = turn.commit()
+    check("effects: a removed layer is named in the turn", "communes" in names, names)
+    restored, left = turn.undo()
+    back = project.mapLayer(layer_id)
+    check("effects: a removed layer comes back, same id, same features", back is not None and back.featureCount() == count
+          and not left, (restored, left))
+    check("effects: at its place in its group", group.findLayer(layer_id) is not None)
+    turn.redo()
+    check("effects: and goes again on redo", project.mapLayer(layer_id) is None)
+    turn.undo()
+
+    memory = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "scratch", "memory")
+    turn.label = "add a layer"
+    turn.begin(ToolCallPart("e4", "add_layer", {"source": "/data/a.gpkg"}))
+    project.addMapLayer(memory)
+    memory_id = memory.id()
+    turn.commit()
+    turn.undo()
+    check("effects: an added layer goes on undo", project.mapLayer(memory_id) is None)
+    turn.redo()
+    check("effects: and comes back on redo", project.mapLayer(memory_id) is not None)
+    turn.label = "remove scratch"
+    turn.begin(ToolCallPart("e5", "remove_layers", {"layers": ["scratch"]}))
+    project.removeMapLayer(memory_id)
+    turn.commit()
+    restored, left = turn.undo()
+    check("effects: a layer in memory cannot come back, and says so", project.mapLayer(memory_id) is None
+          and "scratch" in left, (restored, left))
+
+
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
     work = tempfile.mkdtemp()
@@ -1217,6 +1279,7 @@ def main():
     authcfg = check_key_store()
     check_checkpoint(layer)
     check_chat(provider, layer, authcfg, work)
+    check_effects(layer.id())
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ from ...core.domain.filter_state import CrossOperation, LayerSnapshot
 from ...core.domain.layer_kind import LayerKind
 from ..public_api.operations import _api_service, busy_reason, layer_kind
 from ..qgis.coverage_layers.snapshots import take_snapshot
+from .turn_effects import EffectsRecorder, apply_effects
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -24,12 +25,17 @@ MAX_LABEL = 4000
 _FILTERED_KINDS = (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD, LayerKind.VECTOR_TILE)
 
 
+def _merged(first: List[str], second: List[str]) -> List[str]:
+    return first + [name for name in second if name not in first]
+
+
 class TurnCheckpoint:
     """The state of the project layers before a turn, and the stack of turns to undo."""
 
     def __init__(self) -> None:
         self._before: Dict[str, Tuple[LayerSnapshot, LayerKind]] = {}
         self._steps: List[Tuple[str, Dict[str, LayerSnapshot]]] = []
+        self._effects = EffectsRecorder()
         self._open = False
         # The request of the turn being run, kept as the description of its operation.
         self.label = ""
@@ -72,6 +78,8 @@ class TurnCheckpoint:
             if layer.id() not in self._before:
                 self._before[layer.id()] = (snapshot, kind)
         self._steps.append((self._label(call), states))
+        if call is not None:
+            self._effects.before_call(call)
 
     def _step_record(self, after: Dict[str, LayerSnapshot]) -> Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...]:
         """For each step, the state before it of the layers it changed (next step's state, or the end of the turn)."""
@@ -102,10 +110,14 @@ class TurnCheckpoint:
                 changes.append((before, after))
                 names.append(layer.name())
         steps = self._step_record(final)
+        effects = self._effects.finish()
         self._before = {}
         self._steps = []
         _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
-                                                   steps=steps if len(steps) > 1 else ()))
+                                                   steps=steps if len(steps) > 1 else (), effects=effects))
+        for effect in effects:
+            if effect[0] in ("added", "removed") and len(effect) > 4 and effect[4] not in names:
+                names.append(effect[4])
         return names
 
     @staticmethod
@@ -119,6 +131,9 @@ class TurnCheckpoint:
             for before, _after in operation.changes:
                 layer = project.mapLayer(before.layer_id)
                 layers.append(layer.name() if layer is not None else before.layer_id)
+            for effect in getattr(operation, "effects", ()):
+                if effect[0] in ("added", "removed") and len(effect) > 4 and effect[4] not in layers:
+                    layers.append(effect[4])
             return {"time": operation.timestamp, "request": operation.description, "layers": layers,
                     "applied": applied, "steps": [label for label, _states in getattr(operation, "steps", ())]}
 
@@ -205,7 +220,9 @@ class TurnCheckpoint:
         names, left, refused = self._apply(operation, use_before=True)
         if refused:
             history.redo(HISTORY_KEY)
-        return names, left
+            return names, left
+        done, not_done = apply_effects(getattr(operation, "effects", ()), undo=True)
+        return _merged(names, done), _merged(left, not_done)
 
     def redo(self) -> Tuple[List[str], List[str]]:
         """Apply again the last turn undone: names of the layers changed, and of those left as they are."""
@@ -213,7 +230,10 @@ class TurnCheckpoint:
         operation = history.redo(HISTORY_KEY)
         if operation is None:
             return [], []
+        done, not_done = apply_effects(getattr(operation, "effects", ()), undo=False)  # layers first: filters need them
         names, left, refused = self._apply(operation, use_before=False)
         if refused:
+            apply_effects(getattr(operation, "effects", ()), undo=True)
             history.undo(HISTORY_KEY)
-        return names, left
+            return names, left
+        return _merged(names, done), _merged(left, not_done)
