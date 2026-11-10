@@ -149,6 +149,8 @@ class LayerDetails:
     geometry_type: str = ""
     feature_count: int = -1
     subset: str = ""
+    # Vector: the language its filter is written in: postgresql, sqlite, ogr_sql or qgis_expression.
+    sql_dialect: str = ""
     # Vector: {"name", "type", "alias", "filterable"}; virtual and joined fields are not filterable.
     fields: List[Dict[str, Any]] = field(default_factory=list)
     # Raster: {"band", "name", "classes": [{"value", "label"}]}, classes only on a paletted band.

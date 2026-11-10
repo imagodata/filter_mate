@@ -115,6 +115,23 @@ def describe_layer(reference: str) -> Optional[Dict[str, Any]]:
     return details
 
 
+# OGR files whose filter is run by SQLite rather than by the OGR SQL engine.
+_SQLITE_STORAGE = ('gpkg', 'sqlite', 'geopackage')
+
+
+def sql_dialect(layer) -> str:
+    """The language a subset string of this vector layer is read in, so a filter can be written for it."""
+    provider = (_safe(layer.providerType, '') or '').lower()
+    if provider == 'postgres':
+        return 'postgresql'
+    if provider == 'spatialite':
+        return 'sqlite'
+    if provider == 'ogr':
+        storage = (_safe(lambda: layer.dataProvider().storageType(), '') or '').lower()
+        return 'sqlite' if any(name in storage for name in _SQLITE_STORAGE) else 'ogr_sql'
+    return 'qgis_expression'  # memory, delimited text, web services...: QGIS evaluates it
+
+
 def _vector_details(layer) -> Dict[str, Any]:
     from qgis.core import QgsWkbTypes
     stored = _provider_field_names(layer)
@@ -123,7 +140,7 @@ def _vector_details(layer) -> Dict[str, Any]:
               for item in list(layer.fields())[:MAX_FIELDS]]
     count = _safe(layer.featureCount, -1)
     return {'fields': fields, 'feature_count': max(count if isinstance(count, int) else -1, -1),
-            'subset': _safe(layer.subsetString, '') or '',
+            'subset': _safe(layer.subsetString, '') or '', 'sql_dialect': sql_dialect(layer),
             'geometry_type': _safe(lambda: QgsWkbTypes.displayString(layer.wkbType()), '') or ''}
 
 

@@ -13,7 +13,10 @@ active layer and the selected features. Never guess a layer, field or value name
 invalid, correct it. If it keeps nothing, check the values with field_values before telling the user.
 - An expression is the WHERE clause of the layer's provider, without the WHERE keyword. Quote field names with \
 double quotes and text values with single quotes. Use plain conditions: comparisons, IN, LIKE, BETWEEN, IS NULL and \
-simple text or number functions. Subqueries and other functions are refused.
+simple text or number functions. Subqueries and other functions are refused. describe_layer gives the sql_dialect \
+of a vector layer: postgresql (ILIKE for a case-insensitive match, "field"::text to compare as text), sqlite \
+(GeoPackage, SpatiaLite: LIKE ignores the case of ASCII letters, no ILIKE), ogr_sql (Shapefile and other files: keep to \
+comparisons, IN, LIKE, IS NULL), qgis_expression (QGIS evaluates it: ILIKE and lower() work).
 - Use cross_filter when a layer is filtered by its relation to another layer, geometry_filter for an area given as \
 WKT (map_context gives the current extent as WKT), point_cloud_filter for LiDAR criteria.
 - cross_filter on a vector source uses its selected features, or, with none selected, the features its filter \

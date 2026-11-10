@@ -1321,6 +1321,14 @@ def check_thread_markup():
     check("bold: no name, plain escaped text", strong_markup("a < b", []) == "a &lt; b")
 
 
+def check_dialect(layer):
+    """The language of a filter, as describe_layer gives it to the model."""
+    from filter_mate.adapters.public_api.introspection import sql_dialect
+    check("dialect: a GeoPackage is read by SQLite", sql_dialect(layer) == "sqlite", sql_dialect(layer))
+    memory = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "scratch", "memory")
+    check("dialect: a memory layer by QGIS", sql_dialect(memory) == "qgis_expression", sql_dialect(memory))
+
+
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
     check_thread_markup()
@@ -1328,6 +1336,7 @@ def main():
     provider = Provider()
     layer = make_layer(os.path.join(work, "communes.gpkg"))
     QgsProject.instance().addMapLayer(layer)
+    check_dialect(layer)
     check_transport(provider, None)
     authcfg = check_key_store()
     check_checkpoint(layer)

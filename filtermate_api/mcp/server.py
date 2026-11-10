@@ -196,7 +196,8 @@ def build_server(client: FilterMateClient) -> Any:
         """What a filter can test on a layer: its fields, bands or point attributes.
 
         Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its
-        current filter), and by kind: fields [{name, type, alias, filterable}] for a vector layer (filterable is
+        current filter), and by kind: sql_dialect (postgresql, sqlite, ogr_sql or qgis_expression: the language of
+        its filter) and fields [{name, type, alias, filterable}] for a vector layer (filterable is
         false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}]
         and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point
         cloud.
