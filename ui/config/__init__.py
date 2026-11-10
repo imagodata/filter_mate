@@ -212,8 +212,8 @@ class UIConfig:
                 'large': 32,
             },
             'action_frame': {
-                'min_height': 64,
-                'max_height': 80,
+                'min_height': 48,
+                'max_height': 52,
                 'padding': 4,
             },
         },
@@ -382,8 +382,8 @@ class UIConfig:
                 'loose': {'top': 20, 'right': 20, 'bottom': 20, 'left': 20},
             },
             'action_frame': {
-                'min_height': 56,
-                'max_height': 70,
+                'min_height': 42,
+                'max_height': 46,
                 'padding': 3,
             },
         },
@@ -557,8 +557,8 @@ class UIConfig:
                 'large': 40,
             },
             'action_frame': {
-                'min_height': 80,
-                'max_height': 96,
+                'min_height': 58,
+                'max_height': 62,
                 'padding': 5,
             },
         },
@@ -747,8 +747,8 @@ class UIConfig:
                 'large': 32,
             },
             'action_frame': {
-                'min_height': 64,
-                'max_height': 80,
+                'min_height': 48,
+                'max_height': 52,
                 'padding': 4,
             },
         },
