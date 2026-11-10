@@ -730,9 +730,14 @@
           "description": "Open data platforms allowed besides data.gouv.fr and the Opendatasoft hub, comma separated: a host (Opendatasoft portal) or host:kind with kind opendatasoft or ckan, e.g. data.toulouse-metropole.fr, data.example.org:ckan"
         },
         "enabled": {
-          "value": false,
+          "value": true,
           "choices": [true, false],
           "description": "Show the AGENT section before FILTERING (on: when the panel is next opened; off: after restarting QGIS)"
+        },
+        "shown_by_default": {
+          "value": true,
+          "_hidden": true,
+          "description": "Marks a configuration in which the AGENT section was turned on once, when it became on by default"
         }
       },
       "EXPLORATION": {

@@ -1,7 +1,8 @@
 # Agent mode: foundations
 
-Status: steps 1 and 2 of 4 are in the code. The chat is off by default (`APP.OPTIONS.AGENT.enabled`, read when the panel
-opens) and works with the user's own key. For developers of FilterMate.
+Status: the four steps are in the code. The chat is on by default since 5.0.4 (`APP.OPTIONS.AGENT.enabled`, read when the
+panel opens; a configuration written while it was off is turned on once), with a free quota and then the user's own key.
+For developers of FilterMate.
 
 ## Goal
 

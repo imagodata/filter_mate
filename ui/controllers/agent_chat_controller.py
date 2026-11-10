@@ -64,11 +64,11 @@ def _tr(text: str) -> str:
 
 
 def agent_enabled(config_data) -> bool:
-    """``APP.OPTIONS.AGENT.enabled``; off when the section is absent."""
+    """``APP.OPTIONS.AGENT.enabled``; on when the section is absent, as in the default configuration."""
     try:
         from ...config.config import _get_option_value
         section = config_data.get("APP", {}).get("OPTIONS", {}).get("AGENT", {})
-        return _get_option_value(section.get("enabled"), False) is True
+        return _get_option_value(section.get("enabled"), True) is True
     except Exception:
         logger.debug("AGENT option unreadable", exc_info=True)
         return False

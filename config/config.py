@@ -266,6 +266,21 @@ def _migrate_config(config_data, default_data):
                 point_cloud["enabled"] = True
                 dirty = True
 
+    # 0b) FilterMate 5.0.4: the AGENT section is on by default. A configuration written while it was
+    # off by default holds that off value without the marker: turn it on once. The merge below adds
+    # the marker, so a user who turns the section off afterwards keeps it off.
+    user_agent = user_options.get("AGENT") if isinstance(user_options, dict) else None
+    default_agent = default_options.get("AGENT") if isinstance(default_options, dict) else None
+    if (isinstance(user_agent, dict) and isinstance(default_agent, dict)
+            and "shown_by_default" in default_agent and "shown_by_default" not in user_agent):
+        enabled = user_agent.get("enabled")
+        if isinstance(enabled, dict) and enabled.get("value") is False:
+            enabled["value"] = True
+            dirty = True
+        elif enabled is False:
+            user_agent["enabled"] = True
+            dirty = True
+
     # 1) Merge new keys from default into user config (recursive, non-destructive)
     if _merge_missing_keys(config_data, default_data):
         dirty = True
