@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **AGENT finds the objects that look like an example.** `similar_objects` (chat, MCP, `POST /objects/similar`) takes one selected feature of a layer, or the last object drawn in the dock, and has SAM look for objects like it in an area, window by window, by their encoder features alone (no values of the raster needed); they are added as a layer with `appearance` and `area_m2`. Measured on buildings of the 25 cm Cerdagne orthophoto: about half of what it finds is right and it finds about a fifth of what is there, which the tool and the agent say. Checked on QGIS 3.22, LTR and 4.3 with a stub model.
+
 ## [5.1.0] - 2026-11-10
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

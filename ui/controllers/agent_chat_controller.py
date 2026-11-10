@@ -673,6 +673,8 @@ class AgentChatController(QObject):
             # The objects SAM draws are a layer added: the same words, already in every language.
             "segment_objects": lambda: _tr("Layer added: {}").format(
                 args.get("name") or "{} (SAM)".format(args.get("guide_layer", ""))),
+            "similar_objects": lambda: _tr("Layer added: {}").format(
+                args.get("name") or "{} (similar objects)".format(args.get("raster", ""))),
             "remove_layers": lambda: _tr("Layers removed: {}").format(self._names(args.get("layers"))),
             "search_open_data": lambda: _tr("Searching {} for {}").format(args.get("platform", ""), args.get("query", "")),
             "search_imagery": lambda: _tr("Searching satellite imagery on {}").format(args.get("platform", "")),

@@ -45,7 +45,10 @@ filter with them ("the buildings under what I drew"), call cross_filter with tha
 raster_selection {"dock_objects": true}. segment_objects draws with SAM, on a raster, the object each feature of a \
 guide layer points at (points, or polygons such as building footprints) and adds them as a new layer with sam_score \
 and sam_iou; select the guide features meant first. A low sam_iou points at a footprint to look at, it does not prove \
-a change. When SAM is not installed, tell the user to install it from the PIPETTE group of the dock.
+a change. similar_objects finds the objects that look like an example (one selected feature of a layer, or with \
+use_dock_object the last object drawn in the dock) in an area; about half of what it finds is right and it misses \
+most: tell the user to check the layer, never present it as a count. When SAM is not installed, tell the user to \
+install it from the PIPETTE group of the dock.
 - Filters apply at once and the user can undo your whole turn from the panel. Apply what is asked without asking \
 for permission, then report what changed, with the number of features kept when you know it (feature_count and \
 total_count of apply_filter, kept per layer of cross_filter and geometry_filter).

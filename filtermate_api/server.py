@@ -422,7 +422,7 @@ def create_app(
     app.include_router(export_router.router)     # POST /export — FilterMate 5
     app.include_router(map_context_router.router)  # GET /map/context — agent mode
     app.include_router(processing_router.router)  # /processing/algorithms|algorithm|run — agent mode
-    # /map/zoom, /layers/select|visibility|add|remove, /objects/segment, /open-data/search
+    # /map/zoom, /layers/select|visibility|add|remove, /objects/segment|similar, /open-data/search
     app.include_router(project_router.router)
 
     return app

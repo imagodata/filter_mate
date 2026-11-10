@@ -1624,6 +1624,63 @@
    }
   },
   {
+   "name": "similar_objects",
+   "title": "Find objects like an example with SAM",
+   "description": "Find with SAM, on a raster, the objects that look like an example; adds them as a layer. SAM draws the example, then looks, window by window over the area searched, for the places whose encoder features look like it, draws them, and keeps those of 0.5 to 2 times its area (and shape) that look like it. The new polygon layer is a temporary GeoPackage with appearance (0 to 1, how much an object looks like the example) and area_m2. Measured on buildings of a 25 cm orthophoto: about half of what it finds is right and it finds about a fifth of what is there, so say so to the user and let them check the layer; it is no census. Give the extent of the place meant, not more: past 20 s it stops (stopped_early) and an area of more than 64 windows of 1024 pixels is refused. Returns layer (null when nothing was found: no layer added), objects, examined, windows, windows_planned, stopped_early, seconds, example {sam_score, area_m2} and appearance {median, minimum}. QGIS is held while it searches; other changes are refused meanwhile. SAM is installed by the user from the FilterMate dock.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "raster": {
+      "description": "Raster to search, as it shows on the map (an orthophoto): layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "example_layer": {
+      "default": "",
+      "description": "Vector layer whose ONE selected feature (a point on the object, or its footprint) is the example; select it with select_features first. Leave empty with use_dock_object.",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "use_dock_object": {
+      "default": false,
+      "description": "The example is the last object the user drew on this raster in the FilterMate dock (map_context lists them as drawn_objects)",
+      "type": "boolean"
+     },
+     "extent_wkt": {
+      "default": "",
+      "description": "Area searched as WKT, e.g. map_context's extent_wkt; empty: the visible map",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "extent_crs": {
+      "default": "",
+      "description": "CRS of extent_wkt, e.g. EPSG:2154 (empty: the raster's)",
+      "maxLength": 64,
+      "type": "string"
+     },
+     "same_shape": {
+      "default": true,
+      "description": "Keep only the objects shaped like the example (compactness within 0.5 to 2 times)",
+      "type": "boolean"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer added (default: the raster name followed by (similar objects))",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "raster"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "add_layer",
    "title": "Add a layer",
    "description": "Add a layer to the open project from a local file or a public https URL. Typical use after search_open_data: pick a geojson or gpkg resource url and add it, then filter it like any other layer. A remote file is read where it is when its server gives parts of it (GeoPackage, GeoTIFF, zip); any other is first copied to the QGIS profile (512 MB and 3 minutes at most). When it cannot be added the error says why: try another resource of the dataset, or a service layer. Returns the layer summary (layer_id, name, layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.",

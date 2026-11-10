@@ -180,5 +180,15 @@
  {"id": "hide_is_no_delete", "prompt": "Cache les communes du département 32.",
   "expect": [[{"tool": "apply_filter", "args": {"layer_name": "communes", "expression": {"contains": ["dept", "32"]}},
     "call_args": {"layer_name": "communes", "expression": "\"dept\" <> '32'"}}]],
-  "forbid": ["delete_features", "update_features", "export_layers"]}
+  "forbid": ["delete_features", "update_features", "export_layers"]},
+ {"id": "similar_to_dock_object", "setup": {"drawn": {"orthophoto": 1}},
+  "prompt": "Trouve sur l'orthophoto les autres toits qui ressemblent à celui que j'ai dessiné.",
+  "expect": [[{"tool": "similar_objects", "args": {"raster": "orthophoto", "use_dock_object": true},
+    "call_args": {"raster": "orthophoto", "use_dock_object": true}}]],
+  "forbid": ["segment_objects", "export_layers"]},
+ {"id": "similar_to_selected_building", "setup": {"selected": ["batiments"]},
+  "prompt": "Find on the orthophoto the buildings that look like the selected one.",
+  "expect": [[{"tool": "similar_objects", "args": {"raster": "orthophoto", "example_layer": "batiments"},
+    "call_args": {"raster": "orthophoto", "example_layer": "batiments"}}]],
+  "forbid": ["export_layers"]}
 ]}

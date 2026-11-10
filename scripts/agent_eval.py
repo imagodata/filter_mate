@@ -376,6 +376,32 @@ class SimulatedProject:
                     "sam_score": {"median": 0.93, "minimum": 0.61},
                     "sam_iou": {"median": 0.81, "minimum": 0.12, "below_half": 2}}
 
+        def similar_objects(args):
+            raster, image = self._layer(args["raster"])
+            if image["kind"] != "raster":
+                raise ToolFailure(f"'{raster}' is not a raster layer")
+            if bool(args.get("example_layer")) == bool(args.get("use_dock_object")):
+                raise ToolFailure("Give an example: example_layer (with its one feature selected) or use_dock_object, "
+                                  "one of them.")
+            if args.get("use_dock_object") and raster not in self.drawn:
+                raise ToolFailure(f"no object is drawn on '{raster}' in the FilterMate dock: map_context lists the "
+                                  "rasters that have some (drawn_objects)")
+            if args.get("example_layer"):
+                example = self._layer(args["example_layer"])[0]
+                if example not in self.selected:
+                    raise ToolFailure(f"'{example}' has 0 features selected: select exactly the one example with "
+                                      "select_features first")
+            name = args.get("name") or f"{raster} (similar objects)"
+            added = {"id": f"similar_{len(self.layers)}", "kind": "vector", "geometry": "MultiPolygon", "count": 9,
+                     "fields": {"object": [1, 9], "appearance": [0.8, 0.97], "area_m2": [70.0, 260.0]}}
+            self.layers[name] = added
+            self.by_ref[name] = self.by_ref[added["id"]] = name
+            return {"layer": {"layer_id": added["id"], "name": name, "layer_kind": "vector", "provider_type": "ogr",
+                              "crs_authid": "EPSG:2154", "feature_count": 9},
+                    "objects": 9, "examined": 31, "windows": 2, "windows_planned": 2, "stopped_early": False,
+                    "seconds": 9.5, "example": {"sam_score": 0.94, "area_m2": 142.0},
+                    "appearance": {"median": 0.86, "minimum": 0.8}}
+
         return {
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
@@ -385,7 +411,7 @@ class SimulatedProject:
             "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,
             "select_features": select_features, "set_layers_visibility": operation, "add_layer": add_layer,
-            "segment_objects": segment_objects,
+            "segment_objects": segment_objects, "similar_objects": similar_objects,
             "remove_layers": operation, "search_open_data": search_open_data,
             "add_service_layer": lambda args: {"layer_id": "wfs_1", "name": args.get("name") or args["typename"], "layer_kind": "vector"},
             "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{

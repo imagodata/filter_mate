@@ -199,6 +199,14 @@ address, else its content type), its size, and whether the server gives parts of
   without a definition, so Redo says it cannot come back instead of bringing back an empty layer.
 - `drawn_objects` only offers the objects that select in the dock: object target and SAM engine. With the colour
   engine the panel keeps SAM's objects for later, and they are left out.
+- `similar_objects` (`POST /objects/similar`) runs on the main thread too, marked as running, with the same 20 s: the
+  example is drawn on its window, then `search_windows` cuts the area searched in windows of 1024 pixels at the
+  cell of the example (overlapping by 64 pixels, the example's first, then nearest first; more than 64 is refused).
+  In each, the 40 best peaks of `similarity_peaks` (cosine at least 0.7) are drawn and kept as in the dock (same object
+  at IoU 0.5, area and shape within 0.5 to 2, appearance at least 0.8). These are the settings of the *feature peaks
+  only* variant of `scripts/sam_similar_candidates.py`, chosen there for the recall and judged at precision 0.55, recall
+  0.20 on ten buildings: the tool and the system prompt say the layer is to be checked, not counted. With
+  `use_dock_object` the accessor reads the objects of the dock on the main thread and the last one is the example.
 - `render_window` waits for the rendering without user input when it runs on the main thread: a click during the run
   must not start another tool.
 - SAM missing: the tool says how the user installs it. The agent cannot install it, on purpose (pip and a download

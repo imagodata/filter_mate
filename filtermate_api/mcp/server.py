@@ -43,7 +43,7 @@ apply_filter to filter, filter_state to see what is filtered now, export_layers 
 clear_filters to put layers back on their original source.
 Objects on a raster: map_context lists those the user drew in the dock (cross_filter uses them with \
 raster_selection dock_objects); segment_objects draws with SAM the objects that points or footprints point at, as a \
-new layer.
+new layer; similar_objects finds the objects that look like an example, as a new layer to check.
 undo_filter / redo_filter are not idempotent: after one (also after an error or a timeout), read filter_state \
 before calling it again.
 
@@ -724,6 +724,43 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/objects/segment", _body(
             raster=raster, guide_layer=guide_layer, selected_only=selected_only, limit=limit, name=name))
+
+    @mcp.tool(annotations=_write("Find objects like an example with SAM", idempotent=False))
+    async def similar_objects(
+        raster: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Raster to search, as it shows on the map (an orthophoto): layer id or name"))],
+        example_layer: Annotated[str, Field(max_length=1000, description=(
+            "Vector layer whose ONE selected feature (a point on the object, or its footprint) is the example; "
+            "select it with select_features first. Leave empty with use_dock_object."))] = "",
+        use_dock_object: Annotated[bool, Field(description=(
+            "The example is the last object the user drew on this raster in the FilterMate dock (map_context lists "
+            "them as drawn_objects)"))] = False,
+        extent_wkt: Annotated[str, Field(max_length=100_000, description=(
+            "Area searched as WKT, e.g. map_context's extent_wkt; empty: the visible map"))] = "",
+        extent_crs: Annotated[str, Field(max_length=64, description=(
+            "CRS of extent_wkt, e.g. EPSG:2154 (empty: the raster's)"))] = "",
+        same_shape: Annotated[bool, Field(description=(
+            "Keep only the objects shaped like the example (compactness within 0.5 to 2 times)"))] = True,
+        name: Annotated[str, Field(max_length=200, description=(
+            "Name of the layer added (default: the raster name followed by (similar objects))"))] = "",
+    ) -> Dict[str, Any]:
+        """Find with SAM, on a raster, the objects that look like an example; adds them as a layer.
+
+        SAM draws the example, then looks, window by window over the area searched, for the places whose encoder
+        features look like it, draws them, and keeps those of 0.5 to 2 times its area (and shape) that look like
+        it. The new polygon layer is a temporary GeoPackage with appearance (0 to 1, how much an object looks like
+        the example) and area_m2. Measured on buildings of a 25 cm orthophoto: about half of what it finds is right
+        and it finds about a fifth of what is there, so say so to the user and let them check the layer; it is no
+        census. Give the extent of the place meant, not more: past 20 s it stops (stopped_early) and an area of more
+        than 64 windows of 1024 pixels is refused.
+
+        Returns layer (null when nothing was found: no layer added), objects, examined, windows, windows_planned,
+        stopped_early, seconds, example {sam_score, area_m2} and appearance {median, minimum}. QGIS is held while it
+        searches; other changes are refused meanwhile. SAM is installed by the user from the FilterMate dock.
+        """
+        return await call("POST", "/objects/similar", _body(
+            raster=raster, example_layer=example_layer, use_dock_object=use_dock_object, extent_wkt=extent_wkt,
+            extent_crs=extent_crs, same_shape=same_shape, name=name))
 
     @mcp.tool(annotations=ToolAnnotations(title="Add a layer", readOnlyHint=False, destructiveHint=False,
                                           idempotentHint=False, openWorldHint=True))

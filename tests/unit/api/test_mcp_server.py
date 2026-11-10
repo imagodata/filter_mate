@@ -27,7 +27,7 @@ EXPECTED_TOOLS = {
     "layer_statistics", "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm",
     "set_layer_style", "set_labels", "update_features", "delete_features", "add_features",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
-    "add_service_layer", "search_imagery", "segment_objects",
+    "add_service_layer", "search_imagery", "segment_objects", "similar_objects",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
              "preview_filter", "map_context", "search_open_data", "search_imagery", "layer_statistics",
@@ -193,6 +193,17 @@ def test_segment_objects(mcp, fake_api):
     assert (request["method"], request["path"]) == ("POST", "/objects/segment")
     assert request["body"] == {"raster": "ortho", "guide_layer": "bati", "selected_only": True, "limit": 50, "name": ""}
     assert is_error(mcp.call("segment_objects", {"raster": "ortho", "guide_layer": "bati", "limit": 201}))
+
+
+def test_similar_objects(mcp, fake_api):
+    fake_api.respond("POST", "/objects/similar", {"layer": None, "objects": 0, "examined": 7, "windows": 1,
+                                                  "windows_planned": 1, "stopped_early": False, "seconds": 3.0})
+    result = mcp.call("similar_objects", {"raster": "ortho", "use_dock_object": True})
+    assert not is_error(result) and json.loads(text_of(result))["examined"] == 7
+    request = last(fake_api)
+    assert (request["method"], request["path"]) == ("POST", "/objects/similar")
+    assert request["body"] == {"raster": "ortho", "example_layer": "", "use_dock_object": True, "extent_wkt": "",
+                               "extent_crs": "", "same_shape": True, "name": ""}
 
 
 def test_geometry_filter(mcp, fake_api):
