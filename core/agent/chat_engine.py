@@ -94,13 +94,13 @@ class ChatEngine:
     def busy(self) -> bool:
         return self._busy
 
-    def send(self, text: str) -> bool:
-        """Start a request; False when one is running or there is nothing to send."""
+    def send(self, text: str, context: str = "") -> bool:
+        """Start a request; False when one is running or there is nothing to send. ``context`` goes with it."""
         if self._busy or not text.strip():
             return False
         self._busy, self._cancelled = True, False
         self._generation += 1
-        self._session.add_user_text(text)
+        self._session.add_user_text(text, context)
         self._request_model(self._generation)
         return True
 

@@ -67,10 +67,11 @@ class AgentSession:
     def messages(self) -> Tuple[Message, ...]:
         return tuple(self._messages)
 
-    def add_user_text(self, text: str) -> None:
-        """Start a new request of the user."""
+    def add_user_text(self, text: str, context: str = "") -> None:
+        """Start a new request of the user; ``context`` (the state of the project) follows it in the same message."""
         self._request_start = len(self._messages)
-        self._messages.append(Message(ROLE_USER, (TextPart(text),)))
+        parts = (TextPart(text),) + ((TextPart(context),) if context else ())
+        self._messages.append(Message(ROLE_USER, parts))
         self._turns = 0
 
     def abandon_request(self) -> None:
@@ -142,10 +143,10 @@ class ExchangeResult:
 
 
 def run_exchange(session: AgentSession, text: str, transport: Transport, executor: ToolExecutor,
-                 confirm: Callable[[ToolCallPart], bool] = lambda call: False) -> ExchangeResult:
-    """Run one user request to its end, tools included, blocking."""
+                 confirm: Callable[[ToolCallPart], bool] = lambda call: False, context: str = "") -> ExchangeResult:
+    """Run one user request to its end, tools included, blocking; ``context`` goes with the request."""
     result = ExchangeResult()
-    session.add_user_text(text)
+    session.add_user_text(text, context)
     while True:
         turn = None
         for event in transport.send(session.next_request(), session):

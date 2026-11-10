@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from dataclasses import asdict
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
@@ -30,6 +31,7 @@ from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import FREE_PRESET, create_provider
+from ...core.agent.project_summary import project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.tool_catalog import UNDO_AGENT_STEP, chat_tools
@@ -515,7 +517,18 @@ class AgentChatController(QObject):
         self.panel.set_status(_tr("Thinking…"))
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
-        self._engine.send(text)
+        self._engine.send(text, self._project_context())
+
+    def _project_context(self) -> str:
+        """The layers, their filters and the selections now, sent after the request; empty when they cannot be read."""
+        try:
+            accessor = self._accessor()
+            layers = [asdict(layer) for layer in accessor.list_layers()]
+            selections = accessor.map_context().selections
+        except Exception:  # the request goes without it: the model reads the project with its tools
+            logger.debug("Agent: project summary not read", exc_info=True)
+            return ""
+        return project_summary(layers, selections)
 
     def _on_stop(self) -> None:
         abort_active()  # a connector or a platform being waited for

@@ -500,6 +500,9 @@ def check_chat(provider, layer, authcfg, work):
     check("a filter request ends", ask("garde les communes de plus de 1000 habitants"))
     check("the filter is applied", layer.subsetString() == '"pop" > 1000', layer.subsetString())
     check("three model turns", len(provider.requests) == 3, len(provider.requests))
+    first = provider.requests[0]["body"]["messages"][-1]["content"]
+    check("the state of the project goes after the request", first[0]["text"].startswith("garde les communes")
+          and len(first) == 2 and "communes" in first[1]["text"] and "Project when" in first[1]["text"], first)
     second = provider.requests[1]["body"]["messages"]
     check("the tool call goes back with its result", second[1]["content"][0]["type"] == "tool_use" and
           second[2]["content"][0]["tool_use_id"] == "toolu_1" and "communes" in second[2]["content"][0]["content"], second)

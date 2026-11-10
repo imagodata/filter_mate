@@ -30,6 +30,7 @@ sys.path.insert(0, str(ROOT / "core"))
 from agent.messages import ERROR_NETWORK, ProviderError, StreamFailure  # noqa: E402
 from agent.providers import PRESETS, create_provider  # noqa: E402
 from agent.providers.base import ProviderConfig, error_from_response  # noqa: E402
+from agent.project_summary import project_summary  # noqa: E402
 from agent.sql_guard import filter_problem  # noqa: E402
 
 # As filtermate_api/agent_tools.py words it (not imported: it needs QGIS).
@@ -381,7 +382,11 @@ def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     tools = chat_tools()
     session = AgentSession(provider, tools, SYSTEM_PROMPT, AgentLimits())
     executor = ToolExecutor(tools, project.handlers())
-    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True)
+    # As the chat sends it: the state of the project after the request.
+    handlers = project.handlers()
+    context = project_summary(handlers["list_layers"]({})["layers"],
+                              [{"name": name, "selected_count": 1} for name in project.selected])
+    exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True, context=context)
     write_tools = [tool.name for tool in load_catalog() + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):
