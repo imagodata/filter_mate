@@ -1331,137 +1331,137 @@ Rozimisiz?</translation>
         <translation>Nuqtalar buluti mezonlarini tiklash</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Invalid raster calculator expression</source>
         <translation>Raster kalkulyator ifodasi noto‘g‘ri</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1923"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL topilmadi: DTMdan balandlikni hisoblash uchun pdal bajariladigan fayli kerak</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3478"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate vazifasi hali bajarilmoqda: tugashini kuting</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2951"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate vazifasi bajarilmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2988"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Avval piksellarni tanlang: qiymatlar diapazoni, sinflar yoki raster ifodasi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3003"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster filtrlandi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Nuqtalar buluti ifodasi rad etildi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3040"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Avval nuqtalarni tanlang: sinflar, atribut diapazonlari yoki ifoda</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3054"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Nuqtalar buluti filtrlandi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3588"/>
         <source>Filter not applied: {0}</source>
         <translation>Filtr qo‘llanmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>canceled</source>
         <translation>bekor qilindi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} ta nishon filtrlandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
         <source>{0} failed: {1}</source>
         <translation>{0} bajarilmadi: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3161"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: '{0}' dan filtrlanmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3260"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Shundan keyin o‘zgargan, o‘zgarishsiz qoldirildi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3266"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} ta qatlam tiklandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3300"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' eksport qilinmadi: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3314"/>
         <source>Exported: {0}</source>
         <translation>Eksport qilindi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3316"/>
         <source>Export failed: {0}</source>
         <translation>Eksport amalga oshmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3323"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} ta qatlam eksport qilinmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3329"/>
         <source>Export folder</source>
         <translation>Eksport jildi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3411"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster / nuqtalar buluti nishonlari o‘tkazib yuborildi: EXPLORING'da manba obyekt tanlanmagan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster / nuqtalar buluti nishonlari filtrlanmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3442"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} ta raster / nuqtalar buluti nishoni filtrlandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3565"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Yer sathidan balandlik uchun ishlatiladigan DTM rasterini tanlang</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3576"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Yer sathidan balandlik hisoblanmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3597"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>'{0}' ga nisbatan balandlik PDAL bilan hisoblanmoqda…</translation>
     </message>
@@ -1471,12 +1471,12 @@ Rozimisiz?</translation>
         <translation>FilterMate keshi {0} GB joy egallaydi va {1} GB chegarasidan oshib ketdi: endi kerak bo'lmagan raster / nuqtalar buluti qatlamlaridan filtrni olib tashlang</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} juda eski: DTMdan balandlikni hisoblash uchun PDAL 2.4 yoki undan yangisi kerak</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL ishga tushmadi, DTMdan balandlik mavjud emas: {0}</translation>
     </message>
@@ -1496,27 +1496,27 @@ Rozimisiz?</translation>
         <translation>Ko‘rib chiqish: tanlovdan tashqaridagi piksellarni yashirish (qiyalik, qiyalik yo‘nalishi va h.k. uchun oq parda)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Qiyalik yoki qiyalik yo‘nalishini ko‘rib chiqish uchun xarita rasterning CRS ({0}) tizimida bo‘lishi kerak</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2480"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>faqat xaritada chizilgan nuqtalarni tanlash mumkin: ko‘rib chiqish yashirgan sinfni tanlash uchun uni o‘chiring</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2551"/>
         <source>No classified point under the click</source>
         <translation>Bosilgan joyda tasniflangan nuqta yo‘q</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2486"/>
         <source>Class {0} is already checked</source>
         <translation>{0}-sinf allaqachon belgilangan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2575"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>{0}-sinf qatlamning sinflar ro‘yxatida yo‘q</translation>
     </message>
@@ -1531,157 +1531,157 @@ Rozimisiz?</translation>
         <translation>Sinf tanlagich: xaritani bosing — u yerda chizilgan nuqtalarning sinfi belgilanadi. Ctrl+bosish yana bir sinf qo'shadi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1121"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Ko'rib chiqish va statistika ko'rinadigan qamrovning cheklangan lokal namunasidan foydalanadi; filtrlash esa manbani o'qiydi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1325"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Ko'rinadigan qamrov uchun cheklangan rang lahzalik nusxasi tayyorlanmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1337"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>Rang lahzalik nusxasini tayyorlab bo'lmadi. Kichikroq ko'rinadigan qamrovni sinab ko'ring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1341"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>Rang tanlovi olingan ko'rinadigan qamrovga qo'llanadi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1405"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Rasterdan namuna olish muvaffaqiyatsiz. Kichikroq ko'rinadigan qamrovni sinab ko'ring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1526"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>Rang yoki ifoda ko'rib chiqishi uchun xarita rasterning CRS ida ({0}) bo'lishi kerak</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2504"/>
         <source>No point drawn under the click</source>
         <translation>Bosilgan joyda chizilgan nuqta yo'q</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2506"/>
         <source>This point has no {0}</source>
         <translation>Bu nuqtada {0} yo'q</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2508"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} ni shartda ishlatib bo'lmaydi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2565"/>
         <source>Object not read: {0}</source>
         <translation>Obyekt o'qilmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2567"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>Bosilgan joy atrofida nuqtalar juda ko'p: obyektni o'qib bo'lmadi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2569"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>Bosilgan joyda {0} sinfiga tegishli nuqta yo'q: obyektning o'zini bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>Similar objects not read: {0}</source>
         <translation>O'xshash obyektlar o'qilmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2709"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>Maydon nisbatlari doirasida o'xshash obyekt yo'q: ularni kengaytiring</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2778"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>Yangi ko'rinadigan qamrov uchun namuna tayyorlanmoqda. Tayyor bo'lganda yana bosing.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2789"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>Lokal raster namunasi hali tayyorlanmoqda. Tayyor bo'lganda qayta urinib ko'ring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2995"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>Ushbu tasvirlangan qatlamni filtrlashdan oldin rang lahzalik nusxasini tayyorlang.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3140"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} ta raster nishoni sozlangan piksel chegarasigacha qayta namunalandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3172"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>rang tanlovi olingan qamrov bilan cheklangan; ranglar uslub va masshtabga bog'liq</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3174"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>raster manbasi piksel chegarasi doirasida {0} katakka qayta namunalandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>raster tanlovi har {0} pikselda o'qildi: sozlamalardagi piksel chegarasidan oshdi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3179"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>zich raster tanlovi konturi yengil bo'lishi uchun tekislandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3226"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} bo'shatildi, tanlovga hech narsa mos kelmaydi: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3210"/>
         <source>failed</source>
         <translation>muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1520"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1536"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1400"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1749"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1153"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime o‘rnatildi</translation>
     </message>
@@ -4152,7 +4152,7 @@ PostgreSQL jadvalida PRIMARY KEY belgilanganligiga ishonch hosil qiling.</transl
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="632"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: segmentatsiya modeli yuklab olinmoqda</translation>
     </message>
@@ -6545,27 +6545,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Piksel tanlagich bilan xaritada bosing. Ctrl+bosish diapazonni qiymatgacha kengaytiradi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2181"/>
         <source>VALUE RANGE</source>
         <translation>QIYMATLAR DIAPAZONI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Lowest value kept</source>
         <translation>Saqlanadigan eng past qiymat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Highest value kept</source>
         <translation>Saqlanadigan eng yuqori qiymat</translation>
     </message>
@@ -6595,17 +6595,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Hech biri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1502"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTER IFODASI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1506"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Raster kalkulyator ifodasi; piksel 0 bo‘lmagan joyda saqlanadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1507"/>
         <source>Raster expression</source>
         <translation>Raster ifodasi</translation>
     </message>
@@ -6625,12 +6625,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Tanlangan piksellar: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1588"/>
         <source>Set a value range first</source>
         <translation>Avval qiymatlar diapazonini belgilang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2936"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -6650,22 +6650,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Xaritada oxirgi chizilgan to'rtburchakdagi joriy kanal statistikasi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1882"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Kursor ostida: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
         <source>Zone: {0}</source>
         <translation>Zona: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
         <source>no pixel</source>
         <translation>piksel yo'q</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2954"/>
         <source>LAST PICKS</source>
         <translation>OXIRGI O'LCHOVLAR</translation>
     </message>
@@ -6680,37 +6680,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Oraliq qo‘llanadigan kattalik. Qiyalik, qiyalik yo‘nalishi, soyali relyef va g‘adir-budurlik kanalni DTM sifatida o‘qiydi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Pixel value</source>
         <translation>Piksel qiymati</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Slope (degrees)</source>
         <translation>Qiyalik (daraja)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Slope (%)</source>
         <translation>Qiyalik (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Aspect (degrees)</source>
         <translation>Qiyalik yo‘nalishi (daraja)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Hillshade (0-255)</source>
         <translation>Soyali relyef (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>G‘adir-budurlik (TRI, o‘rtacha farq)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Kattalikning odatiy chegaralari</translation>
     </message>
@@ -6720,47 +6720,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Odatiy chegaralar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Flat</source>
         <translation>Tekis</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Gentle</source>
         <translation>Yumshoq</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Moderate</source>
         <translation>O‘rtacha</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>Steep</source>
         <translation>Tik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>East</source>
         <translation>Sharq</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>South</source>
         <translation>Janub</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>West</source>
         <translation>G‘arb</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>Shadow</source>
         <translation>Soya</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>Lit</source>
         <translation>Yoritilgan</translation>
     </message>
@@ -6770,27 +6770,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Odatiy chegaralar…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1148"/>
         <source>PIPETTE</source>
         <translation>TANLAGICH</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Tolerance ±</source>
         <translation>Bardoshlilik ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Tanlangan rang yoki qiymat atrofidagi bardoshlilik, qiymatlar diapazonining % ida</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
         <source>Pipette tolerance</source>
         <translation>Tanlagich bardoshliligi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1542"/>
         <source>Bands</source>
         <translation>Kanallar</translation>
     </message>
@@ -6821,8 +6821,8 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
-        <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation type="obsolete">Odatiy indeks ifodasini yozish (o‘simlik, suv...)</translation>
+        <source>Add every proposed object to the selection (Enter on the map)</source>
+        <translation>Barcha taklif etilgan obyektlarni tanlovga qo'shish (xaritada Enter)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
@@ -6835,22 +6835,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Uch yoki undan ortiq kanalli rasm kerak (qizil, yashil, ko‘k...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>O‘simlik (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>O‘simliksiz (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Suv (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Vegetation (excess green)</source>
         <translation>O‘simlik (ortiqcha yashil)</translation>
     </message>
@@ -6860,12 +6860,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Spektral andozalar…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2491"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Bu pikselda qiymat yo‘q (NoData): boshqasini tanlang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2599"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Bardoshlilik barcha qiymatlarni qamrab oladi: kamaytiring</translation>
     </message>
@@ -6890,12 +6890,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ifoda</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
         <source>BANDS</source>
         <translation>KANALLAR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="911"/>
         <source>Value of the active band under the cursor</source>
         <translation>Faol kanalning kursor ostidagi qiymati</translation>
     </message>
@@ -6905,7 +6905,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Xaritada chizilgan oxirgi to'rtburchakdagi faol kanal statistikasi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="952"/>
         <source>Every band</source>
         <translation>Barcha kanallar</translation>
     </message>
@@ -6915,7 +6915,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Qiymatlar oralig'i barcha rang kanallariga bir vaqtda qo'llanadi (har bir kanal oraliqda bo'lsa, piksel saqlanadi); gistogramma birinchisini ko'rsatadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6925,122 +6925,122 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Tanlagich shu kanalni solishtiradi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1063"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Kanal tashiydigan rang: spektral indekslar va chiplar undan foydalanadi. O'zgartirish uchun bosing</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
         <source>Value at the last click of the pipette</source>
         <translation>Tanlagichning oxirgi bosilishidagi qiymat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
         <source>No colour</source>
         <translation>Rang yo'q</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>1, 2, 3-kanallar qizil, yashil, ko'k</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>IRC</source>
         <translation>CIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>1, 2, 3-kanallar infraqizil, qizil, yashil (IGN infraqizil rangli ortofotosurat)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>1, 2, 3, 4-kanallar qizil, yashil, ko'k, yaqin infraqizil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1016"/>
         <source>Every band: {0}</source>
         <translation>Barcha kanallar: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Rollar taxmin qilingan, tasdiqlang.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Red</source>
         <translation>Qizil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Green</source>
         <translation>Yashil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Blue</source>
         <translation>Ko'k</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
         <source>Near infrared</source>
         <translation>Yaqin infraqizil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
         <source>roles guessed, to confirm</source>
         <translation>rollar taxmin qilingan, tasdiqlang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1154"/>
         <source>Select</source>
         <translation>Tanlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Similar pixels</source>
         <translation>O'xshash piksellar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Rasterning olingan rang yoki qiymatga yaqin barcha piksellari (yon paneldagi tanlagich)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Clicked object</source>
         <translation>Bosilgan obyekt</translation>
     </message>
@@ -7050,7 +7050,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Faqat bosish tushgan shunday piksellar dog'i: hovuz, tom, dala (yon paneldagi obyekt detektori); Ctrl+bosish yana bir obyekt qo'shadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Similar objects</source>
         <translation>O'xshash obyektlar</translation>
     </message>
@@ -7060,7 +7060,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Rasterdagi bosilganga o'xshash har bir obyekt: maydoni quyidagi nisbatlar doirasida bo'lgan shunday piksellar dog'lari (yon paneldagi o'xshash obyektlar vositasi); Ctrl+bosish yana bir ma'lumot obyektini qo'shadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
         <source>Area ×</source>
         <translation>Maydon ×</translation>
     </message>
@@ -7075,72 +7075,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Eng katta o'xshash obyekt, bosilgan eng katta obyektning karrasi sifatida</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1272"/>
         <source>to ×</source>
         <translation>gacha ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>same shape</source>
         <translation>bir xil shakl</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1278"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Faqat bosilgan obyektlarga o'xshash shakldagi obyektlarni saqlang: ularning ixchamligi (4π × maydon / perimetr², doira uchun 1) o'sha nisbatlar doirasida; o'chirilsa, hovuz maydonidagi yo'l hovuz hisoblanadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1352"/>
         <source>Remove this pick</source>
         <translation>Bu tanlovni olib tashlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1431"/>
         <source>Quantity</source>
         <translation>Kattalik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Oraliq qo'llanadigan kattalik. Qiyalik, qiyalik yo'nalishi, soyali relyef va g'adir-budurlik faol kanalni DTM sifatida o'qiydi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
         <source>Thresholds ▾</source>
         <translation>Chegaralar ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Insert ▾</source>
         <translation>Kiritish ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Kanal havolasini, odatiy spektral indeksni yoki joriy oraliqni kiritish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
         <source>Spectral indexes</source>
         <translation>Spektral indekslar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1555"/>
         <source>Range</source>
         <translation>Oraliq</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1556"/>
         <source>The current value range</source>
         <translation>Joriy qiymatlar oralig'i</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Ko'rsatilgan ranglar uslub va masshtabga bog'liq.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Faqat rang tanlovi mavjud: sonli bandlar, indekslar, diapazonlar, sinflar va hosilalar mavjud emas.</translation>
     </message>
@@ -7150,97 +7150,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">QIYMATLAR ORALIG'I — barcha kanallar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2179"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>QIYMATLAR ORALIG'I — {0}-kanal</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2373"/>
         <source>picks on: {0}</source>
         <translation>tanlaydi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Qiyalik, yo'nalish... bitta kanalni DTM sifatida o'qiydi: avval KANALLAR da kanalni tanlang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2634"/>
         <source>The object could not be read</source>
         <translation>Obyektni o'qib bo'lmadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2636"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Bosilgan joyda obyekt yo'q: bardoshlilikni oshiring yoki boshqa pikselni bosing</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2638"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Obyekt o'qilgan oynadan katta va kesildi: bardoshlilikni pasaytiring</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="879"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2473"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="965"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2177"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="918"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Xaritada chizilgan oxirgi zona chegarasidagi faol kanal statistikasi; faqat zona ichidagi piksellar tanlanadi</translation>
     </message>
@@ -7270,7 +7270,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Chizilgan obyektni tanlovga qo'shish (xaritada Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
         <source>Clear</source>
         <translation>Tozalash</translation>
     </message>
@@ -7280,137 +7280,137 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Tasdiqlangan obyektlarni unutish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1291"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1294"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1296"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1304"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1456"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1457"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1458"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1516"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1525"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1734"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2343"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2760"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>onnxruntime fonda o'rnatilmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2764"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>onnxruntime avtomatik o'rnatilmadi (FilterMate jurnaliga qarang). Terminalda (Windows da OSGeo4W Shell) {0} buyrug'ini bajaring, so'ng QGIS ni qayta ishga tushiring.</translation>
     </message>
@@ -7420,7 +7420,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Modelni o'rnatish ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2790"/>
         <source>Repair the model…</source>
         <translation>Modelni tuzatish…</translation>
     </message>
@@ -7439,12 +7439,12 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
 Har bir fayl o'zining SHA-256 qiymati bilan tekshiriladi. Keyin model lokal ravishda, CPU da ishlaydi; kompyuteringizdan hech narsa chiqmaydi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
         <source>Clear ({0})</source>
         <translation>Tozalash ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2958"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7459,7 +7459,7 @@ Har bir fayl o'zining SHA-256 qiymati bilan tekshiriladi. Keyin model lokal ravi
         <translation type="obsolete">onnxruntime’ni o‘rnatish…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
         <source>Segmentation</source>
         <translation>Segmentatsiya</translation>
     </message>
@@ -7473,63 +7473,78 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 Uni hozir PyPI’dan pip yordamida QGIS profilingizga o‘rnatamizmi? QGIS’ning Python’i o‘zgartirilmaydi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
         <translation>Bosish ostidagi obyekt: tom, basseyn, dala (panelning obyekt aniqlagichi). SAM bilan: bosish obyekt qo'shadi, Shift+bosish oxirgisini kengaytiradi, sichqonchaning o'ng tugmasi uni qisqartiradi, ramka bittasini chegaralaydi, Esc uni olib tashlaydi. Rang mexanizmi bilan: o'xshash piksellar dog'i, Ctrl+bosish yana birini qo'shadi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
         <translation>Bosilgan obyektga o'xshash, maydoni quyidagi nisbatlar ichida bo'lgan har bir obyekt (panelning o'xshash obyektlar vositasi). SAM bilan: ko'rinadigan hududdagi o'xshash rangli dog'lar model tomonidan qayta chiziladi, so'ng bosilgan obyekt bilan solishtiriladi. Rang mexanizmi bilan: o'xshash piksellar dog'lari</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1187"/>
         <source>Engine</source>
         <translation>Mexanizm</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1191"/>
         <source>Colour</source>
         <translation>Rang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1192"/>
         <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
         <translation>SAM obyektni tasvirdan CPUda mahalliy chizadi; rang mexanizmi bosilgan rangdagi piksellar dog'ini kengaytiradi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1209"/>
         <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
         <translation>SAM 2.1 tiny'ni QGIS profilingizga bir marta o'rnating; shundan keyin u CPUda mahalliy ishlaydi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1220"/>
         <source>Forget the objects drawn by SAM</source>
         <translation>SAM chizgan obyektlarni unutish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2762"/>
         <source>Downloading the SAM model in the background…</source>
         <translation>SAM modeli fonda yuklab olinmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
         <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
         <translation>Obyektlar rangi bo'yicha topiladi. SAM ularni tasvirdan chizadi, binolarda ancha yaxshi (o'rnatish uchun taxminan {0} MB).</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2772"/>
         <source>Install SAM ({0} MB)…</source>
         <translation>SAM'ni o'rnatish ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
         <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
 
 onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
         <translation>Bosilgan va o'xshash obyektlarni SAM 2.1 segmentatsiya modeli CPUda mahalliy chizishi mumkin. Hozir o'rnatilsinmi (taxminan {0} MB)?
 
 onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, har bir fayl SHA-256 bilan tekshiriladi. Ikkalasi ham QGIS profilingizga tushadi; QGIS Python'i o'zgartirilmaydi va kompyuteringizdan hech narsa chiqmaydi. SAM bo'lmasa, obyektlar rangi bo'yicha topiladi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <source>Reject</source>
+        <translation>Rad etish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <source>Forget the proposed objects (Escape on the map)</source>
+        <translation>Taklif etilgan obyektlarni unutish (xaritada Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2842"/>
+        <source>Keep the {0} proposals</source>
+        <translation>{0} ta taklifni saqlash</translation>
     </message>
 </context>
 <context>
@@ -7801,12 +7816,12 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
         <source>This point cannot be used on this layer</source>
         <translation>Bu nuqtadan ushbu qatlamda foydalanib bo'lmaydi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="214"/>
         <source>Click inside the raster</source>
         <translation>Raster ichini bosing</translation>
     </message>
@@ -7816,7 +7831,7 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <translation type="obsolete">Bu nuqta segmentlanayotgan oynadan tashqarida: avval obyektni tasdiqlang yoki tozalang</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="246"/>
         <source>This box is too small</source>
         <translation>Bu ramka juda kichik</translation>
     </message>
@@ -7826,77 +7841,77 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <translation type="obsolete">Obyektni chap tugma bilan bosishdan boshlang yoki ramka chizing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="239"/>
         <source>This raster cannot be segmented</source>
         <translation>Bu rasterni segmentlab bo'lmaydi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="333"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>Bu hududni segmentlash tayyorlanmoqda…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="447"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>Bu hududni segmentlash bajarilmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="345"/>
         <source>canceled</source>
         <translation>bekor qilindi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="380"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime o'rnatilmoqda, birozdan so'ng yana bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="382"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>onnxruntime yo'q: {0} buyrug'ini bajaring, so'ng QGIS ni qayta ishga tushiring</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="386"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>Segmentatsiya modeli yuklab olinmoqda, o'rnatilgach yana bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="388"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>Avval segmentatsiya modelini o'rnating (pastdagi tugma)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="389"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>Segmentatsiya modelini yuklab bo'lmadi (FilterMate jurnaliga qarang)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="410"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>Segmentatsiya modeli yuklab olinmoqda… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="419"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>Model o'rnatildi: obyektni chap tugma bilan bosing yoki ramka chizing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="421"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>Modelni yuklab olib bo'lmadi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="423"/>
         <source>Download canceled</source>
         <translation>Yuklab olish bekor qilindi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>Click on an object in the area prepared</source>
         <translation>Tayyorlangan hududdagi obyektni bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="456"/>
         <source>No object found: add a point or draw a box</source>
         <translation>Obyekt topilmadi: nuqta qo'shing yoki ramka chizing</translation>
     </message>
@@ -7906,95 +7921,150 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <translation type="obsolete">Chap tugma obyektga qo'shadi, o'ng tugma olib tashlaydi, Enter tasdiqlaydi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="720"/>
         <source>Click an object first</source>
-        <translation type="obsolete">Avval obyektni bosing</translation>
+        <translation>Avval obyektni bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="384"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>Avval pastdagi tugma bilan onnxruntime’ni o‘rnating</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="103"/>
         <source>Click an object, or draw a box around it</source>
         <translation>Obyektni bosing yoki uning atrofiga ramka chizing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="181"/>
         <source>A right click trims the last object: click an object first</source>
         <translation>O'ng tugma oxirgi obyektni qisqartiradi: avval obyektni bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="221"/>
         <source>This point is outside the area of the last object: click it as a new object</source>
         <translation>Bu nuqta oxirgi obyekt hududidan tashqarida: uni yangi obyekt sifatida bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="366"/>
         <source>{0} click(s) fell outside the area prepared: click them again</source>
         <translation>{0} ta bosish tayyorlangan hududdan tashqariga tushdi: qayta bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
         <source>Shift+click extends the object, right click trims it, Escape removes it</source>
         <translation>Shift+bosish obyektni kengaytiradi, o'ng tugma qisqartiradi, Esc olib tashlaydi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
         <source>Similar objects need the values of the raster: this layer is only drawn</source>
         <translation>O'xshash obyektlar uchun rasterning qiymatlari kerak: bu qatlam faqat chizilgan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="531"/>
         <source>No patch of this colour nearby to compare with the object</source>
         <translation>Obyekt bilan solishtirish uchun yaqin atrofda bu rangdagi dog' yo'q</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="547"/>
         <source>Drawing the similar objects: {0} candidates…</source>
         <translation>O'xshash obyektlar chizilmoqda: {0} nomzod…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="558"/>
         <source>Drawing the similar objects… {0} %</source>
         <translation>O'xshash obyektlar chizilmoqda… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="573"/>
         <source>The similar objects could not be drawn: {0}</source>
         <translation>O'xshash obyektlarni chizib bo'lmadi: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
         <source>{0} similar objects found among {1} candidates; Escape removes them</source>
-        <translation>{1} nomzod orasidan {0} ta o'xshash obyekt topildi; Esc ularni olib tashlaydi</translation>
+        <translation type="obsolete">{1} nomzod orasidan {0} ta o'xshash obyekt topildi; Esc ularni olib tashlaydi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="694"/>
         <source>Click the next object</source>
         <translation>Keyingi obyektni bosing</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="701"/>
         <source>Search stopped</source>
         <translation>Qidiruv to'xtatildi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="701"/>
         <source>Click canceled</source>
         <translation>Bosish bekor qilindi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>Oxirgi obyekt olib tashlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Shift+bosish obyektni kengaytiradi, sichqonchaning o'ng tugmasi uni qisqartiradi, G uning batafsillik darajasini o'zgartiradi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
+        <source>{0} similar objects proposed among {1} candidates: click one to keep it, right click to reject it, Enter keeps them all, Escape rejects them all</source>
+        <translation>{1} ta nomzod ichidan {0} ta o'xshash obyekt taklif etildi: saqlash uchun birini bosing, rad etish uchun o'ng tugmani bosing, Enter hammasini saqlaydi, Esc hammasini rad etadi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="583"/>
+        <source>No similar object found among {0} candidates</source>
+        <translation>{0} ta nomzod orasida o'xshash obyekt topilmadi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>Object kept</source>
+        <translation>Obyekt saqlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>Proposal rejected</source>
+        <translation>Taklif rad etildi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>: {0} proposals left</source>
+        <translation>: {0} ta taklif qoldi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
+        <source>{0} similar objects kept</source>
+        <translation>{0} ta o'xshash obyekt saqlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="655"/>
+        <source>Proposals rejected</source>
+        <translation>Takliflar rad etildi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="723"/>
+        <source>SAM proposed a single outline for this object</source>
+        <translation>SAM bu obyekt uchun faqat bitta kontur taklif qildi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="731"/>
+        <source>No object at this granularity: press G again</source>
+        <translation>Bu batafsillik darajasida obyekt yo'q: G ni yana bosing</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="737"/>
+        <source>Granularity {0} of {1}: G for the next one</source>
+        <translation>Batafsillik darajasi {0}/{1}: keyingisi uchun G</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="464"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: segmentatsiya tayyorlanmoqda</translation>
     </message>
@@ -8292,7 +8362,7 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="533"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: o'xshash obyektlar chizilmoqda</translation>
     </message>

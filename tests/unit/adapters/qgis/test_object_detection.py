@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """FilterMate 5 object detection of the pipette: the patch under a click, read in a growing window."""
+import types
 import importlib.util
 import pathlib
 import sys
@@ -162,6 +163,10 @@ class _Multi:
 
     def asGeometryCollection(self):
         return list(self.parts)
+
+    def constGet(self):
+        """Few vertices: the vertex budget of the kept objects leaves the stand-in as it is."""
+        return types.SimpleNamespace(nCoordinates=lambda: 4 * len(self.parts))
 
 
 class TestObjectRegion:

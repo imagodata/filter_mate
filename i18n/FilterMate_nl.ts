@@ -1331,137 +1331,137 @@ Gaat u akkoord?</translation>
         <translation>De puntenwolkcriteria herstellen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ongeldige uitdrukking voor de rasterberekening</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1923"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL is niet gevonden: de hoogte boven een DTM vereist het uitvoerbare bestand pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3478"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Er wordt nog een FilterMate-taak uitgevoerd: wacht tot die klaar is</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2951"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate-taak mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2988"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Selecteer eerst pixels: een waardebereik, klassen of een rasteruitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3003"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>De puntenwolkuitdrukking is geweigerd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3040"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Selecteer eerst punten: klassen, attribuutbereiken of een uitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3054"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Puntenwolk gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3588"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter niet toegepast: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>canceled</source>
         <translation>geannuleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} doel(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
         <source>{0} failed: {1}</source>
         <translation>{0} mislukt: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3161"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filteren vanuit '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3260"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Sindsdien gewijzigd, ongemoeid gelaten: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3266"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} laag/lagen hersteld</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3300"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' niet geëxporteerd: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3314"/>
         <source>Exported: {0}</source>
         <translation>Geëxporteerd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3316"/>
         <source>Export failed: {0}</source>
         <translation>Exporteren mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3323"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} laag/lagen exporteren…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3329"/>
         <source>Export folder</source>
         <translation>Exportmap</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3411"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster-/puntenwolkdoelen overgeslagen: geen bronobject geselecteerd in EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster-/puntenwolkdoelen niet gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3442"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster-/puntenwolkdoel(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3565"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Kies het DTM-raster dat voor de hoogte boven maaiveld wordt gebruikt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3576"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Hoogte boven maaiveld niet berekend: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3597"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Hoogte boven '{0}' berekenen met PDAL…</translation>
     </message>
@@ -1471,12 +1471,12 @@ Gaat u akkoord?</translation>
         <translation>De cache van FilterMate neemt {0} GB in beslag, boven de limiet van {1} GB: verwijder het filter van de raster- / puntenwolklagen die u niet meer nodig hebt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} is te oud: de hoogte boven een DTM vereist PDAL 2.4 of nieuwer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL kon niet worden uitgevoerd, de hoogte boven een DTM is niet beschikbaar: {0}</translation>
     </message>
@@ -1496,27 +1496,27 @@ Gaat u akkoord?</translation>
         <translation>Voorbeeld: pixels buiten de selectie verbergen (een witte sluier voor een helling, expositie...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Het voorbeeld van een helling of expositie vereist de kaart in het CRS van het raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2480"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>alleen de op de kaart getekende punten kunnen worden gekozen: zet het voorbeeld uit om een klasse te kiezen die het verbergt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2551"/>
         <source>No classified point under the click</source>
         <translation>Geen geclassificeerd punt onder de klik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2486"/>
         <source>Class {0} is already checked</source>
         <translation>Klasse {0} is al aangevinkt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2575"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Klasse {0} staat niet in de klassenlijst van de laag</translation>
     </message>
@@ -1531,157 +1531,157 @@ Gaat u akkoord?</translation>
         <translation>Klassenpipet: klik op de kaart en de klasse van de daar getekende punten wordt aangevinkt. Ctrl+klik voegt er nog een toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1121"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Voorbeeld en statistieken gebruiken een begrensde lokale steekproef van het zichtbare extent; het filteren leest de bron.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1325"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Een begrensde kleurmomentopname van het zichtbare extent wordt voorbereid…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1337"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>De kleurmomentopname kon niet worden voorbereid. Probeer een kleiner zichtbaar extent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1341"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>De kleurselectie geldt voor het vastgelegde zichtbare extent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1405"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Rasterbemonstering mislukt. Probeer een kleiner zichtbaar extent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1526"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>Het voorbeeld van een kleur of een expressie vereist de kaart in het CRS van het raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2504"/>
         <source>No point drawn under the click</source>
         <translation>Geen punt getekend onder de klik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2506"/>
         <source>This point has no {0}</source>
         <translation>Dit punt heeft geen {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2508"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} kan niet in een voorwaarde worden gebruikt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2565"/>
         <source>Object not read: {0}</source>
         <translation>Object niet gelezen: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2567"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>Te veel punten rond de klik: het object kon niet worden gelezen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2569"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>Geen punt van klasse {0} onder de klik: klik op het object zelf</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>Similar objects not read: {0}</source>
         <translation>Vergelijkbare objecten niet gelezen: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2709"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>Geen vergelijkbaar object binnen de oppervlakteverhoudingen: vergroot ze</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2778"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>Er wordt een steekproef voor het nieuwe zichtbare extent voorbereid. Klik opnieuw wanneer deze klaar is.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2789"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>De lokale rastersteekproef wordt nog voorbereid. Probeer het opnieuw wanneer deze klaar is.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2995"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>Maak een kleurmomentopname voordat u deze weergegeven laag filtert.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3140"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} rasterdoel(en) opnieuw bemonsterd tot de ingestelde pixellimiet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3172"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>kleurselectie beperkt tot het vastgelegde extent; kleuren zijn afhankelijk van stijl en schaal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3174"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>rasterbron opnieuw bemonsterd tot {0} cellen binnen de pixellimiet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>rasterselectie gelezen om de {0} pixels: boven de pixellimiet van de instellingen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3179"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>dichte rasterselectie afgevlakt om de omtrek licht te houden</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3226"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} leeggemaakt, niets komt overeen met de selectie: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3210"/>
         <source>failed</source>
         <translation>mislukt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1520"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1536"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1400"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1749"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1153"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime geïnstalleerd</translation>
     </message>
@@ -4152,7 +4152,7 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="632"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: segmentatiemodel downloaden</translation>
     </message>
@@ -6545,27 +6545,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Klik op de kaart met de pixelkiezer. Ctrl+klik breidt het bereik uit tot de waarde.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2181"/>
         <source>VALUE RANGE</source>
         <translation>WAARDEBEREIK</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Lowest value kept</source>
         <translation>Laagste behouden waarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Max</source>
         <translation>Max</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Highest value kept</source>
         <translation>Hoogste behouden waarde</translation>
     </message>
@@ -6595,17 +6595,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Geen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1502"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTERUITDRUKKING</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1506"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Uitdrukking van de rasterberekening; een pixel wordt behouden waar deze niet 0 is</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1507"/>
         <source>Raster expression</source>
         <translation>Rasteruitdrukking</translation>
     </message>
@@ -6625,12 +6625,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Geselecteerde pixels: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1588"/>
         <source>Set a value range first</source>
         <translation>Stel eerst een waardebereik in</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2936"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -6650,22 +6650,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Statistieken van de huidige band in de laatst getekende rechthoek op de kaart</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1882"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Onder de cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
         <source>Zone: {0}</source>
         <translation>Zone: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
         <source>no pixel</source>
         <translation>geen pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2954"/>
         <source>LAST PICKS</source>
         <translation>LAATSTE METINGEN</translation>
     </message>
@@ -6680,37 +6680,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Grootheid waarop het bereik van toepassing is. Helling, expositie, reliëfschaduw en ruwheid lezen de band als een DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Pixel value</source>
         <translation>Pixelwaarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Slope (degrees)</source>
         <translation>Helling (graden)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Slope (%)</source>
         <translation>Helling (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Aspect (degrees)</source>
         <translation>Expositie (graden)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Hillshade (0-255)</source>
         <translation>Reliëfschaduw (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Ruwheid (TRI, gemiddeld verschil)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Gebruikelijke drempelwaarden van de grootheid</translation>
     </message>
@@ -6720,47 +6720,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Gebruikelijke drempelwaarden</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Flat</source>
         <translation>Vlak</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Gentle</source>
         <translation>Zacht</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Moderate</source>
         <translation>Matig</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>Steep</source>
         <translation>Steil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>East</source>
         <translation>Oost</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>South</source>
         <translation>Zuid</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>West</source>
         <translation>West</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>Shadow</source>
         <translation>Schaduw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>Lit</source>
         <translation>Verlicht</translation>
     </message>
@@ -6770,27 +6770,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Gebruikelijke drempelwaarden…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1148"/>
         <source>PIPETTE</source>
         <translation>PIPET</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Tolerance ±</source>
         <translation>Tolerantie ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Tolerantie rond de gekozen kleur of waarde, in % van het waardebereik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
         <source>Pipette tolerance</source>
         <translation>Pipettolerantie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1542"/>
         <source>Bands</source>
         <translation>Banden</translation>
     </message>
@@ -6821,8 +6821,8 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
-        <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation type="obsolete">De uitdrukking van een gangbare index schrijven (vegetatie, water...)</translation>
+        <source>Add every proposed object to the selection (Enter on the map)</source>
+        <translation>Alle voorgestelde objecten aan de selectie toevoegen (Enter op de kaart)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
@@ -6835,22 +6835,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Vereist een afbeelding met drie of meer banden (rood, groen, blauw...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Vegetatie (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Geen vegetatie (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Water (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Vegetation (excess green)</source>
         <translation>Vegetatie (groenoverschot)</translation>
     </message>
@@ -6860,12 +6860,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Spectrale voorinstellingen…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2491"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Deze pixel heeft geen waarde (NoData): kies een andere</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2599"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>De tolerantie dekt elke waarde: verlaag haar</translation>
     </message>
@@ -6890,12 +6890,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Expressie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
         <source>BANDS</source>
         <translation>BANDEN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="911"/>
         <source>Value of the active band under the cursor</source>
         <translation>Waarde van de actieve band onder de cursor</translation>
     </message>
@@ -6905,7 +6905,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Statistieken van de actieve band in de laatste rechthoek die op de kaart is getekend</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="952"/>
         <source>Every band</source>
         <translation>Elke band</translation>
     </message>
@@ -6915,7 +6915,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Het waardebereik geldt voor alle kleurbanden tegelijk (een pixel blijft behouden wanneer elke band binnen het bereik valt); het histogram toont de eerste</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6925,122 +6925,122 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">De pipet vergelijkt deze band</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1063"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Kleur van de band: de spectrale indices en de chips gebruiken die. Klik om te wijzigen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
         <source>Value at the last click of the pipette</source>
         <translation>Waarde bij de laatste klik van de pipet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
         <source>No colour</source>
         <translation>Geen kleur</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>Banden 1, 2, 3 zijn rood, groen, blauw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>Banden 1, 2, 3 zijn infrarood, rood, groen (IGN-infraroodkleurenorthofoto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>Banden 1, 2, 3, 4 zijn rood, groen, blauw, nabij-infrarood</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1016"/>
         <source>Every band: {0}</source>
         <translation>Elke band: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Rollen geraden, te bevestigen.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Red</source>
         <translation>Rood</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Green</source>
         <translation>Groen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Blue</source>
         <translation>Blauw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
         <source>Near infrared</source>
         <translation>Nabij-infrarood</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
         <source>roles guessed, to confirm</source>
         <translation>rollen geraden, te bevestigen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1154"/>
         <source>Select</source>
         <translation>Selecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Similar pixels</source>
         <translation>Vergelijkbare pixels</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Elke pixel van het raster dicht bij de opgenomen kleur of waarde (de pipet van de balk)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Clicked object</source>
         <translation>Aangeklikt object</translation>
     </message>
@@ -7050,7 +7050,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Alleen de vlek van dergelijke pixels waarin de klik valt: een zwembad, een dak, een veld (de objectdetector van de balk); Ctrl+klik voegt een ander object toe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Similar objects</source>
         <translation>Vergelijkbare objecten</translation>
     </message>
@@ -7060,7 +7060,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Elk object van het raster dat lijkt op het aangeklikte: de vlekken van dergelijke pixels waarvan de oppervlakte binnen de onderstaande verhoudingen valt (het hulpmiddel voor vergelijkbare objecten van de balk); Ctrl+klik voegt een ander referentieobject toe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
         <source>Area ×</source>
         <translation>Oppervlakte ×</translation>
     </message>
@@ -7075,72 +7075,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Grootste vergelijkbare object, als veelvoud van het grootste aangeklikte</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1272"/>
         <source>to ×</source>
         <translation>tot ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>same shape</source>
         <translation>dezelfde vorm</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1278"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Houd alleen de objecten met dezelfde vorm als de aangeklikte: hun compactheid (4π × oppervlakte / omtrek², 1 voor een schijf) binnen dezelfde verhoudingen; uitgeschakeld is een weg met de oppervlakte van een zwembad een zwembad</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1352"/>
         <source>Remove this pick</source>
         <translation>Deze opname verwijderen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1431"/>
         <source>Quantity</source>
         <translation>Grootheid</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Grootheid waarop het bereik van toepassing is. Helling, expositie, schaduwreliëf en ruwheid lezen de actieve band als DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
         <source>Thresholds ▾</source>
         <translation>Drempels ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Insert ▾</source>
         <translation>Invoegen ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Een bandverwijzing, een gangbare spectrale index of het huidige bereik invoegen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
         <source>Spectral indexes</source>
         <translation>Spectrale indices</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1555"/>
         <source>Range</source>
         <translation>Bereik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1556"/>
         <source>The current value range</source>
         <translation>Het huidige waardebereik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Weergegeven kleuren zijn afhankelijk van stijl en schaal.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Alleen kleurselectie is beschikbaar: numerieke banden, indices, bereiken, klassen en afgeleide producten zijn niet beschikbaar.</translation>
     </message>
@@ -7150,97 +7150,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">WAARDEBEREIK — elke band</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2179"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>WAARDEBEREIK — band {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2373"/>
         <source>picks on: {0}</source>
         <translation>neemt op van: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Een helling, expositie... leest één band als DTM: kies eerst een band in BANDEN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2634"/>
         <source>The object could not be read</source>
         <translation>Het object kon niet worden gelezen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2636"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Geen object onder de klik: verhoog de tolerantie of klik op een andere pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2638"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Een object is groter dan het gelezen venster en is afgekapt: verlaag de tolerantie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="879"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2473"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="965"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2177"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="918"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Statistieken van de actieve band in de omvang van de laatste zone die op de kaart is getekend; alleen de pixels binnen de zone worden geselecteerd</translation>
     </message>
@@ -7270,7 +7270,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Het getekende object aan de selectie toevoegen (Enter op de kaart)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
         <source>Clear</source>
         <translation>Wissen</translation>
     </message>
@@ -7280,137 +7280,137 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">De bevestigde objecten vergeten</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1291"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1294"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1296"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1304"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1456"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1457"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1458"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1516"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1525"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1734"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2343"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2760"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>onnxruntime wordt op de achtergrond geïnstalleerd…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2764"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>onnxruntime kon niet automatisch worden geïnstalleerd (zie het FilterMate-logboek). Voer in een terminal (de OSGeo4W Shell onder Windows) {0} uit en start QGIS daarna opnieuw.</translation>
     </message>
@@ -7420,7 +7420,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Het model installeren ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2790"/>
         <source>Repair the model…</source>
         <translation>Het model herstellen…</translation>
     </message>
@@ -7439,12 +7439,12 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
 Elk bestand wordt gecontroleerd aan de hand van zijn SHA-256. Het model draait daarna lokaal, op de CPU; er verlaat niets uw computer.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
         <source>Clear ({0})</source>
         <translation>Wissen ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2958"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7459,7 +7459,7 @@ Elk bestand wordt gecontroleerd aan de hand van zijn SHA-256. Het model draait d
         <translation type="obsolete">onnxruntime installeren…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
         <source>Segmentation</source>
         <translation>Segmentatie</translation>
     </message>
@@ -7473,63 +7473,78 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 Het nu installeren vanaf PyPI met pip, in uw QGIS-profiel? De Python van QGIS wordt niet gewijzigd.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
         <translation>Het object onder de klik: een dak, een zwembad, een veld (de objectdetector van de balk). Met SAM: een klik voegt een object toe, Shift+klik vergroot het laatste, een rechtsklik snijdt het bij, een kader omlijnt er een, Esc verwijdert het. Met de kleurmethode: de vlek van vergelijkbare pixels, Ctrl+klik voegt er nog een toe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
         <translation>Elk object dat lijkt op het aangeklikte en waarvan de oppervlakte binnen de onderstaande verhoudingen valt (het gereedschap voor vergelijkbare objecten van de balk). Met SAM: de vlekken met vergelijkbare kleur in het zichtbare gebied worden door het model opnieuw getekend en daarna vergeleken met het aangeklikte object. Met de kleurmethode: de vlekken van vergelijkbare pixels</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1187"/>
         <source>Engine</source>
         <translation>Methode</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1191"/>
         <source>Colour</source>
         <translation>Kleur</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1192"/>
         <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
         <translation>SAM tekent het object op basis van de afbeelding, lokaal op de CPU; de kleurmethode laat de vlek van pixels met de aangeklikte kleur groeien</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1209"/>
         <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
         <translation>Installeer SAM 2.1 tiny één keer in uw QGIS-profiel; daarna draait het lokaal op de CPU</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1220"/>
         <source>Forget the objects drawn by SAM</source>
         <translation>De door SAM getekende objecten vergeten</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2762"/>
         <source>Downloading the SAM model in the background…</source>
         <translation>SAM-model wordt op de achtergrond gedownload…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
         <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
         <translation>Objecten worden gevonden op kleur. SAM tekent ze op basis van de afbeelding, veel beter bij gebouwen (ongeveer {0} MB te installeren).</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2772"/>
         <source>Install SAM ({0} MB)…</source>
         <translation>SAM installeren ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
         <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
 
 onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
         <translation>Aangeklikte en vergelijkbare objecten kunnen worden getekend door het segmentatiemodel SAM 2.1, lokaal op de CPU. Nu installeren (ongeveer {0} MB)?
 
 onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand gecontroleerd met zijn SHA-256. Beide gaan naar uw QGIS-profiel; de Python van QGIS wordt niet gewijzigd en er verlaat niets uw computer. Zonder SAM worden objecten op kleur gevonden.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <source>Reject</source>
+        <translation>Afwijzen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <source>Forget the proposed objects (Escape on the map)</source>
+        <translation>De voorgestelde objecten vergeten (Esc op de kaart)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2842"/>
+        <source>Keep the {0} proposals</source>
+        <translation>De {0} voorstellen behouden</translation>
     </message>
 </context>
 <context>
@@ -7801,12 +7816,12 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
         <source>This point cannot be used on this layer</source>
         <translation>Dit punt kan niet op deze laag worden gebruikt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="214"/>
         <source>Click inside the raster</source>
         <translation>Klik binnen het raster</translation>
     </message>
@@ -7816,7 +7831,7 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <translation type="obsolete">Dit punt ligt buiten het venster dat wordt gesegmenteerd: bevestig of wis eerst het object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="246"/>
         <source>This box is too small</source>
         <translation>Dit kader is te klein</translation>
     </message>
@@ -7826,77 +7841,77 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <translation type="obsolete">Begin met een linkerklik op het object, of teken een kader</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="239"/>
         <source>This raster cannot be segmented</source>
         <translation>Dit raster kan niet worden gesegmenteerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="333"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>De segmentatie van dit gebied wordt voorbereid…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="447"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>De segmentatie van dit gebied is mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="345"/>
         <source>canceled</source>
         <translation>geannuleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="380"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime wordt geïnstalleerd, klik zo meteen opnieuw</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="382"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>onnxruntime ontbreekt: voer {0} uit en start QGIS daarna opnieuw</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="386"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>Het segmentatiemodel wordt gedownload, klik opnieuw zodra het is geïnstalleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="388"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>Installeer eerst het segmentatiemodel (knop hieronder)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="389"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>Het segmentatiemodel kon niet worden geladen (zie het FilterMate-logboek)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="410"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>Segmentatiemodel downloaden… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="419"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>Model geïnstalleerd: klik met links op een object, of teken een kader</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="421"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>Het model kon niet worden gedownload: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="423"/>
         <source>Download canceled</source>
         <translation>Download geannuleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>Click on an object in the area prepared</source>
         <translation>Klik op een object in het voorbereide gebied</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="456"/>
         <source>No object found: add a point or draw a box</source>
         <translation>Geen object gevonden: voeg een punt toe of teken een kader</translation>
     </message>
@@ -7906,95 +7921,150 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <translation type="obsolete">Linkerklik voegt toe aan het object, rechterklik verwijdert, Enter bevestigt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="720"/>
         <source>Click an object first</source>
-        <translation type="obsolete">Klik eerst op een object</translation>
+        <translation>Klik eerst op een object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="384"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>Installeer eerst onnxruntime met de knop hieronder</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="103"/>
         <source>Click an object, or draw a box around it</source>
         <translation>Klik op een object of teken er een kader omheen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="181"/>
         <source>A right click trims the last object: click an object first</source>
         <translation>Een rechtsklik snijdt het laatste object bij: klik eerst op een object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="221"/>
         <source>This point is outside the area of the last object: click it as a new object</source>
         <translation>Dit punt ligt buiten het gebied van het laatste object: klik erop als nieuw object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="366"/>
         <source>{0} click(s) fell outside the area prepared: click them again</source>
         <translation>{0} klik(ken) vielen buiten het voorbereide gebied: klik opnieuw</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
         <source>Shift+click extends the object, right click trims it, Escape removes it</source>
         <translation>Shift+klik vergroot het object, rechtsklik snijdt het bij, Esc verwijdert het</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
         <source>Similar objects need the values of the raster: this layer is only drawn</source>
         <translation>Vergelijkbare objecten hebben de waarden van het raster nodig: deze laag wordt alleen getekend</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="531"/>
         <source>No patch of this colour nearby to compare with the object</source>
         <translation>Geen vlek van deze kleur in de buurt om met het object te vergelijken</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="547"/>
         <source>Drawing the similar objects: {0} candidates…</source>
         <translation>Vergelijkbare objecten worden getekend: {0} kandidaten…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="558"/>
         <source>Drawing the similar objects… {0} %</source>
         <translation>Vergelijkbare objecten worden getekend… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="573"/>
         <source>The similar objects could not be drawn: {0}</source>
         <translation>De vergelijkbare objecten konden niet worden getekend: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
         <source>{0} similar objects found among {1} candidates; Escape removes them</source>
-        <translation>{0} vergelijkbare objecten gevonden onder {1} kandidaten; Esc verwijdert ze</translation>
+        <translation type="obsolete">{0} vergelijkbare objecten gevonden onder {1} kandidaten; Esc verwijdert ze</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="694"/>
         <source>Click the next object</source>
         <translation>Klik op het volgende object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="701"/>
         <source>Search stopped</source>
         <translation>Zoekopdracht gestopt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="701"/>
         <source>Click canceled</source>
         <translation>Klik geannuleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>Laatste object verwijderd</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Shift+klik vergroot het object, rechtsklik snoeit het bij, G wijzigt de granulariteit</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
+        <source>{0} similar objects proposed among {1} candidates: click one to keep it, right click to reject it, Enter keeps them all, Escape rejects them all</source>
+        <translation>{0} vergelijkbare objecten voorgesteld uit {1} kandidaten: klik op een object om het te behouden, rechtsklik om het af te wijzen, Enter behoudt ze allemaal, Esc wijst ze allemaal af</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="583"/>
+        <source>No similar object found among {0} candidates</source>
+        <translation>Geen vergelijkbaar object gevonden onder {0} kandidaten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>Object kept</source>
+        <translation>Object behouden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>Proposal rejected</source>
+        <translation>Voorstel afgewezen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>: {0} proposals left</source>
+        <translation>: nog {0} voorstellen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
+        <source>{0} similar objects kept</source>
+        <translation>{0} vergelijkbare objecten behouden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="655"/>
+        <source>Proposals rejected</source>
+        <translation>Voorstellen afgewezen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="723"/>
+        <source>SAM proposed a single outline for this object</source>
+        <translation>SAM stelde slechts één contour voor dit object voor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="731"/>
+        <source>No object at this granularity: press G again</source>
+        <translation>Geen object met deze granulariteit: druk nogmaals op G</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="737"/>
+        <source>Granularity {0} of {1}: G for the next one</source>
+        <translation>Granulariteit {0} van {1}: G voor de volgende</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="464"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: segmentatie voorbereiden</translation>
     </message>
@@ -8292,7 +8362,7 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="533"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: vergelijkbare objecten worden getekend</translation>
     </message>

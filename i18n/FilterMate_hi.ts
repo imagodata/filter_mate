@@ -1331,137 +1331,137 @@ Do you agree?</source>
         <translation>पॉइंट क्लाउड मानदंड रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Invalid raster calculator expression</source>
         <translation>अमान्य रास्टर कैलकुलेटर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1923"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL नहीं मिला: DTM के ऊपर ऊँचाई के लिए pdal निष्पादन योग्य फ़ाइल आवश्यक है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3478"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate कार्य अभी चल रहा है: उसके समाप्त होने की प्रतीक्षा करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2951"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate कार्य विफल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2988"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>पहले पिक्सेल चुनें: मान सीमा, वर्ग या रास्टर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3003"/>
         <source>Raster filtered: {0}</source>
         <translation>रास्टर फ़िल्टर किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>पॉइंट क्लाउड व्यंजक अस्वीकार किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3040"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>पहले बिंदु चुनें: वर्ग, गुण सीमाएँ या व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3054"/>
         <source>Point cloud filtered: {0}</source>
         <translation>पॉइंट क्लाउड फ़िल्टर किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3588"/>
         <source>Filter not applied: {0}</source>
         <translation>फ़िल्टर लागू नहीं हुआ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>canceled</source>
         <translation>रद्द किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} लक्ष्य फ़िल्टर किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
         <source>{0} failed: {1}</source>
         <translation>{0} विफल: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3161"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: '{0}' से फ़िल्टर किया जा रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3260"/>
         <source>Changed since, left as is: {0}</source>
         <translation>तब से बदला गया, जैसा है वैसा छोड़ा गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3266"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} परत(ें) पुनर्स्थापित</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3300"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' निर्यात नहीं हुआ: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3314"/>
         <source>Exported: {0}</source>
         <translation>निर्यात किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3316"/>
         <source>Export failed: {0}</source>
         <translation>निर्यात विफल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3323"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} परत(ें) निर्यात की जा रही हैं…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3329"/>
         <source>Export folder</source>
         <translation>निर्यात फ़ोल्डर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3411"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>रास्टर / पॉइंट क्लाउड लक्ष्य छोड़े गए: EXPLORING में कोई स्रोत फ़ीचर चयनित नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3440"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>रास्टर / पॉइंट क्लाउड लक्ष्य फ़िल्टर नहीं हुए: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3442"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} रास्टर / पॉइंट क्लाउड लक्ष्य फ़िल्टर किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3565"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>भूमि से ऊँचाई के लिए उपयोग किया जाने वाला DTM रास्टर चुनें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3576"/>
         <source>Height above ground not computed: {0}</source>
         <translation>भूमि से ऊँचाई की गणना नहीं हुई: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3597"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>PDAL के साथ '{0}' के ऊपर ऊँचाई की गणना हो रही है…</translation>
     </message>
@@ -1471,12 +1471,12 @@ Do you agree?</source>
         <translation>FilterMate कैश {0} GB घेरता है, जो इसकी {1} GB की सीमा से अधिक है: जिन रास्टर / पॉइंट क्लाउड परतों की अब आवश्यकता नहीं है, उनका फ़िल्टर हटाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} बहुत पुराना है: DTM के ऊपर ऊँचाई के लिए PDAL 2.4 या नया संस्करण आवश्यक है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL चलाया नहीं जा सका, DTM के ऊपर ऊँचाई उपलब्ध नहीं है: {0}</translation>
     </message>
@@ -1496,27 +1496,27 @@ Do you agree?</source>
         <translation>पूर्वावलोकन: चयन के बाहर के पिक्सेल छिपाएँ (ढलान, ढलान दिशा... के लिए सफ़ेद परदा)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>ढलान या ढलान दिशा के पूर्वावलोकन के लिए मानचित्र का रास्टर के CRS ({0}) में होना आवश्यक है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2480"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>केवल मानचित्र पर बने बिंदु ही चुने जा सकते हैं: जिस वर्ग को यह छिपाता है उसे चुनने के लिए पूर्वावलोकन बंद करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2551"/>
         <source>No classified point under the click</source>
         <translation>क्लिक के नीचे कोई वर्गीकृत बिंदु नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2486"/>
         <source>Class {0} is already checked</source>
         <translation>वर्ग {0} पहले से चिह्नित है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2575"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>वर्ग {0} परत की वर्ग सूची में नहीं है</translation>
     </message>
@@ -1531,157 +1531,157 @@ Do you agree?</source>
         <translation>वर्ग पिपेट: मानचित्र पर क्लिक करें, वहाँ बने बिंदुओं का वर्ग चिह्नित हो जाता है। Ctrl+क्लिक एक और जोड़ता है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1121"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>पूर्वावलोकन और आँकड़े दृश्य विस्तार के सीमित स्थानीय नमूने का उपयोग करते हैं; फ़िल्टरिंग स्रोत को पढ़ती है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1325"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>दृश्य विस्तार का सीमित रंग स्नैपशॉट तैयार किया जा रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1337"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>रंग स्नैपशॉट तैयार नहीं किया जा सका। छोटा दृश्य विस्तार आज़माएँ।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1341"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>रंग चयन कैप्चर किए गए दृश्य विस्तार पर लागू होता है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1405"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>रास्टर सैंपलिंग विफल रही। छोटा दृश्य विस्तार आज़माएँ।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1526"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1803"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>रंग या व्यंजक के पूर्वावलोकन के लिए मानचित्र का रास्टर के CRS ({0}) में होना आवश्यक है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2504"/>
         <source>No point drawn under the click</source>
         <translation>क्लिक के नीचे कोई बिंदु नहीं बना है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2506"/>
         <source>This point has no {0}</source>
         <translation>इस बिंदु में {0} नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2508"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} का उपयोग शर्त में नहीं किया जा सकता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2565"/>
         <source>Object not read: {0}</source>
         <translation>ऑब्जेक्ट पढ़ा नहीं गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2567"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>क्लिक के आसपास बहुत अधिक बिंदु हैं: ऑब्जेक्ट पढ़ा नहीं जा सका</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2569"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>क्लिक के नीचे वर्ग {0} का कोई बिंदु नहीं: ऑब्जेक्ट पर ही क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>Similar objects not read: {0}</source>
         <translation>समान ऑब्जेक्ट पढ़े नहीं गए: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2709"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>क्षेत्रफल अनुपातों के भीतर कोई समान ऑब्जेक्ट नहीं: उन्हें बढ़ाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2778"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>नए दृश्य विस्तार के लिए नमूना तैयार किया जा रहा है। तैयार होने पर फिर क्लिक करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2789"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>स्थानीय रास्टर नमूना अभी तैयार किया जा रहा है। तैयार होने पर पुनः प्रयास करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2995"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>इस रेंडर की गई परत को फ़िल्टर करने से पहले रंग स्नैपशॉट तैयार करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3140"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} रास्टर लक्ष्य कॉन्फ़िगर की गई पिक्सेल सीमा तक रीसैंपल किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3172"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>रंग चयन कैप्चर किए गए विस्तार तक सीमित; रंग शैली और स्केल पर निर्भर करते हैं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3174"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>रास्टर स्रोत पिक्सेल सीमा के भीतर {0} सेल में रीसैंपल किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>रास्टर चयन हर {0} पिक्सेल पर पढ़ा गया: सेटिंग्स की पिक्सेल सीमा से अधिक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3179"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>घने रास्टर चयन को उसकी रूपरेखा हल्की रखने के लिए स्मूथ किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3226"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} खाली छोड़ा गया, चयन से कुछ मेल नहीं खाता: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3210"/>
         <source>failed</source>
         <translation>विफल</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1520"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1536"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1400"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1749"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1153"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime इंस्टॉल हो गया</translation>
     </message>
@@ -4152,7 +4152,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="632"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: सेगमेंटेशन मॉडल डाउनलोड हो रहा है</translation>
     </message>
@@ -6545,27 +6545,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">पिक्सेल पिकर से मानचित्र पर क्लिक करें। Ctrl+क्लिक सीमा को उस मान तक बढ़ाता है।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2181"/>
         <source>VALUE RANGE</source>
         <translation>मान सीमा</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Min</source>
         <translation>न्यूनतम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Lowest value kept</source>
         <translation>रखा जाने वाला सबसे कम मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Max</source>
         <translation>अधिकतम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1482"/>
         <source>Highest value kept</source>
         <translation>रखा जाने वाला सबसे अधिक मान</translation>
     </message>
@@ -6595,17 +6595,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">कोई नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1502"/>
         <source>RASTER EXPRESSION</source>
         <translation>रास्टर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1506"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>रास्टर कैलकुलेटर व्यंजक; जहाँ मान 0 नहीं है वहाँ पिक्सेल रखा जाता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1507"/>
         <source>Raster expression</source>
         <translation>रास्टर व्यंजक</translation>
     </message>
@@ -6625,12 +6625,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">चयनित पिक्सेल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1588"/>
         <source>Set a value range first</source>
         <translation>पहले मान सीमा निर्धारित करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2936"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -6650,22 +6650,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">मानचित्र पर अंतिम खींचे गए आयत में वर्तमान बैंड के आँकड़े</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1882"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>कर्सर के नीचे: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
         <source>Zone: {0}</source>
         <translation>क्षेत्र: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1892"/>
         <source>no pixel</source>
         <translation>कोई पिक्सेल नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2954"/>
         <source>LAST PICKS</source>
         <translation>अंतिम माप</translation>
     </message>
@@ -6680,37 +6680,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">वह राशि जिस पर सीमा लागू होती है। ढलान, ढलान दिशा, पहाड़ी छायांकन और खुरदरापन बैंड को DTM के रूप में पढ़ते हैं।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Pixel value</source>
         <translation>पिक्सेल मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Slope (degrees)</source>
         <translation>ढलान (डिग्री)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Slope (%)</source>
         <translation>ढलान (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Aspect (degrees)</source>
         <translation>ढलान दिशा (डिग्री)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Hillshade (0-255)</source>
         <translation>पहाड़ी छायांकन (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1439"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>खुरदरापन (TRI, औसत अंतर)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
         <source>Usual thresholds of the quantity</source>
         <translation>राशि की सामान्य सीमाएँ</translation>
     </message>
@@ -6720,47 +6720,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">सामान्य सीमाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Flat</source>
         <translation>समतल</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Gentle</source>
         <translation>मंद</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>Moderate</source>
         <translation>मध्यम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>Steep</source>
         <translation>तीव्र</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>East</source>
         <translation>पूर्व</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2319"/>
         <source>South</source>
         <translation>दक्षिण</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>West</source>
         <translation>पश्चिम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>Shadow</source>
         <translation>छाया</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2320"/>
         <source>Lit</source>
         <translation>प्रकाशित</translation>
     </message>
@@ -6770,27 +6770,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">सामान्य सीमाएँ…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1148"/>
         <source>PIPETTE</source>
         <translation>पिपेट</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
         <source>Tolerance ±</source>
         <translation>सहनशीलता ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>चुने गए रंग या मान के आसपास सहनशीलता, मान सीमा के % में</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
         <source>Pipette tolerance</source>
         <translation>पिपेट सहनशीलता</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1542"/>
         <source>Bands</source>
         <translation>बैंड</translation>
     </message>
@@ -6821,8 +6821,8 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
-        <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation type="obsolete">किसी प्रचलित सूचकांक का व्यंजक लिखें (वनस्पति, जल...)</translation>
+        <source>Add every proposed object to the selection (Enter on the map)</source>
+        <translation>सभी सुझाए गए ऑब्जेक्ट को चयन में जोड़ें (मानचित्र पर Enter)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
@@ -6835,22 +6835,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">तीन या अधिक बैंड वाली छवि चाहिए (लाल, हरा, नीला...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>वनस्पति (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1561"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>वनस्पति नहीं (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>जल (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1562"/>
         <source>Vegetation (excess green)</source>
         <translation>वनस्पति (अतिरिक्त हरा)</translation>
     </message>
@@ -6860,12 +6860,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">स्पेक्ट्रल प्रीसेट…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2491"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>इस पिक्सेल का कोई मान नहीं है (NoData): कोई दूसरा चुनें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2599"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>सहनशीलता सभी मानों को कवर करती है: इसे घटाएँ</translation>
     </message>
@@ -6890,12 +6890,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
         <source>BANDS</source>
         <translation>BANDS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="911"/>
         <source>Value of the active band under the cursor</source>
         <translation>कर्सर के नीचे सक्रिय बैंड का मान</translation>
     </message>
@@ -6905,7 +6905,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">नक्शे पर बनाए गए अंतिम आयत में सक्रिय बैंड के आँकड़े</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="952"/>
         <source>Every band</source>
         <translation>सभी बैंड</translation>
     </message>
@@ -6915,7 +6915,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">मान रेंज सभी रंग बैंड पर एक साथ लागू होती है (हर बैंड रेंज में होने पर पिक्सेल रखा जाता है); हिस्टोग्राम पहला बैंड दिखाता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="886"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6925,122 +6925,122 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">पिपेट इस बैंड की तुलना करता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1063"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>बैंड द्वारा धारण किया गया रंग: स्पेक्ट्रल इंडेक्स और चिप्स इसका उपयोग करते हैं। बदलने के लिए क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
         <source>Value at the last click of the pipette</source>
         <translation>पिपेट के अंतिम क्लिक पर मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
         <source>No colour</source>
         <translation>कोई रंग नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>बैंड 1, 2, 3 लाल, हरा, नीला हैं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>बैंड 1, 2, 3 इन्फ्रारेड, लाल, हरा हैं (IGN इन्फ्रारेड रंगीन ऑर्थोफ़ोटो)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1013"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>बैंड 1, 2, 3, 4 लाल, हरा, नीला, निकट इन्फ्रारेड हैं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1016"/>
         <source>Every band: {0}</source>
         <translation>सभी बैंड: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
         <source> Roles guessed, to confirm.</source>
         <translation> भूमिकाओं का अनुमान लगाया गया, पुष्टि करें।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1127"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Red</source>
         <translation>लाल</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Green</source>
         <translation>हरा</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1130"/>
         <source>Blue</source>
         <translation>नीला</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1131"/>
         <source>Near infrared</source>
         <translation>निकट इन्फ्रारेड</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
         <source>roles guessed, to confirm</source>
         <translation>भूमिकाओं का अनुमान लगाया गया, पुष्टि करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1154"/>
         <source>Select</source>
         <translation>चुनें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Similar pixels</source>
         <translation>समान पिक्सेल</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>रास्टर के वे सभी पिक्सेल जो चुने गए रंग या मान के निकट हैं (रेल का पिपेट)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Clicked object</source>
         <translation>क्लिक किया गया ऑब्जेक्ट</translation>
     </message>
@@ -7050,7 +7050,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ऐसे पिक्सेल का केवल वह पैच जिसमें क्लिक पड़ता है: एक पूल, एक छत, एक खेत (रेल का ऑब्जेक्ट डिटेक्टर); Ctrl+क्लिक एक और ऑब्जेक्ट जोड़ता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Similar objects</source>
         <translation>समान ऑब्जेक्ट</translation>
     </message>
@@ -7060,7 +7060,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">रास्टर के क्लिक किए गए ऑब्जेक्ट जैसे सभी ऑब्जेक्ट: ऐसे पिक्सेल के वे पैच जिनका क्षेत्रफल नीचे दिए अनुपातों के भीतर है (रेल का समान ऑब्जेक्ट टूल); Ctrl+क्लिक एक और संदर्भ ऑब्जेक्ट जोड़ता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
         <source>Area ×</source>
         <translation>क्षेत्रफल ×</translation>
     </message>
@@ -7075,72 +7075,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">सबसे बड़ा समान ऑब्जेक्ट, क्लिक किए गए सबसे बड़े ऑब्जेक्ट के गुणज के रूप में</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1272"/>
         <source>to ×</source>
         <translation>से ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>same shape</source>
         <translation>समान आकार</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1278"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>केवल क्लिक किए गए ऑब्जेक्ट जैसे आकार वाले ऑब्जेक्ट रखें: उनकी सघनता (4π × क्षेत्रफल / परिमाप², डिस्क के लिए 1) समान अनुपातों के भीतर; बंद होने पर, किसी पूल के क्षेत्रफल वाली सड़क पूल मानी जाती है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1352"/>
         <source>Remove this pick</source>
         <translation>यह चयन हटाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1431"/>
         <source>Quantity</source>
         <translation>राशि</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>वह राशि जिस पर रेंज लागू होती है। ढलान, ढलान दिशा, हिलशेड और खुरदरापन सक्रिय बैंड को DTM की तरह पढ़ते हैं।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1449"/>
         <source>Thresholds ▾</source>
         <translation>सीमाएँ ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Insert ▾</source>
         <translation>डालें ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>बैंड संदर्भ, सामान्य स्पेक्ट्रल इंडेक्स या वर्तमान रेंज डालें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
         <source>Spectral indexes</source>
         <translation>स्पेक्ट्रल इंडेक्स</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1555"/>
         <source>Range</source>
         <translation>रेंज</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1556"/>
         <source>The current value range</source>
         <translation>वर्तमान मान रेंज</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>रेंडर किए गए रंग शैली और स्केल पर निर्भर करते हैं।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1667"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>केवल रंग चयन उपलब्ध है: संख्यात्मक बैंड, सूचकांक, रेंज, वर्ग और व्युत्पन्न उपलब्ध नहीं हैं।</translation>
     </message>
@@ -7150,97 +7150,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">मान रेंज — सभी बैंड</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2179"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>मान रेंज — बैंड {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2373"/>
         <source>picks on: {0}</source>
         <translation>यहाँ से लेता है: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2377"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>ढलान, ढलान दिशा... एक बैंड को DTM की तरह पढ़ते हैं: पहले BANDS में एक बैंड चुनें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2634"/>
         <source>The object could not be read</source>
         <translation>ऑब्जेक्ट पढ़ा नहीं जा सका</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2636"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>क्लिक के नीचे कोई ऑब्जेक्ट नहीं: सहनशीलता बढ़ाएँ या कोई और पिक्सेल क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2638"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>कोई ऑब्जेक्ट पढ़ी गई विंडो से बड़ा है और कट गया: सहनशीलता घटाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="879"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="966"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="885"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2473"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="965"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2177"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="918"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>मानचित्र पर बनाए गए अंतिम क्षेत्र के विस्तार में सक्रिय बैंड के आँकड़े; केवल क्षेत्र के भीतर के पिक्सेल चुने जाते हैं</translation>
     </message>
@@ -7270,7 +7270,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">बनाए गए ऑब्जेक्ट को चयन में जोड़ें (मानचित्र पर Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
         <source>Clear</source>
         <translation>साफ़ करें</translation>
     </message>
@@ -7280,137 +7280,137 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">पुष्टि किए गए ऑब्जेक्ट भूल जाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1259"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1291"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1294"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1296"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1301"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1304"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1446"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1456"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1457"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1458"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1516"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1525"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1734"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2196"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2332"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2339"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2343"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2760"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>onnxruntime पृष्ठभूमि में इंस्टॉल हो रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2764"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>onnxruntime अपने-आप इंस्टॉल नहीं हो सका (FilterMate का लॉग देखें)। टर्मिनल में (Windows पर OSGeo4W Shell) {0} चलाएँ और फिर QGIS को पुनः आरंभ करें।</translation>
     </message>
@@ -7420,7 +7420,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">मॉडल इंस्टॉल करें ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2790"/>
         <source>Repair the model…</source>
         <translation>मॉडल की मरम्मत करें…</translation>
     </message>
@@ -7439,12 +7439,12 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
 हर फ़ाइल को उसके SHA-256 से जाँचा जाता है। इसके बाद मॉडल स्थानीय रूप से, CPU पर चलता है; आपके कंप्यूटर से कुछ भी बाहर नहीं जाता।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2918"/>
         <source>Clear ({0})</source>
         <translation>साफ़ करें ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2958"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7459,7 +7459,7 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
         <translation type="obsolete">onnxruntime इंस्टॉल करें…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
         <source>Segmentation</source>
         <translation>सेगमेंटेशन</translation>
     </message>
@@ -7473,63 +7473,78 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 क्या इसे अभी PyPI से pip द्वारा आपकी QGIS प्रोफ़ाइल में इंस्टॉल करें? QGIS का Python नहीं बदला जाता।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
         <translation>क्लिक के नीचे की वस्तु: एक छत, एक स्विमिंग पूल, एक खेत (रेल का वस्तु संसूचक)। SAM के साथ: क्लिक एक वस्तु जोड़ता है, Shift+क्लिक अंतिम को बड़ा करता है, राइट-क्लिक उसे छाँटता है, एक बॉक्स एक को घेरता है, Esc उसे हटाता है। रंग इंजन के साथ: समान पिक्सेल का धब्बा, Ctrl+क्लिक एक और जोड़ता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1158"/>
         <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
         <translation>क्लिक की गई वस्तु जैसी हर वस्तु, जिसका क्षेत्रफल नीचे दिए अनुपातों के भीतर हो (रेल का समान वस्तु उपकरण)। SAM के साथ: दृश्य क्षेत्र में समान रंग के धब्बों को मॉडल दोबारा बनाता है, फिर उनकी तुलना क्लिक की गई वस्तु से की जाती है। रंग इंजन के साथ: समान पिक्सेल के धब्बे</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1187"/>
         <source>Engine</source>
         <translation>इंजन</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1191"/>
         <source>Colour</source>
         <translation>रंग</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1192"/>
         <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
         <translation>SAM चित्र से वस्तु बनाता है, CPU पर स्थानीय रूप से; रंग इंजन क्लिक किए गए रंग के पिक्सेल के धब्बे को बढ़ाता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1209"/>
         <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
         <translation>SAM 2.1 tiny को अपनी QGIS प्रोफ़ाइल में एक बार इंस्टॉल करें; फिर वह CPU पर स्थानीय रूप से चलता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1220"/>
         <source>Forget the objects drawn by SAM</source>
         <translation>SAM द्वारा बनाई गई वस्तुओं को भूलें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2762"/>
         <source>Downloading the SAM model in the background…</source>
         <translation>SAM मॉडल पृष्ठभूमि में डाउनलोड हो रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2768"/>
         <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
         <translation>वस्तुएँ उनके रंग से खोजी जाती हैं। SAM उन्हें चित्र से बनाता है, इमारतों पर कहीं बेहतर (इंस्टॉल करने के लिए लगभग {0} MB)।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2772"/>
         <source>Install SAM ({0} MB)…</source>
         <translation>SAM इंस्टॉल करें ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2800"/>
         <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
 
 onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
         <translation>क्लिक की गई और समान वस्तुएँ SAM 2.1 सेगमेंटेशन मॉडल द्वारा CPU पर स्थानीय रूप से बनाई जा सकती हैं। क्या इसे अभी इंस्टॉल करें (लगभग {0} MB)?
 
 onnxruntime, pip के साथ PyPI से आता है, मॉडल huggingface.co/{1} से, प्रत्येक फ़ाइल की SHA-256 से जाँच की जाती है। दोनों आपकी QGIS प्रोफ़ाइल में जाते हैं; QGIS का Python संशोधित नहीं होता और कुछ भी आपके कंप्यूटर से बाहर नहीं जाता। SAM के बिना, वस्तुएँ उनके रंग से खोजी जाती हैं।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <source>Reject</source>
+        <translation>अस्वीकार करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <source>Forget the proposed objects (Escape on the map)</source>
+        <translation>सुझाए गए ऑब्जेक्ट छोड़ दें (मानचित्र पर Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2842"/>
+        <source>Keep the {0} proposals</source>
+        <translation>सभी {0} सुझाव रखें</translation>
     </message>
 </context>
 <context>
@@ -7801,12 +7816,12 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
         <source>This point cannot be used on this layer</source>
         <translation>इस बिंदु का उपयोग इस लेयर पर नहीं किया जा सकता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="214"/>
         <source>Click inside the raster</source>
         <translation>रास्टर के अंदर क्लिक करें</translation>
     </message>
@@ -7816,7 +7831,7 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation type="obsolete">यह बिंदु सेगमेंट की जा रही विंडो के बाहर है: पहले ऑब्जेक्ट की पुष्टि करें या उसे साफ़ करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="246"/>
         <source>This box is too small</source>
         <translation>यह बॉक्स बहुत छोटा है</translation>
     </message>
@@ -7826,77 +7841,77 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation type="obsolete">ऑब्जेक्ट पर लेफ़्ट-क्लिक से शुरू करें, या बॉक्स बनाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="239"/>
         <source>This raster cannot be segmented</source>
         <translation>इस रास्टर को सेगमेंट नहीं किया जा सकता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="333"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>इस क्षेत्र का सेगमेंटेशन तैयार हो रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="447"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>इस क्षेत्र का सेगमेंटेशन विफल रहा: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="345"/>
         <source>canceled</source>
         <translation>रद्द किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="380"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime इंस्टॉल हो रहा है, थोड़ी देर में फिर क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="382"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>onnxruntime मौजूद नहीं है: {0} चलाएँ, फिर QGIS को पुनः आरंभ करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="386"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>सेगमेंटेशन मॉडल डाउनलोड हो रहा है, इंस्टॉल होने के बाद फिर क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="388"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>पहले सेगमेंटेशन मॉडल इंस्टॉल करें (नीचे का बटन)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="389"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>सेगमेंटेशन मॉडल लोड नहीं हो सका (FilterMate का लॉग देखें)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="410"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>सेगमेंटेशन मॉडल डाउनलोड हो रहा है… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="419"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>मॉडल इंस्टॉल हो गया: किसी ऑब्जेक्ट पर लेफ़्ट-क्लिक करें, या बॉक्स बनाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="421"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>मॉडल डाउनलोड नहीं हो सका: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="423"/>
         <source>Download canceled</source>
         <translation>डाउनलोड रद्द किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>Click on an object in the area prepared</source>
         <translation>तैयार किए गए क्षेत्र में किसी ऑब्जेक्ट पर क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="456"/>
         <source>No object found: add a point or draw a box</source>
         <translation>कोई ऑब्जेक्ट नहीं मिला: एक बिंदु जोड़ें या बॉक्स बनाएँ</translation>
     </message>
@@ -7906,95 +7921,150 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation type="obsolete">लेफ़्ट-क्लिक ऑब्जेक्ट में जोड़ता है, राइट-क्लिक हटाता है, Enter पुष्टि करता है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="720"/>
         <source>Click an object first</source>
-        <translation type="obsolete">पहले किसी ऑब्जेक्ट पर क्लिक करें</translation>
+        <translation>पहले किसी ऑब्जेक्ट पर क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="384"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>पहले नीचे दिए बटन से onnxruntime इंस्टॉल करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="103"/>
         <source>Click an object, or draw a box around it</source>
         <translation>किसी वस्तु पर क्लिक करें, या उसके चारों ओर बॉक्स बनाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="181"/>
         <source>A right click trims the last object: click an object first</source>
         <translation>राइट-क्लिक अंतिम वस्तु को छाँटता है: पहले किसी वस्तु पर क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="221"/>
         <source>This point is outside the area of the last object: click it as a new object</source>
         <translation>यह बिंदु अंतिम वस्तु के क्षेत्र के बाहर है: इसे नई वस्तु के रूप में क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="366"/>
         <source>{0} click(s) fell outside the area prepared: click them again</source>
         <translation>{0} क्लिक तैयार क्षेत्र के बाहर पड़े: उन्हें फिर से क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="483"/>
         <source>Shift+click extends the object, right click trims it, Escape removes it</source>
         <translation>Shift+क्लिक वस्तु को बड़ा करता है, राइट-क्लिक छाँटता है, Esc हटाता है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="523"/>
         <source>Similar objects need the values of the raster: this layer is only drawn</source>
         <translation>समान वस्तुओं के लिए रेस्टर के मान चाहिए: यह परत केवल चित्रित है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="531"/>
         <source>No patch of this colour nearby to compare with the object</source>
         <translation>वस्तु से तुलना के लिए पास में इस रंग का कोई धब्बा नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="547"/>
         <source>Drawing the similar objects: {0} candidates…</source>
         <translation>समान वस्तुएँ बनाई जा रही हैं: {0} उम्मीदवार…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="558"/>
         <source>Drawing the similar objects… {0} %</source>
         <translation>समान वस्तुएँ बनाई जा रही हैं… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="573"/>
         <source>The similar objects could not be drawn: {0}</source>
         <translation>समान वस्तुएँ नहीं बनाई जा सकीं: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
         <source>{0} similar objects found among {1} candidates; Escape removes them</source>
-        <translation>{1} उम्मीदवारों में से {0} समान वस्तुएँ मिलीं; Esc उन्हें हटाता है</translation>
+        <translation type="obsolete">{1} उम्मीदवारों में से {0} समान वस्तुएँ मिलीं; Esc उन्हें हटाता है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="694"/>
         <source>Click the next object</source>
         <translation>अगली वस्तु पर क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="701"/>
         <source>Search stopped</source>
         <translation>खोज रुकी</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="701"/>
         <source>Click canceled</source>
         <translation>क्लिक रद्द किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="712"/>
         <source>Last object removed</source>
         <translation>अंतिम वस्तु हटाई गई</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="472"/>
+        <source>Shift+click extends the object, right click trims it, G changes its granularity</source>
+        <translation>Shift+क्लिक ऑब्जेक्ट को बढ़ाता है, राइट-क्लिक उसे छाँटता है, G उसकी ग्रैन्युलैरिटी बदलता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="580"/>
+        <source>{0} similar objects proposed among {1} candidates: click one to keep it, right click to reject it, Enter keeps them all, Escape rejects them all</source>
+        <translation>{1} उम्मीदवारों में से {0} समान ऑब्जेक्ट सुझाए गए: रखने के लिए किसी एक पर क्लिक करें, अस्वीकार करने के लिए राइट-क्लिक करें, Enter सबको रखता है, Esc सबको अस्वीकार करता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="583"/>
+        <source>No similar object found among {0} candidates</source>
+        <translation>{0} उम्मीदवारों में कोई समान ऑब्जेक्ट नहीं मिला</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>Object kept</source>
+        <translation>ऑब्जेक्ट रखा गया</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>Proposal rejected</source>
+        <translation>सुझाव अस्वीकृत</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="624"/>
+        <source>: {0} proposals left</source>
+        <translation>: {0} सुझाव शेष</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
+        <source>{0} similar objects kept</source>
+        <translation>{0} समान ऑब्जेक्ट रखे गए</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="655"/>
+        <source>Proposals rejected</source>
+        <translation>सुझाव अस्वीकृत</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="723"/>
+        <source>SAM proposed a single outline for this object</source>
+        <translation>SAM ने इस ऑब्जेक्ट के लिए केवल एक रूपरेखा सुझाई</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="731"/>
+        <source>No object at this granularity: press G again</source>
+        <translation>इस ग्रैन्युलैरिटी पर कोई ऑब्जेक्ट नहीं: G फिर दबाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="737"/>
+        <source>Granularity {0} of {1}: G for the next one</source>
+        <translation>ग्रैन्युलैरिटी {0}/{1}: अगली के लिए G</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="464"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: सेगमेंटेशन तैयार हो रहा है</translation>
     </message>
@@ -8292,7 +8362,7 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
 <context>
     <name>SimilarObjectsTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="533"/>
         <source>FilterMate: drawing the similar objects</source>
         <translation>FilterMate: समान वस्तुएँ बनाई जा रही हैं</translation>
     </message>

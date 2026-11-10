@@ -743,6 +743,8 @@ class RasterExploringPanel(QWidget):
     segmentToolRequested = pyqtSignal()
     engineChanged = pyqtSignal(str)  # the object targets changed engine (the controller swaps the map tool)
     segmentModelInstallRequested = pyqtSignal()
+    proposalsAcceptRequested = pyqtSignal()  # keep every similar object proposed
+    proposalsRejectRequested = pyqtSignal()
     segmentRuntimeInstallRequested = pyqtSignal()
     displayChanged = pyqtSignal()
 
@@ -1219,6 +1221,25 @@ class RasterExploringPanel(QWidget):
         self._segment_clear_button.clicked.connect(self.clear_segments)
         segment_row.addWidget(self._segment_clear_button)
         segment_row.addStretch(1)
+        # The similar objects SAM proposes, before they join the selection.
+        self._proposal_widget = QWidget(self._segment_widget)
+        self._proposal_widget.setObjectName("widget_raster_segment_proposals")
+        proposal_row = QHBoxLayout(self._proposal_widget)
+        proposal_row.setContentsMargins(0, 0, 0, 0)
+        proposal_row.setSpacing(GAP)
+        self._proposal_keep_button = QPushButton("", self._proposal_widget)
+        self._proposal_keep_button.setObjectName("pushButton_raster_segment_keep")
+        self._proposal_keep_button.setToolTip(self.tr("Add every proposed object to the selection (Enter on the map)"))
+        self._proposal_keep_button.clicked.connect(self.proposalsAcceptRequested.emit)
+        proposal_row.addWidget(self._proposal_keep_button)
+        self._proposal_reject_button = QPushButton(self.tr("Reject"), self._proposal_widget)
+        self._proposal_reject_button.setObjectName("pushButton_raster_segment_reject")
+        self._proposal_reject_button.setToolTip(self.tr("Forget the proposed objects (Escape on the map)"))
+        self._proposal_reject_button.clicked.connect(self.proposalsRejectRequested.emit)
+        proposal_row.addWidget(self._proposal_reject_button)
+        proposal_row.addStretch(1)
+        self._proposal_widget.setVisible(False)
+        segment_layout.addWidget(self._proposal_widget)
         segment_layout.addLayout(segment_row)
         self._segment_status = QLabel("", self._segment_widget)
         self._segment_status.setObjectName("label_raster_segment_status")
@@ -2815,6 +2836,11 @@ class RasterExploringPanel(QWidget):
         self._stashed_preset = None
         self._segment_status.setText("")
         self._refresh_segment_buttons()
+
+    def set_proposal_count(self, count: int) -> None:
+        """How many similar objects wait to be kept or rejected; the buttons show while there are some."""
+        self._proposal_keep_button.setText(self.tr("Keep the {0} proposals").format(count))
+        self._proposal_widget.setVisible(count > 0)
 
     def set_segmentation_status(self, text: str) -> None:
         self._segment_status.setText(text)
