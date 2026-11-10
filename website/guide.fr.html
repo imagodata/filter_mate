@@ -867,19 +867,34 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Consentement.</strong> Rien ne quitte votre ordinateur avant que vous ayez choisi un modèle et donné votre accord. Changer de fournisseur ou d'adresse le redemande.</li>
     </ul>
 
+    <figure>
+        <img src="img/guide/agent-settings-fr.png" alt="Réglages d'AGENT, onglet Fournisseur : le quota gratuit choisi, ce qui quitte la machine, la case d'accord" loading="lazy" width="766" height="660">
+        <figcaption>Les réglages d'AGENT : le fournisseur (ici le quota gratuit), ce qui lui est envoyé, et l'accord demandé avant que quoi que ce soit ne quitte l'ordinateur. <em>Sources</em> et <em>Autres applications</em> sont les onglets suivants.</figcaption>
+    </figure>
+
     <h3>Ce que vous voyez</h3>
     <p>
         Les demandes, les étapes et les changements apparaissent comme des cartes dans la conversation. Chaque filtre dit combien d'entités il a gardées, et avertit s'il n'en a gardé aucune, avec ce qu'il faut vérifier.
-        La conversation est conservée par projet sur cet ordinateur et réaffichée à l'ouverture du projet ; le modèle ne la récupère pas, une conversation repart donc de zéro. <em>New conversation</em> oublie ce qui était conservé pour le projet.
+        La conversation est conservée par projet sur cet ordinateur et réaffichée à l'ouverture du projet ; le modèle ne la récupère pas, une conversation repart donc de zéro. <em>Nouvelle conversation</em> oublie ce qui était conservé pour le projet.
     </p>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-chat-fr.png" alt="AGENT ouvert au-dessus de la section EXPLORING repliée : deux demandes, chacune avec une carte de filtre qui donne les entités gardées" loading="lazy" width="360" height="720">
+        <figcaption>Deux demandes et leurs cartes : chaque filtre nomme ses couches et donne les entités gardées ; <em>Annuler</em> sur la dernière carte la reprend. AGENT partage la pile du haut avec EXPLORING, replié ici.</figcaption>
+    </figure>
 
     <h3>Les filtres s'appliquent aussitôt, chaque étape s'annule</h3>
     <ul>
         <li>Tant qu'AGENT est ouvert, <strong>Undo</strong> et <strong>Redo</strong> de la barre d'actions (et Ctrl+Z, Ctrl+Y) parcourent les tours de l'agent. Leur info-bulle nomme la demande.</li>
-        <li>La page <em>History</em> liste les tours, appliqués ou annulés, et renvoie une demande. Pour la dernière demande, elle liste les étapes : <em>Undo back to here</em> remet les couches comme elles étaient avant l'étape choisie, comme une étape à part que Undo reprend.</li>
+        <li>La page <em>Historique</em> liste les tours, appliqués ou annulés, et renvoie une demande. Pour la dernière demande, elle liste les étapes : <em>Annuler jusqu'ici</em> remet les couches comme elles étaient avant l'étape choisie, comme une étape à part que Undo reprend.</li>
         <li>Undo atteint aussi les couches qu'un tour a ajoutées ou retirées, les sélections et la visibilité. Une couche retirée revient depuis sa définition, avec le même identifiant et à sa place dans son groupe ; une couche gardée en mémoire ne peut pas revenir, et le panneau le dit. Les zooms et les exports ne s'annulent pas.</li>
         <li>Vous pouvez demander à l'agent d'annuler sa dernière demande. Arrêter une demande garde ce qui a été fait, et on peut encore l'annuler.</li>
     </ul>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-history-fr.png" alt="La page Historique d'AGENT : quatre demandes, appliquées ou non, les étapes de l'une d'elles, et les boutons d'annulation, de rétablissement et de renvoi" loading="lazy" width="360" height="720">
+        <figcaption>La page <em>Historique</em> : les demandes du projet, appliquées ou non, et les étapes de la dernière qui a changé quelque chose.</figcaption>
+    </figure>
 
     <h3>Confirmations et limites</h3>
     <ul>
@@ -917,12 +932,12 @@ processing.run("filtermate:batch_filter", {
 
     <h3>Serveur MCP intégré au plugin</h3>
     <p>
-        Désactivé par défaut. Dans les réglages de l'agent, l'onglet <em>Other applications</em> l'active : FilterMate écoute alors sur <code>http://127.0.0.1:17823/mcp</code> (le port est modifiable) et demande un jeton d'accès.
+        Désactivé par défaut. Dans les réglages de l'agent, l'onglet <em>Autres applications</em> l'active : FilterMate écoute alors sur <code>http://127.0.0.1:17823/mcp</code> (le port est modifiable) et demande un jeton d'accès.
         Claude Code ou un autre client MCP de cet ordinateur peut piloter FilterMate selon les règles du tchat : mêmes outils, mêmes sources cochées, mêmes confirmations.
         Chaque changement est une étape de l'historique du panneau et apparaît dans la conversation avec le nom de l'application. Un changement est refusé pendant que le tchat travaille ou qu'un dialogue QGIS est ouvert ; les lectures continuent.
     </p>
     <ul>
-        <li>Des boutons copient la configuration pour les clients MCP, l'entrée de Claude Desktop (qui passe par <code>mcp-remote</code> et demande donc Node.js ; elle n'a pas été essayée avec Claude Desktop lui-même) et la commande <code>claude mcp add</code>. Les trois contiennent le jeton. <em>New access token</em> le remplace.</li>
+        <li>Des boutons copient la configuration pour les clients MCP, l'entrée de Claude Desktop (qui passe par <code>mcp-remote</code> et demande donc Node.js ; elle n'a pas été essayée avec Claude Desktop lui-même) et la commande <code>claude mcp add</code>. Les trois contiennent le jeton. <em>Nouveau jeton d'accès</em> le remplace.</li>
         <li>Le serveur n'écoute que sur <code>127.0.0.1</code>. Avec QGIS sous Windows et le client dans WSL 2, cette adresse n'est pas la même machine, sauf si WSL utilise le réseau en miroir.</li>
         <li>Aucun paquet Python n'est nécessaire. Le serveur stdio décrit dans <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a> reste disponible.</li>
     </ul>

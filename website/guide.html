@@ -868,11 +868,21 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Consent.</strong> Nothing leaves your computer before you have chosen a model and agreed. Changing the provider or its address asks again.</li>
     </ul>
 
+    <figure>
+        <img src="img/guide/agent-settings.png" alt="AGENT settings, Provider tab: the free quota chosen, what leaves this machine, the box to agree" loading="lazy" width="712" height="660">
+        <figcaption>The settings of AGENT: the provider (here the free quota), what is sent to it, and the agreement asked before anything leaves the computer. <em>Sources</em> and <em>Other applications</em> are the next tabs.</figcaption>
+    </figure>
+
     <h3>What you see</h3>
     <p>
         Requests, steps and changes appear as cards in the conversation. Each filter says how many features it kept, and warns when it kept none, with what to check.
         The conversation is kept per project on this computer and shown again when the project opens; the model does not get it back, so a conversation starts afresh. <em>New conversation</em> forgets what was kept for the project.
     </p>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-chat.png" alt="AGENT open above the folded EXPLORING section: two requests, each with a filter card that gives the features kept" loading="lazy" width="360" height="720">
+        <figcaption>Two requests and their cards: each filter names its layers and gives the features it kept; <em>Undo</em> on the last card takes it back. AGENT shares the upper stack with EXPLORING, folded here.</figcaption>
+    </figure>
 
     <h3>Filters apply at once, and each step can be undone</h3>
     <ul>
@@ -881,6 +891,11 @@ processing.run("filtermate:batch_filter", {
         <li>Undo also reaches the layers a turn added or removed, the selections and the visibility. A removed layer comes back from its definition, with the same id and at its place in its group; a layer kept in memory cannot come back, and the panel says so. Zooms and exports are not undone.</li>
         <li>You can ask the agent to undo its last request. Stopping a request keeps what was done, and it can still be undone.</li>
     </ul>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-history.png" alt="The History page of AGENT: four requests, applied or not, the steps of one of them, and the Undo the last, Redo and Send again buttons" loading="lazy" width="360" height="720">
+        <figcaption>The <em>History</em> page: the requests of the project, applied or not, and the steps of the last one that changed something.</figcaption>
+    </figure>
 
     <h3>Confirmations and limits</h3>
     <ul>
