@@ -60,7 +60,8 @@
         <li><a href="#backends"><span class="num">11</span>Backends et performances</a></li>
         <li><a href="#processing"><span class="num">12</span>Boîte à outils Processing</a></li>
         <li><a href="#raster-lidar"><span class="num">13</span>Rasters et nuages de points</a></li>
-        <li><a href="#troubleshooting"><span class="num">14</span>Dépannage</a></li>
+        <li><a href="#agent"><span class="num">14</span>Agent</a></li>
+        <li><a href="#troubleshooting"><span class="num">15</span>Dépannage</a></li>
     </ol>
 </aside>
 
@@ -68,7 +69,7 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">Guide utilisateur de FilterMate 5.0</span>
+    <span class="section-label">Guide utilisateur de FilterMate 5.1</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
@@ -160,16 +161,25 @@
         <figcaption>QGIS 4.2 avec le panneau FilterMate ancré à droite. Le projet contient cinq couches GeoPackage.</figcaption>
     </figure>
 
-    <p>Le panneau se compose de quatre zones, de haut en bas :</p>
+    <p>Le panneau se compose de cinq zones, de haut en bas :</p>
     <div class="table-wrap">
     <table>
         <tr><th>Zone</th><th>Rôle</th></tr>
-        <tr><td><strong>Badges d'en-tête</strong></td><td>Le bouton &#9733; ouvre le menu des favoris ; il passe à l'orange dès que des favoris sont enregistrés. Le badge coloré indique le type de la couche courante et ce qui la lit : le backend pour une couche vecteur (PostgreSQL, Spatialite, OGR, Memory), le fournisseur pour un raster ou un nuage de points. Par exemple <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
-        <tr><td><strong>Zone Exploring</strong></td><td>Sélection sur la couche courante, décrite par la fiche en haut de la zone. Pour une couche vecteur : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation. Les rasters et les nuages de points ont leurs propres outils (<a href="#raster-lidar">section 13</a>).</td></tr>
-        <tr><td><strong>Onglets d'outils</strong></td><td>Trois onglets repliables : <strong>Filtering</strong>, <strong>Exporting</strong> et <strong>Configuration</strong>. Un seul est ouvert à la fois.</td></tr>
+        <tr><td><strong>Badges de la barre de titre</strong></td><td>Les favoris, le détachement et la fermeture sont des badges de la barre de titre du panneau. Le bouton &#9733; ouvre le menu des favoris ; il passe à l'orange dès que des favoris sont enregistrés. Un bouton à côté replie EXPLORING. L'étiquette colorée de la source, dans la fiche de la couche, indique le type de la couche courante et ce qui la lit : le backend pour une couche vecteur (PostgreSQL, Spatialite, OGR, Memory), le fournisseur pour un raster ou un nuage de points. Par exemple <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
+        <tr><td><strong>Pile du haut</strong></td><td><strong>Agent</strong>, puis la zone <strong>Exploring</strong>. AGENT est un tchat qui filtre à partir d'une phrase (<a href="#agent">section 14</a>). Exploring sélectionne sur la couche courante, décrite par la fiche en haut de la zone. Pour une couche vecteur : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation. Les rasters et les nuages de points ont leurs propres outils (<a href="#raster-lidar">section 13</a>).</td></tr>
+        <tr><td><strong>Pile du bas</strong></td><td>Trois sections repliables : <strong>Filtering</strong>, <strong>Exporting</strong> et <strong>Configuration</strong>.</td></tr>
         <tr><td><strong>Barre d'actions</strong></td><td>Les six boutons qui agissent réellement : Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
     </table>
     </div>
+
+    <p>
+        Une poignée que vous pouvez faire glisser sépare les deux piles ; le panneau retient sa position. Au plus une section est ouverte dans chaque pile.
+        Ouvrir AGENT replie EXPLORING et FILTERING ; ouvrir FILTERING ramène EXPLORING. AGENT est affiché par défaut et se masque dans l'onglet
+        <a href="#configuration">Configuration</a>.
+    </p>
+    <p>
+        Les captures de cette section ont été prises avant la section AGENT et les badges de la barre de titre : elles montrent le bouton des favoris à côté du badge de la couche et pas de section AGENT.
+    </p>
 
     <div class="fig-row">
         <figure class="narrow">
@@ -403,7 +413,7 @@ AND ST_Intersects("geom",
     <table>
         <tr><th>Bouton</th><th>Action</th></tr>
         <tr><td><strong>Filter</strong></td><td>Construit et applique le filtre décrit par la zone Exploring et l'onglet Filtering.</td></tr>
-        <tr><td><strong>Undo</strong></td><td>Restaure l'état de filtre précédent des couches concernées. L'historique est propre à chaque projet et survit à un redémarrage de QGIS.</td></tr>
+        <tr><td><strong>Undo</strong></td><td>Restaure l'état de filtre précédent des couches concernées. L'historique est propre à chaque projet et survit à un redémarrage de QGIS. Tant qu'AGENT est ouvert, Undo et Redo parcourent plutôt les tours de l'agent (<a href="#agent">section 14</a>).</td></tr>
         <tr><td><strong>Redo</strong></td><td>Réapplique un filtre que vous venez d'annuler.</td></tr>
         <tr><td><strong>Unfilter</strong></td><td>Retire le filtre FilterMate de la couche source et de ses cibles, sans toucher aux autres couches. Contrairement à Undo, il ne remonte pas l'historique.</td></tr>
         <tr><td><strong>Export</strong></td><td>Lance l'export configuré dans l'onglet Exporting.</td></tr>
@@ -507,11 +517,14 @@ AND ST_Intersects("geom",
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
         <img src="img/guide/configuration-tab.png" alt="L'onglet Configuration avec l'arbre des réglages" loading="lazy" width="590" height="617">
-        <figcaption>Onglet Configuration : un arbre de réglages, modifiés sur place. Les changements sont enregistrés immédiatement.</figcaption>
+        <figcaption>Onglet Configuration : un arbre de réglages, modifiés sur place. Les changements sont enregistrés immédiatement. Cette capture est antérieure à la barre de recherche.</figcaption>
     </figure>
     <p>
         L'onglet Configuration expose les réglages de FilterMate sous forme d'arbre. Double-cliquez sur une valeur pour la modifier ; les valeurs à choix proposent leurs options.
-        La plupart des changements s'appliquent à chaud, quelques-uns (position du panneau, profil d'interface) demandent de fermer et rouvrir le panneau.
+        La plupart des changements s'appliquent à chaud ; la position du panneau demande de le fermer et de le rouvrir.
+    </p>
+    <p>
+        <strong>Barre de recherche.</strong> L'onglet a une barre de recherche. Saisissez une partie du nom d'un réglage : FilterMate ouvre sa branche et le sélectionne. Ctrl+F amène à la barre quand l'onglet est ouvert, Échap l'efface.
     </p>
     <div class="table-wrap">
     <table>
@@ -519,13 +532,17 @@ AND ST_Intersects("geom",
         <tr><td><code>AUTO_ACTIVATE</code></td><td>true / false</td><td>Ouvre le panneau automatiquement au chargement d'un projet contenant des couches vectorielles.</td></tr>
         <tr><td><code>FEEDBACK_LEVEL</code></td><td>minimal / normal / verbose</td><td>Quantité de messages dans la barre de messages QGIS. <em>verbose</em> est utile pour signaler un problème.</td></tr>
         <tr><td><code>LANGUAGE</code></td><td>auto ou l'une des 34 langues</td><td><em>auto</em> suit la langue de QGIS. L'interface se retraduit sans redémarrage.</td></tr>
-        <tr><td><code>UI_PROFILE</code></td><td>auto / compact / normal / hidpi</td><td>Taille des contrôles. <em>auto</em> se base sur la taille et la mise à l'échelle de l'écran ; forcez <em>hidpi</em> sur un écran 4K si les contrôles paraissent petits.</td></tr>
+        <tr><td><code>UI_PROFILE</code></td><td>auto / compact / normal / hidpi</td><td>Taille des contrôles, appliquée aussitôt et au démarrage. <em>auto</em> se base sur l'écran de la fenêtre QGIS et sa mise à l'échelle : une hauteur utile sous 800 pixels logiques donne <em>compact</em>, quelle que soit l'échelle. Forcez <em>hidpi</em> sur un écran 4K si les contrôles paraissent petits.</td></tr>
         <tr><td><code>DOCK_POSITION</code></td><td>left / right / top / bottom</td><td>Côté où le panneau s'ancre à l'ouverture.</td></tr>
         <tr><td><code>ACTION_BAR_POSITION</code></td><td>top / bottom / left / right</td><td>Position des six boutons d'action.</td></tr>
         <tr><td><code>ACTIVE_THEME</code></td><td>auto / default / dark / light</td><td><em>auto</em> suit le thème de QGIS.</td></tr>
         <tr><td><code>feature_picker_limit</code></td><td>nombre, 1000 par défaut</td><td>Nombre maximal de lignes chargées dans la liste de sélection multiple.</td></tr>
+        <tr><td><code>AGENT</code></td><td>true / false</td><td>Affiche la section AGENT (<code>enabled</code> sous <code>APP.OPTIONS.AGENT</code>). Active par défaut. L'activer affiche la section à la prochaine ouverture du panneau ; la désactiver la masque après un redémarrage de QGIS.</td></tr>
     </table>
     </div>
+    <p>
+        <strong>La molette.</strong> Une liste ou un champ numérique ne répond à la molette qu'après un clic. Tant que ce n'est pas fait, la molette fait défiler le panneau : une valeur, comme l'entité qui servira de source au prochain filtre, ne change jamais par accident.
+    </p>
     <p>
         L'arbre contient aussi les seuils de performance (quand activer les optimisations), la taille du cache d'expressions, les valeurs par défaut d'export et la
         section <strong>Extensions</strong> (partage de favoris, QFieldCloud). Le fichier complet se trouve dans <code>config/config.json</code> du dossier du plugin ;
@@ -569,6 +586,24 @@ AND ST_Intersects("geom",
         <li>Cliquez sur le badge backend pour voir les backends disponibles pour la couche courante et en forcer un si le choix automatique ne convient pas.</li>
         <li>Chaque étape de plus de quelques millisecondes est journalisée avec le préfixe <code>&#9201;</code> ; comparez deux exécutions en filtrant le journal.</li>
     </ul>
+    <h3 id="remote-sources">Sources distantes</h3>
+    <p>
+        Une couche dont les données sont lues par le réseau suit les mêmes chemins qu'une couche locale : WFS, OGC API Features, ArcGIS Feature et Map Server, WMS / WMTS / XYZ, WCS, tuiles vectorielles,
+        nuages de points EPT et COPC distants, fichiers lus par <code>/vsicurl/</code>, bases MSSQL, Oracle et HANA. Trois règles tiennent : aucune lecture réseau sur le fil principal,
+        chaque lecture est bornée, et aucun résultat n'est faux ou partiel sans qu'on le dise.
+    </p>
+    <ul>
+        <li><strong>Filtres attributaires.</strong> Une expression n'est envoyée au serveur, dans son langage (OGC Filter, CQL2 ou SQL), que si elle se traduit entièrement. Les fonctions non prises en charge et les champs inconnus sont refusés sans toucher la couche. Le filtre serveur est préparé en arrière-plan puis installé sur la couche, qui garde son identité et son style.</li>
+        <li><strong>Filtres spatiaux.</strong> Pour une cible de service web, FilterMate ne lit que les entités dans l'emprise de la source (une requête serveur par rectangle englobant), teste le prédicat exact sur la copie et garde les clés. La copie est plafonnée par défaut à 20 000 entités et 90 secondes (<code>APP.OPTIONS.REMOTE_MATERIALIZATION</code>). Un résultat coupé par la limite est signalé comme partiel, jamais comme complet. Une liste de clés envoyée à un service compte 500 clés au plus, et un service sans clé stable la refuse.</li>
+        <li><strong>Exploration.</strong> Les listes de valeurs et d'entités, les zooms et les emprises filtrées d'une couche longue à compter s'exécutent dans des tâches d'arrière-plan annulables.</li>
+        <li><strong>Rasters.</strong> Un raster COG, WCS ou PostgreSQL distant porte des valeurs : statistiques et aperçus tournent en arrière-plan sur une capture bornée, et un WCS utilisé en source ou en cible est copié dans un GeoTIFF du cache de session, limité à la zone retenue. Les couches WMS, WMTS, XYZ et ArcGIS MapServer sont des images rendues : on peut y sélectionner une couleur sur un rendu borné, et elles ne sont jamais une cible de filtre.</li>
+        <li><strong>Les tuiles vectorielles</strong> sont des cibles seulement. Le filtre s'écrit dans l'expression de filtre du rendu et des règles d'étiquetage, et Undo les restaure.</li>
+        <li><strong>Les nuages de points distants</strong> (EPT, COPC sur http) sont lus par PDAL 2.4 ou plus récent sur la seule emprise utile, jamais en entier : ils demandent donc une zone explicite.</li>
+    </ul>
+    <p>
+        Là où QGIS ne peut pas rapporter sûrement une erreur de protocole (avant la 3.26, ou avant la 3.36 sous Python 3.12), la lecture d'un service est refusée avec un message.
+        Le panneau, Processing, l'API Python, REST et MCP partagent ces chemins.
+    </p>
 </section>
 
 <!-- 12 ----------------------------------------------------------------- -->
@@ -585,7 +620,7 @@ AND ST_Intersects("geom",
         <figcaption>L'algorithme <em>Filtrer plusieurs couches (batch)</em> : choisir les couches, saisir une expression, exécuter.</figcaption>
     </figure>
     <p>
-        FilterMate enregistre un fournisseur Processing. Son algorithme le plus simple, <code>filtermate:batch_filter</code>, applique une expression de filtre à plusieurs couches vectorielles en une seule exécution ; les filtres croisés de FilterMate 5 sont décrits en <a href="#raster-lidar">section 13</a>.
+        FilterMate enregistre un fournisseur Processing de dix algorithmes et quatre modèles. L'algorithme le plus simple, <code>filtermate:batch_filter</code>, applique une expression de filtre à plusieurs couches vectorielles en une seule exécution ; les filtres croisés de FilterMate 5 sont décrits en <a href="#raster-lidar">section 13</a>.
         Comme c'est un algorithme Processing ordinaire, il s'utilise dans le modeleur graphique, en mode batch ou depuis Python :
     </p>
     <pre><code>import processing
@@ -593,6 +628,20 @@ processing.run("filtermate:batch_filter", {
     "INPUT_LAYERS": ["batiment", "haie"],
     "EXPRESSION": "\"etat_de_l_objet\" = 'En service'",
 })</code></pre>
+    <h3>Des objets tracés depuis une couche vecteur</h3>
+    <p>
+        <em>Dessiner des objets sur un raster avec SAM à partir de points ou de polygones</em> (<code>filtermate:segment_from_features</code>, expérimental) trace un objet par entité d'une couche guide, sans clic :
+        un point vaut un clic sur l'objet, un polygone donne sa boîte englobante et un point à l'intérieur. La sortie est une couche de polygones dans le SCR du raster, avec les attributs de l'entité,
+        <code>sam_score</code> (le score que SAM donne à son masque) et, pour un polygone, <code>sam_iou</code> (recouvrement de l'emprise avec l'objet tracé, de 0 à 1).
+        L'algorithme tourne en arrière-plan, ne modifie aucune couche du projet et peut être une étape d'un modèle. Il utilise le modèle SAM que la pipette raster installe (<a href="#sam">section 13</a>).
+    </p>
+    <pre><code>processing.run("filtermate:segment_from_features", {
+    "RASTER": ortho, "FEATURES": footprints, "OUTPUT": "memory:"})</code></pre>
+    <p>
+        Mesuré sur 40 bâtiments de la BD TOPO (50 à 2000 m²) sur une orthophoto de 25 cm, le recouvrement médian avec l'emprise est de 0,81 avec la boîte et un point à l'intérieur, et de 0,73 avec des points seuls.
+        L'emprise de la BD TOPO n'est pas le toit vu du ciel : un <code>sam_iou</code> bas signale un bâtiment à regarder, il ne prouve pas un changement.
+        Les polygones peuvent ensuite être le paramètre <code>SEGMENTS</code> de <em>Filtrer des couches de tout type par les pixels d'un raster</em> (<code>filtermate:cross_filter_from_raster</code>), qui accepte une couche de polygones, dans n'importe quel SCR, à la place des valeurs de pixels.
+    </p>
 </section>
 
 <!-- 13 ----------------------------------------------------------------- -->
@@ -623,7 +672,7 @@ processing.run("filtermate:batch_filter", {
     <h3>Raster</h3>
     <ul>
         <li><strong>Bandes</strong> : une ligne par bande avec son rôle de couleur (R, V, B, PIR, lu dans le rendu ou deviné), la bande active et les bandes que la pipette compare ; raccourcis RVB, IRC et RVB + PIR.</li>
-        <li><strong>Pipette</strong> sur la carte, avec une tolérance : les <em>pixels similaires</em> de tout le raster (une couleur sur une orthophoto, une valeur, une classe d'un raster à palette), <em>l'objet cliqué</em> seul (la tache connexe sous le clic : une piscine, un toit, une parcelle) ou <em>tous les objets semblables à celui cliqué</em> (les taches dont la surface reste dans les ratios choisis). Ctrl+clic ajoute un relevé ; la carte détoure les objets et le bandeau de sélection donne la part retenue.</li>
+        <li><strong>Pipette</strong> sur la carte, avec une tolérance : les <em>pixels similaires</em> de tout le raster (une couleur sur une orthophoto, une valeur, une classe d'un raster à palette), <em>l'objet cliqué</em> seul (une piscine, un toit, une parcelle) ou les <em>objets similaires</em> (les objets semblables à celui cliqué, dans des ratios choisis de sa surface). Les deux cibles d'objets tracent avec SAM quand il est installé, et par la couleur sinon (<a href="#sam">plus bas</a>). Ctrl+clic ajoute un relevé ; la carte détoure les objets et le bandeau de sélection donne la part retenue.</li>
         <li><strong>Plage de valeurs</strong> : faites glisser les poignées de l'histogramme, sur une bande ou sur toutes les bandes de couleur à la fois ; la grandeur peut être la valeur elle-même ou, depuis un MNT, la <strong>pente</strong> (degrés ou %), l'<strong>exposition</strong>, l'<strong>ombrage</strong> ou la <strong>rugosité</strong>. Le bouton Sélectionner (ou la case d'aperçu) masque les autres pixels sur la carte.</li>
         <li>Une <strong>expression</strong> de la calculatrice raster, avec un menu Insérer pour les références de bandes et les préréglages spectraux permis par les rôles : NDVI végétation, NDVI sol nu, NDWI eau, ExG végétation.</li>
     </ul>
@@ -635,6 +684,67 @@ processing.run("filtermate:batch_filter", {
         <li>Option « appliquer aux autres dalles du jeu » pour les données livrées en dalles (LiDAR HD).</li>
         <li>Sur le rail : le bouton Identifier relève une <strong>classe</strong>, la <strong>pipette de valeur</strong> écrit une condition autour de la valeur relevée sur l'attribut choisi (Ctrl+clic ajoute un OU), et l'outil <strong>zone</strong> dessine un rectangle, un polygone, une forme à main levée ou un cercle qui découpe l'emprise de la source.</li>
     </ul>
+    <h3 id="sam">Objets tracés par SAM <small>(5.1, expérimental)</small></h3>
+    <p>
+        Les deux cibles d'objets de la pipette peuvent utiliser SAM 2.1 tiny, un modèle de segmentation qui tourne sur votre ordinateur, sur le processeur. <em>Clicked object</em> trace l'objet sous le clic.
+        <em>Similar objects</em> le trace, puis trace chaque objet qui lui ressemble dans la carte visible. Les objets sont de simples polygones : le filtre appliqué aux autres couches n'a pas besoin du modèle, et un filtre enregistré se rejoue sans lui.
+        Sans SAM, les deux cibles trouvent les objets par leur couleur, et la liste <em>Engine</em> du groupe PIPETTE bascule de l'un à l'autre.
+    </p>
+    <h4>Installation, au premier usage</h4>
+    <p>
+        FilterMate ne fournit ni le modèle ni son moteur d'exécution. Choisissez <em>Clicked object</em> ou <em>Similar objects</em> sur un raster : un message propose d'installer SAM, onnxruntime (environ 100 Mo) et le modèle (62 Mo).
+        Rien n'est installé avant votre accord, ni au démarrage de QGIS. Une fois que vous confirmez, pip installe onnxruntime en arrière-plan, comme une tâche QGIS, dans votre profil QGIS ; le Python de QGIS n'est pas modifié.
+        Le modèle se télécharge ensuite depuis une révision figée, et chaque fichier est vérifié par son SHA-256 avant de remplacer quoi que ce soit. Le téléchargement peut être annulé et passe par le proxy HTTP des options de QGIS.
+        En dehors de ces deux téléchargements, rien ne quitte votre ordinateur.
+    </p>
+    <p>
+        Un bouton <em>Install SAM…</em> reste dans le groupe. Si pip échoue, la raison est dans le journal de FilterMate et le groupe affiche la commande à lancer à la main dans un terminal (l'OSGeo4W Shell sous Windows).
+        Si les fichiers du modèle sont abîmés, <em>Repair the model…</em> remplace les mauvais.
+    </p>
+    <h4>Gestes</h4>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Geste</th><th>Effet</th></tr>
+        <tr><td>Déplacer la souris</td><td>Contour de l'objet sous la souris, une fois la zone préparée.</td></tr>
+        <tr><td>Clic</td><td>Un nouvel objet, ajouté aussitôt.</td></tr>
+        <tr><td>Maj+clic</td><td>Le dernier objet, étendu.</td></tr>
+        <tr><td>Clic droit</td><td>Le dernier objet, rogné.</td></tr>
+        <tr><td>Tracer un rectangle</td><td>Un nouvel objet dans le rectangle.</td></tr>
+        <tr><td><kbd>G</kbd> (ou <kbd>Tab</kbd> quand QGIS le laisse passer)</td><td>Le dernier objet avec le contour suivant que SAM a proposé : une partie, l'objet, un groupe.</td></tr>
+        <tr><td>Échap</td><td>Rejette les propositions ; sinon retire le dernier objet, ou la dernière recherche avec son objet cliqué.</td></tr>
+        <tr><td><em>Clear</em></td><td>Oublie tous les objets tracés par SAM.</td></tr>
+        <tr><td><em>To layer</em></td><td>Ajoute les objets au projet comme une couche de polygones, dans le SCR du raster, numérotée, avec leur surface en m². C'est une couche en mémoire : <em>Make Permanent</em> dans QGIS la conserve. C'est la couche à donner à Processing, à exporter ou à éditer.</td></tr>
+    </table>
+    </div>
+    <p>Le premier clic d'une zone la prépare : environ 3 s sous QGIS pour Windows, puis environ 0,1 s par geste.</p>
+    <h4>Objets similaires : des propositions à garder ou à rejeter</h4>
+    <p>
+        <em>Similar objects</em> trace d'abord l'objet cliqué. Les taches de couleur voisine dans la carte visible, 120 au plus, sont ensuite proposées à SAM, qui redessine chacune en arrière-plan.
+        Un objet est gardé quand sa surface, et sa forme avec <em>same shape</em>, restent dans les ratios du groupe par rapport à l'objet cliqué, et quand il lui ressemble.
+        Les objets trouvés sont des <strong>propositions</strong>, cernées de tirets et hors de la sélection : un clic en garde une, un clic droit la rejette, Entrée (ou <em>Keep</em>) les garde toutes, Échap (ou <em>Reject</em>) les rejette toutes.
+        Environ la moitié des objets proposés sont des bâtiments : gardez ou rejetez-les avant de filtrer avec eux.
+    </p>
+    <p>
+        Les objets sont des polygones dans le SCR du raster, enregistrés avec le filtre comme n'importe quelle sélection raster. Processing (le paramètre <code>SEGMENTS</code>), l'API REST et les outils MCP (<code>segments</code> dans <code>raster_selection</code>) les acceptent aussi.
+    </p>
+    <h4>Ce qu'il fait bien, mesuré</h4>
+    <p>Recouvrement médian avec des contours de référence (IoU, 1 est une coïncidence parfaite) sur une orthophoto de 25 cm, le 9 novembre 2026 :</p>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Geste</th><th>100 bâtiments</th><th>18 parcelles</th></tr></thead>
+        <tbody>
+            <tr><td>1 clic</td><td>0,65</td><td>0,21</td></tr>
+            <tr><td>3 clics correctifs</td><td>0,76</td><td>0,27</td></tr>
+            <tr><td>Rectangle</td><td>0,82</td><td>0,44</td></tr>
+            <tr><td>Moteur couleur, 3 clics</td><td>0,52</td><td>0,26</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p>
+        SAM convient aux bâtiments et aux autres objets bien délimités. Les parcelles n'ont pas atteint l'amélioration exigée, car une limite cadastrale est souvent invisible sur l'image, et les arbres n'ont pas été validés : les haies tendent à fusionner.
+        Utilisez le moteur couleur ou une couche vecteur pour eux. Les objets similaires sont un début, pas un outil fini : sur dix bâtiments jamais utilisés pour fixer le seuil d'apparence, la précision médiane (objets trouvés qui sont des bâtiments) est de 0,35 et le rappel de 0,26.
+        Les chiffres complets et la méthode : <a href="https://github.com/imagodata/filter_mate/blob/main/docs/SEGMENTATION.md" target="_blank" rel="noopener">docs/SEGMENTATION.md</a> (en anglais).
+    </p>
     <figure class="video-figure">
         <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Regarder l’exemple de hauteur du bâti"><img src="video/heights.webp" alt="Points LiDAR de bâtiment à plus de 9 m au-dessus du terrain et les bâtiments auxquels ils appartiennent" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
         <figcaption>Source nuage de points : les points de bâtiment à plus de 9 m au-dessus du MNT (calculé avec PDAL) gardent les bâtiments les plus hauts.</figcaption>
@@ -654,7 +764,7 @@ processing.run("filtermate:batch_filter", {
         <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Regarder l’exemple de lot de relevé"><img src="video/survey.webp" alt="L’église et ses abords à 50 m découpent le modèle de terrain et le nuage de points, puis les deux sont exportés" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
         <figcaption>Source vecteur, cibles raster et nuage de points : l’église et 50 m autour découpent les deux, puis EXPORTING les écrit dans un ZIP.</figcaption>
     </figure>
-    <h3 id="combinaisons">Neuf combinaisons</h3>
+    <h3 id="combinations">Neuf combinaisons</h3>
     <p>
         La source (la couche courante) et les cibles peuvent être de n'importe quel type. FILTERING garde sa forme : couches à filtrer, opérateurs de combinaison
         (AND, OR, AND NOT, ou remplacement quand la combinaison est décochée), prédicats géométriques, tampon et centroïdes. Un réglage est nouveau : la
@@ -728,16 +838,95 @@ processing.run("filtermate:batch_filter", {
     <div class="callout"><p><strong>PDAL.</strong> La hauteur au-dessus d'un MNT et l'écriture directe de fichiers COPC demandent PDAL 2.4 ou plus récent. Avec un PDAL plus ancien, les cibles nuage de points sont découpées par l'exporteur de QGIS, un export COPC écrit du LAZ avec un message, et la hauteur au-dessus d'un MNT est désactivée avec un message qui nomme la version.</p></div>
     <h3>Automatisation</h3>
     <p>
-        Neuf algorithmes Processing (<code>batch_filter</code> et <code>cross_filter</code> hérités de la 4.x, <code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
-        <code>clear_filters</code>, <code>apply_favorite</code>, <code>export_filtered_layers</code>) et quatre modèles prêts à l'emploi (extraction par zone, végétation haute près de lignes,
+        Dix algorithmes Processing (<code>batch_filter</code> et <code>cross_filter</code> hérités de la 4.x, <code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
+        <code>clear_filters</code>, <code>apply_favorite</code>, <code>export_filtered_layers</code>, <code>segment_from_features</code>) et quatre modèles prêts à l'emploi (extraction par zone, végétation haute près de lignes,
         parcelles sur pente douce, bâtiments absents du LiDAR) s'exécutent depuis la boîte à outils, <code>qgis_process</code> (le plugin démarre sans fenêtre QGIS), Python et l'API REST.
         Voir <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a>.
     </p>
 </section>
 
 <!-- 14 ----------------------------------------------------------------- -->
+<section id="agent">
+    <h2><span class="num">14</span>Agent <small>(5.1, expérimental)</small></h2>
+    <div class="callout warn"><p><strong>Expérimental.</strong> Un modèle peut mal comprendre une demande. Vérifiez le nombre d'entités que chaque filtre dit avoir gardées, et annulez ce qui ne correspond pas à votre demande.</p></div>
+    <p>
+        AGENT est un tchat en haut du panneau. Vous écrivez une phrase, par exemple <em>les bâtiments au-dessus de 1200 m dans la commune sélectionnée</em>, et l'agent filtre, sélectionne, zoome, affiche ou masque des couches et exporte.
+        Il utilise les mêmes filtres que le reste de FilterMate. La section est affichée par défaut ; l'option <code>AGENT</code> de l'onglet <a href="#configuration">Configuration</a> la masque.
+    </p>
+
+    <h3>Choisir un modèle</h3>
+    <ul>
+        <li><strong>Quota gratuit.</strong> La première fois, les réglages proposent quelques requêtes gratuites par mois, par un relais de FilterMate vers Claude Haiku 5.5 (Anthropic), sans clé à saisir. Le relais compte ce qui est dépensé et ne garde aucune conversation. Une fois le quota épuisé, le panneau demande votre propre clé d'API.</li>
+        <li><strong>Votre propre fournisseur.</strong> Claude, Mistral, OpenAI, tout serveur compatible OpenAI, ou un modèle Ollama local.</li>
+        <li><strong>La clé</strong> est conservée dans la base d'authentification de QGIS, qui demande son mot de passe maître, jamais dans un fichier de réglages. Elle n'est envoyée qu'au serveur pour lequel elle a été saisie, et vous pouvez la supprimer dans les réglages.</li>
+        <li><strong>Consentement.</strong> Rien ne quitte votre ordinateur avant que vous ayez choisi un modèle et donné votre accord. Changer de fournisseur ou d'adresse le redemande.</li>
+    </ul>
+
+    <h3>Ce que vous voyez</h3>
+    <p>
+        Les demandes, les étapes et les changements apparaissent comme des cartes dans la conversation. Chaque filtre dit combien d'entités il a gardées, et avertit s'il n'en a gardé aucune, avec ce qu'il faut vérifier.
+        La conversation est conservée par projet sur cet ordinateur et réaffichée à l'ouverture du projet ; le modèle ne la récupère pas, une conversation repart donc de zéro. <em>New conversation</em> oublie ce qui était conservé pour le projet.
+    </p>
+
+    <h3>Les filtres s'appliquent aussitôt, chaque étape s'annule</h3>
+    <ul>
+        <li>Tant qu'AGENT est ouvert, <strong>Undo</strong> et <strong>Redo</strong> de la barre d'actions (et Ctrl+Z, Ctrl+Y) parcourent les tours de l'agent. Leur info-bulle nomme la demande.</li>
+        <li>La page <em>History</em> liste les tours, appliqués ou annulés, et renvoie une demande. Pour la dernière demande, elle liste les étapes : <em>Undo back to here</em> remet les couches comme elles étaient avant l'étape choisie, comme une étape à part que Undo reprend.</li>
+        <li>Undo atteint aussi les couches qu'un tour a ajoutées ou retirées, les sélections et la visibilité. Une couche retirée revient depuis sa définition, avec le même identifiant et à sa place dans son groupe ; une couche gardée en mémoire ne peut pas revenir, et le panneau le dit. Les zooms et les exports ne s'annulent pas.</li>
+        <li>Vous pouvez demander à l'agent d'annuler sa dernière demande. Arrêter une demande garde ce qui a été fait, et on peut encore l'annuler.</li>
+    </ul>
+
+    <h3>Confirmations et limites</h3>
+    <ul>
+        <li>Les exports et les couches ajoutées ou retirées vous sont d'abord demandés.</li>
+        <li>Un filtre écrit par le modèle est une simple clause <code>WHERE</code>, lue jeton par jeton face à une liste de ce qu'un filtre exige : pas de sous-requête, pas de fonction hors liste. Une sélection par expression suit la même règle. Un filtre atteint quand même la base avec vos droits.</li>
+        <li>Une couche n'est ajoutée qu'à partir d'un fichier de données simple, d'une adresse https publique ou d'un service listé par une source que vous avez cochée. L'agent ne peut pas donner à QGIS une chaîne de fournisseur de son cru, ni un chemin <code>PG:</code> ou <code>/vsi</code>.</li>
+        <li>Un banc de 39 demandes en français et en anglais, sur un projet simulé, a donné 39/39 avec Claude Haiku 5.5 le 10 novembre 2026.</li>
+    </ul>
+
+    <h3>Les sources, cochées une à une</h3>
+    <p>Dans l'onglet <em>Sources</em> des réglages, rien n'est coché au départ. Dans le tchat, seul ce qui est coché peut servir.</p>
+    <ul>
+        <li><strong>Portails de données ouvertes :</strong> data.gouv.fr, Opendatasoft, et les portails CKAN du Royaume-Uni, du Canada, d'Australie, d'Allemagne, d'Italie, des Pays-Bas, d'Irlande et du Japon.</li>
+        <li><strong>Services WFS :</strong> IGN, IBGE, PRG. Une couche WFS doit être listée par le service, et son adresse est construite par le plugin.</li>
+        <li><strong>Scènes Sentinel-2</strong> d'Earth Search, ouvertes sans les télécharger.</li>
+        <li><strong>Connecteurs MCP :</strong> des serveurs distants, comme celui de data.gouv.fr. Leurs outils rejoignent la conversation, et un outil qui ne se déclare pas en lecture seule vous demande d'abord. Le plugin ne lance aucun processus : un serveur qui ne parle que stdio doit être lancé en mode HTTP.</li>
+    </ul>
+    <p>
+        Tout ce qui vient de ces serveurs est borné : durée et taille plafonnées, et Stop fonctionne. Un fichier sur un serveur qui en donne des morceaux (GeoPackage, GeoTIFF, zip) est lu là où il est.
+        Tout autre fichier est d'abord copié dans le dossier <code>filtermate/open_data</code> de votre profil QGIS, dans la limite de 512 Mo et de 3 minutes, sans figer l'interface ; une archive qui s'étendrait au-delà de 2 Go est refusée.
+        Chaque échec dit sa cause : le statut du serveur, une page web, un fichier trop gros, trop lent ou coupé, une archive sans couche.
+    </p>
+
+    <h3>Ce qui part au modèle</h3>
+    <p>À chaque demande, le fournisseur que vous avez choisi reçoit votre phrase, les noms de vos couches et de leurs champs, les résultats des outils qu'il appelle, et l'état du projet :</p>
+    <ul>
+        <li>toujours : le SCR du projet, l'échelle, l'emprise visible et la couche active ; jusqu'à 30 couches dans l'ordre de l'arbre des couches, chacune avec son type, son nombre d'entités, son SCR s'il diffère de celui du projet, son groupe, sa visibilité et son filtre ; les sélections ;</li>
+        <li>ce qui a changé depuis la dernière réponse, quand quelque chose a changé : couches ajoutées ou retirées, filtres, visibilité, sélections, couche active, vue, y compris ce que vous avez modifié hors de la conversation ;</li>
+        <li>à la demande du modèle, pour une couche : sa place dans l'arbre, son emprise, son style (rendu, champ, nombre de classes, étiquettes, opacité, plage d'échelle), ses jointures et ses relations. Les valeurs de classes et les étiquettes ne sont pas envoyées.</li>
+    </ul>
+    <p>
+        Les valeurs d'attributs ne partent au modèle que si vous les autorisez dans les réglages : sans cela, les outils qui lisent des valeurs (<code>field_values</code>, <code>layer_statistics</code>, <code>sample_features</code>, <code>identify_at</code>) ne sont pas proposés.
+        Les valeurs déjà écrites dans des filtres et des favoris partent quand même, et la boîte de dialogue le dit. Avec le quota gratuit, la requête passe par le relais jusqu'à Claude Haiku 5.5.
+    </p>
+
+    <h3>Serveur MCP intégré au plugin</h3>
+    <p>
+        Désactivé par défaut. Dans les réglages de l'agent, l'onglet <em>Other applications</em> l'active : FilterMate écoute alors sur <code>http://127.0.0.1:17823/mcp</code> (le port est modifiable) et demande un jeton d'accès.
+        Claude Code ou un autre client MCP de cet ordinateur peut piloter FilterMate selon les règles du tchat : mêmes outils, mêmes sources cochées, mêmes confirmations.
+        Chaque changement est une étape de l'historique du panneau et apparaît dans la conversation avec le nom de l'application. Un changement est refusé pendant que le tchat travaille ou qu'un dialogue QGIS est ouvert ; les lectures continuent.
+    </p>
+    <ul>
+        <li>Des boutons copient la configuration pour les clients MCP, l'entrée de Claude Desktop (qui passe par <code>mcp-remote</code> et demande donc Node.js ; elle n'a pas été essayée avec Claude Desktop lui-même) et la commande <code>claude mcp add</code>. Les trois contiennent le jeton. <em>New access token</em> le remplace.</li>
+        <li>Le serveur n'écoute que sur <code>127.0.0.1</code>. Avec QGIS sous Windows et le client dans WSL 2, cette adresse n'est pas la même machine, sauf si WSL utilise le réseau en miroir.</li>
+        <li>Aucun paquet Python n'est nécessaire. Le serveur stdio décrit dans <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a> reste disponible.</li>
+    </ul>
+    <p>Notes pour les développeurs : <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AGENT_MODE.md" target="_blank" rel="noopener">docs/AGENT_MODE.md</a> (en anglais).</p>
+</section>
+
+<!-- 15 ----------------------------------------------------------------- -->
 <section id="troubleshooting">
-    <h2><span class="num">14</span>Dépannage</h2>
+    <h2><span class="num">15</span>Dépannage</h2>
     <h3>Où regarder d'abord</h3>
     <ul>
         <li><strong>Panneau Messages du journal de QGIS</strong>, onglet <em>FilterMate</em> : avertissements et erreurs de la session en cours.</li>
@@ -756,6 +945,11 @@ processing.run("filtermate:batch_filter", {
         <tr><td>Les contrôles sont minuscules sur un écran 4K</td><td>Mettez <code>UI_PROFILE</code> sur <em>hidpi</em>.</td></tr>
         <tr><td>Le panneau s'ouvre dans la mauvaise langue</td><td>Fixez <code>LANGUAGE</code> explicitement au lieu d'<em>auto</em>.</td></tr>
         <tr><td>Un filtre d'une ancienne session est toujours appliqué</td><td>Les filtres vivent dans le fichier de projet. Utilisez <strong>Unfilter</strong>, ou effacez le filtre fournisseur dans les propriétés de la couche.</td></tr>
+        <tr><td>La section AGENT est absente</td><td>L'option <code>AGENT</code> de l'onglet Configuration est désactivée. Activez-la et rouvrez le panneau.</td></tr>
+        <tr><td>AGENT demande ma propre clé d'API</td><td>Le quota gratuit est épuisé, le vôtre pour le mois ou le total du relais. Saisissez une clé dans les réglages d'AGENT, ou choisissez un autre fournisseur, par exemple un modèle Ollama local.</td></tr>
+        <tr><td>Un modèle local donne un délai dépassé</td><td>Le délai réseau de QGIS s'applique à l'agent (60 s par défaut). Un modèle local lent à démarrer peut en demander plus, et le message le dit.</td></tr>
+        <tr><td>SAM n'est pas installé : onnxruntime a été refusé ou l'installation a échoué</td><td>Si vous refusez la question, les cibles d'objets utilisent le moteur couleur, et le bouton <em>Install SAM…</em> du groupe PIPETTE la repropose. Si pip échoue (pas de réseau, pas de pip), la raison est dans le journal de FilterMate et le groupe affiche la commande à lancer à la main dans un terminal, l'OSGeo4W Shell sous Windows.</td></tr>
+        <tr><td>Le modèle SAM ne se télécharge pas, ou est signalé abîmé</td><td>Le téléchargement passe par le proxy HTTP des options de QGIS et peut être annulé. Chaque fichier est vérifié par son SHA-256 avant de remplacer quoi que ce soit. Cliquez sur <em>Repair the model…</em> pour remplacer les mauvais fichiers.</td></tr>
     </table>
     </div>
 
@@ -768,7 +962,7 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <footer class="doc-foot">
-    <p>FilterMate 5.0, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+    <p>FilterMate 5.1, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
     <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.fr.html">Feuille de route</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 
