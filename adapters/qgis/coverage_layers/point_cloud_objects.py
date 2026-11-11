@@ -23,9 +23,9 @@ click under a few seconds; a car is then two cells long.
 Similar objects: the footprint of the whole class (a private copy of the layer
 filtered on the class, :func:`point_cloud_footprint.footprint_geometry` at the
 same resolution, with the same gap closing), whose parts of an area like the
-clicked objects' are kept (:func:`raster_adapter.similar_area_bounds`). The
-clicked objects and the parts are measured alike: same cells, same closing,
-holes filled.
+clicked objects' are kept (:func:`raster_adapter.similar_area_bounds`), and of a
+shape like theirs with *same shape* (compactness, as on a raster). The clicked
+objects and the parts are measured alike: same cells, same closing, holes filled.
 
 The grid and window logic is plain numpy (:func:`object_window`,
 :func:`bin_points`, :func:`seed_cell`, :func:`grow_object`), testable without QGIS.
@@ -189,18 +189,26 @@ def filled_part(part):
     return filled if filled is not None and not filled.isEmpty() else part
 
 
-def similar_parts(geometry, reference_areas: Sequence[float], ratio) -> Tuple[list, int]:
+def similar_parts(geometry, reference_areas: Sequence[float], ratio,
+                  reference_shapes: Optional[Sequence[float]] = None) -> Tuple[list, int]:
     """``(kept, total)``: the parts of ``geometry`` (holes filled) whose area is like ``reference_areas``.
 
     The bounds are those of the raster similar objects (:func:`raster_adapter.similar_area_bounds`):
-    ``ratio[0]`` times the smallest reference to ``ratio[1]`` times the largest one.
+    ``ratio[0]`` times the smallest reference to ``ratio[1]`` times the largest one. With
+    ``reference_shapes`` (compactness of the clicked objects, holes filled), the compactness of a part
+    must be within the same ratios too (:func:`raster_adapter.similar_shape_bounds`), as on a raster.
     """
-    from .raster_adapter import geometry_parts, similar_area_bounds
+    from .geometry_tools import compactness
+    from .raster_adapter import geometry_parts, similar_area_bounds, similar_shape_bounds
     parts = [filled_part(part) for part in geometry_parts(geometry)]
     bounds = similar_area_bounds(reference_areas, ratio)
     if bounds is None:
         return [], len(parts)
-    return [part for part in parts if bounds[0] <= part.area() <= bounds[1]], len(parts)
+    kept = [part for part in parts if bounds[0] <= part.area() <= bounds[1]]
+    shapes = similar_shape_bounds(reference_shapes, ratio) if reference_shapes else None
+    if shapes is not None:
+        kept = [part for part in kept if shapes[0] <= compactness(part) <= shapes[1]]
+    return kept, len(parts)
 
 
 # --- QGIS ---------------------------------------------------------------------
@@ -377,12 +385,14 @@ def class_footprint(layer, code: int, base_subset: str = '', resolution: float =
 
 
 def similar_objects_footprint(layer, code: int, reference_areas: Sequence[float], ratio=DEFAULT_SIMILAR_RATIO,
-                              base_subset: str = '', footprint=None) -> SimilarObjects:
-    """Every object of class ``code`` of ``layer`` whose area is like ``reference_areas`` (layer units²).
+                              base_subset: str = '', footprint=None,
+                              reference_shapes: Optional[Sequence[float]] = None) -> SimilarObjects:
+    """Every object of class ``code`` of ``layer`` whose area (and shape) is like the clicked objects'.
 
     Args:
-        reference_areas: Areas of the clicked objects of that class (:func:`object_footprint`).
+        reference_areas: Areas of the clicked objects of that class (:func:`object_footprint`), layer units².
         ratio: ``(low, high)`` area ratios (:func:`similar_parts`).
+        reference_shapes: Their compactness, holes filled; None: the area alone.
         base_subset: The filter of the layer the objects are read through (not the live preview).
         footprint: The :func:`class_footprint` already read for the class (a ratio changed); read when None.
 
@@ -393,7 +403,7 @@ def similar_objects_footprint(layer, code: int, reference_areas: Sequence[float]
     started = time.perf_counter()
     if footprint is None:
         footprint = class_footprint(layer, code, base_subset)
-    kept, total = similar_parts(footprint.geometry, reference_areas, ratio)
+    kept, total = similar_parts(footprint.geometry, reference_areas, ratio, reference_shapes)
     geometry = union_geometries(kept) if kept else QgsGeometry()
     if footprint.coarse:
         logger.warning(f"[FM5] similar point cloud objects of class {int(code)} measured on cells of "

@@ -6085,6 +6085,16 @@ Asigurați-vă că tabelul PostgreSQL are un PRIMARY KEY definit.</translation>
         <translation>până la ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>aceeași formă</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Păstrează doar obiectele cu forma celor clicate: compactitatea lor (4π × arie / perimetru², 1 pentru un disc) în aceleași rapoarte; dezactivat, un gard viu cu aria unui copac este un copac</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Selector activ</translation>

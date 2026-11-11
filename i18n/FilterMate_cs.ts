@@ -6067,6 +6067,16 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <translation>až ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>stejný tvar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Ponechá jen objekty tvarem podobné těm, na které jste klikli: jejich kompaktnost (4π × plocha / obvod², 1 pro kruh) ve stejných poměrech; vypnuto, živý plot o ploše stromu je strom</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Výběr hodnoty zapnut</translation>

@@ -6085,6 +6085,16 @@ PostgreSQLテーブルにPRIMARY KEYが定義されていることを確認し�
         <translation>〜 ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>同じ形状</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>クリックしたものと同じ形状のオブジェクトだけを残します：コンパクトさ（4π × 面積 / 周長²、円は 1）が同じ比率の範囲内。オフにすると、木と同じ面積の生垣も木とみなされます</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>スポイト オン</translation>

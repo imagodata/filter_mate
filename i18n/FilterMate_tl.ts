@@ -6085,6 +6085,16 @@ Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation
         <translation>hanggang ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>kaparehong hugis</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Panatilihin lamang ang mga bagay na kahugis ng mga na-click: ang kanilang pagkasiksik (4π × lawak / perimetro², 1 para sa bilog) sa parehong mga ratio; kapag naka-off, ang bakod na halaman na kasinlawak ng puno ay puno</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Naka-on ang picker</translation>

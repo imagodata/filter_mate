@@ -6085,6 +6085,16 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <translation>إلى ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>الشكل نفسه</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>الإبقاء فقط على الكائنات التي تشبه في شكلها الكائنات المنقور عليها: تراصّها (4π × المساحة / المحيط²، و1 للقرص) ضمن النسب نفسها؛ عند الإيقاف، يُعدّ السياج الذي له مساحة شجرة شجرةً</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>تشغيل القطارة</translation>

@@ -6085,6 +6085,16 @@ Se till att PostgreSQL-tabellen har en PRIMARY KEY definierad.</translation>
         <translation>till ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>samma form</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Behåll bara objekt formade som de klickade: deras kompakthet (4π × area / omkrets², 1 för en skiva) inom samma förhållanden; av är en häck med ett träds area ett träd</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Pipett på</translation>

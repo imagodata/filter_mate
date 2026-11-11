@@ -11,6 +11,7 @@ All notable changes to FilterMate will be documented in this file.
 ### Objects drawn by SAM (experimental)
 
 - **Similar objects with SAM start sooner.** The candidates that lie well inside the area prepared for the click are drawn on it instead of on an area of their own: one encoding less per search (about 2 s on a CPU), and the search the dock runs is now the one that was measured.
+- **Similar objects of a point cloud keep the shape too, as on a raster.** Under the ratios of the object detector (CLASSES), a *same shape* box, on by default, keeps only the objects whose compactness (4π × area / perimeter², measured with the holes filled) is within the same ratios as the clicked ones: a hedge of the area of a tree is no longer a tree. Measured on 20 BD TOPO buildings of the LiDAR HD tile of the test project, by a rule set before the run (`scripts/pc_similar_shape.py`): median precision 0.435 to 0.455. Recall stays at 0 with or without the box, because the class 6 footprint, in 2 m cells, merges neighbouring buildings into blocks (47 objects for 126 buildings), so this bench says little either way. The box stands on a line of its own so that the panel does not get wider. Translated in the 34 languages.
 
 ## [5.1.0] - 2026-11-10
 

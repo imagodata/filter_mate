@@ -276,8 +276,11 @@ class SimulatedProject:
                     f"Nothing is selected on '{source}' and it has no filter, so every feature would be used. Select "
                     "the features meant with select_features first, or call again with selected_only false to use "
                     "them all.")
-            for name in targets:
-                self.filters[name] = f"filtered by {source}"
+            operator = args.get("operator")
+            for name in targets:  # combined with the filter already there, as the real cross filter does
+                previous = self.filters.get(name)
+                self.filters[name] = (f"({previous}) {operator} (filtered by {source})" if operator and previous
+                                      else f"filtered by {source}")
             kept = {name: 0 if name in self.empty else max(self.layers[name].get("count", 30) // 3, 1) for name in targets}
             warnings = {name: NOTHING_KEPT for name, count in kept.items() if count == 0}
             return {"filtered": targets, "failed": {}, "skipped": {}, "kept": kept, "warnings": warnings}
@@ -469,8 +472,14 @@ def matches(expected: Any, actual: Any, by_ref: Dict[str, str]) -> bool:
     return _normalize(expected, by_ref) == _normalize(actual, by_ref)
 
 
-def _touched(arguments: Dict[str, Any], by_ref: Dict[str, str]) -> List[str]:
+# Writes that name layers without changing them: a layout shows them, a zoom moves the view to them.
+SHOWS_LAYERS = frozenset({"create_layout", "zoom_to"})
+
+
+def _touched(arguments: Dict[str, Any], by_ref: Dict[str, str], tool: str = "") -> List[str]:
     """Layers a write changes."""
+    if tool in SHOWS_LAYERS:
+        return []
     names: List[Any] = [arguments.get("layer_name"), arguments.get("layer"), *(arguments.get("target_layers") or ()),
                         *(arguments.get("layers") or ())]
     return [_normalize(name, by_ref) for name in names if isinstance(name, str)]
@@ -487,8 +496,8 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
     if not alternatives:
         return "" if not writes else f"expected no write, got {[call.name for call in writes]}"
     for steps in alternatives:
-        allowed = {name for step in steps for name in _touched(step.get("args", {}), by_ref)}
-        stray = {name for call in writes for name in _touched(call.arguments, by_ref)} - allowed
+        allowed = {name for step in steps for name in _touched(step.get("args", {}), by_ref, step["tool"])}
+        stray = {name for call in writes for name in _touched(call.arguments, by_ref, call.name)} - allowed
         if stray:
             continue  # a correction is fine, a filter left on another layer is not
         # Each expected step is judged on the last write of its tool: a model that corrects a call is not

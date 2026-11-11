@@ -6085,6 +6085,16 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
         <translation>– ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>sama muoto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Säilytä vain napsautettujen muotoiset kohteet: niiden tiiviys (4π × pinta-ala / piiri², ympyrällä 1) samoissa suhteissa; pois päältä puun kokoinen pensasaita on puu</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Pipetti päällä</translation>

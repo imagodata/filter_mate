@@ -6085,6 +6085,16 @@ Assegureu-vos que la taula PostgreSQL tingui una PRIMARY KEY definida.</translat
         <translation>a ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>mateixa forma</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Conserva només els objectes amb la forma dels clicats: la seva compacitat (4π × àrea / perímetre², 1 per a un disc) dins les mateixes proporcions; desactivat, una tanca viva de l'àrea d'un arbre és un arbre</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Comptagotes a</translation>

@@ -110,6 +110,9 @@ Rules worth keeping:
   The turn keeps the index of the undo stack before its first edit of a layer; undoing the turn steps back over its
   commands, and is refused on a layer saved, discarded or edited by the user since. `describe_layer` says whether
   a layer is being edited and holds unsaved changes.
+  Checked on GeoPackage (`check_agent_tools.py`) and on a PostGIS table (`check_agent_edits_postgis.py`: the key
+  refused, nothing in the table before the user saves, then the values and the point added there with their
+  types and CRS); a WFS-T layer is not checked.
 - **Layouts** (`adapters/public_api/layouts.py`): `create_layout` adds a print layout to the project (A4, A3, A5
   or Letter, landscape or portrait): a map of the layers checked in the tree or of those given, framed on an
   extent, a layer, the map view or the layers shown, with a title, a legend, a scale bar and a north arrow. The
@@ -378,7 +381,7 @@ untrusted data is best run with a database role that cannot write.
     FILTERMATE_AGENT_API_KEY=... python scripts/agent_eval.py --live \
         --provider anthropic --model claude-haiku-5-5                    # real model, costs money
 
-39 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
+63 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
 read-only requests, and one attribute value holding a prompt injection. A case is scored on the filters finally applied.
 It is what decides the model of the free quota, and whether a local model is good enough to offer.
 
@@ -390,6 +393,7 @@ already filtered or a road selected. Without that, a model that checks its work 
 |---|---|
 | Claude Haiku 5.5, direct | 39/39, about 0.09 $ estimated from the token counts |
 | Claude Haiku 5.5, through the free quota relay, 3 cases with tools | 3/3 |
+| Claude Haiku 5.5, direct, 63 cases, 41 tools (2026-11-11) | 58/63; the 5 failures read one by one: 4 came from the bench (a simulated cross filter that dropped the filter it was combined with, a layout and a zoom counted as changes of layers, an edit by selection not accepted), 1 from the model (a favorite applied a second time by hand, a line of the prompt since); those 5 cases again: 5/5 |
 
 The first live run gave 31/39 on a project that kept no state: every failure came from the bench.
 

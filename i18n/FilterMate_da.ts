@@ -6085,6 +6085,16 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY defineret.</translation>
         <translation>til ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>samme form</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Behold kun objekter formet som de klikkede: deres kompakthed (4π × areal / omkreds², 1 for en skive) inden for de samme forhold; slået fra er en hæk med et træs areal et træ</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Pipette på</translation>

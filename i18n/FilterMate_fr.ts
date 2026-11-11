@@ -6145,6 +6145,16 @@ Assurez-vous que la table PostgreSQL a une CLÉ PRIMAIRE définie.</translation>
         <translation>à ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>même forme</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Ne garder que les objets de la forme des objets cliqués : leur compacité (4π × aire / périmètre², 1 pour un disque) dans les mêmes rapports ; décoché, une haie de l'aire d'un arbre est un arbre</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1370"/>
         <source>{0} object(s)</source>
         <translation>{0} objet(s)</translation>

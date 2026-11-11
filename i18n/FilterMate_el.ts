@@ -6085,6 +6085,16 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <translation>έως ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>ίδιο σχήμα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Κρατά μόνο τα αντικείμενα με σχήμα όπως αυτά που επιλέχθηκαν: η συμπαγότητά τους (4π × εμβαδόν / περίμετρος², 1 για δίσκο) μέσα στους ίδιους λόγους· όταν είναι ανενεργό, ένας φράχτης με το εμβαδόν ενός δέντρου είναι δέντρο</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Σταγονόμετρο ενεργό</translation>

@@ -6085,6 +6085,16 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <translation>до ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>та сама форма</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Залишати лише об'єкти тієї ж форми, що й вибрані клацанням: їхня компактність (4π × площа / периметр², 1 для круга) у тих самих межах; якщо вимкнено, жива огорожа площею з дерево вважається деревом</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Піпетку ввімкнено</translation>
