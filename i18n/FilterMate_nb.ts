@@ -1444,6 +1444,11 @@ Er du enig?</translation>
         <source>to</source>
         <translation>til</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>andre</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>

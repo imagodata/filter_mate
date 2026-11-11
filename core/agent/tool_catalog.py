@@ -133,17 +133,20 @@ CHAT_ONLY = (
         description=("Make a small control that stays in the AGENT panel, saved with the project, for the user to "
                      "explore a vector layer without asking you again: range (two bounds on a numeric field: moving "
                      "them filters the layer), values (the values of a field, each ticked or not: at most 50, "
-                     "unticking filters the layer) or stat (a number on the layer as filtered now: count, or sum, "
-                     "mean, min, max of a numeric field, kept up to date). FilterMate builds the filter of a widget "
+                     "unticking filters the layer), stat (a number on the layer as filtered now: count, or sum, "
+                     "mean, min, max of a numeric field, kept up to date) or chart (bars of the layer as filtered "
+                     "now: the features of each value of a field, the 8 most frequent and the others, or a "
+                     "histogram of a numeric field; it filters nothing). FilterMate builds the filter of a widget "
                      "itself; the widgets of one layer narrow it together, after the filter it had when its first "
                      "widget was made. Use it when the user asks for a widget, a slider, a control, a dashboard or "
                      "a way to play with the data; several calls make several widgets. Undone with the turn. Returns "
                      "widget (what was made) and widgets (all of them, without their values)."),
         input_schema={"type": "object", "properties": {
-            "kind": {"type": "string", "enum": ["range", "values", "stat"]},
+            "kind": {"type": "string", "enum": ["range", "values", "stat", "chart"]},
             "layer": {"type": "string", "minLength": 1, "maxLength": 1000, "description": "Vector layer, name or id"},
             "field": {"type": "string", "maxLength": 200,
-                      "description": "Field: numeric for range and for a stat other than count"},
+                      "description": ("Field: numeric for range and for a stat other than count; for chart, the "
+                                      "values counted (a histogram when numeric)")},
             "aggregate": {"type": "string", "enum": ["count", "sum", "mean", "min", "max"], "default": "count",
                           "description": "For stat only"},
             "title": {"type": "string", "maxLength": 60, "description": "Short title in the words of the user"}},

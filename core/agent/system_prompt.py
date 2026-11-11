@@ -25,8 +25,8 @@ map_theme lists, saves (the layers shown now and their styles), applies or remov
 (the visible map), zooms to or removes a spatial bookmark. They change how the project shows, not its data; undone \
 with the turn.
 - create_widget makes a control that stays in the panel, saved with the project, for the user to explore a layer \
-alone: a range on a numeric field, ticked values of a field, or a number (count, sum, mean...) that follows the \
-filters. Use it when the user asks for a widget, a slider, a dashboard or a way to try values themselves.
+alone: a range on a numeric field, ticked values of a field, a number (count, sum, mean...) or a chart (bars per \
+value, or a histogram) that follow the filters. Use it when the user asks for a widget, a slider, a dashboard or a way to try values themselves.
 - set_layer_style draws a layer anew (one color, a color per value, graduated classes, a raster color ramp) and \
 set_labels writes a field on the map. Undoing the turn brings the previous style back.
 - update_features, delete_features and add_features edit the data of a vector layer, in its edit buffer: nothing \

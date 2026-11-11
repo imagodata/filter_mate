@@ -1444,6 +1444,11 @@ Sumasang-ayon ka ba?</translation>
         <source>to</source>
         <translation>hanggang</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>iba pa</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>

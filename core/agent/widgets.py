@@ -5,7 +5,9 @@ Plain Python. A widget is a dict, kept as JSON in the project, drawn by FilterMa
 
 - ``range``: two bounds on a numeric field; moving them filters the layer;
 - ``values``: the values of a field, each ticked or not; ticking filters the layer;
-- ``stat``: a number computed on the layer as it is filtered now (count, sum, mean, minimum, maximum).
+- ``stat``: a number computed on the layer as it is filtered now (count, sum, mean, minimum, maximum);
+- ``chart``: bars of the layer as filtered now: the features of each value of a field (the most frequent ones), or
+  a histogram of a numeric field.
 
 A widget filters only its own layer. The conditions of the widgets of a layer are joined with AND, after the filter
 the layer had when its first widget was made (``base``), so two widgets of one layer narrow it together and the filter
@@ -18,8 +20,14 @@ import json
 import math
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
 
-RANGE, VALUES, STAT = "range", "values", "stat"
-KINDS = (RANGE, VALUES, STAT)
+RANGE, VALUES, STAT, CHART = "range", "values", "stat", "chart"
+KINDS = (RANGE, VALUES, STAT, CHART)
+# Widgets that show the layer and filter nothing.
+SHOWING = (STAT, CHART)
+CATEGORIES, HISTOGRAM = "categories", "histogram"
+CHART_MODES = (CATEGORIES, HISTOGRAM)
+MAX_BARS = 8  # the most frequent values; the others are summed in one bar
+HISTOGRAM_BINS = 10
 AGGREGATES = ("count", "sum", "mean", "min", "max")
 MAX_WIDGETS = 12
 MAX_VALUES = 50
@@ -72,6 +80,11 @@ def _clean(widget: Any) -> Optional[Dict[str, Any]]:
         chosen = widget.get("chosen")
         chosen = list(values) if not isinstance(chosen, list) else [value for value in chosen if value in values]
         out.update(values=values, chosen=chosen)
+    elif kind == CHART:
+        mode = widget.get("mode")
+        if mode not in CHART_MODES or not out["field"]:
+            return None
+        out.update(mode=mode)
     else:
         aggregate = widget.get("aggregate") or "count"
         if aggregate not in AGGREGATES or (aggregate != "count" and not out["field"]):
@@ -111,7 +124,7 @@ def new_id(widgets: Sequence[Dict[str, Any]]) -> str:
 
 def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name: str, base: str, title: str = "",
          field: str = "", aggregate: str = "", minimum: Any = None, maximum: Any = None, integer: bool = False,
-         values: Optional[Iterable[Any]] = None) -> Dict[str, Any]:
+         values: Optional[Iterable[Any]] = None, numeric: bool = False) -> Dict[str, Any]:
     """A new widget, checked; the caller read ``minimum``/``maximum`` or ``values`` from the layer.
 
     Raises:
@@ -121,10 +134,10 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
         raise WidgetError(f"There are already {MAX_WIDGETS} widgets: remove one first (remove_widget).")
     if kind not in KINDS:
         raise WidgetError(f"kind must be one of {', '.join(KINDS)}.")
-    same_layer = [widget for widget in widgets if widget["layer_id"] == layer_id and widget["kind"] != STAT]
-    if kind != STAT and same_layer:
+    same_layer = [widget for widget in widgets if widget["layer_id"] == layer_id and widget["kind"] not in SHOWING]
+    if kind not in SHOWING and same_layer:
         base = same_layer[0]["base"]  # the filter the layer had before its first widget
-    if kind != STAT and any(widget["field"] == field and widget["kind"] != STAT for widget in same_layer):
+    if kind not in SHOWING and any(widget["field"] == field for widget in same_layer):
         raise WidgetError(f"A widget already filters {field!r} of this layer.")
     entry = {"id": new_id(widgets), "kind": kind, "layer_id": layer_id, "layer_name": layer_name,
              "title": (title or "").strip()[:MAX_TITLE], "field": field, "base": base}
@@ -143,6 +156,10 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
             raise WidgetError(f"{field!r} takes more than {MAX_VALUES} values: use a range widget, or filter first.")
         ordered = sorted(found, key=lambda value: (value is None, type(value).__name__, value if value is not None else 0))
         entry.update(values=ordered, chosen=list(ordered))
+    elif kind == CHART:
+        if not field:
+            raise WidgetError("A chart needs a field: the values it counts, or the numbers of a histogram.")
+        entry.update(mode=HISTOGRAM if numeric else CATEGORIES)
     else:
         aggregate = aggregate or "count"
         if aggregate not in AGGREGATES:
@@ -186,7 +203,7 @@ def condition(widget: Dict[str, Any], quote_field: Quote, quote_value: Quote) ->
 
 def layer_filter(widgets: Sequence[Dict[str, Any]], layer_id: str, quote_field: Quote, quote_value: Quote) -> str:
     """The filter of a layer from its widgets: its filter from before, AND each condition."""
-    mine = [widget for widget in widgets if widget["layer_id"] == layer_id and widget["kind"] != STAT]
+    mine = [widget for widget in widgets if widget["layer_id"] == layer_id and widget["kind"] not in SHOWING]
     if not mine:
         return ""
     parts = [mine[0]["base"]] if mine[0]["base"] else []
@@ -208,10 +225,43 @@ def summary(widgets: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
             row.update(low=widget["low"], high=widget["high"])
         elif widget["kind"] == VALUES:
             row.update(values=len(widget["values"]), ticked=len(widget["chosen"]))
+        elif widget["kind"] == CHART:
+            row["mode"] = widget["mode"]
         else:
             row["aggregate"] = widget["aggregate"]
         rows.append(row)
     return rows
+
+
+def category_bars(counts: Iterable[Any], total: int, limit: int = MAX_BARS) -> List[Dict[str, Any]]:
+    """The bars of a chart of categories: the ``limit`` most frequent values, then one bar for all the others.
+
+    ``counts`` holds ``(value, count)``; ``total`` is the number of features of the layer. Each bar is
+    ``{"value", "count", "others"}``; ``others`` is True for the bar of the rest.
+    """
+    ranked = sorted(((value, count) for value, count in counts), key=lambda item: (-item[1], str(item[0])))
+    bars = [{"value": value, "count": count, "others": False} for value, count in ranked[:limit]]
+    rest = total - sum(bar["count"] for bar in bars)
+    if rest > 0:
+        bars.append({"value": None, "count": rest, "others": True})
+    return bars
+
+
+def histogram_bars(values: Iterable[Any], bins: int = HISTOGRAM_BINS) -> List[Dict[str, Any]]:
+    """The bars of a histogram: ``bins`` equal intervals of the finite numbers of ``values``, as
+    ``{"low", "high", "count"}``."""
+    numbers = [float(value) for value in values if _number(value) is not None]
+    if not numbers:
+        return []
+    low, high = min(numbers), max(numbers)
+    if low == high:
+        return [{"low": low, "high": high, "count": len(numbers)}]
+    width = (high - low) / bins
+    counts = [0] * bins
+    for number in numbers:
+        counts[min(int((number - low) / width), bins - 1)] += 1
+    return [{"low": low + index * width, "high": low + (index + 1) * width, "count": count}
+            for index, count in enumerate(counts)]
 
 
 def without(widgets: Sequence[Dict[str, Any]], widget_id: str) -> List[Dict[str, Any]]:

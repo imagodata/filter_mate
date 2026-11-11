@@ -1444,6 +1444,11 @@ Do you agree?</source>
         <source>to</source>
         <translation>hasta</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>otros</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>

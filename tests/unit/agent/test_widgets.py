@@ -5,8 +5,8 @@ import json
 import pytest
 
 from core.agent.widgets import (
-    MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, STAT, VALUES, WidgetError, condition, dumps, layer_filter, make, parse,
-    replaced, summary, without,
+    CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, STAT, VALUES, WidgetError,
+    category_bars, condition, dumps, histogram_bars, layer_filter, make, parse, replaced, summary, without,
 )
 
 pytestmark = pytest.mark.unit
@@ -55,7 +55,7 @@ class TestMake:
         assert make([], STAT, "L1", "communes", "", field="pop", aggregate="sum")["aggregate"] == "sum"
 
     @pytest.mark.parametrize("changes, words", [
-        (dict(kind="chart"), "kind"),
+        (dict(kind="pie"), "kind"),
         (dict(minimum=None), "numeric"),
         (dict(minimum=5, maximum=5), "same value"),
         (dict(minimum=float("nan")), "numeric"),
@@ -178,3 +178,40 @@ class TestStore:
         moved = replaced(widgets, dict(widgets[0], low=10.0))
         assert moved[0]["low"] == 10.0 and moved[1] == widgets[1]
         assert replaced(widgets, {"id": "w1"}) == widgets  # a broken state changes nothing
+
+
+class TestChart:
+    def test_a_numeric_field_makes_a_histogram_a_text_field_categories(self):
+        assert make([], CHART, "L1", "communes", "", field="pop", numeric=True)["mode"] == HISTOGRAM
+        assert make([], CHART, "L1", "communes", "", field="dep")["mode"] == CATEGORIES
+
+    def test_a_chart_needs_a_field(self):
+        with pytest.raises(WidgetError, match="needs a field"):
+            make([], CHART, "L1", "communes", "")
+
+    def test_a_chart_filters_nothing_and_takes_no_field_from_a_filtering_widget(self):
+        first = a_range()
+        chart = make([first], CHART, "L1", "communes", "", field="pop", numeric=True)
+        assert layer_filter([first, chart], "L1", qf, qv) == ""
+        assert condition(chart, qf, qv) == ""
+        assert some_values([chart], field="pop", values=[1, 2])["kind"] == VALUES  # a chart is no filter on pop
+
+    def test_round_trip_and_summary(self):
+        chart = make([], CHART, "L1", "communes", "", field="dep", title="Par département")
+        assert parse(dumps([chart])) == [chart]
+        assert summary([chart])[0]["mode"] == CATEGORIES
+        assert parse(dumps([dict(chart, mode="pie")])) == []
+
+    def test_category_bars_most_frequent_then_the_others(self):
+        counts = [(f"v{index}", index) for index in range(1, 12)]  # 66 features in 11 values
+        bars = category_bars(counts, total=66)
+        assert [bar["value"] for bar in bars[:3]] == ["v11", "v10", "v9"] and len(bars) == MAX_BARS + 1
+        assert bars[-1] == {"value": None, "count": 6, "others": True}  # v1 + v2 + v3
+        assert category_bars([("a", 2), (None, 1)], total=3)[1] == {"value": None, "count": 1, "others": False}
+
+    def test_histogram_bars(self):
+        bars = histogram_bars([0, 1, 2, 9, 10, None, "x"], bins=5)
+        assert [bar["count"] for bar in bars] == [2, 1, 0, 0, 2]
+        assert bars[0]["low"] == 0 and bars[-1]["high"] == 10
+        assert histogram_bars([3, 3]) == [{"low": 3.0, "high": 3.0, "count": 2}]
+        assert histogram_bars([None]) == []

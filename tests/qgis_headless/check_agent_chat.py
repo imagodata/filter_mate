@@ -1239,6 +1239,21 @@ def check_widgets(chat, provider, settings, ask, layer):
     check("widgets: the cross removes it, the filter stays", values[0]["id"] not in strip.cards and
           layer.subsetString() == '("pop" <= 3000) AND ("pop" IN (100, 200))', layer.subsetString())
 
+    layer.setSubsetString("")
+    provider.reset((200, {}, tool_turn("create_widget", {"kind": "chart", "layer": "communes", "field": "pop"})),
+                   (200, {}, text_turn("ok")))
+    ask("un histogramme de la population")
+    charts = [w for w in read_widgets() if w["kind"] == "chart"]
+    chart = strip.cards[charts[0]["id"]].chart if charts else None
+    wait(lambda: chart is not None and sum(bar["count"] for bar in chart.bars) == 60, 3)
+    check("widgets: a histogram of a numeric field, of the features shown", charts and charts[0]["mode"] == "histogram"
+          and len(chart.bars) == 10 and sum(bar["count"] for bar in chart.bars) == 60,
+          chart.bars if chart is not None else charts)
+    layer.setSubsetString('"pop" <= 3000')
+    wait(lambda: sum(bar["count"] for bar in chart.bars) == 30, 3)
+    check("widgets: the chart follows the filter", sum(bar["count"] for bar in chart.bars) == 30, chart.bars)
+    check("widgets: a chart filters nothing", layer.subsetString() == '"pop" <= 3000')
+
     write_widgets([])
     chat._refresh_widgets()
     layer.setSubsetString("")

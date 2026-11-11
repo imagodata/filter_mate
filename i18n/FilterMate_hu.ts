@@ -1444,6 +1444,11 @@ Egyetért?</translation>
         <source>to</source>
         <translation>ig</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>egyéb</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>
