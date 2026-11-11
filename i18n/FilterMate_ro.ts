@@ -802,6 +802,11 @@ Sunteți de acord?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Semn de carte: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Pasul {} nu a fost executat: ar modifica un strat pe care l-ați protejat de agent ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Sunteți de acord?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Da, pentru această conversație</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>STRATURI PROTEJATE DE AGENT (ACEST PROIECT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agentul le citește și le folosește ca sursă, dar nu le modifică niciodată: niciun filtru, stil, editare, câmp, îmbinare, nume nou sau eliminare, indiferent de nivel, nici într-o rețetă, nici pentru alte aplicații. Salvat în proiect.</translation>
     </message>
 </context>
 <context>

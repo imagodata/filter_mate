@@ -802,6 +802,11 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>ዕልባት፦ {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>ደረጃ {} አልተሠራም፦ ከወኪሉ የጠበቁትን ንብርብር ይቀይር ነበር ({})።</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>አዎ፣ ለዚህ ውይይት</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>ከወኪሉ የተጠበቁ ንብርብሮች (ይህ ፕሮጀክት)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>ወኪሉ ያነባቸዋል እንደ ምንጭም ይጠቀምባቸዋል፣ ነገር ግን በፍጹም አይቀይራቸውም፦ ማጣሪያ፣ ቅጥ፣ አርትዖት፣ መስክ፣ ማጣመር፣ አዲስ ስም ወይም ማስወገድ የለም፣ በማንኛውም ደረጃ፣ በምግብ አዘገጃጀት ውስጥም ለሌሎች መተግበሪያዎችም። በፕሮጀክቱ ውስጥ ይቀመጣል።</translation>
     </message>
 </context>
 <context>

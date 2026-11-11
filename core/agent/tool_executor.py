@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 from .json_schema import validate
 from .messages import ToolCallPart, ToolResultPart
-from .permissions import ADVISOR_REFUSAL, ASK, RUN, PermissionPolicy
+from .permissions import ADVISOR_REFUSAL, ASK, PROTECTED, RUN, PermissionPolicy
 from .tool_catalog import ToolSpec
 
 logger = logging.getLogger("FilterMate.agent")
@@ -99,6 +99,8 @@ class ToolExecutor:
         tool = self._tools.get(call.name)
         if tool is None or call.parse_error or validate(call.arguments, tool.input_schema):
             return RUN
+        if policy.protection_refusal(call.name, call.arguments):
+            return PROTECTED
         return policy.verdict(tool)
 
     @staticmethod
@@ -106,9 +108,10 @@ class ToolExecutor:
         return ToolResultPart(call.call_id, DECLINED, is_error=True)
 
     @staticmethod
-    def refused(call: ToolCallPart) -> ToolResultPart:
-        """Not run, because of the level of autonomy the user chose."""
-        return ToolResultPart(call.call_id, ADVISOR_REFUSAL, is_error=True)
+    def refused(call: ToolCallPart, policy: Optional[PermissionPolicy] = None) -> ToolResultPart:
+        """Not run, because of a layer the user protected, or of the level of autonomy the user chose."""
+        protected = policy.protection_refusal(call.name, call.arguments) if policy is not None else ""
+        return ToolResultPart(call.call_id, protected or ADVISOR_REFUSAL, is_error=True)
 
     def execute(self, call: ToolCallPart) -> ToolResultPart:
         """Result of ``call``; never raises, a model reads its mistakes and corrects them."""

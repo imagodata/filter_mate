@@ -802,6 +802,11 @@ Onaylıyor musunuz?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Yer imi: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>{}. adım çalıştırılmadı: ajandan koruduğunuz bir katmanı değiştirecekti ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Onaylıyor musunuz?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Evet, bu konuşma için</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>AJANDAN KORUNAN KATMANLAR (BU PROJE)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Ajan bunları okur ve kaynak olarak kullanır, ancak asla değiştirmez: filtre, stil, düzenleme, alan, birleştirme, yeni ad veya kaldırma yok; her düzeyde, bir tarifte de ve diğer uygulamalar için de. Projede saklanır.</translation>
     </message>
 </context>
 <context>

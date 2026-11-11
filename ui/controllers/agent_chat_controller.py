@@ -29,7 +29,10 @@ from ...core.agent.open_data import KIND_STAC, KIND_WFS, display_source, parse_e
 from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
-from ...core.agent.permissions import ADVISOR, ASK, AUTONOMOUS, REFUSE, RUN, STANDARD, PermissionPolicy, level_note
+from ...core.agent.permissions import (
+    ADVISOR, ASK, AUTONOMOUS, PROTECTED, REFUSE, RUN, STANDARD, PermissionPolicy, level_note,
+)
+from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
 from ...core.agent.recipes import (
     MAX_NAME as RECIPE_MAX_NAME, RecipeError, find as find_recipe, plain as recipe_plain, recipes_block,
     saved as recipe_saved, steps_of as recipe_steps, summary as recipe_summary, without as recipe_without,
@@ -121,7 +124,9 @@ class AgentChatController(QObject):
                           else (lambda title, text: ask_with_conversation(parent_widget, title, text)))
         self._ask_choice = ask_choice
         # The level of the settings, and what the user allowed for the conversation under way.
-        self._policy = PermissionPolicy(load_settings().autonomy)
+        # The layers the user protected in the open project: refused to the chat, the recipes and other applications.
+        self._protection = ProjectProtection()
+        self._policy = PermissionPolicy(load_settings().autonomy, protector=self._protection)
         # Code is read in a dialog of its own; a test that answers the questions gets it in the text.
         self._ask_code = ((lambda title, text, code: ask_code(parent_widget, title, text, code)) if ask_user is None
                           else (lambda title, text, code: ask_user(title, text + "\n\n" + code)))
@@ -346,8 +351,12 @@ class AgentChatController(QObject):
     def open_settings(self) -> bool:
         """Ask for the settings; True when saved."""
         values = load_settings()
+        protected = set(read_protected())
+        project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
+                                 for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
-                                     free_available=bool(free_quota_url()), mcp_error=self._mcp.error)
+                                     free_available=bool(free_quota_url()), mcp_error=self._mcp.error,
+                                     project_layers=project_layers)
         try:
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return False
@@ -382,6 +391,8 @@ class AgentChatController(QObject):
                                         expert_python=dialog.expert_python.isChecked(),
                                         autonomy=dialog.chosen_autonomy()))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
+            if project_layers:
+                write_protected(dialog.chosen_protected())
         finally:
             dialog.key.clear()
             dialog.deleteLater()
@@ -623,7 +634,8 @@ class AgentChatController(QObject):
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)
         level = self._policy.level
-        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level)  # nothing allowed beforehand counts
+        # Nothing allowed beforehand counts; the protected layers do.
+        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection)
         title = _tr("Recipe: {}").format(recipe["name"])
         self._replaying, self._replay_stop = True, False
         self._checkpoint.label = title
@@ -644,6 +656,10 @@ class AgentChatController(QObject):
                         number, step["label"])
                     break
                 verdict = executor.verdict(call, policy)
+                if verdict == PROTECTED:
+                    stop = _tr("Step {} was not run: it would change a layer you protected from the agent ({}).").format(
+                        number, step["label"])
+                    break
                 if level == ADVISOR and verdict == REFUSE:
                     verdict = ASK
                 if verdict != RUN and (verdict == REFUSE or not self._confirm(call, title)):
@@ -944,7 +960,22 @@ class AgentChatController(QObject):
             recipes = recipes_block(read_recipes())
         except Exception:  # the request goes without them
             recipes = ""
-        return "\n\n".join(part for part in (summary, notes, listed, recipes, level_note(self._policy.level)) if part)
+        try:
+            protected = self._protection.names()
+        except Exception:  # the request goes without them
+            protected = []
+        guarded = ("Layers the user protected from the agent (read them, use them as a source, never change them): "
+                   + json.dumps(protected, ensure_ascii=False) if protected else "")
+        return "\n\n".join(part for part in (summary, notes, listed, recipes, guarded, level_note(self._policy.level))
+                           if part)
+
+    def protection_refusal(self, call: ToolCallPart) -> str:
+        """What a call that would change a protected layer is answered, for the MCP server too; "" otherwise."""
+        try:
+            return self._policy.protection_refusal(call.name, call.arguments)
+        except Exception:  # a project closing: nothing to protect
+            logger.debug("Agent: protected layers not read", exc_info=True)
+            return ""
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""

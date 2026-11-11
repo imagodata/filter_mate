@@ -802,6 +802,11 @@ Hi esteu d'acord?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Punt d'interès: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>El pas {} no s'ha executat: canviaria una capa que heu protegit de l'agent ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Hi esteu d'acord?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Sí, per a aquesta conversa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>CAPES PROTEGIDES DE L'AGENT (AQUEST PROJECTE)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>L'agent les llegeix i les fa servir com a font, però no les canvia mai: ni filtre, ni estil, ni edició, ni camp, ni unió, ni nom nou, ni eliminació, sigui quin sigui el nivell, també en una recepta i per a altres aplicacions. Es desa al projecte.</translation>
     </message>
 </context>
 <context>

@@ -802,6 +802,11 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>북마크: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>{}단계가 실행되지 않았습니다: 에이전트로부터 보호한 레이어를 변경하게 됩니다({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>예, 이 대화에서는 허용</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>에이전트로부터 보호된 레이어(이 프로젝트)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>에이전트는 이를 읽고 소스로 사용하지만 절대 변경하지 않습니다. 필터, 스타일, 편집, 필드, 조인, 새 이름, 제거 모두 어떤 수준에서도, 레시피에서도, 다른 애플리케이션에서도 하지 않습니다. 프로젝트에 저장됩니다.</translation>
     </message>
 </context>
 <context>

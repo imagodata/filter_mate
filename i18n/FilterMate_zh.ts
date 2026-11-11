@@ -802,6 +802,11 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>书签：{} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>步骤 {} 未执行：它会更改您已对代理设为保护的图层（{}）。</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>是，本次对话</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>受保护、代理不可更改的图层（本项目）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>代理会读取这些图层并将其用作来源，但绝不会更改它们：无论哪个级别，在配方中以及对其他应用程序，都不会进行筛选、样式、编辑、字段、连接、重命名或移除。保存在项目中。</translation>
     </message>
 </context>
 <context>

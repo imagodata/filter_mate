@@ -214,6 +214,13 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
   when it is not `standard` (the system prompt stays constant for the cache).
 - An invalid call is never asked nor refused: it runs to answer its mistake.
 - The MCP servers keep the `standard` rules (`ToolExecutor.needs_confirmation`): the level is the chat's.
+- **Protected layers** (`adapters/agent/protected_layers.py`, kept in the project by their ids, ticked in the Autonomy
+  tab): a call that would change one (`permissions.CHANGED_LAYERS`: its filter, style, labels, features, fields, join,
+  name, or the layer itself) gets the verdict `PROTECTED`, refused at every level, never turned into a question nor
+  allowed for a conversation; in a recipe it stops the replay; the native MCP server answers it the same way. Reading
+  one, using it as the source of a cross filter or the table of a join, zooming, selecting or showing it stays
+  allowed. Their names go with each request. Not covered: `run_pyqgis` (code, asked at every run) and
+  `apply_favorite` (the layer is in the favorite, not in the call).
 - The question of a change the level shows first (a filter at `careful`) says what the tool does and its arguments; a
   tool added later without a text of its own gets the same, instead of the text of an export.
 

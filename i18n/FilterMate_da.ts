@@ -802,6 +802,11 @@ Er du enig?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Bogmærke: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Trin {} blev ikke udført: det ville ændre et lag, du har beskyttet mod agenten ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Er du enig?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ja, for denne samtale</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>LAG BESKYTTET MOD AGENTEN (DETTE PROJEKT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agenten læser dem og bruger dem som kilde, men ændrer dem aldrig: intet filter, ingen stil, redigering, felt, sammenkædning, nyt navn eller fjernelse, uanset niveau, også i en opskrift og for andre programmer. Gemt i projektet.</translation>
     </message>
 </context>
 <context>

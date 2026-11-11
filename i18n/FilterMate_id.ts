@@ -802,6 +802,11 @@ Apakah Anda setuju?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Markah: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Langkah {} tidak dijalankan: langkah itu akan mengubah lapisan yang Anda lindungi dari agen ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Apakah Anda setuju?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ya, untuk percakapan ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>LAPISAN YANG DILINDUNGI DARI AGEN (PROYEK INI)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agen membacanya dan memakainya sebagai sumber, tetapi tidak pernah mengubahnya: tanpa filter, gaya, penyuntingan, bidang, gabungan, nama baru, atau penghapusan, pada level apa pun, juga dalam resep dan untuk aplikasi lain. Disimpan di proyek.</translation>
     </message>
 </context>
 <context>

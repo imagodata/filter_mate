@@ -1100,6 +1100,7 @@ def check_chat(provider, layer, authcfg, work):
     check_steps(chat, provider, settings, ask, layer)
     check_autonomy(chat, provider, settings, ask, answers, layer)
     check_widgets(chat, provider, settings, ask, layer)
+    check_protected(chat, provider, settings, ask, layer)
     check_recipes(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
@@ -1166,6 +1167,48 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
     panel.clear_thread()
+
+
+def check_protected(chat, provider, settings, ask, layer):
+    """A layer the user protected: refused to the chat at every level, named to the model, and to other applications."""
+    from filter_mate.adapters.agent.protected_layers import read_ids, write_ids
+    from filter_mate.adapters.agent.settings import load_settings, target_of
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
+
+    dialog = AgentSettingsDialog(load_settings(), target_of, project_layers=[(layer.id(), "communes", False)])
+    dialog.protected_layers.item(0).setCheckState(Qt.CheckState.Checked)
+    check("protected: ticked in the Autonomy tab", dialog.chosen_protected() == [layer.id()], dialog.chosen_protected())
+    dialog.close()
+    write_ids([layer.id()])
+    check("protected: kept in the project", read_ids() == [layer.id()])
+    settings(autonomy="autonomous")
+    layer.setSubsetString("")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'})),
+                   (200, {}, text_turn("Elle est protégée.")))
+    ask("filtre les communes")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("protected: a filter is refused even when autonomous, nobody asked", result.get("is_error") is True and
+          "'communes'" in result["content"] and "protected" in result["content"] and not asked and
+          layer.subsetString() == "", (result, asked, layer.subsetString()))
+    sent = json.dumps(provider.requests[0]["body"]["messages"][-1], ensure_ascii=False)
+    check("protected: the model is told which layers", "protected from the agent" in sent and "communes" in sent,
+          sent[-300:])
+    call = ToolCallPart("m1", "set_layer_style", {"layer": layer.id(), "mode": "single"})
+    check("protected: other applications are refused too", "'communes'" in chat.protection_refusal(call))
+    check("protected: a zoom stays allowed", chat.protection_refusal(ToolCallPart("m2", "zoom_to", {"layer": "communes"}))
+          == "")
+    write_ids([])
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'})),
+                   (200, {}, text_turn("ok")))
+    ask("filtre les communes")
+    check("protected: once let go, the filter applies", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    layer.setSubsetString("")
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
 
 
 def check_widgets(chat, provider, settings, ask, layer):

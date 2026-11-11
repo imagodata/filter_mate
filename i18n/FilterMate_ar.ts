@@ -802,6 +802,11 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>إشارة مرجعية: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>لم تُنفَّذ الخطوة {}: كانت ستغيّر طبقة قمت بحمايتها من الوكيل ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>نعم، لهذه المحادثة</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>الطبقات المحمية من الوكيل (هذا المشروع)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>يقرأها الوكيل ويستخدمها كمصدر، لكنه لا يغيّرها أبدًا: لا تصفية ولا نمط ولا تحرير ولا حقل ولا ربط ولا اسم جديد ولا إزالة، مهما كان المستوى، وفي الوصفة أيضًا ولسائر التطبيقات. تُحفظ في المشروع.</translation>
     </message>
 </context>
 <context>

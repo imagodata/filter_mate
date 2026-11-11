@@ -18,7 +18,7 @@ allow one tool for the rest of a conversation, from the question itself; code is
 """
 from __future__ import annotations
 
-from typing import Iterable, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Protocol, Sequence, Set
 
 READ, VIEW, PROJECT, BUFFER, LOCAL, OUTSIDE = range(6)
 RISK_NAMES = ("read", "view", "project", "edit buffer", "irreversible", "outside")
@@ -33,6 +33,21 @@ DEFAULT_LEVEL = STANDARD
 RUN = "run"
 ASK = "ask"
 REFUSE = "refuse"
+# A layer the user protected would change: refused at every level, never turned into a question.
+PROTECTED = "protected"
+
+# The arguments that name the layers a tool changes (its filter, style, data, name, or the layer itself). A layer only
+# read (the source of a cross filter, the table of a join, an input of Processing) or only shown (zoom, selection,
+# visibility, place in the tree) is not changed.
+CHANGED_LAYERS = {
+    "apply_filter": ("layer_name",), "cross_filter": ("target_layers",), "geometry_filter": ("target_layers",),
+    "point_cloud_filter": ("layers",), "clear_filters": ("layers",), "set_layer_style": ("layer",),
+    "set_labels": ("layer",), "update_features": ("layer",), "delete_features": ("layer",),
+    "add_features": ("layer",), "add_field": ("layer",), "join_layers": ("layer",), "rename_layer": ("layer",),
+    "remove_layers": ("layers",),
+}
+# Without any layer named, these act on every layer.
+ALL_WHEN_NONE = frozenset({"clear_filters"})
 
 # The highest class that runs without asking, at each level.
 _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL}
@@ -46,6 +61,10 @@ CODE_TOOLS = frozenset({"run_pyqgis"})
 # What the user asks of the agent about its own work: its history, its notes and its recipes. They run at every level.
 AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe"})
 
+PROTECTED_REFUSAL = ("Not done: the user protected {} from the agent in this project. Read them, use them as a source, "
+                     "zoom to them, but never change them (filter, style, edit, rename, remove). Tell the user; do not "
+                     "try another tool to change them.")
+
 ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing that changes the project runs. "
                    "Tell them, step by step, what you would do and with which tools, so they can do it themselves or "
                    "choose another level in the settings of the agent. Do not try another tool to do it.")
@@ -58,6 +77,32 @@ _LEVEL_NOTES = {
     AUTONOMOUS: ("Level of autonomy chosen by the user: autonomous. Exports, removals and deletions run without a "
                  "question; the network, connectors and code are still confirmed. Say what you wrote or removed."),
 }
+
+
+class Protection(Protocol):
+    """The layers the user protected from the agent, in the open project."""
+
+    def name_of(self, reference: str) -> Optional[str]:
+        """The name of the layer ``reference`` (an id or a name) when it is protected, else None."""
+
+    def names(self) -> Sequence[str]:
+        """The names of every protected layer."""
+
+
+def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
+    """The layer references a call changes; None when it changes every layer (a clear without layers)."""
+    if name == "rename_layer" and arguments.get("group"):
+        return []  # a group of the tree, not a layer
+    references: List[str] = []
+    for key in CHANGED_LAYERS.get(name, ()):
+        value = arguments.get(key)
+        if isinstance(value, str) and value:
+            references.append(value)
+        elif isinstance(value, list):
+            references.extend(item for item in value if isinstance(item, str) and item)
+    if not references and name in ALL_WHEN_NONE:
+        return None
+    return references
 
 
 def level_or_default(value: Optional[str]) -> str:
@@ -89,9 +134,24 @@ def level_note(level: str) -> str:
 class PermissionPolicy:
     """The level of the chat and what the user allowed for the conversation under way."""
 
-    def __init__(self, level: str = DEFAULT_LEVEL, granted: Iterable[str] = ()) -> None:
+    def __init__(self, level: str = DEFAULT_LEVEL, granted: Iterable[str] = (),
+                 protector: Optional[Protection] = None) -> None:
         self.level = level_or_default(level)
         self._granted: Set[str] = set(granted)
+        self.protector = protector
+
+    def protection_refusal(self, name: str, arguments: Dict[str, Any]) -> str:
+        """What the model is told when the call would change a protected layer; "" when it would not."""
+        if self.protector is None:
+            return ""
+        references = changed_layers(name, arguments if isinstance(arguments, dict) else {})
+        if references is None:
+            protected = list(self.protector.names())
+        else:
+            protected = [found for found in (self.protector.name_of(reference) for reference in references) if found]
+        if not protected:
+            return ""
+        return PROTECTED_REFUSAL.format(", ".join(repr(item) for item in dict.fromkeys(protected)))
 
     def verdict(self, spec) -> str:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec``."""

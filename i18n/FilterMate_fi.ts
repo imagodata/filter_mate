@@ -802,6 +802,11 @@ Hyväksytkö?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Kirjanmerkki: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Vaihetta {} ei suoritettu: se muuttaisi tasoa, jonka olet suojannut agentilta ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Hyväksytkö?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Kyllä, tälle keskustelulle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>AGENTILTA SUOJATUT TASOT (TÄMÄ PROJEKTI)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agentti lukee niitä ja käyttää niitä lähteenä, mutta ei koskaan muuta niitä: ei suodatinta, tyyliä, muokkausta, kenttää, liitosta, uutta nimeä tai poistoa millään tasolla, ei myöskään reseptissä eikä muille sovelluksille. Tallennetaan projektiin.</translation>
     </message>
 </context>
 <context>
