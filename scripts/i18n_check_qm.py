@@ -20,7 +20,8 @@ for path in sorted(glob.glob(os.path.join("i18n", "FilterMate_*.qm"))):
         continue
     code = os.path.basename(path)[len("FilterMate_"):-len(".qm")]
     for context, source in pairs:
-        text = translator.translate(context, source)
+        # PyQt hands a str to QTranslator.translate as ASCII; self.tr sends UTF-8, so a source with π or × goes as bytes
+        text = translator.translate(context.encode("utf-8"), source.encode("utf-8"))
         if not text and code != "en":
             failed = True
         print(f"{code:4} {text or 'UNTRANSLATED'}")

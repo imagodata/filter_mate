@@ -5992,6 +5992,16 @@ Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
         <translation>đến ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>cùng hình dạng</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Chỉ giữ các đối tượng có hình dạng giống đối tượng đã nhấp: độ chặt (4π × diện tích / chu vi², hình tròn là 1) trong cùng tỉ lệ; khi tắt, một hàng rào cây có diện tích bằng một cây cũng là cây</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Ống hút bật</translation>

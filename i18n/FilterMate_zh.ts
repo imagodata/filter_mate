@@ -5992,6 +5992,16 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <translation>至 ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>形状相同</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>只保留形状与点击对象相似的对象：其紧凑度（4π × 面积 / 周长²，圆为 1）在相同比例内；关闭时，面积与一棵树相当的树篱也算作树</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>吸管已开启</translation>

@@ -5992,6 +5992,16 @@ PostgreSQL 테이블에 PRIMARY KEY가 정의되어 있는지 확인하세요.</
         <translation>~ ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>같은 모양</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>클릭한 객체와 모양이 비슷한 객체만 남깁니다: 조밀도(4π × 면적 / 둘레², 원은 1)가 같은 비율 안에 있어야 합니다. 끄면 나무만 한 면적의 생울타리도 나무로 봅니다</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>스포이트 켜짐</translation>

@@ -5992,6 +5992,16 @@ Győződjön meg róla, hogy a PostgreSQL tábla rendelkezik definiált PRIMARY 
         <translation>– ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>azonos alak</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Csak a kattintottakhoz hasonló alakú objektumok maradnak: tömörségük (4π × terület / kerület², körre 1) ugyanazon arányokon belül; kikapcsolva egy fa területű sövény is fa</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Pipetta bekapcsolva</translation>

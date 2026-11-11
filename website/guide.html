@@ -684,6 +684,7 @@ processing.run("filtermate:batch_filter", {
         <li>Conditions chained with AND / OR on any attribute, the classification included: <code>Classification = 6</code> with a height above the DTM of at least 9 m keeps the tall roofs (story 10).</li>
         <li>"Apply to the other tiles of the dataset" for data delivered in tiles (LiDAR HD).</li>
         <li>On the rail: the Identify button picks a <strong>class</strong>, the <strong>value pipette</strong> writes a condition around the picked value of the chosen attribute (Ctrl+click adds an OR), and the <strong>zone</strong> tool draws a rectangle, polygon, freehand shape or circle that cuts the footprint of the source.</li>
+        <li>The <strong>object detector</strong> of the rail selects the object under the click (the cluster of points of its class: a building, a tree) or, with a right click on the button, every object of the cloud like it: area within chosen ratios of the clicked objects and, with <em>same shape</em> (on by default), compactness within the same ratios, so a hedge of the area of a tree is not taken for a tree.</li>
     </ul>
     <h3 id="sam">Objects drawn by SAM <small>(5.1, experimental)</small></h3>
     <p>

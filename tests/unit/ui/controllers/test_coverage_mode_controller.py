@@ -2230,10 +2230,13 @@ class FakeObjectsPanel:
 
     def __init__(self, target="object", codes=(2, 5, 6)):
         self.target, self.codes, self.items, self.detected = target, set(codes), [], None
-        self.ratio = (0.5, 2.0)
+        self.ratio, self.shape = (0.5, 2.0), True
 
     def object_target(self):
         return self.target
+
+    def object_shape(self):
+        return self.shape
 
     def set_object_target(self, target):
         changed, self.target = target != self.target, target
@@ -2286,7 +2289,7 @@ class TestPointCloudObjectDetector:
         package.__path__ = []
         monkeypatch.setitem(sys.modules, package.__name__, package)
         reads = types.SimpleNamespace(objects=[], footprints=[], similar=[], outlines=[], on_map=[], under=[],
-                                      copies=[], readers=[])
+                                      copies=[], readers=[], shapes=[])
         adapter = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_layer_adapter")
         adapter.class_at = lambda layer, canvas, point: reads.on_map.append(layer.id()) or code
         objects = types.ModuleType(f"{package.__name__}.point_cloud_objects")
@@ -2304,8 +2307,10 @@ class TestPointCloudObjectDetector:
             reads.footprints.append((code, base_subset))
             return f"footprint {code}"
 
-        def similar_objects_footprint(layer, code, areas, ratio, base_subset="", footprint=None):
+        def similar_objects_footprint(layer, code, areas, ratio, base_subset="", footprint=None,
+                                      reference_shapes=None):
             reads.similar.append((code, tuple(areas), tuple(ratio), footprint))
+            reads.shapes.append(reference_shapes)
             parts = [FakeShape("BOX " + " ".join(str(v) for v in box)) for box in objects.similar_parts.get(code, [])]
             union = FakeShape("U[" + ";".join(part.wkt for part in parts) + "]")
             return types.SimpleNamespace(parts=parts, geometry=union, truncated=False, total=10)
@@ -2319,8 +2324,10 @@ class TestPointCloudObjectDetector:
         objects.base_copy = base_copy
         objects.class_under = lambda layer, x, y, radius=0.0: reads.under.append((layer.name, x, y)) or code
         objects.similar_objects_footprint = similar_objects_footprint
+        objects.filled_part = lambda shape: FakeShape("FILLED " + shape.wkt)
         tools = types.ModuleType(f"{package.__name__}.geometry_tools")
         tools.union_geometries = lambda shapes: FakeShape("U[" + ";".join(shape.wkt for shape in shapes) + "]")
+        tools.compactness = lambda shape: "compactness of " + shape.wkt
         overlay = types.ModuleType(f"{package.__name__}.preview_overlay")
 
         class ObjectOutline:
@@ -2390,6 +2397,18 @@ class TestPointCloudObjectDetector:
         panel.ratio = (0.9, 1.1)
         controller._refresh_point_cloud_objects()  # a ratio edited: the class is not read again
         assert reads.footprints == [(6, "Classification != 7")] and reads.similar[-1][2] == (0.9, 1.1)
+
+    def test_same_shape_passes_the_compactness_of_the_filled_clicked_objects(self, ctrl_module, layers, monkeypatch):
+        """2026-11-11: as on a raster, the shape of the clicked objects, measured holes filled as the parts are."""
+        controller, panel, _iface, reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        objects.similar_parts[6] = [(10, 10, 12, 13)]
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.shapes == [["compactness of FILLED BOX 0 0 2 3"]]
+        panel.shape = False
+        controller._refresh_point_cloud_objects()  # unticked: the area alone
+        assert reads.shapes[-1] is None
 
     def test_similar_objects_read_through_the_filter_not_the_preview(self, ctrl_module, layers, monkeypatch):
         controller, _panel, _iface, reads, objects, _extras = self._controller(

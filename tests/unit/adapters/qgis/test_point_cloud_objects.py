@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """FilterMate 5 object detection on a point cloud: the cluster of points of a class under a click."""
 import importlib.util
+import math
 import pathlib
 import sys
 import types
@@ -253,11 +254,16 @@ class TestObjectFootprint:
 
 
 class Part:
-    def __init__(self, area, filled=None):
+    def __init__(self, area, filled=None, perimeter=None):
         self._area, self._filled = float(area), filled
+        # A square by default: compactness pi / 4
+        self._perimeter = float(perimeter) if perimeter is not None else 4.0 * self._area ** 0.5
 
     def area(self):
         return self._area
+
+    def length(self):
+        return self._perimeter
 
     def isEmpty(self):
         return False
@@ -297,6 +303,19 @@ class TestSimilarObjects:
     def test_without_reference_nothing_is_kept(self):
         kept, total = objects.similar_parts(Multi([Part(10)]), [], (0.5, 2.0))
         assert kept == [] and total == 1
+
+    def test_same_shape_keeps_the_compact_ones_as_on_a_raster(self):
+        # 2026-11-11: a hedge of the area of a tree (100 m², 1 x 100 m: compactness 0.06) against a square of 100 m²
+        hedge, square = Part(100, perimeter=202), Part(100)
+        kept, _total = objects.similar_parts(Multi([hedge, square]), [100.0], (0.5, 2.0))
+        assert kept == [hedge, square]  # the area alone
+        kept, _total = objects.similar_parts(Multi([hedge, square]), [100.0], (0.5, 2.0), [math.pi / 4])
+        assert kept == [square]
+
+    def test_the_shape_of_a_courtyard_is_measured_filled(self):
+        ring = Part(90, filled=Part(120), perimeter=1000)  # its rings would make it look like a line
+        kept, _total = objects.similar_parts(Multi([ring]), [100.0], (0.5, 2.0), [math.pi / 4])
+        assert [part.area() for part in kept] == [120.0]
 
     def test_the_class_is_read_through_the_filter_of_the_layer(self):
         assert objects.class_subset(6) == "(Classification = 6)"

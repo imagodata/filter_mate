@@ -130,6 +130,7 @@ OBJECT_TARGET = "object"  # the object under the click (the cluster of points of
 SIMILAR_OBJECTS_TARGET = "similar_objects"  # every object of the cloud like the clicked one
 OBJECT_TARGETS = (OBJECT_TARGET, SIMILAR_OBJECTS_TARGET)
 DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: x 0.5 to x 2 the clicked one
+DEFAULT_SIMILAR_SHAPE = True  # its compactness within the same ratios too, as on a raster (2026-11-11)
 # Above this many objects the subset string keeps one X / Y box per class (the source geometry of the
 # cross filter stays exact: it is cut by the objects themselves; the panel and the strip say it). QGIS
 # evaluates the subset for every point it decodes: the boxes are grouped by class, the class tested
@@ -304,17 +305,19 @@ def _parse_detected(value: Any) -> Optional[Dict[str, Any]]:
 def parse_objects_state(value: Any) -> Dict[str, Any]:
     """Normalise the object detector part of a panel state (idempotent).
 
-    ``{"target": "object" | "similar_objects", "ratio": [low, high], "items": [clicked objects],
-    "detected": what was found for them or None}``.
+    ``{"target": "object" | "similar_objects", "ratio": [low, high], "shape": same shape too, "items": [clicked
+    objects], "detected": what was found for them or None}``. A state from before the shape has it on, as the raster.
     """
     value = value if isinstance(value, dict) else {}
     target = value.get("target")
     low, high = _parse_bounds(value.get("ratio"))
     ratio = [low, high] if low is not None and high is not None and low > 0 else list(DEFAULT_SIMILAR_RATIO)
     items = [item for item in (_parse_object_item(entry) for entry in value.get("items") or ()) if item is not None]
+    shape = value.get("shape", DEFAULT_SIMILAR_SHAPE)
     return {
         "target": target if target in OBJECT_TARGETS else OBJECT_TARGET,
         "ratio": ratio,
+        "shape": shape if isinstance(shape, bool) else DEFAULT_SIMILAR_SHAPE,
         "items": items,
         "detected": _parse_detected(value.get("detected")) if items else None,
     }
@@ -1140,9 +1143,13 @@ class PointCloudExploringPanel(QWidget):
         holder_layout.setContentsMargins(0, 0, 0, 0)
         self._object_ratio_widget = QWidget(holder)
         self._object_ratio_widget.setObjectName("widget_point_cloud_similar_ratio")
-        row = QHBoxLayout(self._object_ratio_widget)
+        column = QVBoxLayout(self._object_ratio_widget)
+        column.setContentsMargins(0, 0, 0, 0)
+        column.setSpacing(GAP)
+        row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(GAP)
+        column.addLayout(row)
         row.addWidget(QLabel(self.tr("Similar objects: area ×"), self._object_ratio_widget))
         self._object_low_spin = QDoubleSpinBox(self._object_ratio_widget)
         self._object_high_spin = QDoubleSpinBox(self._object_ratio_widget)
@@ -1164,6 +1171,16 @@ class PointCloudExploringPanel(QWidget):
         row.addWidget(QLabel(self.tr("to ×"), self._object_ratio_widget))
         row.addWidget(self._object_high_spin)
         row.addStretch(1)
+        # Shape too, as on a raster: a hedge of the area of a tree is not a tree (compactness within the same ratios).
+        # On a line of its own: beside the longer label of this panel it widened the dock by about 100 px.
+        self._object_shape_check = QCheckBox(self.tr("same shape"), self._object_ratio_widget)
+        self._object_shape_check.setObjectName("checkBox_point_cloud_similar_shape")
+        self._object_shape_check.setChecked(DEFAULT_SIMILAR_SHAPE)
+        self._object_shape_check.setToolTip(self.tr(
+            "Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a "
+            "disc) within the same ratios; off, a hedge of the area of a tree is a tree"))
+        self._object_shape_check.toggled.connect(self._on_object_shape_toggled)
+        column.addWidget(self._object_shape_check)
         self._object_ratio_widget.setVisible(False)
         holder_layout.addWidget(self._object_ratio_widget)
         return holder
@@ -1643,12 +1660,22 @@ class PointCloudExploringPanel(QWidget):
         if self._objects["target"] == SIMILAR_OBJECTS_TARGET and self._objects["items"]:
             self.objectsChanged.emit()
 
+    def _on_object_shape_toggled(self, checked: bool) -> None:
+        self._objects["shape"] = bool(checked)
+        if self._objects["target"] == SIMILAR_OBJECTS_TARGET and self._objects["items"]:
+            self.objectsChanged.emit()
+
+    def object_shape(self) -> bool:
+        """Whether the similar objects must be shaped like the clicked ones too (compactness)."""
+        return bool(self._objects.get("shape", DEFAULT_SIMILAR_SHAPE))
+
     def _restore_objects(self, objects: Dict[str, Any]) -> None:
         """The detector part of a restored state (parsed). Does not emit."""
         self._objects = parse_objects_state(objects)
-        with _signals_blocked(self._object_low_spin, self._object_high_spin):
+        with _signals_blocked(self._object_low_spin, self._object_high_spin, self._object_shape_check):
             self._object_low_spin.setValue(self._objects["ratio"][0])
             self._object_high_spin.setValue(self._objects["ratio"][1])
+            self._object_shape_check.setChecked(self._objects["shape"])
         self._object_ratio_widget.setVisible(self._objects["target"] == SIMILAR_OBJECTS_TARGET)
 
     def apply_to_tiles(self) -> bool:
