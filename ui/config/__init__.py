@@ -160,7 +160,7 @@ class UIConfig:
                 'margins_section': 4,
                 'margins_content': 4,
                 'margins_frame': {'left': 4, 'top': 4, 'right': 4, 'bottom': 6},
-                'margins_actions': {'left': 4, 'top': 4, 'right': 4, 'bottom': 4},
+                'margins_actions': {'left': 4, 'top': 7, 'right': 4, 'bottom': 7},
             },
             'spacer': {
                 'default_size': 4,
@@ -335,7 +335,7 @@ class UIConfig:
                 'margins_section': 2,
                 'margins_content': 2,
                 'margins_frame': {'left': 2, 'top': 2, 'right': 2, 'bottom': 4},
-                'margins_actions': {'left': 2, 'top': 4, 'right': 2, 'bottom': 4},
+                'margins_actions': {'left': 2, 'top': 7, 'right': 2, 'bottom': 7},
             },
             'spacer': {
                 'default_size': 4,
@@ -499,7 +499,7 @@ class UIConfig:
                 'margins_section': 5,
                 'margins_content': 5,
                 'margins_frame': {'left': 5, 'top': 5, 'right': 5, 'bottom': 7},
-                'margins_actions': {'left': 5, 'top': 4, 'right': 5, 'bottom': 4},
+                'margins_actions': {'left': 5, 'top': 7, 'right': 5, 'bottom': 7},
             },
             'groupbox': {
                 'min_height': 50,
@@ -687,7 +687,7 @@ class UIConfig:
                 'margins_section': 4,
                 'margins_content': 4,
                 'margins_frame': {'left': 4, 'top': 4, 'right': 4, 'bottom': 6},
-                'margins_actions': {'left': 4, 'top': 4, 'right': 4, 'bottom': 4},
+                'margins_actions': {'left': 4, 'top': 7, 'right': 4, 'bottom': 7},
             },
             'groupbox': {
                 'min_width': 250,
