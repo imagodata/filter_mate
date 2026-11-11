@@ -254,6 +254,11 @@
         <translation>Четене на картата в точка</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Разглеждане на картата</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>КС на проекта: {}</translation>

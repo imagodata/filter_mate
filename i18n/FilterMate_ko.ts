@@ -254,6 +254,11 @@
         <translation>한 지점의 지도 읽는 중</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>지도 보는 중</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>프로젝트 좌표계: {}</translation>

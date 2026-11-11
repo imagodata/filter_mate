@@ -36,7 +36,7 @@ from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, RUN_PYTHON, UNDO_AGENT_STEP, chat_tools
+from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, RUN_PYTHON, UNDO_AGENT_STEP, VIEW_MAP, chat_tools
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
 from ...filtermate_api.agent_tools import build_handlers
@@ -361,6 +361,10 @@ class AgentChatController(QObject):
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
             left_out.add(RUN_PYTHON)
+        if not values.send_values or values.preset == FREE_PRESET:
+            # An image of the map shows its labels and symbols: a value as much as a field. The relay of the free
+            # quota takes no image (free-quota-proxy/README.md): with a key of the user only.
+            left_out.add(VIEW_MAP)
         if not kinds - {KIND_MCP, KIND_STAC} and not configured_names:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WFS not in kinds:
@@ -375,9 +379,35 @@ class AgentChatController(QObject):
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
+        handlers[VIEW_MAP] = self._view_map_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         return tools, handlers, active
+
+    @staticmethod
+    def _view_map_tool(arguments):
+        """view_map: the map rendered as an image (map_images.map_image), sent with this request only."""
+        from ...adapters.public_api.map_images import map_image
+        from ...adapters.public_api.operations import resolve_layer
+        from ...core.agent.tool_executor import WithImages
+        extent_wkt, crs = arguments.get("extent_wkt") or "", arguments.get("crs") or ""
+        if arguments.get("layer"):
+            layer = resolve_layer(arguments["layer"])
+            if layer is None:
+                raise ToolFailure(f"layer {arguments['layer']!r} not found")
+            box = layer.extent()
+            if box.isNull():
+                raise ToolFailure(f"'{layer.name()}' has no extent to show")
+            if box.width() <= 0 or box.height() <= 0:  # one point, or points in a row: a flat extent draws nothing
+                box.grow(max(box.width(), box.height(), 1.0) * 0.1)
+            else:
+                box.scale(1.05)
+            extent_wkt, crs = box.asWktPolygon(), layer.crs().authid()
+        try:
+            image, info = map_image(extent_wkt, crs, arguments.get("width", 1024))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        return WithImages(info, (("image/jpeg", image),))
 
     @staticmethod
     def _python_tool(arguments) -> dict:
@@ -659,6 +689,7 @@ class AgentChatController(QObject):
             "layer_statistics": lambda: _tr("Computing statistics on {}").format(layer),
             "sample_features": lambda: _tr("Reading features of {}").format(layer),
             "identify_at": lambda: _tr("Reading the map at a point"),
+            VIEW_MAP: lambda: _tr("Looking at the map"),
             "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
             "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),

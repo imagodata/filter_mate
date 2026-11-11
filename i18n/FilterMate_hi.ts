@@ -254,6 +254,11 @@
         <translation>एक बिंदु पर मानचित्र पढ़ना</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>मानचित्र देखना</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>प्रोजेक्ट CRS: {}</translation>

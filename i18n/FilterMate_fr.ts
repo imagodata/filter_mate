@@ -324,6 +324,11 @@ Acceptez-vous ?</translation>
         <translation>Lecture de la carte en un point</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Regard sur la carte</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>SCR du projet : {}</translation>

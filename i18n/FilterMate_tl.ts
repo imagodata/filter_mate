@@ -254,6 +254,11 @@
         <translation>Binabasa ang mapa sa isang punto</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Tinitingnan ang mapa</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>CRS ng proyekto: {}</translation>

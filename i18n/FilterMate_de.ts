@@ -254,6 +254,11 @@
         <translation>Karte wird an einem Punkt gelesen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Karte wird angesehen</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>Projekt-KBS: {}</translation>
