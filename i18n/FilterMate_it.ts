@@ -254,6 +254,11 @@
         <translation>Lettura della mappa in un punto</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>Osservazione della mappa</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Ricerca di un algoritmo di processing</translation>

@@ -254,6 +254,11 @@
         <translation>正在读取某点处的地图</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>正在查看地图</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>正在查找处理算法</translation>

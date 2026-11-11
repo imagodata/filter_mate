@@ -254,6 +254,11 @@
         <translation>قراءة الخريطة عند نقطة</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>النظر إلى الخريطة</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>البحث عن خوارزمية معالجة</translation>

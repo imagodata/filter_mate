@@ -41,12 +41,21 @@ class ToolCallPart:
 
 
 @dataclass(frozen=True)
+class ImageData:
+    """An image a tool answers with (a render of the map), base64 encoded."""
+
+    media_type: str
+    data: str
+
+
+@dataclass(frozen=True)
 class ToolResultPart:
-    """What a tool answered, in a user message."""
+    """What a tool answered, in a user message; ``images`` only for the request it was taken in."""
 
     call_id: str
     content: str
     is_error: bool = False
+    images: Tuple[ImageData, ...] = ()
 
 
 @dataclass(frozen=True)

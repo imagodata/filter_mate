@@ -24,6 +24,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 10. Project notes | Facts the user asks the agent to remember, saved in the project, sent with each request | done |
 | 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
 | 12. Layouts | A print layout of the map added to the project, exported as PDF or PNG (confirmed) | done |
+| 13. Vision | The map as an image for the model, with a key of the user and shared values only | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -112,6 +113,14 @@ Rules worth keeping:
   user finishes it in the layout designer; undoing the turn removes it (a `layout` effect keeps its XML, redoing
   reads it again). `export_layout` writes one as PDF or PNG into a sub-folder of the export root, never a path
   of the model, and is confirmed by the user like `export_layers`. `map_context` lists the layouts.
+- **Vision** (`adapters/public_api/map_view.py`): `view_map`, a tool of the chat alone, renders the map
+  (`QgsMapRendererSequentialJob` from the settings of the canvas, or the layers checked in the tree without one;
+  never `canvas.grab()`) as a JPEG of 1568 pixels at most and answers with it. It is offered only with a key of
+  the user (the free quota relay takes no image) and when attribute values are shared (a map shows its labels).
+  An image goes with the request it was taken in only: before the next request it is replaced by a line saying
+  it was there, or every later request would carry it again. Claude gets it in the `tool_result`; an
+  OpenAI-compatible server, whose tool messages hold text only, in a user message right after. A model that
+  reads no image may refuse the request: the provider says so in its error.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

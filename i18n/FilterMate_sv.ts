@@ -254,6 +254,11 @@
         <translation>Läser kartan i en punkt</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>Tittar på kartan</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Söker efter en bearbetningsalgoritm</translation>

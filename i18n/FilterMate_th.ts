@@ -254,6 +254,11 @@
         <translation>กำลังอ่านแผนที่ที่จุดหนึ่ง</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>กำลังดูแผนที่</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>กำลังค้นหาอัลกอริทึมการประมวลผล</translation>

@@ -465,6 +465,23 @@ def check_layouts(project, work):
         project.layoutManager().removeLayout(layout)
 
 
+def check_view(project):
+    """view_map renders the layers checked in the tree as a JPEG, without a canvas."""
+    from filter_mate.adapters.public_api import map_view
+    meta, jpeg = map_view.render_map(width=600)
+    check("view: a JPEG of the layers shown", jpeg[:3] == b"\xff\xd8\xff" and meta["width"] == 600 and
+          meta["height"] > 0 and meta["extent_from"] == "layers" and "communes" in meta["layers"], meta)
+    layer_meta, _ = map_view.render_map(layer="communes", width=256)
+    check("view: the whole of a layer", layer_meta["extent_from"] == "layer" and layer_meta["width"] == 256, layer_meta)
+    given, _ = map_view.render_map(extent=[650000, 6859990, 650070, 6860010], width=4000)
+    check("view: a given extent, the width bounded", given["extent_from"] == "given" and given["width"] <= 1568 and
+          given["height"] <= 1568, given)
+    for call, label in ((lambda: map_view.render_map(extent=[1, 1, 1, 1]), "an empty extent"),
+                        (lambda: map_view.render_map(layer="nope"), "an unknown layer")):
+        check(f"view: refuses {label}", refused(call))
+    json.dumps(meta)
+
+
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
@@ -587,6 +604,7 @@ def main(introspection):
     check_style(project, gpkg, work)
     check_edits(project, work)
     check_layouts(project, work)
+    check_view(project)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

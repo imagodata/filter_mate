@@ -7,7 +7,7 @@ import logging
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence
 
 from .json_schema import validate
-from .messages import ToolCallPart, ToolResultPart
+from .messages import ImageData, ToolCallPart, ToolResultPart
 from .tool_catalog import ToolSpec
 
 logger = logging.getLogger("FilterMate.agent")
@@ -16,6 +16,14 @@ Handler = Callable[[Dict[str, Any]], Any]
 
 MAX_RESULT_CHARS = 20_000
 DECLINED = "The user declined this action. Nothing was done; do not try again unless they ask."
+
+
+class ImageAnswer:
+    """What a handler returns to answer with an image too: ``value`` is sent as JSON, ``image`` beside it."""
+
+    def __init__(self, value: Any, image: ImageData) -> None:
+        self.value = value
+        self.image = image
 
 
 class ToolFailure(Exception):
@@ -105,7 +113,10 @@ class ToolExecutor:
         if problems:
             return failure("Invalid arguments: " + "; ".join(problems))
         try:
-            return ToolResultPart(call.call_id, bounded_json(handler(_with_defaults(call.arguments, tool.input_schema))))
+            answer = handler(_with_defaults(call.arguments, tool.input_schema))
+            if isinstance(answer, ImageAnswer):
+                return ToolResultPart(call.call_id, bounded_json(answer.value), images=(answer.image,))
+            return ToolResultPart(call.call_id, bounded_json(answer))
         except ToolFailure as exc:
             return failure(str(exc))
         except Exception:  # the text of an unexpected exception may hold paths or SQL: it stays in the log

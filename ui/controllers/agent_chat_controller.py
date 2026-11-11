@@ -36,7 +36,9 @@ from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, UNDO_AGENT_STEP, chat_tools
+from ...core.agent.messages import ImageData
+from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, UNDO_AGENT_STEP, VIEW_MAP, chat_tools
+from ...core.agent.tool_executor import ImageAnswer
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
 from ...filtermate_api.agent_tools import build_handlers
@@ -355,6 +357,10 @@ class AgentChatController(QObject):
         left_out = set()
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
+        if not values.send_values or values.preset == FREE_PRESET:
+            # An image of the map shows its labels and symbols: a value as much as a field. The relay of the free
+            # quota takes no image (free-quota-proxy/README.md): with a key of the user only.
+            left_out.add(VIEW_MAP)
         if not kinds - {KIND_MCP, KIND_STAC} and not configured_names:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WFS not in kinds:
@@ -368,9 +374,21 @@ class AgentChatController(QObject):
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
+        handlers[VIEW_MAP] = self._view_map_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         return tools, handlers, active
+
+    @staticmethod
+    def _view_map_tool(arguments):
+        """view_map: the map rendered as an image, sent to the model with this request only."""
+        from ...adapters.public_api.map_view import render_map_base64
+        try:
+            meta, data = render_map_base64(arguments.get("extent"), arguments.get("layer") or "",
+                                           arguments.get("width", 1024))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        return ImageAnswer(meta, ImageData("image/jpeg", data))
 
     @staticmethod
     def _add_note_tool(arguments) -> dict:
@@ -643,6 +661,7 @@ class AgentChatController(QObject):
             "layer_statistics": lambda: _tr("Computing statistics on {}").format(layer),
             "sample_features": lambda: _tr("Reading features of {}").format(layer),
             "identify_at": lambda: _tr("Reading the map at a point"),
+            VIEW_MAP: lambda: _tr("Looking at the map"),
             "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
             "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),

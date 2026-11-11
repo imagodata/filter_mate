@@ -254,6 +254,11 @@
         <translation>एक बिंदु पर मानचित्र पढ़ना</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>मानचित्र देखना</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>प्रोसेसिंग एल्गोरिद्म खोजना</translation>

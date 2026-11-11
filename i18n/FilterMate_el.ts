@@ -254,6 +254,11 @@
         <translation>Ανάγνωση του χάρτη σε ένα σημείο</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>Εξέταση του χάρτη</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Αναζήτηση αλγορίθμου επεξεργασίας</translation>

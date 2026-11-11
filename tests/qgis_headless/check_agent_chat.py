@@ -633,6 +633,23 @@ def check_chat(provider, layer, authcfg, work):
     check("undoing the turn removes the layout", manager.layoutByName("Carte agent") is None,
           [item.name() for item in manager.printLayouts()])
 
+    offered = [tool.name for tool in chat.tools_and_handlers(load_settings())[0]]
+    check("view_map is offered with a key of the user and shared values", "view_map" in offered, offered)
+    settings(send_values=False)
+    check("not when values are not shared", "view_map" not in
+          [tool.name for tool in chat.tools_and_handlers(load_settings())[0]])
+    settings()
+    provider.reset((200, {}, tool_turn("view_map", {"width": 400})), (200, {}, text_turn("Je vois les communes.")))
+    check("a look at the map through the chat", ask("que montre la carte ?"))
+    sent = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    image = sent["content"][1] if isinstance(sent.get("content"), list) and len(sent["content"]) > 1 else {}
+    check("the model gets a JPEG of the map", image.get("type") == "image" and
+          image.get("source", {}).get("media_type") == "image/jpeg" and len(image["source"]["data"]) > 1000,
+          str(sent)[:300])
+    provider.reset((200, {}, text_turn("ok")))
+    ask("merci")
+    check("and not again with the next request", '"type": "image"' not in json.dumps(provider.requests[0]["body"]))
+
     from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
     write_notes([])
     provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),

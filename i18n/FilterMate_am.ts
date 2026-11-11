@@ -254,6 +254,11 @@
         <translation>ካርታውን በአንድ ነጥብ ላይ በማንበብ ላይ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="664"/>
+        <source>Looking at the map</source>
+        <translation>ካርታውን በመመልከት ላይ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>የProcessing ስልተ ቀመር በመፈለግ ላይ</translation>
