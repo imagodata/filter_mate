@@ -14,6 +14,11 @@ Pre-registered 2026-11-11, before any run on set B. Sets, blocks and clicks of s
   0.05 at most.
 
 Run with QGIS (offscreen): argv = plugins folder, point cloud, buildings, output json.
+
+Result, 2026-11-11, Docker qgis/qgis:latest (QGIS 4.3): A, median IoU 0.536 -> 0.733, 8 better, 2 worse (as
+explored); B, 0.786 -> 0.626, 3 better, 7 worse. Stage 1 FAILED: the cut is not adopted, stage 2 not run. On B the
+blocks were mostly already found whole, and a cut at 1.25 m splits roofs of one building (steep pitches, dormers,
+a lower annex of the same block); on A it split the dense core. The objects stay as they are.
 """
 import json
 import os
