@@ -367,6 +367,16 @@ Zůstanou ve vyrovnávací paměti úprav, dokud úpravy vrstvy neuložíte, a z
         <translation>Vyhledávání satelitních snímků v {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Obrázek mapy odeslán</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Náhledový arch vrstvy {} odeslán</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Hledání v {}: {}</translation>

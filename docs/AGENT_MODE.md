@@ -364,6 +364,12 @@ Rules of a call, in `ui/controllers/agent_mcp_bridge.py`:
 - A change is refused while the chat is working or while a QGIS dialog is open; reads go on.
 - After a refusal, the same tool from the same client is declined for 20 s without a new dialog. A confirmation that comes after
   the client left does nothing.
+- Two tools are this server's alone (`MCP_ONLY` in `core/agent/tool_catalog.py`, `adapters/public_api/map_images.py`):
+  `map_image`, a JPEG of the map as the user sees it (or of an extent), and `contact_sheet`, the objects of a layer cut out of a
+  raster tile by tile, numbered, outlined in red, with tile E an example. Their image goes beside the JSON as an MCP `image`
+  block (`ToolResultPart.images`, `WithImages`); the chat never offers them, so no image of the map reaches the provider of the
+  chat (decided with the user, 2026-11-11). They are read-only and marked open world: each one shows in the thread, unconfirmed.
+  A model judging the proposals of the similar objects on such sheets did not sort them better (`docs/SEGMENTATION.md`).
 
 Access rules, in `core/agent/mcp_server.py`: loopback only, a `Host` of this machine, no `Origin` from elsewhere, a Bearer token
 compared in constant time, `application/json` only, one request per connection, heads of 16 KiB and bodies of 4 MiB at most.

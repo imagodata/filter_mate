@@ -367,6 +367,16 @@ Restano nel buffer di modifica finché non salvi le modifiche del layer, e annul
         <translation>Ricerca di immagini satellitari su {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Immagine della mappa inviata</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Provino di {} inviato</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Ricerca di {} su {}</translation>

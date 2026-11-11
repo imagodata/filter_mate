@@ -367,6 +367,16 @@ Ostanejo v medpomnilniku urejanja, dokler ne shranite urejanj plasti, razveljavi
         <translation>Iskanje satelitskih posnetkov v {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Slika zemljevida poslana</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Kontaktni list za {} poslan</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Iskanje v {}: {}</translation>

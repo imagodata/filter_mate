@@ -290,4 +290,6 @@ class McpProtocol:
         if not isinstance(arguments, dict):
             return _failure(request_id, _INVALID_PARAMS, "arguments must be an object.")
         result = self._run_tool(tool, arguments, client)
-        return _success(request_id, {"content": [{"type": "text", "text": result.content}], "isError": result.is_error})
+        content = [{"type": "text", "text": result.content}]
+        content += [{"type": "image", "data": data, "mimeType": mime} for mime, data in getattr(result, "images", ())]
+        return _success(request_id, {"content": content, "isError": result.is_error})

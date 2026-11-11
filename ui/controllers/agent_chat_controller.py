@@ -680,6 +680,9 @@ class AgentChatController(QObject):
             "remove_layers": lambda: _tr("Layers removed: {}").format(self._names(args.get("layers"))),
             "search_open_data": lambda: _tr("Searching {} for {}").format(args.get("platform", ""), args.get("query", "")),
             "search_imagery": lambda: _tr("Searching satellite imagery on {}").format(args.get("platform", "")),
+            # The MCP server alone serves them: the images go to the application that asked.
+            "map_image": lambda: _tr("Image of the map sent"),
+            "contact_sheet": lambda: _tr("Contact sheet of {} sent").format(args.get("layer", "")),
             "add_service_layer": lambda: _tr("Layer added: {}").format(args.get("name") or args.get("typename", "")),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
         }.get(call.name, lambda: call.name.replace("_", " "))()

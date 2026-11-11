@@ -367,6 +367,16 @@ Ze blijven in de bewerkingsbuffer tot u de bewerkingen van de laag opslaat, en h
         <translation>Satellietbeelden zoeken op {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Afbeelding van de kaart verzonden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Contactblad van {} verzonden</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Zoeken op {} naar {}</translation>

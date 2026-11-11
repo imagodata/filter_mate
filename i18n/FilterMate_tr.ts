@@ -367,6 +367,16 @@ Katman düzenlemelerini kaydedene kadar düzenleme arabelleğinde kalırlar ve t
         <translation>{} üzerinde uydu görüntüsü aranıyor</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Harita görüntüsü gönderildi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>{} için temas sayfası gönderildi</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>{} üzerinde aranıyor: {}</translation>

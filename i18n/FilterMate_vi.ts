@@ -367,6 +367,16 @@ Chúng vẫn ở trong bộ đệm chỉnh sửa cho đến khi bạn lưu các 
         <translation>Đang tìm ảnh vệ tinh trên {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Đã gửi ảnh bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Đã gửi bảng ảnh của {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Đang tìm kiếm trên {}: {}</translation>

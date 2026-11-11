@@ -367,6 +367,16 @@ Sie bleiben im Bearbeitungspuffer, bis Sie die Layer-Bearbeitungen speichern, un
         <translation>Satellitenbilder auf {} werden gesucht</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Kartenbild gesendet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Kontaktabzug von {} gesendet</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Suche auf {} nach {}</translation>

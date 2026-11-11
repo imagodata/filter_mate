@@ -367,6 +367,16 @@ Mananatili sila sa edit buffer hanggang i-save mo ang mga edit ng layer, at ibab
         <translation>Naghahanap ng satellite imagery sa {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Naipadala ang larawan ng mapa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Naipadala ang contact sheet ng {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Hinahanap sa {} ang {}</translation>

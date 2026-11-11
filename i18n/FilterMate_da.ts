@@ -367,6 +367,16 @@ De bliver i redigeringsbufferen, indtil du gemmer lagets redigeringer, og fortry
         <translation>Søger efter satellitbilleder på {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Billede af kortet sendt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Kontaktark for {} sendt</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Søger i {} efter {}</translation>
