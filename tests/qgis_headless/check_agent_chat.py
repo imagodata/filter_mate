@@ -867,6 +867,13 @@ def check_chat(provider, layer, authcfg, work):
     ask("salut")
     check("a local model gets no key", provider.requests and "authorization" not in provider.requests[0]["headers"],
           provider.requests)
+    check("a local model is asked through Ollama's own API, with room for the tools",
+          provider.requests and provider.requests[0]["path"].endswith("/api/chat")
+          and provider.requests[0]["body"]["options"]["num_ctx"] >= 32768,
+          provider.requests and (provider.requests[0]["path"], provider.requests[0]["body"].get("options")))
+    check("Ollama: a consent given for its /v1 address up to 5.1 still counts",
+          AgentSettings(preset="ollama", model="m", consent=True, consent_target="http://localhost:11434/v1").has_consent
+          and target_of("ollama", "http://localhost:11434/v1/") == "http://localhost:11434")
     panel.input.clear()
 
     from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog

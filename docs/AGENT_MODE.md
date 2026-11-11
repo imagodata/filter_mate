@@ -63,8 +63,17 @@ A provider never touches the network. `build_request` gives URL, headers and bod
 response into events. The transport is the caller's: `QgsNetworkAccessManager` in the dock (it follows the proxy settings
 of QGIS), `urllib` in the bench. `AgentSession` holds no thread, so a Qt transport can drive it from signals.
 
-`anthropic` speaks the Messages API, `openai_compatible` the `/chat/completions` format of OpenAI, Mistral, Ollama and
-others. Claude goes through plain HTTP because the official SDK needs Python 3.10 and third-party packages.
+`anthropic` speaks the Messages API, `openai_compatible` the `/chat/completions` format of OpenAI, Mistral and
+others, `ollama` Ollama's own `/api/chat`. Claude goes through plain HTTP because the official SDK needs Python 3.10 and
+third-party packages.
+
+Why Ollama has its own adapter: Ollama loads a model with 4096 tokens of context unless the request asks for more, and
+its OpenAI-compatible endpoint ignores any such request (measured with Ollama 0.30.10, 2026-11-11: `options.num_ctx`
+sent to `/v1/chat/completions` left `context_length` at 4096 in `/api/ps`). The system prompt and the tools of the chat
+weigh about 71,000 characters, near 18,000 tokens, before the conversation: through `/v1` a local model never saw the
+tools nor the request. `core/agent/providers/ollama_chat.py` asks for `num_ctx` 32,768, or 65,536 for a longer
+request (two sizes only: each new size makes Ollama load the model again), and reads the lines of JSON Ollama streams.
+An address saved with `/v1` still works, and a consent given for it still counts.
 
 Rules worth keeping:
 
