@@ -2716,7 +2716,8 @@ class CoverageModeController(BaseController):
             truncated = any(item['truncated'] for item in items)
             found = None
             if panel.object_target() == 'similar_objects':
-                found = self._similar_point_cloud_objects(layer, items, shapes, panel.object_ratio())
+                found = self._similar_point_cloud_objects(layer, items, shapes, panel.object_ratio(),
+                                                          panel.object_shape())
             if found is None:  # the clicked objects (also when the similar ones could not be read)
                 geometry = union_geometries([shape for shape in shapes if shape is not None and not shape.isEmpty()])
                 boxes = [[item['code'], *item['box']] for item in items]
@@ -2737,25 +2738,30 @@ class CoverageModeController(BaseController):
         self._show_point_cloud_objects()
 
     def _similar_point_cloud_objects(self, layer: Any, items: List[dict], shapes: List[Any],
-                                     ratio: Tuple[float, float]) -> Optional[tuple]:
+                                     ratio: Tuple[float, float], same_shape: bool = False) -> Optional[tuple]:
         """``(geometry, boxes, count, truncated)`` of every object like the clicked ones, class by class; None when
         none could be read (said on the message bar), the clicked objects then stay the selection.
 
         Read through the filter of the layer, not its live preview (which keeps the clicked objects only).
+        With ``same_shape`` their compactness must be like the clicked objects' too.
         """
-        from ...adapters.qgis.coverage_layers.geometry_tools import union_geometries
-        from ...adapters.qgis.coverage_layers.point_cloud_objects import similar_objects_footprint
+        from ...adapters.qgis.coverage_layers.geometry_tools import compactness, union_geometries
+        from ...adapters.qgis.coverage_layers.point_cloud_objects import filled_part, similar_objects_footprint
         base = self._preview_base_subset if self._preview_base_subset is not None else layer.subsetString()
         areas: Dict[int, List[float]] = {}
+        compact: Dict[int, List[float]] = {}
         for item, shape in zip(items, shapes):
             if shape is not None and not shape.isEmpty():
                 areas.setdefault(item['code'], []).append(shape.area())  # layer units², as the footprint parts
+                if same_shape:  # measured as the parts are: holes filled
+                    compact.setdefault(item['code'], []).append(compactness(filled_part(shape)))
         geometries, boxes, truncated = [], [], False
         try:
             with _wait_cursor():
                 for code in sorted(areas):
                     found = similar_objects_footprint(layer, code, areas[code], ratio, base_subset=base,
-                                                      footprint=self._class_footprint(layer, code, base))
+                                                      footprint=self._class_footprint(layer, code, base),
+                                                      reference_shapes=compact.get(code))
                     truncated = truncated or found.truncated
                     if found.parts:
                         geometries.append(found.geometry)
