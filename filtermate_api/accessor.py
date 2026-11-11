@@ -386,6 +386,16 @@ class LayerRename:
 
 
 @dataclass(frozen=True)
+class Bookmarks:
+    """The spatial bookmarks of the project after an action on one of them."""
+    action: str
+    name: str = ""
+    bookmarks: List[str] = field(default_factory=list)
+    replaced: bool = False
+    extent_wkt: str = ""
+
+
+@dataclass(frozen=True)
 class MapThemes:
     """The map themes of the project after an action on one of them."""
     action: str
@@ -596,12 +606,18 @@ class FilterMateAccessor(Protocol):
         """Join ``join_layer`` to ``layer`` by a field; raises FilterRejected."""
         ...
 
-    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
-        """Put layers in a group of the layer tree, made where missing; raises FilterRejected when none is found."""
+    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True,
+                     above: str = "") -> LayerTreeChange:
+        """Put layers in a group of the layer tree, made where missing, or just above a layer; raises FilterRejected
+        when none is found."""
         ...
 
-    def rename_layer(self, layer: str, name: str) -> LayerRename:
-        """Give a layer another name; raises FilterRejected on an unknown layer or an empty name."""
+    def rename_layer(self, layer: str, name: str, group: bool = False) -> LayerRename:
+        """Give a layer (or with ``group`` a group) another name; raises FilterRejected on an unknown one."""
+        ...
+
+    def bookmark(self, action: str, name: str = "", extent_wkt: str = "", crs: str = "") -> Bookmarks:
+        """List, add, zoom to or remove a spatial bookmark; raises FilterRejected on an unknown one."""
         ...
 
     def map_theme(self, action: str, name: str = "") -> MapThemes:
@@ -867,14 +883,28 @@ class InMemoryAccessor:
         return JoinAdded(layer_name=found.name, join_layer=other.name,
                          fields_added=[f"{other.name + '_' if prefix is None else prefix}{name}" for name in named])
 
-    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
+    def bookmark(self, action: str, name: str = "", extent_wkt: str = "", crs: str = "") -> Bookmarks:
+        marks = getattr(self, "_bookmarks", [])
+        if action in ("zoom", "remove") and name not in marks:
+            raise FilterRejected(f"no bookmark {name!r}")
+        if action == "add" and name not in marks:
+            marks = marks + [name]
+        elif action == "remove":
+            marks = [mark for mark in marks if mark != name]
+        self._bookmarks = marks
+        return Bookmarks(action=action, name=name, bookmarks=list(marks))
+
+    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True,
+                     above: str = "") -> LayerTreeChange:
         moved = [found.name for found in (self._find(name) for name in layers) if found is not None]
         if not moved:
             raise FilterRejected("no layer of the project among " + ", ".join(repr(name) for name in layers))
         return LayerTreeChange(group=group, groups_made=[group] if group else [], moved=moved,
                                not_found=[name for name in layers if self._find(name) is None])
 
-    def rename_layer(self, layer: str, name: str) -> LayerRename:
+    def rename_layer(self, layer: str, name: str, group: bool = False) -> LayerRename:
+        if group:
+            return LayerRename(layer_id="", name=name.strip(), previous=layer)
         found = self._find(layer)
         if found is None or not name.strip():
             raise FilterRejected(f"no layer {layer!r} in the project" if found is None else "give a name")

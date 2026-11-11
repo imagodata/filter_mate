@@ -337,6 +337,11 @@ Run it?</source>
         <translation>지도 테마</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>북마크</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>레이어 트리</translation>
@@ -716,6 +721,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{}을(를) {}에 결합함</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>북마크: {} {}</translation>
     </message>
 </context>
 <context>

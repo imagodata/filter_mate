@@ -337,6 +337,11 @@ Jalankan?</translation>
         <translation>tema peta</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>penanda</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>pokok lapisan</translation>
@@ -716,6 +721,11 @@ Adakah anda bersetuju?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} digabungkan dengan {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Penanda: {} {}</translation>
     </message>
 </context>
 <context>

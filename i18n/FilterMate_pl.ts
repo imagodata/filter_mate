@@ -337,6 +337,11 @@ Uruchomić?</translation>
         <translation>motywy mapy</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>zakładki</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>drzewo warstw</translation>
@@ -716,6 +721,11 @@ Czy się zgadzasz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} połączono z {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Zakładka: {} {}</translation>
     </message>
 </context>
 <context>

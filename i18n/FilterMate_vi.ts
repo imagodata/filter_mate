@@ -337,6 +337,11 @@ Chạy không?</translation>
         <translation>chủ đề bản đồ</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>dấu trang</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>cây lớp</translation>
@@ -716,6 +721,11 @@ Bạn có đồng ý không?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>Đã nối {} vào {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Dấu trang: {} {}</translation>
     </message>
 </context>
 <context>

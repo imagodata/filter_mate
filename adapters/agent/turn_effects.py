@@ -12,6 +12,7 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("join", layer_id, spec, "", name)``: a join the turn added to a layer (``fields_joins.join_specs``);
 * ``("tree", "", before, after)``: where each layer is in the layer tree and the groups, checked or not (JSON);
 * ``("layer_name", layer_id, before, after)``: the name of a layer;
+* ``("bookmarks", "", before, after)``: the spatial bookmarks of the project, as XML;
 * ``("themes", "", before, after)``: the map themes of the project, as XML;
 * ``("current_style", layer_id, before, after)``: the style of its style manager a layer has on (a theme sets it);
 * ``("widgets", "", before, after)``: the widgets of the panel kept in the project (``core/agent/widgets.py``);
@@ -95,6 +96,11 @@ def _set_tree_state(project: QgsProject, text: str) -> None:
 def _tree_label() -> str:
     from qgis.PyQt.QtCore import QCoreApplication
     return QCoreApplication.translate("AgentChat", "layer tree")
+
+
+def _bookmarks_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "bookmarks")
 
 
 def _themes_label() -> str:
@@ -236,6 +242,7 @@ class EffectsRecorder:
         self._joins: Dict[str, Set[str]] = {}
         self._names: Dict[str, str] = {}
         self._themes: Optional[str] = None
+        self._bookmarks: Optional[str] = None
         self._current_styles: Dict[str, Optional[str]] = {}
         self._edits: Dict[str, int] = {}
         self._layouts: Optional[Set[str]] = None
@@ -274,6 +281,13 @@ class EffectsRecorder:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._joins:
                     self._joins[layer.id()] = {join.joinLayerId() for join in layer.vectorJoins()}
+            elif name == "bookmark":
+                if self._bookmarks is None:
+                    from ..public_api.layer_tree import bookmarks_xml
+                    self._bookmarks = bookmarks_xml()
+            elif name == "rename_layer" and arguments.get("group"):
+                if self._tree is None:  # a group renamed: its path changes, the tree brings it back
+                    self._tree = _tree_state(project)
             elif name == "rename_layer":
                 layer = _resolve(project, arguments.get("layer"))
                 if layer is not None and layer.id() not in self._names:
@@ -370,6 +384,11 @@ class EffectsRecorder:
             layer = project.mapLayer(layer_id)
             if layer is not None and layer.name() != before:
                 effects.append(("layer_name", layer_id, before, layer.name()))
+        if self._bookmarks is not None:
+            from ..public_api.layer_tree import bookmarks_xml
+            after_bookmarks = bookmarks_xml()
+            if after_bookmarks != self._bookmarks:
+                effects.append(("bookmarks", "", self._bookmarks, after_bookmarks))
         if self._themes is not None:
             from ..public_api.layer_tree import current_style, themes_xml
             after_themes = themes_xml()
@@ -488,6 +507,9 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                     done.append(layer.name())
                 else:
                     left.append(effect[3] if undo else effect[2])
+            elif kind == "bookmarks":
+                from ..public_api.layer_tree import set_bookmarks_xml
+                (done if set_bookmarks_xml(effect[2] if undo else effect[3]) else left).append(_bookmarks_label())
             elif kind == "themes":
                 from ..public_api.layer_tree import set_themes_xml
                 (done if set_themes_xml(effect[2] if undo else effect[3]) else left).append(_themes_label())
