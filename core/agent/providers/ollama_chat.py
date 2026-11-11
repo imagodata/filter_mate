@@ -27,7 +27,7 @@ from .base import HttpRequest, ProviderConfig, check_base_url, encode_json
 # local model (core/agent/tool_catalog.FILTERING_TOOLS) and a short conversation, 32k with every tool, then 64k;
 # beyond, the compaction of the history keeps it short. The KV cache of an 8-billion model takes about 4.5 GB at 32k.
 CONTEXT_STEPS = (16_384, 32_768, 65_536)
-CHARS_PER_TOKEN = 3.0  # a cautious estimate: JSON and French text run 3 to 4 characters per token
+CHARS_PER_TOKEN = 3.5  # measured 4.15 to 4.8 with qwen3.5 and qwen3 (2026-11-11): a margin of 15 %
 ANSWER_ROOM = 4_096  # tokens left for the answer of the model
 _STOP_REASONS = {"stop": STOP_END, "length": STOP_MAX_TOKENS}
 _MAX_LINE = 4_000_000  # a line longer than this is not a chunk of a chat answer
