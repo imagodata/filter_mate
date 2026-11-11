@@ -47,6 +47,15 @@ def module(monkeypatch):
     spec = importlib.util.spec_from_file_location('async_query_test', PATH)
     loaded = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(loaded)
+    loaded.WATCHERS = []
+
+    class Watcher:  # the QObject receiver of a read, without Qt
+        def __init__(self, callback):
+            self.changed = callback
+            self.deleteLater = MagicMock()
+            loaded.WATCHERS.append(self)
+
+    monkeypatch.setattr(loaded, '_watcher', Watcher)
     return loaded
 
 
@@ -152,6 +161,10 @@ def test_replaced_query_cannot_deliver_after_its_run_completed(module):
     new_callback.assert_called_once_with([2])
 
 
+SIGNALS = ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged', 'updatedFields', 'crsChanged',
+           'dataSourceChanged')
+
+
 def test_layer_deleted_signal_cancels_feedback(module):
     owner, layer = _owner_layer()
     task = module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock())
@@ -161,20 +174,40 @@ def test_layer_deleted_signal_cancels_feedback(module):
     task.feedback.cancel.assert_called_once()
 
 
-def test_a_deleted_layer_is_never_disconnected_when_the_read_settles(module):
-    """Its bound signals point at freed memory: disconnecting them crashed QGIS 4.2 (access violation)."""
+def test_every_signal_of_every_layer_goes_to_the_receiver_of_the_read(module):
+    owner, layer = _owner_layer()
+    other = MagicMock()
+    module.submit_query(owner, 'query', layer, 'union', lambda _: None, MagicMock(), dependencies=[layer, other])
+    watcher, = module.WATCHERS
+    for dependent in (layer, other):
+        for name in SIGNALS:
+            getattr(dependent, name).connect.assert_called_once_with(watcher.changed)
+
+
+def test_no_signal_of_a_layer_is_ever_disconnected_the_receiver_goes_instead(module):
+    """A layer QGIS loaded is not followed by sip: disconnecting one deleted meanwhile crashed QGIS 4.2 twice."""
     owner, layer = _owner_layer()
     other = MagicMock()
     task = module.submit_query(owner, 'query', layer, 'union', lambda _: None, MagicMock(), dependencies=[layer, other])
-    for call in layer.willBeDeleted.connect.call_args_list:  # the layer goes away while the read runs
-        call.args[0]()
+    watcher, = module.WATCHERS
     settled = task.taskTerminated.connect.call_args.args[0]
     settled()
-    for name in ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged', 'updatedFields',
-                 'crsChanged', 'dataSourceChanged'):
-        getattr(layer, name).disconnect.assert_not_called()
-    other.dataChanged.disconnect.assert_called_once()  # the layer still there is let go as before
-    assert other.willBeDeleted.disconnect.call_count == 2  # its deletion watch and its invalidation
+    settled()  # taskCompleted and taskTerminated: let go once
+    watcher.deleteLater.assert_called_once()
+    for dependent in (layer, other):
+        for name in SIGNALS:
+            getattr(dependent, name).disconnect.assert_not_called()
+
+
+def test_a_signal_after_the_read_settled_cancels_nothing(module):
+    owner, layer = _owner_layer()
+    loading = MagicMock()
+    task = module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    watcher, = module.WATCHERS
+    task.taskCompleted.connect.call_args.args[0]()
+    generation = owner.query.generation
+    watcher.changed()  # queued before the receiver is deleted
+    assert owner.query.generation == generation and not task.isCanceled()
 
 
 def test_cancel_resets_loading_state(module):
