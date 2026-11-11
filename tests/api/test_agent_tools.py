@@ -103,6 +103,13 @@ class TestHandlers:
         error, answer = run(accessor, root, "identify_at", x=570000.5, y=6270000)
         assert not error and (answer["x"], answer["layers"], answer["skipped"]) == (570000.5, [], [])
 
+    def test_project_crs(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "set_project_crs", crs="2154")
+        assert not error and answer["crs"] == "EPSG:2154"
+        assert run(accessor, root, "set_project_crs", crs="Lambert")[0] is True
+        assert run(accessor, root, "set_project_crs", crs="")[0] is True
+
     def test_layout_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "create_layout", name="Carte", title="Communes")
@@ -400,6 +407,11 @@ class TestRoutes:
         response = client.get("/layers/field-values", params={"layer": "communes", "field": "nom"})
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.get("/layers/field-values", params={"layer": "x", "field": "y"}).status_code == 404
+
+    def test_crs_route(self, client):
+        assert client.post("/map/crs", json={"crs": "EPSG:2154"}).json()["crs"] == "EPSG:2154"
+        assert client.post("/map/crs", json={"crs": "nope"}).status_code == 400
+        assert client.post("/map/crs", json={"crs": ""}).status_code == 422
 
     def test_layout_routes(self, client):
         response = client.post("/layouts", json={"name": "Carte", "page": "A3", "orientation": "portrait"})

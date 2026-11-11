@@ -33,6 +33,7 @@ from .accessor import (
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
+    ProjectCrs,
     LayoutExport,
     LayoutResult,
     EditResult,
@@ -481,6 +482,9 @@ class QGISFilterMateAccessor:
 
     def add_features(self, layer: str, features: List[Dict[str, Any]], crs: str = "") -> EditResult:
         return EditResult(**self._edit("add_features", layer, features=features, crs=crs))
+
+    def set_project_crs(self, crs: str) -> ProjectCrs:
+        return ProjectCrs(**self._control("set_project_crs", crs))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))

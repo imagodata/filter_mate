@@ -254,6 +254,11 @@
         <translation>地点の地図を読み取り中</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Project CRS: {}</source>
+        <translation>プロジェクトの CRS: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>プロセシングアルゴリズムを検索中</translation>
@@ -297,6 +302,11 @@
         <location filename="../adapters/agent/turn_effects.py" line="35"/>
         <source>project notes</source>
         <translation>プロジェクトのメモ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="42"/>
+        <source>project CRS</source>
+        <translation>プロジェクトの CRS</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>

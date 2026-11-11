@@ -1696,6 +1696,29 @@
    }
   },
   {
+   "name": "set_project_crs",
+   "title": "Set the CRS of the project",
+   "description": "Set the CRS of the project, which the map follows: what the user calls changing the CRS of the view. Layers in other CRS are reprojected on the fly, their data does not change. Returns crs, description, units, geographic and previous. In the chat of FilterMate, undoing the turn brings the previous CRS back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "crs": {
+      "description": "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, or a layer of the project whose CRS is taken",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "crs"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "set_layers_visibility",
    "title": "Show or hide layers",
    "description": "Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed.",

@@ -11,7 +11,8 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
 * ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
   after the commands of the turn (``adapters/public_api/feature_edits.py``);
-* ``("layout", "", xml, "", name)``: a print layout the turn added to the project.
+* ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
+* ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -33,6 +34,12 @@ STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features")
 LAYOUT_TOOLS = ("create_layout",)
+CRS_TOOLS = ("set_project_crs",)
+
+
+def _crs_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "project CRS")
 
 
 def _layout_names(project: QgsProject) -> Set[str]:
@@ -165,6 +172,7 @@ class EffectsRecorder:
         self._notes: Optional[Tuple[str, ...]] = None
         self._edits: Dict[str, int] = {}
         self._layouts: Optional[Set[str]] = None
+        self._crs: Optional[str] = None
 
     def before_call(self, call: Any) -> None:
         project = QgsProject.instance()
@@ -184,6 +192,10 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
+            elif name in CRS_TOOLS:
+                if self._crs is None:
+                    from ..public_api.project_control import crs_definition
+                    self._crs = crs_definition(project.crs())
             elif name in LAYOUT_TOOLS:
                 if self._layouts is None:
                     self._layouts = _layout_names(project)
@@ -234,6 +246,11 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
+        if self._crs is not None:
+            from ..public_api.project_control import crs_definition
+            after_crs = crs_definition(project.crs())
+            if after_crs != self._crs:
+                effects.append(("project_crs", "", self._crs, after_crs))
         if self._layouts is not None:
             from ..public_api.layouts import layout_xml
             for name in sorted(_layout_names(project) - self._layouts):
@@ -290,6 +307,14 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 if node is not None:
                     node.setItemVisibilityChecked(bool(effect[2] if undo else effect[3]))
                     done.append(node.name())
+            elif kind == "project_crs":
+                from ..public_api.project_control import crs_from_definition
+                wanted = crs_from_definition(effect[2] if undo else effect[3])
+                if wanted.isValid() or not (effect[2] if undo else effect[3]):
+                    project.setCrs(wanted)
+                    done.append(_crs_label())
+                else:
+                    left.append(_crs_label())
             elif kind == "layout":
                 manager = project.layoutManager()
                 layout = manager.layoutByName(effect[4])

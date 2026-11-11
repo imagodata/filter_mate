@@ -24,6 +24,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 10. Project notes | Facts the user asks the agent to remember, saved in the project, sent with each request | done |
 | 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
 | 12. Layouts | A print layout of the map added to the project, exported as PDF or PNG (confirmed) | done |
+| 13. Project CRS | The CRS of the project and of the map, undone with the turn | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -112,6 +113,9 @@ Rules worth keeping:
   user finishes it in the layout designer; undoing the turn removes it (a `layout` effect keeps its XML, redoing
   reads it again). `export_layout` writes one as PDF or PNG into a sub-folder of the export root, never a path
   of the model, and is confirmed by the user like `export_layers`. `map_context` lists the layouts.
+- **Project CRS**: `set_project_crs` takes an authid, an EPSG code alone or a layer of the project, and sets the
+  CRS of the project, which the map follows (layers in other CRS are reprojected on the fly, no data changes).
+  The turn keeps the CRS before (its authid, or its WKT for a CRS of its own) and undoing the turn sets it back.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

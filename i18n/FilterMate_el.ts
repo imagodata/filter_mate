@@ -254,6 +254,11 @@
         <translation>Ανάγνωση του χάρτη σε ένα σημείο</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Project CRS: {}</source>
+        <translation>ΣΣΑ του έργου: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Αναζήτηση αλγορίθμου επεξεργασίας</translation>
@@ -297,6 +302,11 @@
         <location filename="../adapters/agent/turn_effects.py" line="35"/>
         <source>project notes</source>
         <translation>σημειώσεις του έργου</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="42"/>
+        <source>project CRS</source>
+        <translation>ΣΣΑ του έργου</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>

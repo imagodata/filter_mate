@@ -254,6 +254,11 @@
         <translation>Kaart wordt op een punt gelezen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
+        <source>Project CRS: {}</source>
+        <translation>Project-CRS: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Processing-algoritme wordt gezocht</translation>
@@ -297,6 +302,11 @@
         <location filename="../adapters/agent/turn_effects.py" line="35"/>
         <source>project notes</source>
         <translation>projectnotities</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/turn_effects.py" line="42"/>
+        <source>project CRS</source>
+        <translation>project-CRS</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>

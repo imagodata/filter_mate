@@ -111,6 +111,48 @@ def zoom_to(layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: 
     return {'extent_wkt': canvas.extent().asWktPolygon(), 'scale': canvas.scale()}
 
 
+def crs_definition(crs) -> str:
+    """What brings ``crs`` back: its authid, or ``WKT:`` and its WKT for a CRS of its own."""
+    return crs.authid() or ('WKT:' + crs.toWkt()) if crs.isValid() else ''
+
+
+def crs_from_definition(definition: str):
+    from qgis.core import QgsCoordinateReferenceSystem
+    if definition.startswith('WKT:'):
+        return QgsCoordinateReferenceSystem.fromWkt(definition[4:])
+    return QgsCoordinateReferenceSystem(definition)
+
+
+def set_project_crs(crs: str) -> Dict[str, Any]:
+    """Set the CRS of the project, which the map follows: layers in other CRS are reprojected on the fly.
+
+    ``crs`` is an authid (EPSG:2154), an EPSG code alone (2154), or a layer of the project whose CRS is taken.
+
+    Raises:
+        ValueError: A CRS QGIS does not know, or a layer with none.
+    """
+    from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes
+    text = str(crs or '').strip()
+    if not text:
+        raise ValueError('give a CRS, such as EPSG:2154')
+    layer = resolve_layer(text)
+    if layer is not None:
+        target = layer.crs()
+    else:
+        target = QgsCoordinateReferenceSystem(f"EPSG:{text}" if text.isdigit() else text)
+    if not target.isValid():
+        raise ValueError(f"{text!r} is no CRS QGIS knows: give an authid such as EPSG:2154 (Lambert-93) or "
+                         "EPSG:4326 (WGS 84), or a layer of the project")
+    project = QgsProject.instance()
+    previous = project.crs()
+    project.setCrs(target)
+    units = QgsUnitTypes.toString(target.mapUnits())
+    return {'crs': target.authid() or target.description(), 'description': target.description(),
+            'units': units, 'geographic': bool(target.isGeographic()),
+            'previous': previous.authid() or previous.description() if previous.isValid() else '',
+            'note': 'The map follows the CRS of the project; layers in other CRS are reprojected on the fly.'}
+
+
 def select_features(layer: str, expression: str = '', clear: bool = False, add: bool = False) -> Dict[str, Any]:
     """Select the features of a vector layer matching a QGIS expression (not SQL); ``clear`` empties the selection.
 

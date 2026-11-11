@@ -633,6 +633,17 @@ def check_chat(provider, layer, authcfg, work):
     check("undoing the turn removes the layout", manager.layoutByName("Carte agent") is None,
           [item.name() for item in manager.printLayouts()])
 
+    from qgis.core import QgsCoordinateReferenceSystem as _Crs
+    QgsProject.instance().setCrs(_Crs("EPSG:4326"))
+    provider.reset((200, {}, tool_turn("set_project_crs", {"crs": "EPSG:2154"})), (200, {}, text_turn("Carte en Lambert-93.")))
+    check("the CRS of the map through the chat", ask("passe la vue en Lambert 93"))
+    check("the project is in Lambert-93", QgsProject.instance().crs().authid() == "EPSG:2154",
+          QgsProject.instance().crs().authid())
+    check("its card names it", "Project CRS: EPSG:2154" in panel.thread.toPlainText(), panel.thread.toPlainText()[-200:])
+    chat._on_undo()
+    check("undoing the turn brings the CRS back", QgsProject.instance().crs().authid() == "EPSG:4326",
+          QgsProject.instance().crs().authid())
+
     from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
     write_notes([])
     provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),

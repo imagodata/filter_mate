@@ -313,6 +313,9 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def add_features(args: Dict[str, Any]) -> Dict[str, Any]:
         return _edit_answer(accessor.add_features(args["layer"], features=args["features"], crs=args["crs"]))
 
+    def set_project_crs(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.set_project_crs(args["crs"]))
+
     def set_layers_visibility(args: Dict[str, Any]) -> Dict[str, Any]:
         return _report("Visibility", accessor.set_layers_visibility(args["layers"], args["visible"]))
 
@@ -377,7 +380,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
-        "create_layout": create_layout, "export_layout": export_layout,
+        "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,
