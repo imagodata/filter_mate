@@ -708,6 +708,16 @@ Do you agree?</source>
         <translation>Recette {} oubliée</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>Retirer la recette {} ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>Arrêtée avant l'étape {}.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Garder comme recette</translation>

@@ -703,6 +703,16 @@ Do you agree?</source>
         <translation>レシピ {} を削除しました</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>レシピ {} を削除しますか?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>ステップ {} の前で停止しました。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>レシピとして保存</translation>

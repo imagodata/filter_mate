@@ -703,6 +703,16 @@ Do you agree?</source>
         <translation>레시피 {}을(를) 삭제함</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>레시피 {}을(를) 삭제할까요?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>{}단계 전에 중지했습니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>레시피로 저장</translation>

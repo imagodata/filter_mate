@@ -6,8 +6,8 @@ import pytest
 
 from core.agent.permissions import AGENT_OWN, PermissionPolicy, RUN
 from core.agent.recipes import (
-    HEADER, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, kept, parse, recipes_block, saved,
-    steps_of, summary, without,
+    HEADER, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, kept, parse, plain, recipes_block,
+    saved, steps_of, summary, without,
 )
 from core.agent.system_prompt import SYSTEM_PROMPT
 from core.agent.tool_catalog import CHAT_ONLY, REMOVE_RECIPE, SAVE_RECIPE, ToolSpec, chat_tools
@@ -130,10 +130,21 @@ class TestStore:
 
     def test_what_the_model_is_told(self):
         recipes = saved([], "A", "q", _steps(2))
-        assert summary(recipes) == [{"recipe_id": "r1", "name": "A", "steps": ["Filter 0", "Filter 1"]}]
+        assert summary(recipes) == [{"recipe_id": "r1", "name": "A", "tools": ["apply_filter", "apply_filter"]}]
         block = recipes_block(recipes)
-        assert block.startswith(HEADER) and "a = 0" not in block  # never the arguments
+        assert block.startswith(HEADER) and "a = 0" not in block and "Filter 0" not in block  # nor the file's labels
         assert recipes_block([]) == ""
+
+    def test_what_comes_from_a_file_is_one_visible_line(self):
+        """A project made by someone else: no line break, bidi mark or control character hides what a step does."""
+        assert plain("Zoom\n sur‮ la\x00 commune​", 60) == "Zoom sur la commune"
+        stored = json.dumps([{"id": "r1", "name": "Ok‮evil", "request": "a\nb", "steps": [
+            {"tool": "apply_filter", "arguments": {}, "label": "Zoom\nremove"},
+            {"tool": "Bad Name", "arguments": {}}, {"tool": "x" * 80, "arguments": {}}]}])
+        recipe = parse(stored)[0]
+        assert recipe["name"] == "Ok evil" and recipe["request"] == "a b"
+        assert [step["tool"] for step in recipe["steps"]] == ["apply_filter"]
+        assert recipe["steps"][0]["label"] == "Zoom remove"
 
 
 class TestTools:

@@ -703,6 +703,16 @@ Sei d'accordo?</translation>
         <translation>Ricetta {} dimenticata</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>Rimuovere la ricetta {}?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>Interrotta prima del passo {}.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Salva come ricetta</translation>

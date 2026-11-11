@@ -703,6 +703,16 @@ Do you agree?</source>
         <translation>ลืมสูตร {} แล้ว</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>ลบสูตร {} หรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>หยุดก่อนขั้นตอนที่ {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>บันทึกเป็นสูตร</translation>

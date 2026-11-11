@@ -545,10 +545,14 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 write_widgets(parse(effect[2] if undo else effect[3]), project)
                 done.append(_widgets_label())
             elif kind == "recipes":
-                from .recipes_store import write_recipes
-                from ...core.agent.recipes import parse as recipes_parse
-                write_recipes(recipes_parse(effect[2] if undo else effect[3]), project)
-                done.append(_recipes_label())
+                from .recipes_store import read_recipes, write_recipes
+                from ...core.agent.recipes import dumps as recipes_dumps, parse as recipes_parse
+                # Kept or removed from the menu since: that is the user's, left as it is.
+                if recipes_dumps(read_recipes(project)) != (effect[3] if undo else effect[2]):
+                    left.append(_recipes_label())
+                else:
+                    write_recipes(recipes_parse(effect[2] if undo else effect[3]), project)
+                    done.append(_recipes_label())
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)

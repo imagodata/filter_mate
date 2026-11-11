@@ -50,6 +50,9 @@ PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (A
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
 
 
+MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
+
+
 def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentPanel", text)
 
@@ -656,9 +659,12 @@ class AgentPanel(QFrame):
     # --- state ----------------------------------------------------------------
 
     def set_recipes(self, recipes, can_save: bool) -> None:
-        """The recipes of the project in the menu: run or remove each; save the last request as one."""
+        """The recipes of the project in the menu, each with its steps in view before it runs; save the last request."""
         self._recipes, self._can_save_recipe = list(recipes), bool(can_save)
         menu = self.recipes_menu
+        for submenu in getattr(self, "_recipe_menus", ()):  # clear() leaves the submenus alive: they would pile up
+            submenu.deleteLater()
+        self._recipe_menus, self.recipe_actions, self.recipe_lines = [], {}, {}
         menu.clear()
         self.save_recipe_action = menu.addAction(_tr("Save the last request as a recipe…"))
         self.save_recipe_action.setEnabled(self._can_save_recipe)
@@ -668,11 +674,18 @@ class AgentPanel(QFrame):
             empty.setEnabled(False)
             return
         menu.addSeparator()
-        self.recipe_actions = {}
         for recipe in self._recipes:
-            entry = menu.addMenu(_tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"])))
-            entry.setToolTip("\n".join(f"{number}. {step['label']}" for number, step in enumerate(recipe["steps"], 1)))
-            entry.setToolTipsVisible(True)
+            # "&" would make a shortcut of the next letter; the name comes from the project file.
+            entry = menu.addMenu(_tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"])).replace("&", "&&"))
+            self._recipe_menus.append(entry)
+            for number, step in enumerate(recipe["steps"][:MAX_RECIPE_STEPS_SHOWN], 1):
+                line = entry.addAction(f"{number}. {step['label']}".replace("&", "&&"))
+                line.setEnabled(False)  # what it will do, read before Run
+                self.recipe_lines.setdefault(recipe["id"], []).append(line)
+            if len(recipe["steps"]) > MAX_RECIPE_STEPS_SHOWN:
+                more = entry.addAction(f"(+{len(recipe['steps']) - MAX_RECIPE_STEPS_SHOWN})")
+                more.setEnabled(False)
+            entry.addSeparator()
             run = entry.addAction(_tr("Run without the model"))
             run.triggered.connect(lambda _checked=False, recipe_id=recipe["id"]: self.recipe_run_requested.emit(recipe_id))
             remove = entry.addAction(_tr("Remove"))

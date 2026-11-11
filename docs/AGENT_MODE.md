@@ -247,17 +247,24 @@ nothing is sent, nothing is paid, and it works with no provider set up. `core/ag
   a name the user types), or by asking the agent (`save_recipe`, a tool of the chat alone: the changes of the request
   under way, else of the last one that changed something). The same name replaces a recipe. Kept in the project file
   (`FilterMateAgent/recipes`), so a recipe travels with the project.
-- How one runs: **⋯ > Recipes > *name* > Run without the model**. Each step runs through the same executor and
-  confirmations as in the chat, under the level of autonomy (at *advisor*, the run asks before each change instead of
-  refusing: the user asked for it). The first step refused, declined or failed stops the recipe; the steps before stay.
-  A run is one turn of the history, undone as one. It is the user's own action: the next request tells the model what
-  changed, as for a filter set by hand.
+- How one runs: **⋯ > Recipes > *name***: the steps are listed, named from their tool and arguments (never from
+  the words the file holds), then **Run without the model**. Each step runs through the same executor as the chat.
+  A recipe may come with a project made by someone else, so a run asks at least what the usual level asks: what
+  cannot be undone here (exports, removals, deletions) and what reaches outside are asked even at *autonomous*; at
+  *careful* every change is asked; at *advisor* every step is (the user asked for the run). A yes is for that step
+  only, never "for this conversation". The first step declined or failed stops the recipe, and **Stop** stops it
+  before its next step; the steps before stay. A run is one turn of the history, undone as one. It is the user's own
+  action: the next request tells the model what changed, as for a filter set by hand.
 - What a step reads is read again at each run: a cross filter from the selection filters from the selection of the
   moment, and a layer is found by its name. A step that needs a tool the settings now leave out (attribute values not
-  shared, a source unticked) stops the recipe and says so.
-- The recipes go with each request as data (name and the words of each step, never their arguments), so the model can
-  name them or forget one (`remove_recipe`). Keeping or forgetting a recipe through the agent is undone with the turn
-  (`("recipes", "", before, after)` in `adapters/agent/turn_effects.py`); from the menu it is not a step of the history.
+  shared, a source unticked) stops the recipe and says so. Known limit: a step that used a layer an earlier step made
+  (the output of `run_algorithm`, `segment_objects`, `add_layer`), by its id, still names the layer of the first run;
+  by its name, it finds the first layer of that name.
+- The recipes go with each request as data: the name and the tools of each one, never their arguments nor the words
+  of the file, so the model can name them or forget one (`remove_recipe`). Keeping or forgetting a recipe through the
+  agent is undone with the turn (`("recipes", "", before, after)` in `adapters/agent/turn_effects.py`), unless the
+  recipes were changed from the menu since: those are left as they are. From the menu, removing asks first and is not
+  a step of the history.
 - The MCP servers do not offer these tools: recipes live in the panel of the dock. The model cannot run a recipe.
 
 ## History

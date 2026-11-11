@@ -1314,6 +1314,34 @@ def check_recipes(chat, provider, settings, ask, layer):
     chat._ask_user = previous
     settings()
 
+    # A recipe may come with a project made by someone else: what it shows is computed from what it does, and
+    # what cannot be undone is asked even at the autonomous level.
+    write_recipes(read_recipes() + [{"id": "r7", "name": "Zoom", "request": "", "steps": [
+        {"tool": "remove_layers", "arguments": {"layers": ["communes"]}, "label": "Zoom sur la commune"}]}])
+    chat._refresh_recipes()
+    shown = [action.text() for action in panel.recipe_lines.get("r7", [])]
+    check("recipes: a step is named from its arguments, not from the file", shown and "Zoom sur" not in shown[0]
+          and "communes" in shown[0], shown)
+    settings(autonomy="autonomous")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    check("recipes: autonomous still asks before a removal from a recipe", chat.run_recipe("r7") is False and asked
+          and QgsProject.instance().mapLayer(layer.id()) is not None, asked)
+    chat._ask_user = previous
+    settings()
+
+    provider.reset((200, {}, tool_turn("apply_filter", big)), (200, {}, tool_turn("save_recipe", {"name": "Du modèle"},
+                                                                                  "toolu_2")),
+                   (200, {}, text_turn("ok")))
+    ask("filtre et garde")
+    chat._ask_name = lambda title, text, default: "Du menu"
+    panel.save_recipe_action.trigger()
+    chat._on_undo()
+    names = [recipe["name"] for recipe in read_recipes()]
+    check("recipes: undo leaves the recipes changed from the menu since", "Du menu" in names and "Du modèle" in names,
+          names)
+    layer.setSubsetString("")
+
     write_recipes(read_recipes() + [{"id": "r9", "name": "Cassée", "request": "", "steps": [
         {"tool": "apply_filter", "arguments": {"layer_name": "absente", "expression": "1 = 1"}, "label": "absente"},
         {"tool": "apply_filter", "arguments": big, "label": "communes"}]}])
