@@ -1002,6 +1002,7 @@ class AgentChatController(QObject):
             "join_layers": lambda: _tr("{} joined to {}").format(args.get("join_layer", ""), layer),
             "group_layers": lambda: _tr("Layers put in {}").format(args.get("group") or _tr("the top of the tree")),
             "rename_layer": lambda: _tr("{} renamed {}").format(layer, args.get("name", "")),
+            "bookmark": lambda: _tr("Bookmark: {} {}").format(args.get("action", ""), args.get("name", "")).strip(),
             "map_theme": lambda: _tr("Map theme: {} {}").format(args.get("action", ""), args.get("name", "")).strip(),
             CREATE_WIDGET: lambda: _tr("Widget: {}").format(args.get("title") or args.get("field") or layer
                                                             or args.get("layer", "")),

@@ -501,6 +501,52 @@ def check_project_crs(project):
         project_control.crs_definition(own)).isValid())
 
 
+def check_tree_more(project):
+    """group_layers above a layer, a group renamed, bookmarks, and what an undo of the turn brings back."""
+    from filter_mate.adapters.public_api import layer_tree
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+    root = project.layerTreeRoot()
+
+    def names():
+        return [(node.name(), layer_tree.group_path(node)) for node in root.findLayers()]
+
+    start = names()
+    groups = sorted(group.name() for group in root.findGroups(True))
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("c1", "group_layers", {"layers": ["communes"], "above": "routes"}))
+    layer_tree.group_layers(["routes"], "Fond")
+    moved = layer_tree.group_layers(["communes"], above="routes")
+    check("above: in the group of the layer, just over it", moved["group"] == "Fond" and
+          [name for name, path in names() if path == "Fond"] == ["communes", "routes"], names())
+    check("above: a layer not in the tree, refused", refused(layer_tree.group_layers, ["communes"], above="nope"))
+    recorder.before_call(ToolCallPart("c2", "rename_layer", {"layer": "Fond", "name": "Référence", "group": True}))
+    renamed = layer_tree.rename_layer("Fond", "Référence", group=True)
+    check("group: renamed", renamed["previous"] == "Fond" and root.findGroup("Référence") is not None and
+          root.findGroup("Fond") is None, renamed)
+    check("group: unknown, refused", refused(layer_tree.rename_layer, "nope", "x", True))
+    check("group: a name with /, refused", refused(layer_tree.rename_layer, "Référence", "a/b", True))
+    recorder.before_call(ToolCallPart("c3", "bookmark", {"action": "add", "name": "Centre"}))
+    added = layer_tree.bookmark("add", "Centre", extent_wkt="POLYGON((650000 6860000, 651000 6860000, "
+                                                            "651000 6861000, 650000 6861000, 650000 6860000))")
+    check("bookmark: added from an extent", added["bookmarks"] == ["Centre"] and not added["replaced"], added)
+    check("bookmark: added again replaces it", layer_tree.bookmark("add", "Centre", extent_wkt="POINT(1 2)")["replaced"]
+          and layer_tree.bookmark("list")["bookmarks"] == ["Centre"])
+    check("bookmark: unknown, refused", refused(layer_tree.bookmark, "zoom", "nope"))
+    check("bookmark: no window to zoom in, refused", refused(layer_tree.bookmark, "zoom", "Centre"))
+    effects = recorder.finish()
+    check("tree, group and bookmark: kept by the turn", sorted(effect[0] for effect in effects) ==
+          ["bookmarks", "tree"], [effect[0] for effect in effects])
+    apply_effects(effects, undo=True)
+    check("undo: layers back, the group gone, no bookmark", names() == start and
+          sorted(group.name() for group in root.findGroups(True)) == groups and
+          layer_tree.bookmark("list")["bookmarks"] == [], (names(), start))
+    apply_effects(effects, undo=False)
+    check("redo: the renamed group and the bookmark again", root.findGroup("Référence") is not None and
+          layer_tree.bookmark("list")["bookmarks"] == ["Centre"])
+    apply_effects(effects, undo=True)
+
+
 def check_fields_joins(project):
     """add_field (in the edit buffer, filled by a formula) and join_layers, and what an undo of the turn takes back."""
     from filter_mate.adapters.public_api import fields_joins
@@ -733,6 +779,7 @@ def main(introspection):
     check_project_crs(project)
     check_layer_tree(project)
     check_fields_joins(project)
+    check_tree_more(project)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

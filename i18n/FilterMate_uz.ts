@@ -342,6 +342,11 @@ Ishga tushirilsinmi?</translation>
         <translation>xarita mavzulari</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>xatcho‘plar</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>qatlamlar daraxti</translation>
@@ -781,6 +786,11 @@ Rozimisiz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} {} ga birlashtirildi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Xatcho‘p: {} {}</translation>
     </message>
 </context>
 <context>

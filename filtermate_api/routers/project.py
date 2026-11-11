@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
+    Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
 from .filters import LayerName
@@ -158,13 +158,15 @@ class GroupBody(BaseModel):
     layers: List[LayerName] = Field(..., min_length=1, max_length=1000)
     group: str = Field(default="", max_length=_MAX_NAME, description="Group path such as Base/Roads; empty: the top")
     at_top: bool = Field(default=True, description="First of the group, or last")
+    above: str = Field(default="", max_length=_MAX_NAME, description="A layer: put them just above it, in its group")
 
 
 @router.post("/layers/group", response_model=LayerTreeChange)
 def group_layers(payload: GroupBody, request: Request) -> LayerTreeChange:
-    """Put layers in a group of the layer tree, made where missing."""
+    """Put layers in a group of the layer tree, made where missing, or just above a layer."""
     try:
-        return _accessor(request).group_layers(payload.layers, group=payload.group, at_top=payload.at_top)
+        return _accessor(request).group_layers(payload.layers, group=payload.group, at_top=payload.at_top,
+                                               above=payload.above)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
@@ -174,13 +176,33 @@ class RenameBody(BaseModel):
 
     layer: LayerName
     name: str = Field(..., min_length=1, max_length=200)
+    group: bool = Field(default=False, description="layer is the path of a group (Base/Roads), renamed instead")
 
 
 @router.post("/layers/rename", response_model=LayerRename)
 def rename_layer(payload: RenameBody, request: Request) -> LayerRename:
-    """Give a layer of the project another name; its data does not change."""
+    """Give a layer (or a group) of the project another name; its data does not change."""
     try:
-        return _accessor(request).rename_layer(payload.layer, payload.name)
+        return _accessor(request).rename_layer(payload.layer, payload.name, group=payload.group)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class BookmarkBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["list", "add", "zoom", "remove"]
+    name: str = Field(default="", max_length=200)
+    extent_wkt: str = Field(default="", max_length=100_000)
+    crs: str = Field(default="", max_length=200)
+
+
+@router.post("/map/bookmarks", response_model=Bookmarks)
+def bookmark(payload: BookmarkBody, request: Request) -> Bookmarks:
+    """List, add, zoom to or remove a spatial bookmark of the project."""
+    try:
+        return _accessor(request).bookmark(payload.action, payload.name, extent_wkt=payload.extent_wkt,
+                                           crs=payload.crs)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

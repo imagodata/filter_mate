@@ -342,6 +342,11 @@ Run it?</source>
         <translation>θέματα χάρτη</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>σελιδοδείκτες</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>δέντρο επιπέδων</translation>
@@ -781,6 +786,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>Το {} συνδέθηκε με το {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Σελιδοδείκτης: {} {}</translation>
     </message>
 </context>
 <context>

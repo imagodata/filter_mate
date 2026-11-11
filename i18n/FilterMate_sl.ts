@@ -342,6 +342,11 @@ Jo zaženem?</translation>
         <translation>teme karte</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>zaznamki</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>drevo slojev</translation>
@@ -781,6 +786,11 @@ Se strinjate?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} pridruženo k {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Zaznamek: {} {}</translation>
     </message>
 </context>
 <context>

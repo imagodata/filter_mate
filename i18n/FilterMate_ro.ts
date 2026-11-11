@@ -342,6 +342,11 @@ Pentru ce: {}
         <translation>teme de hartă</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>semne de carte</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>arborele de straturi</translation>
@@ -781,6 +786,11 @@ Sunteți de acord?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} unit cu {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Semn de carte: {} {}</translation>
     </message>
 </context>
 <context>

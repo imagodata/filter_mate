@@ -342,6 +342,11 @@ Run it?</source>
         <translation>ธีมแผนที่</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>บุ๊กมาร์ก</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>แผนผังเลเยอร์</translation>
@@ -781,6 +786,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>เชื่อม {} กับ {} แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>บุ๊กมาร์ก: {} {}</translation>
     </message>
 </context>
 <context>

@@ -342,6 +342,11 @@ Patakbuhin?</translation>
         <translation>mga tema ng mapa</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>mga bookmark</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>puno ng layer</translation>
@@ -781,6 +786,11 @@ Sumasang-ayon ka ba?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>Isinama ang {} sa {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Bookmark: {} {}</translation>
     </message>
 </context>
 <context>

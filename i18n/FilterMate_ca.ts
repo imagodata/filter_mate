@@ -342,6 +342,11 @@ L'executem?</translation>
         <translation>temes de mapa</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>punts d'interès</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>arbre de capes</translation>
@@ -781,6 +786,11 @@ Hi esteu d'acord?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} unit a {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Punt d'interès: {} {}</translation>
     </message>
 </context>
 <context>

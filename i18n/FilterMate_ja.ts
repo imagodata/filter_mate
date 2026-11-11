@@ -342,6 +342,11 @@ Run it?</source>
         <translation>マップテーマ</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>ブックマーク</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>レイヤツリー</translation>
@@ -781,6 +786,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} を {} に結合しました</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>ブックマーク：{} {}</translation>
     </message>
 </context>
 <context>

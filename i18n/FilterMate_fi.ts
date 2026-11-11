@@ -342,6 +342,11 @@ Ajetaanko?</translation>
         <translation>karttateemat</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>kirjanmerkit</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>tasopuu</translation>
@@ -781,6 +786,11 @@ Hyväksytkö?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} liitetty tasoon {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Kirjanmerkki: {} {}</translation>
     </message>
 </context>
 <context>

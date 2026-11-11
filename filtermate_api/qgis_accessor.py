@@ -39,6 +39,7 @@ from .accessor import (
     JoinAdded,
     LayerRename,
     MapThemes,
+    Bookmarks,
     LayoutExport,
     LayoutResult,
     EditResult,
@@ -501,12 +502,18 @@ class QGISFilterMateAccessor:
         return JoinAdded(**self._control("join_layers", layer, join_layer, target_field, join_field, fields=fields,
                                          prefix=prefix, module="adapters.public_api.fields_joins"))
 
-    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
-        return LayerTreeChange(**self._control("group_layers", layers, group=group, at_top=at_top,
+    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True,
+                     above: str = "") -> LayerTreeChange:
+        return LayerTreeChange(**self._control("group_layers", layers, group=group, at_top=at_top, above=above,
                                                module="adapters.public_api.layer_tree"))
 
-    def rename_layer(self, layer: str, name: str) -> LayerRename:
-        return LayerRename(**self._control("rename_layer", layer, name, module="adapters.public_api.layer_tree"))
+    def rename_layer(self, layer: str, name: str, group: bool = False) -> LayerRename:
+        return LayerRename(**self._control("rename_layer", layer, name, group=group,
+                                           module="adapters.public_api.layer_tree"))
+
+    def bookmark(self, action: str, name: str = "", extent_wkt: str = "", crs: str = "") -> Bookmarks:
+        return Bookmarks(**self._control("bookmark", action, name, extent_wkt=extent_wkt, crs=crs,
+                                         module="adapters.public_api.layer_tree"))
 
     def map_theme(self, action: str, name: str = "") -> MapThemes:
         return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree"))

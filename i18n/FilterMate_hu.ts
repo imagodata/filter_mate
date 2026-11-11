@@ -342,6 +342,11 @@ Futtatja?</translation>
         <translation>térképtémák</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>könyvjelzők</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>rétegfa</translation>
@@ -781,6 +786,11 @@ Egyetért?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} összekapcsolva ezzel: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>Könyvjelző: {} {}</translation>
     </message>
 </context>
 <context>

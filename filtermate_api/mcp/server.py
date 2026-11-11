@@ -785,22 +785,45 @@ def build_server(client: FilterMateClient) -> Any:
             "Group path from the top of the layer tree, such as Base or Base/Roads (made where missing); empty: "
             "the top of the tree itself"))] = "",
         at_top: Annotated[bool, Field(description="Put them first in the group (true) or last (false)")] = True,
+        above: Annotated[str, Field(max_length=1000, description=(
+            "A layer: put them just above it, in its group, so they are drawn over it; group and at_top are then "
+            "not used"))] = "",
     ) -> Dict[str, Any]:
-        """Organize the layer tree: put layers in a group, made where it is missing, first or last of it.
+        """Organize the layer tree: put layers in a group, made where it is missing, first or last of it; or just above
+        another layer, to draw them over it.
 
         Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of
         FilterMate, undoing the turn puts each layer back and removes the groups it made.
         """
-        return await call("POST", "/layers/group", _body(layers=layers, group=group, at_top=at_top))
+        return await call("POST", "/layers/group", _body(layers=layers, group=group, at_top=at_top, above=above))
 
     @mcp.tool(annotations=_write("Rename a layer", idempotent=True))
     async def rename_layer(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
         name: Annotated[str, Field(min_length=1, max_length=200, description="Its new name")],
+        group: Annotated[bool, Field(description=(
+            "true: layer is the path of a group of the layer tree (Base/Roads), and that group is renamed"))] = False,
     ) -> Dict[str, Any]:
         """Give a layer of the project another name, as shown in the layer tree and the legend; its data and source do
-        not change. Returns layer_id, name and previous."""
-        return await call("POST", "/layers/rename", _body(layer=layer, name=name))
+        not change. With group, rename a group of the layer tree instead. Returns layer_id, name and previous."""
+        return await call("POST", "/layers/rename", _body(layer=layer, name=name, group=group))
+
+    @mcp.tool(annotations=_write("Spatial bookmarks", idempotent=False))
+    async def bookmark(
+        action: Annotated[Literal["list", "add", "zoom", "remove"], Field(description=(
+            "list the bookmarks; add one (the visible map, or extent_wkt; replaces a bookmark of that name); zoom the "
+            "map to one; remove one"))],
+        name: Annotated[str, Field(max_length=200, description="Name of the bookmark, for every action but list")] = "",
+        extent_wkt: Annotated[str, Field(max_length=100000, description=(
+            "For add: the area as WKT (its bounding box is kept); the visible map by default"))] = "",
+        crs: Annotated[str, Field(max_length=200, description="CRS of extent_wkt; the CRS of the map by default")] = "",
+    ) -> Dict[str, Any]:
+        """Spatial bookmarks of the project: named places the user goes back to (Bookmarks panel of QGIS).
+
+        Returns action, name, bookmarks (all names), replaced, and extent_wkt after a zoom. In the chat of FilterMate,
+        undoing the turn brings the bookmarks back as they were.
+        """
+        return await call("POST", "/map/bookmarks", _body(action=action, name=name, extent_wkt=extent_wkt, crs=crs))
 
     @mcp.tool(annotations=_write("Map themes", idempotent=False))
     async def map_theme(
