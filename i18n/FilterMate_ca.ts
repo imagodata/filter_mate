@@ -807,6 +807,11 @@ Hi esteu d'acord?</translation>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>El pas {} no s'ha executat: canviaria una capa que heu protegit de l'agent ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>El pas {} no s'ha executat: heu desactivat la seva eina per a l'agent ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1385,6 +1390,81 @@ Hi esteu d'acord?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>L'agent les llegeix i les fa servir com a font, però no les canvia mai: ni filtre, ni estil, ni edició, ni camp, ni unió, ni nom nou, ni eliminació, sigui quin sigui el nivell, també en una recepta i per a altres aplicacions. Es desa al projecte.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Permet sempre</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Pregunta sempre</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Segons el nivell</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Per defecte cada eina segueix el nivell de la pestanya Autonomia. Una excepció val només per a aquesta eina: Mai també l'amaga a l'agent i la refusa a les receptes i a altres aplicacions; Permet sempre no supera el nivell Assessor, i el codi Python continua llegint-se i confirmant-se a cada execució.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Tipus</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Mai</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Regla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Eina</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Eines</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>buffer d'edició</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>irreversible</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>exterior</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>projecte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>llegeix</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>vista</translation>
     </message>
 </context>
 <context>

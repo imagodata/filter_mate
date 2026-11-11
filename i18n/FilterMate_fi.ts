@@ -807,6 +807,11 @@ Hyväksytkö?</translation>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Vaihetta {} ei suoritettu: se muuttaisi tasoa, jonka olet suojannut agentilta ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>Vaihetta {} ei suoritettu: olet poistanut sen työkalun käytöstä agentilta ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1385,6 +1390,81 @@ Hyväksytkö?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>Agentti lukee niitä ja käyttää niitä lähteenä, mutta ei koskaan muuta niitä: ei suodatinta, tyyliä, muokkausta, kenttää, liitosta, uutta nimeä tai poistoa millään tasolla, ei myöskään reseptissä eikä muille sovelluksille. Tallennetaan projektiin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Salli aina</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Kysy aina</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Tason mukaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Oletuksena jokainen työkalu noudattaa Autonomia-välilehden tasoa. Poikkeus koskee vain kyseistä työkalua: Ei koskaan piilottaa sen myös agentilta ja hylkää sen resepteissä ja muille sovelluksille; Salli aina ei ylitä Neuvoja-tasoa, ja Python-koodi luetaan ja vahvistetaan edelleen joka ajokerralla.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Laji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Ei koskaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Sääntö</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Työkalu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Työkalut</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>muokkauspuskuri</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>peruuttamaton</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>ulkoinen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>projekti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>lukee</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>näkymä</translation>
     </message>
 </context>
 <context>

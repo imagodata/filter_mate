@@ -807,6 +807,11 @@ Do you agree?</source>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트로부터 보호한 레이어를 변경하게 됩니다({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>{}단계가 실행되지 않았습니다: 에이전트에 대해 해당 도구를 꺼 두었습니다 ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1385,6 +1390,81 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>에이전트는 이를 읽고 소스로 사용하지만 절대 변경하지 않습니다. 필터, 스타일, 편집, 필드, 조인, 새 이름, 제거 모두 어떤 수준에서도, 레시피에서도, 다른 애플리케이션에서도 하지 않습니다. 프로젝트에 저장됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>항상 허용</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>항상 묻기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>수준에 따름</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>기본적으로 각 도구는 자율성 탭의 수준을 따릅니다. 예외는 해당 도구에만 적용됩니다. 안 함은 에이전트에게서도 도구를 숨기고 레시피와 다른 애플리케이션에서의 사용을 거부합니다. 항상 허용은 어드바이저 수준을 넘지 않으며, Python 코드는 실행할 때마다 계속 읽고 확인합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>종류</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>안 함</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>규칙</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>도구</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>도구</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>편집 버퍼</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>되돌릴 수 없음</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>외부</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>프로젝트</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>읽기</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>보기</translation>
     </message>
 </context>
 <context>

@@ -807,6 +807,11 @@ Se strinjate?</translation>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Korak {} ni bil izveden: spremenil bi sloj, ki ste ga zaščitili pred agentom ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>Korak {} ni bil izveden: orodje zanj ste izklopili za agenta ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1385,6 +1390,81 @@ Se strinjate?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>Agent jih bere in uporablja kot vir, a jih nikoli ne spremeni: nobenega filtra, sloga, urejanja, polja, združevanja, novega imena ali odstranitve, na kateri koli ravni, tudi v receptu in za druge aplikacije. Shranjeno v projektu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Vedno dovoli</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Vedno vprašaj</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Po ravni</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Privzeto vsako orodje sledi ravni z zavihka Samostojnost. Izjema velja samo za to orodje: Nikoli ga poleg tega skrije pred agentom in zavrne v receptih ter za druge aplikacije; Vedno dovoli ne preseže ravni Svetovalec, koda Python pa se še vedno prebere in potrdi ob vsakem zagonu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Vrsta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Nikoli</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Pravilo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Orodje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Orodja</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>medpomnilnik urejanja</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>nepovratno</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>zunanje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>bere</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>pogled</translation>
     </message>
 </context>
 <context>

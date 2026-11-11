@@ -30,7 +30,8 @@ from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
 from ...core.agent.permissions import (
-    ADVISOR, ASK, AUTONOMOUS, PROTECTED, REFUSE, RUN, STANDARD, PermissionPolicy, level_note,
+    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, PROTECTED, REFUSE, RUN, STANDARD, TURNED_OFF, PermissionPolicy, level_note,
+    risk_of,
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
 from ...core.agent.recipes import (
@@ -126,7 +127,8 @@ class AgentChatController(QObject):
         # The level of the settings, and what the user allowed for the conversation under way.
         # The layers the user protected in the open project: refused to the chat, the recipes and other applications.
         self._protection = ProjectProtection()
-        self._policy = PermissionPolicy(load_settings().autonomy, protector=self._protection)
+        self._policy = PermissionPolicy(load_settings().autonomy, protector=self._protection,
+                                        rules=load_settings().rules)
         # Code is read in a dialog of its own; a test that answers the questions gets it in the text.
         self._ask_code = ((lambda title, text, code: ask_code(parent_widget, title, text, code)) if ask_user is None
                           else (lambda title, text, code: ask_user(title, text + "\n\n" + code)))
@@ -356,7 +358,9 @@ class AgentChatController(QObject):
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
                                      free_available=bool(free_quota_url()), mcp_error=self._mcp.error,
-                                     project_layers=project_layers)
+                                     project_layers=project_layers,
+                                     tools=[(tool.name, tool.title or tool.name, risk_of(tool))
+                                            for tool in chat_tools() if tool.name not in AGENT_OWN])
         try:
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return False
@@ -389,8 +393,10 @@ class AgentChatController(QObject):
                                         mcp_enabled=dialog.mcp_enabled.isChecked(), mcp_port=dialog.mcp_port.value(),
                                         mcp_token=dialog.chosen_mcp_token(),
                                         expert_python=dialog.expert_python.isChecked(),
-                                        autonomy=dialog.chosen_autonomy()))
+                                        autonomy=dialog.chosen_autonomy(),
+                                        tool_rules=json.dumps(dialog.chosen_tool_rules())))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
+            self._policy.rules = load_settings().rules
             if project_layers:
                 write_protected(dialog.chosen_protected())
         finally:
@@ -415,7 +421,7 @@ class AgentChatController(QObject):
         configured = accessor.configured_domains()  # portals allowed in the configuration file count as ticked
         configured_names = list(parse_extra_domains(configured))
         data_sources = [source for source in active if not source.is_connector]
-        left_out = set()
+        left_out = {name for name, rule in values.rules.items() if rule == "never"}  # turned off in the Tools tab
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
@@ -634,8 +640,9 @@ class AgentChatController(QObject):
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)
         level = self._policy.level
-        # Nothing allowed beforehand counts; the protected layers do.
-        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection)
+        # Nothing allowed beforehand counts; the protected layers and the exceptions of the Tools tab do.
+        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection,
+                                  rules=values.rules)
         title = _tr("Recipe: {}").format(recipe["name"])
         self._replaying, self._replay_stop = True, False
         self._checkpoint.label = title
@@ -658,6 +665,10 @@ class AgentChatController(QObject):
                 verdict = executor.verdict(call, policy)
                 if verdict == PROTECTED:
                     stop = _tr("Step {} was not run: it would change a layer you protected from the agent ({}).").format(
+                        number, step["label"])
+                    break
+                if verdict == TURNED_OFF:
+                    stop = _tr("Step {} was not run: you turned its tool off for the agent ({}).").format(
                         number, step["label"])
                     break
                 if level == ADVISOR and verdict == REFUSE:
@@ -901,7 +912,9 @@ class AgentChatController(QObject):
         if self._mcp.busy:
             self._say(_tr("Another application is changing the project: try again in a moment."))
             return
-        self._policy.set_level(load_settings().autonomy)  # however the settings were saved
+        values = load_settings()  # however the settings were saved
+        self._policy.set_level(values.autonomy)
+        self._policy.rules = values.rules
         if self._engine is None:
             self._building = True
             try:
@@ -970,8 +983,11 @@ class AgentChatController(QObject):
                            if part)
 
     def protection_refusal(self, call: ToolCallPart) -> str:
-        """What a call that would change a protected layer is answered, for the MCP server too; "" otherwise."""
+        """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server
+        too; "" otherwise."""
         try:
+            if self._policy.turned_off(call.name):
+                return self._policy.refusal_text(call.name, call.arguments)
             return self._policy.protection_refusal(call.name, call.arguments)
         except Exception:  # a project closing: nothing to protect
             logger.debug("Agent: protected layers not read", exc_info=True)

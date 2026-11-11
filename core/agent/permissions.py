@@ -35,6 +35,12 @@ ASK = "ask"
 REFUSE = "refuse"
 # A layer the user protected would change: refused at every level, never turned into a question.
 PROTECTED = "protected"
+# The user turned this tool off in the Tools tab: refused at every level, never turned into a question.
+TURNED_OFF = "off"
+
+# Exceptions of the Tools tab, by tool: they override the level for that tool alone.
+RULE_ASK, RULE_ALLOW, RULE_NEVER = "ask", "allow", "never"
+RULES = (RULE_ASK, RULE_ALLOW, RULE_NEVER)
 
 # The arguments that name the layers a tool changes (its filter, style, data, name, or the layer itself). A layer only
 # read (the source of a cross filter, the table of a join, an input of Processing) or only shown (zoom, selection,
@@ -64,6 +70,9 @@ AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_no
 PROTECTED_REFUSAL = ("Not done: the user protected {} from the agent in this project. Read them, use them as a source, "
                      "zoom to them, but never change them (filter, style, edit, rename, remove). Tell the user; do not "
                      "try another tool to change them.")
+
+TURNED_OFF_REFUSAL = ("Not done: the user turned the tool {} off for the agent. Tell them; do not try another tool to "
+                      "do the same thing.")
 
 ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing that changes the project runs. "
                    "Tell them, step by step, what you would do and with which tools, so they can do it themselves or "
@@ -108,6 +117,17 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     return references
 
 
+def clean_rules(rules: Any) -> Dict[str, str]:
+    """The exceptions of the Tools tab as ``{tool: rule}``, what cannot be read left out; never allow code."""
+    if not isinstance(rules, dict):
+        return {}
+    cleaned = {str(name): rule for name, rule in rules.items() if rule in RULES and name not in AGENT_OWN}
+    for name in CODE_TOOLS:
+        if cleaned.get(name) == RULE_ALLOW:
+            del cleaned[name]  # code is read and confirmed at every run, whatever the user ticks
+    return cleaned
+
+
 def level_or_default(value: Optional[str]) -> str:
     return value if value in LEVELS else DEFAULT_LEVEL
 
@@ -138,10 +158,20 @@ class PermissionPolicy:
     """The level of the chat and what the user allowed for the conversation under way."""
 
     def __init__(self, level: str = DEFAULT_LEVEL, granted: Iterable[str] = (),
-                 protector: Optional[Protection] = None) -> None:
+                 protector: Optional[Protection] = None, rules: Optional[Dict[str, str]] = None) -> None:
         self.level = level_or_default(level)
         self._granted: Set[str] = set(granted)
         self.protector = protector
+        self.rules = clean_rules(rules or {})
+
+    def turned_off(self, name: str) -> bool:
+        return self.rules.get(name) == RULE_NEVER
+
+    def refusal_text(self, name: str, arguments: Dict[str, Any]) -> str:
+        """What the model is told of a call that is not run: a protected layer, a tool turned off, the level."""
+        return (self.protection_refusal(name, arguments)
+                or (TURNED_OFF_REFUSAL.format(repr(name)) if self.turned_off(name) else "")
+                or ADVISOR_REFUSAL)
 
     def protection_refusal(self, name: str, arguments: Dict[str, Any]) -> str:
         """What the model is told when the call would change a protected layer; "" when it would not."""
@@ -165,7 +195,14 @@ class PermissionPolicy:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec``."""
         if spec.name in AGENT_OWN:
             return RUN
+        rule = self.rules.get(spec.name)
+        if rule == RULE_NEVER:
+            return TURNED_OFF
         risk = risk_of(spec)
+        if rule == RULE_ASK:  # at every call, what was allowed for the conversation included
+            return REFUSE if self.level == ADVISOR and risk > READ else ASK
+        if rule == RULE_ALLOW and spec.name not in CODE_TOOLS and not (self.level == ADVISOR and risk > READ):
+            return RUN
         if risk <= _RUNS_ALONE[self.level] and spec.name not in CODE_TOOLS:
             return RUN
         if self.level == ADVISOR:
@@ -174,10 +211,9 @@ class PermissionPolicy:
             return RUN
         return ASK
 
-    @staticmethod
-    def grantable(spec) -> bool:
-        """Can the user allow this tool for the rest of the conversation? Never code."""
-        return spec.name not in CODE_TOOLS
+    def grantable(self, spec) -> bool:
+        """Can the user allow this tool for the rest of the conversation? Never code, nor a tool always asked."""
+        return spec.name not in CODE_TOOLS and self.rules.get(spec.name) != RULE_ASK
 
     def grant(self, name: str) -> None:
         self._granted.add(name)
