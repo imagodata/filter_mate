@@ -767,7 +767,7 @@ class TestPointCloudCriteriaFromState:
                  "conditions": conditions, "hag_enabled": False, "hag_min": 2.0, "hag_layer_id": None,
                  "expression_enabled": False, "expression": "", "apply_to_tiles": True,
                  "pick_attribute": "Z", "pick_tolerance": 5.0, "zone_wkt": "",
-                 "objects": {"target": "object", "ratio": [0.5, 2.0], "items": [], "detected": None}}
+                 "objects": {"target": "object", "ratio": [0.5, 2.0], "shape": True, "items": [], "detected": None}}
         assert cloud.parse_point_cloud_state(state) == state
 
 
@@ -972,7 +972,13 @@ class TestPointCloudObjects:
     """2026-10-18: the object detector of CLASSES; each object keeps its class and its box goes to the subset."""
 
     def test_default_objects_state(self):
-        assert cloud.parse_objects_state(None) == {"target": "object", "ratio": [0.5, 2.0], "items": [], "detected": None}
+        assert cloud.parse_objects_state(None) == {"target": "object", "ratio": [0.5, 2.0], "shape": True, "items": [],
+                                                   "detected": None}
+
+    def test_same_shape_is_kept_and_an_older_state_has_it_on(self):
+        assert cloud.parse_objects_state({"shape": False})["shape"] is False
+        assert cloud.parse_objects_state({"target": "similar_objects"})["shape"] is True
+        assert cloud.parse_objects_state({"shape": "no"})["shape"] is True  # not a boolean: the default
 
     def test_objects_state_is_normalised_and_idempotent(self):
         state = {"target": "similar_objects", "ratio": [3, 0.25],

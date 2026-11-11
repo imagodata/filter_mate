@@ -6178,6 +6178,16 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
         <translation>tot ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>dezelfde vorm</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Alleen objecten behouden met de vorm van de aangeklikte: hun compactheid (4π × oppervlakte / omtrek², 1 voor een schijf) binnen dezelfde verhoudingen; uit, is een heg met de oppervlakte van een boom een boom</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Pipet op</translation>

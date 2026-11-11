@@ -6178,6 +6178,16 @@ Pastikan jadual PostgreSQL mempunyai PRIMARY KEY yang ditakrifkan.</translation>
         <translation>hingga ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>bentuk sama</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Simpan hanya objek yang berbentuk seperti yang diklik: kepadatannya (4π × luas / perimeter², 1 untuk cakera) dalam nisbah yang sama; jika dimatikan, pagar hidup seluas pokok dianggap pokok</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Pipet hidup</translation>

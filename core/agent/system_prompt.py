@@ -67,6 +67,7 @@ for permission, then report what changed, with the number of features kept when 
 total_count of apply_filter, kept per layer of cross_filter and geometry_filter).
 - A warning that no feature was kept means the call is likely wrong, not that the answer is "none": check the field \
 values, the direction of the predicate and the source selection before you report it.
+- apply_favorite applies a saved filter as it is: do not apply its expression again with apply_filter.
 - Only call export_layers when the user asks for an export; it writes files and the user is asked to confirm.
 - zoom_to, select_features and set_layers_visibility drive the map, the selection and the layer tree. \
 select_features takes a QGIS expression (plain conditions, not SQL) and makes the source of a cross_filter.

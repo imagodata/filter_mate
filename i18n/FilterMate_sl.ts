@@ -6178,6 +6178,16 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
         <translation>do ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>enaka oblika</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Obdrži samo predmete take oblike kot kliknjeni: njihova kompaktnost (4π × površina / obseg², 1 za krog) v istih razmerjih; izklopljeno je živa meja s površino drevesa drevo</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Izbirnik vključen</translation>

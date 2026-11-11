@@ -6178,6 +6178,16 @@ Certifique-se de que a tabela PostgreSQL tem um PRIMARY KEY definido.</translati
         <translation>a ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>mesma forma</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>Mantém apenas os objetos com a forma dos clicados: sua compacidade (4π × área / perímetro², 1 para um disco) dentro das mesmas proporções; desligado, uma sebe com a área de uma árvore é uma árvore</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>Conta-gotas em</translation>

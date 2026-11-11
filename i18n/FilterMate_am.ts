@@ -6178,6 +6178,16 @@ PostgreSQL ሰንጠረዥ PRIMARY KEY እንዳለው ያረጋግጡ።</trans
         <translation>እስከ ×</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1170"/>
+        <source>same shape</source>
+        <translation>ተመሳሳይ ቅርጽ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1173"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a hedge of the area of a tree is a tree</source>
+        <translation>እንደተጫኑት ቅርጽ ያላቸውን ነገሮች ብቻ ያቆዩ፦ የታመቀነታቸው (4π × ስፋት / ዙሪያ², ለክብ 1) በተመሳሳይ ጥምርታ ውስጥ፤ ሲጠፋ፣ የዛፍ ስፋት ያለው አጥር ዛፍ ይሆናል</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1208"/>
         <source>Pipette on</source>
         <translation>መራጭ በርቷል</translation>
