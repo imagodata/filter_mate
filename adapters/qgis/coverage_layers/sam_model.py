@@ -201,6 +201,23 @@ def upsample(logits: Any, size: int) -> Any:
     return rows[:, low] * (1.0 - weight)[None, :] + rows[:, high] * weight[None, :]
 
 
+def choose_by_area(logits: Any, size: int, target_pixels: float) -> int:
+    """Index of the low resolution mask whose area, in pixels of a ``size`` window, is nearest ``target_pixels``.
+
+    Nearest by ratio (``|log(area / target)|``); an empty mask is never chosen while another is not.
+    """
+    import math
+    best, best_distance = 0, math.inf
+    target = max(float(target_pixels), 1.0)
+    for index, grid in enumerate(logits):
+        grid = np.asarray(grid)
+        area = float((grid > 0).sum()) * (size / grid.shape[-1]) ** 2
+        distance = abs(math.log(area / target)) if area > 0 else math.inf
+        if distance < best_distance:
+            best, best_distance = index, distance
+    return best
+
+
 class SamOnnxProvider:
     """Encoder and decoder of a quantized SAM 2.1 export (see ``core/ports/segmentation_port.py``)."""
 
@@ -252,6 +269,18 @@ class SamOnnxProvider:
         logits, scores = self._decode(embedding, points, labels, box)
         best = int(np.argmax(scores))
         return upsample(logits[best], self.input_size) > 0, scores[best]  # one enlargement: 3.5 s of 15 on a search
+
+    def predict_by_area(self, embedding: Any, points: Sequence[Tuple[float, float]], labels: Sequence[int],
+                        box: Optional[Tuple[float, float, float, float]], target_pixels: float) -> Tuple[Any, float]:
+        """Of the three masks SAM proposes, the one whose area is nearest ``target_pixels`` (by ratio), and its score.
+
+        The areas are read on the low resolution masks; only the one kept is enlarged. Measured for the
+        similar objects on 2026-11-11 and not adopted there: more objects found, many more that are not
+        the kind looked for (scripts/sam_similar_granularity.py, docs/SEGMENTATION.md).
+        """
+        logits, scores = self._decode(embedding, points, labels, box)
+        best = choose_by_area(logits, self.input_size, target_pixels)
+        return upsample(logits[best], self.input_size) > 0, scores[best]
 
     def predict_masks(self, embedding: Any, points: Sequence[Tuple[float, float]], labels: Sequence[int],
                       box: Optional[Tuple[float, float, float, float]]) -> Tuple[List[Any], List[float]]:

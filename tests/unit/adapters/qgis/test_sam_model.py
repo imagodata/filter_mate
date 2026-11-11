@@ -167,6 +167,37 @@ class TestUpsample:
         assert np.abs(sam_model.upsample(grid, 64) - expected).max() < 0.02
 
 
+class TestChooseByArea:
+    """2026-11-11: of the three masks, the one nearest the size looked for (the clicked object's)."""
+
+    @staticmethod
+    def masks(*sides):
+        """Square masks of ``side`` low resolution pixels, on grids of 16 (a window of 64 pixels: 4 x 4 each)."""
+        grids = []
+        for side in sides:
+            grid = np.full((16, 16), -1.0)
+            grid[:side, :side] = 1.0
+            grids.append(grid)
+        return grids
+
+    def test_the_nearest_by_ratio(self):
+        # areas in window pixels: 4 * 16, 16 * 16, 64 * 16
+        logits = self.masks(2, 4, 8)
+        assert sam_model.choose_by_area(logits, 64, 16 * 16) == 1
+        assert sam_model.choose_by_area(logits, 64, 50) == 0
+        assert sam_model.choose_by_area(logits, 64, 900) == 2
+
+    def test_by_ratio_not_by_difference(self):
+        # 150 is 86 from 64 and 106 from 256, but 256 / 150 = 1.7 is a smaller ratio than 150 / 64 = 2.3
+        logits = self.masks(2, 4)
+        assert sam_model.choose_by_area(logits, 64, 150) == 1
+        assert sam_model.choose_by_area(logits, 64, 120) == 0  # 120 / 64 = 1.9 < 256 / 120 = 2.1
+
+    def test_an_empty_mask_is_never_chosen_while_another_is_not(self):
+        logits = self.masks(0, 8)
+        assert sam_model.choose_by_area(logits, 64, 1) == 1
+
+
 class TestInstallCommand:
     def test_the_python_of_the_prefix_when_qgis_embeds_it(self, tmp_path, monkeypatch):
         folder = tmp_path / 'QGIS 4'
