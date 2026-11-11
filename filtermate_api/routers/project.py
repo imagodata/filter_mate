@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    FilterRejected, LayerSummary, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
+    FilterRejected, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
 from .filters import LayerName
@@ -107,6 +107,55 @@ def add_service_layer(payload: AddServiceLayerBody, request: Request) -> LayerSu
     """Add a layer of a WFS platform the user allowed."""
     try:
         return _accessor(request).add_service_layer(payload.platform, payload.typename, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class GroupBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layers: List[LayerName] = Field(..., min_length=1, max_length=1000)
+    group: str = Field(default="", max_length=_MAX_NAME, description="Group path such as Base/Roads; empty: the top")
+    at_top: bool = Field(default=True, description="First of the group, or last")
+
+
+@router.post("/layers/group", response_model=LayerTreeChange)
+def group_layers(payload: GroupBody, request: Request) -> LayerTreeChange:
+    """Put layers in a group of the layer tree, made where missing."""
+    try:
+        return _accessor(request).group_layers(payload.layers, group=payload.group, at_top=payload.at_top)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class RenameBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    name: str = Field(..., min_length=1, max_length=200)
+
+
+@router.post("/layers/rename", response_model=LayerRename)
+def rename_layer(payload: RenameBody, request: Request) -> LayerRename:
+    """Give a layer of the project another name; its data does not change."""
+    try:
+        return _accessor(request).rename_layer(payload.layer, payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class ThemeBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["list", "save", "apply", "remove"]
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/map/themes", response_model=MapThemes)
+def map_theme(payload: ThemeBody, request: Request) -> MapThemes:
+    """List, save, apply or remove a map theme of the project."""
+    try:
+        return _accessor(request).map_theme(payload.action, payload.name)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

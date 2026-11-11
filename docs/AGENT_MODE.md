@@ -29,6 +29,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 15. Vision | The map as an image for the model of the chat, with a key of the user and shared values only | done |
 | 16. Levels of autonomy | Each tool in a risk class; the user chooses how far the chat goes alone; "yes for this conversation" | done |
 | 17. Widgets | Controls the agent makes for the user (range, ticked values, a number), kept in the project, undone with the turn | done |
+| 18. Layer tree | Groups, names of layers and map themes, undone with the turn | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -123,6 +124,13 @@ Rules worth keeping:
 - **Project CRS**: `set_project_crs` takes an authid, an EPSG code alone or a layer of the project, and sets the
   CRS of the project, which the map follows (layers in other CRS are reprojected on the fly, no data changes).
   The turn keeps the CRS before (its authid, or its WKT for a CRS of its own) and undoing the turn sets it back.
+- **Layer tree and map themes** (`adapters/public_api/layer_tree.py`): `group_layers` puts layers in a group, made
+  where missing (`Base/Roads` for a group in a group, five levels at most; empty for the top), first or last of it,
+  each one kept checked or not; `rename_layer` renames a layer; `map_theme` lists, saves (the layers shown now and
+  their styles, replacing a theme of that name), applies or removes a map theme. In the chat, the REST API
+  (`POST /layers/group`, `/layers/rename`, `/map/themes`) and both MCP servers. The turn keeps the place of each layer
+  and the groups with their check state, the names, the themes as XML and, for a theme applied, the visibility and
+  the current style of every layer: undoing it brings them back and removes the groups it made.
 - **Expert mode** (`adapters/agent/expert_python.py`): `run_pyqgis`, a tool of the chat alone, is offered only when
   the user ticks *Expert: let the agent run Python code in QGIS* in the settings (off by default). Each run opens
   a dialog with its purpose and the whole code, No by default; the code is written to the log, then run on the
@@ -162,7 +170,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | Class | Tools | Undone |
 |---|---|---|
 | read | every `read_only` tool, open data searches included | nothing to undo |
-| view | `zoom_to`, `select_features`, `set_layers_visibility` | with the turn |
+| view | `zoom_to`, `select_features`, `set_layers_visibility`, `group_layers`, `map_theme` | with the turn |
 | project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
 | edit buffer | `update_features`, `add_features` | with the turn, until the user saves |
 | irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |

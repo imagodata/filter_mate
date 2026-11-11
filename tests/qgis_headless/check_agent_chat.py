@@ -696,6 +696,21 @@ def check_chat(provider, layer, authcfg, work):
     QgsProject.instance().removeEntry("FMcheck", "ran")
     settings()
 
+    root = QgsProject.instance().layerTreeRoot()
+    provider.reset((200, {}, tool_turn("group_layers", {"layers": ["communes"], "group": "Référence"})),
+                   (200, {}, tool_turn("map_theme", {"action": "save", "name": "Communes seules"}, "toolu_2")),
+                   (200, {}, text_turn("Rangée.")))
+    check("the layer tree through the chat", ask("range les communes dans un groupe Référence et garde cette vue"))
+    node = root.findLayer(layer.id())
+    check("the layer is in its group, the view kept as a theme", node is not None and node.parent().name() == "Référence"
+          and "Communes seules" in QgsProject.instance().mapThemeCollection().mapThemes())
+    check("its card names the group", "Layers put in Référence" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-300:])
+    chat._on_undo()
+    node = root.findLayer(layer.id())
+    check("undoing the turn puts it back and forgets the theme", node is not None and node.parent() is root and
+          root.findGroup("Référence") is None and not QgsProject.instance().mapThemeCollection().mapThemes())
+
     from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
     write_notes([])
     provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),
