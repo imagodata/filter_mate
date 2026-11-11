@@ -67,7 +67,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Bekijk de gekozen video"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Bekijk de video</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">Lees de handleiding <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
-            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 en Qt6</p>
+            <p class="home-version">FilterMate 5.1 · QGIS 3.22–4.x · Qt5 en Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Ontdek de werkwijze</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -112,8 +112,31 @@
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">Nieuw in FilterMate 5</p><h2 id="fm5-title">Rasters en LiDAR-puntenwolken, gefilterd als elke andere laag.</h2><p>Kies een raster of een puntenwolk als huidige laag en EXPLORING toont de bijbehorende hulpmiddelen. FILTERING koppelt de selectie daarna aan lagen van elk type.</p></div>
-            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixelkiezer, waardebereik met histogram en live voorbeeld, helling, expositie, reliëfschaduw of ruwheid berekend uit een DTM, klassen, rasterexpressie.</span></li><li><strong>Puntenwolken</strong><span>ASPRS- en LiDAR HD-klassen, voorwaarden op elk attribuut, een klasse gecombineerd met een hoogte boven een DTM.</span></li><li><strong>In elke richting</strong><span>Vector, raster en puntenwolk als bron of doel: negen combinaties met buffer, minimale dekking en Disjoint.</span></li><li><strong>Veilig ongedaan te maken</strong><span>Bijgesneden lagen behouden hun id en stijl. Ongedaan maken, opnieuw uitvoeren en projectbestanden keren terug naar de oorspronkelijke bron.</span></li><li><strong>Exporteren</strong><span>GeoTIFF en COG voor rasters; LAZ, LAS, COPC, GPKG en CSV voor puntenwolken.</span></li><li><strong>Automatiseren</strong><span>Negen Processing-algoritmen, vier modellen, qgis_process en Python- en REST-API&#x27;s.</span></li><li><strong>Getest</strong><span>CI op QGIS 3.22, 3.28, 3.34, 3.44 en 4.2, via Processing en via het paneel zelf.</span></li></ul>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixelkiezer, waardebereik met histogram en live voorbeeld, helling, expositie, reliëfschaduw of ruwheid berekend uit een DTM, klassen, rasterexpressie.</span></li><li><strong>Puntenwolken</strong><span>ASPRS- en LiDAR HD-klassen, voorwaarden op elk attribuut, een klasse gecombineerd met een hoogte boven een DTM.</span></li><li><strong>In elke richting</strong><span>Vector, raster en puntenwolk als bron of doel: negen combinaties met buffer, minimale dekking en Disjoint.</span></li><li><strong>Veilig ongedaan te maken</strong><span>Bijgesneden lagen behouden hun id en stijl. Ongedaan maken, opnieuw uitvoeren en projectbestanden keren terug naar de oorspronkelijke bron.</span></li><li><strong>Exporteren</strong><span>GeoTIFF en COG voor rasters; LAZ, LAS, COPC, GPKG en CSV voor puntenwolken.</span></li><li><strong>Webservices</strong><span>WFS, OGC API Features, ArcGIS, WCS, vectortegels en externe COPC- of EPT-puntenwolken worden gefilterd en verkend met begrensde leesacties, nooit op de hoofdthread.</span></li><li><strong>Automatiseren</strong><span>Tien Processing-algoritmen, vier modellen, qgis_process en Python- en REST-API&#x27;s.</span></li><li><strong>Gecontroleerd</strong><span>In QGIS 3.22 tot 4.x vóór elke versie, via Processing en via het paneel zelf.</span></li></ul>
             <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">De handleiding voor FilterMate 5 lezen <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section examples agent" id="agent" aria-labelledby="agent-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Experimenteel · Nieuw in FilterMate 5.1</p><h2 id="agent-title">Vraag een filter in één zin.</h2><p>AGENT is een chat bovenaan het paneel. Schrijf wat je wilt, bijvoorbeeld gebouwen boven 1200 m in de gekozen gemeente, en hij filtert, selecteert, zoomt of exporteert. Elke stap kan ongedaan worden gemaakt.</p></div>
+            <a class="inline-cta" href="guide.html#agent" hreflang="en">Het hoofdstuk Agent lezen <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+        <ul class="capability-list"><li><strong>Jouw model</strong><span>Claude, Mistral, OpenAI en compatibele servers, of een lokaal Ollama-model. Een paar gratis verzoeken per maand om het te proberen, daarna je eigen sleutel, bewaard in de QGIS-authenticatiedatabase.</span></li><li><strong>Ongedaan per stap</strong><span>Filters worden direct toegepast. Undo en Redo doorlopen de verzoeken van de agent, en Undo back to here gaat terug naar elke stap.</span></li><li><strong>QGIS-algoritmen</strong><span>Hij kan Processing-algoritmen zoeken en uitvoeren die lagen of statistieken opleveren, op lagen van het project. Elk resultaat is een tijdelijke laag die Undo verwijdert.</span></li><li><strong>Jij bevestigt</strong><span>Exports en toegevoegde of verwijderde lagen vragen eerst om bevestiging. Een filter is één gewone WHERE-clausule, gecontroleerd voordat hij wordt uitgevoerd.</span></li><li><strong>Bronnen die je aanvinkt</strong><span>Open-dataportalen, WFS-services, Sentinel-2-scènes en MCP-connectors, allemaal uit totdat je ze aanvinkt.</span></li><li><strong>Eerst jouw toestemming</strong><span>Er wordt niets verzonden voordat je een model kiest en akkoord gaat. De handleiding somt op wat met elk verzoek meegaat.</span></li><li><strong>MCP-server</strong><span>Standaard uit. Claude Code of een andere MCP-client op je computer kan FilterMate bedienen via 127.0.0.1, met een toegangstoken.</span></li></ul>
+    </div>
+</section>
+
+<section class="home-section objects" id="objects" aria-labelledby="objects-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Experimenteel · Nieuw in FilterMate 5.1</p><h2 id="objects-title">Klik op een object. SAM tekent het.</h2><p>Op een raster tekent de pixelkiezer het aangeklikte object met SAM, een model dat op je computer draait. Vergelijkbare objecten komen als voorstellen die je bewaart of verwerpt. Het resultaat is gewone polygonen, dus een filter wordt zonder het model opnieuw afgespeeld.</p></div>
+            <a class="inline-cta" href="guide.html#sam" hreflang="en">Over SAM lezen in de handleiding <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+        <div>
+            <dl class="result-list"><div><dt>0.82</dt><dd>mediane overlap met 100 gebouwcontouren, vanuit een kader</dd></div><div><dt>0.81</dt><dd>mediane overlap met 40 BD TOPO-footprints, vanuit Processing</dd></div></dl>
+            <ul class="capability-list"><li><strong>Tekenen</strong><span>Klik; Shift+klik om uit te breiden, rechtsklik om in te korten, of sleep een kader. G toont de volgende contour die SAM voorstelde.</span></li><li><strong>Vergelijkbare objecten</strong><span>Voorstellen met een gestippelde rand: een klik bewaart er één, een rechtsklik verwerpt hem. Ongeveer de helft zijn gebouwen.</span></li><li><strong>Eenmaal installeren</strong><span>Eén bevestiging installeert onnxruntime en een model van 62 MB in je QGIS-profiel. Daarvoor wordt niets geïnstalleerd.</span></li><li><strong>Voorbij het paneel</strong><span>To layer voegt de objecten toe als polygoonlaag. Processing tekent één object per punt of polygoon van een laag, en polygonen kunnen filteren vanuit scripts, REST en MCP.</span></li><li><strong>Beperkingen</strong><span>Het best op gebouwen en goed afgebakende objecten. Percelen en bomen zijn niet gevalideerd.</span></li></ul>
         </div>
     </div>
 </section>
@@ -201,7 +224,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.nl.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Ruimtelijk filteren in QGIS, door imagodata.</p></div><ul><li><a href="guide.html" hreflang="en">Handleiding <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">Praktijkvoorbeelden <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">Ontwikkelplan <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Broncode</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Probleem melden</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 5.0 · Kaartgegevens in video&#x27;s en schermafbeeldingen: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.1 · Kaartgegevens in video&#x27;s en schermafbeeldingen: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Sluiten</button></form></dialog>
