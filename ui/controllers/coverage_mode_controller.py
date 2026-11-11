@@ -2628,8 +2628,10 @@ class CoverageModeController(BaseController):
         if geometry is None or geometry.isEmpty():
             return self.tr("No point of class {0} under the click: click on the object itself").format(code), False
         box = geometry.boundingBox()
+        # A cell more around: the box filters the points at full density, the object holds the cells of those read.
+        rim = float(getattr(found, 'cell_size', 0.0) or 0.0)
         item = {"x": x, "y": y, "code": code, "wkt": geometry.asWkt(WKT_PRECISION), "truncated": found.truncated,
-                "box": [box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum()]}
+                "box": [box.xMinimum() - rim, box.yMinimum() - rim, box.xMaximum() + rim, box.yMaximum() + rim]}
         if panel.add_object(item, extend):
             return '', True
         return self.tr("Class {0} is not in the class list of the layer").format(code), False
@@ -2748,26 +2750,29 @@ class CoverageModeController(BaseController):
         from ...adapters.qgis.coverage_layers.geometry_tools import compactness, union_geometries
         from ...adapters.qgis.coverage_layers.point_cloud_objects import filled_part, similar_objects_footprint
         base = self._preview_base_subset if self._preview_base_subset is not None else layer.subsetString()
-        areas: Dict[int, List[float]] = {}
-        compact: Dict[int, List[float]] = {}
+        clicked: Dict[int, List[Tuple[dict, Any]]] = {}
         for item, shape in zip(items, shapes):
             if shape is not None and not shape.isEmpty():
-                areas.setdefault(item['code'], []).append(shape.area())  # layer units², as the footprint parts
-                if same_shape:  # measured as the parts are: holes filled
-                    compact.setdefault(item['code'], []).append(compactness(filled_part(shape)))
+                clicked.setdefault(item['code'], []).append((item, shape))
         geometries, boxes, truncated = [], [], False
         try:
             with _wait_cursor():
-                for code in sorted(areas):
-                    found = similar_objects_footprint(layer, code, areas[code], ratio, base_subset=base,
-                                                      footprint=self._class_footprint(layer, code, base),
-                                                      reference_shapes=compact.get(code))
+                for code in sorted(clicked):
+                    footprint = self._class_footprint(layer, code, base)
+                    references = self._reference_objects(layer, code, clicked[code], footprint)
+                    areas = [shape.area() for shape in references]  # layer units², as the footprint parts
+                    # measured as the parts are: holes filled
+                    compact = [compactness(filled_part(shape)) for shape in references] if same_shape else None
+                    found = similar_objects_footprint(layer, code, areas, ratio, base_subset=base,
+                                                      footprint=footprint, reference_shapes=compact)
                     truncated = truncated or found.truncated
                     if found.parts:
                         geometries.append(found.geometry)
+                    rim = float(getattr(footprint, 'cell_size', 0.0) or 0.0)  # as the boxes of the clicked objects
                     for part in found.parts:
                         box = part.boundingBox()
-                        boxes.append([code, box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum()])
+                        boxes.append([code, box.xMinimum() - rim, box.yMinimum() - rim,
+                                      box.xMaximum() + rim, box.yMaximum() + rim])
         except RuntimeError as exc:
             self._push_info(self.tr("Similar objects not read: {0}").format(exc))
             return None
@@ -2775,6 +2780,47 @@ class CoverageModeController(BaseController):
             self._push_info(self.tr("No similar object within the area ratios: widen them"))
             return None
         return union_geometries(geometries), boxes, len(boxes), truncated
+
+    def _reference_objects(self, layer: Any, code: int, clicked: List[Tuple[dict, Any]], footprint: Any) -> List[Any]:
+        """The clicked objects of class ``code`` measured in the cells of its footprint.
+
+        As clicked, unless the class was too dense to be read in their cells (``footprint.resolution``,
+        see ``point_cloud_objects.class_footprint``): then read again in the coarser cells, so that the
+        areas and shapes compared are measured alike, once per footprint (kept in ``footprint.objects``:
+        a ratio edited reads nothing). Read from a point inside the clicked object (the click may have
+        been beside it, within the search radius of the map). One that cannot be read again stays as
+        clicked, and is tried again at the next refresh.
+
+        Raises:
+            RuntimeError: The copy of the layer cannot be read (see :meth:`_object_reader`).
+        """
+        from ...adapters.qgis.coverage_layers.point_cloud_objects import OBJECT_RESOLUTION, object_footprint
+        resolution = float(getattr(footprint, 'resolution', 0.0) or 0.0)
+        measured = getattr(footprint, 'objects', None)
+        if not resolution or resolution == float(OBJECT_RESOLUTION) or measured is None:
+            return [shape for _item, shape in clicked]
+        shapes = []
+        for item, shape in clicked:
+            key = item.get('wkt') or (float(item['x']), float(item['y']))
+            if key not in measured:
+                x, y = self._point_inside(shape, item)
+                reader, _on_map = self._object_reader(layer)
+                again = object_footprint(reader, x, y, code, resolution=resolution).geometry
+                if again is None or again.isEmpty():
+                    shapes.append(shape)
+                    continue
+                measured[key] = again
+            shapes.append(measured[key])
+        return shapes
+
+    @staticmethod
+    def _point_inside(shape: Any, item: dict) -> Tuple[float, float]:
+        """A point of the clicked object ``shape`` (its point on surface), else the click of ``item``."""
+        try:
+            point = shape.pointOnSurface().asPoint()
+            return float(point.x()), float(point.y())
+        except Exception:  # noqa: BLE001 - a shape that cannot tell: the click
+            return float(item['x']), float(item['y'])
 
     def _class_footprint(self, layer: Any, code: int, base_subset: str) -> Any:
         """Footprint of a whole class of ``layer`` (``point_cloud_objects.class_footprint``), the last few kept."""

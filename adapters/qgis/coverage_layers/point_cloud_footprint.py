@@ -18,8 +18,8 @@ points read in 1.8 s at 2 m.
 """
 import logging
 import math
-from dataclasses import dataclass
-from typing import Callable, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional
 
 from qgis.core import QgsDoubleRange, QgsGeometry, QgsRectangle
 
@@ -48,6 +48,9 @@ class FootprintResult:
     cell_size: float
     truncated: bool = False
     coarse: bool = False  # cells larger than the resolution (grid limit)
+    resolution: float = 0.0  # metres asked, when the caller says (point_cloud_objects.class_footprint)
+    # Objects clicked on the cloud measured again in these cells, kept with the footprint they are compared with.
+    objects: Dict[tuple, Any] = field(default_factory=dict)
 
 
 def layer_resolution(resolution: Optional[float], crs) -> float:
@@ -264,8 +267,8 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
         dilate_cells: Grow the occupied cells by this many cells to close gaps.
         is_canceled: Polled between two reads; True stops reading.
         check: Called with the points of each read (see :func:`selection_check`).
-        erode_cells: Then fill the holes and shrink the cells back by this many cells (at most
-            ``dilate_cells``: every cell holding a point stays, the gaps are closed and the footprint not grown).
+        erode_cells: Then shrink them back by this many cells, at most ``dilate_cells``
+            (:func:`geometry_tools.shrink_back`: every cell holding a point stays, the footprint is not grown).
 
     Returns:
         :class:`FootprintResult`, with an empty geometry when no point passes;
@@ -304,6 +307,7 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
     ri = np.clip(np.floor((top - ys) / cell).astype('int64'), 0, rows - 1)
     grid = np.zeros((rows, cols), dtype='uint8')
     grid[ri, ci] = 1
+    occupied = grid.astype(bool)
     for _ in range(max(0, int(dilate_cells))):
         grown = grid.copy()
         grown[1:, :] |= grid[:-1, :]
@@ -311,11 +315,11 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
         grown[:, 1:] |= grid[:, :-1]
         grown[:, :-1] |= grid[:, 1:]
         grid = grown
-    if int(erode_cells) > 0:
-        # Holes filled, then shrunk back, as the objects of point_cloud_objects.grow_object (same cells).
-        from .geometry_tools import erode_mask
-        from .raster_adapter import fill_holes
-        grid = erode_mask(fill_holes(grid.astype(bool)), int(erode_cells)).astype('uint8')
+    erode_cells = min(max(0, int(erode_cells)), max(0, int(dilate_cells)))
+    if erode_cells > 0:
+        # Shrunk back cell by cell as the objects of point_cloud_objects.grow_object are (same cells).
+        from .geometry_tools import shrink_back
+        grid = shrink_back(grid, occupied, erode_cells).astype('uint8')
     geotransform = (left, cell, 0.0, top, 0.0, -cell)
     geometry = mask_to_geometry(grid, geotransform, layer.crs().toWkt(), sieve_pixels=0, simplify_tolerance=cell * 0.5)
     return FootprintResult(geometry, int(len(xs)), cell, truncated, coarse=cell > resolution)

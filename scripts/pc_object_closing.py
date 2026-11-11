@@ -23,6 +23,30 @@ Pre-registered 2026-11-11, before any run:
   one with the higher mean of the two median IoUs; a 2 m variant is kept over a 1 m one within 0.02.
 
 Run with QGIS (offscreen): argv = plugins folder, point cloud, buildings, output json.
+
+Result, 2026-11-11, Docker qgis/qgis:latest (QGIS 4.3): 126 buildings, 121 blocks, 40 candidates. Medians, A then B:
+
+    variant      IoU clicked   precision     recall        click     footprint
+    V0 2 m       0.18 0.20     0.46 0.25     0.02 0.01     0.8 s     2.8 s
+    V1 2 m back  0.24 0.26     0.62 0.40     0.02 0.02     0.7 s     1.9 s
+    V2 1 m       0.38 0.71     0.71 0.79     0.20 0.42     1.9 s     5.0 s
+    V3 1 m back  0.55 0.83     0.82 0.84     0.41 0.47     1.8 s     3.3 s
+
+All three pass, V3 is chosen. The clicked objects of V0 cover 1 740 and 1 890 m² for blocks of 240 and 280 m²: in
+cells of 2 m the village merges. With V3, 8 clicks of 40 still give an object of 6 000 to 9 000 m² (the dense core).
+The rule measured buildings only; scripts/pc_object_cost.py measures the other classes.
+
+Run again the same day after a review of the code: the shrinking eroded the grown cells after filling the holes, which
+broke thin rows of points (a hedge with a gap of one cell fell apart) and filled, on the footprint only, pockets closed
+by patches touching at a corner. It is now geometry_tools.shrink_back (a grown cell between two points stays, no hole
+filled before), the same for the click and the footprint. Same bench, same rule:
+
+    V0 2 m       0.18 0.20     0.46 0.25     0.02 0.01     0.6 s     2.0 s
+    V1 2 m back  0.22 0.24     0.55 0.52     0.03 0.02     0.6 s     1.4 s
+    V2 1 m       0.38 0.71     0.71 0.79     0.20 0.42     1.6 s     4.3 s
+    V3 1 m back  0.54 0.79     0.84 0.84     0.44 0.51     1.6 s     4.9 s
+
+V2 and V3 pass (V1 gains 0.046 on A, short of 0.05); V3 is chosen.
 """
 import json
 import os

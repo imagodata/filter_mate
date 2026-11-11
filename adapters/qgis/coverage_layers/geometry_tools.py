@@ -246,6 +246,28 @@ def erode_mask(mask, radius: int = 1):
     return ~dilate_mask(~np.asarray(mask, dtype=bool), radius)
 
 
+def shrink_back(grown, occupied, radius: int = 1):
+    """``grown`` (``occupied`` dilated by :func:`dilate_mask`) shrunk back by ``radius`` cells without cutting a thin row.
+
+    An eroded cell goes unless it is occupied, or it is a grown cell between two occupied
+    ones (two of its four neighbours: a gap of one cell in a hedge, the step of a diagonal
+    row of points). The rim the dilation added goes, so an object is no longer one cell
+    larger all around; a neck of grown cells two cells long between two objects is cut;
+    a band of grown cells wider than that (two buildings two cells apart along a wall)
+    stays, as in a closing. Every occupied cell stays. Cell by cell, so the clicked object
+    and the footprint of its class get the same cells (point_cloud_objects).
+    """
+    import numpy as np
+    grown = np.asarray(grown, dtype=bool)
+    occupied = np.asarray(occupied, dtype=bool) & grown
+    neighbours = np.zeros(grown.shape, dtype='uint8')
+    neighbours[1:, :] += occupied[:-1, :]
+    neighbours[:-1, :] += occupied[1:, :]
+    neighbours[:, 1:] += occupied[:, :-1]
+    neighbours[:, :-1] += occupied[:, 1:]
+    return erode_mask(grown, radius) | occupied | (grown & (neighbours >= 2))
+
+
 def open_mask(mask, radius: int = 1):
     """Opening of ``mask``: eroded then dilated by ``radius``.
 

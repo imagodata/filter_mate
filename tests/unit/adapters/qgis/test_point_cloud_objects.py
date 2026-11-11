@@ -110,8 +110,10 @@ class TestGrowObject:
         cloud = Cloud((100, 100, 110, 112))
         grid = objects.grow_object(cloud.read, 105.2, 106.3, 1.0)
         assert grid is not None and not grid.truncated and len(cloud.reads) == 1
-        assert grid.region.sum() == (10 + 2) * (12 + 2) - 4  # the roof, a cell around it, no corner
+        assert grid.region.sum() == 10 * 12  # the roof: closed, then shrunk back (2026-11-11)
         assert grid.points == len(cloud.xs)
+        grown = objects.grow_object(cloud.read, 105.2, 106.3, 1.0, erode_cells=0)
+        assert grown.region.sum() == (10 + 2) * (12 + 2) - 4  # the roof, a cell around it, no corner
         left, cell, _r1, top, _r2, minus = grid.geotransform
         assert (cell, minus) == (1.0, -1.0) and left == 105 - 32 and top == 107 + 32
 
@@ -140,21 +142,55 @@ class TestGrowObject:
     def test_shrunk_back_a_neck_of_one_grown_cell_is_cut(self):
         # The roofs face each other across two cells on one row only: the grown cells bridge them by one row.
         cloud = Cloud((100, 100, 110, 110), (112, 109, 122, 119))
-        assert objects.grow_object(cloud.read, 105.0, 105.0, 1.0).points == len(cloud.xs)
+        assert objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=0).points == len(cloud.xs)
         grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=1)
         assert grid.points == len(cloud.xs) // 2 and grid.region.sum() == 100
 
     def test_shrunk_back_sparse_points_stay_one_object(self):
         # A point every other cell: the holes are filled before shrinking, the roof stays whole and not grown.
         cloud = Cloud((100.3, 100.3, 110.3, 110.3), step=2.0)  # points at 101.3, 103.3 … 109.3, inside their cells
-        grown = objects.grow_object(cloud.read, 105.0, 105.0, 1.0)
+        grown = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=0)
         grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=1)
         left, top = grid.geotransform[0], grid.geotransform[3]
         rows, cols = np.nonzero(grid.region)
         assert (cols + left).min() == 101 and (cols + left).max() == 109  # the cells of the points, no more
         assert (top - rows - 1).min() == 101 and (top - rows - 1).max() == 109
-        assert grid.region.sum() < grown.region.sum()
-        assert grid.points >= len(cloud.xs) - 4  # a corner point may touch the roof by a corner only
+        assert grid.region.sum() == 9 * 9 < grown.region.sum() and grid.points == len(cloud.xs)
+
+    def test_shrunk_back_a_hedge_with_gaps_of_one_cell_stays_whole(self):
+        # 2026-11-11 review: eroded alone, the grown cells between two points went and the hedge fell apart.
+        xs, ys = np.arange(100.5, 140, 2.0), np.full(20, 100.5)  # a point every other cell along a row
+
+        def read(xmin, ymin, xmax, ymax):
+            inside = (xs > xmin) & (xs < xmax)
+            return xs[inside], ys[inside]
+
+        grid = objects.grow_object(read, 120.5, 100.5, 1.0, erode_cells=1)
+        assert grid.points == len(xs) and grid.region.sum() == 39  # the row itself, not the cells beside it
+
+    def test_shrunk_back_a_diagonal_row_stays_whole(self):
+        xs = np.arange(100.5, 120, 1.0)
+        ys = xs.copy()  # each point in the cell diagonal to the last one
+        read = lambda xmin, ymin, xmax, ymax: (xs, ys)  # noqa: E731
+        grid = objects.grow_object(read, 110.5, 110.5, 1.0, erode_cells=1)
+        assert grid.points == len(xs) and grid.region.sum() == len(xs) + 2 * (len(xs) - 1)  # the two cells of a step
+
+    def test_shrunk_back_a_gap_of_two_cells_in_a_row_is_cut(self):
+        # Two grown cells between two points look like the neck between two buildings: cut, as there.
+        xs, ys = np.array([100.5, 103.5]), np.array([100.5, 100.5])
+        read = lambda xmin, ymin, xmax, ymax: (xs, ys)  # noqa: E731
+        assert objects.grow_object(read, 100.5, 100.5, 1.0, erode_cells=0).points == 2
+        assert objects.grow_object(read, 100.5, 100.5, 1.0, erode_cells=1).points == 1
+
+    def test_the_object_cut_is_said_on_the_final_object(self):
+        # A long hedge read to the largest window is cut there, and still said so once shrunk back.
+        xs, ys = np.arange(0.5, 400, 1.0), np.full(400, 10.5)
+
+        def read(xmin, ymin, xmax, ymax):
+            inside = (xs > xmin) & (xs < xmax)
+            return xs[inside], ys[inside]
+
+        assert objects.grow_object(read, 200.5, 10.5, 1.0, erode_cells=1).truncated
 
     def test_a_long_building_grows_the_window(self):
         cloud = Cloud((100, 100, 200, 110))  # 100 m long: past the 64 m window
@@ -181,7 +217,8 @@ class TestGrowObject:
         # A ring of buildings around a courtyard of 10 x 10 m.
         cloud = Cloud((100, 100, 130, 105), (100, 125, 130, 130), (100, 105, 105, 125), (125, 105, 130, 125))
         grid = objects.grow_object(cloud.read, 102.0, 102.0, 1.0)
-        assert grid.region.sum() == 32 * 32 - 4
+        assert grid.region.sum() == 30 * 30  # the ring and its courtyard, shrunk back
+        assert objects.grow_object(cloud.read, 102.0, 102.0, 1.0, erode_cells=0).region.sum() == 32 * 32 - 4
 
     def test_geographic_cells(self):
         cell = 1.0 / 111320.0
@@ -193,7 +230,7 @@ class TestGrowObject:
             return 2.0 + xs * cell, 45.0 + ys * cell
 
         grid = objects.grow_object(read, 2.0 + 5 * cell, 45.0 + 5 * cell, cell, 32 * cell, 128 * cell)
-        assert grid is not None and grid.region.sum() == 12 * 12 - 4 and len(cloud.reads) == 1
+        assert grid is not None and grid.region.sum() == 10 * 10 and len(cloud.reads) == 1
 
 
 class FakeProvider:
@@ -246,16 +283,17 @@ def qgis_fakes(monkeypatch):
 
 
 class TestObjectFootprint:
-    """The scenes are laid out on cells of 1 m (the default is 2 m: a click on a LiDAR HD tile in a few seconds)."""
+    """The scenes are laid out on cells of 1 m, the default since 2026-11-11 (2 m before)."""
 
     def test_the_class_of_the_click_only(self, qgis_fakes):
         roof = [(x + 0.25, y + 0.25, 6) for x in np.arange(100, 110, 0.5) for y in np.arange(100, 110, 0.5)]
         tree = [(x + 0.25, y + 0.25, 5) for x in np.arange(108, 116, 0.5) for y in np.arange(100, 108, 0.5)]
         layer = FakeLayer(roof + tree)
-        found = objects.object_footprint(layer, 105.0, 105.0, 6, resolution=1.0)
+        found = objects.object_footprint(layer, 105.0, 105.0, 6)
         assert found.geometry == "object geometry" and found.points == len(roof) and not found.truncated
         region, geotransform, tolerance = qgis_fakes[0]
-        assert region.sum() == 12 * 12 - 4 and tolerance == 0.5  # the tree over the roof is another object
+        assert region.sum() == 10 * 10 and tolerance == 0.5  # the tree over the roof is another object
+        assert geotransform[1] == 1.0 and found.cell_size == 1.0
 
     def test_classification_as_text(self, qgis_fakes):
         layer = FakeLayer([(105.25, 105.25, "6 (Building)")])
@@ -394,18 +432,108 @@ class TestSameCellsAsTheFootprint:
         footprint.footprint_geometry(layer, cell, erode_cells=erode_cells)
         return grids[0]
 
+    @pytest.mark.parametrize("cell", [1.0, 2.0])
     @pytest.mark.parametrize("erode_cells", [0, 1])
     @pytest.mark.parametrize("offset", [0.0, 0.3, 0.7, 1.4])
-    def test_a_tree_has_the_same_cells(self, qgis_fakes, monkeypatch, offset, erode_cells):
+    def test_a_tree_has_the_same_cells(self, qgis_fakes, monkeypatch, offset, erode_cells, cell):
         tree = [(x + offset, y + offset, 5) for x in np.arange(1000.1, 1005, 0.4) for y in np.arange(2000.1, 2005, 0.4)]
         layer = FakeLayer(tree)
         layer.extent = lambda: fk.FakeRectangle(987.3, 1981.9, 1031.7, 2033.2)  # an extent off the cells
-        objects.object_footprint(layer, 1002.5 + offset, 2002.5 + offset, 5, erode_cells=erode_cells)
+        objects.object_footprint(layer, 1002.5 + offset, 2002.5 + offset, 5, resolution=cell, erode_cells=erode_cells)
         region, object_transform = qgis_fakes[0][:2]
-        grid, transform = self._footprint_cells(monkeypatch, layer, 2.0, erode_cells)
-        assert transform[0] % 2.0 == 0 and transform[3] % 2.0 == 0  # cells on the multiples of their size
-        assert (object_transform[0] - transform[0]) % 2.0 == 0 and (object_transform[3] - transform[3]) % 2.0 == 0
+        grid, transform = self._footprint_cells(monkeypatch, layer, cell, erode_cells)
+        assert transform[0] % cell == 0 and transform[3] % cell == 0  # cells on the multiples of their size
+        assert (object_transform[0] - transform[0]) % cell == 0 and (object_transform[3] - transform[3]) % cell == 0
         assert int(region.sum()) == int(grid.sum())
+
+    @staticmethod
+    def _cells(region, transform, cell):
+        rows, cols = np.nonzero(region)
+        col0, row0 = int(round(transform[0] / cell)), int(round(transform[3] / cell))
+        return set(zip((col0 + cols).tolist(), (row0 - 1 - rows).tolist()))
+
+    @pytest.mark.parametrize("seed", range(6))
+    def test_each_clicked_object_is_its_part_of_the_footprint(self, qgis_fakes, monkeypatch, seed):
+        """2026-11-11 review: crowns and roofs scattered at random, shrunk back; the object is the part under it."""
+        raster_adapter = fk.load("raster_adapter")
+        rng = np.random.default_rng(seed)
+        points, clicks = [], []
+        for _ in range(25):
+            if seed % 2:  # roofs of points at random densities
+                x0, y0, w, h = rng.uniform(0, 100), rng.uniform(0, 100), rng.uniform(4, 20), rng.uniform(4, 15)
+                n = int(w * h * rng.uniform(0.3, 2))
+                xs, ys = rng.uniform(x0, x0 + w, n), rng.uniform(y0, y0 + h, n)
+            else:  # crowns
+                cx, cy, r = rng.uniform(0, 120), rng.uniform(0, 120), rng.uniform(1.5, 6)
+                n = int(rng.uniform(0.3, 1.2) * r * r * 3.14)
+                angle, distance = rng.uniform(0, 2 * np.pi, n), r * np.sqrt(rng.uniform(0, 1, n))
+                xs, ys = cx + distance * np.cos(angle), cy + distance * np.sin(angle)
+            points += [(float(x), float(y), 5) for x, y in zip(xs, ys)]
+            clicks.append((float(xs[0]), float(ys[0])))
+        layer = FakeLayer(points)
+        layer.extent = lambda: fk.FakeRectangle(-10.3, -10.7, 140.1, 140.9)
+        clicked = []
+        for x, y in clicks:
+            qgis_fakes.clear()
+            objects.object_footprint(layer, x, y, 5, resolution=1.0, erode_cells=1)
+            region, object_transform = qgis_fakes[0][:2]
+            clicked.append(self._cells(region, object_transform, 1.0))
+        grid, transform = self._footprint_cells(monkeypatch, layer, 1.0, erode_cells=1)
+        grid = np.asarray(grid, dtype=bool)
+        parts = []
+        while grid.any():
+            part = raster_adapter.flood_fill(grid, [tuple(np.argwhere(grid)[0])])
+            parts.append(self._cells(raster_adapter.fill_holes(part), transform, 1.0))
+            grid &= ~part
+        for cells in clicked:
+            assert [part for part in parts if part & cells] == [cells]
+
+
+class TestFootprintCells:
+    """2026-11-11: the footprint of a class in cells of 1 m when it is light enough, else of 2 m."""
+
+    def test_a_light_class_is_read_again_in_the_cells_of_the_clicks(self):
+        assert objects.footprint_resolution(25781) == objects.OBJECT_RESOLUTION == 1.0  # buildings of the tile
+        assert objects.footprint_resolution(objects.FINE_CLASS_POINTS) == 1.0
+
+    def test_a_dense_class_keeps_the_coarse_cells(self):
+        assert objects.footprint_resolution(182406) == objects.COARSE_RESOLUTION == 2.0  # its high vegetation
+        assert objects.footprint_resolution(10, coarse_truncated=True) == 2.0
+
+    def _read(self, monkeypatch, points_at_2m, fine=None):
+        reads = []
+
+        class Copy(FakeLayer):
+            def setSubsetString(self, subset):
+                return True
+
+        def footprint_geometry(layer, resolution, points_limit=0, dilate_cells=1, erode_cells=0, check=None):
+            reads.append((resolution, dilate_cells, erode_cells))
+            points = points_at_2m if resolution == 2.0 else points_at_2m * 4
+            result = footprint.FootprintResult("geometry", points, resolution)
+            if resolution != 2.0 and fine:
+                for name, value in fine.items():
+                    setattr(result, name, value)
+            return result
+
+        monkeypatch.setattr(footprint, "open_point_cloud", lambda source, name, provider: Copy([]))
+        monkeypatch.setattr(footprint, "footprint_geometry", footprint_geometry)
+        layer = FakeLayer([])
+        layer.source, layer.name = (lambda: "/data/tile.copc.laz"), (lambda: "tile")
+        return objects.class_footprint(layer, 6), reads
+
+    def test_the_footprint_of_a_light_class_in_cells_of_1_m(self, monkeypatch):
+        result, reads = self._read(monkeypatch, 25781)
+        assert reads == [(2.0, 1, 1), (1.0, 1, 1)] and result.resolution == 1.0 and result.cell_size == 1.0
+
+    def test_the_footprint_of_a_dense_class_read_once(self, monkeypatch):
+        result, reads = self._read(monkeypatch, 182406)
+        assert reads == [(2.0, 1, 1)] and result.resolution == 2.0 and result.objects == {}
+
+    @pytest.mark.parametrize("fine", [{"truncated": True}, {"coarse": True, "cell_size": 1.3}])
+    def test_a_fine_read_cut_or_widened_keeps_the_coarse_one(self, monkeypatch, fine):
+        result, reads = self._read(monkeypatch, 25781, fine)
+        assert len(reads) == 2 and result.resolution == 2.0 and result.cell_size == 2.0
 
 
 class TestReadThroughACopy:

@@ -4,28 +4,41 @@ Object detection on a point cloud: the cluster of points of one class under a cl
 
 A building, a tree: the points around the click are read with
 ``QgsPointCloudDataProvider.identify`` at :data:`OBJECT_RESOLUTION` (the octree
-level of 2 m, on the layer of the project and the main thread, as the class
+level of 1 m, on the layer of the project and the main thread, as the class
 pipette), those of the clicked class are binned on a grid of cells of that size,
 the gaps between the points are closed by one cell (as the footprint of a source,
-:func:`point_cloud_footprint.footprint_geometry`) and the 4-connected patch of
-cells under the click is followed (:func:`raster_adapter.flood_fill`), its holes
-filled (a courtyard). The window read starts at 64 m a side around the click and
-grows four times while the patch touches its side, up to 128 m: a larger patch
-(a forest) is cut there (``truncated``).
-
-Measured on a LiDAR HD tile (25 M points, QGIS 4.2): ``identify`` turns every
-point read into a dict of its attributes, about 30 000 points a second, and
-reads every class: a click in a forest read at 1 m over 256 m took 11 s, the
-footprint of the vegetation class of the whole tile at 1 m 49 s. Cells of 2 m
-(the resolution of the footprint of a source) and a window of 128 m keep a
-click under a few seconds; a car is then two cells long.
+:func:`point_cloud_footprint.footprint_geometry`), the 4-connected patch of
+cells under the click is followed (:func:`raster_adapter.flood_fill`), shrunk
+back by one cell (:data:`OBJECT_ERODE_CELLS`, :func:`geometry_tools.shrink_back`:
+the object is not grown, a neck of two grown cells between two objects is cut, a
+gap of one cell in a row of points stays closed), the patch under the click taken
+again and its holes filled (a courtyard). The window read starts at 64 m a side
+around the click and grows four times while the patch touches its side, up to
+128 m: a larger patch (a forest) is cut there (``truncated``). A point two cells
+away from its object (the sparse edge of a crown) is left out of it, and is a
+part of one cell of the footprint.
 
 Similar objects: the footprint of the whole class (a private copy of the layer
-filtered on the class, :func:`point_cloud_footprint.footprint_geometry` at the
-same resolution, with the same gap closing), whose parts of an area like the
-clicked objects' are kept (:func:`raster_adapter.similar_area_bounds`), and of a
-shape like theirs with *same shape* (compactness, as on a raster). The clicked
-objects and the parts are measured alike: same cells, same closing, holes filled.
+filtered on the class, :func:`point_cloud_footprint.footprint_geometry`, with the
+same gap closing and shrinking, cell by cell: the clicked object is the part of the
+footprint under the click, holes filled), whose parts of an area like the clicked objects'
+are kept (:func:`raster_adapter.similar_area_bounds`), and of a shape like theirs
+with *same shape* (compactness, as on a raster). It is read in cells of 2 m first
+and, for a class of :data:`FINE_CLASS_POINTS` points at most there, again in cells
+of 1 m; a denser class (the high vegetation of a tile) keeps its cells of 2 m and
+the clicked objects are measured again in them (:func:`class_footprint`). The
+clicked objects and the parts are measured alike: same cells, same closing, holes filled.
+
+Measured 2026-11-11 on the LiDAR HD tile of the test project (Cerdagne), against
+the BD TOPO buildings merged into blocks (``scripts/pc_object_closing.py``, rule
+set before the run, 2 sets of 20): cells of 2 m grown by the closing, as before,
+gave a clicked object overlapping its block at a median IoU of 0.18 and 0.20 (a
+village merged into one object), similar objects of precision 0.46 and 0.25 for a
+recall of 0.02 and 0.01; cells of 1 m shrunk back give 0.54 and 0.79, precision
+0.84 and 0.84, recall 0.44 and 0.51. Cost (``scripts/pc_object_cost.py``, Docker
+qgis/qgis:latest): a click at 1 m 1.1 to 2.3 s (median per class, 5 s at most), the
+footprint of buildings at 1 m 5 s, of the high vegetation 62 s (8 s at 2 m), of the
+ground 97 s (22 s at 2 m).
 
 The grid and window logic is plain numpy (:func:`object_window`,
 :func:`bin_points`, :func:`seed_cell`, :func:`grow_object`), testable without QGIS.
@@ -42,7 +55,11 @@ logger = logging.getLogger(__name__)
 
 # Cell size in metres (degrees for a cloud in a geographic CRS, see point_cloud_footprint.layer_resolution):
 # also the level of detail read, the clicked objects and the similar ones alike (see the module docstring).
-OBJECT_RESOLUTION = 2.0
+OBJECT_RESOLUTION = 1.0
+# The footprint of a class is read in these cells first, and kept in them for a class denser than
+# FINE_CLASS_POINTS points there (about four times as many at 1 m: 200 000 points, some 10 to 15 s).
+COARSE_RESOLUTION = 2.0
+FINE_CLASS_POINTS = 50000
 # Half side in metres of the first window read around a click: 64 m, a house, a tree, a block of flats.
 OBJECT_WINDOW_START = 32.0
 # Largest half side: 128 m. Read on the main thread at each click (every class: identify cannot filter);
@@ -50,7 +67,7 @@ OBJECT_WINDOW_START = 32.0
 OBJECT_WINDOW_MAX = 64.0
 # The window grows four times at each step: 64 m, then 128 m (the limit); two reads at most.
 OBJECT_WINDOW_GROWTH = 4
-# Points read (every class) for one object at most: about 0.1 M in a window of 128 m at 2 m.
+# Points read (every class) for one object at most: some 0.1 to 0.4 M in a window of 128 m at 1 m.
 OBJECT_POINTS_LIMIT = 500000
 # Points read for the footprint of a class (the similar objects, whole layer): about 30 s at most;
 # beyond, the footprint is truncated and the panel says some objects may be missing.
@@ -59,7 +76,7 @@ CLASS_POINTS_LIMIT = 1000000
 OBJECT_DILATE_CELLS = 1
 # Cells taken back off the edge once the gaps are closed and the holes filled (at most OBJECT_DILATE_CELLS,
 # no cell of a point is shrunk away): 0 keeps the objects grown by one cell.
-OBJECT_ERODE_CELLS = 0
+OBJECT_ERODE_CELLS = 1
 # A click between two points of the object: the nearest cell of the class within this many cells
 # (at least; the controller asks for the identify search radius of the map, at most OBJECT_SEED_MAX_CELLS).
 OBJECT_SEED_CELLS = 2
@@ -151,15 +168,17 @@ def grow_object(read_points: Callable[[float, float, float, float], Tuple[Any, A
         growth: Factor of the half side at each step.
         dilate_cells: Gaps between the points closed by this many cells (see :func:`bin_points`).
         seed_radius: A click on an empty cell starts from the nearest cell of the patch within this many cells.
-        erode_cells: Cells taken back off the edges after the gaps are closed (see :func:`bin_points`).
+        erode_cells: Cells taken back off the edges once the gaps are closed
+            (:func:`geometry_tools.shrink_back`, at most ``dilate_cells``).
 
     Returns:
         :class:`ObjectGrid`, None when no point is near the click.
     """
     import numpy as np
-    from .geometry_tools import erode_mask
+    from .geometry_tools import shrink_back
     from .raster_adapter import fill_holes, flood_fill
     margin = max(0, int(dilate_cells))
+    erode_cells = min(max(0, int(erode_cells)), margin)  # never past the dilation: every cell of a point stays
     half = float(start)
     while True:
         left, top, size = object_window(x, y, half, cell)
@@ -174,16 +193,19 @@ def grow_object(read_points: Callable[[float, float, float, float], Tuple[Any, A
         if touches and half < limit and growth > 1:
             half = min(float(limit), half * growth)
             continue
-        region = fill_holes(region)
-        if int(erode_cells) > 0:
-            # Grown, holes filled, then shrunk back: the object is not grown, a neck one grown cell wide is cut, and
-            # no cell of a point is shrunk away (the grown cells around it stay set); one left touching the object
-            # by a corner only is no longer part of it, as on the footprint (polygons of 4-connected cells).
-            shrunk = erode_mask(region, int(erode_cells))
-            start = seed_cell(shrunk, seed[0], seed[1], seed_radius + int(erode_cells))
-            if start is not None:
-                region = fill_holes(flood_fill(shrunk, [start]))
         inside = rows >= 0
+        if int(erode_cells) > 0:
+            # Shrunk back as the footprint of the class is (geometry_tools.shrink_back, cell by cell), then the patch
+            # under the click again: the patches the grown cells had joined by a neck are apart, as in the footprint.
+            occupied = np.zeros(region.shape, dtype=bool)
+            occupied[rows[inside], cols[inside]] = True
+            shrunk = shrink_back(region, occupied, int(erode_cells))
+            again = seed_cell(shrunk, seed[0], seed[1], seed_radius + int(erode_cells))
+            if again is not None:
+                region = flood_fill(shrunk, [again])
+            # cut: the object itself still reaches the side of the largest window
+            touches = bool(region[0].any() or region[-1].any() or region[:, 0].any() or region[:, -1].any())
+        region = fill_holes(region)
         points = int(np.count_nonzero(region[rows[inside], cols[inside]]))
         return ObjectGrid(region, (left, float(cell), 0.0, top, 0.0, -float(cell)), points, touches, half)
 
@@ -371,13 +393,26 @@ def class_subset(code: int, base_subset: str = '') -> str:
     return f"({base}\n) AND {clause}" if base else clause
 
 
-def class_footprint(layer, code: int, base_subset: str = '', resolution: float = OBJECT_RESOLUTION,
+def footprint_resolution(coarse_points: int, coarse_truncated: bool = False) -> float:
+    """Cells (metres) of the footprint of a class read with ``coarse_points`` points in cells of :data:`COARSE_RESOLUTION`.
+
+    Those of the clicked objects (:data:`OBJECT_RESOLUTION`) unless the class is too dense to be read
+    again in them within some seconds: then the coarse cells, and the clicked objects are measured in them.
+    """
+    if coarse_truncated or int(coarse_points) > FINE_CLASS_POINTS:
+        return COARSE_RESOLUTION
+    return OBJECT_RESOLUTION
+
+
+def class_footprint(layer, code: int, base_subset: str = '', resolution: Optional[float] = None,
                     points_limit: int = CLASS_POINTS_LIMIT, erode_cells: int = OBJECT_ERODE_CELLS):
     """Footprint (:class:`point_cloud_footprint.FootprintResult`) of the points of class ``code`` of ``layer``.
 
     Read from a private copy of the layer filtered on the class and ``base_subset`` (the
-    project layer keeps its filter and its preview), at the cell size of the objects (main thread),
-    its gaps closed as the clicked objects' (``erode_cells``, see :func:`bin_points`).
+    project layer keeps its filter and its preview) on the main thread, its gaps closed as the
+    clicked objects' (``erode_cells``, see :func:`grow_object`). Without ``resolution`` (metres),
+    in cells of :data:`COARSE_RESOLUTION` first, then again in those of the clicked objects when
+    the class is light enough (:func:`footprint_resolution`); ``resolution`` of the result says which.
 
     Raises:
         RuntimeError: The cloud cannot be read, or refused the class (the reason).
@@ -394,9 +429,25 @@ def class_footprint(layer, code: int, base_subset: str = '', resolution: float =
         raise RuntimeError(reason)
     if not copy.setSubsetString(subset):
         raise RuntimeError(f"the class was rejected by the point cloud: {subset[:120]}")
-    result = footprint_geometry(copy, layer_resolution(resolution, layer.crs()), points_limit=points_limit,
-                                dilate_cells=OBJECT_DILATE_CELLS, erode_cells=erode_cells,
-                                check=selection_check(subset))
+
+    def read(metres: float):
+        result = footprint_geometry(copy, layer_resolution(metres, layer.crs()), points_limit=points_limit,
+                                    dilate_cells=OBJECT_DILATE_CELLS, erode_cells=erode_cells,
+                                    check=selection_check(subset))
+        result.resolution = float(metres)
+        return result
+
+    if resolution is not None:
+        result = read(float(resolution))
+    else:
+        result = read(COARSE_RESOLUTION)
+        fine = footprint_resolution(result.points_read, result.truncated)
+        if fine != COARSE_RESOLUTION and not result.coarse:
+            again = read(fine)
+            # Cut at the points limit, or in cells widened by the grid limit (a cloud of several km):
+            # the complete read in the coarse cells, the clicked objects measured again in them.
+            if not again.truncated and not again.coarse:
+                result = again
     logger.info(f"⏱ [FM5] point cloud class {int(code)} footprint: {result.points_read} points read, cells of "
                 f"{result.cell_size:.3g}{', truncated' if result.truncated else ''}, {time.perf_counter() - started:.2f} s")
     return result
@@ -412,15 +463,16 @@ def similar_objects_footprint(layer, code: int, reference_areas: Sequence[float]
         ratio: ``(low, high)`` area ratios (:func:`similar_parts`).
         reference_shapes: Their compactness, holes filled; None: the area alone.
         base_subset: The filter of the layer the objects are read through (not the live preview).
-        footprint: The :func:`class_footprint` already read for the class (a ratio changed); read when None.
+        footprint: The :func:`class_footprint` already read for the class (a ratio changed), the reference
+            areas measured in its cells; read in those of :data:`OBJECT_RESOLUTION` when None.
 
     Raises:
         RuntimeError: See :func:`class_footprint`.
     """
     from .geometry_tools import union_geometries
     started = time.perf_counter()
-    if footprint is None:
-        footprint = class_footprint(layer, code, base_subset)
+    if footprint is None:  # in the cells of the clicked objects, whose areas are given
+        footprint = class_footprint(layer, code, base_subset, resolution=OBJECT_RESOLUTION)
     kept, total = similar_parts(footprint.geometry, reference_areas, ratio, reference_shapes)
     geometry = union_geometries(kept) if kept else QgsGeometry()
     if footprint.coarse:

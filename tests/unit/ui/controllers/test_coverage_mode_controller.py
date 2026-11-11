@@ -2296,10 +2296,10 @@ class TestPointCloudObjectDetector:
         objects.found = {}  # (x, y) -> box of the object read there
         objects.similar_parts = {}  # code -> boxes of the similar objects
 
-        def object_footprint(layer, x, y, code, seed_radius=0.0):
-            reads.objects.append((x, y, code))
+        def object_footprint(layer, x, y, code, seed_radius=0.0, resolution=None):
+            reads.objects.append((x, y, code) if resolution is None else (x, y, code, resolution))
             reads.readers.append(layer)
-            box = objects.found.get((x, y))
+            box = objects.found.get((x, y) if resolution is None else (x, y, resolution))
             wkt = "BOX " + " ".join(str(v) for v in box) if box else ""
             return types.SimpleNamespace(geometry=FakeShape(wkt), truncated=False, message="", points=12)
 
@@ -2321,6 +2321,7 @@ class TestPointCloudObjectDetector:
 
         objects.object_footprint = object_footprint
         objects.class_footprint = class_footprint
+        objects.OBJECT_RESOLUTION = 1.0
         objects.base_copy = base_copy
         objects.class_under = lambda layer, x, y, radius=0.0: reads.under.append((layer.name, x, y)) or code
         objects.similar_objects_footprint = similar_objects_footprint
@@ -2397,6 +2398,32 @@ class TestPointCloudObjectDetector:
         panel.ratio = (0.9, 1.1)
         controller._refresh_point_cloud_objects()  # a ratio edited: the class is not read again
         assert reads.footprints == [(6, "Classification != 7")] and reads.similar[-1][2] == (0.9, 1.1)
+
+    def test_a_dense_class_measures_the_clicked_objects_again_in_its_cells(self, ctrl_module, layers, monkeypatch):
+        """2026-11-11: a footprint kept in cells of 2 m (dense class) is compared with the clicked objects read in them."""
+        controller, panel, _iface, reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        coarse = types.SimpleNamespace(resolution=2.0, objects={})
+        monkeypatch.setattr(objects, "class_footprint", lambda layer, code, base_subset="": coarse)
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)  # clicked in cells of 1 m: 6 m²
+        objects.found[(1.0, 1.0, 2.0)] = (0, 0, 4, 4)  # the same tree in cells of 2 m: 16 m²
+        objects.similar_parts[6] = [(10, 10, 14, 14)]
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.objects == [(1.0, 1.0, 6), (1.0, 1.0, 6, 2.0)]
+        assert reads.similar[-1][1] == (16.0,) and reads.similar[-1][3] is coarse
+        panel.ratio = (0.9, 1.1)
+        controller._refresh_point_cloud_objects()  # a ratio edited: nothing read again
+        assert len(reads.objects) == 2 and reads.similar[-1][1] == (16.0,)
+
+    def test_a_light_class_compares_the_clicked_objects_as_they_are(self, ctrl_module, layers, monkeypatch):
+        controller, _panel, _iface, reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        monkeypatch.setattr(objects, "class_footprint",
+                            lambda layer, code, base_subset="": types.SimpleNamespace(resolution=1.0, objects={}))
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        objects.similar_parts[6] = [(10, 10, 12, 13)]
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.objects == [(1.0, 1.0, 6)] and reads.similar[-1][1] == (6.0,)
 
     def test_same_shape_passes_the_compactness_of_the_filled_clicked_objects(self, ctrl_module, layers, monkeypatch):
         """2026-11-11: as on a raster, the shape of the clicked objects, measured holes filled as the parts are."""
