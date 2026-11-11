@@ -50,7 +50,7 @@
         </div>
         <h1 class="fade-in fade-in-delay-1">Beyond Vectors:<br><span class="gradient">Raster & LiDAR Filtering</span></h1>
         <p class="fade-in fade-in-delay-2">EXPLORING selects on the current layer, whatever its kind. FILTERING relates that selection to vector, raster and point cloud layers with its usual predicates and buffer.</p>
-        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Released on 2026-10-15.</strong> FilterMate 5.0 filters vector, raster and point cloud layers. Raster and point cloud support is on by default and can be switched off in the Configuration tab. Every release is tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, with Processing and with the dock itself.</p>
+        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Released on 2026-10-15.</strong> FilterMate 5.0 filters vector, raster and point cloud layers. Raster and point cloud support is on by default and can be switched off in the Configuration tab. Every release is checked in QGIS 3.22 to 4.x before it is published, with Processing and with the dock itself.</p>
         <div class="hero-stats fade-in fade-in-delay-3">
             <div class="hero-stat">
                 <div class="num">3</div>
@@ -219,7 +219,7 @@
                 <div class="timeline-dot s2">3</div>
                 <div class="timeline-sprint">Tested</div>
                 <div class="timeline-title">QGIS 3.22 to 4.2</div>
-                <div class="timeline-desc">A CI job loads FilterMate in the official QGIS Docker images (3.22, 3.28, 3.34, 3.44, 4.2) and drives the dock under Xvfb. Point clouds need QGIS 3.26 or later; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing).</div>
+                <div class="timeline-desc">Before each release, FilterMate is loaded in the official QGIS Docker images, from 3.22 to 4.2, and the dock is driven under Xvfb. Point clouds need QGIS 3.26 or later; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing).</div>
                 <div class="timeline-milestone">FilterMate 5.0</div>
             </div>
         </div>
@@ -236,9 +236,60 @@
                 What's new
             </div>
             <h2 class="section-title">Since the 5.0.0 release</h2>
-            <p class="section-subtitle">Merged on the main branch between 2026-10-16 and 2026-10-18, on its way to the next release on plugins.qgis.org. Details in the <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md">changelog</a>.</p>
+            <p class="section-subtitle">Merged on the main branch between 2026-10-16 and 2026-11-10, and published in FilterMate 5.1.0, which also holds the unreleased 5.0.3 to 5.0.5. Details in the <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md">changelog</a>.</p>
         </div>
         <div class="features-grid">
+            <div class="feature-card highlight-purple fade-in">
+                <span class="star-label">New · experimental</span>
+                <div class="feature-title">AGENT: a chat that filters from a sentence</div>
+                <div class="feature-desc">A section at the top of the panel: write a sentence and the agent filters, selects, zooms, shows or hides layers and exports. It works with Claude, Mistral, OpenAI and compatible servers or a local Ollama model. Filters apply at once; exports and added or removed layers ask first. A filter is one plain WHERE clause, checked before it runs. It can also find and run the Processing algorithms of QGIS that make layers or statistics, on layers of the project; each result is a temporary layer that undoing the turn removes.</div>
+                <div class="feature-tags"><span class="tag must">AGENT</span><span class="tag sprint">Experimental</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Undo by step, and what the agent says</div>
+                <div class="feature-desc">Each filter says how many features it kept and warns when it kept none. While AGENT is open, Undo and Redo of the action bar walk the requests of the agent, and the history lists the steps of the last one with <em>Undo back to here</em>. Undo also reaches layers added or removed, selections and visibility.</div>
+                <div class="feature-tags"><span class="tag must">AGENT</span><span class="tag sprint">Undo</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Sources of the agent</div>
+                <div class="feature-desc">Open data portals (data.gouv.fr, Opendatasoft, CKAN portals), WFS services, Sentinel-2 scenes opened without downloading them and remote MCP connectors, all off until ticked. Downloads stop at 512 MB and 3 minutes, Stop ends them, and each failure says its cause.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span><span class="tag sprint">Open data</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">A free quota to try it</div>
+                <div class="feature-desc">A few free requests a month, through a relay of FilterMate to Claude Haiku 5.5, with no key to enter. The relay counts what it spends and keeps no conversation. Once the quota is used up, the panel asks for your own API key, kept in the QGIS authentication database.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">MCP server built into the plugin</div>
+                <div class="feature-desc">Off by default. Claude Code or another MCP client on the same computer drives FilterMate over <code>http://127.0.0.1:17823/mcp</code> with an access token, under the rules of the chat: the same tools and sources, the same confirmations, each change a step of the history. The stdio server stays.</div>
+                <div class="feature-tags"><span class="tag should">Automation</span><span class="tag sprint">MCP</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">SAM in the raster pipette</div>
+                <div class="feature-desc"><em>Clicked object</em> and <em>Similar objects</em> draw with SAM 2.1 tiny, a model that runs on the CPU and is installed once, after a confirmation (onnxruntime and a 62 MB model). A click adds an object, Shift+click extends it, a right click trims it, a box frames a new one, and G gives the next outline. Similar objects come as proposals to keep or reject. Median overlap 0.82 with 100 buildings from a box; parcels and trees are not validated. Without SAM, the colour engine stays.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Raster</span><span class="tag sprint">Experimental</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Objects in Processing, REST and MCP</div>
+                <div class="feature-desc"><code>segment_from_features</code> draws one object per point or polygon of a layer (median overlap 0.81 with 40 BD TOPO footprints), which makes ten Processing algorithms. <em>To layer</em> adds the objects of the dock to the project as a polygon layer, and the <code>SEGMENTS</code> parameter, or <code>segments</code> in <code>raster_selection</code>, filters other layers with them from scripts, REST and MCP.</div>
+                <div class="feature-tags"><span class="tag should">Automation</span><span class="tag sprint">Processing</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Two stacks of sections</div>
+                <div class="feature-desc">AGENT and EXPLORING above the splitter handle, FILTERING, EXPORTING and CONFIGURATION below, one section open at most in each stack. Opening AGENT folds EXPLORING and FILTERING. Favorites, detach and close are badges of the title bar.</div>
+                <div class="feature-tags"><span class="tag should">Panel</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Search bar and steadier controls</div>
+                <div class="feature-desc">The Configuration tab has a search bar (Ctrl+F, Escape to clear). Lists and numbers answer the mouse wheel only after a click, so a scroll no longer changes a value. <code>UI_PROFILE</code> applies at once, and a small scaled screen gets the compact profile.</div>
+                <div class="feature-tags"><span class="tag should">CONFIGURATION</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Fixes of 5.0.1 and 5.0.2</div>
+                <div class="feature-desc">A Zone on the vector and raster rails, checkbox band selection and band display, centroid controls for every source kind. Changing between vector layers no longer empties the single selection or selects a feature nobody picked, the dock stays usable on small scaled screens, and several features that failed only in QGIS work.</div>
+                <div class="feature-tags"><span class="tag sprint">Fixed</span></div>
+            </div>
             <div class="feature-card highlight fade-in">
                 <span class="star-label">Pipette</span>
                 <div class="feature-title">Three targets for the raster pipette</div>
@@ -272,7 +323,7 @@
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-title">MCP server for AI assistants</div>
-                <div class="feature-desc">A Model Context Protocol server over stdio, started outside QGIS, with one tool per REST endpoint: list layers, apply or cross filter, geometry and point cloud filters, favorites, export. The API key comes from the environment; remote URLs are refused unless allowed.</div>
+                <div class="feature-desc">A Model Context Protocol server over stdio, started outside QGIS, with one tool per REST endpoint: list layers, apply or cross filter, geometry and point cloud filters, favorites, export. The API key comes from the environment; remote URLs are refused unless allowed. Since 5.0.4 the plugin also has a server of its own (below).</div>
                 <div class="feature-tags"><span class="tag should">Automation</span><span class="tag sprint">REST</span></div>
             </div>
             <div class="feature-card fade-in">

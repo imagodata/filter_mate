@@ -67,7 +67,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Watch the selected video"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch the video</button>
                 <a class="home-text-link" href="guide.html">Read the guide <span aria-hidden="true">→</span></a>
             </div>
-            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 and Qt6</p>
+            <p class="home-version">FilterMate 5.1 · QGIS 3.22–4.x · Qt5 and Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Discover the workflow</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -112,8 +112,31 @@
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">New in FilterMate 5</p><h2 id="fm5-title">Rasters and LiDAR point clouds, filtered like any layer.</h2><p>Choose a raster or a point cloud as the current layer and EXPLORING shows its own tools. FILTERING then relates the selection to layers of any kind.</p></div>
-            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixel picker, value range with histogram and live preview, slope, aspect, hillshade or roughness computed from a DTM, classes, raster expression.</span></li><li><strong>Point clouds</strong><span>ASPRS and LiDAR HD classes, conditions on any attribute, a class combined with a height above a DTM.</span></li><li><strong>Every direction</strong><span>Vector, raster and point cloud as source or target: nine combinations with buffer, minimum coverage and Disjoint.</span></li><li><strong>Safe to undo</strong><span>Clipped layers keep their id and style. Undo, redo and project files return to the original source.</span></li><li><strong>Export</strong><span>GeoTIFF and COG for rasters; LAZ, LAS, COPC, GPKG and CSV for point clouds.</span></li><li><strong>Automate</strong><span>Nine Processing algorithms, four models, qgis_process, Python and REST APIs.</span></li><li><strong>Tested</strong><span>CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, through Processing and the dock itself.</span></li></ul>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixel picker, value range with histogram and live preview, slope, aspect, hillshade or roughness computed from a DTM, classes, raster expression.</span></li><li><strong>Point clouds</strong><span>ASPRS and LiDAR HD classes, conditions on any attribute, a class combined with a height above a DTM.</span></li><li><strong>Every direction</strong><span>Vector, raster and point cloud as source or target: nine combinations with buffer, minimum coverage and Disjoint.</span></li><li><strong>Safe to undo</strong><span>Clipped layers keep their id and style. Undo, redo and project files return to the original source.</span></li><li><strong>Export</strong><span>GeoTIFF and COG for rasters; LAZ, LAS, COPC, GPKG and CSV for point clouds.</span></li><li><strong>Web services</strong><span>WFS, OGC API Features, ArcGIS, WCS, vector tiles and remote COPC or EPT point clouds are filtered and explored with bounded reads, never on the main thread.</span></li><li><strong>Automate</strong><span>Ten Processing algorithms, four models, qgis_process, Python and REST APIs.</span></li><li><strong>Checked</strong><span>In QGIS 3.22 to 4.x before each release, through Processing and the dock itself.</span></li></ul>
             <a class="inline-cta" href="guide.html#raster-lidar">Read the FilterMate 5 guide <span aria-hidden="true">→</span></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section examples agent" id="agent" aria-labelledby="agent-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Experimental · New in FilterMate 5.1</p><h2 id="agent-title">Ask for a filter in a sentence.</h2><p>AGENT is a chat at the top of the panel. Write what you want, such as buildings above 1200 m in the selected commune, and it filters, selects, zooms or exports. Each step can be undone.</p></div>
+            <a class="inline-cta" href="guide.html#agent">Read the Agent chapter <span aria-hidden="true">→</span></a>
+        </div>
+        <ul class="capability-list"><li><strong>Your model</strong><span>Claude, Mistral, OpenAI and compatible servers, or a local Ollama model. A few free requests a month to try it, then your own key, kept in the QGIS authentication database.</span></li><li><strong>Undo by step</strong><span>Filters apply at once. Undo and Redo walk the requests of the agent, and Undo back to here returns to any step.</span></li><li><strong>QGIS algorithms</strong><span>It can find and run Processing algorithms that make layers or statistics, on layers of the project. Each result is a temporary layer that Undo removes.</span></li><li><strong>You confirm</strong><span>Exports and added or removed layers ask first. A filter is one plain WHERE clause, checked before it runs.</span></li><li><strong>Sources you tick</strong><span>Open data portals, WFS services, Sentinel-2 scenes and MCP connectors, all off until you tick them.</span></li><li><strong>Consent first</strong><span>Nothing is sent before you choose a model and agree. The guide lists what goes with each request.</span></li><li><strong>MCP server</strong><span>Off by default. Claude Code or another MCP client on your computer can drive FilterMate through 127.0.0.1, with an access token.</span></li></ul>
+    </div>
+</section>
+
+<section class="home-section objects" id="objects" aria-labelledby="objects-title">
+    <div class="home-container capability-layout">
+        <div>
+            <div class="section-heading"><p class="section-kicker">Experimental · New in FilterMate 5.1</p><h2 id="objects-title">Click an object. SAM draws it.</h2><p>On a raster, the pipette draws the clicked object with SAM, a model that runs on your computer. Similar objects come as proposals that you keep or reject. The result is plain polygons, so a filter replays without the model.</p></div>
+            <a class="inline-cta" href="guide.html#sam">Read about SAM in the guide <span aria-hidden="true">→</span></a>
+        </div>
+        <div>
+            <dl class="result-list"><div><dt>0.82</dt><dd>median overlap with 100 building outlines, from a box</dd></div><div><dt>0.81</dt><dd>median overlap with 40 BD TOPO footprints, from Processing</dd></div></dl>
+            <ul class="capability-list"><li><strong>Draw</strong><span>Click, Shift+click to extend, right click to trim, or drag a box. G shows the next outline SAM proposed.</span></li><li><strong>Similar objects</strong><span>Proposals outlined in dashes: a click keeps one, a right click rejects it. About half of them are buildings.</span></li><li><strong>Install once</strong><span>One confirmation installs onnxruntime and a 62 MB model into your QGIS profile. Nothing is installed before.</span></li><li><strong>Beyond the dock</strong><span>To layer adds the objects as a polygon layer. Processing draws one object per point or polygon of a layer, and polygons can filter from scripts, REST and MCP.</span></li><li><strong>Limits</strong><span>Best on buildings and well delimited objects. Parcels and trees are not validated.</span></li></ul>
         </div>
     </div>
 </section>
@@ -201,7 +224,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Spatial filtering for QGIS, by imagodata.</p></div><ul><li><a href="guide.html">User guide</a></li><li><a href="stories.html">Use cases</a></li><li><a href="roadmap.html">Roadmap</a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Source code</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Report an issue</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 5.0 · Map data in videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.1 · Map data in videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Close</button></form></dialog>
