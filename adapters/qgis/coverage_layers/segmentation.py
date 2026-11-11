@@ -303,6 +303,39 @@ def assign_windows(points: List[Tuple[float, float]], raster: Tuple[float, float
     return windows
 
 
+# A candidate this many pixels or more inside the window of the click is drawn on it (the encoding of the click serves
+# again); nearer the edge an object could be cut, so it gets a window of its own.
+CLICK_WINDOW_MARGIN_PIXELS = 32
+
+
+def well_inside(window: SegmentationWindow, x: float, y: float, raster: Tuple[float, float, float, float],
+                margin_pixels: int = CLICK_WINDOW_MARGIN_PIXELS) -> bool:
+    """Farther than ``margin_pixels`` from the edges of ``window``, but those on the edge of the raster."""
+    margin = margin_pixels * window.cell
+    x_max, y_min = window.x_min + window.side, window.y_max - window.side
+    return ((x >= window.x_min + margin or window.x_min <= raster[0]) and (x <= x_max - margin or x_max >= raster[2])
+            and (y >= y_min + margin or y_min <= raster[1]) and (y <= window.y_max - margin or window.y_max >= raster[3]))
+
+
+def plan_similar_windows(points: List[Tuple[float, float]], raster: Tuple[float, float, float, float], cell: float,
+                         size: int, click_window: Optional[SegmentationWindow] = None
+                         ) -> List[Tuple[SegmentationWindow, List[int], bool]]:
+    """Windows to draw the candidates of a similar objects search on: ``(window, indexes, is the click's)``.
+
+    The candidates well inside the window of the click (of the same cell) come first, on it, in their
+    order: its encoding is already made, and that is how the search was measured (2026-11-11). The
+    others are grouped by :func:`assign_windows`.
+    """
+    on_click = ([index for index, (x, y) in enumerate(points) if well_inside(click_window, x, y, raster)]
+                if click_window is not None and abs(click_window.cell - cell) <= 1e-9 * max(cell, 1.0) else [])
+    taken = set(on_click)
+    rest = [index for index in range(len(points)) if index not in taken]
+    planned = [(click_window, on_click, True)] if on_click else []
+    for window, members in assign_windows([points[index] for index in rest], raster, cell, size):
+        planned.append((window, [rest[member] for member in members], False))
+    return planned
+
+
 def point_geometry(provider: Any, embedding: Any, window: SegmentationWindow, x: float, y: float, crs_wkt: str = '') -> Any:
     """The object SAM sees under one point of the map, its part nearest the point; None without one."""
     return point_object(provider, embedding, window, x, y, crs_wkt)[0]
@@ -837,18 +870,21 @@ class SimilarObjectsTask(QgsTask):
     """Redraw with SAM the candidates of a similar objects search and keep those like the clicked object. Worker thread.
 
     The candidates are points inside colour patches near the click, then the places whose features
-    look like the clicked object's (:func:`feature_candidate_points`); each window holding some of
-    them is drawn and encoded once, then each point is one prompt.
+    look like the clicked object's (:func:`feature_candidate_points`). Those well inside the window
+    of the click are drawn on its encoding, given as ``click_window`` and ``click_embedding``; each
+    other window holding some of them is drawn and encoded once (:func:`plan_similar_windows`).
 
     Args:
         callback: ``callback(task, success)`` on the main thread; ``task.wkts`` holds the objects kept
-            (WKT, layer CRS), ``task.examined`` the candidates prompted and ``task.error`` a failure.
+            (WKT, layer CRS), ``task.examined`` the candidates prompted, ``task.encoded`` the windows
+            encoded here and ``task.error`` a failure.
     """
 
     def __init__(self, source: str, provider_key: str, renderer: Any, crs: Any, model: Any,
                  raster: Tuple[float, float, float, float], cell: float, points: List[Tuple[float, float]],
                  reference_wkt: str, ratio: Tuple[float, float], shape: bool, callback: Any, context: Any = None,
-                 existing: Optional[List[str]] = None, reference_features: Any = None) -> None:
+                 existing: Optional[List[str]] = None, reference_features: Any = None,
+                 click_window: Optional[SegmentationWindow] = None, click_embedding: Any = None) -> None:
         super().__init__(QCoreApplication.translate('SimilarObjectsTask', 'FilterMate: drawing the similar objects'),
                          QgsTask.Flag.CanCancel)
         self.source, self.provider_key, self.renderer = source, provider_key, renderer
@@ -856,11 +892,15 @@ class SimilarObjectsTask(QgsTask):
         self.reference_wkt, self.ratio, self.shape = reference_wkt, tuple(ratio), bool(shape)
         self.existing = list(existing or ())  # objects already in the panel: not drawn twice
         self.reference_features = reference_features  # the appearance of the clicked object; None: not compared
+        # The encoding of the click, read only: the candidates inside its window are drawn on it.
+        self.click_window = click_window if click_embedding is not None else None
+        self.click_embedding = click_embedding
         self.callback = callback
         self.crs_wkt = crs.toWkt()
         self.wkts: List[str] = []
         self.features: dict = {}  # WKT of an object kept -> its encoder features (None when unknown): keep / reject sorts by them
         self.examined = 0
+        self.encoded = 0
         self.error = ''
         self.model_damaged = False
         self.settings = QgsMapSettings()
@@ -887,15 +927,20 @@ class SimilarObjectsTask(QgsTask):
             kept: List[Any] = [reference] + [geometry for geometry in (QgsGeometry.fromWkt(wkt) for wkt in self.existing)
                                              if not geometry.isEmpty()]
             bounds = QgsGeometry.fromRect(QgsRectangle(*self.raster))
-            windows = assign_windows(self.points, self.raster, self.cell, int(self.model.input_size))
+            windows = plan_similar_windows(self.points, self.raster, self.cell, int(self.model.input_size),
+                                           self.click_window)
             done = 0
-            for window, members in windows:
+            for window, members, on_click in windows:
                 if self.isCanceled():
                     return False
-                image = render_window(self.settings, layer, window, self.isCanceled)
-                if self.isCanceled():
-                    return False
-                embedding = self.model.embed(image_to_rgb(image))
+                if on_click:
+                    embedding = self.click_embedding
+                else:
+                    image = render_window(self.settings, layer, window, self.isCanceled)
+                    if self.isCanceled():
+                        return False
+                    embedding = self.model.embed(image_to_rgb(image))
+                    self.encoded += 1
                 for index in members:
                     if self.isCanceled():
                         return False

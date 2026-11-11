@@ -821,7 +821,10 @@ def test_similar_flow(folder):
 
     alike = shape_geometry(layer, "alike").centroid().asPoint()
     panel.set_pick_target(panels.PICK_SIMILAR_OBJECTS)
+    encoded = model.embedded
     check("the clicked object is drawn and the search runs", search(), panel._segment_status.text())
+    check("the candidates inside the window of the click are drawn on its encoding: one encoding in all",
+          model.embedded - encoded == 1, model.embedded - encoded)
     proposed = names_of([wkt for wkt, _reference in controller._proposals])
     check("the alike square is proposed", "alike" in proposed, proposed)
     check("the large square and the strip are not", "large" not in proposed and "strip" not in proposed, proposed)

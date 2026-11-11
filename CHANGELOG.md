@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Similar objects with SAM start sooner.** The candidates that lie well inside the area prepared for the click are drawn on it instead of on an area of their own: one encoding less per search (about 2 s on a CPU), and the search the dock runs is now the one that was measured.
+
 ## [5.1.0] - 2026-11-10
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.
