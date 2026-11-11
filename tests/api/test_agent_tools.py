@@ -110,6 +110,17 @@ class TestHandlers:
         assert run(accessor, root, "set_project_crs", crs="Lambert")[0] is True
         assert run(accessor, root, "set_project_crs", crs="")[0] is True
 
+    def test_field_and_join_tools(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "add_field", layer="communes", name="densite", type="decimal",
+                            formula='"pop" / 2')
+        assert not error and answer["computed"] == 9 and answer["type"] == "decimal" and "formula_error" not in answer
+        assert run(accessor, root, "add_field", layer="communes", name="x", type="float")[0] is True
+        assert run(accessor, root, "add_field", layer="nope", name="x")[0] is True
+        assert run(accessor, root, "join_layers", layer="communes", join_layer="communes", target_field="a",
+                   join_field="a")[0] is True
+        assert run(accessor, root, "join_layers", layer="communes", target_field="a", join_field="a")[0] is True
+
     def test_layer_tree_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "group_layers", layers=["communes", "nope"], group="Base/Admin")
@@ -432,6 +443,15 @@ class TestRoutes:
         assert client.post("/map/crs", json={"crs": "EPSG:2154"}).json()["crs"] == "EPSG:2154"
         assert client.post("/map/crs", json={"crs": "nope"}).status_code == 400
         assert client.post("/map/crs", json={"crs": ""}).status_code == 422
+
+    def test_field_and_join_routes(self, client):
+        response = client.post("/layers/fields", json={"layer": "communes", "name": "d", "type": "decimal"})
+        assert response.status_code == 200 and response.json()["field"] == "d"
+        assert client.post("/layers/fields", json={"layer": "communes", "name": "d", "type": "float"}).status_code == 422
+        assert client.post("/layers/fields", json={"layer": "nope", "name": "d"}).status_code == 400
+        assert client.post("/layers/join", json={"layer": "communes", "join_layer": "communes", "target_field": "a",
+                                                 "join_field": "a"}).status_code == 400
+        assert client.post("/layers/join", json={"layer": "communes", "target_field": "a"}).status_code == 422
 
     def test_layer_tree_routes(self, client):
         assert client.post("/layers/group", json={"layers": ["communes"], "group": "Base"}).json()["moved"] == ["communes"]

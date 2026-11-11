@@ -347,6 +347,28 @@ class LayoutExport:
 
 
 @dataclass(frozen=True)
+class FieldAdded:
+    """A field added to a layer, in its edit buffer."""
+    layer_name: str
+    field: str
+    type: str = "text"
+    computed: int = 0
+    editing: bool = True
+    unsaved: bool = True
+    note: str = ""
+    formula_error: str = ""
+
+
+@dataclass(frozen=True)
+class JoinAdded:
+    """A join of the project: the fields of another layer beside each feature."""
+    layer_name: str
+    join_layer: str
+    fields_added: List[str] = field(default_factory=list)
+    note: str = ""
+
+
+@dataclass(frozen=True)
 class LayerTreeChange:
     """Layers put in a group of the layer tree."""
     group: str = ""
@@ -562,6 +584,16 @@ class FilterMateAccessor(Protocol):
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
         """Set the CRS of the project and of the map; raises FilterRejected on an unknown CRS."""
+        ...
+
+    def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
+                  formula: str = "") -> FieldAdded:
+        """Add a field in the edit buffer, filled by ``formula`` when given; raises FilterRejected."""
+        ...
+
+    def join_layers(self, layer: str, join_layer: str, target_field: str, join_field: str,
+                    fields: Optional[List[str]] = None, prefix: Optional[str] = None) -> JoinAdded:
+        """Join ``join_layer`` to ``layer`` by a field; raises FilterRejected."""
         ...
 
     def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
@@ -818,6 +850,22 @@ class InMemoryAccessor:
         import os
         path = os.path.join(folder, f"{name}.{file_format}")
         return LayoutExport(name=name, format=file_format, dpi=dpi, path=path, bytes=1)
+
+    def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
+                  formula: str = "") -> FieldAdded:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return FieldAdded(layer_name=found.name, field=name, type=field_type, computed=found.feature_count if formula else 0)
+
+    def join_layers(self, layer: str, join_layer: str, target_field: str, join_field: str,
+                    fields: Optional[List[str]] = None, prefix: Optional[str] = None) -> JoinAdded:
+        found, other = self._find(layer), self._find(join_layer)
+        if found is None or other is None or found is other:
+            raise FilterRejected("give two different layers of the project")
+        named = fields or [join_field]
+        return JoinAdded(layer_name=found.name, join_layer=other.name,
+                         fields_added=[f"{other.name + '_' if prefix is None else prefix}{name}" for name in named])
 
     def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
         moved = [found.name for found in (self._find(name) for name in layers) if found is not None]

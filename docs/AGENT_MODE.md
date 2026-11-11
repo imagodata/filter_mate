@@ -30,6 +30,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 16. Levels of autonomy | Each tool in a risk class; the user chooses how far the chat goes alone; "yes for this conversation" | done |
 | 17. Widgets | Controls the agent makes for the user (range, ticked values, a number), kept in the project, undone with the turn | done |
 | 18. Layer tree | Groups, names of layers and map themes, undone with the turn | done |
+| 19. Fields and joins | A field filled by an expression in the edit buffer, a join by a field, undone with the turn | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -125,6 +126,14 @@ Rules worth keeping:
 - **Project CRS**: `set_project_crs` takes an authid, an EPSG code alone or a layer of the project, and sets the
   CRS of the project, which the map follows (layers in other CRS are reprojected on the fly, no data changes).
   The turn keeps the CRS before (its authid, or its WKT for a CRS of its own) and undoing the turn sets it back.
+- **Fields and joins** (`adapters/public_api/fields_joins.py`): `add_field` adds a field (integer, integer64, decimal,
+  text, date, datetime, boolean) to a vector layer in its edit buffer, as one command of its undo stack, and fills it
+  on every feature with a QGIS expression when given (the guard of `update_features` applies; a refused formula
+  leaves the field empty and says why). `join_layers` shows the fields of another layer or table beside each
+  feature, matched by a field, as the Joins tab does (memory cache, prefix the name of the joined layer and `_` by
+  default, a subset of its fields); nothing is written. In the chat, the REST API (`POST /layers/fields`,
+  `/layers/join`) and both MCP servers. The turn keeps the undo stack index (the field) and each join it added:
+  undoing it removes them. `add_field` is of the class *edit buffer*, `join_layers` of the class *project*.
 - **Layer tree and map themes** (`adapters/public_api/layer_tree.py`): `group_layers` puts layers in a group, made
   where missing (`Base/Roads` for a group in a group, five levels at most; empty for the top), first or last of it,
   each one kept checked or not; `rename_layer` renames a layer; `map_theme` lists, saves (the layers shown now and
@@ -173,7 +182,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | read | every `read_only` tool, open data searches included | nothing to undo |
 | view | `zoom_to`, `select_features`, `set_layers_visibility`, `group_layers`, `map_theme` | with the turn |
 | project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
-| edit buffer | `update_features`, `add_features` | with the turn, until the user saves |
+| edit buffer | `update_features`, `add_features`, `add_field` | with the turn, until the user saves |
 | irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |
 | outside | `open_world` changes (`add_layer`, `add_service_layer`, connectors) and `run_pyqgis` | no |
 

@@ -707,6 +707,16 @@ Rozimisiz?</translation>
         <source>{} renamed {}</source>
         <translation>{} nomi {} ga o'zgartirildi</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>{} maydoni {} ga qo‘shildi (saqlanmagan)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} {} ga birlashtirildi</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

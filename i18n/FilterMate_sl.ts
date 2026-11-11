@@ -707,6 +707,16 @@ Se strinjate?</translation>
         <source>{} renamed {}</source>
         <translation>Preimenovano: {} → {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Polje {} dodano v {} (ni shranjeno)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} pridruženo k {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

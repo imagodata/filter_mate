@@ -40,7 +40,7 @@ class TestRiskClasses:
         ("map_theme", VIEW), ("rename_layer", PROJECT),
         ("apply_filter", PROJECT), ("set_layer_style", PROJECT), ("run_algorithm", PROJECT),
         ("create_layout", PROJECT), ("set_project_crs", PROJECT),
-        ("update_features", BUFFER), ("add_features", BUFFER),
+        ("update_features", BUFFER), ("add_features", BUFFER), ("add_field", BUFFER), ("join_layers", PROJECT),
         ("delete_features", LOCAL), ("export_layers", LOCAL), ("export_layout", LOCAL), ("remove_layers", LOCAL),
         ("add_layer", OUTSIDE), ("add_service_layer", OUTSIDE),
     ])

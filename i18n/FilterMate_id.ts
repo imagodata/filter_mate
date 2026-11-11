@@ -707,6 +707,16 @@ Apakah Anda setuju?</translation>
         <source>{} renamed {}</source>
         <translation>{} diganti namanya menjadi {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Bidang {} ditambahkan ke {} (belum disimpan)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} digabungkan ke {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

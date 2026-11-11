@@ -1719,6 +1719,136 @@
    }
   },
   {
+   "name": "add_field",
+   "title": "Add a field",
+   "description": "Add a field to a vector layer, in its edit buffer: nothing is saved until the user saves the layer edits. With a formula the field is filled on every feature at once. Returns layer_name, field, type, computed (the features filled), and formula_error when the formula was refused (the field is then added, empty). In the chat of FilterMate, undoing the turn removes the field.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "description": "Name of the new field",
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "default": "text",
+      "description": "Type of the field",
+      "enum": [
+       "integer",
+       "integer64",
+       "decimal",
+       "text",
+       "date",
+       "datetime",
+       "boolean"
+      ],
+      "type": "string"
+     },
+     "length": {
+      "default": 0,
+      "description": "Length of a text field; 0 lets the source choose",
+      "maximum": 10000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "formula": {
+      "default": "",
+      "description": "QGIS expression computing the value of each feature (\"pop\" / $area * 1000000, upper(\"nom\")); empty leaves the field empty",
+      "maxLength": 10000,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer",
+     "name"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "join_layers",
+   "title": "Join a layer",
+   "description": "Join two layers by a field: the fields of join_layer show beside each feature of layer whose target_field equals its join_field, as the Joins tab of the layer properties does. Nothing is written to either source. Returns layer_name, join_layer and fields_added (as they are named in layer). In the chat of FilterMate, undoing the turn removes the join.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Layer that gets the fields (id or name)",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "join_layer": {
+      "description": "Layer whose fields are shown beside it, a table without geometry too (id or name)",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "target_field": {
+      "description": "Field of layer to match",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "join_field": {
+      "description": "Field of join_layer to match",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "fields": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "maxItems": 200,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Fields of join_layer to show; all of them by default"
+     },
+     "prefix": {
+      "anyOf": [
+       {
+        "maxLength": 50,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Put before the names of the fields shown; the name of join_layer and _ by default"
+     }
+    },
+    "required": [
+     "layer",
+     "join_layer",
+     "target_field",
+     "join_field"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "group_layers",
    "title": "Put layers in a group",
    "description": "Organize the layer tree: put layers in a group, made where it is missing, first or last of it. Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of FilterMate, undoing the turn puts each layer back and removes the groups it made.",

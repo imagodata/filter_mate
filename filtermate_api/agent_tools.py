@@ -316,6 +316,17 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def set_project_crs(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.set_project_crs(args["crs"]))
 
+    def add_field(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = asdict(accessor.add_field(args["layer"], args["name"], field_type=args["type"],
+                                           length=args["length"], formula=args["formula"]))
+        if not answer.get("formula_error"):
+            answer.pop("formula_error", None)
+        return answer
+
+    def join_layers(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.join_layers(args["layer"], args["join_layer"], args["target_field"], args["join_field"],
+                                           fields=args.get("fields"), prefix=args.get("prefix")))
+
     def group_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.group_layers(args["layers"], group=args["group"], at_top=args["at_top"]))
 
@@ -390,7 +401,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
-        "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
+        "add_field": add_field, "join_layers": join_layers, "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,

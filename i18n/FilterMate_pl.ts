@@ -707,6 +707,16 @@ Czy się zgadzasz?</translation>
         <source>{} renamed {}</source>
         <translation>Zmieniono nazwę {} na {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Pole {} dodane do {} (niezapisane)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} połączono z {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

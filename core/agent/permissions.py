@@ -39,7 +39,7 @@ _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL
 
 # How the project shows, not what it holds: the map, the layer tree, the selection, the map themes.
 VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "group_layers", "map_theme"})
-BUFFER_TOOLS = frozenset({"update_features", "add_features"})
+BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis"})
 # What the user asks of the agent about its own work: its history and its notes. They run at every level.

@@ -707,6 +707,16 @@ Gaat u akkoord?</translation>
         <source>{} renamed {}</source>
         <translation>{} hernoemd naar {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Veld {} toegevoegd aan {} (niet opgeslagen)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} gekoppeld aan {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

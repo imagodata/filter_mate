@@ -9,6 +9,7 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
 * ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
+* ``("join", layer_id, spec, "", name)``: a join the turn added to a layer (``fields_joins.join_specs``);
 * ``("tree", "", before, after)``: where each layer is in the layer tree and the groups, checked or not (JSON);
 * ``("layer_name", layer_id, before, after)``: the name of a layer;
 * ``("themes", "", before, after)``: the map themes of the project, as XML;
@@ -39,7 +40,7 @@ STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
 WIDGET_TOOLS = ("create_widget", "remove_widget")
 TREE_TOOLS = ("group_layers", "map_theme")
-EDIT_TOOLS = ("update_features", "delete_features", "add_features")
+EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
 CRS_TOOLS = ("set_project_crs",)
 
@@ -232,6 +233,7 @@ class EffectsRecorder:
         self._notes: Optional[Tuple[str, ...]] = None
         self._widgets: Optional[str] = None
         self._tree: Optional[str] = None
+        self._joins: Dict[str, Set[str]] = {}
         self._names: Dict[str, str] = {}
         self._themes: Optional[str] = None
         self._current_styles: Dict[str, Optional[str]] = {}
@@ -268,6 +270,10 @@ class EffectsRecorder:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
                     self._edits[layer.id()] = _edit_index(layer)
+            elif name == "join_layers":
+                layer = _resolve(project, arguments.get("layer"))
+                if isinstance(layer, QgsVectorLayer) and layer.id() not in self._joins:
+                    self._joins[layer.id()] = {join.joinLayerId() for join in layer.vectorJoins()}
             elif name == "rename_layer":
                 layer = _resolve(project, arguments.get("layer"))
                 if layer is not None and layer.id() not in self._names:
@@ -349,6 +355,13 @@ class EffectsRecorder:
             after = _edit_index(layer) if layer is not None else before
             if after != before:
                 effects.append(("edits", layer_id, before, after, layer.name()))
+        for layer_id, before_joins in self._joins.items():
+            layer = project.mapLayer(layer_id)
+            if isinstance(layer, QgsVectorLayer):
+                from ..public_api.fields_joins import join_specs
+                for spec in join_specs(layer):
+                    if spec["join_layer_id"] not in before_joins:
+                        effects.append(("join", layer_id, spec, "", layer.name()))
         if self._tree is not None:
             after_tree = _tree_state(project)
             if after_tree != self._tree:
@@ -449,6 +462,22 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                     done.append(layer.name())
                 else:
                     left.append(effect[4] if len(effect) > 4 else layer_id)
+            elif kind == "join":
+                from ..public_api.fields_joins import add_join, remove_join
+                layer = project.mapLayer(layer_id)
+                spec = effect[2]
+                present = isinstance(layer, QgsVectorLayer) and any(
+                    join.joinLayerId() == spec["join_layer_id"] for join in layer.vectorJoins())
+                if not isinstance(layer, QgsVectorLayer):
+                    left.append(effect[4])
+                elif undo:
+                    if present:
+                        remove_join(layer, spec["join_layer_id"])
+                    done.append(layer.name())
+                elif present or add_join(layer, spec):
+                    done.append(layer.name())
+                else:
+                    left.append(layer.name())  # the join layer went away meanwhile
             elif kind == "tree":
                 _set_tree_state(project, effect[2] if undo else effect[3])
                 done.append(_tree_label())

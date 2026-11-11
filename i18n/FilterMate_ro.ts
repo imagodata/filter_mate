@@ -707,6 +707,16 @@ Sunteți de acord?</translation>
         <source>{} renamed {}</source>
         <translation>{} redenumit în {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Câmpul {} adăugat la {} (nesalvat)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} unit cu {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

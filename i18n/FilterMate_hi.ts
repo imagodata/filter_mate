@@ -707,6 +707,16 @@ Do you agree?</source>
         <source>{} renamed {}</source>
         <translation>{} का नाम बदलकर {} किया गया</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>फ़ील्ड {} को {} में जोड़ा गया (सहेजा नहीं गया)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} को {} से जोड़ा गया</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
