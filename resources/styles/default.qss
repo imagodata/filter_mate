@@ -1126,7 +1126,7 @@ QFrame#frame_actions {
     background-color: {color_bg_0};
     border-top: 1px solid {color_2};
     border-radius: 0px;
-    padding: 8px 12px;
+    padding: 0px 8px;  /* the height is the buttons + the layout margins (ActionBarManager) */
     margin: 0px;
 }
 

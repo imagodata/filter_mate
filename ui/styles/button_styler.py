@@ -334,7 +334,9 @@ class ButtonStyler(StylerBase):
         """Check if button is an action button."""
         action_names = ['filter', 'explore', 'export', 'undo', 'redo', 'reset', 'clear']
         obj_name = button.objectName().lower() if button.objectName() else ''
-        return any(name in obj_name for name in action_names)
+        # pushButton_action_about matched none of the names: it took the standard height (42 px), taller
+        # than the action bar.
+        return obj_name.startswith('pushbutton_action_') or any(name in obj_name for name in action_names)
 
     def _apply_action_button_style(self, button: QPushButton) -> None:
         """

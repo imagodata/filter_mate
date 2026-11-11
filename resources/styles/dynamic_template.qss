@@ -233,8 +233,7 @@
 
 /* ACTION BAR - Bottom action buttons */
 #dockWidgetContents QFrame#frame_actions {
-    min-height: {action_frame_height};
-    padding: 6px 8px 4px 8px;
+    padding: 0px 8px;
     border-top: 1px solid {color_2};
     margin: 0px;
 }
