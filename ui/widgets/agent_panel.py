@@ -219,6 +219,9 @@ class AgentPanel(QFrame):
     history_requested = pyqtSignal()
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
+    recipe_save_requested = pyqtSignal()
+    recipe_run_requested = pyqtSignal(str)
+    recipe_remove_requested = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -304,6 +307,12 @@ class AgentPanel(QFrame):
         menu = QMenu(self.more_button)
         self.history_action = menu.addAction(_tr("History…"))
         self.history_action.triggered.connect(self.history_requested)
+        # Recipes: the changes of a request kept in the project, run again without the model.
+        self.recipes_menu = menu.addMenu(_tr("Recipes"))
+        self.recipes_menu.setObjectName("menu_agent_recipes")
+        self._recipes = []
+        self._can_save_recipe = False
+        self.set_recipes([], False)
         self.new_action = menu.addAction(_tr("New conversation"))
         self.new_action.triggered.connect(self.new_conversation_requested)
         self.settings_action = menu.addAction(_tr("Agent settings"))
@@ -645,6 +654,35 @@ class AgentPanel(QFrame):
         self.input.setFocus()
 
     # --- state ----------------------------------------------------------------
+
+    def set_recipes(self, recipes, can_save: bool) -> None:
+        """The recipes of the project in the menu: run or remove each; save the last request as one."""
+        self._recipes, self._can_save_recipe = list(recipes), bool(can_save)
+        menu = self.recipes_menu
+        menu.clear()
+        self.save_recipe_action = menu.addAction(_tr("Save the last request as a recipe…"))
+        self.save_recipe_action.setEnabled(self._can_save_recipe)
+        self.save_recipe_action.triggered.connect(self.recipe_save_requested)
+        if not self._recipes:
+            empty = menu.addAction(_tr("No recipe in this project yet"))
+            empty.setEnabled(False)
+            return
+        menu.addSeparator()
+        self.recipe_actions = {}
+        for recipe in self._recipes:
+            entry = menu.addMenu(_tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"])))
+            entry.setToolTip("\n".join(f"{number}. {step['label']}" for number, step in enumerate(recipe["steps"], 1)))
+            entry.setToolTipsVisible(True)
+            run = entry.addAction(_tr("Run without the model"))
+            run.triggered.connect(lambda _checked=False, recipe_id=recipe["id"]: self.recipe_run_requested.emit(recipe_id))
+            remove = entry.addAction(_tr("Remove"))
+            remove.triggered.connect(
+                lambda _checked=False, recipe_id=recipe["id"]: self.recipe_remove_requested.emit(recipe_id))
+            self.recipe_actions[recipe["id"]] = (run, remove)
+
+    @property
+    def recipes(self):
+        return list(self._recipes)
 
     def set_ready(self, ready: bool, destination: str = "") -> None:
         """Whether a provider is set up; ``destination`` says where the requests go."""

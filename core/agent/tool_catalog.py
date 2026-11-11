@@ -65,6 +65,8 @@ VIEW_MAP = "view_map"
 RUN_PYTHON = "run_pyqgis"
 CREATE_WIDGET = "create_widget"
 REMOVE_WIDGET = "remove_widget"
+SAVE_RECIPE = "save_recipe"
+REMOVE_RECIPE = "remove_recipe"
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
@@ -154,6 +156,27 @@ CHAT_ONLY = (
         input_schema={"type": "object", "properties": {
             "widget_id": {"type": "string", "minLength": 1, "maxLength": 20}},
             "required": ["widget_id"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=SAVE_RECIPE, title="Keep what was just done as a recipe",
+        description=("Keep the changes of a request as a recipe of this project, under a name: the user runs it again "
+                     "from the panel (More > Recipes), step by step, without you and without sending anything. Only "
+                     "when the user asks to keep, save or reuse what was done (a recipe, a routine, a chain to run "
+                     "again). It keeps the changes made so far in this request, or, when this request changed nothing "
+                     "yet, those of the last request that did; reads, notes, widgets, code and connectors are not "
+                     "kept. The same name replaces the recipe. Returns recipe (its name and steps) and recipes."),
+        input_schema={"type": "object", "properties": {
+            "name": {"type": "string", "minLength": 1, "maxLength": 60,
+                     "description": "Short name in the words of the user"}},
+            "required": ["name"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=REMOVE_RECIPE, title="Forget a recipe",
+        description=("Forget a recipe of this project by its recipe_id (listed with each request), when the user "
+                     "asks. Returns recipes."),
+        input_schema={"type": "object", "properties": {
+            "recipe_id": {"type": "string", "minLength": 1, "maxLength": 20}},
+            "required": ["recipe_id"], "additionalProperties": False},
         chat_only=True),
 )
 

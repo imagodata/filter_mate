@@ -231,6 +231,32 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
   number of ticked values, never the values themselves.
 - The MCP servers do not offer these tools: the widgets live in the panel of the dock.
 
+## Recipes
+
+A recipe keeps the changes of one request of the agent under a name, and runs them again later **without any model**:
+nothing is sent, nothing is paid, and it works with no provider set up. `core/agent/recipes.py` (plain Python),
+`adapters/agent/recipes_store.py`, and the **Recipes** submenu of the **⋯** menu of the panel.
+
+- What is kept: the calls of the request that changed something and succeeded, in order, each with the arguments the
+  model sent and the words of its card. Reads, refused or failed calls, the notes, the widgets, the expert code, the
+  agent's own history and the tools of external connectors are never kept. 30 steps, 20 recipes per project at most.
+- How one is kept: **⋯ > Recipes > Save the last request as a recipe…** (the last request that changed something, under
+  a name the user types), or by asking the agent (`save_recipe`, a tool of the chat alone: the changes of the request
+  under way, else of the last one that changed something). The same name replaces a recipe. Kept in the project file
+  (`FilterMateAgent/recipes`), so a recipe travels with the project.
+- How one runs: **⋯ > Recipes > *name* > Run without the model**. Each step runs through the same executor and
+  confirmations as in the chat, under the level of autonomy (at *advisor*, the run asks before each change instead of
+  refusing: the user asked for it). The first step refused, declined or failed stops the recipe; the steps before stay.
+  A run is one turn of the history, undone as one. It is the user's own action: the next request tells the model what
+  changed, as for a filter set by hand.
+- What a step reads is read again at each run: a cross filter from the selection filters from the selection of the
+  moment, and a layer is found by its name. A step that needs a tool the settings now leave out (attribute values not
+  shared, a source unticked) stops the recipe and says so.
+- The recipes go with each request as data (name and the words of each step, never their arguments), so the model can
+  name them or forget one (`remove_recipe`). Keeping or forgetting a recipe through the agent is undone with the turn
+  (`("recipes", "", before, after)` in `adapters/agent/turn_effects.py`); from the menu it is not a step of the history.
+- The MCP servers do not offer these tools: recipes live in the panel of the dock. The model cannot run a recipe.
+
 ## History
 
 - Every turn that changed a layer is one `CrossOperation` under the key `filtermate_agent_turn` of the automation
@@ -361,6 +387,11 @@ The catalog is JSON because that server needs pydantic and the MCP SDK, which QG
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's
 history, which is not what the agent did.
 
+Counts (2026-11-11): 46 tools in the catalog; the chat offers 52 at most (the catalog without those three, plus 9 of its
+own: `undo_agent_step`, the notes, `run_pyqgis`, `view_map`, the widgets and the recipes, some only under their
+setting); the MCP server of the plugin serves 45 (the chat's tools without its own, plus `map_image` and
+`contact_sheet`).
+
 What the chat adds to the REST checks, because a model can be steered by what it reads:
 
 - arguments are validated against the schema before a handler runs;
@@ -461,7 +492,8 @@ machine unless WSL uses mirrored networking.
 
 Rules of a call, in `ui/controllers/agent_mcp_bridge.py`:
 
-- Same tools as the chat, under the same Sources ticks and the same "attribute values" option. External connectors are not relayed.
+- The tools of the chat but its own (history, notes, expert code, `view_map`, widgets, recipes), plus `map_image` and
+  `contact_sheet`, under the same Sources ticks and the same "attribute values" option. External connectors are not relayed.
 - Same SQL allowlist and same confirmations (export, adding or removing a layer), under the name of the application that asks.
 - One change is one step of the history of the panel, and shows in the thread with the name of the application.
 - A change is refused while the chat is working or while a QGIS dialog is open; reads go on.

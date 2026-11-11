@@ -42,8 +42,8 @@ VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis"})
-# What the user asks of the agent about its own work: its history and its notes. They run at every level.
-AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note"})
+# What the user asks of the agent about its own work: its history, its notes and its recipes. They run at every level.
+AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe"})
 
 ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing that changes the project runs. "
                    "Tell them, step by step, what you would do and with which tools, so they can do it themselves or "
