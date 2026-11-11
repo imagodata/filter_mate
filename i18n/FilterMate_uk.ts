@@ -259,6 +259,24 @@
         <translation>СК проєкту: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Код Python (експерт, не скасовується)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Агент хоче виконати цей код Python у QGIS з вашими правами: він може читати й змінювати все, що можуть QGIS і ваш обліковий запис, а скасування ходу цього не поверне.
+
+Для чого: {}
+
+Виконати?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Пошук алгоритму обробки</translation>
@@ -679,6 +697,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Дозволити надсилання значень атрибутів</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Експерт: дозволити агенту виконувати код Python у QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Кожен запуск показує вам увесь код і спершу питає. Код виконується з вашими правами: він може змінити ваші дані та файли, а скасування ходу цього не поверне. Для тих, хто читає Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

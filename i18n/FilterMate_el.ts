@@ -259,6 +259,24 @@
         <translation>ΣΣΑ του έργου: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Κώδικας Python (ειδικός, δεν αναιρείται)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Ο πράκτορας θέλει να εκτελέσει αυτόν τον κώδικα Python στο QGIS με τα δικαιώματά σας: μπορεί να διαβάσει και να αλλάξει ό,τι μπορούν το QGIS και ο λογαριασμός σας, και η αναίρεση του γύρου δεν το επαναφέρει.
+
+Για ποιο σκοπό: {}
+
+Να εκτελεστεί;</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Αναζήτηση αλγορίθμου επεξεργασίας</translation>
@@ -679,6 +697,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Να επιτρέπεται η αποστολή τιμών χαρακτηριστικών</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Ειδικός: να εκτελεί ο πράκτορας κώδικα Python στο QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Κάθε εκτέλεση σας δείχνει όλο τον κώδικα και σας ρωτά πρώτα. Ο κώδικας τρέχει με τα δικαιώματά σας: μπορεί να αλλάξει τα δεδομένα και τα αρχεία σας, και η αναίρεση του γύρου δεν το επαναφέρει. Για όσους διαβάζουν Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

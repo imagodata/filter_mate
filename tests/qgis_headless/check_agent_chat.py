@@ -644,6 +644,40 @@ def check_chat(provider, layer, authcfg, work):
     check("undoing the turn brings the CRS back", QgsProject.instance().crs().authid() == "EPSG:4326",
           QgsProject.instance().crs().authid())
 
+    check("no Python without the expert mode", "run_pyqgis" not in
+          [tool.name for tool in chat.tools_and_handlers(load_settings())[0]])
+    settings(expert_python=True)
+    check("the expert mode offers it", "run_pyqgis" in [tool.name for tool in chat.tools_and_handlers(load_settings())[0]])
+    shown, verdict = [], {"run": False}
+
+    def read_code(title, text, code):
+        shown.append((text, code))
+        return verdict["run"]
+    chat._ask_code = read_code
+    code = "project.writeEntry('FMcheck', 'ran', 'yes')\nprint('bonjour')\nresult = 6 * 7"
+    provider.reset((200, {}, tool_turn("run_pyqgis", {"purpose": "Écrire une entrée de test", "code": code})),
+                   (200, {}, text_turn("D'accord.")))
+    ask("lance ce code")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("Python is shown in full and asked first; declined, nothing runs", shown and shown[-1][1] == code and
+          "Écrire une entrée de test" in shown[-1][0] and result.get("is_error") is True and
+          QgsProject.instance().readEntry("FMcheck", "ran", "")[0] == "", (shown[-1:], result))
+    verdict["run"] = True
+    provider.reset((200, {}, tool_turn("run_pyqgis", {"purpose": "Écrire une entrée de test", "code": code})),
+                   (200, {}, text_turn("Fait.")))
+    ask("lance-le")
+    answer = json.loads(provider.requests[1]["body"]["messages"][-1]["content"][0]["content"])
+    check("agreed, it runs: what it printed and its result come back", answer["ok"] and answer["printed"] == "bonjour\n"
+          and answer["result"] == "42" and QgsProject.instance().readEntry("FMcheck", "ran", "")[0] == "yes", answer)
+    check("its card says it is not undone", "Python code (expert, not undone)" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-200:])
+    provider.reset((200, {}, tool_turn("run_pyqgis", {"purpose": "Diviser", "code": "1 / 0"})), (200, {}, text_turn("Raté.")))
+    ask("divise")
+    answer = json.loads(provider.requests[1]["body"]["messages"][-1]["content"][0]["content"])
+    check("an error comes back as its traceback", answer["ok"] is False and "ZeroDivisionError" in answer["error"], answer)
+    QgsProject.instance().removeEntry("FMcheck", "ran")
+    settings()
+
     from filter_mate.adapters.agent.project_notes_store import read_notes, write_notes
     write_notes([])
     provider.reset((200, {}, tool_turn("add_project_note", {"text": "Les communes sont la couche communes, clé pop"})),

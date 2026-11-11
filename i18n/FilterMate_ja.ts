@@ -259,6 +259,24 @@
         <translation>プロジェクトの CRS: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python コード（エキスパート、元に戻せません）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>エージェントがこの Python コードをあなたの権限で QGIS 上で実行しようとしています。QGIS とあなたのアカウントにできることはすべて読み書きでき、このターンを元に戻しても取り消されません。
+
+目的: {}
+
+実行しますか？</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>プロセシングアルゴリズムを検索中</translation>
@@ -679,6 +697,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>属性値の送信を許可する</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>エキスパート: エージェントに QGIS で Python コードを実行させる</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>実行のたびにコード全体を表示し、先に確認します。コードはあなたの権限で動作し、データやファイルを変更でき、このターンを元に戻しても取り消されません。Python を読める方向けです。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

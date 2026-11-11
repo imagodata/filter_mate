@@ -259,6 +259,24 @@
         <translation>प्रोजेक्ट CRS: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python कोड (विशेषज्ञ, पूर्ववत नहीं)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>एजेंट इस Python कोड को आपके अधिकारों से QGIS में चलाना चाहता है: यह वह सब पढ़ और बदल सकता है जो QGIS और आपका खाता कर सकते हैं, और चरण पूर्ववत करने से यह वापस नहीं होता।
+
+किसलिए: {}
+
+चलाएँ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>प्रोसेसिंग एल्गोरिद्म खोजना</translation>
@@ -679,6 +697,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>विशेषता मान भेजने की अनुमति दें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>विशेषज्ञ: एजेंट को QGIS में Python कोड चलाने दें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>हर बार चलाने से पहले आपको पूरा कोड दिखाया और पूछा जाता है। कोड आपके अधिकारों से चलता है: यह आपका डेटा और फ़ाइलें बदल सकता है, और चरण पूर्ववत करने से यह वापस नहीं होता। Python पढ़ने वालों के लिए।</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

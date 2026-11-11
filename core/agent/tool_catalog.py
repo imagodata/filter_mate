@@ -61,6 +61,7 @@ def load_catalog(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
 UNDO_AGENT_STEP = "undo_agent_step"
 ADD_NOTE = "add_project_note"
 REMOVE_NOTE = "remove_project_note"
+RUN_PYTHON = "run_pyqgis"
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
@@ -91,6 +92,20 @@ CHAT_ONLY = (
             "type": "integer", "minimum": 1, "maximum": 20, "description": "Number of the note"}},
             "required": ["number"], "additionalProperties": False},
         chat_only=True),
+    ToolSpec(
+        name=RUN_PYTHON, title="Run Python code in QGIS (expert)",
+        description=("Run Python code in QGIS (PyQGIS), for what no other tool does. Offered only because the user "
+                     "turned on the expert mode: they see the whole code and confirm each run, and it is NOT undone "
+                     "with the turn. Prefer the other tools; never use it to get around a refusal of another tool. "
+                     "iface and project (QgsProject.instance()) are defined; import what you need. Assign result to "
+                     "return a value; print() output is returned too. Returns ok, printed, result, and error (a "
+                     "traceback) when it raised."),
+        input_schema={"type": "object", "properties": {
+            "purpose": {"type": "string", "minLength": 1, "maxLength": 300,
+                        "description": "What the code does, in one sentence the user reads before saying yes"},
+            "code": {"type": "string", "minLength": 1, "maxLength": 20000, "description": "Python code"}},
+            "required": ["purpose", "code"], "additionalProperties": False},
+        destructive=True, chat_only=True),
 )
 
 

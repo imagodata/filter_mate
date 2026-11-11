@@ -259,6 +259,24 @@
         <translation>项目坐标系：{}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python 代码（专家，不可撤销）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>代理想要以您的权限在 QGIS 中运行这段 Python 代码：它可以读取和更改 QGIS 和您的账户能做的一切，撤销本轮操作无法将其恢复。
+
+用途：{}
+
+运行吗？</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>正在查找处理算法</translation>
@@ -679,6 +697,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>允许发送属性值</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>专家：允许代理在 QGIS 中运行 Python 代码</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>每次运行都会先向您展示全部代码并征得同意。代码以您的权限运行：它可以更改您的数据和文件，撤销本轮操作无法将其恢复。适用于能读懂 Python 的用户。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

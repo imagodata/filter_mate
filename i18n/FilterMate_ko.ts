@@ -259,6 +259,24 @@
         <translation>프로젝트 좌표계: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python 코드 (전문가, 되돌리지 않음)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>에이전트가 이 Python 코드를 사용자의 권한으로 QGIS에서 실행하려고 합니다. QGIS와 사용자 계정이 할 수 있는 모든 것을 읽고 바꿀 수 있으며, 이 차례를 실행 취소해도 되돌려지지 않습니다.
+
+목적: {}
+
+실행할까요?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>프로세싱 알고리즘 찾는 중</translation>
@@ -679,6 +697,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>속성 값 전송 허용</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>전문가: 에이전트가 QGIS에서 Python 코드를 실행하도록 허용</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>실행할 때마다 전체 코드를 보여 주고 먼저 묻습니다. 코드는 사용자의 권한으로 실행되어 데이터와 파일을 바꿀 수 있으며, 이 차례를 실행 취소해도 되돌려지지 않습니다. Python을 읽는 사용자용입니다.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>
