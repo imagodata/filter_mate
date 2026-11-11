@@ -707,6 +707,16 @@ Sumasang-ayon ka ba?</translation>
         <source>{} renamed {}</source>
         <translation>Pinalitan ang pangalan ng {} ng {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Idinagdag ang field na {} sa {} (hindi pa naka-save)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>Isinama ang {} sa {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

@@ -707,6 +707,16 @@ Godkänner du?</translation>
         <source>{} renamed {}</source>
         <translation>{} bytte namn till {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Fältet {} har lagts till i {} (inte sparat)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} kopplat till {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

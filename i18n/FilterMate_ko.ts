@@ -707,6 +707,16 @@ Do you agree?</source>
         <source>{} renamed {}</source>
         <translation>{} 이름을 {}(으)로 변경함</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>필드 {}을(를) {}에 추가함(저장 안 됨)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{}을(를) {}에 결합함</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

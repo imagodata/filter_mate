@@ -707,6 +707,16 @@ Hyväksytkö?</translation>
         <source>{} renamed {}</source>
         <translation>{} nimetty uudelleen nimellä {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Kenttä {} lisätty tasoon {} (tallentamatta)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} liitetty tasoon {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

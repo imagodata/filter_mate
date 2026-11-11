@@ -737,6 +737,47 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/map/crs", _body(crs=crs))
 
+    @mcp.tool(annotations=_write("Add a field", idempotent=False))
+    async def add_field(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        name: Annotated[str, Field(min_length=1, max_length=63, description="Name of the new field")],
+        type: Annotated[Literal["integer", "integer64", "decimal", "text", "date", "datetime", "boolean"], Field(
+            description="Type of the field")] = "text",
+        length: Annotated[int, Field(ge=0, le=10000, description="Length of a text field; 0 lets the source choose")] = 0,
+        formula: Annotated[str, Field(max_length=10000, description=(
+            "QGIS expression computing the value of each feature (\"pop\" / $area * 1000000, upper(\"nom\")); "
+            "empty leaves the field empty"))] = "",
+    ) -> Dict[str, Any]:
+        """Add a field to a vector layer, in its edit buffer: nothing is saved until the user saves the layer edits.
+
+        With a formula the field is filled on every feature at once. Returns layer_name, field, type, computed (the
+        features filled), and formula_error when the formula was refused (the field is then added, empty). In the chat
+        of FilterMate, undoing the turn removes the field.
+        """
+        return await call("POST", "/layers/fields", _body(layer=layer, name=name, type=type, length=length,
+                                                          formula=formula))
+
+    @mcp.tool(annotations=_write("Join a layer", idempotent=False))
+    async def join_layers(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer that gets the fields (id or name)")],
+        join_layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Layer whose fields are shown beside it, a table without geometry too (id or name)"))],
+        target_field: Annotated[str, Field(min_length=1, max_length=200, description="Field of layer to match")],
+        join_field: Annotated[str, Field(min_length=1, max_length=200, description="Field of join_layer to match")],
+        fields: Annotated[Optional[List[str]], Field(max_length=200, description=(
+            "Fields of join_layer to show; all of them by default"))] = None,
+        prefix: Annotated[Optional[str], Field(max_length=50, description=(
+            "Put before the names of the fields shown; the name of join_layer and _ by default"))] = None,
+    ) -> Dict[str, Any]:
+        """Join two layers by a field: the fields of join_layer show beside each feature of layer whose target_field
+        equals its join_field, as the Joins tab of the layer properties does. Nothing is written to either source.
+
+        Returns layer_name, join_layer and fields_added (as they are named in layer). In the chat of FilterMate,
+        undoing the turn removes the join.
+        """
+        return await call("POST", "/layers/join", _body(layer=layer, join_layer=join_layer, target_field=target_field,
+                                                        join_field=join_field, fields=fields, prefix=prefix))
+
     @mcp.tool(annotations=_write("Put layers in a group", idempotent=True))
     async def group_layers(
         layers: Annotated[LayerList, Field(description="Layer ids or names, in the order they take in the group")],

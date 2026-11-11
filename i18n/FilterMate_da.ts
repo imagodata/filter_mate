@@ -707,6 +707,16 @@ Er du enig?</translation>
         <source>{} renamed {}</source>
         <translation>{} omdøbt til {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Felt {} tilføjet til {} (ikke gemt)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} sammenkædet med {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

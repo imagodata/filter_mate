@@ -707,6 +707,16 @@ Do you agree?</source>
         <source>{} renamed {}</source>
         <translation>Μετονομασία: {} → {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Το πεδίο {} προστέθηκε στο {} (δεν αποθηκεύτηκε)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>Το {} συνδέθηκε με το {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

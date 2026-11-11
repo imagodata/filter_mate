@@ -429,6 +429,13 @@ class SimulatedProject:
                                              "added": 0, "editing": True, "unsaved": True, "note": "not saved"},
             "add_features": lambda args: {"layer_name": self._layer(args["layer"])[0], "changed": 0, "deleted": 0,
                                           "added": len(args["features"]), "editing": True, "unsaved": True},
+            "add_field": lambda args: {"layer_name": self._layer(args["layer"])[0], "field": args["name"],
+                                       "type": args.get("type", "text"), "computed": 586 if args.get("formula") else 0,
+                                       "editing": True, "unsaved": True},
+            "join_layers": lambda args: {"layer_name": self._layer(args["layer"])[0],
+                                         "join_layer": self._layer(args["join_layer"])[0],
+                                         "fields_added": [f"{self._layer(args['join_layer'])[0]}_{name}" for name in
+                                                          (args.get("fields") or [args["join_field"]])]},
             "group_layers": lambda args: {"group": args.get("group", ""), "groups_made": [args.get("group", "")],
                                           "moved": [self._layer(name)[0] for name in args["layers"]], "not_found": []},
             "rename_layer": lambda args: {"layer_id": self._layer(args["layer"])[1]["id"], "name": args["name"],

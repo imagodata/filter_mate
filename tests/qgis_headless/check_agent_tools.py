@@ -501,6 +501,56 @@ def check_project_crs(project):
         project_control.crs_definition(own)).isValid())
 
 
+def check_fields_joins(project):
+    """add_field (in the edit buffer, filled by a formula) and join_layers, and what an undo of the turn takes back."""
+    from filter_mate.adapters.public_api import fields_joins
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+    communes = project.mapLayersByName("communes")[0]
+    table = QgsVectorLayer("NoGeometry?field=nom:string&field=region:string", "regions", "memory")
+    rows = []
+    for feature in communes.getFeatures():
+        row = QgsFeature(table.fields())
+        row.setAttributes([feature["nom"], "Occitanie"])
+        rows.append(row)
+    table.dataProvider().addFeatures(rows)
+    project.addMapLayer(table)
+    fields_before = [field.name() for field in communes.fields()]
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("c1", "add_field", {"layer": "communes", "name": "double_pop"}))
+    added = fields_joins.add_field("communes", "double_pop", "integer64", formula='"pop" * 2')
+    values = {feature["pop"] * 2 == feature["double_pop"] for feature in communes.getFeatures()}
+    check("field: added in the edit buffer and filled", added["computed"] == 60 and values == {True} and
+          communes.isEditable() and communes.isModified(), added)
+    check("field: a name taken, refused", refused(fields_joins.add_field, "communes", "pop", "integer"))
+    check("field: an unknown type, refused", refused(fields_joins.add_field, "communes", "z", "float"))
+    bad = fields_joins.add_field("communes", "vide", "text", formula='"nope" || 1')
+    check("field: a refused formula leaves it empty and says why", bad["computed"] == 0 and "nope" in bad.get(
+        "formula_error", ""), bad)
+    recorder.before_call(ToolCallPart("c2", "join_layers", {"layer": "communes"}))
+    joined = fields_joins.join_layers("communes", "regions", "nom", "nom", fields=["region"])
+    # A commune without a name matches no row: QGIS 4.3 no longer joins NULL to NULL, as SQL does not.
+    named = [feature for feature in communes.getFeatures() if feature["nom"] not in (None, "") and
+             str(feature["nom"]) != "NULL"]
+    check("join: the fields of the table beside each feature", joined["fields_added"] == ["regions_region"] and
+          named and {feature["regions_region"] for feature in named} == {"Occitanie"}, joined)
+    check("join: twice, refused", refused(fields_joins.join_layers, "communes", "regions", "nom", "nom"))
+    check("join: to itself, refused", refused(fields_joins.join_layers, "communes", "communes", "nom", "nom"))
+    check("join: an unknown field, refused", refused(fields_joins.join_layers, "communes", "regions", "nope", "nom"))
+    effects = recorder.finish()
+    check("field and join: kept by the turn", sorted(effect[0] for effect in effects) == ["edits", "join"],
+          [effect[0] for effect in effects])
+    apply_effects(effects, undo=True)
+    check("field and join: undo removes them", [field.name() for field in communes.fields()] == fields_before and
+          not communes.vectorJoins(), [field.name() for field in communes.fields()])
+    apply_effects(effects, undo=False)
+    check("field and join: redo brings them back", "double_pop" in communes.fields().names() and
+          len(communes.vectorJoins()) == 1, communes.fields().names())
+    apply_effects(effects, undo=True)
+    communes.rollBack()
+    project.removeMapLayer(table.id())
+
+
 def check_layer_tree(project):
     """group_layers, rename_layer and map_theme on the real layer tree, and what an undo of the turn brings back."""
     from filter_mate.adapters.public_api import layer_tree
@@ -682,6 +732,7 @@ def main(introspection):
     check_layouts(project, work)
     check_project_crs(project)
     check_layer_tree(project)
+    check_fields_joins(project)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

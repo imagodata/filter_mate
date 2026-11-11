@@ -712,6 +712,16 @@ Do you agree?</source>
         <source>{} renamed {}</source>
         <translation>{} renommée {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>Champ {} ajouté à {} (non enregistré)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{} jointe à {}</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

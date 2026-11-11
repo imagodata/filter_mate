@@ -696,6 +696,18 @@ def check_chat(provider, layer, authcfg, work):
     QgsProject.instance().removeEntry("FMcheck", "ran")
     settings()
 
+    fields_before = layer.fields().names()
+    provider.reset((200, {}, tool_turn("add_field", {"layer": "communes", "name": "pop_k", "type": "decimal",
+                                                     "formula": '"pop" / 1000'})), (200, {}, text_turn("Ajouté.")))
+    check("a field through the chat", ask("ajoute la population en milliers"))
+    check("the field is filled in the edit buffer", "pop_k" in layer.fields().names() and layer.isModified() and
+          {round(feature["pop_k"] * 1000) == feature["pop"] for feature in layer.getFeatures()} == {True})
+    check("its card says it is not saved", "Field pop_k added to communes (not saved)" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-300:])
+    chat._on_undo()
+    check("undoing the turn removes the field", layer.fields().names() == fields_before, layer.fields().names())
+    layer.rollBack()
+
     root = QgsProject.instance().layerTreeRoot()
     provider.reset((200, {}, tool_turn("group_layers", {"layers": ["communes"], "group": "Référence"})),
                    (200, {}, tool_turn("map_theme", {"action": "save", "name": "Communes seules"}, "toolu_2")),

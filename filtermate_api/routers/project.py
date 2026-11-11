@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    FilterRejected, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
+    FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
 from .filters import LayerName
@@ -107,6 +107,47 @@ def add_service_layer(payload: AddServiceLayerBody, request: Request) -> LayerSu
     """Add a layer of a WFS platform the user allowed."""
     try:
         return _accessor(request).add_service_layer(payload.platform, payload.typename, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class FieldBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    name: str = Field(..., min_length=1, max_length=63)
+    type: Literal["integer", "integer64", "decimal", "text", "date", "datetime", "boolean"] = "text"
+    length: int = Field(default=0, ge=0, le=10_000, description="Length of a text field; 0 lets the source choose")
+    formula: str = Field(default="", max_length=10_000, description="QGIS expression filling the field")
+
+
+@router.post("/layers/fields", response_model=FieldAdded)
+def add_field(payload: FieldBody, request: Request) -> FieldAdded:
+    """Add a field to a vector layer, in its edit buffer: nothing is saved."""
+    try:
+        return _accessor(request).add_field(payload.layer, payload.name, field_type=payload.type,
+                                            length=payload.length, formula=payload.formula)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class JoinBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    join_layer: LayerName
+    target_field: str = Field(..., min_length=1, max_length=200)
+    join_field: str = Field(..., min_length=1, max_length=200)
+    fields: Optional[List[str]] = Field(default=None, max_length=200)
+    prefix: Optional[str] = Field(default=None, max_length=50)
+
+
+@router.post("/layers/join", response_model=JoinAdded)
+def join_layers(payload: JoinBody, request: Request) -> JoinAdded:
+    """Show the fields of another layer beside each feature, matched by a field; nothing is written."""
+    try:
+        return _accessor(request).join_layers(payload.layer, payload.join_layer, payload.target_field,
+                                              payload.join_field, fields=payload.fields, prefix=payload.prefix)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

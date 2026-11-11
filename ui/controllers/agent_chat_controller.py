@@ -825,6 +825,8 @@ class AgentChatController(QObject):
             RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
+            "add_field": lambda: _tr("Field {} added to {} (not saved)").format(args.get("name", ""), layer),
+            "join_layers": lambda: _tr("{} joined to {}").format(args.get("join_layer", ""), layer),
             "group_layers": lambda: _tr("Layers put in {}").format(args.get("group") or _tr("the top of the tree")),
             "rename_layer": lambda: _tr("{} renamed {}").format(layer, args.get("name", "")),
             "map_theme": lambda: _tr("Map theme: {} {}").format(args.get("action", ""), args.get("name", "")).strip(),

@@ -35,6 +35,8 @@ from .accessor import (
     AlgorithmDescription,
     ProjectCrs,
     LayerTreeChange,
+    FieldAdded,
+    JoinAdded,
     LayerRename,
     MapThemes,
     LayoutExport,
@@ -488,6 +490,16 @@ class QGISFilterMateAccessor:
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
         return ProjectCrs(**self._control("set_project_crs", crs))
+
+    def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
+                  formula: str = "") -> FieldAdded:
+        return FieldAdded(**self._control("add_field", layer, name, field_type=field_type, length=length,
+                                          formula=formula, module="adapters.public_api.fields_joins"))
+
+    def join_layers(self, layer: str, join_layer: str, target_field: str, join_field: str,
+                    fields: Optional[List[str]] = None, prefix: Optional[str] = None) -> JoinAdded:
+        return JoinAdded(**self._control("join_layers", layer, join_layer, target_field, join_field, fields=fields,
+                                         prefix=prefix, module="adapters.public_api.fields_joins"))
 
     def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
         return LayerTreeChange(**self._control("group_layers", layers, group=group, at_top=at_top,

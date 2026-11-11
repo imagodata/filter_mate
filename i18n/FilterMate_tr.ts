@@ -707,6 +707,16 @@ Onaylıyor musunuz?</translation>
         <source>{} renamed {}</source>
         <translation>{} adı {} olarak değiştirildi</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Field {} added to {} (not saved)</source>
+        <translation>{} alanı {} katmanına eklendi (kaydedilmedi)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} joined to {}</source>
+        <translation>{}, {} ile birleştirildi</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
