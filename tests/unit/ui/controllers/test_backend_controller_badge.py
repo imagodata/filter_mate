@@ -205,3 +205,94 @@ def test_remote_geopackage_is_remote_not_spatialite(controller):
     assert controller.get_current_backend(layer) == "ogr"
     local = FakeVectorLayer("bati", source="/data/bdtopo.gpkg|layername=batiment")
     assert controller._detect_backend_for_layer(local) == "spatialite"
+
+
+class FakeAction:
+    def __init__(self, text):
+        self._text, self._data = text, None
+
+    def text(self):
+        return self._text
+
+    def setText(self, text):
+        self._text = text
+
+    def setData(self, data):
+        self._data = data
+
+    def data(self):
+        return self._data
+
+    def setEnabled(self, enabled):
+        pass
+
+    def setToolTip(self, tip):
+        pass
+
+
+class FakeMenu:
+    """Records the actions; exec() picks the one whose data is ``FakeMenu.pick``."""
+    pick = None
+    shown = []
+
+    def __init__(self, *args):
+        self.actions = []
+        FakeMenu.shown.append(self)
+
+    def setStyleSheet(self, sheet):
+        pass
+
+    def addAction(self, text):
+        action = FakeAction(text)
+        self.actions.append(action)
+        return action
+
+    def addSeparator(self):
+        pass
+
+    def addMenu(self, text):
+        return self
+
+    def exec(self, *args):
+        return next((a for a in self.actions if FakeMenu.pick is not None and a.data() == FakeMenu.pick), None)
+
+    def data_list(self):
+        return [a.data() for a in self.actions]
+
+
+@pytest.fixture
+def menu(backend_module, monkeypatch):
+    FakeMenu.pick, FakeMenu.shown = None, []
+    monkeypatch.setattr(backend_module, "QMenu", FakeMenu)
+    monkeypatch.setattr(backend_module, "QCursor", types.SimpleNamespace(pos=lambda: None))
+    feedback = types.ModuleType(f"{_PKG}.infrastructure.feedback")
+    feedback.show_info = feedback.show_success = feedback.show_warning = MagicMock()
+    monkeypatch.setitem(sys.modules, feedback.__name__, feedback)
+    return FakeMenu
+
+
+def test_raster_click_opens_the_menu_of_every_vector_layer(controller, menu):
+    """2026-11-11: on a raster / point cloud the badge did nothing (the click stopped in the coverage controller)."""
+    controller._show_backend_menu(FakeRasterLayer())
+    assert len(menu.shown) == 1
+    data = menu.shown[0].data_list()
+    assert "__AUTO_ALL__" in data and "__CLEANUP_PROJECT__" in data and "__CLEANUP_GLOBAL__" in data
+    assert "__FORCE_ALL__" not in data  # it forces the backend of the current layer, which a raster has not
+
+
+def test_raster_auto_all_keeps_the_kind_badge(controller, menu, monkeypatch):
+    controller.dockwidget.current_layer = FakeRasterLayer()
+    monkeypatch.setattr(controller, "auto_select_optimal_backends", lambda: 2)
+    menu.pick = "__AUTO_ALL__"
+    controller._indicator_label.setText.reset_mock()
+    controller._show_backend_menu(FakeRasterLayer())
+    controller._indicator_label.setText.assert_not_called()  # "Raster · GDAL" stays
+    assert controller.forced_backends == {}
+
+
+def test_vector_click_still_offers_the_backends_of_the_layer(controller, menu, monkeypatch):
+    monkeypatch.setattr(controller, "get_available_backends_for_layer",
+                        lambda layer: [("ogr", "OGR", "📁"), ("spatialite", "Spatialite", "💾")])
+    controller._show_backend_menu(FakeVectorLayer())
+    data = menu.shown[0].data_list()
+    assert "ogr" in data and "spatialite" in data and "__FORCE_ALL__" in data and "__AUTO_ALL__" in data

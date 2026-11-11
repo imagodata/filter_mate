@@ -714,6 +714,8 @@ class BackendController(BaseController):
         current_layer = self.dockwidget.current_layer
         if not current_layer or not current_layer.isValid():
             return
+        if not isinstance(current_layer, QgsVectorLayer):
+            return  # a raster / point cloud keeps its kind badge ("Raster · GDAL")
 
         # Get the backend for current layer (may have been changed by batch operation)
         backend_type = self._detect_backend_for_layer(
@@ -731,14 +733,18 @@ class BackendController(BaseController):
         """
         Show the backend selection menu.
 
+        A raster or point cloud layer has no backend of its own: the menu keeps what applies to every
+        vector layer of the project (auto-select, temporary tables), without the choice for the layer.
+
         Args:
             layer: Current layer for backend selection
         """
         from ...infrastructure.feedback import show_info, show_success, show_warning
 
-        available = self.get_available_backends_for_layer(layer)
+        is_vector = isinstance(layer, QgsVectorLayer)
+        available = self.get_available_backends_for_layer(layer) if is_vector else []
 
-        if not available:
+        if is_vector and not available:
             show_warning("FilterMate", self._tr("No alternative backends available for this layer"))
             return
 
@@ -758,38 +764,41 @@ class BackendController(BaseController):
             }
         """)
 
-        # Header
-        header = menu.addAction(self._tr("Select Backend:"))
-        header.setEnabled(False)
-        menu.addSeparator()
+        current_backend = ''
+        if is_vector:
+            # Header
+            header = menu.addAction(self._tr("Select Backend:"))
+            header.setEnabled(False)
+            menu.addSeparator()
 
-        # Available backends
-        current_forced = self._forced_backends.get(layer.id())
-        for backend_type, backend_name, backend_icon in available:
-            action_text = f"{backend_icon} {backend_name}"
-            if current_forced == backend_type:
-                action_text += " ✓"
-            action = menu.addAction(action_text)
-            action.setData(backend_type)
+            # Available backends
+            current_forced = self._forced_backends.get(layer.id())
+            for backend_type, backend_name, backend_icon in available:
+                action_text = f"{backend_icon} {backend_name}"
+                if current_forced == backend_type:
+                    action_text += " ✓"
+                action = menu.addAction(action_text)
+                action.setData(backend_type)
 
-        menu.addSeparator()
+            menu.addSeparator()
 
-        # Auto option
-        auto_action = menu.addAction("⚙️ " + self._tr("Auto (Default)"))
-        auto_action.setData(None)
-        if not current_forced:
-            auto_action.setText(auto_action.text() + " ✓")
+            # Auto option
+            auto_action = menu.addAction("⚙️ " + self._tr("Auto (Default)"))
+            auto_action.setData(None)
+            if not current_forced:
+                auto_action.setText(auto_action.text() + " ✓")
 
-        menu.addSeparator()
+            menu.addSeparator()
 
         # Auto-select all
         auto_all_action = menu.addAction("🎯 " + self._tr("Auto-select Optimal for All Layers"))
         auto_all_action.setData('__AUTO_ALL__')
 
-        # Force all
-        current_backend = self.get_current_backend(layer)
-        force_all_action = menu.addAction("🔒 " + self._tr("Force {0} for All Layers").format(current_backend.upper()))
-        force_all_action.setData('__FORCE_ALL__')
+        if is_vector:
+            # Force all
+            current_backend = self.get_current_backend(layer)
+            force_all_action = menu.addAction("🔒 " + self._tr("Force {0} for All Layers").format(current_backend.upper()))
+            force_all_action.setData('__FORCE_ALL__')
 
         menu.addSeparator()
 
@@ -831,7 +840,7 @@ class BackendController(BaseController):
             elif data == '__CLEANUP_GLOBAL__':
                 # Lists the objects and asks before anything is dropped
                 self.run_global_cleanup_with_confirmation()
-            else:
+            elif is_vector:
                 self.set_forced_backend(layer.id(), data)
                 if data:
                     self.update_for_layer(layer, actual_backend=data)
