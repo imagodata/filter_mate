@@ -332,6 +332,16 @@ Chạy không?</translation>
         <translation>các tiện ích của bảng</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="101"/>
+        <source>map themes</source>
+        <translation>chủ đề bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="96"/>
+        <source>layer tree</source>
+        <translation>cây lớp</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>hệ tọa độ dự án</translation>
@@ -676,6 +686,26 @@ Bạn có đồng ý không?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Tiện ích: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Layers put in {}</source>
+        <translation>Đã đặt các lớp vào {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Map theme: {} {}</source>
+        <translation>Chủ đề bản đồ: {} {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>the top of the tree</source>
+        <translation>đầu cây</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} renamed {}</source>
+        <translation>{} đã đổi tên thành {}</translation>
     </message>
 </context>
 <context>

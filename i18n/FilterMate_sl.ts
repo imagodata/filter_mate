@@ -332,6 +332,16 @@ Jo zaženem?</translation>
         <translation>gradniki plošče</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="101"/>
+        <source>map themes</source>
+        <translation>teme karte</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="96"/>
+        <source>layer tree</source>
+        <translation>drevo slojev</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>KS projekta</translation>
@@ -676,6 +686,26 @@ Se strinjate?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Gradnik: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Layers put in {}</source>
+        <translation>Sloji premaknjeni v: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Map theme: {} {}</source>
+        <translation>Tema karte: {} {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>the top of the tree</source>
+        <translation>vrh drevesa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} renamed {}</source>
+        <translation>Preimenovano: {} → {}</translation>
     </message>
 </context>
 <context>

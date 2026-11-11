@@ -347,6 +347,33 @@ class LayoutExport:
 
 
 @dataclass(frozen=True)
+class LayerTreeChange:
+    """Layers put in a group of the layer tree."""
+    group: str = ""
+    groups_made: List[str] = field(default_factory=list)
+    moved: List[str] = field(default_factory=list)
+    not_found: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class LayerRename:
+    """A layer under another name."""
+    layer_id: str
+    name: str
+    previous: str = ""
+
+
+@dataclass(frozen=True)
+class MapThemes:
+    """The map themes of the project after an action on one of them."""
+    action: str
+    name: str = ""
+    themes: List[str] = field(default_factory=list)
+    replaced: bool = False
+    layers_shown: int = -1
+
+
+@dataclass(frozen=True)
 class ProjectCrs:
     """The CRS of the project after a change."""
     crs: str
@@ -535,6 +562,18 @@ class FilterMateAccessor(Protocol):
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
         """Set the CRS of the project and of the map; raises FilterRejected on an unknown CRS."""
+        ...
+
+    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
+        """Put layers in a group of the layer tree, made where missing; raises FilterRejected when none is found."""
+        ...
+
+    def rename_layer(self, layer: str, name: str) -> LayerRename:
+        """Give a layer another name; raises FilterRejected on an unknown layer or an empty name."""
+        ...
+
+    def map_theme(self, action: str, name: str = "") -> MapThemes:
+        """List, save, apply or remove a map theme; raises FilterRejected on an unknown theme."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -779,6 +818,30 @@ class InMemoryAccessor:
         import os
         path = os.path.join(folder, f"{name}.{file_format}")
         return LayoutExport(name=name, format=file_format, dpi=dpi, path=path, bytes=1)
+
+    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
+        moved = [found.name for found in (self._find(name) for name in layers) if found is not None]
+        if not moved:
+            raise FilterRejected("no layer of the project among " + ", ".join(repr(name) for name in layers))
+        return LayerTreeChange(group=group, groups_made=[group] if group else [], moved=moved,
+                               not_found=[name for name in layers if self._find(name) is None])
+
+    def rename_layer(self, layer: str, name: str) -> LayerRename:
+        found = self._find(layer)
+        if found is None or not name.strip():
+            raise FilterRejected(f"no layer {layer!r} in the project" if found is None else "give a name")
+        return LayerRename(layer_id=found.layer_id, name=name.strip(), previous=found.name)
+
+    def map_theme(self, action: str, name: str = "") -> MapThemes:
+        themes = getattr(self, "_themes", [])
+        if action == "save" and name not in themes:
+            themes = themes + [name]
+        elif action in ("apply", "remove") and name not in themes:
+            raise FilterRejected(f"no map theme {name!r}")
+        elif action == "remove":
+            themes = [theme for theme in themes if theme != name]
+        self._themes = themes
+        return MapThemes(action=action, name=name, themes=list(themes))
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
         if not crs.upper().startswith("EPSG:") and not crs.isdigit():

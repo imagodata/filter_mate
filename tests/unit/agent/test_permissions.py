@@ -36,7 +36,8 @@ class TestRiskClasses:
 
     @pytest.mark.parametrize("name, risk", [
         ("list_layers", READ), ("layer_statistics", READ), ("search_open_data", READ),  # a network read
-        ("zoom_to", VIEW), ("select_features", VIEW), ("set_layers_visibility", VIEW),
+        ("zoom_to", VIEW), ("select_features", VIEW), ("set_layers_visibility", VIEW), ("group_layers", VIEW),
+        ("map_theme", VIEW), ("rename_layer", PROJECT),
         ("apply_filter", PROJECT), ("set_layer_style", PROJECT), ("run_algorithm", PROJECT),
         ("create_layout", PROJECT), ("set_project_crs", PROJECT),
         ("update_features", BUFFER), ("add_features", BUFFER),

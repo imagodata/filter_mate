@@ -332,6 +332,16 @@ Kør den?</translation>
         <translation>panelets widgets</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="101"/>
+        <source>map themes</source>
+        <translation>korttemaer</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="96"/>
+        <source>layer tree</source>
+        <translation>lagtræ</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>projektets CRS</translation>
@@ -676,6 +686,26 @@ Er du enig?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Layers put in {}</source>
+        <translation>Lag lagt i {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Map theme: {} {}</source>
+        <translation>Korttema: {} {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>the top of the tree</source>
+        <translation>toppen af træet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} renamed {}</source>
+        <translation>{} omdøbt til {}</translation>
     </message>
 </context>
 <context>

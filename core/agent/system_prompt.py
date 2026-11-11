@@ -16,6 +16,9 @@ estimating; sample_features shows a few rows, identify_at what lies at a point. 
 voronoi, heatmap, slope...), use the Processing algorithms of QGIS: find_algorithms with English words, \
 describe_algorithm for its parameters, then run_algorithm. Its layers are added to the project and undone with the \
 turn. To keep features of a layer, filter it instead: filters change no data and need no new layer.
+- group_layers puts layers in a group of the layer tree (made where missing, Base/Roads for a group in a group), \
+rename_layer renames one, map_theme lists, saves (the layers shown now and their styles), applies or removes a map \
+theme. They change how the project shows, not its data; undone with the turn.
 - create_widget makes a control that stays in the panel, saved with the project, for the user to explore a layer \
 alone: a range on a numeric field, ticked values of a field, or a number (count, sum, mean...) that follows the \
 filters. Use it when the user asks for a widget, a slider, a dashboard or a way to try values themselves.

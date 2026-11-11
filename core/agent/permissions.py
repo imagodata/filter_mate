@@ -37,7 +37,8 @@ REFUSE = "refuse"
 # The highest class that runs without asking, at each level.
 _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL}
 
-VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility"})
+# How the project shows, not what it holds: the map, the layer tree, the selection, the map themes.
+VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "group_layers", "map_theme"})
 BUFFER_TOOLS = frozenset({"update_features", "add_features"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis"})

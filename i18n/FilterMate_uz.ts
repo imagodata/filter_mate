@@ -332,6 +332,16 @@ Ishga tushirilsinmi?</translation>
         <translation>panel vidjetlari</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="101"/>
+        <source>map themes</source>
+        <translation>xarita mavzulari</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="96"/>
+        <source>layer tree</source>
+        <translation>qatlamlar daraxti</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>loyiha CRS</translation>
@@ -676,6 +686,26 @@ Rozimisiz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Vidjet: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Layers put in {}</source>
+        <translation>Qatlamlar quyidagiga joylandi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Map theme: {} {}</source>
+        <translation>Xarita mavzusi: {} {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>the top of the tree</source>
+        <translation>daraxtning tepasi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} renamed {}</source>
+        <translation>{} nomi {} ga o'zgartirildi</translation>
     </message>
 </context>
 <context>

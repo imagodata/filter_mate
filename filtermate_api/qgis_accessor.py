@@ -34,6 +34,9 @@ from .accessor import (
     FavoritesUnavailable,
     AlgorithmDescription,
     ProjectCrs,
+    LayerTreeChange,
+    LayerRename,
+    MapThemes,
     LayoutExport,
     LayoutResult,
     EditResult,
@@ -485,6 +488,16 @@ class QGISFilterMateAccessor:
 
     def set_project_crs(self, crs: str) -> ProjectCrs:
         return ProjectCrs(**self._control("set_project_crs", crs))
+
+    def group_layers(self, layers: List[str], group: str = "", at_top: bool = True) -> LayerTreeChange:
+        return LayerTreeChange(**self._control("group_layers", layers, group=group, at_top=at_top,
+                                               module="adapters.public_api.layer_tree"))
+
+    def rename_layer(self, layer: str, name: str) -> LayerRename:
+        return LayerRename(**self._control("rename_layer", layer, name, module="adapters.public_api.layer_tree"))
+
+    def map_theme(self, action: str, name: str = "") -> MapThemes:
+        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree"))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))

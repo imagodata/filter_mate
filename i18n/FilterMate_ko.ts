@@ -332,6 +332,16 @@ Run it?</source>
         <translation>패널의 위젯</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="101"/>
+        <source>map themes</source>
+        <translation>지도 테마</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="96"/>
+        <source>layer tree</source>
+        <translation>레이어 트리</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>프로젝트 좌표계</translation>
@@ -676,6 +686,26 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>위젯: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Layers put in {}</source>
+        <translation>레이어를 {}에 배치함</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Map theme: {} {}</source>
+        <translation>지도 테마: {} {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>the top of the tree</source>
+        <translation>트리 맨 위</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
+        <source>{} renamed {}</source>
+        <translation>{} 이름을 {}(으)로 변경함</translation>
     </message>
 </context>
 <context>
