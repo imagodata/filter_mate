@@ -219,8 +219,9 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
   name, or the layer itself) gets the verdict `PROTECTED`, refused at every level, never turned into a question nor
   allowed for a conversation; in a recipe it stops the replay; the native MCP server answers it the same way. Reading
   one, using it as the source of a cross filter or the table of a join, zooming, selecting or showing it stays
-  allowed. Their names go with each request. Not covered: `run_pyqgis` (code, asked at every run) and
-  `apply_favorite` (the layer is in the favorite, not in the call).
+  allowed. Their names go with each request. A favorite is checked on the layers applying it would change (its
+  layer, its remote layers, its clips: `operations.favorite_layers`, found as `apply_favorite` finds them). Not
+  covered: `run_pyqgis` (code, asked at every run).
 - The question of a change the level shows first (a filter at `careful`) says what the tool does and its arguments; a
   tool added later without a text of its own gets the same, instead of the text of an export.
 
