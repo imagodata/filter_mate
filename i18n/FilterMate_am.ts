@@ -254,6 +254,11 @@
         <translation>ካርታውን በአንድ ነጥብ ላይ በማንበብ ላይ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>ካርታውን በመመልከት ላይ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>የፕሮጀክት CRS፦ {}</translation>

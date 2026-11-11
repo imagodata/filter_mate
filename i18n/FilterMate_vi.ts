@@ -254,6 +254,11 @@
         <translation>Đang đọc bản đồ tại một điểm</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Đang xem bản đồ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>Hệ tọa độ dự án: {}</translation>

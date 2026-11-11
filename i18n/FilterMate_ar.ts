@@ -254,6 +254,11 @@
         <translation>قراءة الخريطة عند نقطة</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>النظر إلى الخريطة</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>نظام إحداثيات المشروع: {}</translation>

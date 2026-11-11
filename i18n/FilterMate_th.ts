@@ -254,6 +254,11 @@
         <translation>กำลังอ่านแผนที่ที่จุดหนึ่ง</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>กำลังดูแผนที่</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>CRS ของโครงการ: {}</translation>

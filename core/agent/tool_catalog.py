@@ -61,6 +61,7 @@ def load_catalog(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
 UNDO_AGENT_STEP = "undo_agent_step"
 ADD_NOTE = "add_project_note"
 REMOVE_NOTE = "remove_project_note"
+VIEW_MAP = "view_map"
 RUN_PYTHON = "run_pyqgis"
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
@@ -106,6 +107,23 @@ CHAT_ONLY = (
             "code": {"type": "string", "minLength": 1, "maxLength": 20000, "description": "Python code"}},
             "required": ["purpose", "code"], "additionalProperties": False},
         destructive=True, chat_only=True),
+    ToolSpec(
+        name=VIEW_MAP, title="Look at the map",
+        description=("See the map as an image: the view of the user by default, or an extent, or the whole of a "
+                     "layer. Use it to check what a filter, a style or an analysis looks like, to describe the map, or "
+                     "to find what the data does not say (the look of an area). It reads, it changes nothing. Returns "
+                     "the image and its width, height, extent_wkt, crs and scale. The image is only sent with this "
+                     "request: call it again later to look again."),
+        input_schema={"type": "object", "properties": {
+            "extent_wkt": {"type": "string", "minLength": 1, "maxLength": 10000,
+                           "description": "Area to show, as WKT (map_context gives the view as extent_wkt)"},
+            "crs": {"type": "string", "maxLength": 200, "description": "CRS of extent_wkt; the CRS of the map by default"},
+            "layer": {"type": "string", "minLength": 1, "maxLength": 1000,
+                      "description": "Show the whole of this layer instead"},
+            "width": {"type": "integer", "minimum": 256, "maximum": 1568, "default": 1024,
+                      "description": "Width of the image in pixels"}},
+            "additionalProperties": False},
+        read_only=True, chat_only=True),
 )
 
 
