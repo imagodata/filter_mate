@@ -327,6 +327,11 @@ Executar?</translation>
         <translation>notas do projeto</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="53"/>
+        <source>widgets of the panel</source>
+        <translation>widgets do painel</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>SRC do projeto</translation>
@@ -656,6 +661,21 @@ Do you agree?</source>
 {}
 
 Você concorda?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="506"/>
+        <source>Its layer is no longer in the project.</source>
+        <translation>A camada dele não está mais no projeto.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Widget {} removed</source>
+        <translation>Widget {} removido</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Widget: {}</source>
+        <translation>Widget: {}</translation>
     </message>
 </context>
 <context>
@@ -1200,6 +1220,79 @@ Você concorda?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Sim, para esta conversa</translation>
+    </message>
+</context>
+<context>
+    <name>AgentWidgets</name>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
+        <source>(empty)</source>
+        <translation>(vazio)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>All</source>
+        <translation>Todos</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Count</source>
+        <translation>Contagem</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="34"/>
+        <source>Maximum</source>
+        <translation>Máximo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Mean</source>
+        <translation>Média</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Minimum</source>
+        <translation>Mínimo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>None</source>
+        <translation>Nenhum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="80"/>
+        <source>Remove this widget; the filter it set stays until you change it</source>
+        <translation>Remover este widget; o filtro que ele definiu permanece até você alterá-lo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Sum</source>
+        <translation>Soma</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="134"/>
+        <source>The filter of this widget was refused by the layer.</source>
+        <translation>O filtro deste widget foi recusado pela camada.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="124"/>
+        <source>The layer is being edited: save or discard its edits to filter it.</source>
+        <translation>A camada está em edição: salve ou descarte as edições para filtrá-la.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="117"/>
+        <source>The layer of this widget is no longer in the project.</source>
+        <translation>A camada deste widget não está mais no projeto.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="124"/>
+        <source>from</source>
+        <translation>de</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="126"/>
+        <source>to</source>
+        <translation>até</translation>
     </message>
 </context>
 <context>

@@ -327,6 +327,11 @@ Ausführen?</translation>
         <translation>Projektnotizen</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="53"/>
+        <source>widgets of the panel</source>
+        <translation>Widgets des Panels</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>Projekt-KBS</translation>
@@ -656,6 +661,21 @@ Do you agree?</source>
 {}
 
 Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="506"/>
+        <source>Its layer is no longer in the project.</source>
+        <translation>Die zugehörige Ebene ist nicht mehr im Projekt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Widget {} removed</source>
+        <translation>Widget {} entfernt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Widget: {}</source>
+        <translation>Widget: {}</translation>
     </message>
 </context>
 <context>
@@ -1200,6 +1220,79 @@ Sind Sie einverstanden?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ja, für diese Unterhaltung</translation>
+    </message>
+</context>
+<context>
+    <name>AgentWidgets</name>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
+        <source>(empty)</source>
+        <translation>(leer)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Count</source>
+        <translation>Anzahl</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="34"/>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Mean</source>
+        <translation>Mittelwert</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>None</source>
+        <translation>Keine</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="80"/>
+        <source>Remove this widget; the filter it set stays until you change it</source>
+        <translation>Dieses Widget entfernen; der von ihm gesetzte Filter bleibt bestehen, bis Sie ihn ändern</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Sum</source>
+        <translation>Summe</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="134"/>
+        <source>The filter of this widget was refused by the layer.</source>
+        <translation>Der Filter dieses Widgets wurde von der Ebene abgelehnt.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="124"/>
+        <source>The layer is being edited: save or discard its edits to filter it.</source>
+        <translation>Die Ebene wird bearbeitet: Speichern oder verwerfen Sie ihre Änderungen, um sie zu filtern.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="117"/>
+        <source>The layer of this widget is no longer in the project.</source>
+        <translation>Die Ebene dieses Widgets ist nicht mehr im Projekt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="124"/>
+        <source>from</source>
+        <translation>von</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="126"/>
+        <source>to</source>
+        <translation>bis</translation>
     </message>
 </context>
 <context>

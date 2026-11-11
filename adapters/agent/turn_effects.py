@@ -9,6 +9,7 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
 * ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
+* ``("widgets", "", before, after)``: the widgets of the panel kept in the project (``core/agent/widgets.py``);
 * ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
   after the commands of the turn (``adapters/public_api/feature_edits.py``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
@@ -32,6 +33,7 @@ Place = Tuple[Tuple[str, ...], int]
 # The tools that change how a layer is drawn: its style is kept before their first call in a turn.
 STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
+WIDGET_TOOLS = ("create_widget", "remove_widget")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features")
 LAYOUT_TOOLS = ("create_layout",)
 CRS_TOOLS = ("set_project_crs",)
@@ -44,6 +46,11 @@ def _crs_label() -> str:
 
 def _layout_names(project: QgsProject) -> Set[str]:
     return {layout.name() for layout in project.layoutManager().printLayouts()}
+
+
+def _widgets_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "widgets of the panel")
 
 
 def _notes_label() -> str:
@@ -170,6 +177,7 @@ class EffectsRecorder:
         self._visibility: Dict[str, bool] = {}
         self._styles: Dict[str, str] = {}
         self._notes: Optional[Tuple[str, ...]] = None
+        self._widgets: Optional[str] = None
         self._edits: Dict[str, int] = {}
         self._layouts: Optional[Set[str]] = None
         self._crs: Optional[str] = None
@@ -203,6 +211,11 @@ class EffectsRecorder:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
                     self._edits[layer.id()] = _edit_index(layer)
+            elif name in WIDGET_TOOLS:
+                if self._widgets is None:
+                    from .agent_widgets import read_widgets
+                    from ...core.agent.widgets import dumps
+                    self._widgets = dumps(read_widgets(project))
             elif name in NOTE_TOOLS:
                 if self._notes is None:
                     from .project_notes_store import read_notes
@@ -262,6 +275,12 @@ class EffectsRecorder:
             after = _edit_index(layer) if layer is not None else before
             if after != before:
                 effects.append(("edits", layer_id, before, after, layer.name()))
+        if self._widgets is not None:
+            from .agent_widgets import read_widgets
+            from ...core.agent.widgets import dumps
+            after_widgets = dumps(read_widgets(project))
+            if after_widgets != self._widgets:
+                effects.append(("widgets", "", self._widgets, after_widgets))
         if self._notes is not None:
             from .project_notes_store import read_notes
             after_notes = tuple(read_notes(project))
@@ -338,6 +357,11 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                     done.append(layer.name())
                 else:
                     left.append(effect[4] if len(effect) > 4 else layer_id)
+            elif kind == "widgets":
+                from .agent_widgets import write_widgets
+                from ...core.agent.widgets import parse
+                write_widgets(parse(effect[2] if undo else effect[3]), project)
+                done.append(_widgets_label())
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)

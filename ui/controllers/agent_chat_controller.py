@@ -37,7 +37,11 @@ from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, RUN_PYTHON, UNDO_AGENT_STEP, VIEW_MAP, chat_tools
+from ...core.agent.tool_catalog import (
+    ADD_NOTE, CREATE_WIDGET, REMOVE_NOTE, REMOVE_WIDGET, RUN_PYTHON, UNDO_AGENT_STEP, VIEW_MAP, chat_tools,
+)
+from ...core.agent.widgets import STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
 from ...filtermate_api.agent_tools import build_handlers
@@ -50,6 +54,7 @@ from ..widgets.agent_panel import (
     ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
     ask_with_conversation, level_short, preset_label,
 )
+from ..widgets.agent_widgets_strip import number_text
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -130,6 +135,13 @@ class AgentChatController(QObject):
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.settings_requested.connect(self.open_settings)
         self.panel.new_conversation_requested.connect(self.new_conversation)
+        self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
+        self._stat_timer = QTimer(self)
+        self._stat_timer.setSingleShot(True)
+        self._stat_timer.setInterval(300)
+        self._stat_timer.timeout.connect(self._refresh_stats)
+        self.panel.widgets_strip.changed.connect(self._on_widget_changed)
+        self.panel.widgets_strip.remove_requested.connect(self._on_widget_removed)
         self._restore_transcript()
         self._refresh_history()
         QgsProject.instance().cleared.connect(self._on_project_cleared)
@@ -173,6 +185,9 @@ class AgentChatController(QObject):
         """The plugin unloads: nothing may arrive afterwards."""
         self.stop()
         self._mcp.close()
+        for layer in self._stat_layers.values():
+            self._follow(layer, False)
+        self._stat_layers = {}
         for signal, handler in ((QgsProject.instance().cleared, self._on_project_cleared),
                                 (QgsProject.instance().readProject, self._on_project_read),
                                 (QgsProject.instance().fileNameChanged, self._on_file_name_changed)):
@@ -226,6 +241,7 @@ class AgentChatController(QObject):
         self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
 
     def _refresh_history(self) -> None:
+        self._refresh_widgets()  # an undo or a redo may have brought widgets back or taken them away
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
         request = getattr(self._parent_widget, "undoRedoStateRequested", None)
@@ -396,6 +412,8 @@ class AgentChatController(QObject):
         handlers[VIEW_MAP] = self._view_map_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
+        handlers[CREATE_WIDGET] = self._create_widget_tool
+        handlers[REMOVE_WIDGET] = self._remove_widget_tool
         return tools, handlers, active
 
     @staticmethod
@@ -450,6 +468,87 @@ class AgentChatController(QObject):
             raise ToolFailure(str(exc)) from None
         write_notes(notes)
         return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
+
+    def _create_widget_tool(self, arguments) -> dict:
+        """create_widget: a control in the panel, read from the layer, kept in the project."""
+        try:
+            widget = agent_widgets.create(arguments.get("kind", ""), arguments.get("layer", ""),
+                                          field=arguments.get("field") or "", title=arguments.get("title") or "",
+                                          aggregate=arguments.get("aggregate") or "")
+        except WidgetError as exc:
+            raise ToolFailure(str(exc)) from None
+        self._refresh_widgets()
+        return {"widget": widget_summary([widget])[0], "widgets": widget_summary(agent_widgets.read_widgets())}
+
+    def _remove_widget_tool(self, arguments) -> dict:
+        try:
+            widgets = without(agent_widgets.read_widgets(), str(arguments.get("widget_id", "")))
+        except WidgetError as exc:
+            raise ToolFailure(str(exc)) from None
+        agent_widgets.write_widgets(widgets)
+        self._refresh_widgets()
+        return {"widgets": widget_summary(widgets)}
+
+    # --- widgets ----------------------------------------------------------------
+
+    def _refresh_widgets(self) -> None:
+        """Draw the widgets of the project, and follow the layers their numbers are computed on."""
+        try:
+            widgets = agent_widgets.read_widgets()
+        except Exception:  # the panel works without them
+            logger.debug("Agent widgets not read", exc_info=True)
+            widgets = []
+        self.panel.widgets_strip.set_widgets(widgets)
+        wanted = {}
+        for widget in widgets:
+            layer = agent_widgets.widget_layer(widget)
+            if layer is None:
+                self.panel.widgets_strip.set_error(widget["id"], _tr("Its layer is no longer in the project."))
+            elif widget["kind"] == STAT:
+                wanted[layer.id()] = layer
+        for layer_id in set(self._stat_layers) - set(wanted):
+            self._follow(self._stat_layers.pop(layer_id), False)
+        for layer_id, layer in wanted.items():
+            if layer_id not in self._stat_layers:
+                self._stat_layers[layer_id] = layer
+                self._follow(layer, True)
+        self._refresh_stats()
+
+    def _follow(self, layer, on: bool) -> None:
+        for signal in ("subsetStringChanged", "featureAdded", "featuresDeleted", "attributeValueChanged",
+                       "afterRollBack", "afterCommitChanges"):
+            emitter = getattr(layer, signal, None)
+            if emitter is None:
+                continue
+            try:
+                (emitter.connect if on else emitter.disconnect)(self._stat_timer.start)
+            except (RuntimeError, TypeError):  # a layer deleted meanwhile, or never connected
+                pass
+
+    def _refresh_stats(self) -> None:
+        try:
+            widgets = agent_widgets.read_widgets()
+        except Exception:
+            return
+        for widget in widgets:
+            if widget["kind"] == STAT:
+                value = agent_widgets.stat_value(widget)
+                self.panel.widgets_strip.set_value(widget["id"], number_text(value))
+
+    def _on_widget_changed(self, widget) -> None:
+        """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""
+        widgets = widget_replaced(agent_widgets.read_widgets(), widget)
+        agent_widgets.write_widgets(widgets)
+        problem = agent_widgets.apply_layer(widgets, widget["layer_id"], self._plugin.get_public_api())
+        self.panel.widgets_strip.set_error(widget["id"], problem)
+        self._stat_timer.start()
+
+    def _on_widget_removed(self, widget_id: str) -> None:
+        try:
+            agent_widgets.write_widgets(without(agent_widgets.read_widgets(), widget_id))
+        except WidgetError:
+            pass
+        self._refresh_widgets()
 
     def _undo_tool(self, _arguments) -> dict:
         """undo_agent_step: the last request of the agent taken back, as the Undo of the panel does it."""
@@ -637,7 +736,13 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             logger.debug("Agent: project notes not read", exc_info=True)
             notes = ""
-        return "\n\n".join(part for part in (summary, notes, level_note(self._policy.level)) if part)
+        try:
+            widgets = widget_summary(agent_widgets.read_widgets())
+        except Exception:  # the request goes without them
+            widgets = []
+        listed = ("Widgets of the panel (data, made with create_widget): " + json.dumps(widgets, ensure_ascii=False)
+                  if widgets else "")
+        return "\n\n".join(part for part in (summary, notes, listed, level_note(self._policy.level)) if part)
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
@@ -720,6 +825,9 @@ class AgentChatController(QObject):
             RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
+            CREATE_WIDGET: lambda: _tr("Widget: {}").format(args.get("title") or args.get("field") or layer
+                                                            or args.get("layer", "")),
+            REMOVE_WIDGET: lambda: _tr("Widget {} removed").format(args.get("widget_id", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
             "map_context": lambda: _tr("Reading the map"),
             "filter_state": lambda: _tr("Reading the active filters"),

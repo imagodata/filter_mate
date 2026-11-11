@@ -63,6 +63,8 @@ ADD_NOTE = "add_project_note"
 REMOVE_NOTE = "remove_project_note"
 VIEW_MAP = "view_map"
 RUN_PYTHON = "run_pyqgis"
+CREATE_WIDGET = "create_widget"
+REMOVE_WIDGET = "remove_widget"
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
@@ -124,6 +126,35 @@ CHAT_ONLY = (
                       "description": "Width of the image in pixels"}},
             "additionalProperties": False},
         read_only=True, chat_only=True),
+    ToolSpec(
+        name=CREATE_WIDGET, title="Make a widget for the user",
+        description=("Make a small control that stays in the AGENT panel, saved with the project, for the user to "
+                     "explore a vector layer without asking you again: range (two bounds on a numeric field: moving "
+                     "them filters the layer), values (the values of a field, each ticked or not: at most 50, "
+                     "unticking filters the layer) or stat (a number on the layer as filtered now: count, or sum, "
+                     "mean, min, max of a numeric field, kept up to date). FilterMate builds the filter of a widget "
+                     "itself; the widgets of one layer narrow it together, after the filter it had when its first "
+                     "widget was made. Use it when the user asks for a widget, a slider, a control, a dashboard or "
+                     "a way to play with the data; several calls make several widgets. Undone with the turn. Returns "
+                     "widget (what was made) and widgets (all of them, without their values)."),
+        input_schema={"type": "object", "properties": {
+            "kind": {"type": "string", "enum": ["range", "values", "stat"]},
+            "layer": {"type": "string", "minLength": 1, "maxLength": 1000, "description": "Vector layer, name or id"},
+            "field": {"type": "string", "maxLength": 200,
+                      "description": "Field: numeric for range and for a stat other than count"},
+            "aggregate": {"type": "string", "enum": ["count", "sum", "mean", "min", "max"], "default": "count",
+                          "description": "For stat only"},
+            "title": {"type": "string", "maxLength": 60, "description": "Short title in the words of the user"}},
+            "required": ["kind", "layer"], "additionalProperties": False},
+        chat_only=True),
+    ToolSpec(
+        name=REMOVE_WIDGET, title="Remove a widget",
+        description=("Remove a widget of the AGENT panel by its widget_id (listed with each request). "
+                     "The filter it set stays on its layer until the user or you change it. Returns widgets."),
+        input_schema={"type": "object", "properties": {
+            "widget_id": {"type": "string", "minLength": 1, "maxLength": 20}},
+            "required": ["widget_id"], "additionalProperties": False},
+        chat_only=True),
 )
 
 

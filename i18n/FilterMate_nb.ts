@@ -327,6 +327,11 @@ Kjøre den?</translation>
         <translation>prosjektnotater</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="53"/>
+        <source>widgets of the panel</source>
+        <translation>panelets widgeter</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>prosjektets CRS</translation>
@@ -656,6 +661,21 @@ Do you agree?</source>
 {}
 
 Er du enig?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="506"/>
+        <source>Its layer is no longer in the project.</source>
+        <translation>Laget finnes ikke lenger i prosjektet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Widget {} removed</source>
+        <translation>Widget {} fjernet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Widget: {}</source>
+        <translation>Widget: {}</translation>
     </message>
 </context>
 <context>
@@ -1200,6 +1220,79 @@ Er du enig?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ja, for denne samtalen</translation>
+    </message>
+</context>
+<context>
+    <name>AgentWidgets</name>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
+        <source>(empty)</source>
+        <translation>(tom)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Count</source>
+        <translation>Antall</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="34"/>
+        <source>Maximum</source>
+        <translation>Maksimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Mean</source>
+        <translation>Gjennomsnitt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>None</source>
+        <translation>Ingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="80"/>
+        <source>Remove this widget; the filter it set stays until you change it</source>
+        <translation>Fjern denne widgeten; filteret den har satt, blir stående til du endrer det</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Sum</source>
+        <translation>Sum</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="134"/>
+        <source>The filter of this widget was refused by the layer.</source>
+        <translation>Filteret til denne widgeten ble avvist av laget.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="124"/>
+        <source>The layer is being edited: save or discard its edits to filter it.</source>
+        <translation>Laget redigeres: lagre eller forkast redigeringene for å filtrere det.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="117"/>
+        <source>The layer of this widget is no longer in the project.</source>
+        <translation>Laget til denne widgeten finnes ikke lenger i prosjektet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="124"/>
+        <source>from</source>
+        <translation>fra</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="126"/>
+        <source>to</source>
+        <translation>til</translation>
     </message>
 </context>
 <context>

@@ -327,6 +327,11 @@ Jo zaženem?</translation>
         <translation>opombe projekta</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="53"/>
+        <source>widgets of the panel</source>
+        <translation>gradniki plošče</translation>
+    </message>
+    <message>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>KS projekta</translation>
@@ -656,6 +661,21 @@ Do you agree?</source>
 {}
 
 Se strinjate?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="506"/>
+        <source>Its layer is no longer in the project.</source>
+        <translation>Njegov sloj ni več v projektu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="830"/>
+        <source>Widget {} removed</source>
+        <translation>Gradnik {} odstranjen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
+        <source>Widget: {}</source>
+        <translation>Gradnik: {}</translation>
     </message>
 </context>
 <context>
@@ -1200,6 +1220,79 @@ Se strinjate?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Da, za ta pogovor</translation>
+    </message>
+</context>
+<context>
+    <name>AgentWidgets</name>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="39"/>
+        <source>(empty)</source>
+        <translation>(prazno)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>All</source>
+        <translation>Vse</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Count</source>
+        <translation>Število</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="34"/>
+        <source>Maximum</source>
+        <translation>Maksimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Mean</source>
+        <translation>Povprečje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="146"/>
+        <source>None</source>
+        <translation>Nobeno</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="80"/>
+        <source>Remove this widget; the filter it set stays until you change it</source>
+        <translation>Odstrani ta gradnik; filter, ki ga je nastavil, ostane, dokler ga ne spremenite</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="33"/>
+        <source>Sum</source>
+        <translation>Vsota</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="134"/>
+        <source>The filter of this widget was refused by the layer.</source>
+        <translation>Sloj je zavrnil filter tega gradnika.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="124"/>
+        <source>The layer is being edited: save or discard its edits to filter it.</source>
+        <translation>Sloj se ureja: shranite ali zavrzite spremembe, da ga filtrirate.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/agent/agent_widgets.py" line="117"/>
+        <source>The layer of this widget is no longer in the project.</source>
+        <translation>Sloj tega gradnika ni več v projektu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="124"/>
+        <source>from</source>
+        <translation>od</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="126"/>
+        <source>to</source>
+        <translation>do</translation>
     </message>
 </context>
 <context>

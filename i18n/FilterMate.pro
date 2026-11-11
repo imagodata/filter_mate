@@ -65,11 +65,13 @@ SOURCES = \
     ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
     ../ui/controllers/agent_chat_controller.py \
     ../adapters/agent/turn_effects.py \
+    ../adapters/agent/agent_widgets.py \
     ../ui/controllers/property_controller.py \
     ../ui/layout/dock_chrome.py \
     ../ui/styles/mockup_design.py \
     ../ui/widgets/agent_panel.py \
     ../ui/widgets/agent_thread.py \
+    ../ui/widgets/agent_widgets_strip.py \
     ../ui/widgets/selection_strip.py \
     ../ui/controllers/backend_controller.py \
     ../ui/controllers/config_controller.py \

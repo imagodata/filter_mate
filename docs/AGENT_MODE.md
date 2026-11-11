@@ -28,6 +28,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 14. Expert mode | Python code in QGIS, off by default, read and confirmed at each run, not undone | done |
 | 15. Vision | The map as an image for the model of the chat, with a key of the user and shared values only | done |
 | 16. Levels of autonomy | Each tool in a risk class; the user chooses how far the chat goes alone; "yes for this conversation" | done |
+| 17. Widgets | Controls the agent makes for the user (range, ticked values, a number), kept in the project, undone with the turn | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -186,6 +187,32 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - The MCP servers keep the `standard` rules (`ToolExecutor.needs_confirmation`): the level is the chat's.
 - The question of a change the level shows first (a filter at `careful`) says what the tool does and its arguments; a
   tool added later without a text of its own gets the same, instead of the text of an export.
+
+## Widgets
+
+`create_widget` and `remove_widget`, tools of the chat alone. A widget is a description, never code
+(`core/agent/widgets.py`, plain Python), drawn by `ui/widgets/agent_widgets_strip.py` under the conversation:
+
+| Kind | Made from | What the user does |
+|---|---|---|
+| `range` | minimum and maximum of a numeric field among the features shown | two bounds; moving them filters the layer |
+| `values` | the values of a field among the features shown (50 at most, NULL included) | tick or untick; All / None |
+| `stat` | count, or sum, mean, min, max of a numeric field | reads a number that follows the filters and edits |
+
+- The model chooses the kind, the layer, the field, the aggregate and the title, nothing else: FilterMate builds the
+  filter of a widget from the field and values it holds, quoted by `QgsExpression`, and applies it through the public
+  API of the plugin (`apply_filter`, source `FilterMate widget`), or `setSubsetString` when two layers share a name.
+- The widgets of a layer narrow it together: its filter is the filter it had when its first widget was made (`base`),
+  AND the condition of each widget. A bound left at its end, or every value ticked, adds nothing. One filtering
+  widget per field of a layer; 12 widgets at most.
+- What the user does with a widget is the user's own action: it is applied at once, whatever the level of autonomy,
+  and is not a step of the agent's history. Making or removing a widget is (class *project*), undone with the turn
+  (`("widgets", "", before, after)` in `adapters/agent/turn_effects.py`).
+- Kept in the project file (`FilterMateAgent/widgets`), with the state of each one, so they come back with it. A
+  widget whose layer went away says so. Removing a widget leaves the filter it set on its layer.
+- The widgets go with each request, after the project summary, as data: kind, layer, title, field, bounds or the
+  number of ticked values, never the values themselves.
+- The MCP servers do not offer these tools: the widgets live in the panel of the dock.
 
 ## History
 
