@@ -14,6 +14,7 @@ answers through the real parser, session and tools, which checks the bench itsel
     python scripts/agent_eval.py --live --provider ollama --model qwen3 --case attr_dept
 """
 import argparse
+import copy
 import http.client
 import json
 import os
@@ -87,7 +88,8 @@ class SimulatedProject:
     """
 
     def __init__(self, setup: Optional[Dict[str, Any]] = None) -> None:
-        self.layers: Dict[str, Dict[str, Any]] = dict(LAYERS)  # a layer the model adds joins them
+        # A copy of its own: a layer the model adds joins them, a field it adds changes a layer of this case only.
+        self.layers: Dict[str, Dict[str, Any]] = copy.deepcopy(LAYERS)
         self.by_ref = {}
         for name, layer in self.layers.items():
             self.by_ref[name] = name
@@ -97,6 +99,17 @@ class SimulatedProject:
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
+
+    def _add_field(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """A field added to the simulated layer, so that the reads after it see it (filled when a formula is given)."""
+        name, layer = self._layer(args["layer"])
+        fields = layer.setdefault("fields", {})
+        if args["name"] in fields:
+            raise ToolFailure(f"'{name}' already has a field {args['name']!r}")
+        numeric = args.get("type", "text") in ("integer", "integer64", "decimal")
+        fields[args["name"]] = ([0.5, 21.0] if numeric else ["calculé"]) if args.get("formula") else []
+        return {"layer_name": name, "field": args["name"], "type": args.get("type", "text"),
+                "computed": layer.get("count", 0) if args.get("formula") else 0, "editing": True, "unsaved": True}
 
     def _layer(self, reference: str):
         name = self.by_ref.get(reference)
@@ -429,9 +442,7 @@ class SimulatedProject:
                                              "added": 0, "editing": True, "unsaved": True, "note": "not saved"},
             "add_features": lambda args: {"layer_name": self._layer(args["layer"])[0], "changed": 0, "deleted": 0,
                                           "added": len(args["features"]), "editing": True, "unsaved": True},
-            "add_field": lambda args: {"layer_name": self._layer(args["layer"])[0], "field": args["name"],
-                                       "type": args.get("type", "text"), "computed": 586 if args.get("formula") else 0,
-                                       "editing": True, "unsaved": True},
+            "add_field": self._add_field,
             "join_layers": lambda args: {"layer_name": self._layer(args["layer"])[0],
                                          "join_layer": self._layer(args["join_layer"])[0],
                                          "fields_added": [f"{self._layer(args['join_layer'])[0]}_{name}" for name in
@@ -600,6 +611,9 @@ def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):
         reason = f"stopped: {exchange.decision.reason}"
     return {"id": case["id"], "passed": not reason, "reason": reason, "tools": [call.name for call in exchange.calls],
+            # The arguments too, to read a failure of a live run without running it again (they are the bench's own
+            # simulated project: no data of a user).
+            "calls": [{"tool": call.name, "arguments": call.arguments} for call in exchange.calls],
             "input_tokens": session.usage.input_tokens, "output_tokens": session.usage.output_tokens,
             "cache_read_tokens": session.usage.cache_read_tokens,
             "cache_write_tokens": session.usage.cache_write_tokens}

@@ -477,9 +477,10 @@ untrusted data is best run with a database role that cannot write.
     FILTERMATE_AGENT_API_KEY=... python scripts/agent_eval.py --live \
         --provider anthropic --model claude-haiku-5-5                    # real model, costs money
 
-63 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
+69 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
 read-only requests, and one attribute value holding a prompt injection. A case is scored on the filters finally applied.
-It is what decides the model of the free quota, and whether a local model is good enough to offer.
+It is what decides the model of the free quota, and whether a local model is good enough to offer. `--json` writes, for each case, the tools called and their
+arguments (on the simulated project, no data of a user), to read a failure without running it again.
 
 The simulated project keeps what each change did, as QGIS does: `filter_state` and `list_layers` show the filters
 applied, `map_context` the selections. A case states what its request takes for granted in `setup`, such as a layer
@@ -490,6 +491,7 @@ already filtered or a road selected. Without that, a model that checks its work 
 | Claude Haiku 5.5, direct | 39/39, about 0.09 $ estimated from the token counts |
 | Claude Haiku 5.5, through the free quota relay, 3 cases with tools | 3/3 |
 | Claude Haiku 5.5, direct, 63 cases, 41 tools (2026-11-11) | 58/63; the 5 failures read one by one: 4 came from the bench (a simulated cross filter that dropped the filter it was combined with, a layout and a zoom counted as changes of layers, an edit by selection not accepted), 1 from the model (a favorite applied a second time by hand, a line of the prompt since); those 5 cases again: 5/5 |
+| Claude Haiku 5.5, direct, 68 cases, 47 tools (2026-11-11, main 9c065293) | 66/68, about 0.33 $ (1.9 M tokens written to the cache, 6.3 M read, 55 k out); the 2 failures came from the bench: `field_computed` (the simulated layer did not get the field `add_field` added, so the model saw it empty and filled it again with `update_features`; its first call was right, with a formula guarded against 0 floors) and `theme_save` ("keep the view as Relief": a bookmark is as right as a map theme since bookmarks exist; both accepted now, and `theme_named` asks for a map theme by name); those cases again: 3/3 |
 
 The first live run gave 31/39 on a project that kept no state: every failure came from the bench.
 
