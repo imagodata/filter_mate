@@ -212,6 +212,14 @@ fixed the outlines the judge above could not see. On the ten others the rule pas
 (40 to 80 and 400 to 2000 m²) was set before running it: precision 0.50 to 0.21 for a recall of 0.13 to 0.25. Over
 the 20 first searches it added 90 proposals, 78 of them not buildings. The search keeps the mask SAM scores best.
 
+**Sorting the proposals by the LiDAR, not adopted** (2026-11-11, `scripts/sam_similar_lidar.py` and
+`scripts/sam_similar_lidar_analysis.py`, explored on the first ten buildings only). Where a point cloud covers the
+orthophoto, a proposal could have been kept when the footprint of the LiDAR class under the clicked object covers
+it. On the test project every clicked roof lies on class 6, and so do the proposals: a median share of 0.96 of the
+right ones on class 6, 0.99 of the wrong ones, a precision of 0.47 to 0.49 at best. As for the judge that looks,
+the proposals are wrong by their outline, not by their kind. Where a point cloud covers the area, its own similar
+objects (CLASSES) do better on buildings: see the guide.
+
 **Tried and not adopted.** A score and colour filter (precision 0.24 to 0.31 on the ten others, short of the
 0.10 required, `scripts/sam_similar_analysis.py`), and a second, framed pass of SAM after the click (median
 overlap 0.711 to 0.713 on 20 buildings, short of the 0.02 required).
