@@ -25,6 +25,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
 | 12. Layouts | A print layout of the map added to the project, exported as PDF or PNG (confirmed) | done |
 | 13. Project CRS | The CRS of the project and of the map, undone with the turn | done |
+| 14. Expert mode | Python code in QGIS, off by default, read and confirmed at each run, not undone | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -116,6 +117,13 @@ Rules worth keeping:
 - **Project CRS**: `set_project_crs` takes an authid, an EPSG code alone or a layer of the project, and sets the
   CRS of the project, which the map follows (layers in other CRS are reprojected on the fly, no data changes).
   The turn keeps the CRS before (its authid, or its WKT for a CRS of its own) and undoing the turn sets it back.
+- **Expert mode** (`adapters/agent/expert_python.py`): `run_pyqgis`, a tool of the chat alone, is offered only when
+  the user ticks *Expert: let the agent run Python code in QGIS* in the settings (off by default). Each run opens
+  a dialog with its purpose and the whole code, No by default; the code is written to the log, then run on the
+  main thread with `iface` and `project` defined, and the answer gives what it printed, `result`, or its
+  traceback. It runs with the rights of the user and is not undone with the turn; the MCP servers never offer it.
+  The one `exec` of the plugin is marked `nosec B102` for Bandit, with that reason. The evaluation bench leaves the
+  tool out, as the default settings do.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

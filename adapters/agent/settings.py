@@ -75,6 +75,8 @@ class AgentSettings:
     mcp_enabled: bool = False
     mcp_port: int = DEFAULT_PORT
     mcp_token: str = field(default="", repr=False)
+    # Expert mode: the agent may run Python code in QGIS, shown in full and confirmed at each run. Off by default.
+    expert_python: bool = False
 
     @property
     def needs_key(self) -> bool:
@@ -133,7 +135,8 @@ def load_settings() -> AgentSettings:
         key_target=str(settings.value(_PREFIX + "key_target", "") or ""),
         mcp_enabled=settings.value(_PREFIX + "mcp_enabled", False, type=bool),
         mcp_port=_port(settings.value(_PREFIX + "mcp_port", DEFAULT_PORT)),
-        mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""))
+        mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""),
+        expert_python=settings.value(_PREFIX + "expert_python", False, type=bool))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -143,6 +146,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "base_url", values.base_url)
     settings.setValue(_PREFIX + "consent", values.consent)
     settings.setValue(_PREFIX + "send_values", values.send_values)
+    settings.setValue(_PREFIX + "expert_python", values.expert_python)
     settings.setValue(_PREFIX + "enabled_sources", json.dumps(list(values.enabled_sources)))
     settings.setValue(_PREFIX + "custom_sources", values.custom_sources)
     settings.setValue(_PREFIX + "authcfg", values.authcfg)

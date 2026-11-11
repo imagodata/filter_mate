@@ -259,6 +259,24 @@
         <translation>SRC al proiectului: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Cod Python (expert, nu se anulează)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agentul vrea să ruleze acest cod Python în QGIS cu drepturile dumneavoastră: poate citi și modifica tot ce pot QGIS și contul dumneavoastră, iar anularea rundei nu îl desface.
+
+Pentru ce: {}
+
+Îl rulăm?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Căutarea unui algoritm de procesare</translation>
@@ -679,6 +697,16 @@ Sunteți de acord?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Permite trimiterea valorilor atributelor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Expert: permite agentului să ruleze cod Python în QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Fiecare rulare vă arată tot codul și vă întreabă mai întâi. Codul rulează cu drepturile dumneavoastră: vă poate modifica datele și fișierele, iar anularea rundei nu îl desface. Pentru cei care citesc Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

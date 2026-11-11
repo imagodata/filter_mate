@@ -259,6 +259,24 @@
         <translation>KS projekta: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Koda Python (strokovnjak, se ne razveljavi)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agent želi zagnati to kodo Python v QGIS z vašimi pravicami: lahko bere in spreminja vse, kar zmoreta QGIS in vaš račun, razveljavitev kroga pa tega ne povrne.
+
+Za kaj: {}
+
+Jo zaženem?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Iskanje algoritma obdelave</translation>
@@ -679,6 +697,16 @@ Se strinjate?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Dovoli pošiljanje vrednosti atributov</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Strokovnjak: dovoli agentu izvajanje kode Python v QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Vsak zagon vam pokaže celotno kodo in vas najprej vpraša. Koda teče z vašimi pravicami: lahko spremeni vaše podatke in datoteke, razveljavitev kroga pa tega ne povrne. Za tiste, ki berejo Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

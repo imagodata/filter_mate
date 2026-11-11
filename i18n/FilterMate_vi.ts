@@ -259,6 +259,24 @@
         <translation>Hệ tọa độ dự án: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Mã Python (chuyên gia, không hoàn tác)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Tác tử muốn chạy mã Python này trong QGIS với quyền của bạn: nó có thể đọc và thay đổi mọi thứ mà QGIS và tài khoản của bạn có thể, và hoàn tác lượt này không khôi phục được.
+
+Để làm gì: {}
+
+Chạy không?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Đang tìm một thuật toán xử lý</translation>
@@ -679,6 +697,16 @@ Bạn có đồng ý không?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Cho phép gửi giá trị thuộc tính</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Chuyên gia: cho phép tác tử chạy mã Python trong QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Mỗi lần chạy đều cho bạn xem toàn bộ mã và hỏi bạn trước. Mã chạy với quyền của bạn: nó có thể thay đổi dữ liệu và tệp của bạn, và hoàn tác lượt này không khôi phục được. Dành cho người đọc được Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

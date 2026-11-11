@@ -259,6 +259,24 @@
         <translation>SR del progetto: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Codice Python (esperto, non annullato)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>L'agente vuole eseguire questo codice Python in QGIS con i tuoi diritti: può leggere e modificare tutto ciò che QGIS e il tuo account possono, e annullare il turno non lo ripristina.
+
+A cosa serve: {}
+
+Eseguirlo?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Looking for a Processing algorithm</source>
         <translation>Ricerca di un algoritmo di processing</translation>
@@ -679,6 +697,16 @@ Acconsenti?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Consenti l'invio dei valori degli attributi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Esperto: consenti all'agente di eseguire codice Python in QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Ogni esecuzione ti mostra tutto il codice e ti chiede prima. Il codice gira con i tuoi diritti: può modificare i tuoi dati e i tuoi file, e annullare il turno non lo ripristina. Per chi legge Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>
