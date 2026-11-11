@@ -38,7 +38,9 @@ recall of 0.02 and 0.01; cells of 1 m shrunk back give 0.54 and 0.79, precision
 0.84 and 0.84, recall 0.44 and 0.51. Cost (``scripts/pc_object_cost.py``, Docker
 qgis/qgis:latest): a click at 1 m 1.1 to 2.3 s (median per class, 5 s at most), the
 footprint of buildings at 1 m 5 s, of the high vegetation 62 s (8 s at 2 m), of the
-ground 97 s (22 s at 2 m).
+ground 97 s (22 s at 2 m). Tried and not adopted: cutting the object where the roof
+height jumps by more than 1.25 m between two cells (``scripts/pc_object_height.py``):
+better on the set it was chosen on (IoU 0.54 to 0.73), worse on the other (0.79 to 0.63).
 
 The grid and window logic is plain numpy (:func:`object_window`,
 :func:`bin_points`, :func:`seed_cell`, :func:`grow_object`), testable without QGIS.
