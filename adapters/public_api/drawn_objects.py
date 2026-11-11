@@ -366,11 +366,9 @@ def search_windows(first, area, raster, cell: float, size: int) -> list:
 
 
 def _inside_window(window, x: float, y: float, raster) -> bool:
-    """Farther than the margin from the edges of ``window``, but those on the edge of the raster."""
-    margin = WINDOW_MARGIN_PIXELS * window.cell
-    x_max, y_min = window.x_min + window.side, window.y_max - window.side
-    return ((x >= window.x_min + margin or window.x_min <= raster[0]) and (x <= x_max - margin or x_max >= raster[2])
-            and (y >= y_min + margin or y_min <= raster[1]) and (y <= window.y_max - margin or window.y_max >= raster[3]))
+    """Farther than :data:`WINDOW_MARGIN_PIXELS` from the edges of ``window``, but those on the edge of the raster."""
+    from ..qgis.coverage_layers.segmentation import well_inside
+    return well_inside(window, x, y, raster, WINDOW_MARGIN_PIXELS)
 
 
 def _write_objects(objects, crs, path: str, area) -> None:

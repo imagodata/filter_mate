@@ -56,7 +56,8 @@ of the three).
 
 **Similar objects** first draws the clicked object. The patches of a similar colour in the visible map, at
 most 120 of them, are then proposed to SAM, followed by the 10 places of the visible map whose encoder features
-look most like the clicked object's; SAM redraws each one in the background. An object is kept when its area,
+look most like the clicked object's; SAM redraws each one in the background, on the window prepared for the click
+when the candidate lies well inside it (no second encoding, as the search was measured). An object is kept when its area,
 and its shape with *same shape*, are within the ratios of the group compared with the clicked one, and when it
 looks like it: the encoder features of SAM under the two objects must point the same way (cosine at least 0.68).
 
