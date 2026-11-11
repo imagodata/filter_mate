@@ -139,7 +139,9 @@ class ActionBarManager(LayoutManagerBase):
             if self._position in ('left', 'right'):
                 self.apply_position()
             else:
-                # For top/bottom, use the default horizontal layout
+                # For top/bottom, use the default horizontal layout. Its size constraints too: without them the
+                # about button took its icon + padding (42 px) and the frame its stylesheet padding (63 px in all).
+                self.apply_size_constraints()
                 self.dockwidget.frame_actions.show()
                 self.dockwidget._current_action_bar_position = self._position
                 logger.info(f"ActionBarManager: Using '{self._position}' position")
@@ -395,7 +397,7 @@ class ActionBarManager(LayoutManagerBase):
             # Frame hugs the buttons: button height + vertical layout margins
             margins = (UIConfig.get_config('layout', 'margins_actions') if UIConfig else None) or {}
             v_margins = (margins.get('top', 2) + margins.get('bottom', 2)) if isinstance(margins, dict) else 4
-            frame_height = button_height + v_margins
+            frame_height = button_height + v_margins + 1  # + the 1 px top border of the stylesheets
             frame_max = frame_height
             frame.setMinimumHeight(frame_height)
             frame.setMaximumHeight(frame_max)
