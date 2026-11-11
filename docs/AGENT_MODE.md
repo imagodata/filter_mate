@@ -109,6 +109,9 @@ Rules worth keeping:
   The turn keeps the index of the undo stack before its first edit of a layer; undoing the turn steps back over its
   commands, and is refused on a layer saved, discarded or edited by the user since. `describe_layer` says whether
   a layer is being edited and holds unsaved changes.
+  Checked on GeoPackage (`check_agent_tools.py`) and on a PostGIS table (`check_agent_edits_postgis.py`: the key
+  refused, nothing in the table before the user saves, then the values and the point added there with their
+  types and CRS); a WFS-T layer is not checked.
 - **Layouts** (`adapters/public_api/layouts.py`): `create_layout` adds a print layout to the project (A4, A3, A5
   or Letter, landscape or portrait): a map of the layers checked in the tree or of those given, framed on an
   extent, a layer, the map view or the layers shown, with a title, a legend, a scale bar and a north arrow. The
