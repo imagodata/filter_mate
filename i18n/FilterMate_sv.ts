@@ -644,6 +644,19 @@ Godkänner du?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Det den ändrade finns kvar och kan ångras. Be om mindre åt gången, eller säg vad som återstår.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agenten vill göra detta:
+{}
+{}
+
+Godkänner du?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Godkänner du?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>det här projektet · {} tur(er)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Rådgivare</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Rådgivare: läser och förklarar, ändrar ingenting</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Självständig</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Självständig: frågar bara före det som berör omvärlden</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Autonomi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Försiktig</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Försiktig: frågar före varje ändring</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Exporter till exportmappen, borttagning av lager och radering körs också utan fråga, och inte allt går att ångra. Nätverket, anslutningar och kod frågas fortfarande först.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Filter, stilar, Processing, layouter och redigeringar i redigeringsbufferten körs direkt och ångras tillsammans med hela förfrågan. Exporter, borttagningar, raderingar, nätverket och anslutningar frågas först.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Att flytta kartan, visa lager och markera objekt körs av sig självt. Filter, stilar, nya lager, redigeringar och allt annat visas för dig först.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Standard: frågar före det som inte kan ångras</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Agenten läser dina lager och svarar. För en ändring berättar den stegen i stället för att göra den.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Den här åtgärden körs utan att fråga igen tills du startar en ny konversation, öppnar ett annat projekt eller ändrar autonominivån.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>När agenten frågar låter ”Ja, för den här konversationen” den åtgärden köras utan att fråga igen, tills en ny konversation, ett annat projekt eller en annan nivå. Python-kod i expertläget frågas vid varje körning. Andra program (MCP) frågas alltid, som på nivån Standard.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Ja, för den här konversationen</translation>
     </message>
 </context>
 <context>

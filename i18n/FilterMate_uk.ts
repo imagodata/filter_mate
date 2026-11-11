@@ -644,6 +644,19 @@ Do you agree?</source>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Внесені зміни залишаються, їх можна скасувати. Просіть менше за раз або скажіть, що залишилося.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Агент хоче зробити таке:
+{}
+{}
+
+Ви згодні?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>цей проєкт · ходів: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Радник</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Радник: читає й пояснює, нічого не змінює</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Автономний</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Автономний: питає лише перед діями у зовнішньому світі</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Автономність</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Обережний</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Обережний: питає перед кожною зміною</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Експорт у теку експорту, видалення шарів і стирання теж виконуються без запитання, і не все можна скасувати. Мережа, конектори й код, як і раніше, запитуються заздалегідь.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Фільтри, стилі, Processing, макети та редагування в буфері редагування виконуються одразу й скасовуються разом із цілим запитом. Експорт, вилучення, стирання, мережа та конектори запитуються заздалегідь.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Переміщення карти, показ шарів і вибір об’єктів виконуються самі. Фільтри, стилі, нові шари, редагування та все інше спершу показуються вам.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Стандартний</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Стандартний: питає перед тим, що не можна скасувати</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Агент читає ваші шари й відповідає. Для зміни він повідомляє кроки, а не виконує її.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Ця дія виконується без повторного запитання, доки ви не почнете нову розмову, не відкриєте інший проєкт або не зміните рівень автономності.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Коли агент питає, «Так, для цієї розмови» дозволяє виконати цю дію без повторного запитання — до нової розмови, іншого проєкту чи іншого рівня. Код Python експертного режиму запитується під час кожного запуску. Інші застосунки (MCP) запитуються завжди, як на рівні «Стандартний».</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Так, для цієї розмови</translation>
     </message>
 </context>
 <context>

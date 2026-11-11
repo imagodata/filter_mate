@@ -644,6 +644,19 @@ Do you agree?</source>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>변경한 내용은 그대로 남으며 실행 취소할 수 있습니다. 한 번에 더 적게 요청하거나 남은 것을 알려 주세요.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>에이전트가 다음 작업을 하려고 합니다:
+{}
+{}
+
+동의하십니까?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>이 프로젝트 · {}차례</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>조언자</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>조언자: 읽고 설명만 하며 아무것도 변경하지 않음</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>자율</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>자율: 외부 세계와 관련된 작업 전에만 확인함</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>자율성</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>신중</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>신중: 모든 변경 전에 확인함</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>내보내기 폴더로의 내보내기, 레이어 제거, 삭제도 묻지 않고 실행되며, 모두 실행 취소할 수 있는 것은 아닙니다. 네트워크, 커넥터, 코드는 여전히 먼저 확인합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>필터, 스타일, Processing, 레이아웃, 편집 버퍼의 편집은 즉시 실행되며 요청 전체와 함께 실행 취소됩니다. 내보내기, 제거, 삭제, 네트워크, 커넥터는 먼저 확인합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>지도 이동, 레이어 표시, 피처 선택은 스스로 실행됩니다. 필터, 스타일, 새 레이어, 편집 및 그 밖의 모든 작업은 먼저 사용자에게 보여 줍니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>표준</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>표준: 되돌릴 수 없는 작업 전에 확인함</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>에이전트가 레이어를 읽고 답변합니다. 변경이 필요하면 직접 수행하는 대신 단계를 알려 줍니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>이 작업은 새 대화를 시작하거나, 다른 프로젝트를 열거나, 자율성 수준을 변경할 때까지 다시 묻지 않고 실행됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>에이전트가 확인을 요청할 때 “예, 이 대화에서는 허용”를 선택하면 새 대화, 다른 프로젝트 또는 다른 수준이 되기 전까지 해당 작업이 다시 묻지 않고 실행됩니다. 전문가 모드의 Python 코드는 실행할 때마다 확인합니다. 다른 애플리케이션(MCP)은 표준 수준과 마찬가지로 항상 확인합니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>예, 이 대화에서는 허용</translation>
     </message>
 </context>
 <context>

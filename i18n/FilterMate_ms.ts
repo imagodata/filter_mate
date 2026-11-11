@@ -644,6 +644,19 @@ Adakah anda bersetuju?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Apa yang diubahnya kekal dan boleh dibuat asal. Minta kurang sekali gus, atau nyatakan apa yang tinggal.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Ejen mahu melakukan perkara ini:
+{}
+{}
+
+Adakah anda bersetuju?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Adakah anda bersetuju?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>projek ini · {} giliran</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Penasihat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Penasihat: membaca dan menerangkan, tidak mengubah apa-apa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Berautonomi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Berautonomi: hanya bertanya sebelum melibatkan dunia luar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Autonomi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Berhati-hati</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Berhati-hati: bertanya sebelum setiap perubahan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Eksport ke folder eksport, pembuangan lapisan dan pemadaman juga dijalankan tanpa soalan, dan tidak semuanya boleh dibuat asal. Rangkaian, penyambung dan kod masih ditanya dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Penapis, gaya, Processing, reka letak dan suntingan dalam penimbal suntingan dijalankan serta-merta dan dibuat asal bersama keseluruhan permintaan. Eksport, pembuangan, pemadaman, rangkaian dan penyambung ditanya dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Menggerakkan peta, memaparkan lapisan dan memilih fitur dijalankan sendiri. Penapis, gaya, lapisan baharu, suntingan dan semua yang lain ditunjukkan kepada anda dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Standard: bertanya sebelum perkara yang tidak boleh dibuat asal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Ejen membaca lapisan anda dan menjawab. Untuk sesuatu perubahan, ia memberitahu langkah-langkahnya dan bukannya melakukannya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Tindakan ini dijalankan tanpa bertanya lagi sehingga anda memulakan perbualan baharu, membuka projek lain atau menukar tahap autonomi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Apabila ejen bertanya, “Ya, untuk perbualan ini” membolehkan tindakan itu dijalankan tanpa bertanya lagi, sehingga perbualan baharu, projek lain atau tahap lain. Kod Python mod pakar ditanya pada setiap larian. Aplikasi lain (MCP) sentiasa ditanya, seperti pada tahap Standard.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Ya, untuk perbualan ini</translation>
     </message>
 </context>
 <context>

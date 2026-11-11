@@ -644,6 +644,19 @@ Acconsenti?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Ciò che ha cambiato resta e può essere annullato. Chiedi meno alla volta, o di' cosa manca.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>L'agente vuole fare questo:
+{}
+{}
+
+Sei d'accordo?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Acconsenti?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>questo progetto · {} turno/i</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Consulente</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Consulente: legge e spiega, non modifica nulla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Autonomo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Autonomo: chiede solo prima di agire verso l'esterno</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Autonomia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Prudente</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Prudente: chiede prima di ogni modifica</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Anche le esportazioni nella cartella di esportazione, le rimozioni e le eliminazioni di layer vengono eseguite senza chiedere, e non tutte si possono annullare. La rete, i connettori e il codice vengono comunque chiesti prima.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Filtri, stili, Processing, layout e modifiche nel buffer di modifica vengono eseguiti subito e annullati insieme all'intera richiesta. Esportazioni, rimozioni, eliminazioni, rete e connettori vengono chiesti prima.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Spostare la mappa, mostrare i layer e selezionare gli elementi vengono eseguiti da soli. Filtri, stili, nuovi layer, modifiche e tutto il resto ti vengono mostrati prima.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Standard: chiede prima di ciò che non si può annullare</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>L'agente legge i tuoi layer e risponde. Per una modifica, ti indica i passaggi invece di eseguirla.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Questa azione viene eseguita senza chiedere di nuovo finché non avvii una nuova conversazione, apri un altro progetto o cambi il livello di autonomia.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Quando l'agente chiede, «Sì, per questa conversazione» permette a quell'azione di essere eseguita senza chiedere di nuovo, fino a una nuova conversazione, un altro progetto o un altro livello. Il codice Python della modalità esperta viene chiesto a ogni esecuzione. Le altre applicazioni (MCP) vengono sempre chieste, come al livello Standard.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Sì, per questa conversazione</translation>
     </message>
 </context>
 <context>

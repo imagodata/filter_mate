@@ -644,6 +644,19 @@ Do you agree?</source>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>उसने जो बदला वह बना रहता है और पूर्ववत किया जा सकता है। एक बार में कम माँगें, या बताएँ कि क्या बाकी है।</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>एजेंट यह करना चाहता है:
+{}
+{}
+
+क्या आप सहमत हैं?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>यह प्रोजेक्ट · {} दौर</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>सलाहकार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>सलाहकार: पढ़ता और समझाता है, कुछ नहीं बदलता</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>स्वायत्त</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>स्वायत्त: केवल बाहरी दुनिया से जुड़े कामों से पहले पूछता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>स्वायत्तता</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>सतर्क</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>सतर्क: हर बदलाव से पहले पूछता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>निर्यात फ़ोल्डर में निर्यात, लेयर हटाना और मिटाना भी बिना पूछे चलते हैं, और इन सबको पूर्ववत नहीं किया जा सकता। नेटवर्क, कनेक्टर और कोड के लिए फिर भी पहले पूछा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>फ़िल्टर, शैलियाँ, Processing, लेआउट और संपादन बफ़र में किए गए संपादन तुरंत चलते हैं और पूरे अनुरोध के साथ पूर्ववत हो जाते हैं। निर्यात, हटाने, मिटाने, नेटवर्क और कनेक्टर के लिए पहले पूछा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>मानचित्र हिलाना, लेयर दिखाना और फ़ीचर चुनना अपने आप चलते हैं। फ़िल्टर, शैलियाँ, नई लेयर, संपादन और बाकी सब कुछ पहले आपको दिखाया जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>मानक</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>मानक: जो पूर्ववत नहीं हो सकता उससे पहले पूछता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>एजेंट आपकी लेयर पढ़ता है और जवाब देता है। किसी बदलाव के लिए, वह उसे करने के बजाय आपको चरण बताता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>यह कार्रवाई तब तक दोबारा पूछे बिना चलती है जब तक आप नई बातचीत शुरू नहीं करते, दूसरा प्रोजेक्ट नहीं खोलते या स्वायत्तता का स्तर नहीं बदलते।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>जब एजेंट पूछता है, तो “हाँ, इस बातचीत के लिए” उस कार्रवाई को दोबारा पूछे बिना चलने देता है, नई बातचीत, दूसरे प्रोजेक्ट या दूसरे स्तर तक। विशेषज्ञ मोड का Python कोड हर बार चलाने पर पूछा जाता है। अन्य एप्लिकेशन (MCP) के लिए हमेशा पूछा जाता है, जैसे मानक स्तर पर।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>हाँ, इस बातचीत के लिए</translation>
     </message>
 </context>
 <context>

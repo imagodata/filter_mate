@@ -644,6 +644,19 @@ Sunteți de acord?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Ce a schimbat rămâne și poate fi anulat. Cereți mai puțin deodată sau spuneți ce a mai rămas.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agentul vrea să facă următoarele:
+{}
+{}
+
+Sunteți de acord?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1107,6 +1120,86 @@ Sunteți de acord?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>acest proiect · {} tură/ture</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Consilier</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Consilier: citește și explică, nu modifică nimic</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Autonom</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Autonom: întreabă doar înainte de acțiunile spre exterior</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Autonomie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Prudent</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Prudent: întreabă înainte de orice modificare</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Exporturile în dosarul de export, eliminările de straturi și ștergerile rulează și ele fără întrebare, iar nu toate pot fi anulate. Pentru rețea, conectori și cod se întreabă în continuare mai întâi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Filtrele, stilurile, Processing, aspectele și editările din bufferul de editare rulează imediat și se anulează împreună cu întreaga cerere. Pentru exporturi, eliminări, ștergeri, rețea și conectori se întreabă mai întâi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Mutarea hărții, afișarea straturilor și selectarea entităților rulează de la sine. Filtrele, stilurile, straturile noi, editările și orice altceva vă sunt arătate mai întâi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Standard: întreabă înainte de ceea ce nu poate fi anulat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Agentul vă citește straturile și răspunde. Pentru o modificare, vă spune pașii în loc să o facă.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Această acțiune rulează fără să mai întrebe până când începeți o conversație nouă, deschideți alt proiect sau schimbați nivelul de autonomie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Când agentul întreabă, „Da, pentru această conversație” lasă acțiunea să ruleze fără a mai întreba, până la o conversație nouă, alt proiect sau alt nivel. Pentru codul Python al modului expert se întreabă la fiecare rulare. Pentru celelalte aplicații (MCP) se întreabă întotdeauna, ca la nivelul Standard.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Da, pentru această conversație</translation>
     </message>
 </context>
 <context>

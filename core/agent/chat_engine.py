@@ -15,6 +15,7 @@ from .messages import (
 )
 from .providers.base import HttpRequest
 from .session import STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
+from .permissions import ASK, REFUSE, PermissionPolicy
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
@@ -77,8 +78,11 @@ class ChatEngine:
 
     def __init__(self, session: AgentSession, executor: ToolExecutor, transport: AsyncTransport,
                  listener: ChatListener, checkpoint: Checkpoint,
-                 defer: Callable[[Callable[[], None]], None] = lambda step: step()) -> None:
+                 defer: Callable[[Callable[[], None]], None] = lambda step: step(),
+                 policy: Optional[PermissionPolicy] = None) -> None:
         self._session = session
+        # Read at each call: the user may change the level, or allow a tool, while the conversation goes on.
+        self._policy = policy if policy is not None else PermissionPolicy()
         self._executor = executor
         self._transport = transport
         self._listener = listener
@@ -183,7 +187,10 @@ class ChatEngine:
         self._defer(lambda: self._request_model(generation))
 
     def _run_one(self, call: ToolCallPart) -> ToolResultPart:
-        if self._executor.needs_confirmation(call) and not self._confirmed(call):
+        verdict = self._executor.verdict(call, self._policy)
+        if verdict == REFUSE:
+            return self._executor.refused(call)
+        if verdict == ASK and not self._confirmed(call):
             return self._executor.declined(call)
         spec = self._executor.spec(call.name)
         if spec is not None and not spec.read_only and not spec.manages_history:

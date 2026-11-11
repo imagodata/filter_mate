@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **Levels of autonomy.** A new Autonomy tab in the settings of the agent says how far the chat goes alone. *Advisor* only reads and explains the steps of a change; *Careful* asks before every change, filters included; *Standard*, the default, asks before what cannot be undone, as before; *Autonomous* also exports, removes layers and deletes features without asking, and still asks before the network, connectors and code. A question now offers *Yes for this conversation*, so the same action is not asked again until a new conversation, another project or another level. The level shows next to the model when it is not Standard. Other applications (MCP) keep the Standard rules. See `docs/AGENT_MODE.md`.
+
 ## [5.1.0] - 2026-11-10
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

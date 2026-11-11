@@ -1055,9 +1055,72 @@ def check_chat(provider, layer, authcfg, work):
     check("sources: test shows the answer", dialog.source_result.text() == "12 tools" and len(tested) == 1, dialog.source_result.text())
     dialog.close()
     check_steps(chat, provider, settings, ask, layer)
+    check_autonomy(chat, provider, settings, ask, answers, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
     host.close()
+
+
+def check_autonomy(chat, provider, settings, ask, answers, layer):
+    """Levels of autonomy: what runs alone, what is asked, what is refused, and "yes for this conversation"."""
+    from filter_mate.core.agent.permissions import ADVISOR_REFUSAL
+    from filter_mate.ui.widgets.agent_panel import ANSWER_CONVERSATION, ANSWER_NO, AgentSettingsDialog
+    from filter_mate.adapters.agent.settings import load_settings, target_of
+
+    panel = chat.panel
+    dialog = AgentSettingsDialog(load_settings(), target_of)
+    check("autonomy: a tab, standard by default", dialog.chosen_autonomy() == "standard" and
+          any(dialog.tabs.tabText(i) == "Autonomy" for i in range(dialog.tabs.count())))
+    dialog.findChild(QWidget, "radioButton_agent_autonomy_advisor").setChecked(True)
+    check("autonomy: the level chosen is read back", dialog.chosen_autonomy() == "advisor")
+    dialog.close()
+
+    filter_call = {"layer_name": "communes", "expression": '"pop" > 1000'}
+    layer.setSubsetString("")
+    settings(autonomy="advisor")
+    shown = lambda: chat._header_label.text() if chat._header_label is not None else panel.destination.text()  # noqa: E731
+    check("advisor: shown next to the model", "Advisor" in shown(), shown())
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("je vous explique")))
+    ask("filtre")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("advisor: a filter is refused, nobody asked", result.get("is_error") is True and
+          result["content"] == ADVISOR_REFUSAL and not asked and layer.subsetString() == "", (result, asked))
+    sent = json.dumps(provider.requests[0]["body"]["messages"][-1], ensure_ascii=False)
+    check("advisor: the model is told the level", "advisor" in sent, sent[-400:])
+
+    settings(autonomy="careful")
+    provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("ok")))
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    ask("filtre")
+    check("careful: a filter is asked first, with what it does", asked and "communes" in asked[0] and
+          layer.subsetString() == "", asked)
+
+    choices = []
+    chat._ask_choice = lambda title, text: choices.append(text) or ANSWER_CONVERSATION
+    provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("ok")))
+    ask("filtre")
+    check("careful: yes for this conversation applies it", len(choices) == 1 and
+          layer.subsetString() == '"pop" > 1000', (choices, layer.subsetString()))
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 2000'})),
+                   (200, {}, text_turn("ok")))
+    ask("encore")
+    check("careful: not asked again in the conversation", len(choices) == 1 and
+          layer.subsetString() == '"pop" > 2000', (choices, layer.subsetString()))
+    chat.new_conversation()
+    provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("ok")))
+    chat._ask_choice = lambda title, text: choices.append(text) or ANSWER_NO
+    ask("filtre")
+    check("careful: asked again in a new conversation", len(choices) == 2 and layer.subsetString() == '"pop" > 2000',
+          (choices, layer.subsetString()))
+    chat._ask_choice = lambda title, text: "once" if chat._ask_user(title, text) else "no"
+    chat._ask_user = lambda title, text: answers["export"]
+    layer.setSubsetString("")
+    settings()
+    check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
+    panel.clear_thread()
 
 
 def check_steps(chat, provider, settings, ask, layer):
