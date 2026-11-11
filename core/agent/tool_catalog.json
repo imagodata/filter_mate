@@ -1851,7 +1851,7 @@
   {
    "name": "group_layers",
    "title": "Put layers in a group",
-   "description": "Organize the layer tree: put layers in a group, made where it is missing, first or last of it. Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of FilterMate, undoing the turn puts each layer back and removes the groups it made.",
+   "description": "Organize the layer tree: put layers in a group, made where it is missing, first or last of it; or just above another layer, to draw them over it. Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of FilterMate, undoing the turn puts each layer back and removes the groups it made.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -1877,6 +1877,12 @@
       "default": true,
       "description": "Put them first in the group (true) or last (false)",
       "type": "boolean"
+     },
+     "above": {
+      "default": "",
+      "description": "A layer: put them just above it, in its group, so they are drawn over it; group and at_top are then not used",
+      "maxLength": 1000,
+      "type": "string"
      }
     },
     "required": [
@@ -1888,7 +1894,7 @@
   {
    "name": "rename_layer",
    "title": "Rename a layer",
-   "description": "Give a layer of the project another name, as shown in the layer tree and the legend; its data and source do not change. Returns layer_id, name and previous.",
+   "description": "Give a layer of the project another name, as shown in the layer tree and the legend; its data and source do not change. With group, rename a group of the layer tree instead. Returns layer_id, name and previous.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -1906,11 +1912,61 @@
       "maxLength": 200,
       "minLength": 1,
       "type": "string"
+     },
+     "group": {
+      "default": false,
+      "description": "true: layer is the path of a group of the layer tree (Base/Roads), and that group is renamed",
+      "type": "boolean"
      }
     },
     "required": [
      "layer",
      "name"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "bookmark",
+   "title": "Spatial bookmarks",
+   "description": "Spatial bookmarks of the project: named places the user goes back to (Bookmarks panel of QGIS). Returns action, name, bookmarks (all names), replaced, and extent_wkt after a zoom. In the chat of FilterMate, undoing the turn brings the bookmarks back as they were.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "action": {
+      "description": "list the bookmarks; add one (the visible map, or extent_wkt; replaces a bookmark of that name); zoom the map to one; remove one",
+      "enum": [
+       "list",
+       "add",
+       "zoom",
+       "remove"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the bookmark, for every action but list",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "extent_wkt": {
+      "default": "",
+      "description": "For add: the area as WKT (its bounding box is kept); the visible map by default",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "crs": {
+      "default": "",
+      "description": "CRS of extent_wkt; the CRS of the map by default",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "action"
     ],
     "type": "object"
    }

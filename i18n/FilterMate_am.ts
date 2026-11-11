@@ -337,6 +337,11 @@ Run it?</source>
         <translation>የካርታ ገጽታዎች</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="103"/>
+        <source>bookmarks</source>
+        <translation>ዕልባቶች</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="96"/>
         <source>layer tree</source>
         <translation>የንብርብር ዛፍ</translation>
@@ -716,6 +721,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="829"/>
         <source>{} joined to {}</source>
         <translation>{} ከ{} ጋር ተቀላቅሏል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="832"/>
+        <source>Bookmark: {} {}</source>
+        <translation>ዕልባት፦ {} {}</translation>
     </message>
 </context>
 <context>

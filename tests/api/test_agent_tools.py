@@ -132,6 +132,16 @@ class TestHandlers:
         assert run(accessor, root, "rename_layer", layer="nope", name="x")[0] is True
         assert run(accessor, root, "rename_layer", layer="communes", name="")[0] is True
 
+    def test_bookmark_and_tree_options(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "bookmark", action="add", name="Centre")
+        assert not error and answer["bookmarks"] == ["Centre"]
+        assert run(accessor, root, "bookmark", action="zoom", name="nope")[0] is True
+        assert run(accessor, root, "bookmark", action="go", name="Centre")[0] is True
+        assert run(accessor, root, "bookmark", action="remove", name="Centre")[1]["bookmarks"] == []
+        assert run(accessor, root, "rename_layer", layer="Base", name="Fond", group=True)[1]["previous"] == "Base"
+        assert run(accessor, root, "group_layers", layers=["communes"], above="routes")[0] is False
+
     def test_map_theme_tool(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "map_theme", action="save", name="Relief")
@@ -452,6 +462,11 @@ class TestRoutes:
         assert client.post("/layers/join", json={"layer": "communes", "join_layer": "communes", "target_field": "a",
                                                  "join_field": "a"}).status_code == 400
         assert client.post("/layers/join", json={"layer": "communes", "target_field": "a"}).status_code == 422
+
+    def test_bookmark_route(self, client):
+        assert client.post("/map/bookmarks", json={"action": "add", "name": "A"}).json()["bookmarks"] == ["A"]
+        assert client.post("/map/bookmarks", json={"action": "zoom", "name": "B"}).status_code == 400
+        assert client.post("/map/bookmarks", json={"action": "go"}).status_code == 422
 
     def test_layer_tree_routes(self, client):
         assert client.post("/layers/group", json={"layers": ["communes"], "group": "Base"}).json()["moved"] == ["communes"]

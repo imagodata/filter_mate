@@ -696,6 +696,15 @@ def check_chat(provider, layer, authcfg, work):
     QgsProject.instance().removeEntry("FMcheck", "ran")
     settings()
 
+    marks = QgsProject.instance().bookmarkManager()
+    provider.reset((200, {}, tool_turn("bookmark", {"action": "add", "name": "Ici",
+                                                    "extent_wkt": "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"})), (200, {}, text_turn("Gardé.")))
+    check("a bookmark through the chat", ask("garde cette vue en signet Ici"))
+    check("the bookmark is in the project", [mark.name() for mark in marks.bookmarks()] == ["Ici"],
+          [mark.name() for mark in marks.bookmarks()])
+    chat._on_undo()
+    check("undoing the turn removes it", not marks.bookmarks(), [mark.name() for mark in marks.bookmarks()])
+
     fields_before = layer.fields().names()
     provider.reset((200, {}, tool_turn("add_field", {"layer": "communes", "name": "pop_k", "type": "decimal",
                                                      "formula": '"pop" / 1000'})), (200, {}, text_turn("Ajouté.")))

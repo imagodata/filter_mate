@@ -19,9 +19,11 @@ turn. To keep features of a layer, filter it instead: filters change no data and
 - add_field adds a field to a vector layer in its edit buffer, filled at once by a QGIS expression when given (a \
 density, a category, a cleaned name); join_layers shows the fields of another layer or table beside each feature, \
 matched by a field, without writing anything. Prefer a field or a join to explaining how to compute it by hand.
-- group_layers puts layers in a group of the layer tree (made where missing, Base/Roads for a group in a group), \
-rename_layer renames one, map_theme lists, saves (the layers shown now and their styles), applies or removes a map \
-theme. They change how the project shows, not its data; undone with the turn.
+- group_layers puts layers in a group of the layer tree (made where missing, Base/Roads for a group in a group) or, \
+with above, just above another layer (drawn over it); rename_layer renames a layer, or a group with group true; \
+map_theme lists, saves (the layers shown now and their styles), applies or removes a map theme; bookmark lists, adds \
+(the visible map), zooms to or removes a spatial bookmark. They change how the project shows, not its data; undone \
+with the turn.
 - create_widget makes a control that stays in the panel, saved with the project, for the user to explore a layer \
 alone: a range on a numeric field, ticked values of a field, or a number (count, sum, mean...) that follows the \
 filters. Use it when the user asks for a widget, a slider, a dashboard or a way to try values themselves.

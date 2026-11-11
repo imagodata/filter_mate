@@ -137,9 +137,12 @@ Rules worth keeping:
 - **Layer tree and map themes** (`adapters/public_api/layer_tree.py`): `group_layers` puts layers in a group, made
   where missing (`Base/Roads` for a group in a group, five levels at most; empty for the top), first or last of it,
   each one kept checked or not; `rename_layer` renames a layer; `map_theme` lists, saves (the layers shown now and
-  their styles, replacing a theme of that name), applies or removes a map theme. In the chat, the REST API
-  (`POST /layers/group`, `/layers/rename`, `/map/themes`) and both MCP servers. The turn keeps the place of each layer
-  and the groups with their check state, the names, the themes as XML and, for a theme applied, the visibility and
+  their styles, replacing a theme of that name), applies or removes a map theme. `group_layers` with `above` puts layers just above another
+  layer, in its group; `rename_layer` with `group` renames a group (its path changes: the turn keeps the tree).
+  `bookmark` lists, adds (the visible map or an extent, replacing one of that name), zooms to or removes a spatial
+  bookmark; its zoom needs the map window. In the chat, the REST API
+  (`POST /layers/group`, `/layers/rename`, `/map/themes`, `/map/bookmarks`) and both MCP servers. The turn keeps the place of each layer
+  and the groups with their check state, the names, the themes and the bookmarks as XML and, for a theme applied, the visibility and
   the current style of every layer: undoing it brings them back and removes the groups it made.
 - **Expert mode** (`adapters/agent/expert_python.py`): `run_pyqgis`, a tool of the chat alone, is offered only when
   the user ticks *Expert: let the agent run Python code in QGIS* in the settings (off by default). Each run opens
@@ -180,7 +183,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | Class | Tools | Undone |
 |---|---|---|
 | read | every `read_only` tool, open data searches included | nothing to undo |
-| view | `zoom_to`, `select_features`, `set_layers_visibility`, `group_layers`, `map_theme` | with the turn |
+| view | `zoom_to`, `select_features`, `set_layers_visibility`, `group_layers`, `map_theme`, `bookmark` | with the turn |
 | project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
 | edit buffer | `update_features`, `add_features`, `add_field` | with the turn, until the user saves |
 | irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |
