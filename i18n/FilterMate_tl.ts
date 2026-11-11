@@ -621,6 +621,19 @@ Sumasang-ayon ka ba?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Nananatili ang binago nito at maaaring i-undo. Humiling ng mas kaunti sa isang pagkakataon, o sabihin kung ano ang natitira.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Gusto ng ahente na gawin ito:
+{}
+{}
+
+Sumasang-ayon ka ba?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1074,6 +1087,86 @@ Sumasang-ayon ka ba?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>proyektong ito · {} palitan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Tagapayo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Tagapayo: nagbabasa at nagpapaliwanag, walang binabago</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Awtonomo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Awtonomo: nagtatanong lang bago ang anumang may kinalaman sa labas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Awtonomiya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Maingat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Maingat: nagtatanong bago ang bawat pagbabago</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Tumatakbo rin nang walang tanong ang mga pag-export sa export folder, pag-alis ng layer at pagbura, at hindi lahat ay maaaring i-undo. Itinatanong pa rin muna ang network, mga connector at code.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Agad na tumatakbo ang mga filter, istilo, Processing, layout at pag-edit sa edit buffer, at ina-undo kasama ng buong kahilingan. Itinatanong muna ang mga pag-export, pag-alis, pagbura, network at mga connector.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Kusang tumatakbo ang paggalaw ng mapa, pagpapakita ng mga layer at pagpili ng mga feature. Ipinapakita muna sa iyo ang mga filter, istilo, bagong layer, pag-edit at lahat ng iba pa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Karaniwan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Karaniwan: nagtatanong bago ang hindi na maibabalik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Binabasa ng ahente ang iyong mga layer at sumasagot. Para sa pagbabago, sinasabi nito sa iyo ang mga hakbang sa halip na gawin ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Tumatakbo ang aksyong ito nang hindi na nagtatanong hanggang sa magsimula ka ng bagong pag-uusap, magbukas ng ibang proyekto o magpalit ng antas ng awtonomiya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Kapag nagtanong ang ahente, ang “Oo, para sa pag-uusap na ito” ay nagpapatakbo sa aksyong iyon nang hindi na nagtatanong, hanggang sa bagong pag-uusap, ibang proyekto o ibang antas. Itinatanong sa bawat takbo ang Python code ng expert mode. Palaging itinatanong ang ibang application (MCP), tulad sa antas na Karaniwan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Oo, para sa pag-uusap na ito</translation>
     </message>
 </context>
 <context>

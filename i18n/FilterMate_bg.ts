@@ -621,6 +621,19 @@ Do you agree?</source>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Каквото е променил, остава и може да бъде отменено. Искайте по-малко наведнъж или кажете какво остава.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Агентът иска да направи следното:
+{}
+{}
+
+Съгласни ли сте?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1074,6 +1087,86 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>този проект · {} ход(а)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Съветник</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Съветник: чете и обяснява, нищо не променя</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Автономен</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Автономен: пита само преди действия към външния свят</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Автономност</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Предпазлив</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Предпазлив: пита преди всяка промяна</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Експортирането в папката за експорт, премахването на слоеве и изтриванията също се изпълняват без въпрос и не всички могат да бъдат отменени. За мрежата, конекторите и кода все още се пита предварително.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Филтрите, стиловете, Processing, оформленията и редакциите в буфера за редактиране се изпълняват веднага и се отменят заедно с цялата заявка. За експортиранията, премахванията, изтриванията, мрежата и конекторите се пита предварително.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Преместването на картата, показването на слоеве и избирането на обекти се изпълняват самостоятелно. Филтрите, стиловете, новите слоеве, редакциите и всичко останало първо ви се показват.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Стандартен</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Стандартен: пита преди това, което не може да се отмени</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Агентът чете слоевете ви и отговаря. При промяна ви казва стъпките, вместо да я извърши.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Това действие се изпълнява без повторен въпрос, докато не започнете нов разговор, не отворите друг проект или не смените нивото на автономност.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Когато агентът пита, „Да, за този разговор“ позволява на това действие да се изпълни без повторен въпрос — до нов разговор, друг проект или друго ниво. За Python кода от експертния режим се пита при всяко изпълнение. За другите приложения (MCP) се пита винаги, както при ниво Стандартен.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Да, за този разговор</translation>
     </message>
 </context>
 <context>

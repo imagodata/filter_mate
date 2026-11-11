@@ -621,6 +621,19 @@ Hyväksytkö?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Sen tekemät muutokset jäävät ja ne voi kumota. Pyydä vähemmän kerralla tai kerro, mitä on jäljellä.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agentti haluaa tehdä tämän:
+{}
+{}
+
+Hyväksytkö?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1074,6 +1087,86 @@ Hyväksytkö?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>tämä projekti · {} kierros(ta)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Neuvoja</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Neuvoja: lukee ja selittää, ei muuta mitään</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Itsenäinen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Itsenäinen: kysyy vain ennen ulkomaailmaan vaikuttavia toimia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Autonomia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Varovainen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Varovainen: kysyy ennen jokaista muutosta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Viennit vientikansioon, tasojen poistot ja tuhoamiset suoritetaan myös kysymättä, eikä kaikkia voi perua. Verkosta, liittimistä ja koodista kysytään edelleen ensin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Suodattimet, tyylit, Processing, taitot ja muokkauspuskurin muokkaukset suoritetaan heti ja perutaan yhdessä koko pyynnön kanssa. Vienneistä, poistoista, tuhoamisista, verkosta ja liittimistä kysytään ensin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Kartan siirtäminen, tasojen näyttäminen ja kohteiden valinta suoritetaan itsestään. Suodattimet, tyylit, uudet tasot, muokkaukset ja kaikki muu näytetään sinulle ensin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Vakio</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Vakio: kysyy ennen sitä, mitä ei voi perua</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Agentti lukee tasosi ja vastaa. Muutoksen kohdalla se kertoo vaiheet sen tekemisen sijaan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Tämä toiminto suoritetaan kysymättä uudelleen, kunnes aloitat uuden keskustelun, avaat toisen projektin tai muutat autonomiatasoa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Kun agentti kysyy, ”Kyllä, tälle keskustelulle” antaa tämän toiminnon suorittua kysymättä uudelleen, kunnes alkaa uusi keskustelu, avataan toinen projekti tai vaihdetaan tasoa. Asiantuntijatilan Python-koodista kysytään jokaisella suorituksella. Muista sovelluksista (MCP) kysytään aina, kuten Vakio-tasolla.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Kyllä, tälle keskustelulle</translation>
     </message>
 </context>
 <context>

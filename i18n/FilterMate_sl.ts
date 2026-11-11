@@ -621,6 +621,19 @@ Se strinjate?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Kar je spremenil, ostane in se lahko razveljavi. Zahtevajte manj naenkrat ali povejte, kaj je ostalo.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agent želi narediti naslednje:
+{}
+{}
+
+Se strinjate?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1074,6 +1087,86 @@ Se strinjate?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>ta projekt · krogov: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Svetovalec</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Svetovalec: bere in razlaga, ničesar ne spreminja</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Samostojen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Samostojen: vpraša samo pred posegi v zunanji svet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Samostojnost</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Previden</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Previden: vpraša pred vsako spremembo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Izvozi v mapo za izvoz, odstranitve slojev in izbrisi se prav tako izvedejo brez vprašanja, vsega pa ni mogoče razveljaviti. Za omrežje, povezovalnike in kodo se še vedno vpraša vnaprej.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Filtri, slogi, Processing, postavitve in urejanja v medpomnilniku urejanja se izvedejo takoj in se razveljavijo skupaj s celotno zahtevo. Za izvoze, odstranitve, izbrise, omrežje in povezovalnike se vpraša vnaprej.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Premik zemljevida, prikaz slojev in izbira objektov se izvedejo sami. Filtri, slogi, novi sloji, urejanja in vse drugo se vam najprej prikažejo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Standarden</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Standarden: vpraša pred tem, česar ni mogoče razveljaviti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Agent prebere vaše sloje in odgovori. Pri spremembi vam namesto izvedbe sporoči korake.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>To dejanje se izvede brez ponovnega vprašanja, dokler ne začnete novega pogovora, odprete drugega projekta ali spremenite ravni samostojnosti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Ko agent vpraša, »Da, za ta pogovor« omogoči izvedbo tega dejanja brez ponovnega vprašanja, do novega pogovora, drugega projekta ali druge ravni. Za kodo Python v strokovnem načinu se vpraša ob vsakem zagonu. Za druge aplikacije (MCP) se vedno vpraša, kot na ravni Standarden.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Da, za ta pogovor</translation>
     </message>
 </context>
 <context>

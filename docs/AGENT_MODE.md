@@ -25,6 +25,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
 | 12. Layouts | A print layout of the map added to the project, exported as PDF or PNG (confirmed) | done |
 | 13. Project CRS | The CRS of the project and of the map, undone with the turn | done |
+| 14. Levels of autonomy | Each tool in a risk class; the user chooses how far the chat goes alone; "yes for this conversation" | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -132,6 +133,39 @@ Rules worth keeping:
 - **Two stacks of sections** (`ui/layout/dock_chrome.py`): AGENT / EXPLORING above the splitter, FILTERING / EXPORTING /
   CONFIGURATION below, one section open at most in each. AGENT folds EXPLORING and FILTERING; FILTERING brings EXPLORING
   back. `tabTools_current_index` stays 0 / 1 / 2 for the lower sections and is -1 when none is open.
+
+## Levels of autonomy
+
+`core/agent/permissions.py`, plain Python. Each tool falls in one risk class, from what it can break and how it is
+undone; the user chooses a level in the Autonomy tab of the settings, which says up to which class a tool runs alone.
+
+| Class | Tools | Undone |
+|---|---|---|
+| read | every `read_only` tool, open data searches included | nothing to undo |
+| view | `zoom_to`, `select_features`, `set_layers_visibility` | with the turn |
+| project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
+| edit buffer | `update_features`, `add_features` | with the turn, until the user saves |
+| irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |
+| outside | `open_world` changes (`add_layer`, `add_service_layer`, connectors) and `run_pyqgis` | no |
+
+| Level | Runs alone | Asked | Refused |
+|---|---|---|---|
+| advisor | read | | everything else: the model is told to describe the steps |
+| careful | read, view | project and above | |
+| **standard** (default) | up to edit buffer | irreversible, outside | |
+| autonomous | up to irreversible | outside | |
+
+- `standard` asks exactly what the chat asked before the levels (`ToolSpec.requires_confirmation`); a unit test holds it.
+- The notes of the project and `undo_agent_step` run at every level: the user asks for them, and they change only
+  what the agent keeps.
+- A question offers "Yes for this conversation": that tool then runs alone until a new conversation, another project or
+  another level. Never for `run_pyqgis`, asked at every run whatever the level.
+- The level is read at each call (`ChatEngine(policy=...)`), and sent with each request, after the project summary,
+  when it is not `standard` (the system prompt stays constant for the cache).
+- An invalid call is never asked nor refused: it runs to answer its mistake.
+- The MCP servers keep the `standard` rules (`ToolExecutor.needs_confirmation`): the level is the chat's.
+- The question of a change the level shows first (a filter at `careful`) says what the tool does and its arguments; a
+  tool added later without a text of its own gets the same, instead of the text of an export.
 
 ## History
 

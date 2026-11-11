@@ -15,13 +15,15 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
-    QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
+    QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QRadioButton, QScrollArea, QSizePolicy,
+    QSpinBox, QStackedWidget,
     QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
+from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
@@ -112,6 +114,63 @@ def ask_plain(parent, title: str, text: str) -> bool:
     answer = box.exec()
     box.deleteLater()
     return answer == QMessageBox.StandardButton.Yes
+
+
+ANSWER_NO, ANSWER_ONCE, ANSWER_CONVERSATION = "no", "once", "conversation"
+
+
+def ask_with_conversation(parent, title: str, text: str) -> str:
+    """Like ``ask_plain``, with a third answer: yes, and do not ask again in this conversation."""
+    box = QMessageBox(parent)
+    box.setWindowTitle(title)
+    box.setTextFormat(Qt.TextFormat.PlainText)
+    box.setText(text)
+    always = box.addButton(_tr("Yes for this conversation"), QMessageBox.ButtonRole.AcceptRole)
+    always.setToolTip(_tr("This action runs without asking again until you start a new conversation, open another "
+                          "project or change the level of autonomy."))
+    box.addButton(QMessageBox.StandardButton.Yes)
+    no = box.addButton(QMessageBox.StandardButton.No)
+    box.setDefaultButton(no)
+    box.show()
+    box.raise_()
+    box.activateWindow()
+    box.exec()
+    clicked = box.clickedButton()
+    answer = ANSWER_NO
+    if clicked is always:
+        answer = ANSWER_CONVERSATION
+    elif clicked is not None and box.standardButton(clicked) == QMessageBox.StandardButton.Yes:
+        answer = ANSWER_ONCE
+    box.deleteLater()
+    return answer
+
+
+def level_label(level: str) -> str:
+    return {
+        ADVISOR: _tr("Advisor: reads and explains, changes nothing"),
+        CAREFUL: _tr("Careful: asks before every change"),
+        STANDARD: _tr("Standard: asks before what cannot be undone"),
+        AUTONOMOUS: _tr("Autonomous: asks only before the outside world"),
+    }[level_or_default(level)]
+
+
+def level_short(level: str) -> str:
+    """For the head of the section, next to the model."""
+    return {ADVISOR: _tr("Advisor"), CAREFUL: _tr("Careful"), STANDARD: _tr("Standard"),
+            AUTONOMOUS: _tr("Autonomous")}[level_or_default(level)]
+
+
+def level_detail(level: str) -> str:
+    return {
+        ADVISOR: _tr("The agent reads your layers and answers. For a change, it tells you the steps instead of making "
+                     "it."),
+        CAREFUL: _tr("Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, "
+                     "edits and everything else are shown to you first."),
+        STANDARD: _tr("Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with "
+                      "the turn. Exports, removals, deletions, the network and connectors are asked first."),
+        AUTONOMOUS: _tr("Exports into the export folder, layer removals and deletions run without a question too, and "
+                        "not all of them can be undone. The network, connectors and code are still asked first."),
+    }[level_or_default(level)]
 
 
 class AgentPanel(QFrame):
@@ -798,6 +857,7 @@ class AgentSettingsDialog(QDialog):
         self.tabs = QTabWidget(self)
         self.tabs.addTab(general, _tr("Provider"))
         self.tabs.addTab(self._build_sources(values), _tr("Sources"))
+        self.tabs.addTab(self._build_autonomy(values), _tr("Autonomy"))
         self.tabs.addTab(self._build_applications(values), _tr("Other applications"))
         if mcp_error:
             self.mcp_result.setText(_tr("The MCP server could not start: {}").format(mcp_error))
@@ -833,6 +893,39 @@ class AgentSettingsDialog(QDialog):
             f" color: {palette['fm_accent_text']}; }}")
         self.setStyleSheet("")  # the same text again would not polish anew
         self.setStyleSheet(sheet)
+
+    def _build_autonomy(self, values) -> QWidget:
+        """How far the agent of the chat goes alone (core.agent.permissions)."""
+        page = QWidget(self)
+        layout = QVBoxLayout(page)
+        layout.setSpacing(4)
+        self.autonomy = QButtonGroup(page)
+        chosen = level_or_default(getattr(values, "autonomy", STANDARD))
+        for level in LEVELS:
+            button = QRadioButton(level_label(level), page)
+            button.setObjectName(f"radioButton_agent_autonomy_{level}")
+            button.setProperty("level", level)
+            button.setChecked(level == chosen)
+            self.autonomy.addButton(button)
+            detail = QLabel(level_detail(level), page)
+            detail.setObjectName("label_agent_settings_sub")
+            detail.setWordWrap(True)
+            layout.addWidget(button)
+            layout.addWidget(detail)
+            layout.addSpacing(6)
+        note = QLabel(_tr('When the agent asks, "Yes for this conversation" lets that action run without asking '
+                          "again, until a new conversation, another project or another level. Python code of the expert "
+                          "mode is asked at every run. Other applications (MCP) are always asked as at the Standard "
+                          "level."), page)
+        note.setObjectName("label_agent_settings_note")
+        note.setWordWrap(True)
+        layout.addWidget(note)
+        layout.addStretch(1)
+        return page
+
+    def chosen_autonomy(self) -> str:
+        button = self.autonomy.checkedButton()
+        return level_or_default(button.property("level") if button is not None else STANDARD)
 
     def _build_applications(self, values) -> QWidget:
         """The MCP server of the plugin: off by default, and only ever reachable from this computer."""

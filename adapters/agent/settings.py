@@ -14,6 +14,7 @@ from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtCore import QCoreApplication
 
 from ...core.agent.mcp_server import DEFAULT_PORT
+from ...core.agent.permissions import DEFAULT_LEVEL, level_or_default
 from ...core.agent.providers import FREE_PRESET, FREE_QUOTA_URL, PRESETS
 from ...core.agent.providers.base import ProviderConfig
 
@@ -75,6 +76,8 @@ class AgentSettings:
     mcp_enabled: bool = False
     mcp_port: int = DEFAULT_PORT
     mcp_token: str = field(default="", repr=False)
+    # How far the agent of the chat goes alone (core.agent.permissions); "standard" asks before files and the network.
+    autonomy: str = DEFAULT_LEVEL
 
     @property
     def needs_key(self) -> bool:
@@ -133,7 +136,8 @@ def load_settings() -> AgentSettings:
         key_target=str(settings.value(_PREFIX + "key_target", "") or ""),
         mcp_enabled=settings.value(_PREFIX + "mcp_enabled", False, type=bool),
         mcp_port=_port(settings.value(_PREFIX + "mcp_port", DEFAULT_PORT)),
-        mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""))
+        mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""),
+        autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -151,6 +155,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "mcp_enabled", values.mcp_enabled)
     settings.setValue(_PREFIX + "mcp_port", values.mcp_port)
     settings.setValue(_PREFIX + "mcp_token", values.mcp_token)
+    settings.setValue(_PREFIX + "autonomy", level_or_default(values.autonomy))
 
 
 def _auth_manager():

@@ -621,6 +621,19 @@ Do you agree?</source>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Ό,τι άλλαξε μένει και μπορεί να αναιρεθεί. Ζητήστε λιγότερα κάθε φορά ή πείτε τι απομένει.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να κάνει το εξής:
+{}
+{}
+
+Συμφωνείτε;</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1074,6 +1087,86 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>αυτό το έργο · {} γύρος/οι</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Σύμβουλος</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Σύμβουλος: διαβάζει και εξηγεί, δεν αλλάζει τίποτα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Αυτόνομος</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Αυτόνομος: ρωτά μόνο πριν από ενέργειες προς τον έξω κόσμο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Αυτονομία</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Προσεκτικός</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Προσεκτικός: ρωτά πριν από κάθε αλλαγή</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Οι εξαγωγές στον φάκελο εξαγωγής, οι αφαιρέσεις και οι διαγραφές επιπέδων εκτελούνται επίσης χωρίς ερώτηση και δεν μπορούν να αναιρεθούν όλες. Το δίκτυο, οι συνδέσεις και ο κώδικας ερωτώνται πάντα πρώτα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>Τα φίλτρα, τα στυλ, το Processing, οι διατάξεις και οι επεξεργασίες στην προσωρινή μνήμη επεξεργασίας εκτελούνται αμέσως και αναιρούνται μαζί με ολόκληρο το αίτημα. Οι εξαγωγές, οι αφαιρέσεις, οι διαγραφές, το δίκτυο και οι συνδέσεις ερωτώνται πρώτα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>Η μετακίνηση του χάρτη, η εμφάνιση επιπέδων και η επιλογή στοιχείων εκτελούνται μόνες τους. Τα φίλτρα, τα στυλ, τα νέα επίπεδα, οι επεξεργασίες και όλα τα άλλα σας εμφανίζονται πρώτα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Στάνταρ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Στάνταρ: ρωτά πριν από ό,τι δεν αναιρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Ο πράκτορας διαβάζει τα επίπεδά σας και απαντά. Για μια αλλαγή, σας λέει τα βήματα αντί να την κάνει.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Αυτή η ενέργεια εκτελείται χωρίς να ρωτήσει ξανά, μέχρι να ξεκινήσετε νέα συζήτηση, να ανοίξετε άλλο έργο ή να αλλάξετε το επίπεδο αυτονομίας.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Όταν ο πράκτορας ρωτά, το «Ναι, για αυτή τη συζήτηση» επιτρέπει να εκτελεστεί αυτή η ενέργεια χωρίς νέα ερώτηση, μέχρι νέα συζήτηση, άλλο έργο ή άλλο επίπεδο. Ο κώδικας Python της λειτουργίας ειδικού ερωτάται σε κάθε εκτέλεση. Οι άλλες εφαρμογές (MCP) ερωτώνται πάντα, όπως στο επίπεδο Στάνταρ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Ναι, για αυτή τη συζήτηση</translation>
     </message>
 </context>
 <context>

@@ -621,6 +621,19 @@ Elfogadja?</translation>
         <source>What it changed stays and can be undone. Ask for less at once, or say what is left.</source>
         <translation>Amit módosított, megmarad és visszavonható. Kérjen egyszerre kevesebbet, vagy mondja meg, mi maradt.</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="867"/>
+        <source>The agent wants to do this:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Az ügynök a következőt szeretné tenni:
+{}
+{}
+
+Egyetért?</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1074,6 +1087,86 @@ Elfogadja?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
         <source>this project · {} turn(s)</source>
         <translation>ez a projekt · {} kör</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Advisor</source>
+        <translation>Tanácsadó</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="150"/>
+        <source>Advisor: reads and explains, changes nothing</source>
+        <translation>Tanácsadó: olvas és magyaráz, semmit sem módosít</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="160"/>
+        <source>Autonomous</source>
+        <translation>Önálló</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="153"/>
+        <source>Autonomous: asks only before the outside world</source>
+        <translation>Önálló: csak a külvilágot érintő lépések előtt kérdez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="860"/>
+        <source>Autonomy</source>
+        <translation>Önállóság</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Careful</source>
+        <translation>Óvatos</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="151"/>
+        <source>Careful: asks before every change</source>
+        <translation>Óvatos: minden módosítás előtt kérdez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="171"/>
+        <source>Exports into the export folder, layer removals and deletions run without a question too, and not all of them can be undone. The network, connectors and code are still asked first.</source>
+        <translation>Az exportmappába történő exportálások, a rétegek eltávolítása és a törlések kérdés nélkül futnak le, és nem mindegyik vonható vissza. A hálózat, az összekötők és a kód előtt továbbra is rákérdez.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="169"/>
+        <source>Filters, styles, Processing, layouts and edits in the edit buffer run at once and are undone with the turn. Exports, removals, deletions, the network and connectors are asked first.</source>
+        <translation>A szűrők, stílusok, a Processing, az elrendezések és a szerkesztési pufferben végzett szerkesztések azonnal lefutnak, és a teljes kéréssel együtt visszavonhatók. Az exportálások, eltávolítások, törlések, a hálózat és az összekötők előtt rákérdez.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="167"/>
+        <source>Moving the map, showing layers and selecting features run alone. Filters, styles, new layers, edits and everything else are shown to you first.</source>
+        <translation>A térkép mozgatása, a rétegek megjelenítése és az elemek kijelölése magától lefut. A szűrőket, stílusokat, új rétegeket, szerkesztéseket és minden mást előbb megmutatja Önnek.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="159"/>
+        <source>Standard</source>
+        <translation>Szokásos</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="152"/>
+        <source>Standard: asks before what cannot be undone</source>
+        <translation>Szokásos: a vissza nem vonható lépések előtt kérdez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="165"/>
+        <source>The agent reads your layers and answers. For a change, it tells you the steps instead of making it.</source>
+        <translation>Az ügynök elolvassa a rétegeit, és válaszol. Módosítás helyett a lépéseket mondja el Önnek.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="129"/>
+        <source>This action runs without asking again until you start a new conversation, open another project or change the level of autonomy.</source>
+        <translation>Ez a művelet további kérdés nélkül lefut, amíg új beszélgetést nem kezd, másik projektet nem nyit meg, vagy az önállósági szintet nem módosítja.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="916"/>
+        <source>When the agent asks, &quot;Yes for this conversation&quot; lets that action run without asking again, until a new conversation, another project or another level. Python code of the expert mode is asked at every run. Other applications (MCP) are always asked as at the Standard level.</source>
+        <translation>Ha az ügynök kérdez, a „Igen, ehhez a beszélgetéshez” lehetővé teszi, hogy a művelet további kérdés nélkül lefusson egy új beszélgetésig, másik projektig vagy másik szintig. A szakértői mód Python-kódját minden futtatás előtt megkérdezi. A többi alkalmazást (MCP) mindig megkérdezi, ahogy a Szokásos szinten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="128"/>
+        <source>Yes for this conversation</source>
+        <translation>Igen, ehhez a beszélgetéshez</translation>
     </message>
 </context>
 <context>

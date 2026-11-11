@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 from .json_schema import validate
 from .messages import ToolCallPart, ToolResultPart
+from .permissions import ADVISOR_REFUSAL, ASK, RUN, PermissionPolicy
 from .tool_catalog import ToolSpec
 
 logger = logging.getLogger("FilterMate.agent")
@@ -89,15 +90,25 @@ class ToolExecutor:
         return self._tools.get(name)
 
     def needs_confirmation(self, call: ToolCallPart) -> bool:
-        """Only a call that would really run: nobody is asked to confirm an invalid one."""
+        """At the usual level (``standard``): what another application or the bench is asked to confirm."""
+        return self.verdict(call, PermissionPolicy()) == ASK
+
+    def verdict(self, call: ToolCallPart, policy: PermissionPolicy) -> str:
+        """``RUN``, ``ASK`` or ``REFUSE`` under ``policy``. An invalid call runs: it only answers its mistake, and
+        nobody is asked to confirm, or told they may not, what would not run anyway."""
         tool = self._tools.get(call.name)
-        if tool is None or not tool.requires_confirmation or call.parse_error:
-            return False
-        return not validate(call.arguments, tool.input_schema)
+        if tool is None or call.parse_error or validate(call.arguments, tool.input_schema):
+            return RUN
+        return policy.verdict(tool)
 
     @staticmethod
     def declined(call: ToolCallPart) -> ToolResultPart:
         return ToolResultPart(call.call_id, DECLINED, is_error=True)
+
+    @staticmethod
+    def refused(call: ToolCallPart) -> ToolResultPart:
+        """Not run, because of the level of autonomy the user chose."""
+        return ToolResultPart(call.call_id, ADVISOR_REFUSAL, is_error=True)
 
     def execute(self, call: ToolCallPart) -> ToolResultPart:
         """Result of ``call``; never raises, a model reads its mistakes and corrects them."""

@@ -28,6 +28,7 @@ from ...core.agent.open_data import KIND_STAC, KIND_WFS, display_source, parse_e
 from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
+from ...core.agent.permissions import STANDARD, PermissionPolicy, level_note
 from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
@@ -45,7 +46,10 @@ from ...filtermate_api.config import _default_export_root
 from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
 from .agent_mcp_bridge import AgentMcpBridge
-from ..widgets.agent_panel import AgentPanel, AgentSettingsDialog, ask_plain, preset_label
+from ..widgets.agent_panel import (
+    ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_plain, ask_with_conversation,
+    level_short, preset_label,
+)
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -90,10 +94,16 @@ def agent_enabled(config_data) -> bool:
 class AgentChatController(QObject):
     """One panel and its conversation. Also the listener of the conversation."""
 
-    def __init__(self, add_page, plugin, parent_widget=None, ask_user=None) -> None:
+    def __init__(self, add_page, plugin, parent_widget=None, ask_user=None, ask_choice=None) -> None:
         super().__init__(parent_widget)
         self._plugin = plugin
         self._ask_user = ask_user or (lambda title, text: ask_plain(parent_widget, title, text))
+        if ask_choice is None:  # a yes / no given alone answers the questions with three answers too
+            ask_choice = ((lambda title, text: ANSWER_ONCE if self._ask_user(title, text) else ANSWER_NO) if ask_user
+                          else (lambda title, text: ask_with_conversation(parent_widget, title, text)))
+        self._ask_choice = ask_choice
+        # The level of the settings, and what the user allowed for the conversation under way.
+        self._policy = PermissionPolicy(load_settings().autonomy)
         self._parent_widget = parent_widget
         self._engine: Optional[ChatEngine] = None
         self._checkpoint = TurnCheckpoint()
@@ -136,6 +146,8 @@ class AgentChatController(QObject):
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
         values = load_settings()
         destination = destination_text(values.preset, values.model)
+        if values.autonomy != STANDARD:
+            destination += " · " + level_short(values.autonomy)
         if self._mcp.listening:
             destination += " · MCP"
         if self._header_label is not None:
@@ -329,7 +341,8 @@ class AgentChatController(QObject):
                                         authcfg=authcfg,
                                         consent_target=target, key_target=key_target,
                                         mcp_enabled=dialog.mcp_enabled.isChecked(), mcp_port=dialog.mcp_port.value(),
-                                        mcp_token=dialog.chosen_mcp_token()))
+                                        mcp_token=dialog.chosen_mcp_token(), autonomy=dialog.chosen_autonomy()))
+            self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
         finally:
             dialog.key.clear()
             dialog.deleteLater()
@@ -438,7 +451,7 @@ class AgentChatController(QObject):
         if unreachable:
             self.panel.add_note(_tr("Not reachable for this conversation: {}").format(", ".join(unreachable)))
         return ChatEngine(session, ToolExecutor(tools, handlers), QtTransport(self), self, self._checkpoint,
-                          defer=lambda step: QTimer.singleShot(0, step))
+                          defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
 
     def _accessor(self) -> QGISFilterMateAccessor:
         return QGISFilterMateAccessor(self._plugin.get_public_api(), self._plugin)
@@ -510,6 +523,7 @@ class AgentChatController(QObject):
 
     def _reset_view(self) -> None:
         self._engine = None
+        self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         self._seen = None  # another conversation has seen nothing yet
         self.panel.clear_thread()
 
@@ -528,6 +542,7 @@ class AgentChatController(QObject):
         if self._mcp.busy:
             self._say(_tr("Another application is changing the project: try again in a moment."))
             return
+        self._policy.set_level(load_settings().autonomy)  # however the settings were saved
         if self._engine is None:
             self._building = True
             try:
@@ -575,7 +590,7 @@ class AgentChatController(QObject):
         except Exception:  # the request goes without them
             logger.debug("Agent: project notes not read", exc_info=True)
             notes = ""
-        return "\n\n".join(part for part in (summary, notes) if part)
+        return "\n\n".join(part for part in (summary, notes, level_note(self._policy.level)) if part)
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
@@ -801,9 +816,21 @@ class AgentChatController(QObject):
         return f"{data['feature_count']:,} / {total:,}" if isinstance(total, int) and total >= 0 else f"{data['feature_count']:,}"
 
     def confirm(self, call: ToolCallPart) -> bool:
-        return self._confirm(call, _tr("FilterMate agent"))
+        """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
+        rest of the conversation."""
+        title, text = _tr("FilterMate agent"), self._confirm_text(call)
+        spec = self._tools.get(call.name)
+        if spec is None or not self._policy.grantable(spec):
+            return bool(self._ask_user(title, text))
+        answer = self._ask_choice(title, text)
+        if answer == ANSWER_CONVERSATION:
+            self._policy.grant(call.name)
+        return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
+        return self._ask_user(title, self._confirm_text(call))
+
+    def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
         if call.name in self._connector_labels:
@@ -832,9 +859,14 @@ class AgentChatController(QObject):
         elif call.name == "remove_layers":
             text = _tr("The agent wants to remove these layers from the project (their files stay, their styles and "
                        "filters here are lost):\n{}\n\nDo you agree?").format(layers)
-        else:
+        elif call.name == "export_layers":
             text = _tr("The agent wants to export these layers to files:\n{}\n\nDo you agree?").format(layers)
-        return self._ask_user(title, text)
+        else:  # a change the level of autonomy shows first, or a tool added since these texts were written
+            detail = one_line(self._run_detail(call), 300) or one_line(
+                json.dumps(call.arguments, ensure_ascii=False, default=str), 300)
+            text = _tr("The agent wants to do this:\n{}\n{}\n\nDo you agree?").format(
+                one_line(self._describe(call), 200), detail)
+        return text
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         self.panel.set_working(False)
