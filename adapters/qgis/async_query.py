@@ -155,6 +155,30 @@ class QuerySlot:
         return self.generation == generation
 
 
+_WATCHER_CLASS = None
+
+
+def _watcher(on_change):
+    """A QObject whose slot ``changed`` calls ``on_change``: deleting it drops every connection made to it."""
+    global _WATCHER_CLASS
+    if _WATCHER_CLASS is None:
+        from qgis.PyQt.QtCore import QObject, pyqtSlot
+
+        class ReadWatcher(QObject):
+            def __init__(self, callback):
+                super().__init__()
+                self._callback = callback
+
+            @pyqtSlot()
+            def changed(self):
+                callback = self._callback
+                if callback is not None:
+                    callback()
+
+        _WATCHER_CLASS = ReadWatcher
+    return _WATCHER_CLASS(on_change)
+
+
 def submit_query(owner, attribute, layer, description, compute, deliver, loading=None, dependencies=None):
     """Submit a guarded read, bound to the owner and layer lifetimes.
 
@@ -190,37 +214,31 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
     keep_loading = loading is not None and slot.loading == loading
     generation = slot.replace(task, keep_loading=keep_loading)
     slot.loading = loading
-    connections = []
-    # Layers deleted while the read runs. A bound signal kept here holds the address of its layer: disconnecting
-    # it once the layer is gone reads freed memory, an access violation no except can catch (QGIS 4.2, 2026-11-11:
-    # a layer removed during a read, then taskTerminated). Qt drops their connections itself when they go.
-    gone = set()
+    # The signals of the layers go to a receiver of this read alone, never to a plain function: once the read
+    # settles the receiver is deleted and Qt lets go of its connections, whether the layers are still there or not.
+    # Disconnecting through the signals of the layers read their memory: a layer QGIS loaded from a project is not
+    # followed by sip, so one deleted meanwhile was an access violation no except can catch (QGIS 4.2.2 on Windows,
+    # async_query.settled, 2026-11-11, twice: watching willBeDeleted to skip the layers gone was not enough).
+    live = [True]
 
-    def invalidate(*args):
-        if slot.accepts(generation):
+    def invalidate():
+        if live[0] and slot.accepts(generation):
             slot.cancel()
 
-    for position, dependent in enumerate(dependent_layers):
-        def forget(*args, position=position):
-            gone.add(position)
-        deleted = getattr(dependent, 'willBeDeleted', None)
-        if deleted is not None:  # first, so the layer counts as gone before anything it triggers runs
-            deleted.connect(forget)
-            connections.append((position, deleted, forget))
+    watch = _watcher(invalidate)
+    for dependent in dependent_layers:
         for name in ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged',
                      'updatedFields', 'crsChanged', 'dataSourceChanged'):
             signal = getattr(dependent, name, None)
             if signal is not None:
-                signal.connect(invalidate)
-                connections.append((position, signal, invalidate))
+                signal.connect(watch.changed)
 
     def settled():
-        for position, signal, callback in connections:
-            if position in gone:
-                continue
+        if live[0]:
+            live[0] = False
             try:
-                signal.disconnect(callback)
-            except (RuntimeError, TypeError):
+                watch.deleteLater()
+            except RuntimeError:  # already gone with the application
                 pass
         if slot.accepts(generation):
             slot.task = None
