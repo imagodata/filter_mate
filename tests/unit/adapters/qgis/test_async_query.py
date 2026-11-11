@@ -190,9 +190,9 @@ def test_no_signal_of_a_layer_is_ever_disconnected_the_receiver_goes_instead(mod
     other = MagicMock()
     task = module.submit_query(owner, 'query', layer, 'union', lambda _: None, MagicMock(), dependencies=[layer, other])
     watcher, = module.WATCHERS
-    settled = task.taskTerminated.connect.call_args.args[0]
+    settled = task.on_settled
     settled()
-    settled()  # taskCompleted and taskTerminated: let go once
+    settled()  # a second call lets go of nothing more
     watcher.deleteLater.assert_called_once()
     for dependent in (layer, other):
         for name in SIGNALS:
@@ -204,7 +204,7 @@ def test_a_signal_after_the_read_settled_cancels_nothing(module):
     loading = MagicMock()
     task = module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
     watcher, = module.WATCHERS
-    task.taskCompleted.connect.call_args.args[0]()
+    task.finished(True)
     generation = owner.query.generation
     watcher.changed()  # queued before the receiver is deleted
     assert owner.query.generation == generation and not task.isCanceled()
@@ -225,9 +225,37 @@ def test_previous_termination_does_not_clear_new_loading_state(module):
     old = module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
     module.submit_query(owner, 'query', layer, 'read', lambda _: [2], MagicMock(), loading)
     loading.reset_mock()
-    settled = old.taskTerminated.connect.call_args.args[0]
-    settled()
+    old.finished(False)
     loading.assert_not_called()
+
+
+def test_the_read_settles_from_finished_never_from_a_signal_of_the_task(module):
+    """QGIS 4.2.2 on Windows died entering a function connected to taskTerminated (2026-11-11, three times)."""
+    owner, layer = _owner_layer()
+    order = []
+    loading = MagicMock(side_effect=lambda on: order.append(('loading', on)))
+    task = module.submit_query(owner, 'query', layer, 'read', lambda _: [1],
+                               lambda result: order.append(('deliver', result)), loading)
+    task.taskCompleted.connect.assert_not_called()
+    task.taskTerminated.connect.assert_not_called()
+    task.result = [1]
+    task.finished(True)
+    assert order == [('loading', True), ('deliver', [1]), ('loading', False)]
+    assert task.on_settled is None and owner.query.task is None
+    module.WATCHERS[0].deleteLater.assert_called_once()
+
+
+def test_a_terminated_read_settles_too_and_a_failing_settlement_stays_inside_finished(module):
+    owner, layer = _owner_layer()
+    loading = MagicMock()
+    task = module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    task.cancel()
+    task.finished(False)
+    assert loading.call_args.args == (False,) and owner.query.task is None
+    other = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
+    other.on_settled = MagicMock(side_effect=RuntimeError('wrapped C/C++ object has been deleted'))
+    other.finished(False)  # logged, not raised into QGIS
+    assert other.on_settled is None
 
 
 def test_iterator_closes_when_consumer_stops_after_first_row(module):
