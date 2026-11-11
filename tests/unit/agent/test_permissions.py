@@ -215,3 +215,75 @@ class TestEngineUnderALevel:
     def test_declined_answer_is_unchanged(self):
         _, _, session = run_calls(PermissionPolicy(STANDARD), "export", accept=False)
         assert session.messages[-1].parts[0].content == DECLINED
+
+
+class Protector:
+    """Layers protected by id or name, as the adapter of the project answers."""
+
+    def __init__(self, *names):
+        self._names = list(names)
+
+    def name_of(self, reference):
+        reference = reference[:-3] if reference.endswith("_id") else reference
+        return reference if reference in self._names else None
+
+    def names(self):
+        return list(self._names)
+
+
+class TestProtectedLayers:
+    def test_the_layers_a_call_changes(self):
+        from core.agent.permissions import changed_layers
+        assert changed_layers("apply_filter", {"layer_name": "communes"}) == ["communes"]
+        assert changed_layers("cross_filter", {"source_layer": "routes", "target_layers": ["a", "b"]}) == ["a", "b"]
+        assert changed_layers("join_layers", {"layer": "a", "join_layer": "b"}) == ["a"]
+        assert changed_layers("zoom_to", {"layer": "a"}) == []
+        assert changed_layers("rename_layer", {"layer": "Fond", "group": True}) == []
+        assert changed_layers("clear_filters", {}) is None and changed_layers("clear_filters", {"layers": []}) is None
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_a_change_of_a_protected_layer_is_refused_at_every_level(self, level):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(level, granted=("apply_filter",), protector=Protector("cadastre"))
+        call = ToolCallPart("c", "apply_filter", {"layer_name": "cadastre_id", "expression": '"a" = 1'})
+        assert executor.verdict(call, policy) == PROTECTED
+        refusal = ToolExecutor.refused(call, policy).content
+        assert "'cadastre'" in refusal and "protected" in refusal
+
+    def test_reading_using_as_source_and_showing_stay_allowed(self):
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(STANDARD, protector=Protector("cadastre"))
+        for name, arguments in (
+                ("cross_filter", {"source_layer": "cadastre", "target_layers": ["routes"], "predicates": ["Intersect"]}),
+                ("zoom_to", {"layer": "cadastre"}), ("set_layers_visibility", {"layers": ["cadastre"], "visible": False}),
+                ("join_layers", {"layer": "routes", "join_layer": "cadastre", "target_field": "a", "join_field": "a"})):
+            call = ToolCallPart("c", name, arguments)
+            assert executor.verdict(call, policy) == RUN, name
+
+    def test_a_clear_is_refused_on_a_protected_layer_and_on_every_layer(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        call = ToolCallPart("c", "clear_filters", {"layers": ["routes", "cadastre"]})
+        assert executor.verdict(call, PermissionPolicy(protector=Protector("cadastre"))) == PROTECTED
+        assert executor.verdict(call, PermissionPolicy(protector=Protector())) == RUN
+        # The chat asks for layers; another caller (REST) may clear them all: every protected layer counts then.
+        assert "'cadastre'" in PermissionPolicy(protector=Protector("cadastre")).protection_refusal("clear_filters", {})
+
+    def test_without_protector_nothing_changes_and_the_advisor_text_stays(self):
+        call = ToolCallPart("c", "apply_filter", {"layer_name": "a", "expression": "1"})
+        assert ToolExecutor.refused(call, PermissionPolicy(ADVISOR)).content == ADVISOR_REFUSAL
+        assert ToolExecutor.refused(call).content == ADVISOR_REFUSAL
+
+    def test_the_engine_answers_the_protection(self):
+        tools = [spec("read", read_only=True), ToolSpec("apply_filter", "A tool.", EMPTY)]
+        session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+        seen = []
+        handlers = {"read": lambda a: seen.append("read") or {}, "apply_filter": lambda a: seen.append("f") or {}}
+        transport, listener = Transport(), Listener(True)
+        engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(),
+                            policy=PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre")))
+        engine.send("go")
+        transport.emit(turn(STOP_TOOL_USE, ToolCallPart("c1", "apply_filter", {"layer_name": "cadastre"})))
+        assert seen == [] and not [entry for entry in listener.log if entry[0] == "confirm"]
+        assert "'cadastre'" in session.messages[-1].parts[0].content

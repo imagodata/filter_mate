@@ -802,6 +802,11 @@ Godkänner du?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Bokmärke: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Steg {} kördes inte: det skulle ändra ett lager som du har skyddat mot agenten ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Godkänner du?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ja, för den här konversationen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>LAGER SKYDDADE MOT AGENTEN (DETTA PROJEKT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agenten läser dem och använder dem som källa, men ändrar dem aldrig: inget filter, ingen stil, redigering, fält, koppling, nytt namn eller borttagning, oavsett nivå, även i ett recept och för andra program. Sparas i projektet.</translation>
     </message>
 </context>
 <context>

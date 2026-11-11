@@ -802,6 +802,11 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>Закладка: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Шаг {} не выполнен: он изменил бы слой, который вы защитили от агента ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Да, для этого разговора</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>СЛОИ, ЗАЩИЩЁННЫЕ ОТ АГЕНТА (ЭТОТ ПРОЕКТ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Агент читает их и использует как источник, но никогда не изменяет: ни фильтра, ни стиля, ни правки, ни поля, ни связи, ни нового имени, ни удаления — на любом уровне, в рецепте тоже и для других приложений. Сохраняется в проекте.</translation>
     </message>
 </context>
 <context>

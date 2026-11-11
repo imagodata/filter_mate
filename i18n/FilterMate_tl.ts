@@ -802,6 +802,11 @@ Sumasang-ayon ka ba?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Bookmark: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Hindi pinatakbo ang hakbang {}: babaguhin nito ang isang layer na pinrotektahan mo mula sa agent ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Sumasang-ayon ka ba?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Oo, para sa pag-uusap na ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>MGA LAYER NA PROTEKTADO MULA SA AGENT (PROYEKTONG ITO)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Binabasa ng agent ang mga ito at ginagamit bilang source, pero hindi kailanman binabago: walang filter, style, pag-edit, field, join, bagong pangalan o pag-alis, anuman ang antas, pati sa isang recipe at para sa ibang application. Naka-save sa proyekto.</translation>
     </message>
 </context>
 <context>

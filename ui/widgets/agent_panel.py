@@ -848,8 +848,11 @@ class AgentPanel(QFrame):
 class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
-    def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="") -> None:
+    def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="",
+                 project_layers=()) -> None:
         super().__init__(parent)
+        # (layer id, name, protected) of the open project, for the protected layers of the Autonomy tab.
+        self._project_layers = list(project_layers)
         self.setProperty(OWN_STYLE_PROPERTY, True)  # styled as the mockup draws it: the dock must not reset it
         self.setWindowTitle(_tr("FilterMate agent"))
         self._tester = tester
@@ -1022,8 +1025,34 @@ class AgentSettingsDialog(QDialog):
         layout.addSpacing(10)
         layout.addWidget(self.expert_python)
         layout.addWidget(self._expert_note)
+        layout.addSpacing(10)
+        protected_title = QLabel(_tr("LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)"), page)
+        protected_title.setObjectName("label_agent_settings_heading")
+        self.protected_layers = QListWidget(page)
+        self.protected_layers.setObjectName("listWidget_agent_protected_layers")
+        self.protected_layers.setMaximumHeight(140)
+        for layer_id, name, protected in self._project_layers:
+            item = QListWidgetItem(name, self.protected_layers)
+            item.setData(Qt.ItemDataRole.UserRole, layer_id)
+            item.setToolTip(layer_id)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked if protected else Qt.CheckState.Unchecked)
+        protected_note = QLabel(_tr("The agent reads them and uses them as a source, but never changes them: no "
+                                    "filter, style, edit, field, join, new name or removal, whatever the level, in a "
+                                    "recipe too, and for other applications. Kept in the project."), page)
+        protected_note.setObjectName("label_agent_settings_sub")
+        protected_note.setWordWrap(True)
+        for widget in (protected_title, self.protected_layers, protected_note):
+            widget.setVisible(bool(self._project_layers))
+            layout.addWidget(widget)
         layout.addStretch(1)
         return page
+
+    def chosen_protected(self):
+        """The ids of the layers ticked as protected."""
+        return [self.protected_layers.item(row).data(Qt.ItemDataRole.UserRole)
+                for row in range(self.protected_layers.count())
+                if self.protected_layers.item(row).checkState() == Qt.CheckState.Checked]
 
     def chosen_autonomy(self) -> str:
         button = self.autonomy.checkedButton()

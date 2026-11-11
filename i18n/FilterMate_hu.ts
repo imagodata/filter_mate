@@ -802,6 +802,11 @@ Egyetért?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Könyvjelző: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>A(z) {}. lépés nem futott le: egy olyan réteget módosítana, amelyet az ügynök elől védett ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Egyetért?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Igen, ehhez a beszélgetéshez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>AZ ÜGYNÖK ELŐL VÉDETT RÉTEGEK (EZ A PROJEKT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Az ügynök olvassa és forrásként használja őket, de soha nem módosítja: sem szűrő, sem stílus, sem szerkesztés, sem mező, sem összekapcsolás, sem új név, sem eltávolítás, bármely szinten, receptben és más alkalmazások számára sem. A projektben tárolva.</translation>
     </message>
 </context>
 <context>

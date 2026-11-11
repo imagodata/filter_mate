@@ -802,6 +802,11 @@ Bạn có đồng ý không?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Dấu trang: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Bước {} không được chạy: bước này sẽ thay đổi một lớp bạn đã bảo vệ khỏi tác tử ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Bạn có đồng ý không?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Có, cho cuộc trò chuyện này</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>CÁC LỚP ĐƯỢC BẢO VỆ KHỎI TÁC TỬ (DỰ ÁN NÀY)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Tác tử đọc chúng và dùng làm nguồn, nhưng không bao giờ thay đổi chúng: không lọc, không kiểu hiển thị, không chỉnh sửa, không trường, không nối, không đổi tên hay xóa, ở bất kỳ mức nào, cả trong công thức và cho các ứng dụng khác. Được lưu trong dự án.</translation>
     </message>
 </context>
 <context>

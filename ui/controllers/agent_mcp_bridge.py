@@ -110,6 +110,11 @@ class AgentMcpBridge:
             return ToolResultPart(call.call_id, CHAT_IS_WORKING, is_error=True)
         if not tool.read_only and QApplication.activeModalWidget() is not None:
             return ToolResultPart(call.call_id, DIALOG_OPEN, is_error=True)
+        protected = self._host.protection_refusal(call)
+        if protected:  # a layer the user protected in this project: refused to every application too
+            refused = ToolResultPart(call.call_id, protected, is_error=True)
+            self._journal(call, refused, client)
+            return refused
         if self._executor.needs_confirmation(call):
             refusal = self._confirmed(call, client)
             if refusal is not None:

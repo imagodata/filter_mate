@@ -802,6 +802,11 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>บุ๊กมาร์ก: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>ไม่ได้เรียกใช้ขั้นตอนที่ {}: ขั้นตอนนี้จะเปลี่ยนชั้นข้อมูลที่คุณป้องกันไว้จากเอเจนต์ ({})</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>ใช่ สำหรับการสนทนานี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>ชั้นข้อมูลที่ป้องกันจากเอเจนต์ (โครงการนี้)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>เอเจนต์อ่านและใช้เป็นแหล่งข้อมูล แต่จะไม่เปลี่ยนแปลงเลย: ไม่มีตัวกรอง สไตล์ การแก้ไข ฟิลด์ การเชื่อม ชื่อใหม่ หรือการลบ ไม่ว่าระดับใด ทั้งในสูตรและสำหรับแอปพลิเคชันอื่น บันทึกไว้ในโครงการ</translation>
     </message>
 </context>
 <context>

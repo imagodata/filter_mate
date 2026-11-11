@@ -802,6 +802,11 @@ Gaat u akkoord?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Bladwijzer: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Stap {} is niet uitgevoerd: deze zou een laag wijzigen die u tegen de agent hebt beschermd ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Gaat u akkoord?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ja, voor dit gesprek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>LAGEN BESCHERMD TEGEN DE AGENT (DIT PROJECT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>De agent leest ze en gebruikt ze als bron, maar wijzigt ze nooit: geen filter, stijl, bewerking, veld, koppeling, nieuwe naam of verwijdering, op elk niveau, ook in een recept en voor andere toepassingen. Opgeslagen in het project.</translation>
     </message>
 </context>
 <context>

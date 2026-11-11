@@ -802,6 +802,11 @@ Souhlasíte?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Záložka: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Krok {} nebyl proveden: změnil by vrstvu, kterou jste chránili před agentem ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Souhlasíte?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ano, pro tuto konverzaci</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>VRSTVY CHRÁNĚNÉ PŘED AGENTEM (TENTO PROJEKT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agent je čte a používá jako zdroj, ale nikdy je nemění: žádný filtr, styl, úprava, pole, spojení, nový název ani odebrání, na jakékoli úrovni, ani v receptu, ani pro jiné aplikace. Uloženo v projektu.</translation>
     </message>
 </context>
 <context>

@@ -802,6 +802,11 @@ Rozimisiz?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Xatcho‘p: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>{}-qadam bajarilmadi: u agentdan himoya qilgan qatlamingizni o‘zgartirgan bo‘lardi ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1370,6 +1375,16 @@ Rozimisiz?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ha, shu suhbat uchun</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>AGENTDAN HIMOYALANGAN QATLAMLAR (USHBU LOYIHA)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agent ularni o‘qiydi va manba sifatida ishlatadi, lekin hech qachon o‘zgartirmaydi: filtr, uslub, tahrir, maydon, birlashtirish, yangi nom yoki o‘chirish yo‘q, har qanday darajada, retseptda ham, boshqa ilovalar uchun ham. Loyihada saqlanadi.</translation>
     </message>
 </context>
 <context>
