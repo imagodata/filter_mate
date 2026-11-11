@@ -46,6 +46,8 @@ class SnapshotQueryTask(QgsTask):
         self.feedback = QgsFeedback()
         self.compute = compute
         self.deliver = deliver
+        # Called once, last, from finished(): the read lets go of its UI state there (see submit_query).
+        self.on_settled = None
         self.result = None
         self.error = None
         self.setDependentLayers([layer])
@@ -110,6 +112,12 @@ class SnapshotQueryTask(QgsTask):
         finally:
             self.deliver = None
             self.compute = None
+            on_settled, self.on_settled = self.on_settled, None
+            if on_settled is not None:
+                try:
+                    on_settled()
+                except Exception as exc:  # a Python error must not escape a C++ virtual
+                    logger.warning("Snapshot settlement failed (%s)", type(exc).__name__)
 
 
 def collect_extent(task, request):
@@ -256,8 +264,12 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
                     message = QCoreApplication.translate('FilterMate', 'The service could not be read. Please retry.')
                 show_warning(message, QCoreApplication.translate('FilterMate', 'Read failed'))
 
-    task.taskCompleted.connect(settled)
-    task.taskTerminated.connect(settled)
+    # Settled from finished(), which the task manager calls on the main thread for a completed or a terminated
+    # task while the task is alive, before it schedules its deletion. Not from taskCompleted / taskTerminated: a
+    # Python function connected to them is reached through a PyQt proxy, and QGIS 4.2.2 on Windows died entering
+    # it (access violation, async_query.settled at line ???, i.e. before its first line, 2026-11-11, a third time
+    # after #309 and #341 had changed only its body).
+    task.on_settled = settled
     if loading is not None and not keep_loading:
         loading(True)
     QgsApplication.taskManager().addTask(task)
