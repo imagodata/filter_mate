@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Recipes: the changes of one request of the agent, kept under a name and run again without a model.
 
-Plain Python. "Buildings within 50 m of the river, then the schools near them, styled by height": a request the model
+Plain Python. A recipe whose cross filters read a source layer can be *live*: it runs again by itself when the edits
+of that source are saved, so the targets follow the source (``live_problem``, ``followed_sources``).
+
+"Buildings within 50 m of the river, then the schools near them, styled by height": a request the model
 worked out once in several tool calls. A recipe keeps those calls (each tool and its arguments, as the model sent them)
 in the project file, and the panel runs them again in order, with no request to any provider: nothing leaves the
 machine and nothing is paid. What a step reads (the selection, the layers by name) is read again at each run, so a
@@ -50,6 +53,15 @@ def plain(text: Any, limit: int) -> str:
     return " ".join(visible.split())[:limit]
 
 
+# A live recipe runs again by itself when the edits of its source are saved: only what is undone with a turn and asks
+# nothing at the usual level, and nothing that moves the map or writes (an export, an edit) at every save of the user.
+LIVE_TOOLS = frozenset({
+    "cross_filter", "apply_filter", "geometry_filter", "point_cloud_filter", "clear_filters", "select_features",
+    "set_layers_visibility", "set_layer_style", "set_labels",
+})
+FOLLOW_TOOL = "cross_filter"  # what reads a source layer again at each run: a live recipe follows its sources
+
+
 class RecipeError(ValueError):
     """Why a recipe cannot be kept or run; the message is for the model or the user."""
 
@@ -88,8 +100,52 @@ def _clean(recipe: Any) -> Optional[Dict[str, Any]]:
     steps = [step for step in (_clean_step(item) for item in recipe["steps"][:MAX_STEPS]) if step is not None]
     if not name or not steps:
         return None
-    return {"id": recipe["id"][:20], "name": name, "request": plain(recipe.get("request"), MAX_REQUEST),
-            "steps": steps}
+    cleaned = {"id": recipe["id"][:20], "name": name, "request": plain(recipe.get("request"), MAX_REQUEST),
+               "steps": steps}
+    if recipe.get("live") is True and not live_problem(cleaned):
+        cleaned["live"] = True
+    return cleaned
+
+
+def followed_sources(recipe: Dict[str, Any]) -> List[str]:
+    """The source layers a recipe reads again at each run (name or id, as the steps hold them), in order, once."""
+    sources: List[str] = []
+    for step in recipe["steps"]:
+        source = step["arguments"].get("source_layer") if step["tool"] == FOLLOW_TOOL else None
+        if isinstance(source, str) and source.strip() and source not in sources:
+            sources.append(source)
+    return sources
+
+
+def live_problem(recipe: Dict[str, Any]) -> str:
+    """Why a recipe cannot run again by itself; "" when it can."""
+    if not followed_sources(recipe):
+        return "it reads no source layer again (no cross filter): nothing to follow"
+    others = sorted({step["tool"] for step in recipe["steps"]} - LIVE_TOOLS)
+    if others:
+        return "some steps must not run at every save: " + ", ".join(others)
+    return ""
+
+
+def with_live(recipes: Sequence[Dict[str, Any]], recipe_id: str, on: bool) -> List[Dict[str, Any]]:
+    """``recipes`` with ``recipe_id`` following its sources, or no longer.
+
+    Raises:
+        RecipeError: No recipe of that id, or one that cannot follow its sources.
+    """
+    recipe = find(recipes, recipe_id)
+    if recipe is None:
+        raise RecipeError(f"there is no recipe {recipe_id!r}")
+    if on and live_problem(recipe):
+        raise RecipeError(live_problem(recipe))
+    changed = []
+    for item in recipes:
+        if item["id"] == recipe_id:
+            item = {key: value for key, value in item.items() if key != "live"}
+            if on:
+                item["live"] = True
+        changed.append(item)
+    return changed
 
 
 def parse(stored: str) -> List[Dict[str, Any]]:
@@ -142,8 +198,11 @@ def saved(recipes: Sequence[Dict[str, Any]], name: str, request: str,
     kept_recipes = list(recipes)
     for index, recipe in enumerate(kept_recipes):
         if recipe["name"].casefold() == name.casefold():
-            kept_recipes[index] = {"id": recipe["id"], "name": name, "request": plain(request, MAX_REQUEST),
-                                   "steps": [dict(step) for step in steps]}
+            replaced = {"id": recipe["id"], "name": name, "request": plain(request, MAX_REQUEST),
+                        "steps": [dict(step) for step in steps]}
+            if recipe.get("live") and not live_problem(replaced):  # new steps that may still follow their sources
+                replaced["live"] = True
+            kept_recipes[index] = replaced
             return kept_recipes
     if len(kept_recipes) >= MAX_RECIPES:
         raise RecipeError(f"{MAX_RECIPES} recipes are kept already: remove one first")
@@ -170,7 +229,8 @@ def find(recipes: Sequence[Dict[str, Any]], recipe_id: str) -> Optional[Dict[str
 
 def summary(recipes: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """What the model is told of the recipes: name and tools, never the arguments nor the labels of the file."""
-    return [{"recipe_id": recipe["id"], "name": recipe["name"], "tools": [step["tool"] for step in recipe["steps"]]}
+    return [dict({"recipe_id": recipe["id"], "name": recipe["name"], "tools": [step["tool"] for step in recipe["steps"]]},
+                 **({"live": True} if recipe.get("live") else {}))
             for recipe in recipes]
 
 

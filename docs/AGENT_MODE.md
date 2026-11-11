@@ -284,6 +284,26 @@ nothing is sent, nothing is paid, and it works with no provider set up. `core/ag
   a step of the history.
 - The MCP servers do not offer these tools: recipes live in the panel of the dock. The model cannot run a recipe.
 
+### Live recipes
+
+A filter of FilterMate is a subset string written from the source as it was: when the source changes, the targets
+keep the old answer. A favorite does not help, it replays the same strings. A recipe does: its cross filter reads the
+source again at each run. So a recipe can be **live** (**⋯ > Recipes > *name* > Run again when its source is saved**):
+each time the edits of one of its source layers are saved in QGIS (`afterCommitChanges`), it runs again by itself.
+
+- What may be live (`live_problem` in `core/agent/recipes.py`): a recipe with at least one `cross_filter` (its
+  `source_layer` values are the layers followed), whose steps are all in `LIVE_TOOLS`: filters, selection, visibility,
+  style and labels. What writes (an export, an edit), adds or removes layers, runs Processing or moves the map is
+  refused: it would happen at every save. A stored `live` flag on any other recipe is dropped when the project is
+  read, so a project made by someone else cannot make an export run at every save.
+- A live run asks nothing: at the usual level these steps run alone, and one that would ask (a layer protected from
+  the agent) stops it. It is one turn of the history, undone as one, and shows in the thread as a note.
+- Several saves within 0.8 s run it once. While FilterMate or the chat works, it waits and tries again for about a
+  minute, then says so. A source layer is found by its id, then by its name when one layer only has it; a source
+  removed from the project is no longer followed.
+- Not followed: changes made outside QGIS (another user of a PostGIS table, a script writing the file). Only the
+  saves of this QGIS.
+
 ## History
 
 - Every turn that changed a layer is one `CrossOperation` under the key `filtermate_agent_turn` of the automation
