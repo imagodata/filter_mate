@@ -1039,6 +1039,74 @@ def test_agent_similar_objects(folder):
           and max(w.x_min + w.side for w in windows) >= 3000 and min(w.y_max - w.side for w in windows) <= 0, keys)
 
 
+def test_map_images(folder):
+    """2026-11-11: the images of the MCP server of the plugin, the map and the contact sheets of objects."""
+    import base64
+    from qgis.core import QgsFeature, QgsVectorLayer
+    images = importlib.import_module(PACKAGE + ".adapters.public_api.map_images")
+    executor = importlib.import_module(PACKAGE + ".core.agent.tool_executor")
+    layer = make_shapes(folder)
+    project = QgsProject.instance()
+    project.addMapLayer(layer)
+
+    def polygons(name, shapes):
+        made = QgsVectorLayer("Polygon?crs=EPSG:2154&field=name:string", name, "memory")
+        features = []
+        for shape in shapes:
+            feature = QgsFeature(made.fields())
+            feature.setAttributes([shape])
+            feature.setGeometry(shape_geometry(layer, shape))
+            features.append(feature)
+        made.dataProvider().addFeatures(features)
+        project.addMapLayer(made)
+        return made
+    objects, examples = polygons("found", ["alike", "large", "strip"]), polygons("example", ["clicked", "alike"])
+
+    def decoded(data):
+        image = QImage()
+        image.loadFromData(base64.b64decode(data), "JPEG")
+        return image
+    try:
+        examples.selectByIds([next(f.id() for f in examples.getFeatures() if f["name"] == "clicked")])
+        data, info = images.contact_sheet(layer.id(), objects.name(), example_layer=examples.id(), tile=120)
+        sheet = decoded(data)
+        check("a contact sheet: tile E then one tile per object, numbered with its feature id",
+              (sheet.width(), sheet.height()) == (480, 120) and [t["tile"] for t in info["tiles"]] == [1, 2, 3]
+              and info["example_fid"] is not None and len({t["fid"] for t in info["tiles"]}) == 3, (sheet.size(), info))
+        centre = QColor(sheet.pixel(120 + 60, 60))  # tile 1: the alike square, in the middle of its tile
+        check("each object in the middle of its tile", centre.red() > 180 and centre.green() > 180, centre.name())
+        red = sum(1 for x in range(0, 480, 2) for y in range(0, 120, 2)
+                  if QColor(sheet.pixel(x, y)).red() > 180 and QColor(sheet.pixel(x, y)).green() < 90)
+        check("outlined in red", red > 20, red)
+        examples.removeSelection()
+        try:
+            images.contact_sheet(layer.id(), objects.name(), example_layer=examples.id())
+            refused = False
+        except ValueError as exc:
+            refused = "select the one example" in str(exc)
+        check("an example layer without its one selection: refused", refused)
+        objects.selectByIds([next(f.id() for f in objects.getFeatures() if f["name"] == "strip")])
+        data, info = images.contact_sheet(layer.name(), objects.id())
+        check("the selected objects only, no example tile",
+              decoded(data).width() == 160 and len(info["tiles"]) == 1 and info["example_fid"] is None, info)
+        data, info = images.map_image(layer.extent().asWktPolygon(), "EPSG:2154", 400)
+        drawn = decoded(data)
+        check("an image of the map without a map window: the layers checked, the extent given",
+              (drawn.width(), drawn.height()) == (400, 400) and info["crs"] == "EPSG:2154", (drawn.size(), info))
+        handlers = images.handlers()
+        answer = handlers["contact_sheet"]({"raster": layer.id(), "layer": objects.id()})
+        check("the handler answers the image beside the JSON",
+              isinstance(answer, executor.WithImages) and answer.images[0][0] == "image/jpeg", type(answer).__name__)
+        try:
+            handlers["contact_sheet"]({"raster": "ghost", "layer": objects.id()})
+            told = False
+        except executor.ToolFailure as exc:
+            told = "not found" in str(exc)
+        check("a refusal is told to the client", told)
+    finally:
+        project.removeMapLayers([objects.id(), examples.id(), layer.id()])
+
+
 class _TileHandler(BaseHTTPRequestHandler):
     """A web map where every tile is bright."""
 
@@ -1150,6 +1218,7 @@ with tempfile.TemporaryDirectory() as folder:
     test_similar_flow(folder)
     test_feature_candidates_and_sorting(folder)
     test_agent_similar_objects(folder)
+    test_map_images(folder)
     test_web_service()
     test_real_model()
     QgsProject.instance().removeAllMapLayers()

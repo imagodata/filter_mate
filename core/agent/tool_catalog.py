@@ -97,3 +97,46 @@ CHAT_ONLY = (
 def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     """The tools the chat offers."""
     return tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + CHAT_ONLY
+
+
+MAP_IMAGE = "map_image"
+CONTACT_SHEET = "contact_sheet"
+_EXTENT = {"type": "string", "maxLength": 100000,
+           "description": "Extent as WKT, e.g. extent_wkt of map_context; empty: the visible map"}
+_CRS = {"type": "string", "maxLength": 64, "description": "CRS of the WKT, e.g. EPSG:2154; empty: the CRS of the map"}
+# Tools of the MCP server of the plugin alone (2026-11-11, decided with the user): an image of the map goes to the
+# application that asked for it, never to the provider of the chat. Read-only: they draw, they change nothing; open
+# world: the image leaves QGIS (the application may send it to its own provider), so each one shows in the thread.
+MCP_ONLY = (
+    ToolSpec(
+        name=MAP_IMAGE, title="Image of the map",
+        description=("An image (JPEG) of the map of QGIS as the user sees it, with the layers shown: the visible map, "
+                     "or the extent given. Returns the image with width, height, extent_wkt, crs and scale. The image "
+                     "is made on the computer of the user and sent to you, the application that asked; it may show "
+                     "private data: ask before sending it further."),
+        input_schema={"type": "object", "properties": {
+            "extent_wkt": _EXTENT, "crs": _CRS,
+            "width": {"type": "integer", "minimum": 128, "maximum": 1600, "default": 1024,
+                      "description": "Width in pixels; the height follows the extent"}},
+            "additionalProperties": False},
+        read_only=True, idempotent=True, open_world=True),
+    ToolSpec(
+        name=CONTACT_SHEET, title="Contact sheet of objects",
+        description=("A contact sheet (JPEG) to judge objects by eye: tile E is the example (the one selected feature of "
+                     "example_layer, or none), tiles 1 to n the features of layer (its selected features, or all it "
+                     "shows), each cut out of raster around the object and outlined in red. Use it to tell, for "
+                     "example, which objects found by similar_objects are really like the example, then "
+                     "select_features on the ones meant (fids gives the feature id of each tile). At most 30 tiles. "
+                     "Returns the image with tiles [{tile, fid}] and example_fid."),
+        input_schema={"type": "object", "properties": {
+            "raster": {"type": "string", "minLength": 1, "maxLength": 1000,
+                       "description": "Raster the tiles are cut from (an orthophoto): layer id or name"},
+            "layer": {"type": "string", "minLength": 1, "maxLength": 1000,
+                      "description": "Polygon or point layer of the objects to show: layer id or name"},
+            "example_layer": {"type": "string", "maxLength": 1000, "default": "",
+                              "description": "Layer whose one selected feature is the example (tile E); empty: none"},
+            "tile": {"type": "integer", "minimum": 96, "maximum": 256, "default": 160,
+                     "description": "Side of a tile in pixels"}},
+            "required": ["raster", "layer"], "additionalProperties": False},
+        read_only=True, idempotent=True, open_world=True),
+)

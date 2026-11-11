@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Callable, Dict, Mapping, Optional, Sequence
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 from .json_schema import validate
 from .messages import ToolCallPart, ToolResultPart
@@ -20,6 +21,14 @@ DECLINED = "The user declined this action. Nothing was done; do not try again un
 
 class ToolFailure(Exception):
     """A failure whose message is meant for the model (layer not found, rejected filter, QGIS busy)."""
+
+
+@dataclass(frozen=True)
+class WithImages:
+    """What a handler answers when images go with it: ``answer`` as JSON, ``images`` as ``(mime type, base64)``."""
+
+    answer: Any
+    images: Tuple[Tuple[str, str], ...] = ()
 
 
 def _with_defaults(arguments: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
@@ -105,7 +114,10 @@ class ToolExecutor:
         if problems:
             return failure("Invalid arguments: " + "; ".join(problems))
         try:
-            return ToolResultPart(call.call_id, bounded_json(handler(_with_defaults(call.arguments, tool.input_schema))))
+            value = handler(_with_defaults(call.arguments, tool.input_schema))
+            if isinstance(value, WithImages):
+                return ToolResultPart(call.call_id, bounded_json(value.answer), images=tuple(value.images))
+            return ToolResultPart(call.call_id, bounded_json(value))
         except ToolFailure as exc:
             return failure(str(exc))
         except Exception:  # the text of an unexpected exception may hold paths or SQL: it stays in the log

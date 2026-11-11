@@ -367,6 +367,16 @@ Ficam no buffer de edição até guardar as edições da camada, e anular a rond
         <translation>A pesquisar imagens de satélite em {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Imagem do mapa enviada</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Folha de contato de {} enviada</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>A pesquisar {} em {}</translation>

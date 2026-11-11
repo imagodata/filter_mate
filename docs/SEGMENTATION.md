@@ -196,6 +196,13 @@ they are a building), the proposals left closer to the rejected ones than to the
 object are taken away. Median precision of the proposals left 0.21 to 0.33 on the ten others (0.43 to 0.63 on
 the first ten), none of the buildings they held lost.
 
+**Sorting by a model that looks, not adopted** (2026-11-11, `scripts/sam_vision_judge.py`, rule set before any
+call). The proposals of the search above were shown to Claude Haiku 5.5 as contact sheets made by the
+`contact_sheet` tool of the MCP server (tile E the clicked object, then the proposals), with the question "which are
+the same kind of object as the example?". It kept almost all of them: on the ten others, precision 0.36 for all the
+proposals, 0.34 for those it kept (the rule asked +0.10). What SAM gets wrong here is mostly the outline, a part of a
+roof or two roofs in one, not the kind of object: a judge of the kind cannot see it.
+
 **Tried and not adopted.** A score and colour filter (precision 0.24 to 0.31 on the ten others, short of the
 0.10 required, `scripts/sam_similar_analysis.py`), and a second, framed pass of SAM after the click (median
 overlap 0.711 to 0.713 on 20 buildings, short of the 0.02 required).

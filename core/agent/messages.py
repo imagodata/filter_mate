@@ -47,6 +47,9 @@ class ToolResultPart:
     call_id: str
     content: str
     is_error: bool = False
+    # ``(mime type, base64 data)`` of images that go with the answer. Only the MCP server of the plugin sends them, to
+    # the application that asked: the providers of the chat never get one.
+    images: Tuple[Tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)

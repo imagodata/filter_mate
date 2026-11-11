@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Images of the map for the other applications.** The MCP server of the plugin gains `map_image` (the map as the user sees it, or an extent, as JPEG) and `contact_sheet` (the objects of a layer cut out of a raster, numbered and outlined, beside an example), for an application such as Claude Desktop to look at the map. The chat never sends an image to its provider; each image sent shows in the thread. A model sorting the similar objects on such sheets was measured and did not help (`docs/SEGMENTATION.md`).
+
 ## [5.1.0] - 2026-11-10
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

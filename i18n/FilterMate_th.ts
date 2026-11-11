@@ -367,6 +367,16 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <translation>กำลังค้นหาภาพถ่ายดาวเทียมบน {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>ส่งภาพแผนที่แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>ส่งแผ่นรวมภาพของ {} แล้ว</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>กำลังค้นหาบน {}: {}</translation>

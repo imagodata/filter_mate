@@ -191,6 +191,13 @@ class TestProtocol:
         self.rpc("tools/call", {"name": "apply_filter"})
         assert self.calls == [("apply_filter", {}, "MCP client")]
 
+    def test_images_follow_the_text(self):
+        self.protocol = McpProtocol(lambda: (self.tool,), lambda tool, arguments, client: ToolResultPart(
+            "x", '{"width": 2}', images=(("image/jpeg", "AAAA"),)), "Hello", "9")
+        answer = json.loads(self.rpc("tools/call", {"name": "apply_filter"}).body)
+        assert answer["result"]["content"] == [{"type": "text", "text": '{"width": 2}'},
+                                               {"type": "image", "data": "AAAA", "mimeType": "image/jpeg"}]
+
     def test_a_failure_is_a_result(self):
         answer = json.loads(self.rpc("tools/call", {"name": "apply_filter", "arguments": {"fail": True}}).body)
         assert answer["result"]["isError"] is True

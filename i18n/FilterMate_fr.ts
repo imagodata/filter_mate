@@ -155,6 +155,16 @@
         <translation>Recherche d'imagerie satellite sur {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Image de la carte envoyée</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Planche contact de {} envoyée</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="708"/>
         <source>The agent wants to run this action on an external connector:
 {}

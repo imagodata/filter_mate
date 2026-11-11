@@ -367,6 +367,16 @@ Es queden a la memòria d'edició fins que deseu les edicions de la capa, i desf
         <translation>Cerca d'imatges de satèl·lit a {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Imatge del mapa enviada</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Full de contactes de {} enviat</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Cerca a {}: {}</translation>

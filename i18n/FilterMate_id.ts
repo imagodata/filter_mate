@@ -367,6 +367,16 @@ Fitur tetap di penyangga suntingan sampai Anda menyimpan suntingan lapisan, dan 
         <translation>Mencari citra satelit di {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Gambar peta dikirim</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Lembar kontak {} dikirim</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Mencari di {} untuk {}</translation>

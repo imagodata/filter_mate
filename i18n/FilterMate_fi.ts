@@ -367,6 +367,16 @@ Ne pysyvät muokkauspuskurissa, kunnes tallennat tason muokkaukset, ja kierrokse
         <translation>Haetaan satelliittikuvia: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Kartan kuva lähetetty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Kohteen {} vedosarkki lähetetty</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Haetaan lähteestä {}: {}</translation>

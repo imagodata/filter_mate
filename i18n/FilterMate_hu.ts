@@ -367,6 +367,16 @@ A szerkesztési pufferben maradnak, amíg nem menti a réteg szerkesztéseit, é
         <translation>Műholdfelvételek keresése itt: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>A térkép képe elküldve</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>{} kontaktlapja elküldve</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Keresés itt: {}, erre: {}</translation>

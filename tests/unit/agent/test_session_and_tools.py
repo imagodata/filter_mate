@@ -17,8 +17,8 @@ from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
 from core.agent.session import AgentLimits, AgentSession, run_exchange
 from core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
-from core.agent.tool_catalog import CHAT_ONLY, NOT_IN_CHAT, ToolSpec, chat_tools, load_catalog
-from core.agent.tool_executor import MAX_RESULT_CHARS, ToolExecutor, ToolFailure, bounded_json
+from core.agent.tool_catalog import CHAT_ONLY, MCP_ONLY, NOT_IN_CHAT, ToolSpec, chat_tools, load_catalog
+from core.agent.tool_executor import MAX_RESULT_CHARS, ToolExecutor, ToolFailure, WithImages, bounded_json
 
 pytestmark = pytest.mark.unit
 
@@ -273,6 +273,17 @@ class TestExecutor:
 
     def test_unknown_tool(self):
         assert self.run(lambda a: a, call("nope")).is_error
+
+    def test_images_go_beside_the_json(self):
+        result = self.run(lambda a: WithImages({"width": 3}, (("image/jpeg", "QUJD"),)), call("read", name="x"))
+        assert json.loads(result.content) == {"width": 3} and result.images == (("image/jpeg", "QUJD"),)
+        assert self.run(lambda a: {"width": 3}, call("read", name="x")).images == ()
+
+    def test_the_images_of_the_map_are_the_mcp_server_s_alone(self):
+        names = {tool.name for tool in chat_tools()}
+        assert not names & {tool.name for tool in MCP_ONLY}
+        assert all(tool.read_only and tool.open_world and not tool.requires_confirmation for tool in MCP_ONLY)
+        assert {tool.name for tool in MCP_ONLY} == {"map_image", "contact_sheet"}
 
     def test_bad_json_is_explained(self):
         result = self.run(lambda a: 1 / 0, ToolCallPart("c", "read", {}, parse_error="line 1"))

@@ -367,6 +367,16 @@ Permanecen en el búfer de edición hasta que guarde las ediciones de la capa, y
         <translation>Buscando imágenes de satélite en {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
+        <source>Image of the map sent</source>
+        <translation>Imagen del mapa enviada</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="683"/>
+        <source>Contact sheet of {} sent</source>
+        <translation>Hoja de contactos de {} enviada</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="609"/>
         <source>Searching {} for {}</source>
         <translation>Buscando {} en {}</translation>
