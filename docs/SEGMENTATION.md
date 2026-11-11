@@ -203,6 +203,14 @@ the same kind of object as the example?". It kept almost all of them: on the ten
 proposals, 0.34 for those it kept (the rule asked +0.10). What SAM gets wrong here is mostly the outline, a part of a
 roof or two roofs in one, not the kind of object: a judge of the kind cannot see it.
 
+**The mask nearest the size of the clicked object, not adopted** (2026-11-11, `scripts/sam_similar_granularity.py`,
+rule set before the run). SAM proposes three masks for a point, roughly a part, the object and a group; drawing each
+candidate with the one whose area is nearest the clicked object's, instead of the one SAM scores best, should have
+fixed the outlines the judge above could not see. On the ten others the rule passed (recall 0.32 to 0.52, precision
+0.36 to 0.33), but on the first ten the precision fell from 0.56 to 0.38, so a confirmation on 14 buildings never used
+(40 to 80 and 400 to 2000 m²) was set before running it: precision 0.50 to 0.21 for a recall of 0.13 to 0.25. Over
+the 20 first searches it added 90 proposals, 78 of them not buildings. The search keeps the mask SAM scores best.
+
 **Tried and not adopted.** A score and colour filter (precision 0.24 to 0.31 on the ten others, short of the
 0.10 required, `scripts/sam_similar_analysis.py`), and a second, framed pass of SAM after the click (median
 overlap 0.711 to 0.713 on 20 buildings, short of the 0.02 required).
