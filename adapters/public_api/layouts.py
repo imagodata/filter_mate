@@ -122,7 +122,7 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
     Raises:
         ValueError: A name already taken or empty, an unknown layer or page, nothing to show.
     """
-    from qgis.core import (QgsLayoutItemLabel, QgsLayoutItemLegend, QgsLayoutItemMap, QgsLayoutItemPicture,
+    from qgis.core import (QgsLayoutItem, QgsLayoutItemLabel, QgsLayoutItemLegend, QgsLayoutItemMap, QgsLayoutItemPicture,
                            QgsLayoutItemScaleBar, QgsLayoutPoint, QgsLayoutSize, QgsPrintLayout, QgsProject)
     from qgis.PyQt.QtGui import QFont
     project = QgsProject.instance()
@@ -167,7 +167,12 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
         font = QFont()
         font.setPointSize(20)
         font.setBold(True)
-        if hasattr(label, 'setFont'):
+        if hasattr(label, 'setTextFormat'):  # 3.24 and later; setFont is deprecated since 3.40
+            from qgis.core import QgsTextFormat
+            text_format = QgsTextFormat.fromQFont(font)
+            text_format.setSize(20)
+            label.setTextFormat(text_format)
+        else:
             label.setFont(font)
         label.attemptMove(QgsLayoutPoint(MARGIN, MARGIN - 2, mm))
         label.attemptResize(QgsLayoutSize(width - 2 * MARGIN, TITLE_HEIGHT, mm))
@@ -181,10 +186,12 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
             item.setLegendFilterByMapEnabled(True)
         item.setBackgroundEnabled(True)
         item.setFrameEnabled(True)
+        # Held by its upper right corner: its size is only known once QGIS has drawn it, and it grows to the left.
+        corner = getattr(QgsLayoutItem, 'ReferencePoint', QgsLayoutItem).UpperRight
+        item.setReferencePoint(corner)
         layout.addLayoutItem(item)
+        item.attemptMove(QgsLayoutPoint(width - MARGIN - 3, top + 3, mm))
         item.adjustBoxSize()
-        size = item.sizeWithUnits()
-        item.attemptMove(QgsLayoutPoint(width - MARGIN - size.width() - 3, top + 3, mm))
         items.append('legend')
     if scale_bar:
         bar = QgsLayoutItemScaleBar(layout)

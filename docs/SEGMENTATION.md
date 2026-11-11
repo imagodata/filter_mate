@@ -56,7 +56,8 @@ of the three).
 
 **Similar objects** first draws the clicked object. The patches of a similar colour in the visible map, at
 most 120 of them, are then proposed to SAM, followed by the 10 places of the visible map whose encoder features
-look most like the clicked object's; SAM redraws each one in the background. An object is kept when its area,
+look most like the clicked object's; SAM redraws each one in the background, on the window prepared for the click
+when the candidate lies well inside it (no second encoding, as the search was measured). An object is kept when its area,
 and its shape with *same shape*, are within the ratios of the group compared with the clicked one, and when it
 looks like it: the encoder features of SAM under the two objects must point the same way (cosine at least 0.68).
 
@@ -202,6 +203,14 @@ call). The proposals of the search above were shown to Claude Haiku 5.5 as conta
 the same kind of object as the example?". It kept almost all of them: on the ten others, precision 0.36 for all the
 proposals, 0.34 for those it kept (the rule asked +0.10). What SAM gets wrong here is mostly the outline, a part of a
 roof or two roofs in one, not the kind of object: a judge of the kind cannot see it.
+
+**The mask nearest the size of the clicked object, not adopted** (2026-11-11, `scripts/sam_similar_granularity.py`,
+rule set before the run). SAM proposes three masks for a point, roughly a part, the object and a group; drawing each
+candidate with the one whose area is nearest the clicked object's, instead of the one SAM scores best, should have
+fixed the outlines the judge above could not see. On the ten others the rule passed (recall 0.32 to 0.52, precision
+0.36 to 0.33), but on the first ten the precision fell from 0.56 to 0.38, so a confirmation on 14 buildings never used
+(40 to 80 and 400 to 2000 m²) was set before running it: precision 0.50 to 0.21 for a recall of 0.13 to 0.25. Over
+the 20 first searches it added 90 proposals, 78 of them not buildings. The search keeps the mask SAM scores best.
 
 **Tried and not adopted.** A score and colour filter (precision 0.24 to 0.31 on the ten others, short of the
 0.10 required, `scripts/sam_similar_analysis.py`), and a second, framed pass of SAM after the click (median

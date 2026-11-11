@@ -254,9 +254,32 @@
         <translation>Harita bir noktada okunuyor</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Haritaya bakılıyor</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>Proje KRS: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python kodu (uzman, geri alınmaz)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Ajan bu Python kodunu QGIS'te sizin yetkilerinizle çalıştırmak istiyor: QGIS'in ve hesabınızın yapabildiği her şeyi okuyup değiştirebilir, turu geri almak bunu geri getirmez.
+
+Ne için: {}
+
+Çalıştırılsın mı?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
@@ -692,6 +715,16 @@ Onaylıyor musunuz?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Öznitelik değerlerinin gönderilmesine izin ver</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Uzman: ajanın QGIS'te Python kodu çalıştırmasına izin ver</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Her çalıştırma size kodun tamamını gösterir ve önce sorar. Kod sizin yetkilerinizle çalışır: verilerinizi ve dosyalarınızı değiştirebilir, turu geri almak bunu geri getirmez. Python okuyanlar için.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

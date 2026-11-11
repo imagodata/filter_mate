@@ -443,6 +443,13 @@ def check_layouts(project, work):
     os.makedirs(folder, exist_ok=True)
     pdf = layouts.export_layout("Carte des communes", folder, "pdf", dpi=96)
     png = layouts.export_layout("Sans décor", folder, "png", dpi=96)
+    from qgis.core import QgsLayoutItemLegend
+    if layout is not None:  # its size is only known once drawn: after the export
+        sheet = layout.pageCollection().page(0).sceneBoundingRect()
+        outside = [item.__class__.__name__ for item in layout.items()
+                   if hasattr(item, "sceneBoundingRect") and isinstance(item, QgsLayoutItemLegend)
+                   and not sheet.contains(item.sceneBoundingRect())]
+        check("layout: the legend stays on the page", not outside, outside)
     check("layout: exported as PDF and PNG", pdf["bytes"] > 1000 and png["bytes"] > 1000 and
           os.path.dirname(pdf["path"]) == folder and pdf["path"].endswith(".pdf") and
           open(pdf["path"], "rb").read(4) == b"%PDF" and open(png["path"], "rb").read(4) == b"\x89PNG", (pdf, png))

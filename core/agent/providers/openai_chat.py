@@ -20,9 +20,17 @@ def _wire_messages(system: str, messages: Sequence[Message]) -> List[Dict[str, A
     wire: List[Dict[str, Any]] = [{"role": "system", "content": system}]
     for message in messages:
         if message.role == ROLE_USER:
+            images = []
             for part in message.parts:
                 if isinstance(part, ToolResultPart):
                     wire.append({"role": "tool", "tool_call_id": part.call_id, "content": part.content})
+                    images.extend((part.call_id, mime, data) for mime, data in part.images)
+            if images:  # a tool message holds text only: its images follow, in a message of the user
+                content: List[Dict[str, Any]] = []
+                for call_id, mime, data in images:
+                    content.append({"type": "text", "text": f"Image answered by the tool call {call_id}:"})
+                    content.append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{data}"}})
+                wire.append({"role": "user", "content": content})
             text = message.text
             if text:
                 wire.append({"role": "user", "content": text})

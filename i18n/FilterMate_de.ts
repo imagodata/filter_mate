@@ -254,9 +254,32 @@
         <translation>Karte wird an einem Punkt gelesen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Karte wird angesehen</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>Projekt-KBS: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python-Code (Experte, nicht rückgängig)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Der Agent möchte diesen Python-Code in QGIS mit Ihren Rechten ausführen: Er kann alles lesen und ändern, was QGIS und Ihr Konto können, und das Rückgängigmachen der Runde nimmt das nicht zurück.
+
+Wofür: {}
+
+Ausführen?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
@@ -692,6 +715,16 @@ Sind Sie einverstanden?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Senden von Attributwerten erlauben</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Experte: den Agenten Python-Code in QGIS ausführen lassen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Jede Ausführung zeigt Ihnen den ganzen Code und fragt Sie zuerst. Der Code läuft mit Ihren Rechten: Er kann Ihre Daten und Dateien ändern, und das Rückgängigmachen der Runde nimmt das nicht zurück. Für alle, die Python lesen.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

@@ -5,7 +5,7 @@ import pytest
 from core.agent.chat_engine import ChatEngine
 from core.agent.messages import STOP_TOOL_USE, ToolCallPart
 from core.agent.permissions import (
-    ADVISOR, ADVISOR_REFUSAL, ASK, AUTONOMOUS, BUFFER, CAREFUL, DEFAULT_LEVEL, LEVELS, LOCAL, OUTSIDE, PROJECT, READ,
+    ADVISOR, ADVISOR_REFUSAL, AGENT_OWN, ASK, AUTONOMOUS, BUFFER, CAREFUL, DEFAULT_LEVEL, LEVELS, LOCAL, OUTSIDE, PROJECT, READ,
     REFUSE, RUN, STANDARD, VIEW, PermissionPolicy, level_note, level_or_default, risk_of,
 )
 from core.agent.providers import create_provider
@@ -93,8 +93,16 @@ class TestLevels:
     @pytest.mark.parametrize("level", LEVELS)
     def test_the_agent_own_notes_and_history_run_at_every_level(self, level):
         policy = PermissionPolicy(level)
-        for tool in CHAT_ONLY:
+        own = [tool for tool in CHAT_ONLY if tool.name in AGENT_OWN]
+        assert {tool.name for tool in own} == AGENT_OWN
+        for tool in own:
             assert policy.verdict(tool) == RUN
+
+    def test_the_expert_code_and_the_image_of_the_map(self):
+        tools = {tool.name: tool for tool in CHAT_ONLY}
+        assert risk_of(tools["run_pyqgis"]) == OUTSIDE and not PermissionPolicy().grantable(tools["run_pyqgis"])
+        assert PermissionPolicy(AUTONOMOUS).verdict(tools["run_pyqgis"]) == ASK
+        assert risk_of(tools["view_map"]) == READ
 
     @pytest.mark.parametrize("level", LEVELS)
     def test_code_is_asked_at_every_level_but_advisor(self, level):

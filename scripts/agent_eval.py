@@ -559,7 +559,8 @@ class UrllibTransport:
 def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict."""
     project = SimulatedProject(case.get("setup"))
-    tools = chat_tools()
+    # Off by default (the expert mode), or nothing to draw in a simulated project (view_map).
+    tools = tuple(tool for tool in chat_tools() if tool.name not in ("run_pyqgis", "view_map"))
     session = AgentSession(provider, tools, SYSTEM_PROMPT, AgentLimits())
     executor = ToolExecutor(tools, project.handlers())
     # As the chat sends it: the state of the project after the request.

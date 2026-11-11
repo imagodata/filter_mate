@@ -25,7 +25,9 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
 | 12. Layouts | A print layout of the map added to the project, exported as PDF or PNG (confirmed) | done |
 | 13. Project CRS | The CRS of the project and of the map, undone with the turn | done |
-| 14. Levels of autonomy | Each tool in a risk class; the user chooses how far the chat goes alone; "yes for this conversation" | done |
+| 14. Expert mode | Python code in QGIS, off by default, read and confirmed at each run, not undone | done |
+| 15. Vision | The map as an image for the model of the chat, with a key of the user and shared values only | done |
+| 16. Levels of autonomy | Each tool in a risk class; the user chooses how far the chat goes alone; "yes for this conversation" | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -117,6 +119,20 @@ Rules worth keeping:
 - **Project CRS**: `set_project_crs` takes an authid, an EPSG code alone or a layer of the project, and sets the
   CRS of the project, which the map follows (layers in other CRS are reprojected on the fly, no data changes).
   The turn keeps the CRS before (its authid, or its WKT for a CRS of its own) and undoing the turn sets it back.
+- **Expert mode** (`adapters/agent/expert_python.py`): `run_pyqgis`, a tool of the chat alone, is offered only when
+  the user ticks *Expert: let the agent run Python code in QGIS* in the settings (off by default). Each run opens
+  a dialog with its purpose and the whole code, No by default; the code is written to the log, then run on the
+  main thread with `iface` and `project` defined, and the answer gives what it printed, `result`, or its
+  traceback. It runs with the rights of the user and is not undone with the turn; the MCP servers never offer it.
+  The one `exec` of the plugin is marked `nosec B102` for Bandit, with that reason. The evaluation bench leaves the
+  tool out, as the default settings do.
+- **Vision**: `view_map`, a tool of the chat alone, answers with the map rendered by `map_images.map_image` (the
+  view, an extent as WKT, or the whole of a layer), a JPEG in `ToolResultPart.images` (`WithImages`, as the
+  MCP-only `map_image` and `contact_sheet`). Offered only with a key of the user (the free quota relay takes no
+  image) and when attribute values are shared (a map shows its labels): a decision of the user, 2026-11-11.
+  Claude gets the image in the `tool_result`; an OpenAI-compatible server, whose tool messages hold text only, in
+  a user message right after. An image goes with the request it was taken in only: before the next request it
+  is replaced by a line saying it was there. A model that reads no image may refuse the request.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

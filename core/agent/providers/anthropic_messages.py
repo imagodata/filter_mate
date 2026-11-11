@@ -39,6 +39,10 @@ def _content(message: Message) -> List[Dict[str, Any]]:
             blocks.append({"type": "tool_use", "id": part.call_id, "name": part.name, "input": part.arguments})
         elif isinstance(part, ToolResultPart):
             block: Dict[str, Any] = {"type": "tool_result", "tool_use_id": part.call_id, "content": part.content}
+            if part.images:
+                block["content"] = [{"type": "text", "text": part.content}] + [
+                    {"type": "image", "source": {"type": "base64", "media_type": mime, "data": data}}
+                    for mime, data in part.images]
             if part.is_error:
                 block["is_error"] = True
             blocks.append(block)

@@ -53,6 +53,18 @@ class TurnDecision:
     reason: str = ""
 
 
+IMAGE_GONE = " (An image of the map came with this answer; it is no longer sent: call the tool again to see it.)"
+
+
+def _without_images(message: Message) -> Message:
+    """An image goes with the request it was taken in only: sent again with each later one, it would weigh on all."""
+    if not any(isinstance(part, ToolResultPart) and part.images for part in message.parts):
+        return message
+    return Message(message.role, tuple(
+        ToolResultPart(part.call_id, part.content + IMAGE_GONE, part.is_error)
+        if isinstance(part, ToolResultPart) and part.images else part for part in message.parts))
+
+
 class AgentSession:
     """The conversation and its rules, without any transport."""
 
@@ -78,6 +90,7 @@ class AgentSession:
 
         A conversation past ``max_history_chars`` first loses its oldest requests, summed up in their place.
         """
+        self._messages = [_without_images(message) for message in self._messages]
         writes = [tool.name for tool in self._tools if not tool.read_only]
         self._messages, summarized = compact(self._messages, self._limits.max_history_chars, writes)
         self.summarized += summarized

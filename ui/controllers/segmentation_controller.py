@@ -552,7 +552,8 @@ class SegmentationController:
                                   session.window.cell, points, reference.asWkt(), panel.similar_ratio(),
                                   panel.similar_shape(), self._searched(self._generation, layer.id(), reference.asWkt()),
                                   QgsProject.instance().transformContext(), existing=list(panel._segments),
-                                  reference_features=reference_features)
+                                  reference_features=reference_features,
+                                  click_window=session.window, click_embedding=session.embedding)
         self._search = task
         self._running.append(task)
         task.progressChanged.connect(lambda progress: self._on_search_progress(task, progress))

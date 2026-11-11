@@ -11,12 +11,12 @@ import time
 from typing import Sequence, Tuple
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, QTimer, pyqtSignal
-from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtGui import QColor, QFont
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
-    QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QRadioButton, QScrollArea, QSizePolicy,
-    QSpinBox, QStackedWidget,
+    QButtonGroup, QListWidget, QListWidgetItem, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QRadioButton,
+    QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
     QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
@@ -114,6 +114,39 @@ def ask_plain(parent, title: str, text: str) -> bool:
     answer = box.exec()
     box.deleteLater()
     return answer == QMessageBox.StandardButton.Yes
+
+
+def ask_code(parent, title: str, text: str, code: str) -> bool:
+    """Yes or no on code written by a model: the whole code is shown, as plain text, and No is the default."""
+    dialog = QDialog(parent)
+    dialog.setWindowTitle(title)
+    dialog.resize(720, 520)
+    layout = QVBoxLayout(dialog)
+    label = QLabel(dialog)
+    label.setTextFormat(Qt.TextFormat.PlainText)
+    label.setWordWrap(True)
+    label.setText(text)
+    view = QPlainTextEdit(dialog)
+    view.setReadOnly(True)
+    view.setPlainText(code)
+    mono = QFont("monospace")
+    mono.setStyleHint(QFont.StyleHint.Monospace)
+    view.setFont(mono)
+    view.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+    buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Yes | QDialogButtonBox.StandardButton.No, dialog)
+    buttons.button(QDialogButtonBox.StandardButton.No).setDefault(True)
+    buttons.button(QDialogButtonBox.StandardButton.No).setFocus()
+    buttons.accepted.connect(dialog.accept)
+    buttons.rejected.connect(dialog.reject)
+    layout.addWidget(label)
+    layout.addWidget(view, 1)
+    layout.addWidget(buttons)
+    dialog.show()
+    dialog.raise_()
+    dialog.activateWindow()
+    answer = dialog.exec()
+    dialog.deleteLater()
+    return answer == QDialog.DialogCode.Accepted
 
 
 ANSWER_NO, ANSWER_ONCE, ANSWER_CONVERSATION = "no", "once", "conversation"
@@ -801,6 +834,15 @@ class AgentSettingsDialog(QDialog):
                                  "in your filters and favorites are still sent."), self)
         values_note.setObjectName("label_agent_settings_sub")
         values_note.setWordWrap(True)
+        self.expert_python = QCheckBox(_tr("Expert: let the agent run Python code in QGIS"), self)
+        self.expert_python.setObjectName("checkBox_agent_expert_python")
+        self.expert_python.setChecked(values.expert_python)
+        expert_note = QLabel(_tr("Each run shows you the whole code and asks you first. The code runs with your rights: "
+                                 "it can change your data and your files, and undoing the turn does not take it back. "
+                                 "For those who read Python."), self)
+        expert_note.setObjectName("label_agent_settings_sub")
+        expert_note.setWordWrap(True)
+        self._expert_note = expert_note  # shown in the Autonomy tab, with the levels
         leaving = QLabel(_tr("WHAT LEAVES THIS MACHINE"), self)
         leaving.setObjectName("label_agent_settings_heading")
         notice = QLabel(_tr(
@@ -920,6 +962,9 @@ class AgentSettingsDialog(QDialog):
         note.setObjectName("label_agent_settings_note")
         note.setWordWrap(True)
         layout.addWidget(note)
+        layout.addSpacing(10)
+        layout.addWidget(self.expert_python)
+        layout.addWidget(self._expert_note)
         layout.addStretch(1)
         return page
 

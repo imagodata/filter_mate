@@ -254,9 +254,32 @@
         <translation>Binabasa ang mapa sa isang punto</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Tinitingnan ang mapa</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>CRS ng proyekto: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python code (eksperto, hindi naa-undo)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Gustong patakbuhin ng agent ang Python code na ito sa QGIS gamit ang iyong mga karapatan: mababasa at mababago nito ang lahat ng kaya ng QGIS at ng iyong account, at hindi ito ibinabalik ng pag-undo sa yugto.
+
+Para saan: {}
+
+Patakbuhin?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
@@ -692,6 +715,16 @@ Sumasang-ayon ka ba?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Payagang maipadala ang mga halaga ng attribute</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Eksperto: hayaang magpatakbo ang agent ng Python code sa QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Bawat pagpapatakbo ay ipinapakita sa iyo ang buong code at nagtatanong muna. Tumatakbo ang code gamit ang iyong mga karapatan: maaari nitong baguhin ang iyong data at mga file, at hindi ito ibinabalik ng pag-undo sa yugto. Para sa mga nakakabasa ng Python.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

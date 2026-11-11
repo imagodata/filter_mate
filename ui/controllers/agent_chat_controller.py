@@ -37,7 +37,7 @@ from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
-from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, UNDO_AGENT_STEP, chat_tools
+from ...core.agent.tool_catalog import ADD_NOTE, REMOVE_NOTE, RUN_PYTHON, UNDO_AGENT_STEP, VIEW_MAP, chat_tools
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
 from ...filtermate_api.agent_tools import build_handlers
@@ -47,8 +47,8 @@ from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
 from .agent_mcp_bridge import AgentMcpBridge
 from ..widgets.agent_panel import (
-    ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_plain, ask_with_conversation,
-    level_short, preset_label,
+    ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
+    ask_with_conversation, level_short, preset_label,
 )
 
 logger = logging.getLogger("FilterMate.agent")
@@ -104,6 +104,9 @@ class AgentChatController(QObject):
         self._ask_choice = ask_choice
         # The level of the settings, and what the user allowed for the conversation under way.
         self._policy = PermissionPolicy(load_settings().autonomy)
+        # Code is read in a dialog of its own; a test that answers the questions gets it in the text.
+        self._ask_code = ((lambda title, text, code: ask_code(parent_widget, title, text, code)) if ask_user is None
+                          else (lambda title, text, code: ask_user(title, text + "\n\n" + code)))
         self._parent_widget = parent_widget
         self._engine: Optional[ChatEngine] = None
         self._checkpoint = TurnCheckpoint()
@@ -330,10 +333,10 @@ class AgentChatController(QObject):
                 return False
             chosen = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(), dialog.consent.isChecked(),
                       dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(), authcfg, target,
-                      key_target)
+                      key_target, dialog.expert_python.isChecked())
             same_chat = chosen == (values.preset, values.model, values.base_url, values.consent, values.send_values,
                                    values.enabled_sources, values.custom_sources, values.authcfg, values.consent_target,
-                                   values.key_target) and not key
+                                   values.key_target, values.expert_python) and not key
             save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
                                         base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
                                         send_values=dialog.send_values.isChecked(), enabled_sources=dialog.chosen_sources(),
@@ -341,7 +344,9 @@ class AgentChatController(QObject):
                                         authcfg=authcfg,
                                         consent_target=target, key_target=key_target,
                                         mcp_enabled=dialog.mcp_enabled.isChecked(), mcp_port=dialog.mcp_port.value(),
-                                        mcp_token=dialog.chosen_mcp_token(), autonomy=dialog.chosen_autonomy()))
+                                        mcp_token=dialog.chosen_mcp_token(),
+                                        expert_python=dialog.expert_python.isChecked(),
+                                        autonomy=dialog.chosen_autonomy()))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
         finally:
             dialog.key.clear()
@@ -368,6 +373,12 @@ class AgentChatController(QObject):
         left_out = set()
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
+        if not values.expert_python:
+            left_out.add(RUN_PYTHON)
+        if not values.send_values or values.preset == FREE_PRESET:
+            # An image of the map shows its labels and symbols: a value as much as a field. The relay of the free
+            # quota takes no image (free-quota-proxy/README.md): with a key of the user only.
+            left_out.add(VIEW_MAP)
         if not kinds - {KIND_MCP, KIND_STAC} and not configured_names:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WFS not in kinds:
@@ -381,9 +392,45 @@ class AgentChatController(QObject):
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
+        handlers[RUN_PYTHON] = self._python_tool
+        handlers[VIEW_MAP] = self._view_map_tool
         handlers[ADD_NOTE] = self._add_note_tool
         handlers[REMOVE_NOTE] = self._remove_note_tool
         return tools, handlers, active
+
+    @staticmethod
+    def _view_map_tool(arguments):
+        """view_map: the map rendered as an image (map_images.map_image), sent with this request only."""
+        from ...adapters.public_api.map_images import map_image
+        from ...adapters.public_api.operations import resolve_layer
+        from ...core.agent.tool_executor import WithImages
+        extent_wkt, crs = arguments.get("extent_wkt") or "", arguments.get("crs") or ""
+        if arguments.get("layer"):
+            layer = resolve_layer(arguments["layer"])
+            if layer is None:
+                raise ToolFailure(f"layer {arguments['layer']!r} not found")
+            box = layer.extent()
+            if box.isNull():
+                raise ToolFailure(f"'{layer.name()}' has no extent to show")
+            if box.width() <= 0 or box.height() <= 0:  # one point, or points in a row: a flat extent draws nothing
+                box.grow(max(box.width(), box.height(), 1.0) * 0.1)
+            else:
+                box.scale(1.05)
+            extent_wkt, crs = box.asWktPolygon(), layer.crs().authid()
+        try:
+            image, info = map_image(extent_wkt, crs, arguments.get("width", 1024))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        return WithImages(info, (("image/jpeg", image),))
+
+    @staticmethod
+    def _python_tool(arguments) -> dict:
+        """run_pyqgis: code the user read and confirmed (the executor asked before calling this)."""
+        from ...adapters.agent.expert_python import run_code
+        try:
+            return run_code(arguments.get("code", ""), arguments.get("purpose", ""))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
 
     @staticmethod
     def _add_note_tool(arguments) -> dict:
@@ -658,6 +705,7 @@ class AgentChatController(QObject):
             "layer_statistics": lambda: _tr("Computing statistics on {}").format(layer),
             "sample_features": lambda: _tr("Reading features of {}").format(layer),
             "identify_at": lambda: _tr("Reading the map at a point"),
+            VIEW_MAP: lambda: _tr("Looking at the map"),
             "find_algorithms": lambda: _tr("Looking for a Processing algorithm"),
             "describe_algorithm": lambda: _tr("Reading the algorithm {}").format(args.get("algorithm_id", "")),
             "run_algorithm": lambda: _tr("Processing: {}").format(args.get("algorithm_id", "")),
@@ -669,6 +717,7 @@ class AgentChatController(QObject):
             "set_project_crs": lambda: _tr("Project CRS: {}").format(args.get("crs", "")),
             "create_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
             "export_layout": lambda: _tr("Layout {} exported").format(args.get("name", "")),
+            RUN_PYTHON: lambda: _tr("Python code (expert, not undone)"),
             ADD_NOTE: lambda: _tr("Note kept for this project"),
             REMOVE_NOTE: lambda: _tr("Note {} forgotten").format(args.get("number", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
@@ -783,6 +832,8 @@ class AgentChatController(QObject):
         if call.name in ("create_layout", "export_layout") and isinstance(call.arguments, dict):
             keys = ("title", "page", "orientation") if call.name == "create_layout" else ("format", "dpi", "subfolder")
             return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))
+        if call.name == RUN_PYTHON and isinstance(call.arguments, dict):
+            return str(call.arguments.get("purpose", ""))
         if call.name == ADD_NOTE and isinstance(call.arguments, dict):
             return str(call.arguments.get("text", ""))
         if call.name in ("set_layer_style", "set_labels") and isinstance(call.arguments, dict):
@@ -818,16 +869,22 @@ class AgentChatController(QObject):
     def confirm(self, call: ToolCallPart) -> bool:
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
         rest of the conversation."""
-        title, text = _tr("FilterMate agent"), self._confirm_text(call)
+        title = _tr("FilterMate agent")
         spec = self._tools.get(call.name)
-        if spec is None or not self._policy.grantable(spec):
-            return bool(self._ask_user(title, text))
+        if spec is None or not self._policy.grantable(spec):  # code is read in its own dialog, at every run
+            return bool(self._confirm(call, title))
+        text = self._confirm_text(call)
         answer = self._ask_choice(title, text)
         if answer == ANSWER_CONVERSATION:
             self._policy.grant(call.name)
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
+        if call.name == RUN_PYTHON:
+            text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
+                       "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "
+                       "{}\n\nRun it?").format(one_line(str(call.arguments.get("purpose", "")), 300))
+            return bool(self._ask_code(title, text, str(call.arguments.get("code", ""))))
         return self._ask_user(title, self._confirm_text(call))
 
     def _confirm_text(self, call: ToolCallPart) -> str:

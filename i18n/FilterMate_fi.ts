@@ -254,9 +254,32 @@
         <translation>Luetaan karttaa pisteessä</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="689"/>
+        <source>Looking at the map</source>
+        <translation>Katsotaan karttaa</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="654"/>
         <source>Project CRS: {}</source>
         <translation>Projektin KKJ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="673"/>
+        <source>Python code (expert, not undone)</source>
+        <translation>Python-koodi (asiantuntija, ei kumota)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="827"/>
+        <source>The agent wants to run this Python code in QGIS, with your rights: it can read and change anything QGIS and your account can, and undoing the turn does not take it back.
+
+What for: {}
+
+Run it?</source>
+        <translation>Agentti haluaa ajaa tämän Python-koodin QGIS:ssä sinun oikeuksillasi: se voi lukea ja muuttaa kaikkea, mitä QGIS ja tilisi voivat, eikä kierroksen kumoaminen palauta sitä.
+
+Mihin: {}
+
+Ajetaanko?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
@@ -692,6 +715,16 @@ Hyväksytkö?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Salli attribuuttiarvojen lähettäminen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="778"/>
+        <source>Expert: let the agent run Python code in QGIS</source>
+        <translation>Asiantuntija: anna agentin ajaa Python-koodia QGIS:ssä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="781"/>
+        <source>Each run shows you the whole code and asks you first. The code runs with your rights: it can change your data and your files, and undoing the turn does not take it back. For those who read Python.</source>
+        <translation>Jokainen ajo näyttää koko koodin ja kysyy ensin. Koodi toimii sinun oikeuksillasi: se voi muuttaa tietojasi ja tiedostojasi, eikä kierroksen kumoaminen palauta sitä. Pythonia lukeville.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="866"/>

@@ -465,6 +465,38 @@ class TestAppearance:
         assert segmentation.coarse_features({'scores': np.zeros(3)}) is None
 
 
+class TestClickWindow:
+    """2026-11-11: the candidates inside the window of the click are drawn on it, as the search was measured."""
+
+    RASTER = (0.0, 0.0, 5000.0, 5000.0)
+
+    def click(self):
+        return segmentation.SegmentationWindow(1000.0, 2024.0, 1.0, 1024)  # x 1000..2024, y 1000..2024
+
+    def test_inside_on_the_click_first_the_others_grouped(self):
+        points = [(4000.0, 4000.0), (1500.0, 1500.0), (1010.0, 1500.0), (1600.0, 1600.0)]
+        planned = segmentation.plan_similar_windows(points, self.RASTER, 1.0, 1024, self.click())
+        assert planned[0][0] is not None and planned[0][1:] == ([1, 3], True)
+        rest = sorted(index for _window, members, on_click in planned[1:] for index in members)
+        assert rest == [0, 2] and not any(on_click for _w, _m, on_click in planned[1:])  # 1010: in the margin
+
+    def test_every_candidate_once(self):
+        points = [(1000.0 + 37 * i, 1000.0 + 23 * i) for i in range(40)]
+        planned = segmentation.plan_similar_windows(points, self.RASTER, 1.0, 1024, self.click())
+        assert sorted(index for _window, members, _on in planned for index in members) == list(range(40))
+
+    def test_without_the_click_or_at_another_cell_as_before(self):
+        points = [(1500.0, 1500.0)]
+        for click in (None, segmentation.SegmentationWindow(1000.0, 2024.0, 2.0, 1024)):
+            planned = segmentation.plan_similar_windows(points, self.RASTER, 1.0, 1024, click)
+            assert [on for _w, _m, on in planned] == [False]
+
+    def test_the_edge_of_the_raster_is_no_edge_of_an_object(self):
+        window = segmentation.SegmentationWindow(0.0, 1024.0, 1.0, 1024)  # on the corner of the raster
+        assert segmentation.well_inside(window, 5.0, 5.0, self.RASTER)
+        assert not segmentation.well_inside(window, 1015.0, 500.0, self.RASTER)
+
+
 class TestFeatureCandidates:
     """2026-11-11: the places whose features look like the clicked object's, and the proposals sorted by keep / reject."""
 
