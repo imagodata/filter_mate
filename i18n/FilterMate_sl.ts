@@ -987,6 +987,16 @@ Se strinjate?</translation>
         <translation>Recepti</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Ponudi lokalnemu modelu vsa orodja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Izklopljeno: lokalni model dobi orodja, ki berejo in filtrirajo projekt; ta gredo v GPU z 8 GB. Vsa orodja potrebujejo približno dvakrat več pomnilnika.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Shrani zadnjo zahtevo kot recept…</translation>

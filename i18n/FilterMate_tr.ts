@@ -987,6 +987,16 @@ Onaylıyor musunuz?</translation>
         <translation>Tarifler</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Yerel modele tüm araçları sun</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Kapalıyken yerel model yalnızca projeyi okuyan ve süzen araçları alır: bunlar 8 GB'lık bir GPU'ya sığar. Tüm araçlar yaklaşık iki kat bellek gerektirir.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Son isteği tarif olarak kaydet…</translation>

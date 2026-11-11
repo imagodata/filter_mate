@@ -18,6 +18,7 @@ import http.client
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -38,7 +39,7 @@ NOTHING_KEPT = ("No feature kept. Check the direction of the predicate (the targ
                 "the buffer, and that the source holds the features meant (its selection, its filter).")
 from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_exchange  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, chat_tools, load_catalog  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, chat_tools, load_catalog  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -582,12 +583,18 @@ class UrllibTransport:
         return events + parser.close()
 
 
-def run_case(case: Dict[str, Any], provider, transport) -> Dict[str, Any]:
-    """Play one case; the outcome as a JSON-ready dict."""
+def fits(case: Dict[str, Any], names) -> bool:
+    """Can ``case`` pass with only the tools ``names``: one of its expected answers uses none other."""
+    return any(all(step["tool"] in names for step in steps) for steps in (case.get("expect") or [[]]))
+
+
+def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False) -> Dict[str, Any]:
+    """Play one case; the outcome as a JSON-ready dict. ``filtering``: the tools a local model gets by default."""
     project = SimulatedProject(case.get("setup"))
     # Off by default (the expert mode), or nothing to draw in a simulated project (view_map).
-    tools = tuple(tool for tool in chat_tools() if tool.name not in ("run_pyqgis", "view_map"))
-    session = AgentSession(provider, tools, SYSTEM_PROMPT, AgentLimits())
+    tools = tuple(tool for tool in chat_tools() if tool.name not in ("run_pyqgis", "view_map")
+                  and (not filtering or tool.name in FILTERING_TOOLS))
+    session = AgentSession(provider, tools, SYSTEM_PROMPT + (FILTERING_NOTE if filtering else ""), AgentLimits())
     executor = ToolExecutor(tools, project.handlers())
     # As the chat sends it: the state of the project after the request.
     handlers = project.handlers()
@@ -624,6 +631,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--base-url", help="instead of the provider's usual address")
     parser.add_argument("--case", action="append", help="only this case (repeatable)")
     parser.add_argument("--json", type=Path, help="write the results here")
+    parser.add_argument("--tools", choices=("all", "filtering"), default="all",
+                        help="filtering: the tools a local model gets by default; the cases that need others are left out")
     args = parser.parse_args(argv)
     if args.live and not args.model:
         parser.error("--live needs --model")
@@ -633,12 +642,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         kind=kind, model=args.model or "scripted", base_url=args.base_url or base_url,
         api_key=os.environ.get(KEY_VARIABLE, "") if args.live else ""))
     results = []
+    filtering = args.tools == "filtering"
     for case in load_cases(args.case):
+        if filtering and not fits(case, FILTERING_TOOLS):
+            continue
         transport = UrllibTransport() if args.live else ScriptedTransport(expected_script(case))
-        result = run_case(case, provider, transport)
+        started = time.monotonic()
+        result = run_case(case, provider, transport, filtering)
+        result["seconds"] = round(time.monotonic() - started, 1)
         results.append(result)
         status = "PASS" if result["passed"] else "FAIL"
-        print(f"{status} {result['id']:<28} {','.join(result['tools'])}" + (
+        print(f"{status} {result['id']:<28} {result['seconds']:>6}s {','.join(result['tools'])}" + (
             f"\n     {result['reason']}" if result["reason"] else ""))
     passed = sum(1 for result in results if result["passed"])
     totals = {key: sum(result[key] for result in results)

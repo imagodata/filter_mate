@@ -75,6 +75,14 @@ tools nor the request. `core/agent/providers/ollama_chat.py` asks for `num_ctx` 
 request (two sizes only: each new size makes Ollama load the model again), and reads the lines of JSON Ollama streams.
 An address saved with `/v1` still works, and a consent given for it still counts.
 
+What a local model is offered: by default only the tools that read the project and filter it, select, show or hide
+layers, zoom, export the result, undo and keep a recipe (`FILTERING_TOOLS` in `core/agent/tool_catalog.py`, 22 tools),
+and the system prompt says the rest exists and where to turn it on. Every tool of the chat weighs about 21,000 tokens
+with the system prompt; the filtering ones about 11,000. The context of the model, not its weights, decides what fits:
+`qwen3:8b` with every tool needed 14.7 GB at 32k tokens, and only 5.8 GB fitted on a GPU of 8 GB, the rest crawling on
+the processor (2026-11-11). **Offer every tool to the local model**, in the Provider tab, gives it all of them. The
+other providers always get every tool.
+
 Rules worth keeping:
 
 - Reasoning blocks come back to the provider that wrote them, unchanged, as `OpaquePart`. Without its signature a block

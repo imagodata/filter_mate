@@ -987,6 +987,16 @@ Do you agree?</source>
         <translation>रेसिपी</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>स्थानीय मॉडल को सभी टूल दें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>बंद होने पर स्थानीय मॉडल को प्रोजेक्ट पढ़ने और फ़िल्टर करने वाले टूल मिलते हैं: ये 8 GB के GPU में आ जाते हैं। सभी टूल के लिए लगभग दोगुनी मेमोरी चाहिए।</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>आख़िरी अनुरोध को रेसिपी के रूप में सहेजें…</translation>

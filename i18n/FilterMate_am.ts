@@ -987,6 +987,16 @@ Do you agree?</source>
         <translation>ሬሲፒዎች</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>ሁሉንም መሣሪያዎች ለአካባቢው ሞዴል አቅርብ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>ሲጠፋ፣ የአካባቢው ሞዴል ፕሮጀክቱን የሚያነቡና የሚያጣሩ መሣሪያዎችን ብቻ ያገኛል፤ በ8 GB GPU ይበቃሉ። ሁሉም መሣሪያዎች ሁለት እጥፍ ያህል ማህደረ ትውስታ ይፈልጋሉ።</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>የመጨረሻውን ጥያቄ እንደ ሬሲፒ አስቀምጥ…</translation>

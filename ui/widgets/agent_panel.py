@@ -885,6 +885,11 @@ class AgentSettingsDialog(QDialog):
                                    "It is only sent to this address."), self)
         self.key_note.setObjectName("label_agent_settings_note")
         self.key_note.setWordWrap(True)
+        self.local_all_tools = QCheckBox(_tr("Offer every tool to the local model"), self)
+        self.local_all_tools.setObjectName("checkBox_agent_local_all_tools")
+        self.local_all_tools.setChecked(values.local_all_tools)
+        self.local_all_tools.setToolTip(_tr("Off, a local model gets the tools that read and filter the project: they "
+                                             "fit a GPU of 8 GB. Every tool needs about twice the memory."))
         self.send_values = QCheckBox(_tr("Allow attribute values to be sent"), self)
         self.send_values.setChecked(values.send_values)
         values_note = QLabel(_tr("Without it, the agent does not read the values of your fields. Those already written "
@@ -945,6 +950,7 @@ class AgentSettingsDialog(QDialog):
         general_layout.setSpacing(10)
         general_layout.addLayout(form)
         general_layout.addWidget(self.key_note)
+        general_layout.addWidget(self.local_all_tools)
         general_layout.addWidget(self.free_notice)
         general_layout.addWidget(line)
         general_layout.addWidget(leaving)
@@ -1256,6 +1262,7 @@ class AgentSettingsDialog(QDialog):
         self.base_url.setPlaceholderText(PRESETS[name][1])
         free = name == FREE_PRESET
         no_key = free or name == "ollama"
+        self.local_all_tools.setVisible(name == "ollama")
         self.key_label.setVisible(not no_key)
         self.key.setVisible(not no_key)
         self.key_note.setVisible(not no_key)
@@ -1270,7 +1277,10 @@ class AgentSettingsDialog(QDialog):
         stored = bool(self._values.authcfg) and self._values.key_target == target and not self.forget_key
         self.key.setPlaceholderText(_tr("Stored: leave empty to keep it") if stored else "")
         self.forget_button.setVisible(stored and self.key.isVisibleTo(self))
-        self.consent.setChecked(self._values.consent and self._values.consent_target == target)
+        stored_target = self._values.consent_target
+        if self.preset.currentData() == "ollama":  # an Ollama address saved with /v1, up to 5.1, is the same server
+            stored_target = self._target_of("ollama", stored_target) if stored_target else ""
+        self.consent.setChecked(self._values.consent and stored_target == target)
         name = preset_label(self.preset.currentData()) if self.preset.currentData() else self.preset.currentText()
         self.consent.setText(_tr("I agree to send this data to {}").format(name))
 

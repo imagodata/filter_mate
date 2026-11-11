@@ -987,6 +987,16 @@ Souhlasíte?</translation>
         <translation>Recepty</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Nabídnout místnímu modelu všechny nástroje</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Vypnuto: místní model dostane nástroje, které čtou a filtrují projekt; vejdou se do GPU s 8 GB. Všechny nástroje potřebují zhruba dvojnásobek paměti.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Uložit poslední požadavek jako recept…</translation>

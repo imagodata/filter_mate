@@ -86,6 +86,8 @@ class AgentSettings:
     expert_python: bool = False
     # How far the agent of the chat goes alone (core.agent.permissions); "standard" asks before files and the network.
     autonomy: str = DEFAULT_LEVEL
+    # Every tool for a model of Ollama, instead of the filtering ones (core.agent.tool_catalog.FILTERING_TOOLS).
+    local_all_tools: bool = False
 
     @property
     def needs_key(self) -> bool:
@@ -147,6 +149,7 @@ def load_settings() -> AgentSettings:
         mcp_port=_port(settings.value(_PREFIX + "mcp_port", DEFAULT_PORT)),
         mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""),
         expert_python=settings.value(_PREFIX + "expert_python", False, type=bool),
+        local_all_tools=settings.value(_PREFIX + "local_all_tools", False, type=bool),
         autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")))
 
 
@@ -158,6 +161,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "consent", values.consent)
     settings.setValue(_PREFIX + "send_values", values.send_values)
     settings.setValue(_PREFIX + "expert_python", values.expert_python)
+    settings.setValue(_PREFIX + "local_all_tools", values.local_all_tools)
     settings.setValue(_PREFIX + "enabled_sources", json.dumps(list(values.enabled_sources)))
     settings.setValue(_PREFIX + "custom_sources", values.custom_sources)
     settings.setValue(_PREFIX + "authcfg", values.authcfg)

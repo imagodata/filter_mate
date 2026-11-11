@@ -987,6 +987,16 @@ Do you agree?</source>
         <translation>สูตร</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>ให้เครื่องมือทั้งหมดแก่โมเดลในเครื่อง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>เมื่อปิด โมเดลในเครื่องจะได้เฉพาะเครื่องมือที่อ่านและกรองโครงการ ซึ่งพอดีกับ GPU 8 GB เครื่องมือทั้งหมดต้องใช้หน่วยความจำประมาณสองเท่า</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>บันทึกคำขอล่าสุดเป็นสูตร…</translation>

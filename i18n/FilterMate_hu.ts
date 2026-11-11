@@ -987,6 +987,16 @@ Egyetért?</translation>
         <translation>Receptek</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Minden eszköz a helyi modellnek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Kikapcsolva a helyi modell a projektet olvasó és szűrő eszközöket kapja: ezek elférnek egy 8 GB-os GPU-n. Minden eszközhöz nagyjából kétszer annyi memória kell.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Az utolsó kérés mentése receptként…</translation>

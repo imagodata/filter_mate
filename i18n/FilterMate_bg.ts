@@ -987,6 +987,16 @@ Do you agree?</source>
         <translation>Рецепти</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Всички инструменти за локалния модел</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Изключено, локалният модел получава инструментите за четене и филтриране на проекта: те се побират в GPU с 8 GB. Всички инструменти изискват около два пъти повече памет.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Запази последната заявка като рецепта…</translation>

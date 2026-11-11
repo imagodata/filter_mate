@@ -987,6 +987,16 @@ Do you agree?</source>
         <translation>レシピ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>ローカルモデルにすべてのツールを渡す</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>オフのとき、ローカルモデルにはプロジェクトを読み取り・フィルタするツールだけを渡します。8 GB の GPU に収まります。すべてのツールには約 2 倍のメモリが必要です。</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>直前のリクエストをレシピとして保存…</translation>

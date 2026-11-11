@@ -189,6 +189,26 @@ def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     return tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + CHAT_ONLY
 
 
+# What a local model is offered by default: reading the project and filtering it, the selection and the view, the
+# export of the result, and the agent's own undo and recipes. Every tool of the chat weighs about 21,000 tokens with the
+# system prompt; these about 11,000, which an 8-billion model holds with its context on a GPU of 8 GB (measured
+# 2026-11-11: qwen3:8b with every tool needed 14.7 GB at 32k tokens). The user can offer every tool in the settings.
+FILTERING_TOOLS = frozenset({
+    "list_layers", "filter_state", "list_favorites", "describe_layer", "field_values", "layer_statistics",
+    "sample_features", "preview_filter", "map_context", "apply_filter", "cross_filter", "geometry_filter",
+    "point_cloud_filter", "clear_filters", "apply_favorite", "zoom_to", "select_features", "set_layers_visibility",
+    "export_layers", "undo_agent_step", "save_recipe", "add_project_note",
+})
+FILTERING_NOTE = ("\n\nOnly the tools for reading and filtering the project are offered with this local model. For "
+                  "styles, Processing, editing, layouts, layers to add or remove, widgets: say so, and that the user can "
+                  "offer every tool to the local model in the settings of the agent (it needs a GPU with more memory).")
+
+
+def filtering_only(tools) -> Tuple[ToolSpec, ...]:
+    """``tools`` without what a local model is not offered by default."""
+    return tuple(tool for tool in tools if tool.name in FILTERING_TOOLS)
+
+
 MAP_IMAGE = "map_image"
 CONTACT_SHEET = "contact_sheet"
 _EXTENT = {"type": "string", "maxLength": 100000,

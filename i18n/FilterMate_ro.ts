@@ -987,6 +987,16 @@ Sunteți de acord?</translation>
         <translation>Rețete</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Oferă toate instrumentele modelului local</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Dezactivat, un model local primește instrumentele care citesc și filtrează proiectul: încap într-un GPU de 8 GB. Toate instrumentele necesită aproximativ dublul memoriei.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Salvează ultima cerere ca rețetă…</translation>

@@ -987,6 +987,16 @@ Do you agree?</source>
         <translation>الوصفات</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>إتاحة كل الأدوات للنموذج المحلي</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>عند تعطيله، يحصل النموذج المحلي على أدوات قراءة المشروع وتصفيته فقط: تكفيها بطاقة رسومية بسعة 8 غيغابايت. أما كل الأدوات فتحتاج نحو ضعف الذاكرة.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>حفظ آخر طلب كوصفة…</translation>

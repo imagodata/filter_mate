@@ -987,6 +987,16 @@ Bạn có đồng ý không?</translation>
         <translation>Công thức</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Cung cấp mọi công cụ cho mô hình cục bộ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Khi tắt, mô hình cục bộ chỉ nhận các công cụ đọc và lọc dự án: chúng vừa với GPU 8 GB. Mọi công cụ cần khoảng gấp đôi bộ nhớ.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Lưu yêu cầu gần nhất thành công thức…</translation>

@@ -987,6 +987,16 @@ Sind Sie einverstanden?</translation>
         <translation>Rezepte</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Dem lokalen Modell alle Werkzeuge anbieten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Aus: Ein lokales Modell erhält die Werkzeuge, die das Projekt lesen und filtern; sie passen auf eine GPU mit 8 GB. Alle Werkzeuge brauchen etwa doppelt so viel Speicher.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Letzte Anfrage als Rezept speichern…</translation>

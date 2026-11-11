@@ -4,11 +4,12 @@
 Ollama loads a model with 4096 tokens of context unless told otherwise, and its OpenAI-compatible endpoint ignores
 any attempt to say more (measured with Ollama 0.30.10, 2026-11-11). A request of the agent carries about 18,000 tokens
 of system prompt and tool definitions before the conversation: through ``/v1`` the model never saw the tools nor the
-request, and answered nothing useful. Here ``options.num_ctx`` grows with the request, in two steps only: each new
-size makes Ollama load the model again, which takes seconds.
+request, and answered nothing useful. Here ``options.num_ctx`` grows with the request, in three steps only: each
+new size makes Ollama load the model again, which takes seconds.
 
 The response is newline-delimited JSON, one object per line, the last one with ``done``. A model that thinks
-(``message.thinking``) keeps its thoughts: only ``message.content`` is the answer.
+(``message.thinking``) keeps its thoughts: only ``message.content`` is the answer, and a turn that only thought (a
+small model, after its tools, may have nothing to add) ends the request without an error.
 """
 from __future__ import annotations
 
@@ -22,9 +23,10 @@ from ..messages import (
 from ..tool_catalog import ToolSpec
 from .base import HttpRequest, ProviderConfig, check_base_url, encode_json
 
-# Context sizes asked of Ollama: enough for the tools and a conversation, then twice that. A request whose estimate
-# goes past the first one asks for the second; beyond, the compaction of the history keeps it short.
-CONTEXT_STEPS = (32_768, 65_536)
+# Context sizes asked of Ollama, the smallest that holds the request and an answer: 16k for the filtering tools of a
+# local model (core/agent/tool_catalog.FILTERING_TOOLS) and a short conversation, 32k with every tool, then 64k;
+# beyond, the compaction of the history keeps it short. The KV cache of an 8-billion model takes about 4.5 GB at 32k.
+CONTEXT_STEPS = (16_384, 32_768, 65_536)
 CHARS_PER_TOKEN = 3.0  # a cautious estimate: JSON and French text run 3 to 4 characters per token
 ANSWER_ROOM = 4_096  # tokens left for the answer of the model
 _STOP_REASONS = {"stop": STOP_END, "length": STOP_MAX_TOKENS}
@@ -115,6 +117,7 @@ class OllamaStreamParser:
         self._done_reason: Optional[str] = None
         self._usage = Usage()
         self._finished = False
+        self._thought = False  # the model thought, even if it then said nothing
 
     def feed(self, data: bytes) -> List[StreamEvent]:
         if self._finished:
@@ -165,13 +168,15 @@ class OllamaStreamParser:
             if isinstance(text, str) and text:
                 self._text.append(text)
                 events.append(TextDelta(text))
+            if message.get("thinking"):
+                self._thought = True
             for call in message.get("tool_calls") or ():
                 self._on_tool_call(call)
         if payload.get("done"):
             self._finished = True
             self._done_reason = str(payload.get("done_reason") or "stop")
             self._usage = Usage(int(payload.get("prompt_eval_count") or 0), int(payload.get("eval_count") or 0))
-            if not self._text and not self._calls:
+            if not self._text and not self._calls and not self._thought:
                 events.append(StreamFailure(ProviderError(ERROR_STREAM, "The response was empty.")))
             else:
                 events.append(self._turn())

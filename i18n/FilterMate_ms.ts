@@ -987,6 +987,16 @@ Adakah anda bersetuju?</translation>
         <translation>Resipi</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Tawarkan semua alat kepada model setempat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Jika dimatikan, model setempat mendapat alat yang membaca dan menapis projek: ia muat dalam GPU 8 GB. Semua alat memerlukan kira-kira dua kali ganda memori.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Simpan permintaan terakhir sebagai resipi…</translation>

@@ -987,6 +987,16 @@ Godkänner du?</translation>
         <translation>Recept</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Ge den lokala modellen alla verktyg</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Avstängt får en lokal modell de verktyg som läser och filtrerar projektet: de ryms i en GPU på 8 GB. Alla verktyg kräver ungefär dubbelt så mycket minne.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Spara den senaste förfrågan som recept…</translation>

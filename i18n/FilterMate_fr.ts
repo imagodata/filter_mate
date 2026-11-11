@@ -1139,6 +1139,16 @@ Do you agree?</source>
         <translation>Recettes</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Proposer tous les outils au modèle local</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Décochée, un modèle local reçoit les outils qui lisent et filtrent le projet : ils tiennent sur un GPU de 8 Go. Tous les outils demandent environ deux fois plus de mémoire.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Garder la dernière demande comme recette…</translation>
