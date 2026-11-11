@@ -7,14 +7,15 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
 
-from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer, pyqtSignal
+from qgis.PyQt.QtCore import QCoreApplication, QRectF, Qt, QTimer, pyqtSignal
+from qgis.PyQt.QtGui import QColor, QPainter
 from qgis.PyQt.QtWidgets import (
     QDoubleSpinBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSizePolicy,
     QToolButton,
     QVBoxLayout, QWidget,
 )
 
-from ...core.agent.widgets import RANGE, VALUES
+from ...core.agent.widgets import CATEGORIES, CHART, RANGE, VALUES
 from ..styles.mockup_design import plugin_is_dark, tokens
 
 APPLY_DELAY_MS = 400  # a value typed or ticked is applied once the user pauses
@@ -28,7 +29,7 @@ def _tr(text: str) -> str:
 
 
 def default_title(widget: Dict[str, Any]) -> str:
-    if widget["kind"] == RANGE or widget["kind"] == VALUES:
+    if widget["kind"] in (RANGE, VALUES, CHART):
         return widget["field"]
     aggregate = {"count": _tr("Count"), "sum": _tr("Sum"), "mean": _tr("Mean"), "min": _tr("Minimum"),
                  "max": _tr("Maximum")}[widget["aggregate"]]
@@ -45,6 +46,94 @@ def number_text(value: Optional[float]) -> str:
     if float(value).is_integer() and abs(value) < 1e15:
         return f"{int(value):,}".replace(",", " ")
     return f"{value:,.2f}".replace(",", " ")
+
+
+CHART_ROW = 16
+HISTOGRAM_HEIGHT = 64
+
+
+def short_number(value: float) -> str:
+    """A bound of a histogram, short: 1 200, 0.35, 1.2e+07."""
+    if abs(value) >= 1e7:
+        return f"{value:.2g}"
+    if float(value).is_integer():
+        return f"{int(value):,}".replace(",", "\u202f")
+    return f"{value:.3g}"
+
+
+class ChartView(QWidget):
+    """Bars drawn by hand: one row per value (categories), or a histogram."""
+
+    def __init__(self, mode: str, parent=None) -> None:
+        super().__init__(parent)
+        self.mode = mode
+        self.bars = []
+        self.accent = QColor("#2f6db5")
+        self.muted = QColor("#5f5f5f")
+        font = self.font()
+        if font.pointSizeF() > 0:
+            font.setPointSizeF(font.pointSizeF() * 0.85)  # a chart is small print, as the layer name beside it
+            self.setFont(font)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._fit()
+
+    def row(self) -> int:
+        return max(CHART_ROW, self.fontMetrics().height() + 4)
+
+    def set_bars(self, bars) -> None:
+        self.bars = list(bars or [])
+        self._fit()
+        self.update()
+
+    def _fit(self) -> None:
+        if self.mode == CATEGORIES:
+            self.setFixedHeight(max(1, len(self.bars)) * self.row() + 2)
+        else:
+            self.setFixedHeight(HISTOGRAM_HEIGHT + self.fontMetrics().height() + 4)
+
+    def label(self, bar) -> str:
+        if bar.get("others"):
+            return _tr("others")
+        return value_text(bar.get("value"))
+
+    def paintEvent(self, _event) -> None:  # noqa: N802 - Qt name
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        if not self.bars:
+            painter.setPen(self.muted)
+            painter.drawText(self.rect(), int(Qt.AlignmentFlag.AlignCenter), "—")
+            painter.end()
+            return
+        top = max(bar["count"] for bar in self.bars) or 1
+        width = self.width()
+        metrics = self.fontMetrics()
+        if self.mode == CATEGORIES:
+            label_width = int(width * 0.38)
+            count_width = metrics.horizontalAdvance("0000000")
+            room = max(4, width - label_width - count_width - 8)
+            line = self.row()
+            for row, bar in enumerate(self.bars):
+                y = row * line
+                painter.setPen(self.muted if bar.get("others") else self.palette().text().color())
+                text = metrics.elidedText(self.label(bar), Qt.TextElideMode.ElideRight, label_width - 4)
+                painter.drawText(QRectF(0, y, label_width - 4, line), int(Qt.AlignmentFlag.AlignVCenter), text)
+                length = room * bar["count"] / top
+                color = QColor(self.muted if bar.get("others") else self.accent)
+                painter.fillRect(QRectF(label_width, y + 3, max(1.0, length), line - 6), color)
+                painter.setPen(self.muted)
+                painter.drawText(QRectF(label_width + length + 4, y, count_width, line),
+                                 int(Qt.AlignmentFlag.AlignVCenter), number_text(bar["count"]))
+        else:
+            step = width / len(self.bars)
+            for index, bar in enumerate(self.bars):
+                height = HISTOGRAM_HEIGHT * bar["count"] / top
+                painter.fillRect(QRectF(index * step + 1, HISTOGRAM_HEIGHT - height, max(1.0, step - 2), height),
+                                 self.accent)
+            painter.setPen(self.muted)
+            baseline = QRectF(0, HISTOGRAM_HEIGHT + 2, width, metrics.height())
+            painter.drawText(baseline, int(Qt.AlignmentFlag.AlignLeft), short_number(self.bars[0]["low"]))
+            painter.drawText(baseline, int(Qt.AlignmentFlag.AlignRight), short_number(self.bars[-1]["high"]))
+        painter.end()
 
 
 class WidgetCard(QFrame):
@@ -82,7 +171,7 @@ class WidgetCard(QFrame):
         head.addWidget(self.title)
         head.addWidget(self.layer, 1)
         self.value: Optional[QLabel] = None
-        if widget["kind"] not in (RANGE, VALUES):  # a number fits on the line of its title
+        if widget["kind"] not in (RANGE, VALUES, CHART):  # a number fits on the line of its title
             self.value = QLabel("—", self)
             self.value.setObjectName("label_agent_widget_value")
             head.addWidget(self.value)
@@ -96,7 +185,12 @@ class WidgetCard(QFrame):
         self.low: Optional[QDoubleSpinBox] = None
         self.high: Optional[QDoubleSpinBox] = None
         self.values: Optional[QListWidget] = None
-        if widget["kind"] == RANGE:
+        self.chart: Optional[ChartView] = None
+        if widget["kind"] == CHART:
+            self.chart = ChartView(widget["mode"], self)
+            self.chart.setObjectName("widget_agent_chart")
+            layout.addWidget(self.chart)
+        elif widget["kind"] == RANGE:
             layout.addLayout(self._build_range())
         elif widget["kind"] == VALUES:
             layout.addWidget(self._build_values())
@@ -190,6 +284,10 @@ class WidgetCard(QFrame):
         if self.value is not None:
             self.value.setText(text)
 
+    def set_bars(self, bars) -> None:
+        if self.chart is not None:
+            self.chart.set_bars(bars)
+
     def set_error(self, text: str) -> None:
         self.error.setText(text)
         self.error.setVisible(bool(text))
@@ -254,6 +352,12 @@ class WidgetsStrip(QFrame):
         if card is not None:
             card.set_value(text)
 
+    def set_bars(self, widget_id: str, bars) -> None:
+        card = self.cards.get(widget_id)
+        if card is not None:
+            card.set_bars(bars)
+            self._fit()
+
     def set_error(self, widget_id: str, text: str) -> None:
         card = self.cards.get(widget_id)
         if card is not None:
@@ -261,6 +365,11 @@ class WidgetsStrip(QFrame):
 
     def refresh_look(self) -> None:
         palette = tokens(plugin_is_dark(self))
+        for card in self.cards.values():
+            if card.chart is not None:
+                card.chart.accent = QColor(palette['fm_accent'])
+                card.chart.muted = QColor(palette['fm_text_muted'])
+                card.chart.update()
         self.setStyleSheet(
             f"QFrame#frame_agent_widget {{ border: 1px solid {palette['fm_group_border']}; border-radius: 6px; }}"
             "QLabel#label_agent_widget_title { font-weight: 600; }"

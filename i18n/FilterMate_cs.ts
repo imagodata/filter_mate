@@ -1344,6 +1344,11 @@ Souhlasíte?</translation>
         <source>to</source>
         <translation>do</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>ostatní</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>

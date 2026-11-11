@@ -218,6 +218,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | `range` | minimum and maximum of a numeric field among the features shown | two bounds; moving them filters the layer |
 | `values` | the values of a field among the features shown (50 at most, NULL included) | tick or untick; All / None |
 | `stat` | count, or sum, mean, min, max of a numeric field | reads a number that follows the filters and edits |
+| `chart` | the features of each value of a field (the 8 most frequent and the others), or a histogram (10 bins) of a numeric field | reads bars that follow the filters and edits; it filters nothing |
 
 - The model chooses the kind, the layer, the field, the aggregate and the title, nothing else: FilterMate builds the
   filter of a widget from the field and values it holds, quoted by `QgsExpression`, and applies it through the public
