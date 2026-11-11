@@ -21,6 +21,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel
+from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
@@ -327,6 +328,9 @@ class AgentPanel(QFrame):
         layout.setSpacing(6)
         layout.addWidget(self.progress)  # a thin bar under the header while the agent works (mockup)
         layout.addWidget(self.stack, 1)
+        # The widgets the agent made for the user: they stay in view while the conversation scrolls.
+        self.widgets_strip = WidgetsStrip(self)
+        layout.addWidget(self.widgets_strip)
         layout.addLayout(actions)
         layout.addLayout(ask)
         layout.addWidget(self.destination)
@@ -556,6 +560,8 @@ class AgentPanel(QFrame):
         """Icons and colors of the current theme, as the mockup draws them."""
         dark = self._dark()
         palette = tokens(dark)
+        if hasattr(self, "widgets_strip"):
+            self.widgets_strip.refresh_look()
         muted = palette["fm_text_muted"]
         self.destination.setStyleSheet(f"color: {muted};")
         send_color = palette["fm_danger"] if self._working else palette["fm_accent"]

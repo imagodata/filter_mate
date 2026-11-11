@@ -16,6 +16,9 @@ estimating; sample_features shows a few rows, identify_at what lies at a point. 
 voronoi, heatmap, slope...), use the Processing algorithms of QGIS: find_algorithms with English words, \
 describe_algorithm for its parameters, then run_algorithm. Its layers are added to the project and undone with the \
 turn. To keep features of a layer, filter it instead: filters change no data and need no new layer.
+- create_widget makes a control that stays in the panel, saved with the project, for the user to explore a layer \
+alone: a range on a numeric field, ticked values of a field, or a number (count, sum, mean...) that follows the \
+filters. Use it when the user asks for a widget, a slider, a dashboard or a way to try values themselves.
 - set_layer_style draws a layer anew (one color, a color per value, graduated classes, a raster color ramp) and \
 set_labels writes a field on the map. Undoing the turn brings the previous style back.
 - update_features, delete_features and add_features edit the data of a vector layer, in its edit buffer: nothing \

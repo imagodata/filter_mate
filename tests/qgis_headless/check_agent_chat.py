@@ -1056,6 +1056,7 @@ def check_chat(provider, layer, authcfg, work):
     dialog.close()
     check_steps(chat, provider, settings, ask, layer)
     check_autonomy(chat, provider, settings, ask, answers, layer)
+    check_widgets(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
     host.close()
@@ -1120,6 +1121,91 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     layer.setSubsetString("")
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
+    panel.clear_thread()
+
+
+def check_widgets(chat, provider, settings, ask, layer):
+    """Widgets the agent makes: drawn in the panel, kept in the project, filtering their layer, undone with the turn."""
+    from filter_mate.adapters.agent.agent_widgets import read_widgets, write_widgets
+
+    panel = chat.panel
+    strip = panel.widgets_strip
+    settings()
+    layer.setSubsetString("")
+    write_widgets([])
+    chat._refresh_widgets()
+    check("widgets: none, nothing shown", strip.isHidden() and not strip.cards)
+    provider.reset((200, {}, tool_turn("create_widget", {"kind": "range", "layer": "communes", "field": "pop",
+                                                         "title": "Population"})), (200, {}, text_turn("ok")))
+    ask("un curseur sur la population")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    stored = read_widgets()
+    check("widgets: a range is made from the layer", not result.get("is_error") and len(stored) == 1 and
+          stored[0]["minimum"] == 100 and stored[0]["maximum"] == 6000 and stored[0]["integer"], (result, stored))
+    check("widgets: drawn in the panel", not strip.isHidden() and list(strip.cards) == ["w1"] and
+          strip.cards["w1"].title.text() == "Population")
+    provider.reset((200, {}, tool_turn("create_widget", {"kind": "stat", "layer": "communes"})),
+                   (200, {}, text_turn("ok")))
+    ask("combien")
+    wait(lambda: strip.cards.get("w2") is not None and strip.cards["w2"].value.text() == "60", 3)
+    check("widgets: a number counts the features shown", "w2" in strip.cards and
+          strip.cards["w2"].value.text() == "60", strip.cards.get("w2") and strip.cards["w2"].value.text())
+    sent = json.dumps(provider.requests[0]["body"]["messages"][-1], ensure_ascii=False)
+    check("widgets: listed with the next request", "Widgets of the panel" in sent and "w1" in sent, sent[-300:])
+
+    card = strip.cards["w1"]
+    card.low.setValue(1000)
+    card.flush()
+    check("widgets: moving a bound filters the layer", layer.subsetString() == '"pop" >= 1000', layer.subsetString())
+    check("widgets: its state is kept in the project", read_widgets()[0]["low"] == 1000)
+    wait(lambda: strip.cards["w2"].value.text() == "51", 3)
+    check("widgets: the number follows the filter", strip.cards["w2"].value.text() == "51",
+          strip.cards["w2"].value.text())
+    card = strip.cards["w1"]
+    card.low.setValue(100)
+    card.flush()
+    check("widgets: wide open again, the filter goes", layer.subsetString() == "", layer.subsetString())
+
+    provider.reset((200, {}, tool_turn("create_widget", {"kind": "values", "layer": "communes", "field": "pop"})),
+                   (200, {}, text_turn("ok")))
+    ask("des cases")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("widgets: one filtering widget per field", result.get("is_error") is True and "already" in result["content"],
+          result)
+    check("widgets: a refused one draws nothing", list(strip.cards) == ["w1", "w2"])
+
+    chat._on_undo()
+    wait(lambda: list(strip.cards) == ["w1"], 3)
+    check("widgets: undoing the turn takes the widget back", [w["id"] for w in read_widgets()] == ["w1"] and
+          list(strip.cards) == ["w1"], (read_widgets(), list(strip.cards)))
+    chat._on_redo()
+    wait(lambda: list(strip.cards) == ["w1", "w2"], 3)
+    check("widgets: redoing brings it again", list(strip.cards) == ["w1", "w2"], list(strip.cards))
+
+    layer.setSubsetString('"pop" <= 3000')
+    provider.reset((200, {}, tool_turn("remove_widget", {"widget_id": "w1"})),
+                   (200, {}, tool_turn("create_widget", {"kind": "values", "layer": "communes", "field": "pop"},
+                                       "toolu_2")),
+                   (200, {}, text_turn("ok")))
+    ask("des cases sur les petites")
+    values = [w for w in read_widgets() if w["kind"] == "values"]
+    check("widgets: values of the features shown, the filter kept as the base", len(values) == 1 and
+          len(values[0]["values"]) == 30 and values[0]["base"] == '"pop" <= 3000', values)
+    card = strip.cards[values[0]["id"]]
+    for row in range(card.values.count()):
+        if card.values.item(row).data(256) not in (100, 200):
+            card.values.item(row).setCheckState(Qt.CheckState.Unchecked)
+    card.flush()
+    check("widgets: unticking filters, after the filter from before", layer.subsetString() ==
+          '("pop" <= 3000) AND ("pop" IN (100, 200))', layer.subsetString())
+    strip.remove_requested.emit(values[0]["id"])
+    check("widgets: the cross removes it, the filter stays", values[0]["id"] not in strip.cards and
+          layer.subsetString() == '("pop" <= 3000) AND ("pop" IN (100, 200))', layer.subsetString())
+
+    write_widgets([])
+    chat._refresh_widgets()
+    layer.setSubsetString("")
+    check("widgets: gone, the strip hides", strip.isHidden())
     panel.clear_thread()
 
 
