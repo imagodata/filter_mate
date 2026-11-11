@@ -110,6 +110,26 @@ class TestHandlers:
         assert run(accessor, root, "set_project_crs", crs="Lambert")[0] is True
         assert run(accessor, root, "set_project_crs", crs="")[0] is True
 
+    def test_layer_tree_tools(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "group_layers", layers=["communes", "nope"], group="Base/Admin")
+        assert not error and answer["moved"] == ["communes"] and answer["not_found"] == ["nope"]
+        assert run(accessor, root, "group_layers", layers=["nope"])[0] is True
+        assert run(accessor, root, "group_layers", layers=[])[0] is True  # at least one layer
+        error, answer = run(accessor, root, "rename_layer", layer="communes", name="Communes 31")
+        assert not error and answer == {"layer_id": "L1", "name": "Communes 31", "previous": "communes"}
+        assert run(accessor, root, "rename_layer", layer="nope", name="x")[0] is True
+        assert run(accessor, root, "rename_layer", layer="communes", name="")[0] is True
+
+    def test_map_theme_tool(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "map_theme", action="save", name="Relief")
+        assert not error and answer["themes"] == ["Relief"]
+        assert run(accessor, root, "map_theme", action="apply", name="Relief")[0] is False
+        assert run(accessor, root, "map_theme", action="apply", name="nope")[0] is True
+        assert run(accessor, root, "map_theme", action="erase", name="Relief")[0] is True
+        assert run(accessor, root, "map_theme", action="list")[1]["themes"] == ["Relief"]
+
     def test_layout_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "create_layout", name="Carte", title="Communes")
@@ -412,6 +432,16 @@ class TestRoutes:
         assert client.post("/map/crs", json={"crs": "EPSG:2154"}).json()["crs"] == "EPSG:2154"
         assert client.post("/map/crs", json={"crs": "nope"}).status_code == 400
         assert client.post("/map/crs", json={"crs": ""}).status_code == 422
+
+    def test_layer_tree_routes(self, client):
+        assert client.post("/layers/group", json={"layers": ["communes"], "group": "Base"}).json()["moved"] == ["communes"]
+        assert client.post("/layers/group", json={"layers": ["nope"]}).status_code == 400
+        assert client.post("/layers/group", json={"layers": []}).status_code == 422
+        assert client.post("/layers/rename", json={"layer": "communes", "name": "C"}).json()["previous"] == "communes"
+        assert client.post("/layers/rename", json={"layer": "communes", "name": ""}).status_code == 422
+        assert client.post("/map/themes", json={"action": "save", "name": "A"}).json()["themes"] == ["A"]
+        assert client.post("/map/themes", json={"action": "apply", "name": "B"}).status_code == 400
+        assert client.post("/map/themes", json={"action": "erase", "name": "A"}).status_code == 422
 
     def test_layout_routes(self, client):
         response = client.post("/layouts", json={"name": "Carte", "page": "A3", "orientation": "portrait"})

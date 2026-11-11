@@ -737,6 +737,42 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/map/crs", _body(crs=crs))
 
+    @mcp.tool(annotations=_write("Put layers in a group", idempotent=True))
+    async def group_layers(
+        layers: Annotated[LayerList, Field(description="Layer ids or names, in the order they take in the group")],
+        group: Annotated[str, Field(max_length=1000, description=(
+            "Group path from the top of the layer tree, such as Base or Base/Roads (made where missing); empty: "
+            "the top of the tree itself"))] = "",
+        at_top: Annotated[bool, Field(description="Put them first in the group (true) or last (false)")] = True,
+    ) -> Dict[str, Any]:
+        """Organize the layer tree: put layers in a group, made where it is missing, first or last of it.
+
+        Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of
+        FilterMate, undoing the turn puts each layer back and removes the groups it made.
+        """
+        return await call("POST", "/layers/group", _body(layers=layers, group=group, at_top=at_top))
+
+    @mcp.tool(annotations=_write("Rename a layer", idempotent=True))
+    async def rename_layer(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
+        name: Annotated[str, Field(min_length=1, max_length=200, description="Its new name")],
+    ) -> Dict[str, Any]:
+        """Give a layer of the project another name, as shown in the layer tree and the legend; its data and source do
+        not change. Returns layer_id, name and previous."""
+        return await call("POST", "/layers/rename", _body(layer=layer, name=name))
+
+    @mcp.tool(annotations=_write("Map themes", idempotent=False))
+    async def map_theme(
+        action: Annotated[Literal["list", "save", "apply", "remove"], Field(description=(
+            "list the themes; save the layers shown now and their styles under a name (replaces a theme of that "
+            "name); apply a theme to the map; remove a theme"))],
+        name: Annotated[str, Field(max_length=200, description="Name of the theme, for every action but list")] = "",
+    ) -> Dict[str, Any]:
+        """Map themes of the project: saved views of which layers are shown, with their styles, used by layouts and
+        by the user to switch views. Returns action, name, themes (all of them), replaced and layers_shown. In the
+        chat of FilterMate, undoing the turn brings the themes, the visibility and the styles back."""
+        return await call("POST", "/map/themes", _body(action=action, name=name))
+
     @mcp.tool(annotations=_write("Show or hide layers", idempotent=True))
     async def set_layers_visibility(
         layers: Annotated[LayerList, Field(description="Layer ids or names")],

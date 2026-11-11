@@ -9,6 +9,10 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("visibility", layer_id, before, after)``: checked in the layer tree or not;
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
 * ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
+* ``("tree", "", before, after)``: where each layer is in the layer tree and the groups, checked or not (JSON);
+* ``("layer_name", layer_id, before, after)``: the name of a layer;
+* ``("themes", "", before, after)``: the map themes of the project, as XML;
+* ``("current_style", layer_id, before, after)``: the style of its style manager a layer has on (a theme sets it);
 * ``("widgets", "", before, after)``: the widgets of the panel kept in the project (``core/agent/widgets.py``);
 * ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
   after the commands of the turn (``adapters/public_api/feature_edits.py``);
@@ -23,7 +27,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from qgis.core import QgsLayerDefinition, QgsProject, QgsReadWriteContext, QgsVectorLayer
+from qgis.core import QgsLayerDefinition, QgsLayerTree, QgsProject, QgsReadWriteContext, QgsVectorLayer
 from qgis.PyQt.QtXml import QDomDocument
 
 logger = logging.getLogger("FilterMate.agent")
@@ -34,6 +38,7 @@ Place = Tuple[Tuple[str, ...], int]
 STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
 WIDGET_TOOLS = ("create_widget", "remove_widget")
+TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features")
 LAYOUT_TOOLS = ("create_layout",)
 CRS_TOOLS = ("set_project_crs",)
@@ -46,6 +51,54 @@ def _crs_label() -> str:
 
 def _layout_names(project: QgsProject) -> Set[str]:
     return {layout.name() for layout in project.layoutManager().printLayouts()}
+
+
+def _tree_state(project: QgsProject) -> str:
+    """Where each layer is in the tree, and the groups with whether they are checked, as JSON."""
+    import json
+    root = project.layerTreeRoot()
+    layers = []
+    for node in root.findLayers():
+        path, index = _place(project, node.layerId())
+        layers.append([node.layerId(), list(path), index])
+    groups = []
+
+    def walk(group, path):
+        for child in group.children():
+            if QgsLayerTree.isGroup(child):
+                groups.append(["/".join(path + [child.name()]), bool(child.itemVisibilityChecked())])
+                walk(child, path + [child.name()])
+    walk(root, [])
+    return json.dumps({"layers": layers, "groups": groups})
+
+
+def _set_tree_state(project: QgsProject, text: str) -> None:
+    """Put the layers back where ``text`` says, make or check its groups, and remove the empty groups it had not."""
+    import json
+    from ..public_api.layer_tree import ensure_group, move_layer
+    state = json.loads(text)
+    wanted = {path: checked for path, checked in state["groups"]}
+    for path, checked in state["groups"]:
+        group, _made = ensure_group(path.split("/"))
+        group.setItemVisibilityChecked(checked)
+    for layer_id, path, index in sorted(state["layers"], key=lambda row: (row[1], row[2])):
+        if project.layerTreeRoot().findLayer(layer_id) is not None and index >= 0:
+            move_layer(layer_id, ensure_group(path)[0] if path else project.layerTreeRoot(), index)
+    stale = [path for path, _checked in json.loads(_tree_state(project))["groups"] if path not in wanted]
+    for path in sorted(stale, key=lambda item: -item.count("/")):  # the deepest first
+        group = _group(project, path.split("/"))
+        if group is not project.layerTreeRoot() and not group.children():
+            group.parent().removeChildNode(group)
+
+
+def _tree_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "layer tree")
+
+
+def _themes_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "map themes")
 
 
 def _widgets_label() -> str:
@@ -178,6 +231,10 @@ class EffectsRecorder:
         self._styles: Dict[str, str] = {}
         self._notes: Optional[Tuple[str, ...]] = None
         self._widgets: Optional[str] = None
+        self._tree: Optional[str] = None
+        self._names: Dict[str, str] = {}
+        self._themes: Optional[str] = None
+        self._current_styles: Dict[str, Optional[str]] = {}
         self._edits: Dict[str, int] = {}
         self._layouts: Optional[Set[str]] = None
         self._crs: Optional[str] = None
@@ -211,6 +268,23 @@ class EffectsRecorder:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
                     self._edits[layer.id()] = _edit_index(layer)
+            elif name == "rename_layer":
+                layer = _resolve(project, arguments.get("layer"))
+                if layer is not None and layer.id() not in self._names:
+                    self._names[layer.id()] = layer.name()
+            elif name in TREE_TOOLS:
+                if self._tree is None:
+                    self._tree = _tree_state(project)
+                if name == "map_theme":
+                    from ..public_api.layer_tree import current_style, themes_xml
+                    if self._themes is None:
+                        self._themes = themes_xml()
+                    for layer_id, layer in project.mapLayers().items():  # a theme applied shows and styles any
+                        visible = _visible(project, layer_id)
+                        if visible is not None and layer_id not in self._visibility:
+                            self._visibility[layer_id] = visible
+                        if layer_id not in self._current_styles:
+                            self._current_styles[layer_id] = current_style(layer)
             elif name in WIDGET_TOOLS:
                 if self._widgets is None:
                     from .agent_widgets import read_widgets
@@ -275,6 +349,24 @@ class EffectsRecorder:
             after = _edit_index(layer) if layer is not None else before
             if after != before:
                 effects.append(("edits", layer_id, before, after, layer.name()))
+        if self._tree is not None:
+            after_tree = _tree_state(project)
+            if after_tree != self._tree:
+                effects.append(("tree", "", self._tree, after_tree))
+        for layer_id, before in self._names.items():
+            layer = project.mapLayer(layer_id)
+            if layer is not None and layer.name() != before:
+                effects.append(("layer_name", layer_id, before, layer.name()))
+        if self._themes is not None:
+            from ..public_api.layer_tree import current_style, themes_xml
+            after_themes = themes_xml()
+            if after_themes != self._themes:
+                effects.append(("themes", "", self._themes, after_themes))
+            for layer_id, before in self._current_styles.items():
+                layer = project.mapLayer(layer_id)
+                after = current_style(layer) if layer is not None else before
+                if after != before and before is not None and after is not None:
+                    effects.append(("current_style", layer_id, before, after))
         if self._widgets is not None:
             from .agent_widgets import read_widgets
             from ...core.agent.widgets import dumps
@@ -357,6 +449,26 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                     done.append(layer.name())
                 else:
                     left.append(effect[4] if len(effect) > 4 else layer_id)
+            elif kind == "tree":
+                _set_tree_state(project, effect[2] if undo else effect[3])
+                done.append(_tree_label())
+            elif kind == "layer_name":
+                layer = project.mapLayer(layer_id)
+                if layer is not None:
+                    layer.setName(effect[2] if undo else effect[3])
+                    done.append(layer.name())
+                else:
+                    left.append(effect[3] if undo else effect[2])
+            elif kind == "themes":
+                from ..public_api.layer_tree import set_themes_xml
+                (done if set_themes_xml(effect[2] if undo else effect[3]) else left).append(_themes_label())
+            elif kind == "current_style":
+                layer = project.mapLayer(layer_id)
+                manager = layer.styleManager() if layer is not None else None
+                if manager is not None and manager.setCurrentStyle(effect[2] if undo else effect[3]):
+                    done.append(layer.name())
+                elif layer is not None:
+                    left.append(layer.name())
             elif kind == "widgets":
                 from .agent_widgets import write_widgets
                 from ...core.agent.widgets import parse

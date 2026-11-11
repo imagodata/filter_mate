@@ -1719,6 +1719,106 @@
    }
   },
   {
+   "name": "group_layers",
+   "title": "Put layers in a group",
+   "description": "Organize the layer tree: put layers in a group, made where it is missing, first or last of it. Layers keep their data, style and visibility. Returns group, groups_made, moved and not_found. In the chat of FilterMate, undoing the turn puts each layer back and removes the groups it made.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layer ids or names, in the order they take in the group",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "group": {
+      "default": "",
+      "description": "Group path from the top of the layer tree, such as Base or Base/Roads (made where missing); empty: the top of the tree itself",
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "at_top": {
+      "default": true,
+      "description": "Put them first in the group (true) or last (false)",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "rename_layer",
+   "title": "Rename a layer",
+   "description": "Give a layer of the project another name, as shown in the layer tree and the legend; its data and source do not change. Returns layer_id, name and previous.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "description": "Its new name",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer",
+     "name"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "map_theme",
+   "title": "Map themes",
+   "description": "Map themes of the project: saved views of which layers are shown, with their styles, used by layouts and by the user to switch views. Returns action, name, themes (all of them), replaced and layers_shown. In the chat of FilterMate, undoing the turn brings the themes, the visibility and the styles back.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "action": {
+      "description": "list the themes; save the layers shown now and their styles under a name (replaces a theme of that name); apply a theme to the map; remove a theme",
+      "enum": [
+       "list",
+       "save",
+       "apply",
+       "remove"
+      ],
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the theme, for every action but list",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "action"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "set_layers_visibility",
    "title": "Show or hide layers",
    "description": "Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed.",

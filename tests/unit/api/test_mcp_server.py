@@ -26,7 +26,7 @@ EXPECTED_TOOLS = {
     "describe_layer", "field_values", "preview_filter", "map_context",
     "layer_statistics", "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm",
     "set_layer_style", "set_labels", "update_features", "delete_features", "add_features",
-    "create_layout", "export_layout", "set_project_crs",
+    "create_layout", "export_layout", "set_project_crs", "group_layers", "rename_layer", "map_theme",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
     "add_service_layer", "search_imagery", "segment_objects", "similar_objects",
 }

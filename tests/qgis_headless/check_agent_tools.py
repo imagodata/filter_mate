@@ -501,6 +501,63 @@ def check_project_crs(project):
         project_control.crs_definition(own)).isValid())
 
 
+def check_layer_tree(project):
+    """group_layers, rename_layer and map_theme on the real layer tree, and what an undo of the turn brings back."""
+    from filter_mate.adapters.public_api import layer_tree
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+    root = project.layerTreeRoot()
+
+    def places():
+        return [(node.name(), layer_tree.group_path(node), node.itemVisibilityChecked()) for node in root.findLayers()]
+
+    start = places()
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("c1", "group_layers", {"layers": ["routes", "communes"], "group": "Base/Admin"}))
+    answer = layer_tree.group_layers(["routes", "communes", "nope"], "Base/Admin")
+    check("tree: layers put in a group made for them", answer["groups_made"] == ["Base", "Base/Admin"] and
+          answer["moved"] == ["routes", "communes"] and answer["not_found"] == ["nope"], answer)
+    check("tree: in the order given, checked as before", [row[:2] for row in places()] ==
+          [("routes", "Base/Admin"), ("communes", "Base/Admin")] and all(row[2] for row in places()), places())
+    check("tree: no layer, refused", refused(layer_tree.group_layers, ["nope"], "X") and root.findGroup("X") is None)
+    check("tree: too deep, refused", refused(layer_tree.group_layers, ["routes"], "a/b/c/d/e/f"))
+    recorder.before_call(ToolCallPart("c2", "rename_layer", {"layer": "routes", "name": "Routes 31"}))
+    renamed = layer_tree.rename_layer("routes", "Routes 31")
+    check("rename: a layer", renamed["previous"] == "routes" and project.mapLayersByName("Routes 31"), renamed)
+    check("rename: empty, refused", refused(layer_tree.rename_layer, "communes", "  "))
+    effects = recorder.finish()
+    check("tree: the turn keeps the tree and the name", sorted(effect[0] for effect in effects) == ["layer_name", "tree"],
+          [effect[0] for effect in effects])
+    apply_effects(effects, undo=True)
+    check("tree: undo puts the layers back and removes the groups made", places() == start and
+          root.findGroup("Base") is None and project.mapLayersByName("routes"), (places(), start))
+    apply_effects(effects, undo=False)
+    check("tree: redo makes them again", [row[1] for row in places()] == ["Base/Admin", "Base/Admin"] and
+          project.mapLayersByName("Routes 31"), places())
+    apply_effects(effects, undo=True)
+
+    communes = project.mapLayersByName("communes")[0]
+    root.findLayer(communes.id()).setItemVisibilityChecked(False)
+    saved = layer_tree.map_theme("save", "Sans communes")
+    check("theme: saved from the map now", saved["themes"] == ["Sans communes"] and not saved["replaced"], saved)
+    check("theme: saved again replaces it", layer_tree.map_theme("save", "Sans communes")["replaced"])
+    root.findLayer(communes.id()).setItemVisibilityChecked(True)
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("c3", "map_theme", {"action": "apply", "name": "Sans communes"}))
+    layer_tree.map_theme("apply", "Sans communes")
+    check("theme: applied hides the layer", not root.findLayer(communes.id()).itemVisibilityChecked())
+    recorder.before_call(ToolCallPart("c4", "map_theme", {"action": "remove", "name": "Sans communes"}))
+    check("theme: removed", layer_tree.map_theme("remove", "Sans communes")["themes"] == [])
+    check("theme: unknown, refused", refused(layer_tree.map_theme, "apply", "nope"))
+    check("theme: an action it does not know, refused", refused(layer_tree.map_theme, "erase", "x"))
+    effects = recorder.finish()
+    apply_effects(effects, undo=True)
+    check("theme: undo shows the layer again and brings the theme back",
+          root.findLayer(communes.id()).itemVisibilityChecked() and layer_tree.theme_names() == ["Sans communes"],
+          [effect[0] for effect in effects])
+    layer_tree.map_theme("remove", "Sans communes")
+
+
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
@@ -624,6 +681,7 @@ def main(introspection):
     check_edits(project, work)
     check_layouts(project, work)
     check_project_crs(project)
+    check_layer_tree(project)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

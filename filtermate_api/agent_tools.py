@@ -316,6 +316,15 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def set_project_crs(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.set_project_crs(args["crs"]))
 
+    def group_layers(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.group_layers(args["layers"], group=args["group"], at_top=args["at_top"]))
+
+    def rename_layer(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.rename_layer(args["layer"], args["name"]))
+
+    def map_theme(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.map_theme(args["action"], args["name"]))
+
     def set_layers_visibility(args: Dict[str, Any]) -> Dict[str, Any]:
         return _report("Visibility", accessor.set_layers_visibility(args["layers"], args["visible"]))
 
@@ -381,6 +390,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "set_layer_style": set_layer_style, "set_labels": set_labels,
         "update_features": update_features, "delete_features": delete_features, "add_features": add_features,
         "create_layout": create_layout, "export_layout": export_layout, "set_project_crs": set_project_crs,
+        "group_layers": group_layers, "rename_layer": rename_layer, "map_theme": map_theme,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,
