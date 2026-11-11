@@ -332,6 +332,11 @@ Ne için: {}
         <translation>panelin widget'ları</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="114"/>
+        <source>recipes of the agent</source>
+        <translation>ajanın tarifleri</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="101"/>
         <source>map themes</source>
         <translation>harita temaları</translation>
@@ -688,6 +693,76 @@ Onaylıyor musunuz?</translation>
         <translation>Widget kaldırıldı: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1009"/>
+        <source>Recipe kept: {}</source>
+        <translation>Tarif kaydedildi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1010"/>
+        <source>Recipe {} forgotten</source>
+        <translation>{} tarifi unutuldu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>{} tarifi kaldırılsın mı?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>{}. adımdan önce durduruldu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Save as a recipe</source>
+        <translation>Tarif olarak kaydet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Name of the recipe ({} steps, run again without the model):</source>
+        <translation>Tarifin adı ({} adım, model olmadan yeniden çalıştırılır):</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="571"/>
+        <source>Recipe kept: {} ({} steps). Run it from More &gt; Recipes.</source>
+        <translation>Tarif kaydedildi: {} ({} adım). Daha fazla &gt; Tarifler menüsünden çalıştırın.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="607"/>
+        <source>Recipe: {}</source>
+        <translation>Tarif: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="620"/>
+        <source>Step {} needs a tool the settings of the agent leave out: {}.</source>
+        <translation>{}. adım, ajanın ayarlarının dışarıda bıraktığı bir araç gerektiriyor: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="625"/>
+        <source>Step {} was not run: {}.</source>
+        <translation>{}. adım çalıştırılmadı: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="631"/>
+        <source>The undo point could not be made, so step {} was not run.</source>
+        <translation>Geri alma noktası oluşturulamadı, bu yüzden {}. adım çalıştırılmadı.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="638"/>
+        <source>Step {} failed: {}</source>
+        <translation>{}. adım başarısız oldu: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="649"/>
+        <source>Recipe done: {} steps, without the model. Undo takes it back as one turn.</source>
+        <translation>Tarif tamamlandı: {} adım, model olmadan. Geri al, onu tek bir tur olarak geri alır.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>The {} steps before stay, and can be undone.</source>
+        <translation>Önceki {} adım kalır ve geri alınabilir.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
@@ -905,6 +980,31 @@ Onaylıyor musunuz?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Yeni konuşma</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="311"/>
+        <source>Recipes</source>
+        <translation>Tarifler</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="663"/>
+        <source>Save the last request as a recipe…</source>
+        <translation>Son isteği tarif olarak kaydet…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="667"/>
+        <source>No recipe in this project yet</source>
+        <translation>Bu projede henüz tarif yok</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="673"/>
+        <source>{} ({} steps)</source>
+        <translation>{} ({} adım)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="676"/>
+        <source>Run without the model</source>
+        <translation>Model olmadan çalıştır</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

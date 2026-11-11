@@ -332,6 +332,11 @@ Executar?</translation>
         <translation>widgets do painel</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="114"/>
+        <source>recipes of the agent</source>
+        <translation>receitas do agente</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="101"/>
         <source>map themes</source>
         <translation>temas de mapa</translation>
@@ -688,6 +693,76 @@ Você concorda?</translation>
         <translation>Widget {} removido</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1009"/>
+        <source>Recipe kept: {}</source>
+        <translation>Receita salva: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1010"/>
+        <source>Recipe {} forgotten</source>
+        <translation>Receita {} esquecida</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>Remover a receita {}?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>Interrompida antes da etapa {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Save as a recipe</source>
+        <translation>Salvar como receita</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Name of the recipe ({} steps, run again without the model):</source>
+        <translation>Nome da receita ({} etapas, executadas de novo sem o modelo):</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="571"/>
+        <source>Recipe kept: {} ({} steps). Run it from More &gt; Recipes.</source>
+        <translation>Receita salva: {} ({} etapas). Execute-a em Mais &gt; Receitas.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="607"/>
+        <source>Recipe: {}</source>
+        <translation>Receita: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="620"/>
+        <source>Step {} needs a tool the settings of the agent leave out: {}.</source>
+        <translation>A etapa {} precisa de uma ferramenta que as configurações do agente excluem: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="625"/>
+        <source>Step {} was not run: {}.</source>
+        <translation>A etapa {} não foi executada: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="631"/>
+        <source>The undo point could not be made, so step {} was not run.</source>
+        <translation>Não foi possível criar o ponto de desfazer, então a etapa {} não foi executada.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="638"/>
+        <source>Step {} failed: {}</source>
+        <translation>A etapa {} falhou: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="649"/>
+        <source>Recipe done: {} steps, without the model. Undo takes it back as one turn.</source>
+        <translation>Receita concluída: {} etapas, sem o modelo. Desfazer a reverte como um único turno.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>The {} steps before stay, and can be undone.</source>
+        <translation>As {} etapas anteriores permanecem e podem ser desfeitas.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
@@ -905,6 +980,31 @@ Você concorda?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Nova conversa</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="311"/>
+        <source>Recipes</source>
+        <translation>Receitas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="663"/>
+        <source>Save the last request as a recipe…</source>
+        <translation>Salvar a última solicitação como receita…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="667"/>
+        <source>No recipe in this project yet</source>
+        <translation>Nenhuma receita neste projeto ainda</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="673"/>
+        <source>{} ({} steps)</source>
+        <translation>{} ({} etapas)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="676"/>
+        <source>Run without the model</source>
+        <translation>Executar sem o modelo</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

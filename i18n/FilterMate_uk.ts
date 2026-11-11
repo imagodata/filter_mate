@@ -332,6 +332,11 @@ Run it?</source>
         <translation>віджети панелі</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="114"/>
+        <source>recipes of the agent</source>
+        <translation>рецепти агента</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="101"/>
         <source>map themes</source>
         <translation>теми карти</translation>
@@ -688,6 +693,76 @@ Do you agree?</source>
         <translation>Віджет {} вилучено</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1009"/>
+        <source>Recipe kept: {}</source>
+        <translation>Рецепт збережено: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1010"/>
+        <source>Recipe {} forgotten</source>
+        <translation>Рецепт {} забуто</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>Вилучити рецепт {}?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>Зупинено перед кроком {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Save as a recipe</source>
+        <translation>Зберегти як рецепт</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Name of the recipe ({} steps, run again without the model):</source>
+        <translation>Назва рецепта (кроків: {}, повторюються без моделі):</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="571"/>
+        <source>Recipe kept: {} ({} steps). Run it from More &gt; Recipes.</source>
+        <translation>Рецепт збережено: {} (кроків: {}). Запустіть його через Ще &gt; Рецепти.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="607"/>
+        <source>Recipe: {}</source>
+        <translation>Рецепт: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="620"/>
+        <source>Step {} needs a tool the settings of the agent leave out: {}.</source>
+        <translation>Кроку {} потрібен інструмент, який виключено налаштуваннями агента: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="625"/>
+        <source>Step {} was not run: {}.</source>
+        <translation>Крок {} не виконано: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="631"/>
+        <source>The undo point could not be made, so step {} was not run.</source>
+        <translation>Не вдалося створити точку скасування, тому крок {} не виконано.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="638"/>
+        <source>Step {} failed: {}</source>
+        <translation>Крок {} не вдався: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="649"/>
+        <source>Recipe done: {} steps, without the model. Undo takes it back as one turn.</source>
+        <translation>Рецепт виконано: кроків {}, без моделі. Скасування відкочує його як один хід.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>The {} steps before stay, and can be undone.</source>
+        <translation>Попередні кроки ({}) залишаються й можуть бути скасовані.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Віджет: {}</translation>
@@ -905,6 +980,31 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Нова розмова</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="311"/>
+        <source>Recipes</source>
+        <translation>Рецепти</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="663"/>
+        <source>Save the last request as a recipe…</source>
+        <translation>Зберегти останній запит як рецепт…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="667"/>
+        <source>No recipe in this project yet</source>
+        <translation>У цьому проєкті ще немає рецептів</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="673"/>
+        <source>{} ({} steps)</source>
+        <translation>{} (кроків: {})</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="676"/>
+        <source>Run without the model</source>
+        <translation>Виконати без моделі</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

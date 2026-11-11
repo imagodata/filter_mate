@@ -332,6 +332,11 @@ Futtatja?</translation>
         <translation>a panel widgetjei</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="114"/>
+        <source>recipes of the agent</source>
+        <translation>az ügynök receptjei</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="101"/>
         <source>map themes</source>
         <translation>térképtémák</translation>
@@ -688,6 +693,76 @@ Egyetért?</translation>
         <translation>Widget eltávolítva: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1009"/>
+        <source>Recipe kept: {}</source>
+        <translation>Recept mentve: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1010"/>
+        <source>Recipe {} forgotten</source>
+        <translation>A(z) {} recept elfelejtve</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>Eltávolítja a(z) {} receptet?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>Leállítva a(z) {}. lépés előtt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Save as a recipe</source>
+        <translation>Mentés receptként</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Name of the recipe ({} steps, run again without the model):</source>
+        <translation>A recept neve ({} lépés, a modell nélkül futtatható újra):</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="571"/>
+        <source>Recipe kept: {} ({} steps). Run it from More &gt; Recipes.</source>
+        <translation>Recept mentve: {} ({} lépés). Futtassa a Továbbiak &gt; Receptek menüből.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="607"/>
+        <source>Recipe: {}</source>
+        <translation>Recept: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="620"/>
+        <source>Step {} needs a tool the settings of the agent leave out: {}.</source>
+        <translation>A(z) {}. lépéshez olyan eszköz kell, amelyet az ügynök beállításai kihagynak: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="625"/>
+        <source>Step {} was not run: {}.</source>
+        <translation>A(z) {}. lépés nem futott le: {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="631"/>
+        <source>The undo point could not be made, so step {} was not run.</source>
+        <translation>A visszavonási pontot nem sikerült létrehozni, ezért a(z) {}. lépés nem futott le.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="638"/>
+        <source>Step {} failed: {}</source>
+        <translation>A(z) {}. lépés sikertelen: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="649"/>
+        <source>Recipe done: {} steps, without the model. Undo takes it back as one turn.</source>
+        <translation>Recept kész: {} lépés, modell nélkül. A visszavonás egyetlen körként vonja vissza.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>The {} steps before stay, and can be undone.</source>
+        <translation>Az előző {} lépés megmarad, és visszavonható.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
@@ -905,6 +980,31 @@ Egyetért?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>Új beszélgetés</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="311"/>
+        <source>Recipes</source>
+        <translation>Receptek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="663"/>
+        <source>Save the last request as a recipe…</source>
+        <translation>Az utolsó kérés mentése receptként…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="667"/>
+        <source>No recipe in this project yet</source>
+        <translation>Ebben a projektben még nincs recept</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="673"/>
+        <source>{} ({} steps)</source>
+        <translation>{} ({} lépés)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="676"/>
+        <source>Run without the model</source>
+        <translation>Futtatás modell nélkül</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

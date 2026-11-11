@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
@@ -18,6 +18,7 @@ from ...adapters.agent.settings import (
 )
 from ...adapters.agent import free_quota, transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
+from ...adapters.agent.recipes_store import read_recipes, write_recipes
 from ...adapters.agent.bounded_http import abort_active
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
@@ -28,7 +29,11 @@ from ...core.agent.open_data import KIND_STAC, KIND_WFS, display_source, parse_e
 from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
-from ...core.agent.permissions import STANDARD, PermissionPolicy, level_note
+from ...core.agent.permissions import ADVISOR, ASK, AUTONOMOUS, REFUSE, RUN, STANDARD, PermissionPolicy, level_note
+from ...core.agent.recipes import (
+    MAX_NAME as RECIPE_MAX_NAME, RecipeError, find as find_recipe, plain as recipe_plain, recipes_block,
+    saved as recipe_saved, steps_of as recipe_steps, summary as recipe_summary, without as recipe_without,
+)
 from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
@@ -38,7 +43,8 @@ from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, CREATE_WIDGET, REMOVE_NOTE, REMOVE_WIDGET, RUN_PYTHON, UNDO_AGENT_STEP, VIEW_MAP, chat_tools,
+    ADD_NOTE, CREATE_WIDGET, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
+    VIEW_MAP, chat_tools,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...adapters.agent import agent_widgets
@@ -99,9 +105,16 @@ def agent_enabled(config_data) -> bool:
 class AgentChatController(QObject):
     """One panel and its conversation. Also the listener of the conversation."""
 
-    def __init__(self, add_page, plugin, parent_widget=None, ask_user=None, ask_choice=None) -> None:
+    def __init__(self, add_page, plugin, parent_widget=None, ask_user=None, ask_choice=None, ask_name=None) -> None:
         super().__init__(parent_widget)
         self._plugin = plugin
+        # The name of a recipe; a test answers it without a dialog.
+        self._ask_name = ask_name or (lambda title, text, default: self._name_dialog(parent_widget, title, text, default))
+        # The calls of the request under way, and the steps of the last request that changed something: a recipe.
+        self._request_calls = []
+        self._last_steps, self._last_steps_request = [], ""
+        self._replaying = False
+        self._replay_stop = False
         self._ask_user = ask_user or (lambda title, text: ask_plain(parent_widget, title, text))
         if ask_choice is None:  # a yes / no given alone answers the questions with three answers too
             ask_choice = ((lambda title, text: ANSWER_ONCE if self._ask_user(title, text) else ANSWER_NO) if ask_user
@@ -142,6 +155,9 @@ class AgentChatController(QObject):
         self._stat_timer.timeout.connect(self._refresh_stats)
         self.panel.widgets_strip.changed.connect(self._on_widget_changed)
         self.panel.widgets_strip.remove_requested.connect(self._on_widget_removed)
+        self.panel.recipe_save_requested.connect(self._on_save_recipe)
+        self.panel.recipe_run_requested.connect(self.run_recipe)
+        self.panel.recipe_remove_requested.connect(self._on_remove_recipe)
         self._restore_transcript()
         self._refresh_history()
         QgsProject.instance().cleared.connect(self._on_project_cleared)
@@ -242,6 +258,7 @@ class AgentChatController(QObject):
 
     def _refresh_history(self) -> None:
         self._refresh_widgets()  # an undo or a redo may have brought widgets back or taken them away
+        self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
         request = getattr(self._parent_widget, "undoRedoStateRequested", None)
@@ -292,7 +309,7 @@ class AgentChatController(QObject):
         self.panel.show_history()
 
     def chat_busy(self) -> bool:
-        return self._building or (self._engine is not None and self._engine.busy)
+        return self._building or self._replaying or (self._engine is not None and self._engine.busy)
 
     def _on_redo(self) -> None:
         if self.chat_busy() or self._mcp.busy:
@@ -316,6 +333,7 @@ class AgentChatController(QObject):
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
         self._last_request = ""
+        self._request_calls, self._last_steps, self._last_steps_request = [], [], ""
         if self._engine is not None:
             self._engine.cancel()
         self._transcript, self._transcript_key = [], ""
@@ -414,6 +432,8 @@ class AgentChatController(QObject):
         handlers[REMOVE_NOTE] = self._remove_note_tool
         handlers[CREATE_WIDGET] = self._create_widget_tool
         handlers[REMOVE_WIDGET] = self._remove_widget_tool
+        handlers[SAVE_RECIPE] = self._save_recipe_tool
+        handlers[REMOVE_RECIPE] = self._remove_recipe_tool
         return tools, handlers, active
 
     @staticmethod
@@ -488,6 +508,180 @@ class AgentChatController(QObject):
         agent_widgets.write_widgets(widgets)
         self._refresh_widgets()
         return {"widgets": widget_summary(widgets)}
+
+    # --- recipes ----------------------------------------------------------------
+
+    def _steps_to_keep(self):
+        """``(steps, request)`` a recipe keeps now: the changes of this request so far, else of the last one."""
+        steps = recipe_steps(self._request_calls, self._tools)
+        if steps:
+            return steps, self._last_request
+        return list(self._last_steps), self._last_steps_request
+
+    def _save_recipe_tool(self, arguments) -> dict:
+        """save_recipe: the changes of a request kept in the project under a name, to run again without a model."""
+        steps, request = self._steps_to_keep()
+        try:
+            recipes = recipe_saved(read_recipes(), arguments.get("name", ""), request, steps)
+        except RecipeError as exc:
+            raise ToolFailure(str(exc)) from None
+        write_recipes(recipes)
+        self._refresh_recipes()
+        name = " ".join(str(arguments.get("name", "")).split()).casefold()
+        recipe = next(item for item in recipes if item["name"].casefold() == name)
+        return {"recipe": recipe_summary([recipe])[0], "recipes": recipe_summary(recipes)}
+
+    def _remove_recipe_tool(self, arguments) -> dict:
+        try:
+            recipes = recipe_without(read_recipes(), str(arguments.get("recipe_id", "")))
+        except RecipeError as exc:
+            raise ToolFailure(str(exc)) from None
+        write_recipes(recipes)
+        self._refresh_recipes()
+        return {"recipes": recipe_summary(recipes)}
+
+    def _refresh_recipes(self) -> None:
+        try:
+            recipes = read_recipes()
+        except Exception:  # the panel works without them
+            logger.debug("Agent recipes not read", exc_info=True)
+            recipes = []
+        # A recipe may come with a project made by someone else: each step is named from what it does.
+        shown = [dict(recipe, steps=[dict(step, label=self.describe_call(
+            ToolCallPart("", step["tool"], dict(step["arguments"])))) for step in recipe["steps"]])
+            for recipe in recipes]
+        self.panel.set_recipes(shown, bool(self._last_steps))
+
+    @staticmethod
+    def _name_dialog(parent, title: str, text: str, default: str) -> str:
+        name, accepted = QInputDialog.getText(parent, title, text, QLineEdit.EchoMode.Normal, default)
+        return name if accepted else ""
+
+    def _on_save_recipe(self) -> None:
+        """From the menu: the last request that changed something, kept under the name the user types."""
+        if not self._last_steps or self.chat_busy():
+            return
+        default = one_line(self._last_steps_request, RECIPE_MAX_NAME)
+        name = self._ask_name(_tr("Save as a recipe"), _tr("Name of the recipe ({} steps, run again without the "
+                                                            "model):").format(len(self._last_steps)), default)
+        name = recipe_plain(name, RECIPE_MAX_NAME)
+        if not name:
+            return
+        try:
+            recipes = recipe_saved(read_recipes(), name, self._last_steps_request, self._last_steps)
+        except RecipeError as exc:
+            self._say(str(exc), error=True)
+            return
+        write_recipes(recipes)
+        self._refresh_recipes()
+        note = _tr("Recipe kept: {} ({} steps). Run it from More > Recipes.").format(
+            one_line(name, RECIPE_MAX_NAME), len(self._last_steps))
+        self.panel.show_thread()
+        self.panel.add_note(note)
+        self._record("note", note)
+        self._save_transcript()
+
+    def _forget_undone_steps(self, request: str) -> None:
+        """The request whose changes were just undone is no longer something to keep as a recipe."""
+        if request and request == self._last_steps_request:
+            self._last_steps, self._last_steps_request = [], ""
+            self._refresh_recipes()
+
+    def _on_remove_recipe(self, recipe_id: str) -> None:
+        recipe = find_recipe(read_recipes(), recipe_id)
+        if recipe is None or self.chat_busy() or not self._ask_user(
+                _tr("FilterMate agent"), _tr("Remove the recipe {}?").format(recipe["name"])):
+            return
+        try:
+            write_recipes(recipe_without(read_recipes(), recipe_id))
+        except RecipeError:
+            pass
+        self._refresh_recipes()
+
+    def run_recipe(self, recipe_id: str) -> bool:
+        """Run the steps of a recipe again, in order, without any model: one turn of the history, undone as one.
+
+        A recipe may come with a project made by someone else, so a run asks what the chat would ask at the level of
+        the user, but never less than the usual level: what cannot be undone here (exports, removals, deletions) and
+        what reaches outside are always asked, even at autonomous; at advisor every step is asked (the user asked for
+        the run). A yes is for this step only, never for the rest of the conversation. The first step declined or
+        failed stops the recipe, and Stop stops it between two steps. True when every step ran.
+        """
+        if self.chat_busy() or self._mcp.busy:
+            return False
+        busy = self._checkpoint.busy()
+        if busy:
+            self._say(busy, error=True)
+            return False
+        recipe = find_recipe(read_recipes(), recipe_id)
+        if recipe is None:
+            self._refresh_recipes()
+            return False
+        values = load_settings()
+        tools, handlers, _active = self.tools_and_handlers(values)
+        executor = ToolExecutor(tools, handlers)
+        available = {tool.name for tool in tools}
+        self._policy.set_level(values.autonomy)
+        level = self._policy.level
+        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level)  # nothing allowed beforehand counts
+        title = _tr("Recipe: {}").format(recipe["name"])
+        self._replaying, self._replay_stop = True, False
+        self._checkpoint.label = title
+        self.panel.show_thread()
+        self.panel.add_user(title)
+        self._record("user", title)
+        self.panel.set_working(True)
+        self.panel.set_can_undo(False)
+        done, stop = 0, ""
+        try:
+            for number, step in enumerate(recipe["steps"], 1):
+                call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
+                if self._replay_stop:
+                    stop = _tr("Stopped before step {}.").format(number)
+                    break
+                if call.name not in available:
+                    stop = _tr("Step {} needs a tool the settings of the agent leave out: {}.").format(
+                        number, step["label"])
+                    break
+                verdict = executor.verdict(call, policy)
+                if level == ADVISOR and verdict == REFUSE:
+                    verdict = ASK
+                if verdict != RUN and (verdict == REFUSE or not self._confirm(call, title)):
+                    stop = _tr("Step {} was not run: {}.").format(number, step["label"])
+                    break
+                try:
+                    self._checkpoint.begin(call)
+                except Exception:
+                    logger.exception("Recipe undo point failed")
+                    stop = _tr("The undo point could not be made, so step {} was not run.").format(number)
+                    break
+                self.panel.add_step(self._describe(call))
+                result = executor.execute(call)
+                self.panel.finish_steps(not result.is_error)
+                self._log_action(call, result, self._describe(call))
+                if result.is_error:
+                    stop = _tr("Step {} failed: {}").format(number, one_line(result.content, MAX_DETAIL_CHARS))
+                    break
+                done += 1
+        finally:
+            self._replaying, self._replay_stop = False, False
+            try:
+                self._checkpoint.commit()
+            except Exception:
+                logger.exception("Recipe undo point could not be closed")
+            self.panel.set_working(False)
+            self.panel.clear_steps()
+            note = stop or _tr("Recipe done: {} steps, without the model. Undo takes it back as one turn.").format(done)
+            if stop and done:
+                note += " " + _tr("The {} steps before stay, and can be undone.").format(done)
+            self.panel.add_note(note)
+            self._record("note", note)
+            self._say("")
+            self._flush_journal()
+            self._save_transcript()
+            self._refresh_history()
+        # Not _remember_project: what the recipe changed is the user's doing, and the next request is told so.
+        return not stop
 
     # --- widgets ----------------------------------------------------------------
 
@@ -564,6 +758,7 @@ class AgentChatController(QObject):
             raise ToolFailure("Nothing of the agent to undo in this project.")
         request = applied[-1].get("request") or ""
         restored, left = self._checkpoint.undo()
+        self._forget_undone_steps(request)
         return {"undone": request, "restored": restored, "left": left}
 
     def _build_engine(self) -> Optional[ChatEngine]:
@@ -700,6 +895,7 @@ class AgentChatController(QObject):
         if self._engine is None:
             return
         self._last_request = text
+        self._request_calls = []
         self._checkpoint.label = text
         self.panel.clear_input()
         self.panel.show_thread()
@@ -744,7 +940,11 @@ class AgentChatController(QObject):
             widgets = []
         listed = ("Widgets of the panel (data, made with create_widget): " + json.dumps(widgets, ensure_ascii=False)
                   if widgets else "")
-        return "\n\n".join(part for part in (summary, notes, listed, level_note(self._policy.level)) if part)
+        try:
+            recipes = recipes_block(read_recipes())
+        except Exception:  # the request goes without them
+            recipes = ""
+        return "\n\n".join(part for part in (summary, notes, listed, recipes, level_note(self._policy.level)) if part)
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
@@ -753,6 +953,8 @@ class AgentChatController(QObject):
 
     def _on_stop(self) -> None:
         abort_active()  # a connector or a platform being waited for
+        if self._replaying:  # a recipe stops before its next step
+            self._replay_stop = True
         if self._engine is not None:
             self._engine.cancel()
 
@@ -763,7 +965,10 @@ class AgentChatController(QObject):
         if busy:
             self._say(busy, error=True)
             return
+        applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+        undone = applied[-1].get("request") or "" if applied else ""
         restored, skipped = self._checkpoint.undo()
+        self._forget_undone_steps(undone)
         message = _tr("Restored: {}.").format(", ".join(restored)) if restored else _tr("Nothing to restore.")
         if skipped:
             message += " " + _tr("Changed since, left as is: {}.").format(", ".join(skipped))
@@ -836,6 +1041,8 @@ class AgentChatController(QObject):
             CREATE_WIDGET: lambda: _tr("Widget: {}").format(args.get("title") or args.get("field") or layer
                                                             or args.get("layer", "")),
             REMOVE_WIDGET: lambda: _tr("Widget {} removed").format(args.get("widget_id", "")),
+            SAVE_RECIPE: lambda: _tr("Recipe kept: {}").format(args.get("name", "")),
+            REMOVE_RECIPE: lambda: _tr("Recipe {} forgotten").format(args.get("recipe_id", "")),
             "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
             "map_context": lambda: _tr("Reading the map"),
             "filter_state": lambda: _tr("Reading the active filters"),
@@ -877,6 +1084,7 @@ class AgentChatController(QObject):
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
         self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
+        self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call)))
         self.panel.set_status(_tr("Thinking…"))
 
     def _log_action(self, call: ToolCallPart, result: ToolResultPart, label: str, keep: bool = True) -> None:
@@ -1042,6 +1250,10 @@ class AgentChatController(QObject):
         return text
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        steps = recipe_steps(self._request_calls, self._tools)
+        if steps:  # what "Save the last request as a recipe" keeps
+            self._last_steps, self._last_steps_request = steps, self._last_request
+        self._request_calls = []
         self.panel.set_working(False)
         self.panel.clear_steps()
         self._flush_answer()

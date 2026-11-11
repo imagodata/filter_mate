@@ -1093,6 +1093,7 @@ def check_chat(provider, layer, authcfg, work):
     check_steps(chat, provider, settings, ask, layer)
     check_autonomy(chat, provider, settings, ask, answers, layer)
     check_widgets(chat, provider, settings, ask, layer)
+    check_recipes(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
     host.close()
@@ -1257,6 +1258,115 @@ def check_widgets(chat, provider, settings, ask, layer):
     chat._refresh_widgets()
     layer.setSubsetString("")
     check("widgets: gone, the strip hides", strip.isHidden())
+    panel.clear_thread()
+
+
+def check_recipes(chat, provider, settings, ask, layer):
+    """Recipes: the changes of a request kept in the project, run again without any request to the model."""
+    from qgis.core import QgsProject
+    from filter_mate.adapters.agent.recipes_store import read_recipes, write_recipes
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+
+    panel = chat.panel
+    settings()
+    layer.setSubsetString("")
+    write_recipes([])
+    chat._last_steps, chat._last_steps_request = [], ""
+    chat._refresh_recipes()
+    check("recipes: none yet, nothing to save", not panel.save_recipe_action.isEnabled() and panel.recipes == [])
+
+    big = {"layer_name": "communes", "expression": '"pop" > 1000'}
+    provider.reset((200, {}, tool_turn("describe_layer", {"layer": "communes"})),
+                   (200, {}, tool_turn("apply_filter", big, "toolu_2")), (200, {}, text_turn("ok")))
+    ask("garde les grandes communes")
+    check("recipes: the request filtered", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    check("recipes: the last request can be saved", panel.save_recipe_action.isEnabled())
+
+    chat._ask_name = lambda title, text, default: "Grandes communes"
+    panel.save_recipe_action.trigger()
+    stored = read_recipes()
+    check("recipes: kept from the menu, its changes only", len(stored) == 1 and stored[0]["name"] == "Grandes communes"
+          and [step["tool"] for step in stored[0]["steps"]] == ["apply_filter"]
+          and stored[0]["steps"][0]["arguments"] == big and stored[0]["request"] == "garde les grandes communes", stored)
+    entry, _found = QgsProject.instance().readEntry("FilterMateAgent", "recipes", "")
+    check("recipes: saved in the project file", "Grandes communes" in entry, entry[:200])
+    check("recipes: listed in the menu", [recipe["id"] for recipe in panel.recipes] == ["r1"] and
+          "r1" in panel.recipe_actions)
+
+    layer.setSubsetString("")
+    provider.reset()
+    panel.recipe_actions["r1"][0].trigger()
+    check("recipes: run again, without the model", layer.subsetString() == '"pop" > 1000' and provider.requests == [],
+          (layer.subsetString(), len(provider.requests)))
+    applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+    check("recipes: one turn of the history", applied and applied[-1]["request"] == "Recipe: Grandes communes",
+          applied[-1:] if applied else None)
+    check("recipes: not busy afterwards", not chat.chat_busy() and not panel._working)
+    chat._on_undo()
+    check("recipes: undo takes the run back", layer.subsetString() == "", layer.subsetString())
+
+    provider.reset((200, {}, tool_turn("save_recipe", {"name": "Via le modèle"})), (200, {}, text_turn("ok")))
+    ask("garde ça comme recette")
+    stored = read_recipes()
+    check("recipes: the model keeps the last request that changed something", len(stored) == 2 and
+          stored[1]["name"] == "Via le modèle" and stored[1]["steps"][0]["arguments"] == big, stored)
+    provider.reset((200, {}, text_turn("ok")))
+    ask("bonjour")
+    sent = json.dumps(provider.requests[0]["body"]["messages"][-1], ensure_ascii=False)
+    check("recipes: listed with the next request, without their arguments",
+          "Recipes of this project" in sent and "Via le mod" in sent and "pop" not in sent.split("Recipes of this project")[1],
+          sent[-300:])
+    chat._on_undo()  # the last turn that changed something: the one that saved the recipe
+    check("recipes: undoing the turn of the model forgets its recipe", [r["name"] for r in read_recipes()] ==
+          ["Grandes communes"], read_recipes())
+
+    settings(autonomy="careful")
+    asked, previous = [], chat._ask_user
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    layer.setSubsetString("")
+    check("recipes: careful asks before each change, a no stops it", chat.run_recipe("r1") is False and asked and
+          layer.subsetString() == "", (asked, layer.subsetString()))
+    chat._ask_user = previous
+    settings()
+
+    # A recipe may come with a project made by someone else: what it shows is computed from what it does, and
+    # what cannot be undone is asked even at the autonomous level.
+    write_recipes(read_recipes() + [{"id": "r7", "name": "Zoom", "request": "", "steps": [
+        {"tool": "remove_layers", "arguments": {"layers": ["communes"]}, "label": "Zoom sur la commune"}]}])
+    chat._refresh_recipes()
+    shown = [action.text() for action in panel.recipe_lines.get("r7", [])]
+    check("recipes: a step is named from its arguments, not from the file", shown and "Zoom sur" not in shown[0]
+          and "communes" in shown[0], shown)
+    settings(autonomy="autonomous")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    check("recipes: autonomous still asks before a removal from a recipe", chat.run_recipe("r7") is False and asked
+          and QgsProject.instance().mapLayer(layer.id()) is not None, asked)
+    chat._ask_user = previous
+    settings()
+
+    provider.reset((200, {}, tool_turn("apply_filter", big)), (200, {}, tool_turn("save_recipe", {"name": "Du modèle"},
+                                                                                  "toolu_2")),
+                   (200, {}, text_turn("ok")))
+    ask("filtre et garde")
+    chat._ask_name = lambda title, text, default: "Du menu"
+    panel.save_recipe_action.trigger()
+    chat._on_undo()
+    names = [recipe["name"] for recipe in read_recipes()]
+    check("recipes: undo leaves the recipes changed from the menu since", "Du menu" in names and "Du modèle" in names,
+          names)
+    layer.setSubsetString("")
+
+    write_recipes(read_recipes() + [{"id": "r9", "name": "Cassée", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "absente", "expression": "1 = 1"}, "label": "absente"},
+        {"tool": "apply_filter", "arguments": big, "label": "communes"}]}])
+    chat._refresh_recipes()
+    check("recipes: a failed step stops the recipe", chat.run_recipe("r9") is False and layer.subsetString() == "",
+          layer.subsetString())
+
+    write_recipes([])
+    chat._refresh_recipes()
+    layer.setSubsetString("")
     panel.clear_thread()
 
 

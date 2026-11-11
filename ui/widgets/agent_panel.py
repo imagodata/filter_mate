@@ -50,6 +50,9 @@ PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (A
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
 
 
+MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
+
+
 def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentPanel", text)
 
@@ -219,6 +222,9 @@ class AgentPanel(QFrame):
     history_requested = pyqtSignal()
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
+    recipe_save_requested = pyqtSignal()
+    recipe_run_requested = pyqtSignal(str)
+    recipe_remove_requested = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -304,6 +310,12 @@ class AgentPanel(QFrame):
         menu = QMenu(self.more_button)
         self.history_action = menu.addAction(_tr("History…"))
         self.history_action.triggered.connect(self.history_requested)
+        # Recipes: the changes of a request kept in the project, run again without the model.
+        self.recipes_menu = menu.addMenu(_tr("Recipes"))
+        self.recipes_menu.setObjectName("menu_agent_recipes")
+        self._recipes = []
+        self._can_save_recipe = False
+        self.set_recipes([], False)
         self.new_action = menu.addAction(_tr("New conversation"))
         self.new_action.triggered.connect(self.new_conversation_requested)
         self.settings_action = menu.addAction(_tr("Agent settings"))
@@ -645,6 +657,45 @@ class AgentPanel(QFrame):
         self.input.setFocus()
 
     # --- state ----------------------------------------------------------------
+
+    def set_recipes(self, recipes, can_save: bool) -> None:
+        """The recipes of the project in the menu, each with its steps in view before it runs; save the last request."""
+        self._recipes, self._can_save_recipe = list(recipes), bool(can_save)
+        menu = self.recipes_menu
+        for submenu in getattr(self, "_recipe_menus", ()):  # clear() leaves the submenus alive: they would pile up
+            submenu.deleteLater()
+        self._recipe_menus, self.recipe_actions, self.recipe_lines = [], {}, {}
+        menu.clear()
+        self.save_recipe_action = menu.addAction(_tr("Save the last request as a recipe…"))
+        self.save_recipe_action.setEnabled(self._can_save_recipe)
+        self.save_recipe_action.triggered.connect(self.recipe_save_requested)
+        if not self._recipes:
+            empty = menu.addAction(_tr("No recipe in this project yet"))
+            empty.setEnabled(False)
+            return
+        menu.addSeparator()
+        for recipe in self._recipes:
+            # "&" would make a shortcut of the next letter; the name comes from the project file.
+            entry = menu.addMenu(_tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"])).replace("&", "&&"))
+            self._recipe_menus.append(entry)
+            for number, step in enumerate(recipe["steps"][:MAX_RECIPE_STEPS_SHOWN], 1):
+                line = entry.addAction(f"{number}. {step['label']}".replace("&", "&&"))
+                line.setEnabled(False)  # what it will do, read before Run
+                self.recipe_lines.setdefault(recipe["id"], []).append(line)
+            if len(recipe["steps"]) > MAX_RECIPE_STEPS_SHOWN:
+                more = entry.addAction(f"(+{len(recipe['steps']) - MAX_RECIPE_STEPS_SHOWN})")
+                more.setEnabled(False)
+            entry.addSeparator()
+            run = entry.addAction(_tr("Run without the model"))
+            run.triggered.connect(lambda _checked=False, recipe_id=recipe["id"]: self.recipe_run_requested.emit(recipe_id))
+            remove = entry.addAction(_tr("Remove"))
+            remove.triggered.connect(
+                lambda _checked=False, recipe_id=recipe["id"]: self.recipe_remove_requested.emit(recipe_id))
+            self.recipe_actions[recipe["id"]] = (run, remove)
+
+    @property
+    def recipes(self):
+        return list(self._recipes)
 
     def set_ready(self, ready: bool, destination: str = "") -> None:
         """Whether a provider is set up; ``destination`` says where the requests go."""

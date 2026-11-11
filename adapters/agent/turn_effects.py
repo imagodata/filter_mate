@@ -16,6 +16,7 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("themes", "", before, after)``: the map themes of the project, as XML;
 * ``("current_style", layer_id, before, after)``: the style of its style manager a layer has on (a theme sets it);
 * ``("widgets", "", before, after)``: the widgets of the panel kept in the project (``core/agent/widgets.py``);
+* ``("recipes", "", before, after)``: the recipes kept in the project (``core/agent/recipes.py``), as JSON;
 * ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
   after the commands of the turn (``adapters/public_api/feature_edits.py``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
@@ -40,6 +41,7 @@ Place = Tuple[Tuple[str, ...], int]
 STYLE_TOOLS = ("set_layer_style", "set_labels")
 NOTE_TOOLS = ("add_project_note", "remove_project_note")
 WIDGET_TOOLS = ("create_widget", "remove_widget")
+RECIPE_TOOLS = ("save_recipe", "remove_recipe")
 TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
@@ -111,6 +113,11 @@ def _themes_label() -> str:
 def _widgets_label() -> str:
     from qgis.PyQt.QtCore import QCoreApplication
     return QCoreApplication.translate("AgentChat", "widgets of the panel")
+
+
+def _recipes_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "recipes of the agent")
 
 
 def _notes_label() -> str:
@@ -238,6 +245,7 @@ class EffectsRecorder:
         self._styles: Dict[str, str] = {}
         self._notes: Optional[Tuple[str, ...]] = None
         self._widgets: Optional[str] = None
+        self._recipes: Optional[str] = None
         self._tree: Optional[str] = None
         self._joins: Dict[str, Set[str]] = {}
         self._names: Dict[str, str] = {}
@@ -310,6 +318,11 @@ class EffectsRecorder:
                     from .agent_widgets import read_widgets
                     from ...core.agent.widgets import dumps
                     self._widgets = dumps(read_widgets(project))
+            elif name in RECIPE_TOOLS:
+                if self._recipes is None:
+                    from .recipes_store import read_recipes
+                    from ...core.agent.recipes import dumps as recipes_dumps
+                    self._recipes = recipes_dumps(read_recipes(project))
             elif name in NOTE_TOOLS:
                 if self._notes is None:
                     from .project_notes_store import read_notes
@@ -405,6 +418,12 @@ class EffectsRecorder:
             after_widgets = dumps(read_widgets(project))
             if after_widgets != self._widgets:
                 effects.append(("widgets", "", self._widgets, after_widgets))
+        if self._recipes is not None:
+            from .recipes_store import read_recipes
+            from ...core.agent.recipes import dumps as recipes_dumps
+            after_recipes = recipes_dumps(read_recipes(project))
+            if after_recipes != self._recipes:
+                effects.append(("recipes", "", self._recipes, after_recipes))
         if self._notes is not None:
             from .project_notes_store import read_notes
             after_notes = tuple(read_notes(project))
@@ -525,6 +544,15 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[
                 from ...core.agent.widgets import parse
                 write_widgets(parse(effect[2] if undo else effect[3]), project)
                 done.append(_widgets_label())
+            elif kind == "recipes":
+                from .recipes_store import read_recipes, write_recipes
+                from ...core.agent.recipes import dumps as recipes_dumps, parse as recipes_parse
+                # Kept or removed from the menu since: that is the user's, left as it is.
+                if recipes_dumps(read_recipes(project)) != (effect[3] if undo else effect[2]):
+                    left.append(_recipes_label())
+                else:
+                    write_recipes(recipes_parse(effect[2] if undo else effect[3]), project)
+                    done.append(_recipes_label())
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)

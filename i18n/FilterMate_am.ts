@@ -332,6 +332,11 @@ Run it?</source>
         <translation>የፓነሉ ዊጅቶች</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="114"/>
+        <source>recipes of the agent</source>
+        <translation>የወኪሉ ሬሲፒዎች</translation>
+    </message>
+    <message>
         <location filename="../../adapters/agent/turn_effects.py" line="101"/>
         <source>map themes</source>
         <translation>የካርታ ገጽታዎች</translation>
@@ -688,6 +693,76 @@ Do you agree?</source>
         <translation>ዊጅት {} ተወግዷል</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1009"/>
+        <source>Recipe kept: {}</source>
+        <translation>ሬሲፒ ተቀምጧል፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1010"/>
+        <source>Recipe {} forgotten</source>
+        <translation>ሬሲፒ {} ተሰርዟል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="593"/>
+        <source>Remove the recipe {}?</source>
+        <translation>የምግብ አሰራሩን {} ይሰርዙ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Stopped before step {}.</source>
+        <translation>ከደረጃ {} በፊት ቆሟል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Save as a recipe</source>
+        <translation>እንደ ሬሲፒ አስቀምጥ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
+        <source>Name of the recipe ({} steps, run again without the model):</source>
+        <translation>የሬሲፒው ስም ({} ደረጃዎች፣ ሞዴሉ ሳይጠራ እንደገና ይሄዳሉ)፦</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="571"/>
+        <source>Recipe kept: {} ({} steps). Run it from More &gt; Recipes.</source>
+        <translation>ሬሲፒ ተቀምጧል፦ {} ({} ደረጃዎች)። ከተጨማሪ &gt; ሬሲፒዎች ያሂዱት።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="607"/>
+        <source>Recipe: {}</source>
+        <translation>ሬሲፒ፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="620"/>
+        <source>Step {} needs a tool the settings of the agent leave out: {}.</source>
+        <translation>ደረጃ {} የወኪሉ ቅንብሮች የሚያስቀሩትን መሣሪያ ይፈልጋል፦ {}።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="625"/>
+        <source>Step {} was not run: {}.</source>
+        <translation>ደረጃ {} አልተሄደም፦ {}።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="631"/>
+        <source>The undo point could not be made, so step {} was not run.</source>
+        <translation>የመቀልበሻ ነጥቡን መፍጠር አልተቻለም፣ ስለዚህ ደረጃ {} አልተሄደም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="638"/>
+        <source>Step {} failed: {}</source>
+        <translation>ደረጃ {} አልተሳካም፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="649"/>
+        <source>Recipe done: {} steps, without the model. Undo takes it back as one turn.</source>
+        <translation>ሬሲፒ ተጠናቀቀ፦ {} ደረጃዎች፣ ሞዴሉ ሳይጠራ። መቀልበስ እንደ አንድ ዙር ይመልሰዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>The {} steps before stay, and can be undone.</source>
+        <translation>ከዚህ በፊት ያሉት {} ደረጃዎች ይቀራሉ፣ መቀልበስም ይቻላል።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>ዊጅት፦ {}</translation>
@@ -905,6 +980,31 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="214"/>
         <source>New conversation</source>
         <translation>አዲስ ውይይት</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="311"/>
+        <source>Recipes</source>
+        <translation>ሬሲፒዎች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="663"/>
+        <source>Save the last request as a recipe…</source>
+        <translation>የመጨረሻውን ጥያቄ እንደ ሬሲፒ አስቀምጥ…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="667"/>
+        <source>No recipe in this project yet</source>
+        <translation>በዚህ ፕሮጀክት ውስጥ ገና ሬሲፒ የለም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="673"/>
+        <source>{} ({} steps)</source>
+        <translation>{} ({} ደረጃዎች)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="676"/>
+        <source>Run without the model</source>
+        <translation>ያለ ሞዴል አሂድ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

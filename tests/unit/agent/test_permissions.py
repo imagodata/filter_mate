@@ -79,8 +79,7 @@ class TestLevels:
     def test_what_each_level_runs_alone(self, level, runs, asks):
         policy = PermissionPolicy(level)
         for tool in chat_tools():
-            expected = RUN if risk_of(tool) in runs or tool.name.endswith("_note") or tool.name == "undo_agent_step" \
-                else ASK
+            expected = RUN if risk_of(tool) in runs or tool.name in AGENT_OWN else ASK
             assert policy.verdict(tool) == expected, (level, tool.name)
             assert risk_of(tool) in runs | asks
 
