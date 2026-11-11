@@ -287,3 +287,24 @@ class TestProtectedLayers:
         transport.emit(turn(STOP_TOOL_USE, ToolCallPart("c1", "apply_filter", {"layer_name": "cadastre"})))
         assert seen == [] and not [entry for entry in listener.log if entry[0] == "confirm"]
         assert "'cadastre'" in session.messages[-1].parts[0].content
+
+
+class TestProtectedFavorites:
+    def test_a_favorite_on_a_protected_layer_is_refused(self):
+        from core.agent.permissions import PROTECTED
+
+        class WithFavorites(Protector):
+            def favorite_layers(self, favorite_id):
+                return {"fav-1": ["cadastre_id"], "fav-2": ["routes_id"]}.get(favorite_id, [])
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithFavorites("cadastre"))
+        assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}), policy) == PROTECTED
+        assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-2"}), policy) == RUN
+        assert "'cadastre'" in ToolExecutor.refused(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}),
+                                                    policy).content
+
+    def test_a_protector_without_favorites_lets_them_run(self):
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(protector=Protector("cadastre"))
+        assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}), policy) == RUN

@@ -88,6 +88,9 @@ class Protection(Protocol):
     def names(self) -> Sequence[str]:
         """The names of every protected layer."""
 
+    def favorite_layers(self, favorite_id: str) -> Sequence[str]:
+        """The ids of the layers a favorite would change: they are in the favorite, not in the call."""
+
 
 def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     """The layer references a call changes; None when it changes every layer (a clear without layers)."""
@@ -144,7 +147,12 @@ class PermissionPolicy:
         """What the model is told when the call would change a protected layer; "" when it would not."""
         if self.protector is None:
             return ""
-        references = changed_layers(name, arguments if isinstance(arguments, dict) else {})
+        arguments = arguments if isinstance(arguments, dict) else {}
+        if name == "apply_favorite":
+            resolve = getattr(self.protector, "favorite_layers", None)
+            references = list(resolve(str(arguments.get("favorite_id", "")))) if resolve is not None else []
+        else:
+            references = changed_layers(name, arguments)
         if references is None:
             protected = list(self.protector.names())
         else:

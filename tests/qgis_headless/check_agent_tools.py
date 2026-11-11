@@ -501,6 +501,35 @@ def check_project_crs(project):
         project_control.crs_definition(own)).isValid())
 
 
+def check_favorite_layers(project):
+    """The layers a favorite would change, found as applying it finds them: what the protected layers check."""
+    from filter_mate.adapters.public_api.operations import favorite_layers
+    from filter_mate.core.domain.favorites_manager import FilterFavorite
+    communes, routes = project.mapLayersByName("communes")[0], project.mapLayersByName("routes")[0]
+    favorite = FilterFavorite(id="fav-1", name="Deux couches", expression='"pop" > 100', layer_name="communes",
+                              layer_id=communes.id(),
+                              remote_layers={"routes": {"layer_id": routes.id(), "display_name": "routes",
+                                                        "expression": '"type" = 1'}})
+
+    class Service:
+        def get_favorite(self, favorite_id):
+            return favorite if favorite_id == "fav-1" else None
+
+        def get_favorite_by_name(self, name):
+            return favorite if name == favorite.name else None
+
+        def get_all_favorites(self):
+            return [favorite]
+
+    found = favorite_layers("fav-1", service=Service(), project=project)
+    check("favorite: its layer and its remote layer", sorted(layer.id() for layer in found) ==
+          sorted([communes.id(), routes.id()]), [layer.name() for layer in found])
+    check("favorite: by name too", len(favorite_layers("Deux couches", service=Service(), project=project)) == 2)
+    check("favorite: unknown, no layer", favorite_layers("nope", service=Service(), project=project) == [])
+    check("favorite: nothing changed by reading it", communes.subsetString() == "" and routes.subsetString() == "",
+          (communes.subsetString(), routes.subsetString()))
+
+
 def check_tree_more(project):
     """group_layers above a layer, a group renamed, bookmarks, and what an undo of the turn brings back."""
     from filter_mate.adapters.public_api import layer_tree
@@ -780,6 +809,7 @@ def main(introspection):
     check_layer_tree(project)
     check_fields_joins(project)
     check_tree_more(project)
+    check_favorite_layers(project)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

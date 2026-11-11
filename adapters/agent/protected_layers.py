@@ -56,3 +56,13 @@ class ProjectProtection:
         project = QgsProject.instance()
         return [layer.name() for layer in (project.mapLayer(layer_id) for layer_id in read_ids(project))
                 if layer is not None]
+
+    def favorite_layers(self, favorite_id: str) -> List[str]:
+        """The ids of the layers the favorite would change, found as applying it finds them."""
+        if not read_ids():
+            return []  # nothing protected: the favorite is not even read
+        from ..public_api.operations import favorite_layers
+        try:
+            return [layer.id() for layer in favorite_layers(favorite_id)]
+        except Exception:  # the favorites cannot be read now: its apply says why, nothing to protect here
+            return []
