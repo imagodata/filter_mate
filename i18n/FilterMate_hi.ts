@@ -807,6 +807,11 @@ Do you agree?</source>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>चरण {} नहीं चलाया गया: यह उस परत को बदल देता जिसे आपने एजेंट से सुरक्षित किया है ({})।</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>चरण {} नहीं चला: आपने एजेंट के लिए उसका टूल बंद कर दिया है ({})।</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1385,6 +1390,81 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>एजेंट इन्हें पढ़ता है और स्रोत के रूप में उपयोग करता है, पर कभी बदलता नहीं: कोई फ़िल्टर, शैली, संपादन, फ़ील्ड, जॉइन, नया नाम या हटाना नहीं, किसी भी स्तर पर, किसी रेसिपी में भी और अन्य एप्लिकेशन के लिए भी। प्रोजेक्ट में सहेजा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>हमेशा अनुमति दें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>हमेशा पूछें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>स्तर के अनुसार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>डिफ़ॉल्ट रूप से हर टूल स्वायत्तता टैब के स्तर का पालन करता है। अपवाद केवल उसी टूल पर लागू होता है: कभी नहीं उसे एजेंट से छिपा भी देता है और रेसिपी में तथा अन्य एप्लिकेशन के लिए अस्वीकार करता है; हमेशा अनुमति दें सलाहकार स्तर से आगे नहीं जाता, और Python कोड हर बार चलाने पर पढ़ा और पुष्ट किया जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>प्रकार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>कभी नहीं</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>नियम</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>टूल</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>टूल</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>संपादन बफ़र</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>अपरिवर्तनीय</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>बाहरी</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>प्रोजेक्ट</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>पढ़ता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>दृश्य</translation>
     </message>
 </context>
 <context>

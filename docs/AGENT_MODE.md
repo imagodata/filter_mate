@@ -214,6 +214,11 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
   when it is not `standard` (the system prompt stays constant for the cache).
 - An invalid call is never asked nor refused: it runs to answer its mistake.
 - The MCP servers keep the `standard` rules (`ToolExecutor.needs_confirmation`): the level is the chat's.
+- **Exceptions by tool** (Tools tab, `AgentSettings.tool_rules`): *As the level says* (default), *Always ask* (at
+  every call; never allowed for a conversation), *Always allow* (not past `advisor`, never for `run_pyqgis`) or
+  *Never*: the tool is left out of the tools offered to the model and answered `TURNED_OFF` if it is called anyway,
+  in a recipe, or by another application through the native MCP server. The notes and `undo_agent_step` have no
+  exception. A protected layer is refused before any exception.
 - **Protected layers** (`adapters/agent/protected_layers.py`, kept in the project by their ids, ticked in the Autonomy
   tab): a call that would change one (`permissions.CHANGED_LAYERS`: its filter, style, labels, features, fields, join,
   name, or the layer itself) gets the verdict `PROTECTED`, refused at every level, never turned into a question nor

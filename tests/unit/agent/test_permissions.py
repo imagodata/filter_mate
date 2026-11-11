@@ -308,3 +308,62 @@ class TestProtectedFavorites:
         executor = ToolExecutor(chat_tools(), {})
         policy = PermissionPolicy(protector=Protector("cadastre"))
         assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}), policy) == RUN
+
+
+class TestToolRules:
+    def names(self):
+        return {tool.name: tool for tool in chat_tools()}
+
+    def test_never_turns_a_tool_off_at_every_level(self):
+        from core.agent.permissions import TURNED_OFF
+        for level in LEVELS:
+            policy = PermissionPolicy(level, rules={"zoom_to": "never"})
+            assert policy.verdict(self.names()["zoom_to"]) == TURNED_OFF, level
+        executor = ToolExecutor(chat_tools(), {})
+        call = ToolCallPart("c", "zoom_to", {})
+        refusal = ToolExecutor.refused(call, PermissionPolicy(rules={"zoom_to": "never"})).content
+        assert "turned the tool 'zoom_to' off" in refusal
+        assert executor.verdict(call, PermissionPolicy(rules={"zoom_to": "never"})) == TURNED_OFF
+
+    def test_ask_asks_at_every_call_and_cannot_be_allowed_for_a_conversation(self):
+        policy = PermissionPolicy(AUTONOMOUS, granted=("apply_filter",), rules={"apply_filter": "ask"})
+        filter_tool = self.names()["apply_filter"]
+        assert policy.verdict(filter_tool) == ASK and not policy.grantable(filter_tool)
+        assert PermissionPolicy(rules={"list_layers": "ask"}).verdict(self.names()["list_layers"]) == ASK
+        assert PermissionPolicy(ADVISOR, rules={"apply_filter": "ask"}).verdict(filter_tool) == REFUSE
+        assert PermissionPolicy(ADVISOR, rules={"list_layers": "ask"}).verdict(self.names()["list_layers"]) == ASK
+
+    def test_allow_runs_without_asking_but_not_over_advisor_nor_for_code(self):
+        export = self.names()["export_layers"]
+        assert PermissionPolicy(STANDARD).verdict(export) == ASK
+        assert PermissionPolicy(STANDARD, rules={"export_layers": "allow"}).verdict(export) == RUN
+        assert PermissionPolicy(ADVISOR, rules={"export_layers": "allow"}).verdict(export) == REFUSE
+        code = spec("run_pyqgis", destructive=True)
+        assert PermissionPolicy(AUTONOMOUS, rules={"run_pyqgis": "allow"}).verdict(code) == ASK
+
+    def test_rules_that_cannot_be_read_are_left_out(self):
+        from core.agent.permissions import clean_rules
+        assert clean_rules({"a": "never", "b": "maybe", "undo_agent_step": "never", "run_pyqgis": "allow",
+                            "c": "ask"}) == {"a": "never", "c": "ask"}
+        assert clean_rules("nope") == {} and clean_rules(None) == {}
+
+    def test_the_agent_own_tools_ignore_rules(self):
+        policy = PermissionPolicy(rules={"add_project_note": "never"})
+        assert policy.verdict(next(tool for tool in CHAT_ONLY if tool.name == "add_project_note")) == RUN
+
+    def test_protection_comes_before_a_rule_that_allows(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre"), rules={"apply_filter": "allow"})
+        call = ToolCallPart("c", "apply_filter", {"layer_name": "cadastre", "expression": "1"})
+        assert executor.verdict(call, policy) == PROTECTED
+
+
+def test_a_tool_turned_off_and_left_out_is_still_answered_why():
+    from core.agent.permissions import TURNED_OFF
+    executor = ToolExecutor([spec("read", read_only=True)], {"read": lambda a: {}})
+    call = ToolCallPart("c", "apply_filter", {"layer_name": "a", "expression": "1"})
+    policy = PermissionPolicy(rules={"apply_filter": "never"})
+    assert executor.verdict(call, policy) == TURNED_OFF
+    assert "turned the tool 'apply_filter' off" in ToolExecutor.refused(call, policy).content
+    assert executor.verdict(call, PermissionPolicy()) == RUN  # unknown, and answered as unknown

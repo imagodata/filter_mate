@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 from .json_schema import validate
 from .messages import ToolCallPart, ToolResultPart
-from .permissions import ADVISOR_REFUSAL, ASK, PROTECTED, RUN, PermissionPolicy
+from .permissions import ADVISOR_REFUSAL, ASK, PROTECTED, RUN, TURNED_OFF, PermissionPolicy
 from .tool_catalog import ToolSpec
 
 logger = logging.getLogger("FilterMate.agent")
@@ -97,6 +97,8 @@ class ToolExecutor:
         """``RUN``, ``ASK`` or ``REFUSE`` under ``policy``. An invalid call runs: it only answers its mistake, and
         nobody is asked to confirm, or told they may not, what would not run anyway."""
         tool = self._tools.get(call.name)
+        if tool is None and policy.turned_off(call.name):
+            return TURNED_OFF  # left out of the tools offered, and still called: say why, not "unknown"
         if tool is None or call.parse_error or validate(call.arguments, tool.input_schema):
             return RUN
         if policy.protection_refusal(call.name, call.arguments):
@@ -109,9 +111,9 @@ class ToolExecutor:
 
     @staticmethod
     def refused(call: ToolCallPart, policy: Optional[PermissionPolicy] = None) -> ToolResultPart:
-        """Not run, because of a layer the user protected, or of the level of autonomy the user chose."""
-        protected = policy.protection_refusal(call.name, call.arguments) if policy is not None else ""
-        return ToolResultPart(call.call_id, protected or ADVISOR_REFUSAL, is_error=True)
+        """Not run, because of a layer the user protected, a tool turned off, or the level of autonomy."""
+        text = policy.refusal_text(call.name, call.arguments) if policy is not None else ADVISOR_REFUSAL
+        return ToolResultPart(call.call_id, text, is_error=True)
 
     def execute(self, call: ToolCallPart) -> ToolResultPart:
         """Result of ``call``; never raises, a model reads its mistakes and corrects them."""
