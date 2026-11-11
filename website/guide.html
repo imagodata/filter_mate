@@ -860,6 +860,16 @@ processing.run("filtermate:batch_filter", {
         Each layer it makes is a temporary file added to the project, removed if you undo the turn, and Stop cancels the run.
     </p>
 
+    <p>Beyond filters, it can also:</p>
+    <ul>
+        <li><strong>style and label a layer</strong>: one symbol, categories of a field, graduated classes, a raster colour ramp, an opacity, labels from a field;</li>
+        <li><strong>edit features</strong>: change values, add or delete features (you confirm a deletion). The layer is put in editing mode and nothing is written to its source until you save its edits, or discard them;</li>
+        <li><strong>make a print layout</strong> with a map, a title, a legend, a scale bar and a north arrow, to finish in the layout designer, and export it as PDF or PNG after you confirm;</li>
+        <li><strong>read and draw objects with SAM</strong>: use the objects drawn in the dock as a selection, draw objects from a layer of points or footprints, and look for objects like an example (about half of what it finds is right, and it finds about a fifth of what is there: the agent says so);</li>
+        <li><strong>keep notes for the project</strong> when you ask it to (which layer holds what, what you call things): up to 20, saved in the project and sent with each request.</li>
+    </ul>
+    <p>Each of these is undone with the turn. A long conversation is summed up rather than sent again in full: past a certain length, the oldest requests are replaced by a few lines that say what they did.</p>
+
     <h3>Choose a model</h3>
     <ul>
         <li><strong>Free quota.</strong> The first time, the settings offer a few free requests a month, through a relay of FilterMate to Claude Haiku 5.5 (Anthropic), with no key to enter. The relay counts what is spent and keeps no conversation. Once the quota is used up, the panel asks for your own API key.</li>

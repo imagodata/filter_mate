@@ -859,6 +859,16 @@ processing.run("filtermate:batch_filter", {
         Chaque couche produite est un fichier temporaire ajouté au projet, retiré si vous annulez le tour, et Stop annule l’exécution.
     </p>
 
+    <p>Au-delà des filtres, il peut aussi :</p>
+    <ul>
+        <li><strong>styler et étiqueter une couche</strong> : un symbole unique, des catégories d'un champ, des classes graduées, une rampe de couleurs raster, une opacité, des étiquettes tirées d'un champ ;</li>
+        <li><strong>modifier des entités</strong> : changer des valeurs, ajouter ou supprimer des entités (une suppression vous est demandée). La couche passe en mode édition et rien n'est écrit dans sa source tant que vous n'enregistrez pas ses modifications, ou que vous ne les annulez pas ;</li>
+        <li><strong>faire une mise en page</strong> avec une carte, un titre, une légende, une échelle et une flèche du nord, à finir dans le concepteur de mise en page, et l'exporter en PDF ou PNG après votre accord ;</li>
+        <li><strong>lire et dessiner des objets avec SAM</strong> : prendre les objets dessinés dans le panneau comme sélection, dessiner des objets à partir d'une couche de points ou d'emprises, et chercher des objets semblables à un exemple (environ la moitié de ce qu'il trouve est juste, et il trouve environ un cinquième de ce qui existe : l'agent le dit) ;</li>
+        <li><strong>garder des notes pour le projet</strong> quand vous le lui demandez (quelle couche contient quoi, comment vous appelez les choses) : 20 au plus, enregistrées dans le projet et envoyées avec chaque demande.</li>
+    </ul>
+    <p>Chacune de ces actions s'annule avec le tour. Une longue conversation est résumée au lieu d'être renvoyée en entier : au-delà d'une certaine longueur, les plus anciennes demandes sont remplacées par quelques lignes qui disent ce qu'elles ont fait.</p>
+
     <h3>Choisir un modèle</h3>
     <ul>
         <li><strong>Quota gratuit.</strong> La première fois, les réglages proposent quelques requêtes gratuites par mois, par un relais de FilterMate vers Claude Haiku 5.5 (Anthropic), sans clé à saisir. Le relais compte ce qui est dépensé et ne garde aucune conversation. Une fois le quota épuisé, le panneau demande votre propre clé d'API.</li>
