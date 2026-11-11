@@ -8,8 +8,8 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    FilterRejected, LayerSummary, OpenDataResult, OperationResult, SegmentResult, SelectionResult, SimilarResult,
-    ViewState,
+    FilterRejected, LayerSummary, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
+    SimilarResult, ViewState,
 )
 from .filters import LayerName
 
@@ -34,6 +34,21 @@ def zoom(payload: ZoomBody, request: Request) -> ViewState:
     try:
         return _accessor(request).zoom_to(layer=payload.layer, extent_wkt=payload.extent_wkt, crs=payload.crs,
                                           selected_only=payload.selected_only)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class CrsBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    crs: str = Field(..., min_length=1, max_length=_MAX_NAME, description="EPSG:2154, 2154, or a layer of the project")
+
+
+@router.post("/map/crs", response_model=ProjectCrs)
+def set_project_crs(payload: CrsBody, request: Request) -> ProjectCrs:
+    """Set the CRS of the project, which the map follows."""
+    try:
+        return _accessor(request).set_project_crs(payload.crs)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

@@ -651,6 +651,7 @@ class AgentChatController(QObject):
             "update_features": lambda: _tr("Edit of {} (not saved)").format(layer),
             "delete_features": lambda: _tr("Features deleted from {} (not saved)").format(layer),
             "add_features": lambda: _tr("Features added to {} (not saved)").format(layer),
+            "set_project_crs": lambda: _tr("Project CRS: {}").format(args.get("crs", "")),
             "create_layout": lambda: _tr("Layout {}").format(args.get("name", "")),
             "export_layout": lambda: _tr("Layout {} exported").format(args.get("name", "")),
             ADD_NOTE: lambda: _tr("Note kept for this project"),

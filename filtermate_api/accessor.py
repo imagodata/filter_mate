@@ -347,6 +347,17 @@ class LayoutExport:
 
 
 @dataclass(frozen=True)
+class ProjectCrs:
+    """The CRS of the project after a change."""
+    crs: str
+    description: str = ""
+    units: str = ""
+    geographic: bool = False
+    previous: str = ""
+    note: str = ""
+
+
+@dataclass(frozen=True)
 class FilterPreview:
     """What a filter expression would keep, tried on a private copy of the layer."""
     layer_name: str
@@ -520,6 +531,10 @@ class FilterMateAccessor(Protocol):
 
     def export_layout(self, name: str, folder: str, file_format: str = "pdf", dpi: int = 150) -> LayoutExport:
         """Write a layout of the project into ``folder`` (resolved by the route); raises FilterRejected."""
+        ...
+
+    def set_project_crs(self, crs: str) -> ProjectCrs:
+        """Set the CRS of the project and of the map; raises FilterRejected on an unknown CRS."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -764,6 +779,11 @@ class InMemoryAccessor:
         import os
         path = os.path.join(folder, f"{name}.{file_format}")
         return LayoutExport(name=name, format=file_format, dpi=dpi, path=path, bytes=1)
+
+    def set_project_crs(self, crs: str) -> ProjectCrs:
+        if not crs.upper().startswith("EPSG:") and not crs.isdigit():
+            raise FilterRejected(f"{crs!r} is no CRS QGIS knows")
+        return ProjectCrs(crs=crs if ":" in crs else f"EPSG:{crs}")
 
     def _edited(self, layer: str, **counts: int) -> EditResult:
         found = self._find(layer)

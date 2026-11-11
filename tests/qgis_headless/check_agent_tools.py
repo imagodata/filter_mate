@@ -465,6 +465,35 @@ def check_layouts(project, work):
         project.layoutManager().removeLayout(layout)
 
 
+def check_project_crs(project):
+    """set_project_crs by authid, code or layer, its refusals, and the CRS an undo of the turn brings back."""
+    from filter_mate.adapters.public_api import project_control
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+    from qgis.core import QgsCoordinateReferenceSystem
+    project.setCrs(QgsCoordinateReferenceSystem("EPSG:4326"))
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("c1", "set_project_crs", {"crs": "EPSG:2154"}))
+    lambert = project_control.set_project_crs("EPSG:2154")
+    check("crs: by authid", project.crs().authid() == "EPSG:2154" and lambert["previous"] == "EPSG:4326" and
+          lambert["units"] and lambert["geographic"] is False, lambert)
+    check("crs: by EPSG code alone", project_control.set_project_crs("3857")["crs"] == "EPSG:3857")
+    check("crs: from a layer", project_control.set_project_crs("communes")["crs"] == "EPSG:2154")
+    for bad in ("Lambert", "EPSG:999999999", ""):
+        check(f"crs: refuses {bad!r}", refused(project_control.set_project_crs, bad) and
+              project.crs().authid() == "EPSG:2154")
+    effects = recorder.finish()
+    check("crs: the turn keeps the CRS before", [effect[:2] for effect in effects] == [("project_crs", "")] and
+          effects[0][2:] == ("EPSG:4326", "EPSG:2154"), effects)
+    apply_effects(effects, undo=True)
+    check("crs: undo brings it back", project.crs().authid() == "EPSG:4326", project.crs().authid())
+    apply_effects(effects, undo=False)
+    check("crs: redo sets it again", project.crs().authid() == "EPSG:2154", project.crs().authid())
+    own = QgsCoordinateReferenceSystem.fromProj("+proj=tmerc +lat_0=0 +lon_0=3 +k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m")
+    check("crs: a CRS of its own comes back by its WKT", project_control.crs_from_definition(
+        project_control.crs_definition(own)).isValid())
+
+
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
@@ -587,6 +616,7 @@ def main(introspection):
     check_style(project, gpkg, work)
     check_edits(project, work)
     check_layouts(project, work)
+    check_project_crs(project)
 
     if gdal is not None:
         raster_path = os.path.join(work, "occupation.tif")

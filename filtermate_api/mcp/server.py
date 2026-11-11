@@ -724,6 +724,19 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layouts/export", _body(name=name, format=format, dpi=dpi, subfolder=subfolder))
 
+    @mcp.tool(annotations=_write("Set the CRS of the project", idempotent=True))
+    async def set_project_crs(
+        crs: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "EPSG:2154 (Lambert-93), EPSG:4326 (WGS 84), EPSG:3857 (Web Mercator), an EPSG code alone, or a layer "
+            "of the project whose CRS is taken"))],
+    ) -> Dict[str, Any]:
+        """Set the CRS of the project, which the map follows: what the user calls changing the CRS of the view.
+
+        Layers in other CRS are reprojected on the fly, their data does not change. Returns crs, description, units,
+        geographic and previous. In the chat of FilterMate, undoing the turn brings the previous CRS back.
+        """
+        return await call("POST", "/map/crs", _body(crs=crs))
+
     @mcp.tool(annotations=_write("Show or hide layers", idempotent=True))
     async def set_layers_visibility(
         layers: Annotated[LayerList, Field(description="Layer ids or names")],
