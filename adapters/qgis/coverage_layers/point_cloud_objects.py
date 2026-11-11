@@ -57,6 +57,9 @@ OBJECT_POINTS_LIMIT = 500000
 CLASS_POINTS_LIMIT = 1000000
 # Gaps between the points closed by this many cells, as the footprint of a source does.
 OBJECT_DILATE_CELLS = 1
+# Cells taken back off the edge once the gaps are closed and the holes filled (at most OBJECT_DILATE_CELLS,
+# no cell of a point is shrunk away): 0 keeps the objects grown by one cell.
+OBJECT_ERODE_CELLS = 0
 # A click between two points of the object: the nearest cell of the class within this many cells
 # (at least; the controller asks for the identify search radius of the map, at most OBJECT_SEED_MAX_CELLS).
 OBJECT_SEED_CELLS = 2
@@ -137,7 +140,7 @@ class ObjectGrid:
 def grow_object(read_points: Callable[[float, float, float, float], Tuple[Any, Any]], x: float, y: float, cell: float,
                 start: float = OBJECT_WINDOW_START, limit: float = OBJECT_WINDOW_MAX,
                 growth: int = OBJECT_WINDOW_GROWTH, dilate_cells: int = OBJECT_DILATE_CELLS,
-                seed_radius: int = OBJECT_SEED_CELLS) -> Optional[ObjectGrid]:
+                seed_radius: int = OBJECT_SEED_CELLS, erode_cells: int = OBJECT_ERODE_CELLS) -> Optional[ObjectGrid]:
     """The patch of cells holding points under ``(x, y)``, read in a window grown while the patch touches its side.
 
     Args:
@@ -148,11 +151,13 @@ def grow_object(read_points: Callable[[float, float, float, float], Tuple[Any, A
         growth: Factor of the half side at each step.
         dilate_cells: Gaps between the points closed by this many cells (see :func:`bin_points`).
         seed_radius: A click on an empty cell starts from the nearest cell of the patch within this many cells.
+        erode_cells: Cells taken back off the edges after the gaps are closed (see :func:`bin_points`).
 
     Returns:
         :class:`ObjectGrid`, None when no point is near the click.
     """
     import numpy as np
+    from .geometry_tools import erode_mask
     from .raster_adapter import fill_holes, flood_fill
     margin = max(0, int(dilate_cells))
     half = float(start)
@@ -170,6 +175,14 @@ def grow_object(read_points: Callable[[float, float, float, float], Tuple[Any, A
             half = min(float(limit), half * growth)
             continue
         region = fill_holes(region)
+        if int(erode_cells) > 0:
+            # Grown, holes filled, then shrunk back: the object is not grown, a neck one grown cell wide is cut, and
+            # no cell of a point is shrunk away (the grown cells around it stay set); one left touching the object
+            # by a corner only is no longer part of it, as on the footprint (polygons of 4-connected cells).
+            shrunk = erode_mask(region, int(erode_cells))
+            start = seed_cell(shrunk, seed[0], seed[1], seed_radius + int(erode_cells))
+            if start is not None:
+                region = fill_holes(flood_fill(shrunk, [start]))
         inside = rows >= 0
         points = int(np.count_nonzero(region[rows[inside], cols[inside]]))
         return ObjectGrid(region, (left, float(cell), 0.0, top, 0.0, -float(cell)), points, touches, half)
@@ -245,7 +258,8 @@ def _readable_reason(layer) -> str:
 
 def object_footprint(layer, x: float, y: float, code: int, seed_radius: float = 0.0,
                      resolution: float = OBJECT_RESOLUTION, start: float = OBJECT_WINDOW_START,
-                     limit: float = OBJECT_WINDOW_MAX, points_limit: int = OBJECT_POINTS_LIMIT) -> PointCloudObject:
+                     limit: float = OBJECT_WINDOW_MAX, points_limit: int = OBJECT_POINTS_LIMIT,
+                     erode_cells: int = OBJECT_ERODE_CELLS) -> PointCloudObject:
     """The object of class ``code`` under ``(x, y)`` (layer CRS), read from ``layer`` (main thread).
 
     ``identify`` honours the subset string of the layer and reads every class: the points
@@ -256,6 +270,7 @@ def object_footprint(layer, x: float, y: float, code: int, seed_radius: float = 
         seed_radius: Search radius of the click, in layer units (a click between the points of a roof).
         resolution, start, limit: Cell size and half sides of the first and largest windows, in metres.
         points_limit: Points read at most for one window (``truncated`` beyond).
+        erode_cells: Cells taken back off the edges once the gaps are closed (see :func:`bin_points`).
     """
     from ..point_cloud_layer_adapter import class_code
     from .geometry_tools import mask_to_geometry
@@ -283,7 +298,8 @@ def object_footprint(layer, x: float, y: float, code: int, seed_radius: float = 
         return xs, ys
 
     radius = max(OBJECT_SEED_CELLS, min(OBJECT_SEED_MAX_CELLS, int(math.ceil(max(0.0, float(seed_radius)) / cell))))
-    grid = grow_object(read_points, float(x), float(y), cell, start * scale, limit * scale, seed_radius=radius)
+    grid = grow_object(read_points, float(x), float(y), cell, start * scale, limit * scale, seed_radius=radius,
+                       erode_cells=erode_cells)
     elapsed = time.perf_counter() - started
     if grid is None:
         logger.info(f"⏱ [FM5] point cloud object: no point of class {code} under the click "
@@ -356,11 +372,12 @@ def class_subset(code: int, base_subset: str = '') -> str:
 
 
 def class_footprint(layer, code: int, base_subset: str = '', resolution: float = OBJECT_RESOLUTION,
-                    points_limit: int = CLASS_POINTS_LIMIT):
+                    points_limit: int = CLASS_POINTS_LIMIT, erode_cells: int = OBJECT_ERODE_CELLS):
     """Footprint (:class:`point_cloud_footprint.FootprintResult`) of the points of class ``code`` of ``layer``.
 
     Read from a private copy of the layer filtered on the class and ``base_subset`` (the
-    project layer keeps its filter and its preview), at the cell size of the objects (main thread).
+    project layer keeps its filter and its preview), at the cell size of the objects (main thread),
+    its gaps closed as the clicked objects' (``erode_cells``, see :func:`bin_points`).
 
     Raises:
         RuntimeError: The cloud cannot be read, or refused the class (the reason).
@@ -378,6 +395,7 @@ def class_footprint(layer, code: int, base_subset: str = '', resolution: float =
     if not copy.setSubsetString(subset):
         raise RuntimeError(f"the class was rejected by the point cloud: {subset[:120]}")
     result = footprint_geometry(copy, layer_resolution(resolution, layer.crs()), points_limit=points_limit,
+                                dilate_cells=OBJECT_DILATE_CELLS, erode_cells=erode_cells,
                                 check=selection_check(subset))
     logger.info(f"⏱ [FM5] point cloud class {int(code)} footprint: {result.points_read} points read, cells of "
                 f"{result.cell_size:.3g}{', truncated' if result.truncated else ''}, {time.perf_counter() - started:.2f} s")

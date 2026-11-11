@@ -253,7 +253,7 @@ def _read_xy(provider, resolution: float, area: QgsRectangle, points_limit: int,
 def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Optional[QgsRectangle] = None,
                        points_limit: int = DEFAULT_POINTS_LIMIT, dilate_cells: int = 1,
                        is_canceled: Optional[Callable[[], bool]] = None,
-                       check: Optional[CheckFn] = None) -> FootprintResult:
+                       check: Optional[CheckFn] = None, erode_cells: int = 0) -> FootprintResult:
     """Polygon covering the points of ``layer`` that pass its subset string.
 
     Args:
@@ -264,6 +264,8 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
         dilate_cells: Grow the occupied cells by this many cells to close gaps.
         is_canceled: Polled between two reads; True stops reading.
         check: Called with the points of each read (see :func:`selection_check`).
+        erode_cells: Then fill the holes and shrink the cells back by this many cells (at most
+            ``dilate_cells``: every cell holding a point stays, the gaps are closed and the footprint not grown).
 
     Returns:
         :class:`FootprintResult`, with an empty geometry when no point passes;
@@ -278,7 +280,7 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
     xs, ys, truncated = _read_xy(layer.dataProvider(), resolution, area, int(points_limit), is_canceled, check)
     if not len(xs):
         return FootprintResult(QgsGeometry(), 0, resolution, truncated)
-    margin = max(0, int(dilate_cells)) + 1
+    margin = max(0, int(dilate_cells)) + max(0, int(erode_cells)) + 1
     span_x, span_y = float(xs.max() - xs.min()), float(ys.max() - ys.min())
 
     def cells(size):
@@ -309,6 +311,11 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
         grown[:, 1:] |= grid[:, :-1]
         grown[:, :-1] |= grid[:, 1:]
         grid = grown
+    if int(erode_cells) > 0:
+        # Holes filled, then shrunk back, as the objects of point_cloud_objects.grow_object (same cells).
+        from .geometry_tools import erode_mask
+        from .raster_adapter import fill_holes
+        grid = erode_mask(fill_holes(grid.astype(bool)), int(erode_cells)).astype('uint8')
     geotransform = (left, cell, 0.0, top, 0.0, -cell)
     geometry = mask_to_geometry(grid, geotransform, layer.crs().toWkt(), sieve_pixels=0, simplify_tolerance=cell * 0.5)
     return FootprintResult(geometry, int(len(xs)), cell, truncated, coarse=cell > resolution)

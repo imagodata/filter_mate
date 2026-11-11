@@ -126,6 +126,36 @@ class TestGrowObject:
         grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0)
         assert grid.points == len(cloud.xs)
 
+    def test_shrunk_back_a_roof_is_its_cells(self):
+        """2026-11-11: closed and shrunk back, the object is not grown by a cell on each side."""
+        cloud = Cloud((100, 100, 110, 112))
+        grid = objects.grow_object(cloud.read, 105.2, 106.3, 1.0, erode_cells=1)
+        assert grid.region.sum() == 10 * 12 and grid.points == len(cloud.xs)
+
+    def test_shrunk_back_a_gap_of_two_cells_stays_closed(self):
+        cloud = Cloud((100, 100, 110, 110), (112, 100, 122, 110))
+        grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=1)
+        assert grid.points == len(cloud.xs)
+
+    def test_shrunk_back_a_neck_of_one_grown_cell_is_cut(self):
+        # The roofs face each other across two cells on one row only: the grown cells bridge them by one row.
+        cloud = Cloud((100, 100, 110, 110), (112, 109, 122, 119))
+        assert objects.grow_object(cloud.read, 105.0, 105.0, 1.0).points == len(cloud.xs)
+        grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=1)
+        assert grid.points == len(cloud.xs) // 2 and grid.region.sum() == 100
+
+    def test_shrunk_back_sparse_points_stay_one_object(self):
+        # A point every other cell: the holes are filled before shrinking, the roof stays whole and not grown.
+        cloud = Cloud((100.3, 100.3, 110.3, 110.3), step=2.0)  # points at 101.3, 103.3 … 109.3, inside their cells
+        grown = objects.grow_object(cloud.read, 105.0, 105.0, 1.0)
+        grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, erode_cells=1)
+        left, top = grid.geotransform[0], grid.geotransform[3]
+        rows, cols = np.nonzero(grid.region)
+        assert (cols + left).min() == 101 and (cols + left).max() == 109  # the cells of the points, no more
+        assert (top - rows - 1).min() == 101 and (top - rows - 1).max() == 109
+        assert grid.region.sum() < grown.region.sum()
+        assert grid.points >= len(cloud.xs) - 4  # a corner point may touch the roof by a corner only
+
     def test_a_long_building_grows_the_window(self):
         cloud = Cloud((100, 100, 200, 110))  # 100 m long: past the 64 m window
         grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, limit=128.0)
@@ -352,7 +382,7 @@ class TestFinalWindow:
 class TestSameCellsAsTheFootprint:
     """2026-10-18 review: the object and the footprint of its class are measured on the same cells."""
 
-    def _footprint_cells(self, monkeypatch, layer, cell):
+    def _footprint_cells(self, monkeypatch, layer, cell, erode_cells=0):
         grids = []
 
         def mask_to_geometry(region, geotransform, crs_wkt, sieve_pixels=0, simplify_tolerance=0.0):
@@ -361,17 +391,18 @@ class TestSameCellsAsTheFootprint:
 
         monkeypatch.setattr(geometry_tools, "mask_to_geometry", mask_to_geometry)
         monkeypatch.setattr(footprint, "QgsRectangle", fk.FakeRectangle)
-        footprint.footprint_geometry(layer, cell)
+        footprint.footprint_geometry(layer, cell, erode_cells=erode_cells)
         return grids[0]
 
+    @pytest.mark.parametrize("erode_cells", [0, 1])
     @pytest.mark.parametrize("offset", [0.0, 0.3, 0.7, 1.4])
-    def test_a_tree_has_the_same_cells(self, qgis_fakes, monkeypatch, offset):
+    def test_a_tree_has_the_same_cells(self, qgis_fakes, monkeypatch, offset, erode_cells):
         tree = [(x + offset, y + offset, 5) for x in np.arange(1000.1, 1005, 0.4) for y in np.arange(2000.1, 2005, 0.4)]
         layer = FakeLayer(tree)
         layer.extent = lambda: fk.FakeRectangle(987.3, 1981.9, 1031.7, 2033.2)  # an extent off the cells
-        objects.object_footprint(layer, 1002.5 + offset, 2002.5 + offset, 5)
+        objects.object_footprint(layer, 1002.5 + offset, 2002.5 + offset, 5, erode_cells=erode_cells)
         region, object_transform = qgis_fakes[0][:2]
-        grid, transform = self._footprint_cells(monkeypatch, layer, 2.0)
+        grid, transform = self._footprint_cells(monkeypatch, layer, 2.0, erode_cells)
         assert transform[0] % 2.0 == 0 and transform[3] % 2.0 == 0  # cells on the multiples of their size
         assert (object_transform[0] - transform[0]) % 2.0 == 0 and (object_transform[3] - transform[3]) % 2.0 == 0
         assert int(region.sum()) == int(grid.sum())
