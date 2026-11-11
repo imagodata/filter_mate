@@ -1344,6 +1344,11 @@ Onaylıyor musunuz?</translation>
         <source>to</source>
         <translation>bitiş</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>diğer</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>

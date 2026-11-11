@@ -40,7 +40,7 @@ from ...core.agent.project_notes import added as note_added, notes_block, remove
 from ...core.agent.tool_catalog import (
     ADD_NOTE, CREATE_WIDGET, REMOVE_NOTE, REMOVE_WIDGET, RUN_PYTHON, UNDO_AGENT_STEP, VIEW_MAP, chat_tools,
 )
-from ...core.agent.widgets import STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
@@ -504,7 +504,7 @@ class AgentChatController(QObject):
             layer = agent_widgets.widget_layer(widget)
             if layer is None:
                 self.panel.widgets_strip.set_error(widget["id"], _tr("Its layer is no longer in the project."))
-            elif widget["kind"] == STAT:
+            elif widget["kind"] in SHOWING:
                 wanted[layer.id()] = layer
         for layer_id in set(self._stat_layers) - set(wanted):
             self._follow(self._stat_layers.pop(layer_id), False)
@@ -534,6 +534,8 @@ class AgentChatController(QObject):
             if widget["kind"] == STAT:
                 value = agent_widgets.stat_value(widget)
                 self.panel.widgets_strip.set_value(widget["id"], number_text(value))
+            elif widget["kind"] == CHART:
+                self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""

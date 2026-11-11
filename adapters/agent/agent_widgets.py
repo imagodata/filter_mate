@@ -9,7 +9,8 @@ from qgis.core import QgsExpression, QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QCoreApplication
 
 from ...core.agent.widgets import (
-    MAX_VALUES, RANGE, STAT, VALUES, WidgetError, dumps, layer_filter, make, parse,
+    CATEGORIES, CHART, MAX_VALUES, RANGE, SHOWING, STAT, VALUES, WidgetError, category_bars, dumps, histogram_bars,
+    layer_filter, make, parse,
 )
 
 logger = logging.getLogger("FilterMate.agent")
@@ -104,6 +105,8 @@ def create(kind: str, layer: str, field: str = "", title: str = "", aggregate: s
         options = dict(minimum=low, maximum=high, integer=isinstance(low, int) and isinstance(high, int))
     elif kind == VALUES:
         options = dict(values=[_plain(value) for value in target.uniqueValues(index, MAX_VALUES + 1)])
+    elif kind == CHART:
+        options = dict(numeric=definition is not None and definition.isNumeric())
     widget = make(widgets, kind, target.id(), target.name(), target.subsetString() or "", title=title,
                   field=definition.name() if definition is not None else "", aggregate=aggregate, **options)
     write_widgets(widgets + [widget])
@@ -116,7 +119,7 @@ def apply_layer(widgets: Sequence[Dict[str, Any]], layer_id: str, public_api=Non
     if not isinstance(layer, QgsVectorLayer):
         return _tr("The layer of this widget is no longer in the project.")
     expression = layer_filter(widgets, layer_id, quote_field, quote_value)
-    if not any(widget["layer_id"] == layer_id and widget["kind"] != STAT for widget in widgets):
+    if not any(widget["layer_id"] == layer_id and widget["kind"] not in SHOWING for widget in widgets):
         return ""
     if expression == (layer.subsetString() or ""):
         return ""
@@ -150,3 +153,32 @@ def stat_value(widget: Dict[str, Any]) -> Optional[float]:
     statistics = (answer or {}).get("statistics") or {}
     value = statistics.get({"min": "minimum", "max": "maximum"}.get(widget["aggregate"], widget["aggregate"]))
     return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+
+def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+    """The bars of a chart widget on its layer as filtered now; None when they cannot be read (layer gone, field
+    gone, a web service, too many features)."""
+    from qgis.core import QgsFeatureRequest
+    from ..public_api.introspection import MAX_STAT_FEATURES, _refuse_web_service
+    layer = widget_layer(widget)
+    if layer is None:
+        return None
+    index = layer.fields().lookupField(widget.get("field", ""))
+    if index < 0:
+        return None
+    try:
+        _refuse_web_service(layer)
+    except ValueError:
+        return None
+    count = layer.featureCount()
+    if not isinstance(count, int) or count > MAX_STAT_FEATURES:
+        return None
+    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry).setSubsetOfAttributes([index])
+    values = [_plain(feature.attribute(index)) for feature in layer.getFeatures(request)]
+    if widget["mode"] == CATEGORIES:
+        counts: Dict[Any, int] = {}
+        for value in values:
+            key = value if isinstance(value, (str, int, float, bool)) or value is None else str(value)
+            counts[key] = counts.get(key, 0) + 1
+        return category_bars(counts.items(), total=len(values))
+    return histogram_bars(values)

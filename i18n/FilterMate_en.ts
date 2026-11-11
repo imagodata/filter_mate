@@ -1339,6 +1339,11 @@ Do you agree?</translation>
         <source>to</source>
         <translation>to</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/agent_widgets_strip.py" line="96"/>
+        <source>others</source>
+        <translation>others</translation>
+    </message>
 </context>
 <context>
     <name>AppInitializer</name>
