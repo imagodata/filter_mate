@@ -16,6 +16,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 from ...core.agent.mcp_server import DEFAULT_PORT
 from ...core.agent.permissions import DEFAULT_LEVEL, level_or_default
 from ...core.agent.providers import FREE_PRESET, FREE_QUOTA_URL, PRESETS
+from ...core.agent.providers.ollama_chat import native_base
 from ...core.agent.providers.base import ProviderConfig
 
 logger = logging.getLogger("FilterMate.agent")
@@ -48,11 +49,16 @@ def free_quota_url() -> str:
     return (override or FREE_QUOTA_URL).rstrip("/")
 
 
+OLLAMA_PRESET = "ollama"
+
+
 def target_of(preset: str, base_url: str) -> str:
     """The server a key and a consent are for."""
     if preset == FREE_PRESET:
         return free_quota_url()
-    return base_url.strip().rstrip("/") or PRESETS[preset][1]
+    target = base_url.strip().rstrip("/") or PRESETS[preset][1]
+    # The same Ollama server, through its own API or its OpenAI-compatible one (the usual address up to 5.1).
+    return native_base(target) if preset == OLLAMA_PRESET else target
 
 
 @dataclass(frozen=True)
@@ -91,7 +97,8 @@ class AgentSettings:
 
     @property
     def has_consent(self) -> bool:
-        return self.consent and bool(self.target) and self.consent_target == self.target
+        stored = native_base(self.consent_target) if self.preset == OLLAMA_PRESET else self.consent_target
+        return self.consent and bool(self.target) and stored == self.target
 
     @property
     def has_key(self) -> bool:

@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from .anthropic_messages import AnthropicProvider
 from .base import Provider, ProviderConfig
+from .ollama_chat import OllamaChatProvider
 from .openai_chat import OpenAIChatProvider
 
 KIND_ANTHROPIC = "anthropic"
 KIND_OPENAI_COMPATIBLE = "openai_compatible"
+KIND_OLLAMA = "ollama"
 FREE_PRESET = "free"
 FREE_MODEL = "claude-haiku-5-5"  # the relay decides; this is what the panel shows
 # Set here and not in config.default.json: that file is copied once per profile and would never follow a change.
@@ -18,7 +20,8 @@ PRESETS = {
     "anthropic": (KIND_ANTHROPIC, "https://api.anthropic.com"),
     "mistral": (KIND_OPENAI_COMPATIBLE, "https://api.mistral.ai/v1"),
     "openai": (KIND_OPENAI_COMPATIBLE, "https://api.openai.com/v1"),
-    "ollama": (KIND_OPENAI_COMPATIBLE, "http://localhost:11434/v1"),
+    # Ollama's own API: its OpenAI-compatible one cannot ask for more than 4096 tokens of context (ollama_chat.py).
+    "ollama": (KIND_OLLAMA, "http://localhost:11434"),
     # Its address: see adapters.agent.settings.free_quota_url.
     FREE_PRESET: (KIND_ANTHROPIC, ""),
 }
@@ -36,4 +39,6 @@ def create_provider(config: ProviderConfig) -> Provider:
         return AnthropicProvider(config)
     if config.kind == KIND_OPENAI_COMPATIBLE:
         return OpenAIChatProvider(config)
+    if config.kind == KIND_OLLAMA:
+        return OllamaChatProvider(config)
     raise ValueError(f"unknown provider kind {config.kind!r}")
