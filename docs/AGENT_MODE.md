@@ -296,13 +296,22 @@ each time the edits of one of its source layers are saved in QGIS (`afterCommitC
   style and labels. What writes (an export, an edit), adds or removes layers, runs Processing or moves the map is
   refused: it would happen at every save. A stored `live` flag on any other recipe is dropped when the project is
   read, so a project made by someone else cannot make an export run at every save.
+- Ticked by the user, on this computer: the project file keeps `live`, but a recipe runs by itself only once the
+  user ticked it here for these very steps (`approve_live` in `adapters/agent/recipes_store.py`: a hash of the project,
+  the recipe and its steps, in the QGIS settings). A project made by someone else, or a recipe saved again under the
+  same name by the agent, shows unticked and follows nothing. Nothing runs alone at the *advisor* and *careful* levels.
 - A live run asks nothing: at the usual level these steps run alone, and one that would ask (a layer protected from
-  the agent) stops it. It is one turn of the history, undone as one, and shows in the thread as a note.
-- Several saves within 0.8 s run it once. While FilterMate or the chat works, it waits and tries again for about a
-  minute, then says so. A source layer is found by its id, then by its name when one layer only has it; a source
-  removed from the project is no longer followed.
-- Not followed: changes made outside QGIS (another user of a PostGIS table, a script writing the file). Only the
-  saves of this QGIS.
+  the agent) stops it. It is one turn of the history, undone as one (it empties Redo, as any change does), and shows
+  in the thread as a note without leaving the history or the settings.
+- Several saves within 0.8 s run it once. While FilterMate or the chat works, or while a layer the recipe filters is
+  being edited (its filter cannot change then), it waits and tries again for about five minutes, then says so. A
+  source layer is found by its id, then by its name when one layer only has it; the layers followed are updated when
+  layers come or go, and on closing a project a pending run is dropped.
+- What a cross filter reads is read at each run: with `selected_only`, the selection of the moment, or what the source
+  shows when nothing is selected. A save through **Save changes and filter** of the dock runs the live recipes after
+  that filter, and they write their targets again.
+- Not followed: changes made outside QGIS (another user of a PostGIS table, a script writing the file), and a live
+  recipe whose source is the target of another one (a filter is not a save). Only the saves of this QGIS.
 
 ## History
 

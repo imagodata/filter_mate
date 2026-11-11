@@ -117,6 +117,14 @@ def followed_sources(recipe: Dict[str, Any]) -> List[str]:
     return sources
 
 
+def fingerprint(recipe: Dict[str, Any]) -> str:
+    """What a recipe does, as a short hash of its steps: an approval of a live recipe holds for these steps only."""
+    import hashlib
+    text = json.dumps([[step["tool"], step["arguments"]] for step in recipe["steps"]], ensure_ascii=False,
+                      sort_keys=True, default=str)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:32]
+
+
 def live_problem(recipe: Dict[str, Any]) -> str:
     """Why a recipe cannot run again by itself; "" when it can."""
     if not followed_sources(recipe):
@@ -198,11 +206,9 @@ def saved(recipes: Sequence[Dict[str, Any]], name: str, request: str,
     kept_recipes = list(recipes)
     for index, recipe in enumerate(kept_recipes):
         if recipe["name"].casefold() == name.casefold():
-            replaced = {"id": recipe["id"], "name": name, "request": plain(request, MAX_REQUEST),
-                        "steps": [dict(step) for step in steps]}
-            if recipe.get("live") and not live_problem(replaced):  # new steps that may still follow their sources
-                replaced["live"] = True
-            kept_recipes[index] = replaced
+            # Not live any more: new steps run at every save only once the user says so again.
+            kept_recipes[index] = {"id": recipe["id"], "name": name, "request": plain(request, MAX_REQUEST),
+                                   "steps": [dict(step) for step in steps]}
             return kept_recipes
     if len(kept_recipes) >= MAX_RECIPES:
         raise RecipeError(f"{MAX_RECIPES} recipes are kept already: remove one first")

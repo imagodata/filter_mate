@@ -1474,12 +1474,22 @@ def check_live_recipes(chat, panel, layer):
     wait(lambda: False, 2)
     check("live: off, a save changes nothing", layer.featureCount() == 5, layer.featureCount())
 
+    # A project made by someone else may say a recipe is live: it runs by itself only once the user ticked it here.
     write_recipes([{"id": "r1", "name": "Communes des zones", "request": "", "live": True, "steps": [
         {"tool": "cross_filter", "arguments": cross, "label": "cross"}]}])
     chat._refresh_recipes()
-    QgsProject.instance().removeMapLayer(zones.id())
+    check("live: a live flag from the project file alone follows nothing, and shows unticked",
+          not chat.followed_layer_ids() and not panel.recipe_live["r1"].isChecked(), chat.followed_layer_ids())
+    panel.recipe_live["r1"].setChecked(True)
+    check("live: ticked here, followed", zones.id() in chat.followed_layer_ids())
+    chat._policy.set_level("advisor")
     chat._refresh_recipes()
-    check("live: a source removed from the project is no longer followed", not chat.followed_layer_ids())
+    check("live: nothing runs alone at the advisor level", not chat.followed_layer_ids())
+    chat._policy.set_level("standard")
+    chat._refresh_recipes()
+    QgsProject.instance().removeMapLayer(zones.id())
+    check("live: a source removed from the project is no longer followed", not chat.followed_layer_ids(),
+          chat.followed_layer_ids())
     layer.setSubsetString("")
 
 

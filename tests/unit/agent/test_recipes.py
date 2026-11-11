@@ -6,7 +6,7 @@ import pytest
 
 from core.agent.permissions import AGENT_OWN, PermissionPolicy, RUN
 from core.agent.recipes import (
-    HEADER, LIVE_TOOLS, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, followed_sources, kept,
+    HEADER, LIVE_TOOLS, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, fingerprint, followed_sources, kept,
     live_problem, parse, plain, recipes_block, saved, steps_of, summary, with_live, without,
 )
 from core.agent.system_prompt import SYSTEM_PROMPT
@@ -201,7 +201,12 @@ class TestLive:
         recipes = parse(stored)
         assert [recipe.get("live") for recipe in recipes] == [None, None, True]
 
-    def test_saving_again_under_the_name_keeps_it_live_while_it_may(self):
+    def test_saving_again_under_the_name_is_no_longer_live(self):
+        """New steps run at every save only once the user says so again (the model may save under a name)."""
         recipes = with_live(saved([], "A", "", [_cross()]), "r1", True)
-        assert saved(recipes, "A", "", [_cross("autre")])[0]["live"] is True
-        assert "live" not in saved(recipes, "A", "", _steps(1))[0]
+        assert "live" not in saved(recipes, "A", "", [_cross("autre")])[0]
+
+    def test_the_fingerprint_follows_the_steps_only(self):
+        first = saved([], "A", "q", [_cross()])[0]
+        assert fingerprint(first) == fingerprint(dict(first, name="B", request="other", live=True))
+        assert fingerprint(first) != fingerprint(saved([], "A", "q", [_cross("autre")])[0])

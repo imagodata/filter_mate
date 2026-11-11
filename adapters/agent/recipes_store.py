@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Sequence
 
-from qgis.core import QgsProject
+import hashlib
+import json
 
-from ...core.agent.recipes import dumps, parse
+from qgis.core import QgsProject, QgsSettings
+
+from ...core.agent.recipes import dumps, fingerprint, parse
 
 SCOPE = "FilterMateAgent"
 KEY = "recipes"
@@ -27,3 +30,31 @@ def write_recipes(recipes: Sequence[Dict[str, Any]], project=None) -> None:
         project.writeEntry(SCOPE, KEY, dumps(recipes))
     else:
         project.removeEntry(SCOPE, KEY)
+
+
+# The live recipes the user turned on here, on this computer: a project made by someone else may say a recipe is live,
+# but it runs at every save only once the user ticked it for these very steps (``fingerprint``).
+APPROVALS_KEY = "filter_mate/agent/live_recipes"
+MAX_APPROVALS = 200
+
+
+def _approval(project_key: str, recipe) -> str:
+    return hashlib.sha256(f"{project_key}\n{recipe['id']}\n{fingerprint(recipe)}".encode("utf-8")).hexdigest()[:32]
+
+
+def _approvals():
+    try:
+        value = json.loads(QgsSettings().value(APPROVALS_KEY, "[]") or "[]")
+    except (TypeError, ValueError):
+        return []
+    return [item for item in value if isinstance(item, str)] if isinstance(value, list) else []
+
+
+def live_approved(project_key: str, recipe) -> bool:
+    return _approval(project_key, recipe) in _approvals()
+
+
+def approve_live(project_key: str, recipe, on: bool) -> None:
+    key = _approval(project_key, recipe)
+    kept = [item for item in _approvals() if item != key] + ([key] if on else [])
+    QgsSettings().setValue(APPROVALS_KEY, json.dumps(kept[-MAX_APPROVALS:]))
