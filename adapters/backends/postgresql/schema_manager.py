@@ -240,6 +240,10 @@ def ensure_table_stats(connexion, schema: str, table: str, geom_field: str, use_
                 cursor.execute(f'ANALYZE "{safe_schema}"."{safe_table}";')
                 connexion.commit()
                 logger.debug(f"ANALYZE completed for \"{safe_schema}\".\"{safe_table}\"")
+            else:
+                # 2026-11-12: ends the read transaction psycopg2 opened for the SELECT:
+                # the task goes on with this connection (materialized views)
+                connexion.rollback()
 
             _STATS_VERIFIED.add(key)
             elapsed_ms = (time.perf_counter() - started) * 1000.0
@@ -248,6 +252,12 @@ def ensure_table_stats(connexion, schema: str, table: str, geom_field: str, use_
             return True
     except Exception as e:
         logger.warning(f"Could not check/create stats for \"{schema}\".\"{table}\": {e}")
+        # 2026-11-12: an aborted transaction left on the task's connection failed its
+        # next statement (InFailedSqlTransaction in the "SELECT 1" check of the views)
+        try:
+            connexion.rollback()
+        except Exception:  # nosec B110 - rollback best-effort, the connection may be broken
+            pass
         return False
 
 
