@@ -92,6 +92,13 @@ class TestFilterGuard:
     def test_anything_else_is_refused(self, expression):
         assert filter_problem(expression)
 
+    @pytest.mark.parametrize("expression", ['"a\\"" OR sleep(5) #".x', '"a\\"" OR sleep(5) #".x = 1', '"a\\" = 1',
+                                            '"C:\\data" = 1'])
+    def test_a_backslash_in_a_quoted_name_is_refused(self, expression):
+        # Through OGR on MySQL a backslash escapes the quote and # starts a comment: the first one would run sleep(5).
+        assert "backslash" in filter_problem(expression)
+        assert expression_problem(expression)
+
 
 class TestExpressionGuard:
     @pytest.mark.parametrize("expression", [

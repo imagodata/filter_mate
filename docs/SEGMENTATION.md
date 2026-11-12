@@ -19,14 +19,16 @@ plugins.qgis.org. Both are installed once, from the panel, after your confirmati
    agree, and nothing is installed at the start of QGIS. The question comes once a session; an
    **Install SAM…** button stays in the group.
 2. Once you confirm, pip installs onnxruntime in the background, as a QGIS task, into your QGIS profile
-   (`filtermate/python/py<version>`). The Python of QGIS is not modified. onnxruntime is declared by the
-   `python_dependencies` key of `metadata.txt`.
+   (`filtermate/python/py<version>`). The Python of QGIS is not modified, and pip keeps the numpy version QGIS
+   has, so that the onnxruntime it picks loads with it. An install cut short (QGIS closed meanwhile) is noticed
+   by its missing files, and the button offers it again. onnxruntime is declared by the `python_dependencies`
+   key of `metadata.txt`.
 3. The model then downloads from a pinned revision of
    [onnx-community/sam2.1-hiera-tiny-ONNX](https://huggingface.co/onnx-community/sam2.1-hiera-tiny-ONNX)
    into `filtermate/models/sam2.1-hiera-tiny-q`. Each file is checked against its SHA-256 before it replaces
    anything. The download can be canceled and uses the HTTP proxy set in the QGIS options.
 4. If pip fails (no network, no pip), the reason is in the FilterMate log and the group shows the command to
-   run by hand in a terminal (the OSGeo4W Shell on Windows). If the model files turn out to be damaged, a
+   run by hand in a terminal (the OSGeo4W Shell on Windows): the same install, into the same folder. If the model files turn out to be damaged, a
    **Repair the model…** button replaces the bad ones.
 
 Nothing else leaves your computer: the model runs on your CPU.

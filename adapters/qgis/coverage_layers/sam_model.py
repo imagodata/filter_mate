@@ -88,11 +88,17 @@ def python_executable() -> str:
     return 'python'
 
 
-def install_command() -> str:
-    """The pip command to run by hand when the install from the panel failed."""
-    python = python_executable()
-    quoted = f'"{python}"' if ' ' in python else python
-    return f'{quoted} -m pip install {RUNTIME_MODULE}'
+def install_command(target: str, requirements: Sequence[str] = ()) -> str:
+    """The pip command to run by hand when the install from the panel failed, into ``target`` as the panel does.
+
+    Without ``--target`` it installed into the Python of QGIS: refused under Linux (PEP 668), for an
+    administrator only under Windows, and replacing the numpy QGIS ships. ``requirements``: the pins
+    of the panel's install (``python_dependencies.numpy_requirement``).
+    """
+    def quoted(text: str) -> str:
+        return f'"{text}"' if ' ' in text else text
+    return ' '.join([quoted(python_executable()), '-m', 'pip', 'install', '--upgrade', '--target', quoted(target)]
+                    + [quoted(requirement) for requirement in requirements] + [RUNTIME_MODULE])
 
 
 # === The files ===

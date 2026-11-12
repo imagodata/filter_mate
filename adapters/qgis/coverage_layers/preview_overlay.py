@@ -257,3 +257,13 @@ class ObjectOutline:
                 self._band.hide()
             except RuntimeError:  # the canvas is gone (plugin unloaded)
                 self._band = None
+
+    def remove(self) -> None:
+        """Take the band out of the scene of the map, once the outline is no longer used: hidden, it stays there."""
+        band, self._band = self._band, None
+        self._shown = False
+        if band is not None:
+            try:
+                self._canvas.scene().removeItem(band)
+            except RuntimeError:  # the canvas is gone (plugin unloaded)
+                pass
