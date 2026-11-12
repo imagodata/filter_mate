@@ -1064,3 +1064,12 @@ Result: Que veux-tu faire dans cette session ?
   bus de session D-Bus → lancer l'interface sous `dbus-run-session -- xvfb-run …`. Une couleur de palette lue sans
   groupe suit l'état actif / inactif de la fenêtre (histogramme gris quand QGIS n'a pas le focus) : prendre
   `QPalette.ColorGroup.Active` pour une couleur de donnée.
+
+## [2026-11-12] Suite complète : `scripts/full_suite.sh`
+- Le `python3` système n'a ni PyQt, ni GDAL, ni mcp, ni fastapi : environ 620 tests y sautent par module entier et la suite
+  « passe ». Le catalogue d'outils laissé périmé par #365 (`test_catalog_agrees_with_the_mcp_server`) est passé ainsi.
+- `scripts/full_suite.sh` : venv uv (`FM_TEST_VENV`, par défaut `~/.cache/filter_mate/test-venv`) avec requirements-test*,
+  PyQt5, PyQt6 et Pillow, puis les fichiers sautés pour GDAL dans `qgis/qgis:stable`. Échoue si un test saute faute d'import
+  (onnxruntime excepté). Référence au 12/11 : 4 échecs `test_expression_builder` + `test_theme_icons` (artefact du test :
+  faux paquet `_real_qt_theme_styles` sous lequel `from ..layout` ne remonte pas) côté venv, `test_canceled_selection_is_not_read`
+  côté Docker.
