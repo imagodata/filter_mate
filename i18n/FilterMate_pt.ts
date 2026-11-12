@@ -1053,6 +1053,16 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Somente as ferramentas que filtram, para um computador lento</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>O Ollama não listou nenhum modelo em {}: digite o nome de um.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Modelos instalados no Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Marcado, o modelo local recebe apenas as ferramentas que leem e filtram o projeto: cerca de metade do que ler em cada pedido. Medido com qwen3.5:4b, todas as ferramentas responderam tão bem ou melhor.</translation>

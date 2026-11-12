@@ -208,3 +208,30 @@ class OllamaStreamParser:
         if self._calls and reason in (STOP_END, STOP_OTHER):
             reason = STOP_TOOL_USE  # Ollama says "stop" after complete calls
         return TurnComplete(Message(ROLE_ASSISTANT, tuple(parts)), reason, self._usage)
+
+
+TAGS_PATH = "/api/tags"
+MAX_LISTED_MODELS = 50
+
+
+def tags_url(base_url: str) -> str:
+    """Where Ollama lists the models it has installed."""
+    return native_base(base_url or "http://localhost:11434") + TAGS_PATH
+
+
+def installed_models(payload: Any) -> List[str]:
+    """The names of the chat models of an answer of ``/api/tags``, in its order; embedding models left out."""
+    models = payload.get("models") if isinstance(payload, dict) else None
+    names: List[str] = []
+    for model in models if isinstance(models, list) else ():
+        name = model.get("name") or model.get("model") if isinstance(model, dict) else None
+        if not isinstance(name, str) or not name.strip() or name in names:
+            continue
+        details = model.get("details") if isinstance(model.get("details"), dict) else {}
+        families = " ".join(str(item) for item in (details.get("families") or [details.get("family") or ""]))
+        if "embed" in name.lower() or "bert" in families.lower():  # nomic-embed-text, mxbai-embed…: no chat
+            continue
+        names.append(name.strip())
+        if len(names) >= MAX_LISTED_MODELS:
+            break
+    return names

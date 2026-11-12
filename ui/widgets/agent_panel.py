@@ -26,6 +26,7 @@ from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
+from ...core.agent.providers.ollama_chat import installed_models, tags_url
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
     custom_to_json, make_source,
@@ -48,6 +49,7 @@ _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
+OLLAMA_TAGS_TIMEOUT_MS = 2000  # a local server answers at once; a missing one must not hold the dialog
 
 
 MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
@@ -945,8 +947,10 @@ class AgentSettingsDialog(QDialog):
         consent_layout.setSpacing(2)
         consent_layout.addWidget(self.consent)
         consent_layout.addWidget(consent_note)
+        self._models_reply = None  # the request listing the models of Ollama, while it runs
         self.preset.currentIndexChanged.connect(self._on_preset)
         self.base_url.textChanged.connect(self._on_destination)
+        self.base_url.editingFinished.connect(self._fetch_ollama_models)
         self._on_preset()
         self.model.setEditText(values.model)
 
@@ -1361,6 +1365,58 @@ class AgentSettingsDialog(QDialog):
             widget.setVisible(not free)
         self.free_notice.setVisible(free)
         self._on_destination()
+        self._fetch_ollama_models()
+
+    def _fetch_ollama_models(self) -> None:
+        """List the models Ollama has installed, without waiting for it: the typed name stays, a missing server is
+        said in the tooltip of the field."""
+        if self._models_reply is not None:
+            self._models_reply.abort()
+            self._models_reply = None
+        if self.preset.currentData() != "ollama":
+            self.model.setToolTip("")
+            return
+        from qgis.core import QgsNetworkAccessManager
+        from qgis.PyQt.QtCore import QUrl
+        from qgis.PyQt.QtNetwork import QNetworkRequest
+        url = tags_url(self.base_url.text().strip() or PRESETS["ollama"][1])
+        request = QNetworkRequest(QUrl(url))
+        if hasattr(request, "setTransferTimeout"):
+            request.setTransferTimeout(OLLAMA_TAGS_TIMEOUT_MS)
+        reply = QgsNetworkAccessManager.instance().get(request)
+        self._models_reply = reply
+        reply.finished.connect(lambda answered=reply, address=url: self._on_ollama_models(answered, address))
+
+    def done(self, result) -> None:  # noqa: D401 - Qt name
+        """Closed: a list of models still on its way must not reach a dialog that is gone."""
+        if self._models_reply is not None:
+            reply, self._models_reply = self._models_reply, None
+            reply.abort()
+        super().done(result)
+
+    def _on_ollama_models(self, reply, address: str) -> None:
+        if reply is not self._models_reply:  # replaced by a newer request, or the dialog moved on
+            reply.deleteLater()
+            return
+        self._models_reply = None
+        names = []
+        try:
+            import json
+            names = installed_models(json.loads(bytes(reply.readAll()).decode("utf-8", "replace") or "{}"))
+        except (ValueError, RecursionError):
+            names = []
+        finally:
+            reply.deleteLater()
+        if self.preset.currentData() != "ollama":
+            return
+        if not names:
+            self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(address))
+            return
+        typed = self.model.currentText().strip()
+        self.model.clear()
+        self.model.addItems(names)
+        self.model.setEditText(typed or names[0])
+        self.model.setToolTip(_tr("Models installed in Ollama ({}).").format(len(names)))
 
     def _on_destination(self, _text: str = "") -> None:
         """A key and a consent are for one server: another one starts without them."""

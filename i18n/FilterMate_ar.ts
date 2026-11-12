@@ -1053,6 +1053,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>أدوات التصفية فقط، لحاسوب بطيء</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>لم يعرض Ollama أي نموذج على {}: اكتب اسم أحدها.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>النماذج المثبتة في Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>عند التحديد، لا يحصل النموذج المحلي إلا على أدوات قراءة المشروع وتصفيته: نحو نصف ما يُقرأ في كل طلب. وبالقياس مع qwen3.5:4b، أجابت كل الأدوات بالجودة نفسها أو أفضل.</translation>

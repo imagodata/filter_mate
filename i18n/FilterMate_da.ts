@@ -1053,6 +1053,16 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <translation>Kun værktøjerne der filtrerer, til en langsom computer</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama viste ingen modeller på {}: skriv navnet på en.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Modeller installeret i Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Markeret får den lokale model kun de værktøjer, der læser og filtrerer projektet: cirka halvt så meget at læse ved hver forespørgsel. Målt med qwen3.5:4b svarede alle værktøjer lige så godt eller bedre.</translation>

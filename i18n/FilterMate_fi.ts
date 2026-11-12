@@ -1053,6 +1053,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Vain suodattavat työkalut, hitaalle tietokoneelle</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama ei listannut yhtään mallia osoitteessa {}: kirjoita mallin nimi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Ollamaan asennetut mallit ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Valittuna paikallinen malli saa vain projektia lukevat ja suodattavat työkalut: noin puolet luettavaa kussakin pyynnössä. qwen3.5:4b:llä mitattuna kaikki työkalut vastasivat yhtä hyvin tai paremmin.</translation>

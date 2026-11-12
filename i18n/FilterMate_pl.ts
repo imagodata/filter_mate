@@ -1053,6 +1053,16 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <translation>Tylko narzędzia filtrujące, dla wolnego komputera</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama nie wyświetliła żadnego modelu pod {}: wpisz nazwę modelu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Modele zainstalowane w Ollamie ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Po zaznaczeniu model lokalny dostaje tylko narzędzia do odczytu i filtrowania projektu: przy każdym żądaniu ma do przeczytania mniej więcej połowę. W pomiarze z qwen3.5:4b wszystkie narzędzia odpowiadały równie dobrze lub lepiej.</translation>

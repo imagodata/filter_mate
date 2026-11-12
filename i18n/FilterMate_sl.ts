@@ -1053,6 +1053,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Samo orodja, ki filtrirajo, za počasen računalnik</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama na {} ni navedla nobenega modela: vpišite ime modela.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Modeli, nameščeni v Ollami ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Ob izbiri lokalni model dobi le orodja, ki berejo in filtrirajo projekt: pri vsaki zahtevi približno polovico manj branja. Pri merjenju s qwen3.5:4b so vsa orodja odgovorila enako dobro ali bolje.</translation>
