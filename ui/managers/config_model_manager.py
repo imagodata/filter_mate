@@ -287,19 +287,60 @@ class ConfigModelManager:
         (data_changed_configuration_model): the theme, the profile, the action bar, the language, the layer kinds
         and the timers follow exactly as they do for the user. Returns the paths applied.
         """
+        import copy
         from ...config.config import ENV_VARS
-        from ...core.agent.settings_reference import set_leaf
+        from ...core.agent.settings_reference import load_default, set_leaf
         dw = self.dockwidget
         if not getattr(dw, 'widgets_initialized', False) or not isinstance(dw.CONFIG_DATA, dict):
             raise RuntimeError("the FilterMate panel is not ready")
-        for path, value in values.items():
-            set_leaf(dw.CONFIG_DATA, path, value)
+        # The handlers of the tree compare the layer kinds before and after their own save: here the values are
+        # already in CONFIG_DATA when they run, so the state before is taken now and realigned at the end.
+        kinds_before = self._layer_kind_flags()
+        targets_before = self._target_option_flags()
+        saved = copy.deepcopy(dw.CONFIG_DATA)
+        try:
+            default = load_default()
+            for path, value in values.items():
+                set_leaf(dw.CONFIG_DATA, path, value, default)
+            self._sync_env(ENV_VARS)
+            self._rebuild_tree()
+            config_path = ENV_VARS.get('CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
+            atomic_json_write(config_path, self._sanitize_for_json(dw.CONFIG_DATA), indent=4)
+        except Exception as exc:  # all or none: the configuration in use goes back to what it was
+            logger.warning(f"Settings of the agent not applied: {exc}")
+            dw.CONFIG_DATA.clear()
+            dw.CONFIG_DATA.update(saved)
+            self._sync_env(ENV_VARS)
+            try:
+                self._rebuild_tree()
+            except Exception:
+                logger.exception("Configuration tree not rebuilt after a failed change")
+            raise RuntimeError(f"the settings could not be saved ({exc})") from exc
+        applied = []
+        for path in values:
+            item = self._value_item(dw.config_model, path.split("."))
+            if item is None:
+                logger.warning(f"Setting {path} not found in the configuration tree: applied at its next use")
+                continue
+            self.data_changed_configuration_model(item)
+            applied.append(path)
+        self._realign_layer_kinds(kinds_before)
+        self._realign_target_options(targets_before)
+        return applied
+
+    def _sync_env(self, ENV_VARS):
+        """ENV_VARS follows CONFIG_DATA, the same dict when it can (other holders keep their reference)."""
+        dw = self.dockwidget
         live = ENV_VARS.get("CONFIG_DATA")
         if isinstance(live, dict) and live is not dw.CONFIG_DATA:
             live.clear()
             live.update(dw.CONFIG_DATA)
         else:
             ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
+
+    def _rebuild_tree(self):
+        """The configuration tree built again from CONFIG_DATA, its signal off meanwhile."""
+        dw = self.dockwidget
         self.disconnect_config_model_signal()
         try:
             from ...ui.widgets.json_view.model import JsonModel
@@ -313,17 +354,6 @@ class ConfigModelManager:
                 dw.config_view.model = dw.config_model
         finally:
             self.connect_config_model_signal()
-        config_path = ENV_VARS.get('CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
-        atomic_json_write(config_path, self._sanitize_for_json(dw.CONFIG_DATA), indent=4)
-        applied = []
-        for path in values:
-            item = self._value_item(dw.config_model, path.split("."))
-            if item is None:
-                logger.warning(f"Setting {path} not found in the configuration tree: applied at its next use")
-                continue
-            self.data_changed_configuration_model(item)
-            applied.append(path)
-        return applied
 
     @staticmethod
     def _value_item(model, keys):

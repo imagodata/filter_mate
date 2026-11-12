@@ -143,7 +143,8 @@ class AgentChatController(QObject):
         self._abandoned = False
         self._checkpoint = TurnCheckpoint()
         manager = getattr(parent_widget, '_config_model_manager', None)
-        plugin_settings.set_applier(manager.apply_settings if manager is not None else None)
+        self._settings_applier = manager.apply_settings if manager is not None else None
+        plugin_settings.set_applier(self._settings_applier)
         self._checkpoint.describe = self.describe_call
         self._last_request = ""
         self._tools = {tool.name: tool for tool in chat_tools()}
@@ -225,7 +226,7 @@ class AgentChatController(QObject):
         Each step runs even when one before failed.
         """
         for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project,
-                     lambda: plugin_settings.set_applier(None)):
+                     lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
             except Exception:
@@ -1397,6 +1398,8 @@ class AgentChatController(QObject):
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
+        if call.name == "change_settings" and not self._settings_would_change(call):
+            return True  # nothing to show: every value is already set, or the tool refuses the call and says why
         if call.name == RUN_PYTHON:
             text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
                        "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "
@@ -1445,11 +1448,18 @@ class AgentChatController(QObject):
         return text
 
     @staticmethod
+    def _settings_would_change(call: ToolCallPart) -> bool:
+        try:
+            return any(row["before"] != row["after"] for row in plugin_settings.planned(call.arguments))
+        except Exception:
+            return False
+
+    @staticmethod
     def _settings_text(call: ToolCallPart) -> str:
         """Each setting before and after, as the user reads them before saying yes."""
         try:
             rows = plugin_settings.planned(call.arguments)
-        except ValueError as exc:  # the tool will answer the model why; the user sees what was asked
+        except Exception as exc:  # the tool will answer the model why; the user sees what was asked
             rows, problem = [], str(exc)
         else:
             problem = ""

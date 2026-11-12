@@ -73,6 +73,24 @@ def test_performance_summary_reads_the_timings_timeouts_and_errors():
     assert (answer["log_from"], answer["log_to"]) == ("2026-11-11 10:42:03", "2026-11-11 10:50:07")
 
 
+def test_performance_reads_other_timing_shapes_and_hides_connection_details():
+    lines = [
+        "2026-11-11 11:00:00 - FilterMate.Perf - INFO - ⏱ pg_direct_prepare: connection 12 ms, query 30 ms",
+        "2026-11-11 11:00:01 - filter_mate.x - INFO - ⏱ [FM5] height above ground for 'x': ok=True 1.2s",
+        "2026-11-11 11:00:02 - FilterMate.Perf - INFO - ⏱ pg_layer_connect: 40 ms (host=db.internal.example "
+        "port=5432 dbname='cadastre' user=jeanne)",
+        "2026-11-11 11:00:03 - filter_mate.x - WARNING - QUERY_TIMEOUTS timeout_seconds is 30 (configured)",
+    ]
+    answer = summary(lines)
+    operations = {row["operation"]: row for row in answer["operations"]}
+    assert operations["pg_direct_prepare"]["max_ms"] == 12
+    assert operations["height above ground for 'x'"]["max_ms"] == 1200
+    text = json.dumps(answer)
+    assert "db.internal" not in text and "jeanne" not in text and "cadastre" not in text
+    assert answer["timeouts_logged"] == 0  # a setting that names a timeout is not a query cut short
+    assert any(entry["detail"] == "batiment (GPKG)" for entry in summary(LOG.splitlines()[:1])["slowest"])
+
+
 def test_performance_summary_without_timings_says_what_to_do():
     answer = summary([])
     assert answer["timings"] == 0 and "hint" in answer
@@ -110,6 +128,10 @@ def test_native_mcp_serves_prompts_and_resources():
     assert body["result"]["contents"][0]["text"].startswith("# FilterMate")
     _, body = _post(protocol, {"jsonrpc": "2.0", "id": 7, "method": "resources/read", "params": {"uri": "x"}}, session)
     assert body["error"]["code"] == -32002
+    _, body = _post(protocol, {"jsonrpc": "2.0", "id": 8, "method": "resources/read", "params": {"uri": ["x"]}}, session)
+    assert body["error"]["code"] == -32002
+    _, body = _post(protocol, {"jsonrpc": "2.0", "id": 9, "method": "prompts/get", "params": {"name": {}}}, session)
+    assert "error" in body
 
 
 def test_a_server_without_prompts_keeps_its_capabilities_and_says_method_not_found():

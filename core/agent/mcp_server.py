@@ -295,7 +295,8 @@ class McpProtocol:
                 {"name": item.name, "title": item.title, "description": item.description, "arguments": []}
                 for item in self._prompts.values()]})
         if method == "prompts/get" and self._prompts:
-            prompt = self._prompts.get(params.get("name"))
+            name = params.get("name")
+            prompt = self._prompts.get(name) if isinstance(name, str) else None
             if prompt is None:
                 return _failure(request_id, _INVALID_PARAMS, "Unknown prompt.")
             return _success(request_id, {"description": prompt.description, "messages": [
@@ -305,7 +306,8 @@ class McpProtocol:
                 {"uri": item.uri, "name": item.name, "title": item.title, "description": item.description,
                  "mimeType": item.mime_type} for item in self._resources.values()]})
         if method == "resources/read" and self._resources:
-            resource = self._resources.get(params.get("uri"))
+            uri = params.get("uri")
+            resource = self._resources.get(uri) if isinstance(uri, str) else None
             if resource is None:
                 return _failure(request_id, _RESOURCE_NOT_FOUND, "Resource not found.")
             return _success(request_id, {"contents": [

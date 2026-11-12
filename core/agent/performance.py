@@ -11,24 +11,38 @@ from typing import Any, Dict, Iterable, List, Optional
 
 # 2026-11-11 10:42:03 - FilterMate.Perf - INFO - ⏱ layer_change: 122 ms (batiment (GPKG))
 _LINE = re.compile(r"^(?P<time>\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) - (?P<logger>\S+) - (?P<level>[A-Z]+) - (?P<message>.*)$")
-_TIMING = re.compile(r"⏱\s*(?:\[FM5\]\s*)?(?P<operation>[^:]+?):\s*(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>ms|s)\b\s*(?P<detail>.*)$")
-_IN_SECONDS = re.compile(r"⏱\s*\[FM5\]\s*(?P<operation>.+?)\s+in\s+(?P<value>\d+(?:\.\d+)?)s\b\s*(?P<detail>.*)$")
-_TIMEOUT = re.compile(r"time(?:d)? ?out|timeout|statement_timeout|canceling statement", re.I)
+_MARK = re.compile(r"⏱\s*(?:\[FM5\]\s*)?")
+_IN_SECONDS = re.compile(r"^(?P<operation>[^:]+?)\s+in\s+(?P<value>\d+(?:\.\d+)?)s\b\s*(?P<detail>.*)$")
+_DURATION = re.compile(r"(?<![\w.])(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>ms|s)\b")
+# A query cut short, not a setting that names a timeout.
+_TIMEOUT = re.compile(r"timed out|time out|canceling statement|timeout expired|statement timeout", re.I)
+# Connection details logged with some timings (pg_layer_connect): never sent to a provider.
+_SECRET = re.compile(r"\b(host|hostaddr|service|dbname|user|password|port|sslmode)=('[^']*'|\S+)", re.I)
 MAX_SLOWEST = 8
 MAX_DETAIL = 160
 
 
 def _timing(message: str) -> Optional[Dict[str, Any]]:
-    match = _TIMING.search(message)
+    """``⏱ operation: 12 ms (detail)``, ``⏱ operation: connection 12 ms, ...`` or ``⏱ [FM5] operation in 1.2s ...``."""
+    mark = _MARK.search(message)
+    if not mark:
+        return None
+    text = message[mark.end():]
+    match = _IN_SECONDS.match(text)
     if match:
-        value = float(match["value"]) * (1 if match["unit"] == "ms" else 1000)
+        operation, value, detail = match["operation"], float(match["value"]) * 1000, match["detail"]
     else:
-        match = _IN_SECONDS.search(message)
-        if not match:
+        operation, _colon, rest = text.partition(":")
+        duration = _DURATION.search(rest) if _colon else None
+        if duration is None:
             return None
-        value = float(match["value"]) * 1000
-    return {"operation": match["operation"].strip(), "ms": round(value),
-            "detail": match["detail"].strip(" ()")[:MAX_DETAIL]}
+        value = float(duration["value"]) * (1 if duration["unit"] == "ms" else 1000)
+        detail = (rest[:duration.start()] + rest[duration.end():]).strip(" ,")
+    detail = detail.strip()
+    if detail.startswith("(") and detail.endswith(")"):
+        detail = detail[1:-1]  # one pair: "(batiment (GPKG))" keeps its own
+    detail = _SECRET.sub(lambda found: f"{found[1]}=…", detail)
+    return {"operation": operation.strip(), "ms": round(value), "detail": detail[:MAX_DETAIL]}
 
 
 def summary(lines: Iterable[str], max_entries: int = 200) -> Dict[str, Any]:

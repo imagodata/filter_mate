@@ -26,9 +26,16 @@ _applier: Optional[Applier] = None
 
 
 def set_applier(applier: Optional[Applier]) -> None:
-    """The panel that applies a change (its ConfigModelManager.apply_settings); None when it goes away."""
+    """The panel that applies a change (its ConfigModelManager.apply_settings)."""
     global _applier
     _applier = applier
+
+
+def clear_applier(applier: Optional[Applier]) -> None:
+    """The panel of ``applier`` goes away: forget it, unless a newer panel set its own meanwhile (a reload)."""
+    global _applier
+    if _applier == applier:
+        _applier = None
 
 
 def current_config() -> Dict[str, Any]:
@@ -95,7 +102,7 @@ def _change(arguments: Dict[str, Any]) -> Dict[str, Any]:
         return {"changed": [], "unchanged": unchanged, "note": "Every setting already had this value."}
     try:
         apply_values({change["path"]: change["after"] for change in changes})
-    except RuntimeError as exc:
+    except RuntimeError as exc:  # apply_settings put the configuration back
         raise ToolFailure(f"Nothing changed: {exc}.") from None
     now = leaf_values(current_config(), [change["path"] for change in changes])
     answer: Dict[str, Any] = {

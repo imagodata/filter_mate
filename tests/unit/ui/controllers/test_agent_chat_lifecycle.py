@@ -172,6 +172,7 @@ def ctrl_module(monkeypatch):
     recipes.read_recipes = lambda project=None: list(recipes.recipes)
     _module(monkeypatch, ".adapters.agent.turn_checkpoint", TurnCheckpoint=FakeCheckpoint)
     _module(monkeypatch, ".adapters.agent.plugin_settings", settings_handlers=lambda: {}, set_applier=lambda applier: None,
+            clear_applier=lambda applier: None,
             planned=lambda arguments: [])
     protection = types.SimpleNamespace(name_of=lambda reference: None, names=lambda: [],
                                        favorite_layers=lambda favorite_id: [])

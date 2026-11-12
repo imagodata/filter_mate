@@ -10,8 +10,10 @@ hidden leaves (``_hidden``) are internal. A few values stay on this machine (``P
 """
 from __future__ import annotations
 
+import copy
 import difflib
 import json
+import math
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -240,11 +242,12 @@ LIVE = frozenset({
     "APP.OPTIONS.UI_RESPONSIVENESS.expression_debounce_ms", "APP.DOCKWIDGET.LANGUAGE",
 })
 # Read once, when the panel is built.
-ON_RESTART = frozenset({"APP.DOCKWIDGET.DOCK_POSITION",
-                        "APP.DOCKWIDGET.PushButton.ICONS_SIZES.ACTION", "APP.DOCKWIDGET.PushButton.ICONS_SIZES.OTHERS"})
+ON_RESTART = frozenset({"APP.DOCKWIDGET.DOCK_POSITION"})
 EFFECT_NOW, EFFECT_NEXT_USE, EFFECT_RESTART = "now", "next use", "after restarting QGIS"
 MAX_CHANGES = 10
 MAX_TEXT = 500
+# A number without a maximum in the schema stays within what a Qt integer and a timeout can hold.
+MAX_NUMBER = 2_147_483_647
 
 
 def refusal(setting: Setting) -> str:
@@ -281,15 +284,24 @@ def checked_value(setting: Setting, value: Any) -> Any:
     if isinstance(default, (int, float)):
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError(f"{setting.path} takes a number")
-        if isinstance(default, int) and not float(value).is_integer():
-            raise ValueError(f"{setting.path} takes a whole number")
-        number = int(value) if isinstance(default, int) else float(value)
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ValueError(f"{setting.path} takes a finite number")
+        if isinstance(default, int):
+            if isinstance(value, float) and not value.is_integer():
+                raise ValueError(f"{setting.path} takes a whole number")
+            number: Any = int(value)
+        else:
+            number = float(value)
+        maximum = setting.maximum if setting.maximum is not None else MAX_NUMBER
         if setting.minimum is not None and number < setting.minimum:
             raise ValueError(f"{setting.path} is {setting.minimum} at least")
-        if setting.maximum is not None and number > setting.maximum:
-            raise ValueError(f"{setting.path} is {setting.maximum} at most")
+        if number > maximum:
+            raise ValueError(f"{setting.path} is {maximum} at most")
         if setting.minimum is None and number < 0:
             raise ValueError(f"{setting.path} is not negative")
+        # A size, a delay or a timeout whose default is positive: 0 would divide by zero or time out at once.
+        if setting.minimum is None and number == 0 and default > 0:
+            raise ValueError(f"{setting.path} is more than 0")
         return number
     if isinstance(default, str):
         if not isinstance(value, str) or len(value) > MAX_TEXT or any(ord(char) < 32 for char in value):
@@ -334,12 +346,6 @@ def plan(settings: Sequence[Setting], changes: Sequence[Dict[str, Any]]) -> List
     return list(planned.values())
 
 
-def display_only(paths: Iterable[str]) -> bool:
-    """Whether every path is a setting of how the panel looks (what the autonomous level changes alone)."""
-    paths = list(paths)
-    return bool(paths) and all(path.startswith(DISPLAY_SECTION + ".") for path in paths)
-
-
 def leaf_values(config: Dict[str, Any], paths: Iterable[str]) -> Dict[str, Any]:
     """The values of ``paths`` in a configuration (wrapped or raw leaves); a missing one is left out."""
     values = {}
@@ -350,17 +356,26 @@ def leaf_values(config: Dict[str, Any], paths: Iterable[str]) -> Dict[str, Any]:
     return values
 
 
-def set_leaf(config: Dict[str, Any], path: str, value: Any) -> None:
-    """Write ``value`` at ``path`` of a configuration in place, keeping a wrapped leaf wrapped."""
+def set_leaf(config: Dict[str, Any], path: str, value: Any, default: Optional[Dict[str, Any]] = None) -> None:
+    """Write ``value`` at ``path`` of a configuration in place, keeping a wrapped leaf wrapped.
+
+    A leaf missing there is copied from ``default`` first (its description, choices and bounds): the configuration
+    tree shows a bare ``{"value": ...}`` as a section, not as a setting. ``ValueError`` when a section on the way
+    is not an object."""
     keys = path.split(".")
-    node = config
+    node, model = config, default
     for key in keys[:-1]:
         node = node.setdefault(key, {})
+        model = model.get(key) if isinstance(model, dict) else None
+        if not isinstance(node, dict):
+            raise ValueError(f"{path}: {key} is not a section")
     leaf = node.get(keys[-1])
     if isinstance(leaf, dict) and "value" in leaf:
         leaf["value"] = value
-    elif isinstance(leaf, dict) or leaf is None:
-        node[keys[-1]] = {**(leaf or {}), "value": value}
+    elif leaf is None or isinstance(leaf, dict):
+        template = model.get(keys[-1]) if isinstance(model, dict) else None
+        base = copy.deepcopy(template) if isinstance(template, dict) and "value" in template else {}
+        node[keys[-1]] = {**base, **(leaf or {}), "value": value}
     else:
         node[keys[-1]] = value
 
@@ -370,8 +385,9 @@ def _cell(value: Any) -> str:
     return text.replace("|", "\\|")
 
 
-def reference_markdown(settings: Iterable[Setting]) -> str:
-    """The reference of every setting, generated from ``config.default.json`` (``scripts/export_config_reference.py``)."""
+def reference_markdown(settings: Iterable[Setting], with_values: bool = False) -> str:
+    """The reference of every setting, generated from ``config.default.json`` (``scripts/export_config_reference.py``);
+    ``with_values`` adds the value in use (private ones said set or empty), for the MCP resource."""
     lines = ["# FilterMate — settings reference", "",
              "> Generated from `config/config.default.json` by `scripts/export_config_reference.py`: do not edit by "
              "hand. Each setting is edited in the configuration tree of the panel (Settings), or by the AGENT, which "
@@ -383,7 +399,8 @@ def reference_markdown(settings: Iterable[Setting]) -> str:
             lines += ["", f"## {item.where.rsplit(' > ', 1)[0]}", "", f"`{item.section}`", ""]
             if item.section_note:
                 lines += [item.section_note, ""]
-            lines += ["| Setting | Default | Allowed | Description |", "|---|---|---|---|"]
+            lines += (["| Setting | Value | Default | Allowed | Description |", "|---|---|---|---|---|"] if with_values
+                      else ["| Setting | Default | Allowed | Description |", "|---|---|---|---|"])
         allowed = ""
         if item.choices is not None:
             allowed = ", ".join(_cell(choice) for choice in item.choices)
@@ -391,6 +408,7 @@ def reference_markdown(settings: Iterable[Setting]) -> str:
             allowed = f"{_cell(item.minimum) if item.minimum is not None else ''}–" \
                       f"{_cell(item.maximum) if item.maximum is not None else ''}"
         default = PRIVATE_EMPTY if item.private and item.default in (None, "") else _cell(item.default)
-        lines.append(f"| `{item.path.rsplit('.', 1)[-1]}` | {default} | {allowed} | "
+        value = f" {_cell(item._shown(item.value))} |" if with_values else ""
+        lines.append(f"| `{item.path.rsplit('.', 1)[-1]}` |{value} {default} | {allowed} | "
                      f"{item.description.replace('|', '/')} |")
     return "\n".join(lines).replace("\n\n\n", "\n\n") + "\n"

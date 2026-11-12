@@ -452,8 +452,10 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   (`ConfigModelManager.apply_settings`): the theme, the profile, the action bar, the language, the layer kinds and the
   timers follow at once; undoing the turn puts the values back, except a setting the user changed since.
 - Permissions: asked at every level, *Advisor* included (the user reads each setting before and after); at the
-  *Autonomous* level, a change of `APP.DOCKWIDGET` alone (how the panel looks) runs without a question. Always allow and
-  Yes for this conversation work above Advisor. A recipe never keeps a change of the settings.
+  *Autonomous* level, a change of `APP.DOCKWIDGET` alone (how the panel looks, `FEEDBACK_LEVEL` aside) runs without a
+  question. Always allow (tab Tools) works above Advisor; Yes for this conversation is not offered: each change is shown.
+  A call that would change nothing, or that the tool refuses, is not asked. A recipe never keeps a change of the
+  settings.
 - `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
 - Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
   and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt

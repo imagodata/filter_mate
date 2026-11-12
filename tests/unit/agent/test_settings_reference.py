@@ -12,7 +12,7 @@ from core.agent.permissions import (
     PermissionPolicy, risk_of)
 from core.agent.recipes import NOT_KEPT
 from core.agent.settings_reference import (
-    EFFECT_NEXT_USE, EFFECT_NOW, EFFECT_RESTART, PRIVATE_EMPTY, PRIVATE_SET, checked_value, describe, display_only,
+    EFFECT_NEXT_USE, EFFECT_NOW, EFFECT_RESTART, PRIVATE_EMPTY, PRIVATE_SET, checked_value, describe,
     find, get, leaf_values, load_default, plan, read_settings, reference_markdown, set_leaf)
 from core.agent.tool_catalog import CHANGE_SETTINGS, SETTINGS_TOOLS
 
@@ -168,10 +168,36 @@ def test_set_leaf_keeps_wrapped_leaves_and_leaf_values_reads_them(default):
     assert raw["APP"]["DOCKWIDGET"]["COLORS"]["ACTIVE_THEME"] == "dark"
 
 
-def test_display_only():
-    assert display_only(["APP.DOCKWIDGET.COLORS.ACTIVE_THEME", "APP.DOCKWIDGET.UI_PROFILE"])
-    assert not display_only(["APP.DOCKWIDGET.UI_PROFILE", "APP.OPTIONS.QUERY_CACHE.enabled"])
-    assert not display_only([])
+def test_numbers_are_finite_bounded_and_not_zero_where_the_default_is_positive(default):
+    rows = read_settings(None, default)
+    chunk = _row(rows, "APP.OPTIONS.STREAMING_EXPORT.chunk_size")
+    with pytest.raises(ValueError, match="more than 0"):
+        checked_value(chunk, 0)
+    with pytest.raises(ValueError, match="at most"):
+        checked_value(chunk, 10 ** 400)  # no OverflowError
+    ttl = _row(rows, "APP.OPTIONS.QUERY_CACHE.ttl_seconds")
+    assert checked_value(ttl, 0) == 0  # 0 means no expiration: its default
+    resolution = _row(rows, "APP.OPTIONS.CROSS_FILTER.point_cloud_footprint_resolution")
+    for wrong in (float("nan"), float("inf"), -float("inf")):
+        with pytest.raises(ValueError):
+            checked_value(resolution, wrong)
+
+
+def test_a_missing_leaf_is_copied_from_the_defaults(default):
+    config = {"APP": {"OPTIONS": {}}}
+    set_leaf(config, "APP.OPTIONS.QUERY_CACHE.max_size", 300, default)
+    leaf = config["APP"]["OPTIONS"]["QUERY_CACHE"]["max_size"]
+    assert leaf["value"] == 300 and leaf["description"]
+    with pytest.raises(ValueError):
+        set_leaf({"APP": {"OPTIONS": "flat"}}, "APP.OPTIONS.QUERY_CACHE.max_size", 1, default)
+
+
+def test_the_reference_with_values_keeps_private_values_private(default):
+    current = copy.deepcopy(default)
+    current["APP"]["USER_IDENTITY"]["value"] = "Jeanne Martin"
+    current["APP"]["OPTIONS"]["QUERY_CACHE"]["max_size"]["value"] = 321
+    text = reference_markdown(read_settings(current, default), with_values=True)
+    assert "| Value |" in text and "321" in text and "Jeanne" not in text and PRIVATE_SET in text
 
 
 def _change(*paths):
@@ -190,6 +216,8 @@ def test_change_settings_is_asked_at_every_level_but_the_look_of_the_panel_when_
     assert PermissionPolicy(AUTONOMOUS).verdict(spec, _change("APP.DOCKWIDGET.UI_PROFILE",
                                                              "APP.OPTIONS.QUERY_CACHE.max_size")) == ASK
     assert PermissionPolicy(AUTONOMOUS).verdict(spec, None) == ASK
+    # fewer messages may hide a warning: not the look of the panel
+    assert PermissionPolicy(AUTONOMOUS).verdict(spec, _change("APP.DOCKWIDGET.FEEDBACK_LEVEL")) == ASK
 
 
 def test_change_settings_rules_and_grant():
@@ -200,8 +228,9 @@ def test_change_settings_rules_and_grant():
     assert PermissionPolicy(ADVISOR, rules={CHANGE_SETTINGS: RULE_ALLOW}).verdict(spec, work) == ASK
     look = _change("APP.DOCKWIDGET.COLORS.ACTIVE_THEME")
     assert PermissionPolicy(AUTONOMOUS, rules={CHANGE_SETTINGS: RULE_ASK}).verdict(spec, look) == ASK
+    # never allowed for the conversation: each change is shown
     granted = PermissionPolicy(STANDARD, granted=[CHANGE_SETTINGS])
-    assert granted.verdict(spec, work) == RUN
+    assert not granted.grantable(spec) and granted.verdict(spec, work) == ASK
     assert PermissionPolicy(ADVISOR, granted=[CHANGE_SETTINGS]).verdict(spec, work) == ASK
 
 

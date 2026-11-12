@@ -37,9 +37,9 @@ def settings_resources():
     def read() -> str:
         from ...adapters.agent.plugin_settings import settings_rows
         from ...core.agent.settings_reference import reference_markdown
-        return reference_markdown(settings_rows())
+        return reference_markdown(settings_rows(), with_values=True)
     return (McpResource("filtermate://settings/reference", "settings", "Settings of FilterMate",
-                        "Every setting of FilterMate: path, default, choices or bounds, what it does.", "text/markdown",
+                        "Every setting of FilterMate: value in use, default, choices or bounds, what it does.", "text/markdown",
                         read),)
 
 

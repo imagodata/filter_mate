@@ -91,8 +91,9 @@ ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing 
                    "choose another level in the settings of the agent. Do not try another tool to do it.")
 
 _LEVEL_NOTES = {
-    ADVISOR: ("Level of autonomy chosen by the user: advisor. Only the tools that read run; every change is refused. "
-              "Answer the question, and for a change describe the steps and the tools you would use."),
+    ADVISOR: ("Level of autonomy chosen by the user: advisor. Only the tools that read run; every change is refused, "
+              "except change_settings, which the user reads and confirms. Answer the question, and for a change "
+              "describe the steps and the tools you would use."),
     CAREFUL: ("Level of autonomy chosen by the user: careful. Every change of the project, filters included, is shown "
               "to the user before it runs; a declined one is their choice: ask what they want instead."),
     AUTONOMOUS: ("Level of autonomy chosen by the user: autonomous. Exports, removals and deletions run without a "
@@ -198,7 +199,12 @@ def _display_only(arguments: Optional[Dict[str, Any]]) -> bool:
     if not isinstance(changes, list) or not changes:
         return False
     paths = [str(change.get("path", "")).strip().upper() for change in changes if isinstance(change, dict)]
-    return len(paths) == len(changes) and all(path.startswith("APP.DOCKWIDGET.") for path in paths)
+    return len(paths) == len(changes) and all(path.startswith("APP.DOCKWIDGET.") and path not in _NOT_LOOK
+                                              for path in paths)
+
+
+# Under APP.DOCKWIDGET but not how the panel looks: fewer messages may hide a warning the user should read.
+_NOT_LOOK = frozenset({"APP.DOCKWIDGET.FEEDBACK_LEVEL"})
 
 
 def level_note(level: str) -> str:
@@ -284,10 +290,10 @@ class PermissionPolicy:
     def _settings_verdict(self, spec, rule: Optional[str], arguments: Optional[Dict[str, Any]]) -> str:
         """A change of the settings of FilterMate: asked at every level (advisor too: the user reads it and says yes),
         run alone at the autonomous level when it only changes how the panel looks, or when the user allowed it
-        (always, or for the conversation) above advisor."""
+        always (tab Tools) above advisor. Never allowed for the conversation: each change is shown."""
         if rule == RULE_ASK or self.level == ADVISOR:
             return ASK
-        if rule == RULE_ALLOW or (spec.name in self._granted and self.grantable(spec)):
+        if rule == RULE_ALLOW:
             return RUN
         if self.level == AUTONOMOUS and _display_only(arguments):
             return RUN
@@ -295,7 +301,7 @@ class PermissionPolicy:
 
     def grantable(self, spec) -> bool:
         """Can the user allow this tool for the rest of the conversation? Never code, nor a tool always asked."""
-        return spec.name not in CODE_TOOLS and self.rules.get(spec.name) != RULE_ASK
+        return spec.name not in CODE_TOOLS and spec.name not in SETTINGS_TOOLS and self.rules.get(spec.name) != RULE_ASK
 
     def grant(self, name: str) -> None:
         self._granted.add(name)

@@ -57,16 +57,20 @@ def _settings_label() -> str:
 
 
 def _setting_paths(arguments: Dict[str, Any]) -> List[str]:
-    """The settings a change_settings call names, as their full paths (an unknown one is left out)."""
+    """The settings a change_settings call may change, as their full paths: an unknown one, or one the agent may
+    not change (its own settings, private values), is left out, so an undo never writes it."""
     from .plugin_settings import settings_rows
-    from ...core.agent.settings_reference import get
+    from ...core.agent.settings_reference import get, refusal
     rows = settings_rows()
+    by_path = {row.path: row for row in rows}
     paths = []
     for change in arguments.get("changes") or ():
         try:
-            paths.append(get(rows, str(change.get("path", "")))["path"])
+            path = get(rows, str(change.get("path", "")))["path"]
         except (LookupError, AttributeError):
             continue
+        if not refusal(by_path[path]):
+            paths.append(path)
     return paths
 
 
@@ -602,14 +606,19 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool,
                     done.append(_recipes_label())
             elif kind == "settings":
                 import json
-                from .plugin_settings import apply_values, current_values
+                from .plugin_settings import apply_values, current_values, settings_rows
+                from ...core.agent.settings_reference import refusal
                 wanted, expected = json.loads(effect[2] if undo else effect[3]), json.loads(effect[3] if undo else effect[2])
-                # A setting the user changed since is theirs: left as it is, the others put back.
+                allowed = {row.path for row in settings_rows() if not refusal(row)}
+                # A setting the user changed since is theirs: left as it is, the others put back. Never one the
+                # agent may not change, whatever the history holds.
                 now = current_values(wanted)
-                kept = {path: value for path, value in wanted.items() if now.get(path) == expected.get(path)}
+                kept = {path: value for path, value in wanted.items()
+                        if path in allowed and now.get(path) == expected.get(path)}
                 try:
                     apply_values(kept)
-                except RuntimeError:
+                except Exception:  # apply_settings put the configuration back: the history stays in step
+                    logger.warning("Agent undo: settings of FilterMate not restored", exc_info=True)
                     left.append(_settings_label())
                 else:
                     (done if len(kept) == len(wanted) else left).append(_settings_label())
