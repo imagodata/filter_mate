@@ -8,7 +8,7 @@ files of the turn alive.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, FrozenSet, List, Optional, Sequence, Tuple
 
 from qgis.core import QgsProject
 
@@ -156,19 +156,26 @@ class TurnCheckpoint:
         """Why nothing can be restored now, "" when it can."""
         return busy_reason()
 
-    def _apply(self, operation: CrossOperation, use_before: bool) -> Tuple[List[str], List[str], bool]:
+    def _apply(self, operation: CrossOperation, use_before: bool,
+               keep: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str], bool]:
         """Put the layers of a turn in one of its states: ``(changed, left as they are, a layer refused)``.
 
         A layer the user changed since is left alone and does not hold the history back. A layer that refused (being
-        edited) is seen by comparing the states afterwards: that can be tried again.
+        edited) is seen by comparing the states afterwards: that can be tried again. A layer whose id is in ``keep``
+        (protected from the agent) is left as it is.
         """
         service = _api_service()
         project = QgsProject.instance()
-        pairs = reversed(operation.changes) if use_before else operation.changes
+        changes = [pair for pair in operation.changes if pair[0].layer_id not in keep]
+        pairs = reversed(changes) if use_before else changes
         restored = set(service._restore(pairs, use_before=use_before, project=project))
         names, left = [], list(service.last_skipped)
+        for before, _after in operation.changes:
+            if before.layer_id in keep:
+                layer = project.mapLayer(before.layer_id)
+                left.append(layer.name() if layer is not None else before.layer_id)
         refused = False
-        for before, after in operation.changes:
+        for before, after in changes:
             layer = project.mapLayer(before.layer_id)
             if layer is None or before.layer_id not in restored:
                 continue
@@ -210,20 +217,21 @@ class TurnCheckpoint:
             history.push(operation)
         return names, left
 
-    def undo(self) -> Tuple[List[str], List[str]]:
+    def undo(self, keep: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str]]:
         """Undo the last turn: names of the layers restored, and of those left as they are.
 
-        When a layer refused, the turn stays where it was and can be tried again.
+        When a layer refused, the turn stays where it was and can be tried again. The layers whose ids are in
+        ``keep`` (protected from the agent, when the agent undoes its turn) are left as they are.
         """
         history = _api_service().history
         operation = history.undo(HISTORY_KEY)
         if operation is None:
             return [], []
-        names, left, refused = self._apply(operation, use_before=True)
+        names, left, refused = self._apply(operation, use_before=True, keep=keep)
         if refused:
             history.redo(HISTORY_KEY)
             return names, left
-        done, not_done = apply_effects(getattr(operation, "effects", ()), undo=True)
+        done, not_done = apply_effects(getattr(operation, "effects", ()), undo=True, keep=keep)
         return _merged(names, done), _merged(left, not_done)
 
     def redo(self) -> Tuple[List[str], List[str]]:

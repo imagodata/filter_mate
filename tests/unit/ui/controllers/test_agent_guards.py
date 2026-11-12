@@ -234,3 +234,48 @@ class TestMcpBridgeFollowsTheToolsTab:
         assert not server._run(tools["list_layers"], {}, "Claude").is_error
         assert not server._run(tools["remove_layers"], {"layers": ["a"]}, "Claude").is_error
         assert server._host.asked == ["remove_layers"] and ran == ["list_layers", "remove_layers"]
+
+
+def _snapshot(layer_id):
+    return SimpleNamespace(layer_id=layer_id, kind="vector", same_state=lambda other: True)
+
+
+class TestTheAgentUndoLeavesProtectedLayersAlone:
+    """undo_agent_step puts back what changed during the turn: a layer protected since, or changed by the user meanwhile
+    and protected, is left as it is."""
+
+    def test_the_filters_of_a_kept_layer_are_not_restored(self, monkeypatch):
+        checkpoint = sys.modules[f"{_PKG}.adapters.agent.turn_checkpoint"]
+        operation = SimpleNamespace(changes=((_snapshot("cadastre_id"), _snapshot("cadastre_id")),
+                                             (_snapshot("routes_id"), _snapshot("routes_id"))), effects=("e",))
+        restored, effects = [], []
+
+        def restore(pairs, use_before, project):
+            restored.extend(before.layer_id for before, _after in pairs)
+            return list(restored)
+
+        history = SimpleNamespace(undo=lambda key: operation, redo=lambda key: None)
+        service = SimpleNamespace(history=history, last_skipped=[], _restore=restore)
+        names = {"cadastre_id": "cadastre", "routes_id": "routes"}
+        project = SimpleNamespace(mapLayer=lambda layer_id: SimpleNamespace(name=lambda: names[layer_id]))
+        monkeypatch.setattr(checkpoint, "_api_service", lambda: service)
+        monkeypatch.setattr(checkpoint, "QgsProject", SimpleNamespace(instance=lambda: project))
+        monkeypatch.setattr(checkpoint, "take_snapshot", lambda layer, kind: _snapshot("x"))
+
+        def apply_effects(items, undo, keep=frozenset()):
+            effects.append(keep)
+            return [], []
+        monkeypatch.setattr(checkpoint, "apply_effects", apply_effects)
+        done, left = checkpoint.TurnCheckpoint().undo(keep=frozenset({"cadastre_id"}))
+        assert restored == ["routes_id"] and done == ["routes"] and left == ["cadastre"]
+        assert effects == [frozenset({"cadastre_id"})]
+
+    def test_the_style_or_the_addition_of_a_kept_layer_is_not_undone(self, monkeypatch):
+        effects_module = sys.modules[f"{_PKG}.adapters.agent.turn_effects"]
+        touched = []
+        project = SimpleNamespace(mapLayer=lambda layer_id: None, removeMapLayer=touched.append)
+        monkeypatch.setattr(effects_module, "QgsProject", SimpleNamespace(instance=lambda: project))
+        done, left = effects_module.apply_effects(
+            (("added", "cadastre_id", "<qlr/>", ([], 0), "cadastre"),
+             ("style", "cadastre_id", "<a/>", "<b/>", "cadastre")), undo=True, keep=frozenset({"cadastre_id"}))
+        assert (done, left, touched) == ([], ["cadastre", "cadastre"], [])

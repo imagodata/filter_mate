@@ -70,6 +70,10 @@ class ProjectProtection:
                 return candidate.name()
         return None
 
+    def ids(self) -> List[str]:
+        """The ids of the protected layers (an entry that cannot be read raises)."""
+        return read_ids(strict=True)
+
     def names(self) -> List[str]:
         project = QgsProject.instance()
         return [layer.name() for layer in (project.mapLayer(layer_id) for layer_id in read_ids(project, strict=True))

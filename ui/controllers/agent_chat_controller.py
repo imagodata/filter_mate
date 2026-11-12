@@ -664,8 +664,13 @@ class AgentChatController(QObject):
                     break
                 verdict = executor.verdict(call, policy)
                 if verdict == PROTECTED:
-                    stop = _tr("Step {} was not run: it would change a layer you protected from the agent ({}).").format(
-                        number, step["label"])
+                    from ...core.agent.permissions import PROTECTION_UNREADABLE
+                    if policy.protection_refusal(call.name, call.arguments) == PROTECTION_UNREADABLE:
+                        stop = _tr("Step {} was not run: the layers you protected from the agent could not be read ({}).").format(
+                            number, step["label"])
+                    else:
+                        stop = _tr("Step {} was not run: it would change a layer you protected from the agent ({}).").format(
+                            number, step["label"])
                     break
                 if verdict == TURNED_OFF:
                     stop = _tr("Step {} was not run: you turned its tool off for the agent ({}).").format(
@@ -784,7 +789,12 @@ class AgentChatController(QObject):
         if not applied:
             raise ToolFailure("Nothing of the agent to undo in this project.")
         request = applied[-1].get("request") or ""
-        restored, left = self._checkpoint.undo()
+        try:  # the agent undoing its turn leaves the layers the user protected as they are
+            protected = frozenset(self._protection.ids())
+        except Exception:
+            from ...core.agent.permissions import PROTECTION_UNREADABLE
+            raise ToolFailure(PROTECTION_UNREADABLE) from None
+        restored, left = self._checkpoint.undo(keep=protected)
         self._forget_undone_steps(request)
         return {"undone": request, "restored": restored, "left": left}
 
