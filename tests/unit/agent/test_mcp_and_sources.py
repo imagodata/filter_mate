@@ -61,9 +61,18 @@ class TestTools:
         assert [t.spec.name for t in tools] == ["mcp_srv__search", "mcp_srv__wr_te"]
         first, second = tools
         assert first.remote_name == "search" and first.spec.description == "[External connector Server] Find things"
-        assert first.spec.read_only and first.spec.open_world and not first.spec.requires_confirmation
+        assert first.spec.open_world and first.spec.requires_confirmation
         assert not second.spec.read_only and second.spec.requires_confirmation  # unannotated counts as a change
         assert second.spec.input_schema["type"] == "object"
+
+    @pytest.mark.parametrize("level, verdict", [("advisor", "refuse"), ("careful", "ask"), ("standard", "ask"),
+                                                ("autonomous", "ask")])
+    def test_a_connector_that_says_it_only_reads_is_still_a_call_outside(self, level, verdict):
+        # readOnlyHint is the remote server's own claim, and the arguments may carry data of the project.
+        from core.agent.permissions import OUTSIDE, PermissionPolicy, risk_of
+        first = tools_from_listing("srv", "Server", self.LISTING)[0]
+        assert not first.spec.read_only and risk_of(first.spec) == OUTSIDE
+        assert PermissionPolicy(level).verdict(first.spec) == verdict
 
     def test_a_server_cannot_flood_the_conversation(self):
         many = {"tools": [{"name": f"t{i}", "description": "d" * 5000, "inputSchema": {}} for i in range(200)]}

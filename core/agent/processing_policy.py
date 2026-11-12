@@ -10,10 +10,11 @@ accepted, not of what is refused:
   (undoing the turn removes it), or one of a few that only answer values (statistics). What acts on the project or
   on a data source in place (selection, style, projection, index, truncation, import into a database, upload,
   download) makes no layer, and is left out by this rule alone;
-- no parameter that names a file or a folder, a database connection, a layout or a map theme: an algorithm that
-  needs one is refused, an optional one stays unset. An input layer is a layer of the project, an output is a
-  temporary layer;
-- the few algorithms that make a layer from code or SQL a model would write are refused by name.
+- only parameters of a type known here: layers of the project, an extent, a point, a CRS, a formula, an option, the
+  rows of an interpolation (each a layer of the project), and plain values. Any other type (a file or a folder, a
+  database connection, a layout, a map theme, a PROJ operation, which names a grid by path or URL, or a type this
+  list does not know) is refused when required and stays unset when optional. An output is a temporary layer;
+- the few algorithms that make a layer from code or SQL a model would write, or send data out, are refused by name.
 """
 from __future__ import annotations
 
@@ -24,27 +25,39 @@ PROVIDERS = ("native", "qgis")
 LAYER_DESTINATIONS = frozenset({"sink", "vectorDestination", "rasterDestination", "pointCloudDestination"})
 # What writes a file or a folder of the model's choosing: refused when required, left unset when optional.
 FILE_DESTINATIONS = frozenset({"fileDestination", "folderDestination", "vectorTileDestination"})
-# Never given by a model, required or not.
-FORBIDDEN_TYPES = frozenset({
-    "file",  # a path on this machine
-    "providerconnection", "databaseschema", "databasetable", "execute_sql", "authcfg",
-    "layout", "layoutitem", "maptheme", "dxflayers", "vectortilewriterlayers", "tininputlayers",
-    "fields_mapping", "aggregates",  # they hold expressions this guard does not read
-})
 # Parameters that take layers: only layers of the project, by id or name, never a path or a URL.
 LAYER_INPUTS = frozenset({"source", "vector", "raster", "layer", "pointcloud", "mesh"})
 MULTI_LAYER_INPUTS = frozenset({"multilayer"})
+# The inputs of an interpolation (IDW, TIN): rows "source::~::value source::~::field index::~::source type" joined by
+# "::|::". QGIS opens each source from its text, a path or a URL included: FilterMate writes each row again, its source
+# a vector layer of the project given by its id, the rest integers.
+INTERPOLATION_DATA = "idw_interpolation_data"
+# Read by FilterMate before QGIS sees them.
+CHECKED_TYPES = LAYER_INPUTS | MULTI_LAYER_INPUTS | frozenset({"extent", "point", "crs", "expression", "enum",
+                                                               INTERPOLATION_DATA})
+# Plain values QGIS takes as they are: numbers, texts, field names, flags, tables of values, colours, dates, ranges,
+# a geometry as WKT, the bands or dataset groups of an input. Nothing that names a file, a URL or a layer.
+PLAIN_TYPES = frozenset({
+    "number", "distance", "area", "volume", "scale", "duration", "band", "field", "string", "boolean", "matrix",
+    "color", "datetime", "range", "geometry", "raster_calc_expression", "relief_colors", "meshdatasetgroups",
+    "meshdatasettime",
+    "attribute", "pointcloudattribute",  # an attribute of a point cloud input, by name
+})
+# What a model may give; any other parameter is refused when required, left unset when optional.
+GIVEN_TYPES = CHECKED_TYPES | PLAIN_TYPES
 # Algorithms that only answer values, and make no layer.
 VALUE_ALGORITHMS = frozenset({
     "native:basicstatisticsforfields", "qgis:basicstatisticsforfields", "native:rasterlayerstatistics",
     "qgis:rasterlayerstatistics", "native:rasterlayerproperties", "native:rasterlayeruniquevaluesreport",
     "native:listuniquevalues", "qgis:listuniquevalues", "native:rastersurfacevolume",
 })
-# They make a layer, from SQL or Python written by the model, or from a database or a web server.
+# They make a layer, from SQL or Python written by the model, or from a database or a web server, or send data out.
 DENIED = frozenset({
     "qgis:executesql", "native:executesql", "qgis:advancedpythonfieldcalculator",
     "qgis:postgisexecuteandloadsql", "native:postgisexecuteandloadsql",
     "native:httprequest", "native:filedownloader", "native:downloadvectortiles",
+    "native:batchnominatimgeocoder",  # sends the addresses of a layer to the Nominatim server of OpenStreetMap
+    "native:openurl",  # hands a URL or a file to the system (it makes no layer, refused by name all the same)
     "native:zonalstatistics",  # "in place": it adds fields to the source of its input
 })
 
@@ -60,7 +73,8 @@ def refusal(algorithm_id: str, provider_id: str, parameters: Sequence[Parameter]
         return "it runs code, SQL or a network request written by the model"
     if deprecated:
         return "it is deprecated in this version of QGIS"
-    forbidden = sorted({kind for _, kind, optional in parameters if kind in FORBIDDEN_TYPES and not optional})
+    forbidden = sorted({kind for _, kind, optional in parameters if not optional and kind not in GIVEN_TYPES
+                        and kind not in LAYER_DESTINATIONS and kind not in FILE_DESTINATIONS})
     if forbidden:
         return f"it needs {', '.join(forbidden)} parameters, which are not given by a model"
     files = sorted({kind for _, kind, optional in parameters if kind in FILE_DESTINATIONS and not optional})

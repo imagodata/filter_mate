@@ -15,6 +15,8 @@ import urllib.request
 from typing import Any, Dict, Optional
 from urllib.parse import quote
 
+from ..accessor import PROTECTED_HEADER
+
 API_KEY_HEADER = "X-API-Key"  # pragma: allowlist secret
 # A layer list of a big project stays far below this; it only bounds a rogue answer.
 _MAX_RESPONSE_BYTES = 16 * 1024 * 1024
@@ -166,6 +168,8 @@ class FilterMateClient:
 
     def _http_error(self, method: str, path: str, status: int, headers, raw: bytes) -> FilterMateAPIError:
         detail = _detail(raw)
+        if status == 403 and headers is not None and headers.get(PROTECTED_HEADER) == "protected-layer":
+            return FilterMateAPIError(detail, status)  # a layer the user protected from the agent: said as it is
         if status in (401, 403):
             if status == 401:
                 why = "The FilterMate REST API rejected the API key (HTTP 401)."

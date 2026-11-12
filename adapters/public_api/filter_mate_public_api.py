@@ -96,7 +96,7 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
         error handling on PostgreSQL layers.
 
         Args:
-            layer_name: Name of the QGIS layer to filter.
+            layer_name: Id or name of the QGIS layer to filter (an id when names repeat).
             filter_expr: SQL WHERE clause (without WHERE keyword).
             source_plugin: Name of the calling plugin (for logging/audit).
 
@@ -131,7 +131,7 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
                     f"PublicAPI: Filter applied on {layer_name!r} "
                     f"by {source_plugin!r}"
                 )
-                self.filter_applied.emit(layer_name, filter_expr, source_plugin)
+                self.filter_applied.emit(layer.name(), filter_expr, source_plugin)
             else:
                 msg = (
                     f"setSubsetString failed for layer {layer_name!r}. "
@@ -200,7 +200,7 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
         Clear the filter on a specific layer.
 
         Args:
-            layer_name: Name of the QGIS layer to clear.
+            layer_name: Id or name of the QGIS layer to clear.
 
         Returns:
             True if filter was cleared successfully, False otherwise.
@@ -225,7 +225,7 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
             success = self._safe_set_subset(layer, '') if self._is_server_filter_layer(layer) else layer.setSubsetString('')
             if success:
                 logger.info(f"PublicAPI: Filter cleared on {layer_name!r}")
-                self.filter_cleared.emit(layer_name, "external")
+                self.filter_cleared.emit(layer.name(), "external")
             else:
                 msg = f"Failed to clear filter on layer {layer_name!r}"
                 logger.warning(f"PublicAPI: {msg}")
@@ -448,15 +448,21 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
 
     def _find_vector_layer(self, layer_name: str):
         """
-        Find a vector layer by name in the current QGIS project.
+        Find a vector layer by id, then by name, in the current QGIS project.
+
+        An id names one layer; a name may be shared by several, and the first
+        vector layer of that name is taken.
 
         Args:
-            layer_name: Layer name to search for.
+            layer_name: Layer id or name to search for.
 
         Returns:
             QgsVectorLayer or None if not found.
         """
         project = QgsProject.instance()
+        layer = project.mapLayer(layer_name)
+        if isinstance(layer, QgsVectorLayer):
+            return layer
         layers = project.mapLayersByName(layer_name)
         for layer in layers:
             if isinstance(layer, QgsVectorLayer):
