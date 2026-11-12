@@ -811,10 +811,15 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
         # read, is refused (the targets were filtered by the whole source).
         filter_to_use = _source_filter_expression(context)
         if filter_to_use:
+            from ..source_refusal import SourceSelectionError, source_selection_refusal
             if mode != SourceMode.FALLBACK:  # FALLBACK has just read it
-                features = _features_matching(source_layer, filter_to_use)
+                try:
+                    features = _features_matching(source_layer, filter_to_use)
+                except SourceSelectionError:
+                    # The layer read by its mode showed nothing already; the
+                    # expression may be the SQL of its provider, not QGIS.
+                    features = []
             if not features:
-                from ..source_refusal import source_selection_refusal
                 raise source_selection_refusal(source_layer.name())
 
     if not features:

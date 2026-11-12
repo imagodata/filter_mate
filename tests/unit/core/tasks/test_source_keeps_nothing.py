@@ -199,6 +199,24 @@ def test_spatialite_fallback_without_expression_keeps_every_feature(qgis):
     assert len(features) == 12
 
 
+def test_spatialite_filtered_source_showing_nothing_keeps_no_feature(qgis):
+    """A filtered source read empty by its mode, with an expression in the SQL of its provider: no feature kept
+    (not "cannot be evaluated"), and never the whole layer."""
+    mod = _load("adapters.backends.spatialite.filter_executor", "adapters/backends/spatialite/filter_executor.py")
+
+    class _Filtered(_Layer):
+        def subsetString(self):
+            return '"class" GLOB \'x*\''
+
+        def getFeatures(self, request=None):
+            self.requests.append(request)
+            return iter([])
+
+    qgis.parse_error = True
+    with pytest.raises(_refusal_class(), match="keeps no feature"):
+        mod.prepare_spatialite_source_geom(_spatialite_context(mod, _Filtered(), '"class" GLOB \'x*\''))
+
+
 # ---------------------------------------------------------------------------
 # OGR
 # ---------------------------------------------------------------------------
