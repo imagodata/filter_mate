@@ -123,6 +123,7 @@ def ctrl_module(monkeypatch):
     kinds = {"vector": layer_kind.LayerKind.VECTOR, "raster": layer_kind.LayerKind.RASTER,
              "pc": layer_kind.LayerKind.POINT_CLOUD}
     capability.get_layer_kind = lambda layer: kinds.get(getattr(layer, "kind", None), layer_kind.LayerKind.OTHER)
+    capability.is_unlisted_vector_source_target = lambda layer: getattr(layer, "unlisted", False)
     monkeypatch.setitem(sys.modules, capability.__name__, capability)
     service = FakeService(filter_state.CrossOperationHistory())
     service_module = types.ModuleType(f"{_PKG}.core.services.cross_filter_service")
@@ -381,6 +382,18 @@ class TestVectorSourceTargets:
         assert not ctrl_module._test_service.history.can_undo("v1")
         controller.run_vector_source_task("undo", layers["v1"], [])
         assert ("undo", "v1") not in ctrl_module._test_service.calls
+
+    def test_targets_taken_off_the_list_are_not_clipped(self, ctrl_module, layers, monkeypatch):
+        """A raster checked, then its CROSS_FILTER option turned off (or a web basemap): left alone."""
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        ran = []
+        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids, run=None: ran.append(ids) or True)
+        layers["r1"].unlisted = True
+        controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        assert ran == [["p1"]]
+        assert [run.op_id for run in controller._linked_runs["v1"]] == [None, None]  # the second, vector only
 
     def test_filter_without_coverage_targets_records_unlinked_run(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())

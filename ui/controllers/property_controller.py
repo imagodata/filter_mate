@@ -586,7 +586,7 @@ class PropertyController(BaseController):
 
             # Special: refresh layers list when has_layers_to_filter is activated
             if property_path[1] == 'has_layers_to_filter':
-                self._refresh_layers_to_filter()
+                self.refresh_layers_to_filter()
 
         elif input_data is False:
             if "ON_FALSE" in custom_functions:
@@ -688,8 +688,8 @@ class PropertyController(BaseController):
             except Exception as e:
                 logger.debug(f"Could not reconnect {widget_path}: {e}")
 
-    def _refresh_layers_to_filter(self) -> None:
-        """Refresh layers_to_filter combobox."""
+    def refresh_layers_to_filter(self) -> None:
+        """Refresh layers_to_filter combobox (also when a CROSS_FILTER option of its rasters / point clouds changed)."""
         dw = self.dockwidget
 
         if not hasattr(dw, 'manageSignal'):

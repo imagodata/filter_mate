@@ -412,6 +412,31 @@ class ConfigModelManager:
             QTimer.singleShot(0, apply_options)
             logger.info(f"Layer kinds changed by the configuration reload (point clouds={after[0]}, rasters={after[1]})")
 
+    @staticmethod
+    def _target_option_flags():
+        """(rasters, point clouds) listed as targets of a vector source (CROSS_FILTER), None when unreadable."""
+        try:
+            from ...adapters.qgis.point_cloud_capability import (
+                is_vector_source_point_cloud_targets_enabled, is_vector_source_raster_targets_enabled)
+            return is_vector_source_raster_targets_enabled(), is_vector_source_point_cloud_targets_enabled()
+        except Exception as e:
+            logger.debug(f"Target options unreadable: {e}")
+            return None
+
+    def _realign_target_options(self, before):
+        """The configuration read from disk changed which rasters / point clouds a vector source
+        lists as targets: fill the FILTERING targets list again (PropertyController)."""
+        after = self._target_option_flags()
+        if before is None or after is None or after == before:
+            return
+        integration = getattr(self.dockwidget, '_controller_integration', None)
+        properties = getattr(integration, 'property_controller', None)
+        if properties is not None:
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, properties.refresh_layers_to_filter)
+            logger.info(f"Targets of a vector source changed by the configuration reload "
+                        f"(rasters={after[0]}, point clouds={after[1]})")
+
     # ========================================
     # MODEL & VIEW SETUP
     # ========================================
@@ -457,6 +482,7 @@ class ConfigModelManager:
                 dw.plugin_dir, 'config', 'config.json'
             )
             kinds_before = self._layer_kind_flags()
+            targets_before = self._target_option_flags()
             try:
                 # 2026-10-18: migrated like at start (a file without the RASTER /
                 # POINT_CLOUD sections turned both layer kinds off here).
@@ -486,6 +512,7 @@ class ConfigModelManager:
             except Exception as e:
                 logger.warning(f"Could not reload config from disk: {e}")
             self._realign_layer_kinds(kinds_before)
+            self._realign_target_options(targets_before)
 
             from ...ui.widgets.json_view.model import JsonModel
             dw.config_model = JsonModel(

@@ -3464,6 +3464,9 @@ class CoverageModeController(BaseController):
                 run = _LinkedRun()  # gets its cross operation once the cross task really changed a layer
                 self._linked_runs.setdefault(source_id, []).append(run)
                 self._linked_redo[source_id] = []
+                # 2026-11-12: a raster / point cloud checked before its CROSS_FILTER option was turned off.
+                from ...adapters.qgis.point_cloud_capability import is_unlisted_vector_source_target
+                coverage_ids = [i for i in coverage_ids if not is_unlisted_vector_source_target(self._map_layer(i))]
                 if coverage_ids and self._vector_engine_filters_targets():
                     self._run_vector_source_filter(source, coverage_ids, run=run)
             elif task_name in ('unfilter', 'reset'):

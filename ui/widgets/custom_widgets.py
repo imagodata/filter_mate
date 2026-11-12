@@ -224,6 +224,11 @@ class ItemDelegate(QStyledItemDelegate):
 
         x, y, dx, dy = option.rect.x(), option.rect.y(), option.rect.width(), option.rect.height()
 
+        # A layer listed only to say why it is no target (add_unfilterable_item): greyed, no check box.
+        enabled = bool(index.flags() & Qt.ItemFlag.ItemIsEnabled)
+        if not enabled:
+            painter.setOpacity(0.5)
+
         # Decoration - Draw icon FIRST, positioned after checkbox
         # v4.0.2: Simplified - icon is now properly stored via setData(icon, Qt.ItemDataRole.DecorationRole)
         pic = index.data(Qt.ItemDataRole.DecorationRole)
@@ -260,7 +265,7 @@ class ItemDelegate(QStyledItemDelegate):
             painter.drawText(text_x, text_y, metrics.elidedText(text, Qt.TextElideMode.ElideRight, available))
             if hint:
                 muted = QColor(painter.pen().color())
-                muted.setAlphaF(0.6)
+                muted.setAlphaF(0.6 if enabled else 1.0)  # a greyed row is muted already
                 painter.save()
                 painter.setPen(muted)
                 painter.drawText(hint_x + 4, text_y, hint)
@@ -278,7 +283,7 @@ class ItemDelegate(QStyledItemDelegate):
 
         # Checkstate
         value = index.data(Qt.ItemDataRole.CheckStateRole)
-        if value is not None:
+        if value is not None and index.flags() & Qt.ItemFlag.ItemIsUserCheckable:
             opt = QStyleOptionViewItem()
             opt.rect = self.getCheckboxRect(option)
             opt.state = opt.state & ~QStyle.StateFlag.State_HasFocus
@@ -536,10 +541,34 @@ class QgsCheckableComboBoxLayer(QComboBox):
         self.model().appendRow(item)
         self._populated_timer.start()
 
+    def add_unfilterable_item(self, icon, text, layer_id):
+        """Add a greyed row that cannot be checked: a web basemap, listed to say why it is no target.
+
+        The row has no flag (neither enabled, nor selectable, nor checkable), no check
+        state and no ``layer_id`` in its data: it is never checked here nor read as a
+        target (get_layers_to_filter, the saved ``layers_to_filter``).
+        """
+        item = QStandardItem()
+        item.setFlags(Qt.ItemFlag.NoItemFlags)
+        item.setText(text)
+        if icon and not icon.isNull():
+            item.setData(icon, role=Qt.ItemDataRole.DecorationRole)
+        item.setData({"unfilterable_layer_id": layer_id}, role=Qt.ItemDataRole.UserRole)
+        item.setData(self.tr('not filterable'), TARGET_HINT_ROLE)
+        item.setToolTip(f"{text}\n" + self.tr('Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): '
+                                              'colours only, it cannot be filtered'))
+        self.model().appendRow(item)
+        self._populated_timer.start()
+
+    @staticmethod
+    def _checkable(item):
+        """False for a row added by add_unfilterable_item: nothing checks it."""
+        return item is not None and item.isCheckable()
+
     def setItemCheckState(self, i, state=None):
         """Set or toggle the check state of an item."""
         item = self.model().item(i)
-        if item is None:
+        if not self._checkable(item):
             return
         if state is not None:
             item.setCheckState(state)
@@ -556,7 +585,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
             raise TypeError("input_list must be a list")
         for i in input_list:
             item = self.model().item(i)
-            if item:
+            if self._checkable(item):
                 item.setCheckState(state)
         self.checkedItemsChangedEvent()
 
@@ -567,13 +596,14 @@ class QgsCheckableComboBoxLayer(QComboBox):
         for text in input_list:
             items = self.model().findItems(text)
             for item in items:
-                item.setCheckState(Qt.CheckState.Checked)
+                if self._checkable(item):
+                    item.setCheckState(Qt.CheckState.Checked)
 
     def select_all(self):
         """Select all items."""
         for i in range(self.count()):
             item = self.model().item(i)
-            if item:
+            if self._checkable(item):
                 item.setCheckState(Qt.CheckState.Checked)
         self.checkedItemsChangedEvent()
 
@@ -581,7 +611,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
         """Deselect all items."""
         for i in range(self.count()):
             item = self.model().item(i)
-            if item:
+            if self._checkable(item):
                 item.setCheckState(Qt.CheckState.Unchecked)
         self.checkedItemsChangedEvent()
 
@@ -616,9 +646,11 @@ class QgsCheckableComboBoxLayer(QComboBox):
                 toggled.setData(not toggled.data(CENTROID_ROLE), CENTROID_ROLE)
                 self.centroidsChanged.emit(self.centroid_layer_ids())
                 return True
-            index = self.view().currentIndex()
+            # The row under the click: the current row never is a greyed one (Qt keeps the last
+            # enabled row current), so clicking a greyed row toggled the row hovered before it.
+            index = self.view().indexAt(position)
             item = self.model().itemFromIndex(index)
-            if item:
+            if self._checkable(item):
                 state = index.data(Qt.ItemDataRole.CheckStateRole)
                 if state == Qt.CheckState.Checked:
                     item.setCheckState(Qt.CheckState.Unchecked)

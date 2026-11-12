@@ -777,6 +777,16 @@
       },
       "CROSS_FILTER": {
         "description": "Filtering between layers of different kinds (vector, raster, point cloud)",
+        "vector_source_raster_targets": {
+          "value": true,
+          "choices": [true, false],
+          "description": "List the raster layers among the layers to filter of a vector source (with RASTER enabled). Web basemaps (WMS, WMTS, XYZ) are listed greyed: colours only, they cannot be filtered"
+        },
+        "vector_source_point_cloud_targets": {
+          "value": true,
+          "choices": [true, false],
+          "description": "List the point cloud layers among the layers to filter of a vector source (with POINT_CLOUD enabled)"
+        },
         "point_cloud_clip": {
           "value": "exact",
           "choices": ["exact", "bbox"],

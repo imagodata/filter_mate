@@ -598,8 +598,9 @@ class TestStreamRasterTargets:
         rendered = _FakeRasterLayer("gdal", GDAL_WMS_XML)
         wcs = _FakeRasterLayer("wcs")
         assert namespace["_is_coverage_layer"](rendered)
-        assert not namespace["_is_coverage_target"](rendered)
-        assert namespace["_is_coverage_target"](wcs)
+        for vector_source in (True, False):
+            assert not namespace["_is_coverage_target"](rendered, vector_source)
+            assert namespace["_is_coverage_target"](wcs, vector_source)
 
 
     @pytest.mark.parametrize("provider,source,allowed", [
@@ -658,3 +659,281 @@ class TestStreamRasterTargets:
                                    point_cloud_criteria=None, source_operator=None, filter_source=True,
                                    footprint_resolution=None, max_pixels=1000)
         jobs.RasterSourceJob.assert_not_called()
+
+
+class _Named:
+    """name() / crs() / isSpatial() / isValid() of a project layer listed in the dock."""
+
+    def name(self):
+        return self.id()
+
+    def crs(self):
+        return types.SimpleNamespace(authid=lambda: "EPSG:31370")
+
+    def isSpatial(self):
+        return True
+
+    def isValid(self):
+        return True
+
+
+class _ListedVector(_Named, _FakeVectorLayer):
+    pass
+
+
+class _ListedPointCloud(_Named, _FakePointCloudLayer):
+    pass
+
+
+class _ListedRaster(_Named, _FakeRasterLayer):
+    def __init__(self, layer_id, provider="gdal", source="/data/dem.tif"):
+        super().__init__(provider, source)
+        self._layer_id = layer_id
+
+    def id(self):
+        return self._layer_id
+
+
+class QgsVectorTileLayer(_Named):
+    """A vector tile layer is recognized by its class name (target only, never clipped here)."""
+
+    def id(self):
+        return "tiles"
+
+
+OSM_XYZ = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+
+def _options(raster=True, point_cloud=True, rasters=True, point_clouds=True, cross_filter=None):
+    """CONFIG_DATA with the layer kinds and the two CROSS_FILTER options of the targets of a vector source."""
+    if cross_filter is None:
+        cross_filter = {
+            "vector_source_raster_targets": {"value": raster, "choices": [True, False], "description": "x"},
+            "vector_source_point_cloud_targets": {"value": point_cloud, "choices": [True, False], "description": "x"},
+        }
+    config_mod.ENV_VARS["CONFIG_DATA"] = {"APP": {"OPTIONS": {
+        "RASTER": {"enabled": {"value": rasters}}, "POINT_CLOUD": {"enabled": {"value": point_clouds}},
+        "CROSS_FILTER": cross_filter}}}
+
+
+@pytest.fixture
+def all_kinds(env):
+    """qgis.core with distinct vector, raster and point cloud classes, both kinds on, both options on."""
+    env.set_core(types.SimpleNamespace(QgsVectorLayer=_FakeVectorLayer, QgsRasterLayer=_FakeRasterLayer,
+                                       QgsPointCloudLayer=_FakePointCloudLayer,
+                                       Qgis=types.SimpleNamespace(QGIS_VERSION_INT=34400)))
+    _options()
+    return env
+
+
+class TestVectorSourceTargetOptions:
+    """APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets / vector_source_point_cloud_targets (2026-11-12)."""
+
+    def test_on_when_unset(self, all_kinds):
+        """A configuration the migration has not reached yet: the dock behaves as before the options."""
+        _options(cross_filter={})
+        assert cap.is_vector_source_raster_targets_enabled() is True
+        assert cap.is_vector_source_point_cloud_targets_enabled() is True
+        config_mod.ENV_VARS["CONFIG_DATA"] = None
+        assert cap.is_vector_source_raster_targets_enabled() is True
+
+    def test_false_text_is_off(self, all_kinds):
+        _options(raster="false", point_cloud="off")
+        assert cap.is_vector_source_raster_targets_enabled() is False
+        assert cap.is_vector_source_point_cloud_targets_enabled() is False
+
+    def test_raster_target_follows_its_option_under_a_vector_source_only(self, all_kinds):
+        dem, lidar = _ListedRaster("dem"), _ListedPointCloud("lidar")
+        assert cap.is_listed_coverage_target(dem, True)
+        _options(raster=False)
+        assert not cap.is_listed_coverage_target(dem, True)
+        assert cap.is_listed_coverage_target(dem, False)  # a raster source keeps its raster targets
+        assert cap.is_listed_coverage_target(lidar, True)  # independent
+
+    def test_point_cloud_target_follows_its_option_under_a_vector_source_only(self, all_kinds):
+        dem, lidar = _ListedRaster("dem"), _ListedPointCloud("lidar")
+        assert cap.is_listed_coverage_target(lidar, True)
+        _options(point_cloud=False)
+        assert not cap.is_listed_coverage_target(lidar, True)
+        assert cap.is_listed_coverage_target(lidar, False)
+        assert cap.is_listed_coverage_target(dem, True)
+
+    def test_the_layer_kind_still_has_to_be_on(self, all_kinds):
+        """A raster target needs RASTER.enabled AND the option (same for point clouds)."""
+        _options(rasters=False, point_clouds=False)
+        assert not cap.is_listed_coverage_target(_ListedRaster("dem"), True)
+        assert not cap.is_listed_coverage_target(_ListedPointCloud("lidar"), True)
+
+    def test_vectors_are_not_coverage_targets(self, all_kinds):
+        assert not cap.is_listed_coverage_target(_ListedVector("roads"), True)
+        assert not cap.is_listed_coverage_target(None, True)
+
+    @pytest.mark.parametrize("provider,source", [("wms", OSM_XYZ), ("wms", "type=wmts&url=https://example.org"),
+                                                 ("arcgismapserver", "url=https://example.org/MapServer"),
+                                                 ("gdal", GDAL_WMS_XML)])
+    def test_rendered_raster_is_never_a_target_but_is_shown_greyed(self, all_kinds, provider, source):
+        basemap = _ListedRaster("osm", provider, source)
+        for vector_source in (True, False):
+            assert not cap.is_listed_coverage_target(basemap, vector_source)
+            assert cap.is_listed_rendered_raster(basemap, vector_source)
+
+    def test_greyed_basemaps_go_with_the_raster_targets(self, all_kinds):
+        """Shown where the rasters of values are listed, never where rasters were turned off."""
+        basemap = _ListedRaster("osm", "wms", OSM_XYZ)
+        _options(raster=False)
+        assert not cap.is_listed_rendered_raster(basemap, True)
+        assert cap.is_listed_rendered_raster(basemap, False)
+        _options(rasters=False)
+        assert not cap.is_listed_rendered_raster(basemap, False)
+
+    def test_value_rasters_and_vectors_are_not_greyed(self, all_kinds):
+        assert not cap.is_listed_rendered_raster(_ListedRaster("dem"), True)
+        assert not cap.is_listed_rendered_raster(_ListedRaster("dem", "wcs", "url=https://example.org"), True)
+        assert not cap.is_listed_rendered_raster(_ListedVector("roads"), True)
+
+    def test_targets_left_out_at_launch(self, all_kinds):
+        dem, lidar, basemap = _ListedRaster("dem"), _ListedPointCloud("lidar"), _ListedRaster("osm", "wms", OSM_XYZ)
+        assert not cap.is_unlisted_vector_source_target(dem)
+        assert not cap.is_unlisted_vector_source_target(lidar)
+        assert cap.is_unlisted_vector_source_target(basemap)
+        _options(raster=False, point_cloud=False)
+        assert cap.is_unlisted_vector_source_target(dem)
+        assert cap.is_unlisted_vector_source_target(lidar)
+        # Vector and vector tile targets are never concerned.
+        assert not cap.is_unlisted_vector_source_target(_ListedVector("roads"))
+        assert not cap.is_unlisted_vector_source_target(QgsVectorTileLayer())
+        assert not cap.is_unlisted_vector_source_target(None)
+
+
+class _TargetList:
+    """The FILTERING targets list as both filling paths use it: checkable rows and greyed rows."""
+
+    def __init__(self):
+        self.rows, self.greyed = [], []
+
+    def clear(self):
+        self.rows, self.greyed = [], []
+
+    def addItem(self, icon, text, data=None):
+        self.rows.append(data["layer_id"])
+
+    def add_unfilterable_item(self, icon, text, layer_id):
+        self.greyed.append((layer_id, text))
+
+    def model(self):
+        return types.SimpleNamespace(item=lambda index: MagicMock())
+
+    def count(self):
+        return len(self.rows) + len(self.greyed)
+
+
+class TestTargetListsFollowTheOptions:
+    """FilteringController and its direct fallback (ComboboxPopulationManager) on the real capability module."""
+
+    @pytest.fixture
+    def dock(self, all_kinds, monkeypatch):
+        layers = [_ListedVector("roads"), _ListedVector("parcels"), _ListedRaster("dem"), _ListedRaster("dtm"),
+                  _ListedPointCloud("lidar"), _ListedRaster("osm", "wms", OSM_XYZ)]
+        project = _FakeProject(layers)
+        core = sys.modules["qgis.core"]
+        monkeypatch.setattr(core, "QgsProject", types.SimpleNamespace(instance=lambda: project), raising=False)
+        geometry = {"roads": "GeometryType.Line", "parcels": "GeometryType.Polygon", "dem": "GeometryType.Raster",
+                    "dtm": "GeometryType.Raster", "lidar": "GeometryType.PointCloud", "osm": "GeometryType.Raster"}
+        project_layers = {layer_id: {
+            "infos": {"layer_id": layer_id, "layer_name": layer_id, "layer_crs_authid": "EPSG:31370",
+                      "layer_geometry_type": geometry_type},
+            "filtering": {"has_layers_to_filter": True, "layers_to_filter": ["dem", "lidar", "osm"]},
+        } for layer_id, geometry_type in geometry.items()}
+        self._stub_dock_modules(monkeypatch)
+        return types.SimpleNamespace(
+            widgets_initialized=True, has_loaded_layers=True, PROJECT_LAYERS=project_layers, app=None,
+            current_layer=layers[0], layers={layer.id(): layer for layer in layers},
+            widgets={"FILTERING": {"LAYERS_TO_FILTER": {"WIDGET": _TargetList()}}},
+            icon_per_geometry_type=lambda geometry_type: None)
+
+    @staticmethod
+    def _stub_dock_modules(monkeypatch):
+        def module(name, **attributes):
+            mod = types.ModuleType(f"{_PKG}.{name}")
+            mod.__path__ = []
+            mod.__dict__.update(attributes)
+            monkeypatch.setitem(sys.modules, mod.__name__, mod)
+
+        class BaseController:
+            def __init__(self, dockwidget, filter_service=None, signal_manager=None):
+                self._dockwidget = dockwidget
+
+        class SignalBlocker:
+            def __init__(self, *widgets):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        for name in ("ui", "ui.controllers", "ui.controllers.mixins", "ui.managers", "infrastructure",
+                     "adapters.qgis.coverage_layers"):
+            module(name)
+        module("ui.controllers.base_controller", BaseController=BaseController)
+        module("ui.controllers.mixins.layer_selection_mixin", LayerSelectionMixin=type("LayerSelectionMixin", (), {}))
+        module("infrastructure.signal_utils", SignalBlocker=SignalBlocker)
+        module("infrastructure.utils", geometry_type_to_string=lambda layer: "GeometryType.Point")
+        module("infrastructure.utils.validation_utils",
+               is_layer_source_available=lambda layer, require_psycopg2=False: True)
+        module("adapters.qgis.coverage_layers.vector_tile_filters", append_targets=lambda *args, **kwargs: None)
+
+    @staticmethod
+    def _load(monkeypatch, sub, *relpath):
+        full = f"{_PKG}.{sub}"
+        spec = importlib.util.spec_from_file_location(full, os.path.join(_PROJECT_ROOT, *relpath))
+        mod = importlib.util.module_from_spec(spec)
+        monkeypatch.setitem(sys.modules, full, mod)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def _fill(self, monkeypatch, dock, path, source_id="roads"):
+        source = dock.layers[source_id]
+        if path == "controller":
+            module = self._load(monkeypatch, "ui.controllers.filtering_controller",
+                                "ui", "controllers", "filtering_controller.py")
+            assert module.FilteringController(dock).populate_layers_checkable_combobox(source) is True
+        else:
+            module = self._load(monkeypatch, "ui.managers.combobox_population_manager",
+                                "ui", "managers", "combobox_population_manager.py")
+            assert module.ComboboxPopulationManager(dock).populate_filtering_layers_direct(source) is True
+        return dock.widgets["FILTERING"]["LAYERS_TO_FILTER"]["WIDGET"]
+
+    @pytest.mark.parametrize("path", ["controller", "direct"])
+    def test_options_on_list_rasters_and_point_clouds(self, monkeypatch, dock, path):
+        targets = self._fill(monkeypatch, dock, path)
+        assert targets.rows == ["parcels", "dem", "dtm", "lidar"]
+        assert targets.greyed == [("osm", "osm [EPSG:31370]")]
+
+    @pytest.mark.parametrize("path", ["controller", "direct"])
+    def test_raster_option_off_drops_the_rasters_and_their_greyed_basemaps(self, monkeypatch, dock, path):
+        _options(raster=False)
+        targets = self._fill(monkeypatch, dock, path)
+        assert targets.rows == ["parcels", "lidar"]
+        assert targets.greyed == []
+
+    @pytest.mark.parametrize("path", ["controller", "direct"])
+    def test_point_cloud_option_off_drops_the_point_clouds(self, monkeypatch, dock, path):
+        _options(point_cloud=False)
+        targets = self._fill(monkeypatch, dock, path)
+        assert targets.rows == ["parcels", "dem", "dtm"]
+        assert [layer_id for layer_id, _ in targets.greyed] == ["osm"]
+
+    @pytest.mark.parametrize("path", ["controller", "direct"])
+    def test_options_are_for_a_vector_source_only(self, monkeypatch, dock, path):
+        _options(raster=False, point_cloud=False)
+        targets = self._fill(monkeypatch, dock, path, source_id="dem")
+        assert targets.rows == ["roads", "parcels", "dtm", "lidar"]
+        assert [layer_id for layer_id, _ in targets.greyed] == ["osm"]
+
+    @pytest.mark.parametrize("path", ["controller", "direct"])
+    def test_a_web_basemap_source_is_not_listed_greyed(self, monkeypatch, dock, path):
+        """The source is never among its targets, greyed or not."""
+        targets = self._fill(monkeypatch, dock, path, source_id="osm")
+        assert "osm" not in targets.rows and targets.greyed == []
