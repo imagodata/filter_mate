@@ -873,16 +873,16 @@ def check_chat(provider, layer, authcfg, work):
           provider.requests and (provider.requests[0]["path"], provider.requests[0]["body"].get("options")))
     offered = [tool["function"]["name"] for tool in (provider.requests[0]["body"].get("tools") or [])] \
         if provider.requests else []
-    check("Ollama: the filtering tools only, by default, and the model is told so",
-          offered and "apply_filter" in offered and "run_algorithm" not in offered and len(offered) <= 22
-          and "every tool" in provider.requests[0]["body"]["messages"][0]["content"], offered)
+    check("Ollama: every tool by default", "run_algorithm" in offered and len(offered) > 40, len(offered))
     settings(preset="ollama", key_target=target_of("ollama", provider.url), consent_target=target_of("ollama", provider.url),
-             local_all_tools=True)
+             local_filtering_only=True)
     provider.reset((200, {}, b"data: [DONE]\n\n"))
     ask("salut")
     offered = [tool["function"]["name"] for tool in (provider.requests[0]["body"].get("tools") or [])] \
         if provider.requests else []
-    check("Ollama: every tool once the user offers them", "run_algorithm" in offered and len(offered) > 40, len(offered))
+    check("Ollama: the filtering tools only once the user asks, and the model is told so",
+          offered and "apply_filter" in offered and "run_algorithm" not in offered and len(offered) <= 22
+          and "every tool" in provider.requests[0]["body"]["messages"][0]["content"], offered)
     panel.input.clear()
     check("Ollama: a consent given for its /v1 address up to 5.1 still counts",
           AgentSettings(preset="ollama", model="m", consent=True, consent_target="http://localhost:11434/v1").has_consent
@@ -907,10 +907,10 @@ def check_chat(provider, layer, authcfg, work):
     dialog.base_url.clear()
     dialog.preset.setCurrentIndex(dialog.preset.findData("ollama"))
     check("settings: a local model has no key field", not dialog.key.isVisible())
-    check("settings: a local model may be offered every tool", dialog.local_all_tools.isVisible()
-          and not dialog.local_all_tools.isChecked())
+    check("settings: a local model may get the filtering tools only, off by default",
+          dialog.local_filtering_only.isVisible() and not dialog.local_filtering_only.isChecked())
     dialog.preset.setCurrentIndex(dialog.preset.findData("mistral"))
-    check("settings: not for a provider of the network", not dialog.local_all_tools.isVisible())
+    check("settings: not for a provider of the network", not dialog.local_filtering_only.isVisible())
     dialog.close()
     legacy = AgentSettings(preset="ollama", model="m", consent=True, consent_target="http://localhost:11434/v1")
     dialog = AgentSettingsDialog(legacy, target_of)

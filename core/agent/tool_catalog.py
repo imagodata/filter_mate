@@ -189,10 +189,11 @@ def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     return tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + CHAT_ONLY
 
 
-# What a local model is offered by default: reading the project and filtering it, the selection and the view, the
-# export of the result, and the agent's own undo and recipes. Every tool of the chat weighs about 21,000 tokens with the
-# system prompt; these about 11,000, which an 8-billion model holds with its context on a GPU of 8 GB (measured
-# 2026-11-11: qwen3:8b with every tool needed 14.7 GB at 32k tokens). The user can offer every tool in the settings.
+# What a local model gets when the user asks for the filtering tools only (a slow computer): reading the project and
+# filtering it, the selection and the view, the export of the result, and the agent's own undo and recipes. Every tool
+# of the chat weighs 15,000 to 18,000 tokens with the system prompt, these 8,000 to 9,000. Measured on 2026-11-11 with
+# qwen3.5:4b on the 48 cases of the bench these tools cover: 33 passed with every tool, 29 with these, for half the
+# tokens; so every tool stays the default. The memory of the model and its context, not the tools, decide what fits.
 FILTERING_TOOLS = frozenset({
     "list_layers", "filter_state", "list_favorites", "describe_layer", "field_values", "layer_statistics",
     "sample_features", "preview_filter", "map_context", "apply_filter", "cross_filter", "geometry_filter",
@@ -201,7 +202,7 @@ FILTERING_TOOLS = frozenset({
 })
 FILTERING_NOTE = ("\n\nOnly the tools for reading and filtering the project are offered with this local model. For "
                   "styles, Processing, editing, layouts, layers to add or remove, widgets: say so, and that the user can "
-                  "offer every tool to the local model in the settings of the agent (it needs a GPU with more memory).")
+                  "offer every tool again in the settings of the agent.")
 
 
 def filtering_only(tools) -> Tuple[ToolSpec, ...]:

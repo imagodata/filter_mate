@@ -885,11 +885,12 @@ class AgentSettingsDialog(QDialog):
                                    "It is only sent to this address."), self)
         self.key_note.setObjectName("label_agent_settings_note")
         self.key_note.setWordWrap(True)
-        self.local_all_tools = QCheckBox(_tr("Offer every tool to the local model"), self)
-        self.local_all_tools.setObjectName("checkBox_agent_local_all_tools")
-        self.local_all_tools.setChecked(values.local_all_tools)
-        self.local_all_tools.setToolTip(_tr("Off, a local model gets the tools that read and filter the project: they "
-                                             "fit a GPU of 8 GB. Every tool needs about twice the memory."))
+        self.local_filtering_only = QCheckBox(_tr("Only the tools that filter, for a slow computer"), self)
+        self.local_filtering_only.setObjectName("checkBox_agent_local_filtering_only")
+        self.local_filtering_only.setChecked(values.local_filtering_only)
+        self.local_filtering_only.setToolTip(_tr(
+            "Ticked, the local model gets only the tools that read and filter the project: about half as much to read "
+            "at each request. Measured with qwen3.5:4b, every tool answered as well, or better."))
         self.send_values = QCheckBox(_tr("Allow attribute values to be sent"), self)
         self.send_values.setChecked(values.send_values)
         values_note = QLabel(_tr("Without it, the agent does not read the values of your fields. Those already written "
@@ -950,7 +951,7 @@ class AgentSettingsDialog(QDialog):
         general_layout.setSpacing(10)
         general_layout.addLayout(form)
         general_layout.addWidget(self.key_note)
-        general_layout.addWidget(self.local_all_tools)
+        general_layout.addWidget(self.local_filtering_only)
         general_layout.addWidget(self.free_notice)
         general_layout.addWidget(line)
         general_layout.addWidget(leaving)
@@ -1262,7 +1263,7 @@ class AgentSettingsDialog(QDialog):
         self.base_url.setPlaceholderText(PRESETS[name][1])
         free = name == FREE_PRESET
         no_key = free or name == "ollama"
-        self.local_all_tools.setVisible(name == "ollama")
+        self.local_filtering_only.setVisible(name == "ollama")
         self.key_label.setVisible(not no_key)
         self.key.setVisible(not no_key)
         self.key_note.setVisible(not no_key)

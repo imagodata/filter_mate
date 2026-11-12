@@ -367,10 +367,10 @@ class AgentChatController(QObject):
                 return False
             chosen = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(), dialog.consent.isChecked(),
                       dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(), authcfg, target,
-                      key_target, dialog.expert_python.isChecked(), dialog.local_all_tools.isChecked())
+                      key_target, dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked())
             same_chat = chosen == (values.preset, values.model, values.base_url, values.consent, values.send_values,
                                    values.enabled_sources, values.custom_sources, values.authcfg, values.consent_target,
-                                   values.key_target, values.expert_python, values.local_all_tools) and not key
+                                   values.key_target, values.expert_python, values.local_filtering_only) and not key
             save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
                                         base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
                                         send_values=dialog.send_values.isChecked(), enabled_sources=dialog.chosen_sources(),
@@ -380,7 +380,7 @@ class AgentChatController(QObject):
                                         mcp_enabled=dialog.mcp_enabled.isChecked(), mcp_port=dialog.mcp_port.value(),
                                         mcp_token=dialog.chosen_mcp_token(),
                                         expert_python=dialog.expert_python.isChecked(),
-                                        local_all_tools=dialog.local_all_tools.isChecked(),
+                                        local_filtering_only=dialog.local_filtering_only.isChecked(),
                                         autonomy=dialog.chosen_autonomy()))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
         finally:
@@ -856,8 +856,8 @@ class AgentChatController(QObject):
 
     @staticmethod
     def local_filtering(values: AgentSettings) -> bool:
-        """A model of Ollama gets the filtering tools, unless the user offered it every tool."""
-        return values.preset == "ollama" and not values.local_all_tools
+        """A model of Ollama gets only the filtering tools when the user asked for it (a slow computer)."""
+        return values.preset == "ollama" and values.local_filtering_only
 
     def _test_source(self, source) -> str:
         """For the Sources tab: does it answer, and with what?"""

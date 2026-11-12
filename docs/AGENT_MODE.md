@@ -75,13 +75,22 @@ tools nor the request. `core/agent/providers/ollama_chat.py` asks for `num_ctx` 
 request (two sizes only: each new size makes Ollama load the model again), and reads the lines of JSON Ollama streams.
 An address saved with `/v1` still works, and a consent given for it still counts.
 
-What a local model is offered: by default only the tools that read the project and filter it, select, show or hide
-layers, zoom, export the result, undo and keep a recipe (`FILTERING_TOOLS` in `core/agent/tool_catalog.py`, 22 tools),
-and the system prompt says the rest exists and where to turn it on. Every tool of the chat weighs about 21,000 tokens
-with the system prompt; the filtering ones about 11,000. The context of the model, not its weights, decides what fits:
-`qwen3:8b` with every tool needed 14.7 GB at 32k tokens, and only 5.8 GB fitted on a GPU of 8 GB, the rest crawling on
-the processor (2026-11-11). **Offer every tool to the local model**, in the Provider tab, gives it all of them. The
-other providers always get every tool.
+What a local model can run, measured on 2026-11-11 (Ollama 0.30.10, RTX 5070 Laptop GPU of 8 GB, WSL 2):
+
+| | Every tool (53) | Filtering tools (22) |
+|---|---|---|
+| Prompt and tools, tokens | 15,300 (qwen3) to 17,600 (qwen3.5) | 8,300 to 9,400 |
+| qwen3.5:4b, memory | 3.7 GB at 32k tokens, all on the GPU | 3.2 GB at 16k |
+| qwen3:8b, memory | 14.3 GB at 32k, 5.6 GB on the GPU | 9.6 GB at 16k, 5.7 GB on the GPU |
+| qwen3.5:4b, `agent_eval.py --live` | 42/69 cases; 33 of the 48 the filtering tools cover | 29/48 |
+
+The memory of the model and of its context decides what runs, more than the tools: `qwen3.5:4b` (hybrid attention)
+holds every tool with room to spare, `qwen3:8b` does not fit a GPU of 8 GB even with the filtering tools and crawls on
+the processor. With fewer tools a small model did not answer better (sampling at temperature 1: a few cases either
+way are noise). So every tool is the default. **Only the tools that filter, for a slow computer** (Provider tab, for
+Ollama) gives the model `FILTERING_TOOLS` of `core/agent/tool_catalog.py` (read and filter the project, select, show or
+hide, zoom, export, undo, keep a recipe): half as much to read at each request, which matters on a processor without a
+GPU; the system prompt says the rest exists. `scripts/agent_eval.py --tools filtering` plays the same set.
 
 Rules worth keeping:
 
