@@ -373,19 +373,28 @@ def apply_postgresql_type_casting(expression: str, layer=None) -> str:
     # the whole table as soon as one value was not a number ('2A').
     from ....core.filter.sql_quotes import mask_quoted, unmask_quoted
 
-    non_numeric = set()
+    #
+    # 2026-11-12: a column the layer declares numeric is no longer cast (not
+    # qualified by a table: in an EXISTS it may be another table's column). The
+    # cast fixed text columns only; on a double precision it rounds to 15 digits,
+    # and a native translation (native_filter_translation) is typed as QGIS reads it.
+    non_numeric, numeric = set(), set()
     if layer is not None:
         try:
-            non_numeric = {field.name().lower() for field in layer.fields() if not field.isNumeric()}
+            for field in layer.fields():
+                (numeric if field.isNumeric() else non_numeric).add(field.name().lower())
         except Exception:  # nosec B110 - types unknown: every comparison is cast as before
-            non_numeric = set()
+            non_numeric, numeric = set(), set()
 
     masked, parts = mask_quoted(expression)
     numeric_comparison_pattern = r'(\x04(\d+)\x05)(?!\s*::)(\s*)(<=|>=|<|>|=)(\s*)(\d+(?:\.\d+)?)(?![\w.])'
 
     def add_numeric_cast(match):
         column, index, space1, operator, space2, number = match.groups()
-        if operator == '=' and parts[int(index)][1:-1].replace('""', '"').lower() in non_numeric:
+        name = parts[int(index)][1:-1].replace('""', '"').lower()
+        if operator == '=' and name in non_numeric:
+            return match.group(0)
+        if name in numeric and masked[max(match.start() - 1, 0)] != '.':
             return match.group(0)
         return f'{column}::numeric{space1}{operator}{space2}{number}'
 
