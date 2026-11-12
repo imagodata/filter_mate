@@ -297,6 +297,9 @@ class ConfigModelManager:
         if not getattr(dw, 'widgets_initialized', False) or not isinstance(dw.CONFIG_DATA, dict) \
                 or getattr(dw, 'config_model', None) is None:
             raise RuntimeError("the FilterMate panel is not ready")
+        if 'APP.DOCKWIDGET.LANGUAGE' in values and self._language_change_pending:
+            # The tree skips a change while one is pending, and the pending one would then be saved over it.
+            raise RuntimeError("a change of language is under way: try again in a moment")
         saved = copy.deepcopy(dw.CONFIG_DATA)
         try:
             missing = {path: value for path, value in values.items()

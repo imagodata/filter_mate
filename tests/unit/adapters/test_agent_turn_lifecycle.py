@@ -47,7 +47,7 @@ class Project:
 class Effects:
     """EffectsRecorder stand-in: a project note the turn kept, compared at its end."""
 
-    def before_call(self, call):
+    def before_call(self, call, step=0):
         pass
 
     def finish(self):
@@ -123,6 +123,31 @@ def test_a_turn_kept_open_is_recorded(checkpoint_module):
     layer.subset = "x > 1"
     assert list(checkpoint.commit()) == ["roads"]
     assert history.can_undo(checkpoint_module.HISTORY_KEY)
+
+
+def test_settings_effects_are_placed_among_the_recorded_steps(checkpoint_module):
+    """The call of a settings effect becomes the number of recorded steps up to it (calls that changed a layer)."""
+    effects = (("notes", "", (), ("n",)), ("settings", "", "{}", "{}", 2), ("settings", "", "{}", "{}", 5))
+    placed = checkpoint_module.TurnCheckpoint._settings_at_steps(effects, [0, 3, 4])
+    assert placed[0] == effects[0]
+    assert placed[1][4] == 1 and placed[2][4] == 3  # one recorded step up to call 2, three up to call 5
+
+
+def test_back_to_a_step_restores_the_settings_changed_from_it(monkeypatch, checkpoint_module):
+    """2026-11-12: undo_to_step restored the layers only; the settings changed at or after the step came back too."""
+    import json
+    now = {"APP.A": 2, "APP.B": 20}
+    _module(monkeypatch, ".adapters.agent.plugin_settings",
+            current_values=lambda paths: {path: now[path] for path in paths if path in now})
+    effects = (("settings", "", json.dumps({"APP.A": 1}), json.dumps({"APP.A": 2}), 1),  # before recorded step 1
+               ("settings", "", json.dumps({"APP.B": 10}), json.dumps({"APP.B": 20}), 2))  # after it
+    back = checkpoint_module.TurnCheckpoint._settings_back_to(effects, 1)
+    assert len(back) == 1 and json.loads(back[0][2]) == {"APP.B": 20} and json.loads(back[0][3]) == {"APP.B": 10}
+    assert checkpoint_module.TurnCheckpoint._settings_back_to(effects, 2) == ()
+    both = checkpoint_module.TurnCheckpoint._settings_back_to(effects, 0)
+    assert json.loads(both[0][3]) == {"APP.A": 1, "APP.B": 10}
+    now["APP.B"] = 10  # already back: nothing to do
+    assert json.loads(checkpoint_module.TurnCheckpoint._settings_back_to(effects, 0)[0][3]) == {"APP.A": 1}
 
 
 def test_a_count_widget_does_not_count_a_web_service(monkeypatch, packages):

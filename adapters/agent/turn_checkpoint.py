@@ -79,10 +79,13 @@ class TurnCheckpoint:
                 self._before[layer.id()] = (snapshot, kind)
         self._steps.append((self._label(call), states))
         if call is not None:
-            self._effects.before_call(call)
+            self._effects.before_call(call, len(self._steps) - 1)
 
-    def _step_record(self, after: Dict[str, LayerSnapshot]) -> Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...]:
-        """For each step, the state before it of the layers it changed (next step's state, or the end of the turn)."""
+    def _step_record(self, after: Dict[str, LayerSnapshot],
+                     calls: Optional[List[int]] = None) -> Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...]:
+        """For each step, the state before it of the layers it changed (next step's state, or the end of the turn).
+
+        ``calls`` receives the index of the call of each step kept (a step that changed no layer is not kept)."""
         steps = []
         for index, (label, states) in enumerate(self._steps):
             following = self._steps[index + 1][1] if index + 1 < len(self._steps) else after
@@ -90,7 +93,21 @@ class TurnCheckpoint:
                             if layer_id in following and not following[layer_id].same_state(before))
             if changed:
                 steps.append((label, changed))
+                if calls is not None:
+                    calls.append(index)
         return tuple(steps)
+
+    @staticmethod
+    def _settings_at_steps(effects, calls: List[int]):
+        """The call of each settings effect turned into the number of recorded steps up to it: "back to before
+        recorded step k" restores the settings whose number is above k."""
+        placed = []
+        for effect in effects:
+            if effect[0] == "settings" and len(effect) > 4:
+                call = effect[4]
+                effect = effect[:4] + (sum(1 for index in calls if index <= call),)
+            placed.append(effect)
+        return tuple(placed)
 
     def discard(self) -> None:
         """Forget the turn under way without recording it: its project is closing.
@@ -121,8 +138,9 @@ class TurnCheckpoint:
             if after is not None and not after.same_state(before):
                 changes.append((before, after))
                 names.append(layer.name())
-        steps = self._step_record(final)
-        effects = self._effects.finish()
+        calls: List[int] = []
+        steps = self._step_record(final, calls)
+        effects = self._settings_at_steps(self._effects.finish(), calls)
         self._before = {}
         self._steps = []
         _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
@@ -210,6 +228,7 @@ class TurnCheckpoint:
         steps = getattr(stack[-1], "steps", ()) if stack else ()
         if not 0 <= step < len(steps):
             return [], []
+        settings = self._settings_back_to(getattr(stack[-1], "effects", ()), step)
         targets: Dict[str, LayerSnapshot] = {}
         for _label, befores in steps[step:]:
             for before in befores:
@@ -221,13 +240,36 @@ class TurnCheckpoint:
             now = self._snapshot(layer, LayerKind(target.kind)) if layer is not None else None
             if now is not None and not now.same_state(target):
                 pairs.append((now, target))
-        if not pairs:
+        if not pairs and not settings:
             return [], []
-        operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=(description or steps[step][0])[:MAX_LABEL])
-        names, left, refused = self._apply(operation, use_before=False)
-        if names and not refused:
+        operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=(description or steps[step][0])[:MAX_LABEL],
+                                   effects=settings)
+        names, left, refused = self._apply(operation, use_before=False) if pairs else ([], [], False)
+        if refused:
+            return names, left
+        done, not_done = apply_effects(settings, undo=False)
+        if names or done:
             history.push(operation)
-        return names, left
+        return _merged(names, done), _merged(left, not_done)
+
+    @staticmethod
+    def _settings_back_to(effects, step: int):
+        """The settings of the last turn changed at or after its recorded step ``step``, as effects going from what
+        they hold now to what they held before that step (a step of the history of its own, undoable)."""
+        import json
+        from .plugin_settings import current_values
+        wanted: Dict[str, Any] = {}
+        for effect in effects:
+            if effect[0] == "settings" and len(effect) > 4 and effect[4] > step:
+                for path, value in json.loads(effect[2]).items():
+                    wanted.setdefault(path, value)
+        if not wanted:
+            return ()
+        now = current_values(wanted)
+        moved = {path: value for path, value in wanted.items() if now.get(path) != value}
+        if not moved:
+            return ()
+        return (("settings", "", json.dumps({path: now.get(path) for path in moved}), json.dumps(moved), 0),)
 
     def undo(self, keep: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str]]:
         """Undo the last turn: names of the layers restored, and of those left as they are.

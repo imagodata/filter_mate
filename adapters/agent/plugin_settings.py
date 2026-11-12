@@ -23,6 +23,17 @@ _DEFAULT: Optional[Dict[str, Any]] = None
 # Applies {path: value} in the panel and returns the paths it applied; None while no panel is there.
 Applier = Callable[[Dict[str, Any]], List[str]]
 _applier: Optional[Applier] = None
+# The values the agent applied, by path, since the recorder of the turn last took them (turn_effects): the value
+# "after" of an undo is what the agent set, not what the setting holds at the end of the turn (the user may have
+# changed it meanwhile, and an undo must then leave it).
+_applied: Dict[str, Any] = {}
+
+
+def take_applied() -> Dict[str, Any]:
+    """The values the agent applied since the last call, and forget them."""
+    taken = dict(_applied)
+    _applied.clear()
+    return taken
 
 
 def set_applier(applier: Optional[Applier]) -> None:
@@ -104,6 +115,7 @@ def _change(arguments: Dict[str, Any]) -> Dict[str, Any]:
         apply_values({change["path"]: change["after"] for change in changes})
     except RuntimeError as exc:  # apply_settings put the configuration back
         raise ToolFailure(f"Nothing changed: {exc}.") from None
+    _applied.update({change["path"]: change["after"] for change in changes})
     now = leaf_values(current_config(), [change["path"] for change in changes])
     answer: Dict[str, Any] = {
         "changed": [{key: change[key] for key in ("path", "before", "after", "effect")} for change in changes

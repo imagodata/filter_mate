@@ -21,8 +21,10 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
   after the commands of the turn (``adapters/public_api/feature_edits.py``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
 * ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT;
-* ``("settings", "", before, after)``: settings of FilterMate (config.json) the turn changed, as JSON
-  ``{path: value}``; not of the project, but undone with the turn that changed them.
+* ``("settings", "", before, after, step)``: settings of FilterMate (config.json) the turn changed, as JSON
+  ``{path: value}``, one effect per step that first changed them; ``step`` is the call of the turn (0, 1...) and,
+  once committed, the number of recorded steps up to that call (TurnCheckpoint.commit), so that "back to before a
+  step" restores the settings changed from it. Not of the project, but undone with the turn that changed them.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -284,8 +286,9 @@ class EffectsRecorder:
         self._layouts: Optional[Set[str]] = None
         self._crs: Optional[str] = None
         self._settings: Dict[str, Any] = {}
+        self._settings_step: Dict[str, int] = {}
 
-    def before_call(self, call: Any) -> None:
+    def before_call(self, call: Any, step: int = 0) -> None:
         project = QgsProject.instance()
         if self._ids_before is None:
             self._ids_before = set(project.mapLayers())
@@ -307,6 +310,8 @@ class EffectsRecorder:
                 from .plugin_settings import current_values
                 paths = [path for path in _setting_paths(arguments) if path not in self._settings]
                 self._settings.update(current_values(paths))
+                for path in paths:
+                    self._settings_step.setdefault(path, step)
             elif name in CRS_TOOLS:
                 if self._crs is None:
                     from ..public_api.project_control import crs_definition
@@ -401,12 +406,15 @@ class EffectsRecorder:
                 effects.append(("visibility", layer_id, before, after))
         if self._settings:
             import json
-            from .plugin_settings import current_values
-            after_settings = current_values(self._settings)
-            changed = sorted(path for path, value in self._settings.items() if after_settings.get(path) != value)
-            if changed:
-                effects.append(("settings", "", json.dumps({path: self._settings[path] for path in changed}),
-                                json.dumps({path: after_settings.get(path) for path in changed})))
+            from .plugin_settings import take_applied
+            applied = take_applied()  # what the agent set: a value the user put meanwhile stays theirs at undo
+            changed = sorted(path for path, value in self._settings.items() if path in applied and applied[path] != value)
+            by_step: Dict[int, List[str]] = {}
+            for path in changed:
+                by_step.setdefault(self._settings_step.get(path, 0), []).append(path)
+            for step, paths in sorted(by_step.items()):
+                effects.append(("settings", "", json.dumps({path: self._settings[path] for path in paths}),
+                                json.dumps({path: applied[path] for path in paths}), step))
         if self._crs is not None:
             from ..public_api.project_control import crs_definition
             after_crs = crs_definition(project.crs())

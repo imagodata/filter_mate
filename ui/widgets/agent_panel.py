@@ -1087,10 +1087,13 @@ class AgentSettingsDialog(QDialog):
         self._rule_boxes = {}
         kinds = {0: _tr("reads"), 1: _tr("view"), 2: _tr("project"), 3: _tr("edit buffer"), 4: _tr("irreversible"),
                  5: _tr("outside")}
+        # change_settings: asked like an irreversible change, but undone with the turn (words of the undo, translated)
+        settings_kind = QCoreApplication.translate("AgentChat", "settings of FilterMate")
         choices = [("", _tr("As the level says")), ("ask", _tr("Always ask")), ("allow", _tr("Always allow")),
                    ("never", _tr("Never"))]
         for name, title, risk in sorted(self._tools, key=lambda row: (row[2], row[1].lower())):
-            item = QTreeWidgetItem(self.tool_rules, [title, kinds.get(risk, ""), ""])
+            kind = settings_kind if name == "change_settings" else kinds.get(risk, "")
+            item = QTreeWidgetItem(self.tool_rules, [title, kind, ""])
             item.setToolTip(0, name)
             box = QComboBox(self.tool_rules)
             for value, label in choices:
