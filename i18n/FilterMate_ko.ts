@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>내보내기를 zip으로 압축</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>비교: 선 왼쪽은 마지막 필터 전의 지도, 오른쪽은 현재 지도이며 선은 마우스를 따라갑니다</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>마지막 필터 전후 비교</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>비교할 것이 없습니다. 여기에는 되돌릴 필터가 없습니다.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>즐겨찾기 관리자를 사용할 수 없음</translation>

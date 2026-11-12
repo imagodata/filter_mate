@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>Comprimi l'esportazione in zip</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Confronta: la mappa prima dell'ultimo filtro a sinistra della linea, com'è ora a destra; la linea segue il mouse</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Confronta prima e dopo l'ultimo filtro</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Niente da confrontare: qui non c'è alcun filtro da annullare.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Gestore preferiti non disponibile</translation>

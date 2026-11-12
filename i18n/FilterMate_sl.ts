@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>Stisni izvoz v zip</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Primerjaj: zemljevid pred zadnjim filtrom levo od črte, sedanji desno; črta sledi miški</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Primerjaj pred zadnjim filtrom in po njem</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Ni česa primerjati: tu ni filtra za razveljavitev.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Upravitelj priljubljenih ni na voljo</translation>

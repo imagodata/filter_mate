@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>Zipkan eksport</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Banding: peta sebelum penapis terakhir di kiri garis, keadaan semasa di kanan; garis mengikut tetikus</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Banding sebelum dan selepas penapis terakhir</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Tiada apa untuk dibanding: tiada penapis untuk dibuat asal di sini.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Pengurus kegemaran tidak tersedia</translation>

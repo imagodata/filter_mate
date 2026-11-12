@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>निर्यात को ज़िप करें</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>तुलना: पिछले फ़िल्टर से पहले का नक्शा रेखा के बाईं ओर, अभी का दाईं ओर; रेखा माउस के साथ चलती है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>पिछले फ़िल्टर से पहले और बाद की तुलना करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>तुलना के लिए कुछ नहीं: यहाँ पूर्ववत करने के लिए कोई फ़िल्टर नहीं है।</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>पसंदीदा प्रबंधक उपलब्ध नहीं</translation>

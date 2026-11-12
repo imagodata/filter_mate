@@ -79,6 +79,7 @@ SOURCES = \
     ../ui/controllers/favorites_controller.py \
     ../ui/controllers/integration.py \
     ../ui/controllers/coverage_mode_controller.py \
+    ../ui/controllers/compare_controller.py \
     ../ui/controllers/segmentation_controller.py \
     ../ui/controllers/coverage_dock_extras.py \
     ../ui/controllers/centroid_targets_sync.py \

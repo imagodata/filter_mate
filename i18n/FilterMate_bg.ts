@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>Архивиране на експорта (zip)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Сравняване: картата преди последния филтър вляво от линията, сегашната вдясно; линията следва мишката</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Сравняване преди и след последния филтър</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Няма какво да се сравни: тук няма филтър за отмяна.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Управлението на любими не е налично</translation>

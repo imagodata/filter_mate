@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>ضغط التصدير (Zip)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>مقارنة: الخريطة قبل آخر تصفية على يسار الخط، وكما هي الآن على يمينه؛ يتبع الخط مؤشر الفأرة</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>مقارنة ما قبل آخر تصفية وما بعدها</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>لا شيء للمقارنة: لا توجد تصفية للتراجع عنها هنا.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>مدير المفضلات غير متوفر</translation>

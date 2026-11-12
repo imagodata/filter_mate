@@ -257,6 +257,7 @@ class ActionBarManager(LayoutManagerBase):
             'pushButton_action_filter',
             'pushButton_action_undo_filter',
             'pushButton_action_redo_filter',
+            'pushButton_action_compare',
             'pushButton_action_unfilter',
             'pushButton_action_export',
             'pushButton_action_qfieldcloud',

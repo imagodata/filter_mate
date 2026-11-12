@@ -4360,6 +4360,21 @@ What would you like to do?</translation>
         <translation>Zabalit export (zip)</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Porovnat: mapa před posledním filtrem vlevo od čáry, současná vpravo; čára sleduje myš</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Porovnat před posledním filtrem a po něm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Není co porovnat: zde není žádný filtr k vrácení.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Správce oblíbených není dostupný</translation>

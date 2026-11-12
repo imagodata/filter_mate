@@ -744,6 +744,39 @@ def s_vector_filter():
     return lambda: layer('dem').source().endswith('.vrt') and tasks_idle()
 
 
+def s_compare_check():
+    """Compare (action bar): the map before the last filter left of a line, its tool on the canvas, gone when off."""
+    from qgis.utils import iface
+    d = dock()
+    button = getattr(d, 'pushButton_action_compare', None)
+    redo = d.pushButton_action_redo_filter
+    if not check('compare: a checkable button beside Redo', button is not None and button.isCheckable()
+                 and button.parentWidget() is redo.parentWidget()):
+        return None
+    canvas = iface.mapCanvas()
+    previous = canvas.mapTool()
+    button.click()
+    session = d._controller_integration._compare_controller.session
+    compared = session.compared_layer_ids() if session is not None else []
+    check('compare: on after a filter, the dem drawn as it was', button.isChecked() and layer('dem').id() in compared
+          and canvas.mapTool() is session.tool, f"checked={button.isChecked()} compared={compared}")
+    STATE['compare_session'] = session
+    STATE['compare_previous_tool'] = previous
+    return lambda: session is None or session.renders >= 1
+
+
+def s_compare_off_check():
+    from qgis.utils import iface
+    d = dock()
+    session = STATE.get('compare_session')
+    check('compare: the before image was rendered', session is not None and session.renders >= 1,
+          session.renders if session is not None else None)
+    d.pushButton_action_compare.click()
+    check('compare: off, the tool there before and no clone left',
+          not d.pushButton_action_compare.isChecked() and iface.mapCanvas().mapTool() is STATE.get('compare_previous_tool')
+          and (session is None or not session.clones))
+
+
 def s_vector_check():
     dem = layer('dem')
     if not check('vector source -> raster target: clipped VRT', dem.source().endswith('.vrt') and dem.isValid(),
@@ -1784,7 +1817,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
-         s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
+         s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_vector_check,
+         s_vector_undo_check,
          s_user_pick_after_undo_check,
          s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,

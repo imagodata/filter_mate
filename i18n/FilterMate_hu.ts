@@ -4372,6 +4372,21 @@ What would you like to do?</translation>
         <translation>Export tömörítése zip-be</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Összehasonlítás: a térkép az utolsó szűrő előtt a vonaltól balra, a mostani jobbra; a vonal követi az egeret</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Összehasonlítás az utolsó szűrő előtt és után</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Nincs mit összehasonlítani: itt nincs visszavonható szűrő.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>A kedvencek kezelő nem érhető el</translation>

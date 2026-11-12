@@ -212,6 +212,11 @@ class ControllerIntegration:
             return
 
         try:
+            compare = getattr(self, "_compare_controller", None)
+            if compare is not None:
+                compare.teardown()
+                self._compare_controller = None
+
             # Disconnect signals
             self._disconnect_signals()
 
@@ -251,6 +256,9 @@ class ControllerIntegration:
         controller = self._point_cloud_ui_controller
         if controller is not None:
             controller.release_map_tools()
+        compare = getattr(self, "_compare_controller", None)
+        if compare is not None:  # its swipe tool would keep the map while the dock is hidden
+            compare.stop()
 
     def _create_controllers(self) -> None:
         """Create all controller instances."""
@@ -317,6 +325,15 @@ class ControllerIntegration:
             filter_service=self._filter_service,
             signal_manager=self._signal_manager
         )
+
+        # Compare: a button of the action bar, the map before the last filter left of a line. Never in the way of the
+        # dock: a failure leaves it without the button.
+        try:
+            from .compare_controller import CompareController
+            self._compare_controller = CompareController(self._dockwidget, self)
+        except Exception:
+            logger.warning("Compare mode not set up", exc_info=True)
+            self._compare_controller = None
 
         logger.debug("All controllers created")
 
