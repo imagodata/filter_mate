@@ -12,6 +12,7 @@ from core.domain.cross_filter import (
     coverage_ratio_ok,
     coverage_side_for_predicates,
     predicate_methods,
+    selection_subset,
 )
 from core.domain.filter_state import CrossOperation, CrossOperationHistory, LayerSnapshot
 from core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
@@ -108,6 +109,20 @@ class TestSubsets:
     ])
     def test_combine(self, previous, operator, expected):
         assert combine_subset(previous, "x", operator) == expected
+
+    @pytest.mark.parametrize("previous,new,operator,expected", [
+        # 2026-11-12: the targets follow the selection, the operator applies to the source only
+        ("", "x", "AND NOT", "x"),
+        ("a = 1", "x", "AND NOT", "(a = 1) AND (x)"),   # read through the old subset, as the dock selects
+        ("a = 1", "x", "AND", "(a = 1) AND (x)"),       # the subset of the source itself
+        ("a = 1", "x", "OR", "x"),                      # read on the whole layer
+        ("a = 1", "x", None, "x"),
+        ("", "x", "AND", "x"),
+        ("a = 1", "", "AND NOT", "a = 1"),              # no new criteria: the source is not changed
+        ("", "", None, ""),
+    ])
+    def test_selection(self, previous, new, operator, expected):
+        assert selection_subset(previous, new, operator) == expected
 
 
 class TestSnapshotsAndHistory:

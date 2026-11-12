@@ -1158,6 +1158,26 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Receptek</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Minden eszköz a helyi modellnek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Csak a szűrő eszközök, lassú számítógéphez</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Bejelölve a helyi modell csak a projektet olvasó és szűrő eszközöket kapja: kérésenként nagyjából fele annyit kell olvasnia. A qwen3.5:4b-vel mérve minden eszközzel ugyanolyan jól vagy jobban válaszolt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Kikapcsolva a helyi modell a projektet olvasó és szűrő eszközöket kapja: ezek elférnek egy 8 GB-os GPU-n. Minden eszközhöz nagyjából kétszer annyi memória kell.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Az utolsó kérés mentése receptként…</translation>
@@ -10367,6 +10387,19 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Minden érték visszaállítása az alapértékekre?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>A(z) '{0}' kijelölése nem értékelhető ki: semmi sem lett szűrve.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>A(z) '{0}' kijelölése egyetlen objektumot sem tart meg: semmi sem lett szűrve.</translation>
     </message>
 </context>
 <context>

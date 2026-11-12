@@ -1158,6 +1158,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Рецепти</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Дати локальній моделі всі інструменти</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Лише інструменти фільтрування, для повільного комп'ютера</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Якщо позначено, локальна модель отримує лише інструменти читання й фільтрування проєкту: приблизно вдвічі менше тексту в кожному запиті. За вимірами з qwen3.5:4b з усіма інструментами відповіді були не гірші.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Якщо вимкнено, локальна модель отримує інструменти читання й фільтрування проєкту: вони вміщуються в GPU на 8 ГБ. Усім інструментам потрібно приблизно вдвічі більше пам'яті.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Зберегти останній запит як рецепт…</translation>
@@ -10367,6 +10387,19 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Скинути всі значення за замовчуванням?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Вибірку шару «{0}» неможливо обчислити: нічого не відфільтровано.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Вибірка шару «{0}» не залишає жодного об’єкта: нічого не відфільтровано.</translation>
     </message>
 </context>
 <context>

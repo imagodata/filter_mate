@@ -82,9 +82,25 @@ def _symbol(layer, color=None):
     return symbol
 
 
+def _read_values_guard(layer, all_values: bool) -> None:
+    """A classification reads the values of the layer on the main thread: never from a web service (each read is a
+    download), and never more than the reads of layer_statistics when it reads every value (graduated classes).
+
+    Raises:
+        ValueError: A web service, or too many features shown.
+    """
+    from .introspection import MAX_STAT_FEATURES, _refuse_web_service
+    _refuse_web_service(layer)
+    count = layer.featureCount() if all_values else -1
+    if isinstance(count, int) and count > MAX_STAT_FEATURES:
+        raise ValueError(f"'{layer.name()}' shows more than {MAX_STAT_FEATURES} features and graduated classes read "
+                         "every value: filter it first, or draw it with categories or one symbol")
+
+
 def _categorized(layer, field: str, ramp):
     from qgis.core import QgsCategorizedSymbolRenderer, QgsRendererCategory
     index = _field_index(layer, field)
+    _read_values_guard(layer, all_values=False)
     values = list(layer.uniqueValues(index, MAX_CATEGORIES + 2))
     plain = sorted((value for value in values if value is not None and not (hasattr(value, 'isNull') and value.isNull())),
                    key=lambda item: (isinstance(item, str), str(item) if not isinstance(item, (int, float)) else item))
@@ -102,6 +118,7 @@ def _categorized(layer, field: str, ramp):
 def _graduated(layer, field: str, ramp, classes: int, method: str):
     from qgis import core
     index = _field_index(layer, field, numeric=True)
+    _read_values_guard(layer, all_values=True)
     makers = {'quantile': 'QgsClassificationQuantile', 'equal_interval': 'QgsClassificationEqualInterval',
               'jenks': 'QgsClassificationJenks', 'pretty': 'QgsClassificationPrettyBreaks',
               'stddev': 'QgsClassificationStandardDeviation'}

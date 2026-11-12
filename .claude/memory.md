@@ -113,11 +113,15 @@ Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l
 (`filtermate_core/filter/native_dialect.py`, pur ; adaptateur `adapters/qgis/native_filter_translation.py`), et
 seulement là où la source rend la réponse de QGIS. FULL → ce SQL remplace l'ancienne réécriture par regex ; sinon
 ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPackage, SpatiaLite) et OGR SQL
-(Shapefile, GeoJSON, FlatGeobuf, MapInfo) ; PostgreSQL écrit mais pas appliqué (`APPLIED_DIALECTS`) : le
-contrôle `check_native_translation.py` a tourné sur PostGIS le 12/11 (0 échec, QGIS 4.2.3 et 3.44.15, base UTF-8
-et base en locale C) après deux corrections : ILIKE écrit `SIMILAR TO` avec une classe par lettre (`ſ`, `İ` : ILIKE
-suit la locale de la base) et `lower()` / `upper()` plus traduits en PostgreSQL (casse de la locale). Activation à
-décider.
+(Shapefile, GeoJSON, FlatGeobuf, MapInfo) ; PostgreSQL appliqué depuis le 12/11 (décision utilisateur, PR à part) : contrôle 345 PASS / 0 FAIL en
+QGIS 4.2.3 et 3.44.15, base UTF-8 et base en locale C, après ILIKE → `SIMILAR TO` à classes par lettre (`ſ`, `İ`)
+et `lower()` / `upper()` retirés (casse de la locale). Banc de bout en bout `check_pg_connection_cases.py`
+`FM_PG_CASE=native`. Deux défauts trouvés en chemin : `TaskParameterBuilder.determine_skip_source_filter` prenait
+`"nom" ILIKE 'x'` (et `~`) pour un champ d'affichage (liste d'opérateurs sans ILIKE : la source n'était jamais
+filtrée, tout backend) → `has_comparison_operator` ; `apply_postgresql_type_casting` (appelé aussi par
+`safe_set_subset_string` sur TOUT subset PG) castait en `::numeric` les colonnes déjà numériques (un double arrondi à
+15 chiffres) → plus de cast sur une colonne numérique non qualifiée. Piège du banc : `setFilterExpression` sur une
+couche PG est compilé côté serveur (ILIKE de PostgreSQL), la référence QGIS s'évalue entité par entité.
 - **Preuve** : ce contrôle évalue l'expression dans QGIS entité par entité et compare au subset traduit. Sans Docker,
   il tourne dans le QGIS Windows : `powershell.exe -Command "& 'C:\Program Files\QGIS 3.44.6\bin\python-qgis.bat'
   '\\wsl.localhost\Ubuntu\home\simon\projects\filter_mate\tests\qgis_headless\check_native_translation.py'"`.
@@ -134,7 +138,7 @@ décider.
 - **Replis qui relisent l'expression en QGIS** (`EXPRESSION_FALLBACK` OGR / Spatialite) : la tâche garde
   `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
   COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
-- **Reste** : activer PostgreSQL, fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
+- **Reste** : fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
   `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin. Les 5 échecs de
   la suite complète (expression_builder PG / Spatialite, coverage_raster_target) existent sur `main` ; les lancer
   dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :
@@ -1064,3 +1068,12 @@ Result: Que veux-tu faire dans cette session ?
   bus de session D-Bus → lancer l'interface sous `dbus-run-session -- xvfb-run …`. Une couleur de palette lue sans
   groupe suit l'état actif / inactif de la fenêtre (histogramme gris quand QGIS n'a pas le focus) : prendre
   `QPalette.ColorGroup.Active` pour une couleur de donnée.
+
+## [2026-11-12] Suite complète : `scripts/full_suite.sh`
+- Le `python3` système n'a ni PyQt, ni GDAL, ni mcp, ni fastapi : environ 620 tests y sautent par module entier et la suite
+  « passe ». Le catalogue d'outils laissé périmé par #365 (`test_catalog_agrees_with_the_mcp_server`) est passé ainsi.
+- `scripts/full_suite.sh` : venv uv (`FM_TEST_VENV`, par défaut `~/.cache/filter_mate/test-venv`) avec requirements-test*,
+  PyQt5, PyQt6 et Pillow, puis les fichiers sautés pour GDAL dans `qgis/qgis:stable`. Échoue si un test saute faute d'import
+  (onnxruntime excepté). Référence au 12/11 : 4 échecs `test_expression_builder` + `test_theme_icons` (artefact du test :
+  faux paquet `_real_qt_theme_styles` sous lequel `from ..layout` ne remonte pas) côté venv, `test_canceled_selection_is_not_read`
+  côté Docker.

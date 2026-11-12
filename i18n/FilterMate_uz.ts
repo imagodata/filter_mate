@@ -1158,6 +1158,26 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Retseptlar</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Mahalliy modelga barcha vositalarni berish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Sekin kompyuter uchun faqat filtrlovchi vositalar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Belgilansa, mahalliy model faqat loyihani o'qiydigan va filtrlaydigan vositalarni oladi: har bir so'rovda o'qiladigan matn taxminan yarmiga kamayadi. qwen3.5:4b bilan o'lchanganda barcha vositalar bilan javoblar shunday yoki yaxshiroq bo'ldi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>O'chirilganda mahalliy model loyihani o'qiydigan va filtrlaydigan vositalarni oladi: ular 8 GB GPU ga sig'adi. Barcha vositalar taxminan ikki baravar ko'p xotira talab qiladi.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Oxirgi so'rovni retsept sifatida saqlash…</translation>
@@ -10367,6 +10387,19 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Barcha qiymatlarni standartga qaytarilsinmi?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>'{0}' tanlovini baholab bo‘lmaydi: hech narsa filtrlanmadi.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>'{0}' tanlovida birorta ham obyekt qolmaydi: hech narsa filtrlanmadi.</translation>
     </message>
 </context>
 <context>

@@ -1158,6 +1158,26 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Recepten</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Alle hulpmiddelen aan het lokale model geven</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Alleen de filterhulpmiddelen, voor een trage computer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Aangevinkt krijgt het lokale model alleen de hulpmiddelen die het project lezen en filteren: ongeveer half zoveel te lezen per verzoek. Gemeten met qwen3.5:4b antwoordden alle hulpmiddelen even goed of beter.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Uit krijgt een lokaal model de hulpmiddelen die het project lezen en filteren: die passen op een GPU van 8 GB. Alle hulpmiddelen vragen ongeveer twee keer zoveel geheugen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Laatste verzoek bewaren als recept…</translation>
@@ -10367,6 +10387,19 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Alle waarden terugzetten naar standaard?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>De selectie van '{0}' kan niet worden geëvalueerd: er is niets gefilterd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>De selectie van '{0}' behoudt geen enkel object: er is niets gefilterd.</translation>
     </message>
 </context>
 <context>

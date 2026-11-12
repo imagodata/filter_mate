@@ -1158,6 +1158,26 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <translation>Przepisy</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Udostępnij modelowi lokalnemu wszystkie narzędzia</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Tylko narzędzia filtrujące, dla wolnego komputera</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Po zaznaczeniu model lokalny dostaje tylko narzędzia do odczytu i filtrowania projektu: przy każdym żądaniu ma do przeczytania mniej więcej połowę. W pomiarze z qwen3.5:4b wszystkie narzędzia odpowiadały równie dobrze lub lepiej.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Gdy wyłączone, model lokalny dostaje narzędzia do odczytu i filtrowania projektu: mieszczą się w GPU 8 GB. Wszystkie narzędzia wymagają około dwa razy więcej pamięci.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Zapisz ostatnie żądanie jako przepis…</translation>
@@ -10367,6 +10387,19 @@ onnxruntime pochodzi z PyPI przez pip, model z huggingface.co/{1}, każdy plik j
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Zresetować wszystkie wartości do domyślnych?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Nie można obliczyć zaznaczenia warstwy „{0}”: nic nie zostało przefiltrowane.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Zaznaczenie warstwy „{0}” nie zachowuje żadnego obiektu: nic nie zostało przefiltrowane.</translation>
     </message>
 </context>
 <context>

@@ -457,6 +457,13 @@ class TestSourceCopy:
         job = source_jobs.PointCloudSourceJob(FakeCloudLayer(subset='Classification = 6'))
         assert job._layer is opened[0] and opened[0].subsetString() == '(Classification = 6\n)'
 
+    def test_copy_reads_the_selection_given(self, engine, opened):
+        # 2026-11-12: under AND NOT the layer keeps every point but the selection;
+        # the footprint of the targets is read on the selection
+        job = source_jobs.PointCloudSourceJob(FakeCloudLayer(subset='NOT (\nClassification = 6\n)'),
+                                              selection='Classification = 6')
+        assert job._layer is opened[0] and opened[0].subsetString() == '(Classification = 6\n)'
+
     def test_final_comment_stays_out_of_the_parenthesis(self, engine, opened):
         source_jobs.PointCloudSourceJob(FakeCloudLayer(subset='Classification = 6 -- buildings'))
         assert opened[0].subsetString() == '(Classification = 6 -- buildings\n)'

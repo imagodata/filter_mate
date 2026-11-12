@@ -11,6 +11,9 @@ FilterMate on PostGIS: three cases of the 2026-11-12 PostgreSQL fixes (QGIS GUI 
   password asked at opening and not saved (#355). An Intersect filter to two distant layers, an
   unfilter, then a filter with a buffer expression (the materialized-view path): the distant layers
   are filtered all the same.
+- ``native``: attribute filters of the source written in the native SQL of PostgreSQL (ILIKE, the
+  tolerance of a real equality, a float division), each compared with QGIS's own answer, then a
+  geometric filter from the source filtered that way.
 - ``or_buffer``: a first filter with a buffer expression from a selection holding OR and BETWEEN,
   then a second one on another selection with the OR operator, to the same target and to a new one
   (#368: the distant layers followed the previous subset of the source, its OR written as AND).
@@ -44,7 +47,7 @@ from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.utils import iface
 import qgis.utils
 
-STATE = {'results': [], 'errors': [], 'connect_lines': [], 'started': time.time()}
+STATE = {'results': [], 'errors': [], 'connect_lines': [], 'native_lines': [], 'started': time.time()}
 faulthandler.enable(all_threads=True)
 PG = os.environ.get('FM_PG', 'host=fm_pg port=5432 dbname=postgres user=postgres password=fm')
 CASE = os.environ.get('FM_PG_CASE', 'service')
@@ -103,13 +106,16 @@ class _Records(logging.Handler):
             _error(f"[{record.name}] {message[:300]}")
         if 'pg_layer_connect' in message:
             STATE['connect_lines'].append(message)
+        if message.startswith('Native translation:'):
+            STATE['native_lines'].append(message)
         lowered = message.lower()
-        if record.levelno >= logging.WARNING or 'pg_layer_connect' in message or 'buffer expr' in lowered \
+        if VERBOSE or record.levelno >= logging.WARNING or 'pg_layer_connect' in message or 'buffer expr' in lowered \
                 or 'materialized view' in lowered or 'distant layers' in lowered:
             print(f"   | {record.levelname} {record.name}: {message[:260]}", flush=True)
 
 
-_RECORDS = _Records(level=logging.INFO)
+VERBOSE = bool(os.environ.get('FM_PG_VERBOSE'))  # every record of FilterMate, DEBUG included
+_RECORDS = _Records(level=logging.DEBUG if VERBOSE else logging.INFO)
 
 
 def watch_plugin_loggers():
@@ -117,7 +123,9 @@ def watch_plugin_loggers():
         if isinstance(logger, logging.Logger) and name.split('.')[0] in ('FilterMate', 'filter_mate') \
                 and _RECORDS not in logger.handlers:
             logger.addHandler(_RECORDS)
-            if logger.level > logging.INFO or logger.level == logging.NOTSET:
+            if VERBOSE:
+                logger.setLevel(logging.DEBUG)
+            elif logger.level > logging.INFO or logger.level == logging.NOTSET:
                 logger.setLevel(logging.INFO)
 
 
@@ -251,8 +259,10 @@ def configure(selection, targets, buffered, operator=None):
         d.mGroupBox_exploring_custom_selection.setChecked(True)
         d.mFieldExpressionWidget_exploring_custom_selection.setExpression(selection)
         set_targets(targets)
-        d.pushButton_checkable_filtering_geometric_predicates.setChecked(True)
-        d.comboBox_filtering_geometric_predicates.setCheckedItems(['Intersect'])
+        d.pushButton_checkable_filtering_layers_to_filter.setChecked(bool(targets))
+        d.pushButton_checkable_filtering_geometric_predicates.setChecked(bool(targets))
+        if targets:
+            d.comboBox_filtering_geometric_predicates.setCheckedItems(['Intersect'])
         set_buffer_expression(buffered)
         set_combine_operator(operator)
 
@@ -296,6 +306,12 @@ def s_setup():
     for table in (SRC, TGT_A, TGT_B):
         sql(f"ALTER TABLE public.{table} ADD PRIMARY KEY (id); CREATE INDEX ON public.{table} USING GIST (geom); "
             f"ANALYZE public.{table}", fetch=False)
+    # Texts and reals for the native translation (case 'native'): the long s, a NULL, a real a
+    # tolerance compares
+    sql(f"ALTER TABLE public.{SRC} ADD COLUMN nom text, ADD COLUMN ratio double precision; "
+        f"UPDATE public.{SRC} SET nom = (ARRAY['Route', 'route', '\u017faint', 'Saint', NULL, 'Kelvin K', "
+        "'été'])[1 + id % 7], ratio = (id % 10) / 4.0; "
+        f"ANALYZE public.{SRC}", fetch=False)
     if CASE == 'service':
         host = dict(part.split('=', 1) for part in PG.split())
         folder = tempfile.mkdtemp(prefix='fm_pgsvc_')
@@ -430,6 +446,76 @@ def s_second_check():
           f"count={total} expected={kept} unreadable={problems}")
 
 
+# native: attribute filters of the source, each compared with QGIS's answer, then a geometric one
+
+NATIVE_EXPRESSIONS = [
+    '"ratio" = 0.5',                      # QGIS compares reals with a tolerance
+    '"nom" ILIKE \'saint\'',             # the long s matches s in QGIS, not in PostgreSQL's ILIKE
+    '"id" / 400 > 4.5',                   # a float division in QGIS, an integer one in PostgreSQL
+    '"nom" LIKE \'R%\' AND "id" <= 300',
+    '"nom" IS NULL OR "ratio" >= 2',
+]
+if os.environ.get('FM_PG_NATIVE_ONLY'):  # a part of the text of the expressions to run
+    NATIVE_EXPRESSIONS = [text for text in NATIVE_EXPRESSIONS if os.environ['FM_PG_NATIVE_ONLY'] in text]
+NATIVE_GEOMETRIC = '"id" / 400 > 4.5'
+
+
+def reference_ids(expression):
+    """The ids QGIS keeps for the expression, read on a layer of its own (never filtered)."""
+    from qgis.core import QgsFeatureRequest
+    from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils
+    # Evaluated feature by feature: a filter expression of the request would be compiled for
+    # PostgreSQL (its own ILIKE, not QGIS's)
+    reference = pg_layer(SRC, 'reference')
+    parsed = QgsExpression(expression)
+    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(reference))
+    kept = []
+    for feature in reference.getFeatures(QgsFeatureRequest()):
+        context.setFeature(feature)
+        if parsed.evaluate(context) is True or parsed.evaluate(context) == 1:
+            kept.append(feature['id'])
+    return sorted(kept)
+
+
+def native_steps(expression):
+    def configure_step():
+        return configure(expression, (), buffered=False)
+
+    def filter_step():
+        STATE['native_lines'].clear()
+        return run_task('filter')
+
+    def check_step():
+        wanted = reference_ids(expression)
+        source = layer(SRC)
+        got = sorted(feature['id'] for feature in source.getFeatures())
+        print(f"   subset({SRC}) = {source.subsetString()[:300]!r}", flush=True)
+        check(f"native: {expression}: the source keeps QGIS's {len(wanted)} features",
+              got == wanted and bool(STATE['native_lines']) and '::numeric' not in source.subsetString(),
+              f"count={len(got)} expected={len(wanted)} native={STATE['native_lines'][:1]}")
+
+    def unfilter_step():
+        return run_task('unfilter')
+
+    for function, name in ((configure_step, 'configure'), (filter_step, 'filter'), (check_step, 'check'),
+                           (unfilter_step, 'unfilter')):
+        function.__name__ = f"s_native_{name} {expression}"
+    return [configure_step, filter_step, check_step, unfilter_step]
+
+
+def s_native_geometric_configure():
+    return configure(NATIVE_GEOMETRIC, (TGT_A,), buffered=False)
+
+
+def s_native_geometric_check():
+    ids = reference_ids(NATIVE_GEOMETRIC)
+    check_count('native: geometric filter from the selection', TGT_A,
+                expected(TGT_A, f"s.id IN ({', '.join(map(str, ids))})", buffered=False))
+    total, problems = count(SRC)
+    check('native: the source keeps the selection', total == len(ids) and not problems,
+          f"count={total} expected={len(ids)} unreadable={problems}")
+
+
 def s_finish():
     check('no Python error, no FilterMate critical message, no failed task', not STATE['errors'],
           '; '.join(STATE['errors'][:3]))
@@ -443,6 +529,8 @@ CASES = {
     'service': [s_plain_configure, s_plain_filter, s_plain_check, s_service_check],
     'no_psycopg2': [s_plain_configure, s_plain_filter, s_plain_check, s_unfilter, s_unfilter_check,
                     s_buffer_configure, s_buffer_filter, s_buffer_check, s_no_connection_check],
+    'native': [step for expression in NATIVE_EXPRESSIONS for step in native_steps(expression)]
+    + [s_native_geometric_configure, s_plain_filter, s_native_geometric_check],
     'or_buffer': [s_first_configure, s_first_filter, s_first_check, s_second_configure, s_second_filter,
                   s_second_check],
 }

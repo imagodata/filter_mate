@@ -1158,6 +1158,26 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Tarifler</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Yerel modele tüm araçları sun</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Yavaş bir bilgisayar için yalnızca süzme araçları</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>İşaretlenince yerel model yalnızca projeyi okuyan ve süzen araçları alır: her istekte okunacak metin yaklaşık yarıya iner. qwen3.5:4b ile ölçüldüğünde tüm araçlarla yanıtlar aynı ya da daha iyiydi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Kapalıyken yerel model yalnızca projeyi okuyan ve süzen araçları alır: bunlar 8 GB'lık bir GPU'ya sığar. Tüm araçlar yaklaşık iki kat bellek gerektirir.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Son isteği tarif olarak kaydet…</translation>
@@ -10367,6 +10387,19 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Tüm değerler varsayılanlara sıfırlansın mı?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>'{0}' seçimi değerlendirilemiyor: hiçbir şey filtrelenmedi.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>'{0}' seçimi hiçbir öğe tutmuyor: hiçbir şey filtrelenmedi.</translation>
     </message>
 </context>
 <context>

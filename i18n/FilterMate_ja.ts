@@ -1158,6 +1158,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>レシピ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>ローカルモデルにすべてのツールを渡す</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>低速なコンピューター向けに、フィルタ用ツールのみ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>オンにすると、ローカルモデルにはプロジェクトの読み取りとフィルタのツールだけを渡し、リクエストごとに読む量がほぼ半分になります。qwen3.5:4b での計測では、すべてのツールでも同等以上の回答でした。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>オフのとき、ローカルモデルにはプロジェクトを読み取り・フィルタするツールだけを渡します。8 GB の GPU に収まります。すべてのツールには約 2 倍のメモリが必要です。</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>直前のリクエストをレシピとして保存…</translation>
@@ -10367,6 +10387,19 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>すべての値をデフォルトにリセットしますか?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>'{0}' の選択を評価できません。何もフィルタされていません。</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>'{0}' の選択に残る地物がありません。何もフィルタされていません。</translation>
     </message>
 </context>
 <context>

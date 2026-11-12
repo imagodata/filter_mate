@@ -89,6 +89,10 @@ class ExpressionFacadeHandler:
                   (source_layer, task_parameters, executor getters, etc.)
         """
         self.task = task
+        # (source filter, source selection, selection read on the whole layer) of
+        # the last combine_with_old_subset, recorded with the source filter once
+        # it is queued
+        self._pending_source_selection = None
 
     # =========================================================================
     # Sanitization and extraction
@@ -210,9 +214,60 @@ class ExpressionFacadeHandler:
         """
         executor = self.task._get_attribute_executor()
         if not getattr(executor, 'old_subset', None):
-            return self._without_old_subset(executor, expression)
-        # FIX 2026-01-18: only takes the expression parameter
-        return executor.combine_with_old_subset(expression)
+            combined = self._without_old_subset(executor, expression)
+        else:
+            # FIX 2026-01-18: only takes the expression parameter
+            combined = executor.combine_with_old_subset(expression)
+        self._pending_source_selection = (combined, self._source_selection(executor, expression, combined),
+                                          self._selection_reads_whole_layer(executor))
+        return combined
+
+    @staticmethod
+    def _selection_reads_whole_layer(executor):
+        """Whether the selection is read without the old subset of the source.
+
+        2026-11-12 (review): ExpressionBuilder reads the selection in QGIS when it
+        holds an EXISTS (PATH 3A), through the source layer, which keeps the old
+        subset during the task. Under OR and replace x is read on the whole layer,
+        as the SpatiaLite / OGR source preparations do (selection_reads_whole_layer
+        in FilterEngineTask.prepare_spatialite_source_geom).
+        """
+        operator = (getattr(executor, 'combine_operator', None) or '').strip().upper()
+        return operator not in ('AND', 'AND NOT')
+
+    @staticmethod
+    def _source_selection(executor, expression, combined):
+        """The source features the target layers are filtered by: the new selection, not the source filter.
+
+        2026-11-12: the operator combines the new selection with the old subset of
+        the source only; the targets are filtered by the selection itself, as the
+        SpatiaLite / OGR source preparations read it (selection_reads_whole_layer):
+        through the old subset under AND and AND NOT (the dock selects among the
+        features it shows), on the whole layer under OR and replace. The source
+        filter served instead: NOT (x) under AND NOT filtered the targets by every
+        feature but the selection, all of them when x kept none.
+
+        Args:
+            executor: AttributeFilterExecutor holding old_subset, combine_operator
+                and provider_type.
+            expression: The new selection, in the language of the source.
+            combined: The source filter combine_with_old_subset returns.
+
+        Returns:
+            str: The selection, in the language of the source.
+        """
+        old_subset = getattr(executor, 'old_subset', None)
+        operator = (getattr(executor, 'combine_operator', None) or '').strip().upper()
+        if not old_subset or operator not in ('AND', 'AND NOT'):
+            return expression
+        if operator == 'AND':
+            return combined
+        try:
+            from ...filtermate_core.filter.expression_combiner import combine_with_old_subset
+        except ImportError:  # imported from the repository root (tests)
+            from filtermate_core.filter.expression_combiner import combine_with_old_subset
+        return combine_with_old_subset(expression, old_subset, 'AND',
+                                       provider_type=getattr(executor, 'provider_type', None) or 'postgresql')
 
     @staticmethod
     def _without_old_subset(executor, expression):
@@ -386,9 +441,19 @@ class ExpressionFacadeHandler:
         Returns:
             bool: True if expression was queued successfully.
         """
+        # The selection of the source filter combine_with_old_subset just built;
+        # None for any other filter (a key list): its selection is not known here
+        pending, self._pending_source_selection = self._pending_source_selection, None
+        if pending is not None and pending[0] == expression:
+            _, selection, whole_layer = pending
+        else:
+            selection = whole_layer = None
+
         # Apply type casting for PostgreSQL to fix varchar/numeric comparison issues
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:
             expression = self.apply_postgresql_type_casting(expression, self.task.source_layer)
+            if selection:
+                selection = self.apply_postgresql_type_casting(selection, self.task.source_layer)
 
         # Queue source layer for filter application in finished()
         if hasattr(self.task, '_pending_subset_requests'):
@@ -397,6 +462,11 @@ class ExpressionFacadeHandler:
             # 2026-11-12: the source layer keeps its previous subset until finished();
             # the distant filters read the one it will have (ExpressionBuilder)
             self.task.task_parameters['source_subset_after_task'] = expression
+            # ...and the targets are filtered by the selection, not by that subset
+            # (NOT (x) under AND NOT, (old) OR (x) under OR; see _source_selection)
+            self.task.task_parameters['source_selection_after_task'] = selection
+            # ...read on the whole layer, or through the old subset
+            self.task.task_parameters['source_selection_reads_whole_layer'] = whole_layer
 
         # Only build PostgreSQL SELECT for PostgreSQL providers
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:

@@ -30,6 +30,15 @@ from qgis.core import (
 logger = logging.getLogger('filter_mate')
 
 
+def _source_selection_refusal(layer_name: str, unreadable: bool = False):
+    """adapters.backends.source_refusal.source_selection_refusal (the message is translated)."""
+    try:
+        from ...adapters.backends.source_refusal import source_selection_refusal
+    except ImportError:  # imported from the repository root (tests)
+        from adapters.backends.source_refusal import source_selection_refusal
+    return source_selection_refusal(layer_name, unreadable=unreadable)
+
+
 def record_task_view(task_parameters, mv_ref) -> None:
     """Record a materialized view as created by the running filter task (``_parent_task``).
 
@@ -341,7 +350,13 @@ class ExpressionBuilder:
         # the previous one, a buffer expression (which prefers the source subset to the
         # selected features) filtered the distant layers by the previous selection.
         # Without a record (all features / field-based modes) the subset does not change.
-        source_subset = self.task_parameters.get('source_subset_after_task')
+        # 2026-11-12: the selection of this filter first. The new subset is the
+        # selection combined with the old one by the source operator, NOT (x) under
+        # AND NOT, (old) OR (x) under OR: the targets are filtered by the selection
+        # (ExpressionFacadeHandler._source_selection), as on SpatiaLite / OGR.
+        source_subset = self.task_parameters.get('source_selection_after_task')
+        if source_subset is None:
+            source_subset = self.task_parameters.get('source_subset_after_task')
         if source_subset is None:
             source_subset = self.source_layer.subsetString() if self.source_layer else None
         logger.debug("=" * 80)
@@ -528,7 +543,14 @@ class ExpressionBuilder:
         )
 
         # Handle different scenarios
-        if scenario in ('spatial_chain', 'spatial_chain_with_custom'):
+        # 2026-11-12 (review): the chain is the subset of the source layer itself
+        # (all features / field-based modes). A selection recorded by this filter
+        # is ( EXISTS old ) AND ( x ) under AND and AND NOT: the chain kept its
+        # EXISTS only, x was lost and the buffer covered the whole source table.
+        # It is read like any selection below (its features, or PATH 3A); those
+        # features are within the old subset, so the old EXISTS holds for them.
+        chains_the_source_subset = self.task_parameters.get('source_selection_after_task') is None
+        if scenario in ('spatial_chain', 'spatial_chain_with_custom') and chains_the_source_subset:
             # FILTER CHAINING MODE: Extract EXISTS from source_subset for combination
             logger.debug("🔗 FILTER CHAIN MODE: Extracting EXISTS clauses for chaining")
             logger.debug(f"   Scenario: {scenario}")
@@ -687,16 +709,14 @@ class ExpressionBuilder:
                                 else:
                                     logger.warning("   ⚠️ Advanced optimization failed - falling back to FID extraction")
                                     # Fallback to FID extraction
-                                    from qgis.core import QgsFeatureRequest
-                                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                                    filtered_features = list(self.source_layer.getFeatures(request))
+                                    filtered_features = self._features_of_the_selection()
 
                                     if filtered_features:
                                         source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
                                         logger.debug(f"   ✅ Fallback FID filter: {len(source_filter) if source_filter else 0} chars")
                                     else:
                                         logger.warning("   ⚠️ No features extracted")
-                                        source_filter = None
+                                        source_filter = self._empty_selection_filter()
                             else:
                                 logger.warning("   ⚠️ No reusable components found - falling back to FID extraction")
                                 logger.debug(f"   → WHERE length: {len(where_clause)} chars")
@@ -717,9 +737,7 @@ class ExpressionBuilder:
                                                     f"'{where_clause[exists_pos.start():exists_pos.start() + 50]}...'")
 
                                 # FALLBACK: Extract FIDs instead
-                                from qgis.core import QgsFeatureRequest
-                                request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                                filtered_features = list(self.source_layer.getFeatures(request))
+                                filtered_features = self._features_of_the_selection()
 
                                 if filtered_features:
                                     source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
@@ -729,7 +747,7 @@ class ExpressionBuilder:
                                         logger.warning(f"   → Features count: {len(filtered_features)}, consider using MV")
                                 else:
                                     logger.warning("   ⚠️ No features extracted")
-                                    source_filter = None
+                                    source_filter = self._empty_selection_filter()
                         else:
                             # Safe to reuse WHERE clause - no __source alias
                             # Remove trailing parentheses that belong to EXISTS, not to the WHERE condition
@@ -766,9 +784,7 @@ class ExpressionBuilder:
                         logger.warning(f"   → This may generate large expression for {filtered_count} features")
 
                         # Extract FIDs from filtered features
-                        from qgis.core import QgsFeatureRequest
-                        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                        filtered_features = list(self.source_layer.getFeatures(request))
+                        filtered_features = self._features_of_the_selection()
 
                         if filtered_features:
                             source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
@@ -777,21 +793,19 @@ class ExpressionBuilder:
                                 logger.warning("   → Consider using materialized view optimization")
                         else:
                             logger.warning("   ⚠️ No features extracted from filtered layer")
-                            source_filter = None
+                            source_filter = self._empty_selection_filter()
                 else:
                     # Small dataset: Extract FIDs directly
                     logger.debug(f"   → Extracting FIDs from {filtered_count} filtered features")
 
-                    from qgis.core import QgsFeatureRequest
-                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                    filtered_features = list(self.source_layer.getFeatures(request))
+                    filtered_features = self._features_of_the_selection()
 
                     if filtered_features:
                         source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
                         logger.debug(f"   ✅ Generated FID filter: {len(source_filter)} chars")
                     else:
                         logger.warning("   ⚠️ No features extracted from filtered layer")
-                        source_filter = None
+                        source_filter = self._empty_selection_filter()
             else:
                 # NO FILTER: Will match all source features (this is NORMAL when source layer already filtered)
                 logger.debug("🎯 PostgreSQL EXISTS: PATH 3B - No source_filter (will use all source features)")
@@ -1113,6 +1127,120 @@ class ExpressionBuilder:
         logger.debug(f"Generated field value filter: {field_ref} IN ({len(formatted_values)} values)")
 
         return filter_sql
+
+    def _selection_qgis_expression(self) -> str:
+        """The QGIS expression of this filter's selection, '' when it recorded none (PATH 3A)."""
+        if self.task_parameters.get('source_selection_after_task') is None:
+            return ''
+        return (self.task_parameters.get('task', {}).get('expression') or '').strip()
+
+    def _features_of_the_selection(self, limit: Optional[int] = None) -> List[Any]:
+        """The source features of the selection, read through the source layer (PATH 3A).
+
+        2026-11-12: the layer keeps its previous subset until finished(), so its
+        features were those of the PREVIOUS filter whatever the new selection.
+        When this filter recorded its selection (old subset AND the new
+        expression, see ExpressionFacadeHandler._source_selection), its QGIS
+        expression is read through that subset too.
+
+        2026-11-12 (review): under OR and replace the selection is x alone, read
+        on the whole layer (an x holding an EXISTS came here and kept only the
+        features of the old subset); an expression that does not parse or fails
+        to evaluate is refused, as SpatiaLite's _features_matching does (it read
+        nothing, and FALSE emptied the targets with no word).
+
+        Args:
+            limit: Read at most this many features (None: all of them).
+
+        Raises:
+            SourceSelectionError: The selection cannot be read.
+        """
+        from qgis.core import QgsFeatureRequest
+        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        if limit is not None:
+            request.setLimit(limit)
+        expression = self._selection_qgis_expression()
+        if not expression:
+            return list(self.source_layer.getFeatures(request))
+        from qgis.core import QgsExpression
+        parsed = QgsExpression(expression)
+        if parsed.hasParserError():
+            logger.error(f"   ❌ The source selection does not parse: {parsed.parserErrorString()}")
+            raise _source_selection_refusal(self.source_layer.name(), unreadable=True)
+        request.setFilterExpression(expression)
+        layer = self.source_layer
+        if self.task_parameters.get('source_selection_reads_whole_layer') and layer.subsetString():
+            layer = self._unfiltered_source() or layer
+        try:
+            return list(layer.getFeatures(request))
+        except Exception as e:
+            logger.error(f"   ❌ The source selection failed: {e}")
+            raise _source_selection_refusal(self.source_layer.name(), unreadable=True) from e
+
+    def _unfiltered_source(self) -> Optional[QgsVectorLayer]:
+        """A second layer on the data source of the source layer, without its subset; None when it cannot be opened.
+
+        Same way as the SpatiaLite source preparation (spatialite/filter_executor._unfiltered_copy).
+        Opened for each reading, in the task thread, never kept: a layer made in
+        the worker must not outlive it.
+        """
+        layer = self.source_layer
+        try:
+            from qgis.core import QgsProviderRegistry
+            provider = layer.providerType()
+            registry = QgsProviderRegistry.instance()
+            parts = dict(registry.decodeUri(provider, layer.source()))
+            for key in ('subset', 'sql', 'filter'):
+                parts.pop(key, None)
+            uri = registry.encodeUri(provider, parts) if parts else layer.source()
+            copy = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider)
+            if copy.isValid() and copy.subsetString():
+                copy.setSubsetString('')
+            if copy.isValid() and not copy.subsetString():
+                return copy
+        except Exception as exc:  # nosec B110 - read through the layer instead
+            logger.debug(f"   Unfiltered reading of {layer.name()} unavailable: {exc}")
+        logger.warning(f"   ⚠️ {layer.name()} cannot be read without its current filter")
+        return None
+
+    def check_source_selection(self) -> None:
+        """Refuse, before any target, a selection that keeps no source feature or cannot be read.
+
+        2026-11-12 (review): without any feature sent, the distant PostgreSQL
+        filters are made of the selection: its SQL (PATH 2) or the keys read from
+        its QGIS expression (PATH 3A). One keeping nothing emptied every target
+        with no word (FALSE, or SQL matching nothing), one QGIS could not read
+        too (PATH 3A), while SpatiaLite / OGR refuse both while preparing the
+        source geometry (SourceSelectionError). The refusal must come before the
+        first target: a refused filter only drops the subset queued for the
+        source (FilterEngineTask.execute_filtering).
+
+        The selection is read as PATH 3A reads it (_features_of_the_selection),
+        one feature at most. Nothing is read when features were sent (PATH 1: the
+        same lookups as _prepare_source_filter, ATTEMPT 1 to 3) or when no
+        selection was recorded (all features / field-based modes, a key list).
+
+        Raises:
+            SourceSelectionError: The selection keeps no feature or cannot be read.
+        """
+        if not self._selection_qgis_expression():
+            return
+        task = self.task_parameters.get('task', {})
+        if task.get('features') or task.get('feature_fids') or self.source_layer.selectedFeatureCount() > 0:
+            return
+        if not self._features_of_the_selection(limit=1):
+            logger.warning("   ⚠️ The source selection keeps no feature: nothing is filtered")
+            raise _source_selection_refusal(self.source_layer.name())
+
+    def _empty_selection_filter(self) -> Optional[str]:
+        """The source filter when the selection read keeps no feature (PATH 3A).
+
+        2026-11-12: None means every source feature, so a selection keeping none
+        filtered the targets by the whole source. The selection of this filter
+        then matches no source feature, as PATH 2 does with an empty selection.
+        Without a recorded selection the former None stays.
+        """
+        return 'FALSE' if self._selection_qgis_expression() else None
 
     def _generate_fid_filter(self, task_features: List[Any], backend_name: str = 'postgresql') -> Optional[str]:
         """
