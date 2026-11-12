@@ -1043,6 +1043,26 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Receptes</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Oferir totes les eines al model local</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Només les eines que filtren, per a un ordinador lent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Marcat, el model local només rep les eines que llegeixen i filtren el projecte: aproximadament la meitat per llegir a cada petició. Mesurat amb qwen3.5:4b, totes les eines van respondre igual de bé o millor.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Desactivat, el model local rep les eines que llegeixen i filtren el projecte: caben en una GPU de 8 GB. Totes les eines necessiten aproximadament el doble de memòria.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Desa l'última sol·licitud com a recepta…</translation>

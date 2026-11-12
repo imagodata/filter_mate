@@ -1043,6 +1043,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>الوصفات</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>إتاحة كل الأدوات للنموذج المحلي</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>أدوات التصفية فقط، لحاسوب بطيء</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>عند التحديد، لا يحصل النموذج المحلي إلا على أدوات قراءة المشروع وتصفيته: نحو نصف ما يُقرأ في كل طلب. وبالقياس مع qwen3.5:4b، أجابت كل الأدوات بالجودة نفسها أو أفضل.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>عند تعطيله، يحصل النموذج المحلي على أدوات قراءة المشروع وتصفيته فقط: تكفيها بطاقة رسومية بسعة 8 غيغابايت. أما كل الأدوات فتحتاج نحو ضعف الذاكرة.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>حفظ آخر طلب كوصفة…</translation>

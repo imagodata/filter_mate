@@ -1043,6 +1043,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>สูตร</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>ให้เครื่องมือทั้งหมดแก่โมเดลในเครื่อง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>เฉพาะเครื่องมือกรอง สำหรับคอมพิวเตอร์ที่ช้า</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>เมื่อเลือก โมเดลในเครื่องจะได้เฉพาะเครื่องมือที่อ่านและกรองโครงการ ทำให้ต้องอ่านน้อยลงราวครึ่งหนึ่งในแต่ละคำขอ จากการวัดด้วย qwen3.5:4b เครื่องมือทั้งหมดตอบได้ดีเท่ากันหรือดีกว่า</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>เมื่อปิด โมเดลในเครื่องจะได้เฉพาะเครื่องมือที่อ่านและกรองโครงการ ซึ่งพอดีกับ GPU 8 GB เครื่องมือทั้งหมดต้องใช้หน่วยความจำประมาณสองเท่า</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>บันทึกคำขอล่าสุดเป็นสูตร…</translation>
