@@ -302,6 +302,24 @@ def test_target_operator_is_the_tasks(operator):
     assert orchestrator.task_parameters['_current_combine_operator'] == operator
 
 
+@pytest.mark.parametrize("subset", [
+    "coalesce(\"nom\",'')='route'",                   # the native SQLite translation writes COALESCE("nom", '')
+    "COALESCE(\"nom\", '') = 'route' AND \"a\" > 1",
+    "CASE WHEN \"a\" > 1 THEN true ELSE false END",
+    "(\"a\" = 1 AND TRUE)",
+])
+def test_a_filter_that_looks_like_a_style_is_combined(subset):
+    """2026-11-12: the style patterns matched these real filters, which were replaced without a word."""
+    orchestrator = _orchestrator_with_operator("AND")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (subset, "AND")
+
+
+@pytest.mark.parametrize("subset", ["coalesce(\"nom\", '')", "\"nom\"", "concat(\"a\", \"b\")"])
+def test_a_display_expression_is_still_replaced(subset):
+    orchestrator = _orchestrator_with_operator("AND")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (None, None)
+
+
 @pytest.mark.parametrize("operator", ["AND", "OR", "AND NOT", None])
 def test_a_target_without_filter_gets_the_operator(operator):
     """2026-11-12: (None, operator), so that AND NOT writes NOT (new) on a target without a filter."""
