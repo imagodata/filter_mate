@@ -43,7 +43,7 @@ protected_layers, chat_controller, mcp_bridge = _load()
 
 class TestProtectionFailsClosed:
     def test_favorites_that_cannot_be_read_are_not_taken_for_none(self, monkeypatch):
-        monkeypatch.setattr(protected_layers, "read_ids", lambda project=None: ["cadastre_id"])
+        monkeypatch.setattr(protected_layers, "read_ids", lambda project=None, strict=False: ["cadastre_id"])
         offline = types.ModuleType("operations")
 
         def favorite_layers(_favorite_id):
@@ -56,8 +56,30 @@ class TestProtectionFailsClosed:
         policy = PermissionPolicy(protector=protection)
         assert policy.protection_refusal("apply_favorite", {"favorite_id": "fav-1"}) == PROTECTION_UNREADABLE
 
+    @pytest.mark.parametrize("stored", ['["cadastre_id"', '{"cadastre_id": 1}', '"cadastre_id"', '["a", 3]'])
+    def test_an_entry_that_cannot_be_read_refuses_a_change(self, monkeypatch, stored):
+        project = SimpleNamespace(readEntry=lambda scope, key, default: (stored, True), mapLayer=lambda reference: None,
+                                  mapLayersByName=lambda reference: [])
+        monkeypatch.setattr(protected_layers, "QgsProject", SimpleNamespace(instance=lambda: project))
+        protection = protected_layers.ProjectProtection()
+        with pytest.raises(ValueError):
+            protection.name_of("cadastre")
+        assert PermissionPolicy(protector=protection).protection_refusal("remove_layers", {"layers": ["routes"]}) \
+            == PROTECTION_UNREADABLE
+        assert isinstance(protected_layers.read_ids(project), list)  # the settings still open, with what reads
+
+    def test_writing_again_mends_an_entry_that_cannot_be_read(self):
+        writes = []
+        project = SimpleNamespace(readEntry=lambda scope, key, default: ('["cadastre_id"', True),
+                                  writeEntry=lambda scope, key, value: writes.append(("write", value)),
+                                  removeEntry=lambda scope, key: writes.append(("remove",)))
+        protected_layers.write_ids([], project)
+        assert writes == [("remove",)]  # nothing ticked: the broken entry goes
+        protected_layers.write_ids(["routes_id"], project)
+        assert writes[-1] == ("write", '["routes_id"]')
+
     def test_nothing_protected_does_not_read_the_favorites(self, monkeypatch):
-        monkeypatch.setattr(protected_layers, "read_ids", lambda project=None: [])
+        monkeypatch.setattr(protected_layers, "read_ids", lambda project=None, strict=False: [])
         assert protected_layers.ProjectProtection().favorite_layers("fav-1") == []
 
     def test_the_controller_refuses_a_change_it_cannot_check_and_lets_a_read_run(self):

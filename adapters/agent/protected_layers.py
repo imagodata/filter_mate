@@ -15,21 +15,32 @@ SCOPE = "FilterMateAgent"
 KEY = "protected_layers"
 
 
-def read_ids(project=None) -> List[str]:
+def read_ids(project=None, strict: bool = False) -> List[str]:
+    """The ids kept in the project. An entry that cannot be read (cut, not a list of texts) raises ValueError when
+    ``strict`` (what the agent is refused by), and reads as what it holds of ids otherwise (what the settings show).
+    """
     project = project or QgsProject.instance()
     stored, _found = project.readEntry(SCOPE, KEY, "")
     try:
         value = json.loads(stored) if stored else []
     except (ValueError, RecursionError):
-        return []
+        value = None
+    readable = isinstance(value, list) and all(isinstance(item, str) for item in value)
+    if strict and not readable:
+        raise ValueError("the layers protected from the agent cannot be read in this project")
     return [item for item in value if isinstance(item, str)] if isinstance(value, list) else []
 
 
 def write_ids(ids: Sequence[str], project=None) -> None:
-    """Keep ``ids`` in the project, saved with it; nothing written when nothing changes."""
+    """Keep ``ids`` in the project, saved with it; nothing written when nothing changes, an entry that cannot be read
+    written again."""
     project = project or QgsProject.instance()
     wanted = sorted(set(ids))
-    if wanted == sorted(read_ids(project)):
+    try:
+        current = sorted(read_ids(project, strict=True))
+    except ValueError:
+        current = None
+    if wanted == current:
         return
     if wanted:
         project.writeEntry(SCOPE, KEY, json.dumps(wanted))
@@ -38,11 +49,14 @@ def write_ids(ids: Sequence[str], project=None) -> None:
 
 
 class ProjectProtection:
-    """The protected layers of the open project, read at each call: the user may change them at any time."""
+    """The protected layers of the open project, read at each call: the user may change them at any time.
+
+    An entry that cannot be read raises: the policy refuses the change (PROTECTION_UNREADABLE).
+    """
 
     def name_of(self, reference: str) -> Optional[str]:
         project = QgsProject.instance()
-        ids = set(read_ids(project))
+        ids = set(read_ids(project, strict=True))
         if not ids:
             return None
         layer = project.mapLayer(reference)
@@ -54,7 +68,7 @@ class ProjectProtection:
 
     def names(self) -> List[str]:
         project = QgsProject.instance()
-        return [layer.name() for layer in (project.mapLayer(layer_id) for layer_id in read_ids(project))
+        return [layer.name() for layer in (project.mapLayer(layer_id) for layer_id in read_ids(project, strict=True))
                 if layer is not None]
 
     def favorite_layers(self, favorite_id: str) -> List[str]:
@@ -63,7 +77,7 @@ class ProjectProtection:
         Raises whatever stops the favorites from being read: the policy then refuses the favorite, never runs it
         unchecked.
         """
-        if not read_ids():
+        if not read_ids(strict=True):
             return []  # nothing protected: the favorite is not even read
         from ..public_api.operations import favorite_layers
         return [layer.id() for layer in favorite_layers(favorite_id)]
