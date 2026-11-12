@@ -28,7 +28,7 @@ cannot be redone once undone (it would come back empty); both say so. The layers
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, FrozenSet, List, Optional, Sequence, Set, Tuple
 
 from qgis.core import QgsLayerDefinition, QgsLayerTree, QgsProject, QgsReadWriteContext, QgsVectorLayer
 from qgis.PyQt.QtXml import QDomDocument
@@ -438,13 +438,25 @@ class EffectsRecorder:
         return tuple(effects)
 
 
-def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool) -> Tuple[List[str], List[str]]:
-    """Undo (or apply again) what a turn did beside the filters: names of what changed, and of what could not."""
+# What changes a layer itself (protected layers are left as they are); a selection or visibility only shows it.
+_LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "current_style", "edits"})
+
+
+def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool,
+                  keep: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str]]:
+    """Undo (or apply again) what a turn did beside the filters: names of what changed, and of what could not.
+
+    What would change a layer whose id is in ``keep`` (protected from the agent) is left as it is.
+    """
     project = QgsProject.instance()
     done: List[str] = []
     left: List[str] = []
     for effect in (reversed(effects) if undo else effects):
         kind, layer_id = effect[0], effect[1]
+        if kind in _LAYER_CHANGES and layer_id in keep:
+            layer = project.mapLayer(layer_id)
+            left.append(layer.name() if layer is not None else (effect[4] if len(effect) > 4 else layer_id))
+            continue
         try:
             if kind in ("added", "removed"):
                 definition, place = effect[2], effect[3]

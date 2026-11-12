@@ -808,6 +808,11 @@ Do you agree?</translation>
         <translation>Step {} was not run: it would change a layer you protected from the agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Step {} was not run: the layers you protected from the agent could not be read ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Step {} was not run: you turned its tool off for the agent ({}).</translation>

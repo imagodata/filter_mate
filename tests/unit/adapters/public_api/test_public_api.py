@@ -351,10 +351,19 @@ class TestFilterMatePublicAPIFindsALayerById:
         first.setSubsetString.assert_not_called()
         api.filter_cleared.emit.assert_called_once_with("communes", "external")
 
-    def test_an_id_of_another_kind_is_read_as_a_name(self, mock_plugin):
-        vector = _make_layer("mnt")
-        api, result = self._run(mock_plugin, lambda api: api.apply_filter("mnt", "id = 1"),
-                                {"mnt": types.SimpleNamespace(name=lambda: "raster")}, {"mnt": [vector]})
+    def test_an_id_of_another_kind_is_never_read_as_a_name(self, mock_plugin):
+        # The protection checks the layer of an id alone: a vector layer named like the id of a raster is not it.
+        vector = _make_layer("mnt_1234")
+        api, result = self._run(mock_plugin, lambda api: api.apply_filter("mnt_1234", "id = 1"),
+                                {"mnt_1234": types.SimpleNamespace(name=lambda: "mnt")}, {"mnt_1234": [vector]})
+        assert result is False
+        api._safe_set_subset.assert_not_called()
+        assert "not found" in api.error_occurred.emit.call_args.args[1].lower()
+
+    def test_a_name_finds_the_first_vector_layer_of_that_name(self, mock_plugin):
+        raster, vector = types.SimpleNamespace(name=lambda: "mnt"), _make_layer("mnt")
+        api, result = self._run(mock_plugin, lambda api: api.apply_filter("mnt", "id = 1"), {},
+                                {"mnt": [raster, vector]})
         assert result is True
         api._safe_set_subset.assert_called_once_with(vector, "id = 1")
 

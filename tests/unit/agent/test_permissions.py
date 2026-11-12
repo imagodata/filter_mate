@@ -259,6 +259,20 @@ class TestProtectedLayers:
                           {"point_cloud_criteria": None}, {"point_cloud_criteria": ""}):
             assert changed_layers("cross_filter", {"source_layer": "s", "target_layers": ["a"], **arguments}) == ["a"]
 
+    def test_an_empty_reference_is_checked_as_qgis_resolves_it(self):
+        # resolve_layer("") finds the first layer whose name is empty: the check must see it too.
+        from core.agent.permissions import changed_layers
+        assert changed_layers("remove_layers", {"layers": [""]}) == [""]
+        assert changed_layers("cross_filter", {"source_layer": "", "target_layers": [""], "filter_source": True}) \
+            == ["", ""]
+        assert changed_layers("set_layer_style", {"layer": ""}) == [""]
+        assert changed_layers("clear_filters", {"layers": []}) is None
+        policy = PermissionPolicy(protector=Protector(""))  # a protected layer whose name is empty
+        for name, arguments in (("remove_layers", {"layers": [""]}), ("geometry_filter", {"target_layers": [""]}),
+                                ("cross_filter", {"source_layer": "x", "target_layers": [""]}),
+                                ("point_cloud_filter", {"layers": [""]})):
+            assert "protected ''" in policy.protection_refusal(name, arguments), name
+
     def test_a_protected_source_masked_or_filtered_by_a_cross_filter_is_refused(self):
         from core.agent.permissions import PROTECTED
         executor = ToolExecutor(chat_tools(), {})
@@ -352,6 +366,39 @@ class TestProtectedFavorites:
         for name, arguments in (("list_layers", {}), ("zoom_to", {"layer": "a"}),
                                 ("cross_filter", {"source_layer": "a", "target_layers": [], "predicates": ["Intersect"]})):
             assert policy.protection_refusal(name, arguments) == "", name
+
+    def test_a_map_theme_that_would_restyle_a_protected_layer_is_refused(self):
+        from core.agent.permissions import PROTECTED, changes_layers
+        read = []
+
+        class WithThemes(Protector):
+            def theme_layers(self, name):
+                read.append(name)
+                return {"Cadastre": ["cadastre_id"], "Routes": ["routes_id"]}.get(name, [])
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithThemes("cadastre"))
+        apply = ToolCallPart("c", "map_theme", {"action": "apply", "name": "Cadastre"})
+        assert executor.verdict(apply, policy) == PROTECTED
+        assert "'cadastre'" in ToolExecutor.refused(apply, policy).content
+        assert executor.verdict(ToolCallPart("c", "map_theme", {"action": "apply", "name": "Routes"}), policy) == RUN
+        read.clear()
+        for action in ("save", "remove", "list"):  # they change no layer: the theme is not even read
+            assert not changes_layers("map_theme", {"action": action, "name": "Cadastre"})
+            assert executor.verdict(ToolCallPart("c", "map_theme", {"action": action, "name": "Cadastre"}), policy) == RUN
+        assert read == []
+
+    def test_removing_a_layer_a_protected_layer_joins_is_refused(self):
+        # QGIS takes a removed layer out of the joins of the layers that join it.
+        class WithJoins(Protector):
+            def layers_joining(self, references):
+                return ["cadastre_id"] if "owners" in references else []
+
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithJoins("cadastre"))
+        assert "'cadastre'" in policy.protection_refusal("remove_layers", {"layers": ["owners"]})
+        assert policy.protection_refusal("remove_layers", {"layers": ["routes"]}) == ""
+        # Editing the joined layer writes nothing in the layer that joins it (upsert and cascade go the other way).
+        assert policy.protection_refusal("update_features", {"layer": "owners", "values": {"a": 1}}) == ""
 
     def test_a_protector_without_favorites_lets_them_run(self):
         executor = ToolExecutor(chat_tools(), {})

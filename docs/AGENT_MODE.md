@@ -230,7 +230,13 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
   a change (`PROTECTION_UNREADABLE`), never let it through. Reading
   one, using it as the source of a cross filter or the table of a join, zooming, selecting or showing it stays
   allowed. Their names go with each request. A favorite is checked on the layers applying it would change (its
-  layer, its remote layers, its clips: `operations.favorite_layers`, found as `apply_favorite` finds them). Not
+  layer, its remote layers, its clips: `operations.favorite_layers`, found as `apply_favorite` finds them); a map
+  theme applied on the layers whose current style or legend items it would change (`layer_tree.theme_changed_layers`,
+  compared with what QGIS records from the map now; a layer of the theme hidden now counts); removing a layer counts
+  as a change of the layers that join it (`permissions.JOINED_CHANGES`: QGIS removes the join). Editing a joined layer
+  does not (an editable join and a cascaded delete write from the layer that holds the join into the joined one);
+  relations (kept by the project, not by a layer) and virtual layers (their query stays, they can no longer read a
+  layer removed) are not counted. Not
   covered: `run_pyqgis` (code, asked at every run).
 - The question of a change the level shows first (a filter at `careful`) says what the tool does and its arguments; a
   tool added later without a text of its own gets the same, instead of the text of an export.

@@ -813,6 +813,11 @@ Egyetért?</translation>
         <translation>A(z) {}. lépés nem futott le: egy olyan réteget módosítana, amelyet az ügynök elől védett ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>A(z) {}. lépés nem futott le: az ügynök elől védett rétegek nem olvashatók ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>A(z) {}. lépés nem futott le: kikapcsolta az eszközét az ügynök számára ({}).</translation>

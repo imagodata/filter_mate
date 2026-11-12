@@ -813,6 +813,11 @@ Adakah anda bersetuju?</translation>
         <translation>Langkah {} tidak dijalankan: ia akan mengubah lapisan yang anda lindungi daripada ejen ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Langkah {} tidak dijalankan: lapisan yang anda lindungi daripada ejen tidak dapat dibaca ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Langkah {} tidak dijalankan: anda mematikan alatnya untuk ejen ({}).</translation>

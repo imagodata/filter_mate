@@ -813,6 +813,11 @@ Czy się zgadzasz?</translation>
         <translation>Krok {} nie został wykonany: zmieniłby warstwę chronioną przez Ciebie przed agentem ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Krok {} nie został wykonany: nie można odczytać warstw chronionych przed agentem ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Krok {} nie został wykonany: wyłączono jego narzędzie dla agenta ({}).</translation>

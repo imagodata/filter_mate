@@ -813,6 +813,11 @@ Godkänner du?</translation>
         <translation>Steg {} kördes inte: det skulle ändra ett lager som du har skyddat mot agenten ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Steg {} kördes inte: lagren som du har skyddat mot agenten kunde inte läsas ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Steg {} kördes inte: du har stängt av dess verktyg för agenten ({}).</translation>

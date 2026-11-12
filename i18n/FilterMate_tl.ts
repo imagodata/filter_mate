@@ -813,6 +813,11 @@ Sumasang-ayon ka ba?</translation>
         <translation>Hindi pinatakbo ang hakbang {}: babaguhin nito ang isang layer na pinrotektahan mo mula sa agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Hindi pinatakbo ang hakbang {}: hindi mabasa ang mga layer na pinoprotektahan mo mula sa agent ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Hindi pinatakbo ang hakbang {}: pinatay mo ang tool nito para sa ahente ({}).</translation>

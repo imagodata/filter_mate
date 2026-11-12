@@ -44,6 +44,13 @@ _REFUSED_WORDS = frozenset({
 })
 _OPERATORS = ("!~*", "<>", "!=", "<=", ">=", "||", "::", "!~", "~*", "=", "<", ">", "+", "-", "*", "/", "%", "~",
               "(", ")", ",", ".")
+# Outside quotes, ASCII only: str.isspace / isalpha / isdigit also take U+02BC, a no-break space, U+2028 or another
+# script's digits, which a database or a driver may read otherwise. A name with an accent is quoted.
+_SPACES = frozenset(" \t\r\n")
+_DIGITS = frozenset("0123456789")
+_LETTERS = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_")
+# A conversion to a narrower character set may turn them into a backslash or a quote (best fit).
+_FULL_WIDTH = ("\uff3c", "\uff02", "\uff07")
 
 
 def _quoted_end(expression: str, start: int) -> int:
@@ -60,26 +67,26 @@ def _quoted_end(expression: str, start: int) -> int:
 
 
 def _next_char(expression: str, index: int) -> str:
-    while index < len(expression) and expression[index].isspace():
+    while index < len(expression) and expression[index] in _SPACES:
         index += 1
     return expression[index:index + 1]
 
 
 def _word_end(expression: str, start: int) -> int:
     index = start
-    while index < len(expression) and (expression[index].isalnum() or expression[index] == "_"):
+    while index < len(expression) and (expression[index] in _LETTERS or expression[index] in _DIGITS):
         index += 1
     return index
 
 
 def _number_end(expression: str, start: int) -> int:
     index = start
-    while index < len(expression) and (expression[index].isdigit() or expression[index] == "."):
+    while index < len(expression) and (expression[index] in _DIGITS or expression[index] == "."):
         index += 1
     if expression[index:index + 1] in ("e", "E") and (
-            expression[index + 1:index + 2].isdigit() or expression[index + 1:index + 2] in ("+", "-")):
+            expression[index + 1:index + 2] in _DIGITS or expression[index + 1:index + 2] in ("+", "-")):
         index += 2
-        while index < len(expression) and expression[index].isdigit():
+        while index < len(expression) and expression[index] in _DIGITS:
             index += 1
     return index
 
@@ -105,7 +112,7 @@ def _problem(expression: str, functions: frozenset, variables: frozenset) -> str
     index, depth, previous = 0, 0, ""
     while index < len(expression):
         char = expression[index]
-        if char.isspace():
+        if char in _SPACES:
             index += 1
         elif char == "'" or char == '"':
             end = _quoted_end(expression, index)
@@ -114,17 +121,19 @@ def _problem(expression: str, functions: frozenset, variables: frozenset) -> str
             if "\\" in expression[index:end]:
                 # Where a backslash escapes a quote (MySQL through OGR), the text or the name would end elsewhere.
                 return "a text value cannot hold a backslash" if char == "'" else "a quoted name cannot hold a backslash"
+            if any(item in expression[index:end] for item in _FULL_WIDTH):
+                return "a quoted text or name cannot hold a full-width backslash or quote"
             if char == '"' and _next_char(expression, end) == "(":
                 return "a quoted name cannot be called as a function"
             index, previous = end, "value"
-        elif char.isdigit():
+        elif char in _DIGITS:
             index, previous = _number_end(expression, index), "value"
         elif char == "$" and variables:
             end = _word_end(expression, index + 1)
             if expression[index:end].lower() not in variables:
                 return f"the variable {expression[index:end]} is not accepted"
             index, previous = end, "value"
-        elif char.isalpha() or char == "_":
+        elif char in _LETTERS:
             end = _word_end(expression, index)
             word = expression[index:end].lower()
             if expression[end:end + 1] in ("'", '"'):

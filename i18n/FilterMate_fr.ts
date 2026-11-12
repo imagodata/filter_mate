@@ -818,6 +818,11 @@ Do you agree?</source>
         <translation>L'étape {} n'a pas été exécutée : elle changerait une couche que vous avez protégée de l'agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>L'étape {} n'a pas été exécutée : les couches que vous avez protégées de l'agent n'ont pas pu être lues ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>L'étape {} n'a pas été exécutée : vous avez coupé son outil pour l'agent ({}).</translation>

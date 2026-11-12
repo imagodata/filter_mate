@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: θα άλλαζε ένα επίπεδο που έχετε προστατέψει από τον πράκτορα ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Το βήμα {} δεν εκτελέστηκε: τα επίπεδα που προστατέψατε από τον πράκτορα δεν μπόρεσαν να διαβαστούν ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: απενεργοποιήσατε το εργαλείο του για τον πράκτορα ({}).</translation>
