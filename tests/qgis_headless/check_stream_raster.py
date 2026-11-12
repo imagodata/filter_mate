@@ -516,7 +516,7 @@ def main():
     app = QgsApplication([], False)
     app.initQgis()
     sys.path.append(os.path.join(QgsApplication.pkgDataPath(), 'python', 'plugins'))
-    with tempfile.TemporaryDirectory(prefix='fm_stream_raster_') as directory:
+    with tempfile.TemporaryDirectory(prefix='fm_stream_raster_', ignore_cleanup_errors=True) as directory:
         folder = Path(directory)
         os.environ['FILTERMATE_LOG_DIR'] = str(folder / 'logs')
         gdal.UseExceptions()

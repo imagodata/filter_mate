@@ -36,7 +36,7 @@ def main():
     app.initQgis()
     main_thread = threading.get_ident()
     root = Path(__file__).resolve().parents[2]
-    with tempfile.TemporaryDirectory(prefix='fm_automation_') as directory:
+    with tempfile.TemporaryDirectory(prefix='fm_automation_', ignore_cleanup_errors=True) as directory:
         folder = Path(directory)
         os.environ['FILTERMATE_LOG_DIR'] = str(folder / 'logs')
         plugins = folder / 'plugins'

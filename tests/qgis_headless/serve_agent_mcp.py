@@ -20,6 +20,17 @@ from qgis.PyQt.QtCore import QCoreApplication  # noqa: E402
 from qgis.PyQt.QtWidgets import QLabel, QToolBox  # noqa: E402
 
 
+def _link(source, target):
+    """A link to the plugin folder: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        os.symlink(source, target)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", target, source], check=True, capture_output=True)
+
+
 def make_layer(path):
     memory = QgsVectorLayer("Point?crs=EPSG:2154&field=pop:integer", "m", "memory")
     features = []
@@ -70,7 +81,7 @@ if __name__ == "__main__":
     app = QgsApplication([], True)
     app.initQgis()
     package_root = tempfile.mkdtemp()
-    os.symlink(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
+    _link(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
     sys.path.insert(0, package_root)
     sys.dont_write_bytecode = True
     main()

@@ -545,7 +545,7 @@ def check_async_controller(layer):
         controller.deleteLater()
 
 
-with tempfile.TemporaryDirectory(prefix="fm_raster_interactions_") as folder:
+with tempfile.TemporaryDirectory(prefix="fm_raster_interactions_", ignore_cleanup_errors=True) as folder:
     layer = make_layer(folder)
     failures = []
     for name, check in (("numeric expressions, zero/NoData, histogram, presets and restoration", check_numeric_quantity),

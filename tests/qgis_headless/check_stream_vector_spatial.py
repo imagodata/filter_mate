@@ -220,9 +220,11 @@ def automatic(task):
           str(queued) + str(builder.user_warnings))
     success, queued, builder = filter_keys(layer, source_polygon(), limits={"max_features": 1},
                                            combine_operator="AND NOT")
-    check("partial AND NOT without a previous filter lists the partial keys with its warning",
-          success and queued == ['"id" IN (1)']
-          and any("Partial result" in warning for warning in builder.user_warnings), str(queued))
+    # 2026-11-12: AND NOT without a previous filter is NOT (keys), the whole layer minus the matching features: with
+    # partial keys the matching features never read would stay, so it is refused as with a previous filter.
+    check("partial AND NOT without a previous filter refused before applying",
+          not success and not queued and "AND NOT would keep the features not read" in str(builder.last_error),
+          str(queued) + str(builder.user_warnings))
     success, queued, builder = filter_keys(layer, source_polygon(), old_subset='"label" = \'other\'',
                                            combine_operator="AND NOT")
     check("complete AND NOT keeps the previous filter minus every matching row",

@@ -36,7 +36,7 @@ app.initQgis()
 
 
 def run():
-    with tempfile.TemporaryDirectory(prefix='fm_capture_smoke_') as folder:
+    with tempfile.TemporaryDirectory(prefix='fm_capture_smoke_', ignore_cleanup_errors=True) as folder:
         cache.set_cache_root(str(Path(folder) / 'cache'))
         original = str(Path(folder) / 'values.tif')
         ds = gdal.GetDriverByName('GTiff').Create(original, 200, 100, 2, gdal.GDT_Float32)
@@ -221,7 +221,7 @@ def public_wcs():
         target.release()
         cache.settle([captured] + target.outputs)
 
-    with tempfile.TemporaryDirectory(prefix='fm_public_wcs_') as folder:
+    with tempfile.TemporaryDirectory(prefix='fm_public_wcs_', ignore_cleanup_errors=True) as folder:
         cache.set_cache_root(str(Path(folder) / 'cache'))
         from qgis.PyQt.QtCore import QThread
 
