@@ -10275,6 +10275,19 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
     </message>
 </context>
 <context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>De selectie van '{0}' kan niet worden geëvalueerd: er is niets gefilterd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>De selectie van '{0}' behoudt geen enkel object: er is niets gefilterd.</translation>
+    </message>
+</context>
+<context>
     <name>SqlUtils</name>
     <message>
         <location filename="../infrastructure/database/sql_utils.py" line="243"/>
