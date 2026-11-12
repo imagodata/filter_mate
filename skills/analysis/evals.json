@@ -1,0 +1,138 @@
+{
+ "cases": [
+  {
+   "id": "processing_buffer_layer",
+   "prompt": "Crée une nouvelle couche avec une zone tampon de 500 m autour des routes.",
+   "expect": [
+    [
+     {
+      "tool": "run_algorithm",
+      "args": {
+       "algorithm_id": "native:buffer",
+       "parameters": {
+        "INPUT": "routes",
+        "DISTANCE": 500
+       }
+      },
+      "call_args": {
+       "algorithm_id": "native:buffer",
+       "parameters": {
+        "INPUT": "routes",
+        "DISTANCE": 500
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "export_layers",
+    "remove_layers"
+   ]
+  },
+  {
+   "id": "processing_centroids",
+   "prompt": "Make a layer of the centroids of the communes.",
+   "expect": [
+    [
+     {
+      "tool": "run_algorithm",
+      "args": {
+       "algorithm_id": "native:centroids",
+       "parameters": {
+        "INPUT": "communes"
+       }
+      },
+      "call_args": {
+       "algorithm_id": "native:centroids",
+       "parameters": {
+        "INPUT": "communes"
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "export_layers",
+    "remove_layers"
+   ]
+  },
+  {
+   "id": "field_computed",
+   "prompt": "Ajoute aux bâtiments un champ hauteur_etage, la hauteur divisée par le nombre d'étages.",
+   "expect": [
+    [
+     {
+      "tool": "add_field",
+      "args": {
+       "layer": "batiments",
+       "name": "hauteur_etage"
+      },
+      "call_args": {
+       "layer": "batiments",
+       "name": "hauteur_etage",
+       "type": "decimal",
+       "formula": "\"hauteur\" / \"nb_etages\""
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "update_features",
+    "run_pyqgis",
+    "apply_filter"
+   ]
+  },
+  {
+   "id": "join_parcels",
+   "prompt": "Joins les communes aux parcelles par le code INSEE, juste le nom de la commune.",
+   "expect": [
+    [
+     {
+      "tool": "join_layers",
+      "args": {
+       "layer": "parcelles",
+       "join_layer": "communes"
+      },
+      "call_args": {
+       "layer": "parcelles",
+       "join_layer": "communes",
+       "target_field": "commune",
+       "join_field": "insee",
+       "fields": [
+        "nom"
+       ]
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "run_algorithm",
+    "add_field",
+    "update_features"
+   ]
+  },
+  {
+   "id": "analysis_filter_not_layer",
+   "trap": true,
+   "prompt": "Garde seulement les bâtiments industriels.",
+   "expect": [
+    [
+     {
+      "tool": "apply_filter",
+      "args": {
+       "layer_name": "batiments"
+      },
+      "call_args": {
+       "layer_name": "batiments",
+       "expression": "\"usage\" = 'Industriel'"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "run_algorithm",
+    "add_field"
+   ]
+  }
+ ]
+}

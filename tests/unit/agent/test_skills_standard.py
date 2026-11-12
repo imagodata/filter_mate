@@ -58,14 +58,14 @@ def test_every_skill_follows_the_standard(name):
             assert _NEGATION.search(sentence), sentence
 
 
-@pytest.mark.parametrize("name", sorted(SKILLS))
-def test_every_skill_has_its_cases_one_of_them_a_trap(name):
+@pytest.mark.parametrize("name", sorted(name for name, skill in SKILLS.items() if "chat" in skill.audience))
+def test_every_skill_of_the_chat_has_its_cases_one_of_them_a_trap(name):
     cases = json.loads((ROOT / "skills" / name / "evals.json").read_text(encoding="utf-8"))["cases"]
     assert len(cases) >= 3
     assert any(case.get("trap") and case.get("forbid") for case in cases)
     shared = json.loads((ROOT / "scripts" / "agent_eval_cases.json").read_text(encoding="utf-8"))["cases"]
-    ids = [case["id"] for case in shared] + [case["id"] for skill in SKILLS for case in json.loads(
-        (ROOT / "skills" / skill / "evals.json").read_text(encoding="utf-8"))["cases"]]
+    ids = [case["id"] for case in shared] + [case["id"] for path in (ROOT / "skills").glob("*/evals.json")
+                                             for case in json.loads(path.read_text(encoding="utf-8"))["cases"]]
     assert len(ids) == len(set(ids))
 
 

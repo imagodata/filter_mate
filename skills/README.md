@@ -67,8 +67,10 @@ comma separated. Any other key is refused.
 
 ## evals.json
 
-`{"cases": [...]}` in the format of `scripts/agent_eval_cases.json`, three cases at least, one of them a trap (marked
-`"trap": true`: what the model must not do, with `forbid`). Run offline with `python scripts/agent_eval.py`, and live
+For a skill of the chat: `{"cases": [...]}` in the format of `scripts/agent_eval_cases.json`, three cases at least,
+one of them a trap (marked
+`"trap": true`: what the model must not do, with `forbid`; `"expert": true` turns the expert mode on). A skill of
+audience `mcp` alone is not played by the bench of the chat. Run offline with `python scripts/agent_eval.py`, and live
 before a change of a skill that matters (see `docs/AGENT_MODE.md`).
 
 ## Skills from elsewhere
