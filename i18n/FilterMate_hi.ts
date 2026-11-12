@@ -963,6 +963,11 @@ Do you agree?</source>
         <translation>चरण {} नहीं चला: आपने एजेंट के लिए उसका टूल बंद कर दिया है ({})।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>चरण {step} नहीं चलाया गया: यह परत {layer} पर काम करता है जिसे चरण {maker} ने पहली बार बनाया था, और इस बार वह फिर से नहीं बनी।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

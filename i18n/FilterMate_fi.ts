@@ -963,6 +963,11 @@ Hyväksytkö?</translation>
         <translation>Vaihetta {} ei suoritettu: olet poistanut sen työkalun käytöstä agentilta ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Vaihetta {step} ei suoritettu: se käsittelee tasoa {layer}, jonka vaihe {maker} loi ensimmäisellä kerralla, eikä tämä ajo luonut sitä uudelleen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

@@ -144,6 +144,17 @@ couche PG est compilé côté serveur (ILIKE de PostgreSQL), la référence QGIS
   dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :
   `test_no_unscoped_qt_enums` refuse `QgsFeatureRequest.NoGeometry`, écrire `QgsFeatureRequest.Flag.NoGeometry`).
 
+## [2026-11-12] Mode hybride étendu à PostgreSQL (décision utilisateur)
+Les expressions que la traduction PostgreSQL refuse (regexp_match, texte comparé à un nombre, signe d'un NULL…)
+ne prennent plus l'ancienne conversion par regex, fausse sur plusieurs cas (`"code" > 9` sur un texte rendait 0
+entité, `-"pop" IS NULL` une de trop) : liste de clés évaluée par QGIS, mêmes conditions que SQLite. Clé texte
+PostgreSQL écrite SANS collation (une COLLATE refuserait une clé uuid et laisserait l'index de la clé inutilisé ;
+une collation déterministe compare les octets). Contrôle 369 PASS / 0 FAIL (4.2.3 et 3.44, UTF-8 et C) ;
+`check_native_translation.py` passait `primary_key='fid'` en dur (les tables PostGIS ont `id`). Restent sur
+l'ancienne conversion, comme en SQLite : combinaisons OR / AND NOT / remplacement (liste lue à travers l'ancien
+subset ou niée). Limite connue acceptée : la sélection EXPLORING d'une couche PG est compilée côté serveur (ILIKE
+de PostgreSQL : 286 au lieu de 572 pour 'saint') alors que le filtre suit QGIS.
+
 ## [2026-11-12] Mode hybride (SQLite seulement) et durcissement de la traduction native
 - **Hybride** : traduction PARTIAL / NONE sur GeoPackage / SpatiaLite → QGIS évalue l'expression localement entité
   par entité (pas le filtre compilé du provider : QGIS compile `=` sur réels sans sa tolérance) et le subset liste des

@@ -963,6 +963,11 @@ Do you agree?</source>
         <translation>ขั้นตอนที่ {} ไม่ได้ทำงาน: คุณปิดเครื่องมือของขั้นตอนนี้สำหรับเอเจนต์ ({})</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>ไม่ได้เรียกใช้ขั้นตอน {step}: ขั้นตอนนี้ทำงานกับชั้นข้อมูล {layer} ที่ขั้นตอน {maker} สร้างไว้ในครั้งแรก และการเรียกใช้ครั้งนี้ไม่ได้สร้างขึ้นใหม่</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

@@ -963,6 +963,11 @@ Gaat u akkoord?</translation>
         <translation>Stap {} is niet uitgevoerd: u hebt het hulpmiddel ervan uitgezet voor de agent ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Stap {step} is niet uitgevoerd: deze werkt op de laag {layer} die stap {maker} de eerste keer maakte, en deze uitvoering heeft die niet opnieuw gemaakt.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

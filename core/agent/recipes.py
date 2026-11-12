@@ -10,6 +10,11 @@ in the project file, and the panel runs them again in order, with no request to 
 machine and nothing is paid. What a step reads (the selection, the layers by name) is read again at each run, so a
 recipe applied after a new selection filters from that selection.
 
+A step that made layers (a Processing result, a layer added) keeps their ids and names as they were (``made``): a later
+step that worked on such a layer names an id that no longer exists at the next run. The run pairs the layers each step
+makes again with those it made the first time (``pair_made``) and gives the later steps the new ids (``remap``); a step
+that needs a layer this run did not make stops the recipe (``stale_reference``).
+
 Only what changed the project and succeeded is kept: reads are the model's way to find its way, and a refused or
 failed call did nothing. Code (expert mode), the notes and widgets of the agent, its own history and the tools of
 external connectors are never kept: code is read and confirmed at each run by the user, the rest belongs to the
@@ -28,6 +33,8 @@ MAX_STEPS = 30
 MAX_NAME = 60
 MAX_REQUEST = 300
 MAX_LABEL = 120
+MAX_MADE = 20  # layers kept per step as made by it: a Processing call makes a few
+MAX_LAYER_REF = 1000
 # The arguments of every step of a recipe, as JSON: a filter, a style or a Processing call each fit many times over.
 MAX_RECIPE_CHARS = 50_000
 
@@ -63,6 +70,15 @@ LIVE_TOOLS = frozenset({
 })
 FOLLOW_TOOL = "cross_filter"  # what reads a source layer again at each run: a live recipe follows its sources
 
+# The arguments that name layers (by id or name), at any depth; and the Processing parameters, whose values name layers
+# under the names of the algorithm. Only there does the name of a layer made by an earlier step stand for that layer: an
+# id is unique enough to be replaced wherever it is.
+LAYER_KEYS = frozenset({
+    "layer", "layers", "layer_name", "source_layer", "target_layers", "join_layer", "raster", "guide_layer",
+    "example_layer", "extent_layer",
+})
+PROCESSING = ("run_algorithm", "parameters")
+
 
 class RecipeError(ValueError):
     """Why a recipe cannot be kept or run; the message is for the model or the user."""
@@ -77,12 +93,40 @@ def kept(name: str, spec: Any, failed: bool) -> bool:
 
 
 def steps_of(calls: Iterable[Any], tools: Mapping[str, Any]) -> List[Dict[str, Any]]:
-    """The steps of a recipe from the calls of a request: ``(name, arguments, failed, label)`` each, in order."""
+    """The steps of a recipe from the calls of a request, in order.
+
+    Each call is ``(name, arguments, failed, label)``, or ``(name, arguments, failed, label, made)`` where ``made`` lists
+    the layers the call added to the project (``made_layers``).
+    """
     steps = []
-    for name, arguments, failed, label in calls:
+    for call in calls:
+        name, arguments, failed, label = call[:4]
         if kept(name, tools.get(name), failed) and isinstance(arguments, dict):
-            steps.append({"tool": name, "arguments": dict(arguments), "label": plain(label or name, MAX_LABEL)})
+            step = {"tool": name, "arguments": dict(arguments), "label": plain(label or name, MAX_LABEL)}
+            made = _clean_made(call[4] if len(call) > 4 else None)
+            if made:
+                step["made"] = made
+            steps.append(step)
     return steps
+
+
+def _clean_made(made: Any) -> List[Dict[str, str]]:
+    """The layers a step made, as ``[{"id", "name"}]``; what is not a pair of non-empty texts is left out."""
+    if not isinstance(made, (list, tuple)):
+        return []
+    cleaned, seen = [], set()
+    for entry in made:
+        if not isinstance(entry, dict):
+            continue
+        layer_id, name = entry.get("id"), entry.get("name")
+        if not isinstance(layer_id, str) or not isinstance(name, str) or not layer_id or len(layer_id) > MAX_LAYER_REF \
+                or len(name) > MAX_LAYER_REF or layer_id in seen:
+            continue
+        seen.add(layer_id)
+        cleaned.append({"id": layer_id, "name": name})
+        if len(cleaned) >= MAX_MADE:
+            break
+    return cleaned
 
 
 def _clean_step(step: Any) -> Optional[Dict[str, Any]]:
@@ -91,7 +135,124 @@ def _clean_step(step: Any) -> Optional[Dict[str, Any]]:
     name = step["tool"]
     if not _TOOL_NAME.fullmatch(name) or name in NOT_KEPT or name.startswith(CONNECTOR_PREFIX):
         return None
-    return {"tool": name, "arguments": step["arguments"], "label": plain(step.get("label") or name, MAX_LABEL)}
+    cleaned = {"tool": name, "arguments": step["arguments"], "label": plain(step.get("label") or name, MAX_LABEL)}
+    made = _clean_made(step.get("made"))
+    if made:
+        cleaned["made"] = made
+    return cleaned
+
+
+# --- layers made by a step ------------------------------------------------------
+
+def made_layers(before: Iterable[str], after: Mapping[str, str]) -> List[Dict[str, str]]:
+    """The layers of ``after`` (id -> name) whose id was not in ``before``, as a step keeps them.
+
+    The order is the one of ``after``: the project lists its layers by id, so by name, not in the order they came.
+    """
+    known = set(before)
+    return _clean_made([{"id": layer_id, "name": name} for layer_id, name in after.items() if layer_id not in known])
+
+
+def pair_made(made: Sequence[Dict[str, str]], new: Sequence[Dict[str, str]]) -> Dict[str, str]:
+    """``{id the first time: id now}``: the layers a step made the first time, paired with those it made in this run.
+
+    By name (a Processing output keeps its name from run to run). Then, when exactly one layer is left on each side, those
+    two: the one output of an algorithm whose name changed (the language of QGIS, a name given by the user). With more
+    left, nothing tells which is which (the project lists its layers by name), and a wrong pair would send a later step,
+    a deletion maybe, to another layer: they stay without a pair, and a step that needs one stops the recipe.
+    """
+    left = list(new)
+    pairs: Dict[str, str] = {}
+    for old in made:
+        match = next((layer for layer in left if layer["name"] == old["name"]), None)
+        if match is not None:
+            pairs[old["id"]] = match["id"]
+            left.remove(match)
+    alone = [old for old in made if old["id"] not in pairs]
+    if len(alone) == 1 and len(left) == 1:
+        pairs[alone[0]["id"]] = left[0]["id"]
+    return pairs
+
+
+def _names_layers(tool: str, key: str, layer_params: Optional[Iterable[str]]) -> Optional[Iterable[str]]:
+    """At ``key`` of the arguments of ``tool``: True where a text names a layer, the parameters that take layers for
+    the parameters of ``run_algorithm`` (all of them when ``layer_params`` is None), False elsewhere."""
+    if (tool, key) == PROCESSING:
+        return None if layer_params is None else frozenset(layer_params)
+    return key in LAYER_KEYS
+
+
+def _swap(value: Any, ids: Mapping[str, str], names: Mapping[str, str], names_layers: bool) -> Any:
+    if isinstance(value, str):
+        if value in ids:
+            return ids[value]
+        return names[value] if names_layers and value in names else value
+    if isinstance(value, list):
+        return [_swap(item, ids, names, names_layers) for item in value]
+    if isinstance(value, dict):
+        return {key: _swap(item, ids, names, names_layers or key in LAYER_KEYS) for key, item in value.items()}
+    return value
+
+
+def remap(tool: str, arguments: Dict[str, Any], ids: Mapping[str, str], names: Mapping[str, str],
+          layer_params: Optional[Iterable[str]] = None) -> Dict[str, Any]:
+    """``arguments`` of a step of ``tool`` naming the layers made in this run instead of those made the first time.
+
+    ``ids``: ``{id the first time: id now}``, replaced wherever a text is exactly such an id. ``names``: ``{name the
+    first time: id now}``, replaced only where layers are named (``LAYER_KEYS``, the Processing parameters): at the
+    second run two layers of that name are in the project, and a name would read the first one, made the first time.
+    ``layer_params``: the parameters of the algorithm of a ``run_algorithm`` step that take layers (None: all), so that
+    a field or a text that happens to be the name of a layer stays as it is.
+    """
+    if not ids and not names:
+        return dict(arguments)
+    changed = {}
+    for key, value in arguments.items():
+        where = _names_layers(tool, key, layer_params)
+        if isinstance(where, bool):
+            changed[key] = _swap(value, ids, names, where)
+        elif isinstance(value, dict):
+            changed[key] = {name: _swap(item, ids, names, where is None or name in where)
+                            for name, item in value.items()}
+        else:
+            changed[key] = _swap(value, ids, names, where is None)
+    return changed
+
+
+def _texts(value: Any, names_layers: bool):
+    """``(text, names a layer here)`` of every text in ``value``."""
+    if isinstance(value, str):
+        yield value, names_layers
+    elif isinstance(value, list):
+        for item in value:
+            yield from _texts(item, names_layers)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _texts(item, names_layers or key in LAYER_KEYS)
+
+
+def stale_reference(tool: str, arguments: Dict[str, Any], made_ids: Iterable[str], made_names: Iterable[str] = (),
+                    layer_params: Optional[Iterable[str]] = None) -> Optional[str]:
+    """The first layer made by an earlier step the first time, and not this time, that ``arguments`` still name.
+
+    ``made_ids`` wherever they are; ``made_names`` where layers are named, as ``remap`` reads them: the layer of the
+    first time may still be in the project under that name, and the step would quietly work on it.
+    """
+    ids, names = set(made_ids), set(made_names)
+    if not ids and not names:
+        return None
+    for key, value in arguments.items():
+        where = _names_layers(tool, key, layer_params)
+        if isinstance(where, bool):
+            found = _texts(value, where)
+        elif isinstance(value, dict):
+            found = (pair for name, item in value.items() for pair in _texts(item, where is None or name in where))
+        else:
+            found = _texts(value, where is None)
+        for text, names_layer in found:
+            if text in ids or (names_layer and text in names):
+                return text
+    return None
 
 
 def _clean(recipe: Any) -> Optional[Dict[str, Any]]:
@@ -122,8 +283,10 @@ def followed_sources(recipe: Dict[str, Any]) -> List[str]:
 def fingerprint(recipe: Dict[str, Any]) -> str:
     """What a recipe does, as a short hash of its steps: an approval of a live recipe holds for these steps only."""
     import hashlib
-    text = json.dumps([[step["tool"], step["arguments"]] for step in recipe["steps"]], ensure_ascii=False,
-                      sort_keys=True, default=str)
+    # The layers a step made say which layers the later steps work on: part of what the approval holds for. Not there
+    # for the steps without, so that a live recipe approved before keeps its approval.
+    text = json.dumps([[step["tool"], step["arguments"]] + ([step["made"]] if step.get("made") else [])
+                       for step in recipe["steps"]], ensure_ascii=False, sort_keys=True, default=str)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:32]
 
 
@@ -203,7 +366,8 @@ def saved(recipes: Sequence[Dict[str, Any]], name: str, request: str,
                           "widgets, code and connectors are not kept)")
     if len(steps) > MAX_STEPS:
         raise RecipeError(f"a recipe holds {MAX_STEPS} steps at most; this request made {len(steps)}")
-    if len(json.dumps([step["arguments"] for step in steps], ensure_ascii=False, default=str)) > MAX_RECIPE_CHARS:
+    if len(json.dumps([[step["arguments"], step.get("made")] for step in steps], ensure_ascii=False,
+                      default=str)) > MAX_RECIPE_CHARS:
         raise RecipeError("the steps of this request are too long to keep as a recipe")
     kept_recipes = list(recipes)
     for index, recipe in enumerate(kept_recipes):

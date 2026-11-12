@@ -963,6 +963,11 @@ Se strinjate?</translation>
         <translation>Korak {} ni bil izveden: orodje zanj ste izklopili za agenta ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Korak {step} ni bil izveden: deluje na sloju {layer}, ki ga je prvič ustvaril korak {maker}, ta zagon pa ga ni ponovno ustvaril.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

@@ -963,6 +963,11 @@ Você concorda?</translation>
         <translation>A etapa {} não foi executada: você desativou a ferramenta dela para o agente ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>O passo {step} não foi executado: trabalha sobre a camada {layer} que o passo {maker} criou da primeira vez, e esta execução não a voltou a criar.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

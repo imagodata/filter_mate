@@ -963,6 +963,11 @@ Adakah anda bersetuju?</translation>
         <translation>Langkah {} tidak dijalankan: anda mematikan alatnya untuk ejen ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Langkah {step} tidak dijalankan: ia berfungsi pada lapisan {layer} yang dibuat oleh langkah {maker} pada kali pertama, dan larian ini tidak membuatnya semula.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

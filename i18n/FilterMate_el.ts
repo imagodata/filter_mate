@@ -963,6 +963,11 @@ Do you agree?</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: απενεργοποιήσατε το εργαλείο του για τον πράκτορα ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Το βήμα {step} δεν εκτελέστηκε: δουλεύει στο επίπεδο {layer} που δημιούργησε το βήμα {maker} την πρώτη φορά, και αυτή η εκτέλεση δεν το δημιούργησε ξανά.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

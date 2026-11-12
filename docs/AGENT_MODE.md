@@ -315,9 +315,23 @@ nothing is sent, nothing is paid, and it works with no provider set up. `core/ag
   action: the next request tells the model what changed, as for a filter set by hand.
 - What a step reads is read again at each run: a cross filter from the selection filters from the selection of the
   moment, and a layer is found by its name. A step that needs a tool the settings now leave out (attribute values not
-  shared, a source unticked) stops the recipe and says so. Known limit: a step that used a layer an earlier step made
-  (the output of `run_algorithm`, `segment_objects`, `add_layer`), by its id, still names the layer of the first run;
-  by its name, it finds the first layer of that name.
+  shared, a source unticked) stops the recipe and says so.
+- A layer made by a step (the output of `run_algorithm`, `segment_objects`, `add_layer`…) is a new layer at each run,
+  with a new id. Each step keeps the layers it made (`made`: their ids and names, the layers new in the project after
+  the call). At a run, the layers the step makes again are paired with those by name; when exactly one is left on each
+  side (the one output of an algorithm, named in another language), those two. With more left nothing tells which is
+  which, and they stay unpaired rather than send a later step (a deletion maybe) to the wrong layer. The later steps
+  then name the new layers: an id of the first run wherever it is; a name where the arguments name layers (`layer`,
+  `layers`, `source_layer`, `target_layers`, `join_layer`, `raster`… and the parameters of `run_algorithm` that take
+  layers), the last layer made under that name and still there, or renamed by `rename_layer` in the recipe. A later
+  step that names, by id or name, a layer this run did not make again stops the recipe and says which: the layer of
+  the first run may still be there under that name. A step on a made layer is asked alone, once that layer is there,
+  not in the one question of the recipe. A name protected in the file stays protected, even paired with a layer made
+  here. `made` counts in the size of a recipe and in what the approval of a live recipe holds for (`remap`,
+  `pair_made`, `stale_reference` in `core/agent/recipes.py`). A recipe kept before this has no `made` and runs as it
+  did. Limits: a layer added by something else during a step (the user, another plugin, while Processing runs) counts
+  as made by it; a layer made by code or a connector, which are not kept, is not followed; an id inside a longer text
+  (an expression, `aggregate('id', …)`) is not replaced.
 - The recipes go with each request as data: the name and the tools of each one, never their arguments nor the words
   of the file, so the model can name them or forget one (`remove_recipe`). Keeping or forgetting a recipe through the
   agent is undone with the turn (`("recipes", "", before, after)` in `adapters/agent/turn_effects.py`), unless the

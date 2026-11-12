@@ -963,6 +963,11 @@ Godkänner du?</translation>
         <translation>Steg {} kördes inte: du har stängt av dess verktyg för agenten ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Steg {step} kördes inte: det arbetar på lagret {layer} som steg {maker} skapade första gången, och den här körningen skapade det inte igen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

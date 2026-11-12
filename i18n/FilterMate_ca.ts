@@ -963,6 +963,11 @@ Hi esteu d'acord?</translation>
         <translation>El pas {} no s'ha executat: heu desactivat la seva eina per a l'agent ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>El pas {step} no s'ha executat: treballa sobre la capa {layer} que el pas {maker} va crear la primera vegada, i aquesta execució no l'ha tornat a crear.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

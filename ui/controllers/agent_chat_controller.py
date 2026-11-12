@@ -38,9 +38,9 @@ from ...core.agent.permissions import (
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
 from ...core.agent.recipes import (
-    MAX_NAME as RECIPE_MAX_NAME, RecipeError, find as find_recipe, followed_sources, live_problem,
-    plain as recipe_plain, recipes_block, saved as recipe_saved, steps_of as recipe_steps, summary as recipe_summary,
-    with_live, without as recipe_without,
+    MAX_LABEL as RECIPE_MAX_LABEL, MAX_NAME as RECIPE_MAX_NAME, RecipeError, find as find_recipe, followed_sources, live_problem, made_layers,
+    pair_made, plain as recipe_plain, recipes_block, remap as recipe_remap, saved as recipe_saved,
+    stale_reference, steps_of as recipe_steps, summary as recipe_summary, with_live, without as recipe_without,
 )
 from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
@@ -124,6 +124,7 @@ class AgentChatController(QObject):
         self._ask_name = ask_name or (lambda title, text, default: self._name_dialog(parent_widget, title, text, default))
         # The calls of the request under way, and the steps of the last request that changed something: a recipe.
         self._request_calls = []
+        self._layers_before = ()  # the layer ids of the project when the tool under way started
         self._last_steps, self._last_steps_request = [], ""
         self._replaying = False
         self._replay_stop = False
@@ -939,17 +940,34 @@ class AgentChatController(QObject):
         # The steps the user would be asked about, asked together when there are several: one yes for the recipe.
         together = {}
         asked = []
+        ahead_ids, ahead_names = set(), set()  # the layers earlier steps made the first time
         for number, step in enumerate(recipe["steps"], 1):
             call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
             verdict = executor.verdict(call, policy) if call.name in available else RUN
-            if (verdict == ASK or (level == ADVISOR and verdict == REFUSE)) and call.name not in CODE_TOOLS:
+            # A step on a layer an earlier step makes is asked alone, once that layer is there: the question then
+            # names the layer it will change, not the one of the first time.
+            on_made = stale_reference(call.name, call.arguments, ahead_ids, ahead_names)
+            if (verdict == ASK or (level == ADVISOR and verdict == REFUSE)) and call.name not in CODE_TOOLS \
+                    and not on_made:
                 asked.append(call)
+            ahead_ids.update(old["id"] for old in step.get("made", ()))
+            ahead_names.update(old["name"] for old in step.get("made", ()))
+            renamed = self._renamed_to(step["tool"], step["arguments"])
+            if renamed:
+                ahead_names.add(renamed)
         if len(asked) > 1 and not live:
             yes = self.confirm_many(asked, title)
             together = {call.call_id: yes for call in asked}
+        # The layers earlier steps made the first time (id -> (step, name); name -> step), and those they made in this
+        # run instead (id of the first time -> id now; name -> id now, the last layer made under that name).
+        made_before, made_names, new_ids, new_names = {}, {}, {}, {}
         try:
             for number, step in enumerate(recipe["steps"], 1):
-                call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
+                present = set(QgsProject.instance().mapLayers())
+                names_now = {name: layer_id for name, layer_id in new_names.items() if layer_id in present}
+                layer_params = self._layer_params(step)
+                arguments = recipe_remap(step["tool"], step["arguments"], new_ids, names_now, layer_params)
+                call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], arguments)
                 if self._replay_stop:
                     stop = _tr("Stopped before step {}.").format(number)
                     break
@@ -958,9 +976,16 @@ class AgentChatController(QObject):
                         number, step["label"])
                     break
                 verdict = executor.verdict(call, policy)
+                checked = call
+                if verdict != PROTECTED and arguments != step["arguments"]:
+                    # A layer named as protected in the file stays protected: the layers a step made are written in
+                    # the project, and a recipe from someone else could pair a protected name with a copy made here.
+                    first = ToolCallPart(call.call_id, call.name, dict(step["arguments"]))
+                    if executor.verdict(first, policy) == PROTECTED:
+                        verdict, checked = PROTECTED, first
                 if verdict == PROTECTED:
                     from ...core.agent.permissions import PROTECTION_UNREADABLE
-                    if policy.protection_refusal(call.name, call.arguments) == PROTECTION_UNREADABLE:
+                    if policy.protection_refusal(checked.name, checked.arguments) == PROTECTION_UNREADABLE:
                         stop = _tr("Step {} was not run: the layers you protected from the agent could not be read ({}).").format(
                             number, step["label"])
                     else:
@@ -970,6 +995,15 @@ class AgentChatController(QObject):
                 if verdict == TURNED_OFF:
                     stop = _tr("Step {} was not run: you turned its tool off for the agent ({}).").format(
                         number, step["label"])
+                    break
+                missing = stale_reference(call.name, arguments, set(made_before) - set(new_ids),
+                                          set(made_names) - set(names_now), layer_params)
+                if missing:
+                    made_by, made_name = made_before[missing] if missing in made_before else (
+                        made_names[missing], missing)
+                    stop = _tr("Step {step} was not run: it works on the layer {layer} that step {maker} made the "
+                               "first time, and this run did not make it again.").format(
+                        step=number, layer=recipe_plain(made_name, RECIPE_MAX_LABEL), maker=made_by)
                     break
                 if level == ADVISOR and verdict == REFUSE:
                     verdict = ASK
@@ -986,9 +1020,23 @@ class AgentChatController(QObject):
                     stop = _tr("The undo point could not be made, so step {} was not run.").format(number)
                     break
                 self.panel.add_step(self._describe(call))
+                before = tuple(self._project_layers())
                 result = executor.execute(call)
                 if self._abandoned:  # its project closed during the step
                     break
+                if not result.is_error and step.get("made"):
+                    pairs = pair_made(step["made"], made_layers(before, self._project_layers()))
+                    for old in step["made"]:
+                        made_before[old["id"]] = (number, old["name"])
+                        made_names[old["name"]] = number
+                        if old["id"] in pairs:
+                            new_ids[old["id"]] = pairs[old["id"]]
+                            new_names[old["name"]] = pairs[old["id"]]  # the last made under a name, as it read then
+                renamed = None if result.is_error else self._renamed_to(call.name, call.arguments)
+                if renamed and call.arguments.get("layer") in new_ids.values():
+                    # A layer made here, renamed: the later steps name it by its new name.
+                    made_names[renamed] = number
+                    new_names[renamed] = call.arguments["layer"]
                 self.panel.finish_steps(not result.is_error)
                 self._log_action(call, result, self._describe(call))
                 if result.is_error:
@@ -1524,7 +1572,44 @@ class AgentChatController(QObject):
                 if isinstance(change, dict))),
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
+    @staticmethod
+    def _renamed_to(tool: str, arguments) -> str:
+        """The new name a ``rename_layer`` step gives a layer; "" for any other step, or a group renamed."""
+        if tool != "rename_layer" or arguments.get("group") or not isinstance(arguments.get("name"), str):
+            return ""
+        return arguments["name"]
+
+    @staticmethod
+    def _layer_params(step):
+        """The parameters of the algorithm of a ``run_algorithm`` step that take layers; None for another step, or an
+        algorithm Processing does not know here (every parameter is then read as a layer)."""
+        if step["tool"] != "run_algorithm":
+            return None
+        try:
+            from qgis.core import QgsApplication
+            from ...core.agent.processing_policy import LAYER_INPUTS, MULTI_LAYER_INPUTS
+            algorithm = QgsApplication.processingRegistry().algorithmById(str(step["arguments"].get("algorithm_id", "")))
+        except Exception:  # Processing missing: read as layers, the safer side
+            return None
+        if algorithm is None:
+            return None
+        return frozenset(definition.name() for definition in algorithm.parameterDefinitions()
+                         if definition.type() in LAYER_INPUTS | MULTI_LAYER_INPUTS)
+
+    @staticmethod
+    def _project_layers() -> dict:
+        """``{id: name}`` of the layers of the project, as it lists them (by id): what a step made is what is new after
+        it."""
+        names = {}
+        for layer_id, layer in QgsProject.instance().mapLayers().items():
+            try:
+                names[layer_id] = layer.name()
+            except RuntimeError:  # deleted meanwhile
+                continue
+        return names
+
     def on_tool_start(self, call: ToolCallPart) -> None:
+        self._layers_before = tuple(self._project_layers())
         if self._abandoned:
             return
         self.panel.set_status(self._describe(call) + "…")
@@ -1537,7 +1622,8 @@ class AgentChatController(QObject):
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
         self.panel.finish_steps(not result.is_error)
         self._log_action(call, result, self._describe(call))
-        self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call)))
+        made = [] if result.is_error else made_layers(self._layers_before, self._project_layers())
+        self._request_calls.append((call.name, call.arguments, result.is_error, self.describe_call(call), made))
         self.panel.set_status(_tr("Thinking…"))
 
     def _log_action(self, call: ToolCallPart, result: ToolResultPart, label: str, keep: bool = True) -> None:
