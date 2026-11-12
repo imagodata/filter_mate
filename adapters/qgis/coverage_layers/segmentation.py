@@ -17,9 +17,9 @@ import math
 import os
 import sys
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
-from qgis.core import QgsMapRendererSequentialJob, QgsMapSettings, QgsRasterLayer, QgsRectangle, QgsTask
+from qgis.core import QgsMapRendererSequentialJob, QgsRectangle, QgsTask
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QSize, QThread, QTimer
 from qgis.PyQt.QtGui import QColor, QImage
 
@@ -83,7 +83,8 @@ def model_state() -> ModelState:
         logger.debug(f"[FM5] segmentation model folder unknown: {exc}")
         installed = False
     from .. import python_dependencies
-    runtime = sam_model.runtime_available()
+    # An install cut short: found, but its files are not all there; the panel offers to install it again.
+    runtime = sam_model.runtime_available() and python_dependencies.is_intact(sam_model.RUNTIME_MODULE)
     return ModelState(runtime, installed, not runtime and python_dependencies.installing(), not runtime and python_dependencies.install_failed())
 
 
@@ -279,27 +280,53 @@ def window_at(x: float, y: float, raster: Tuple[float, float, float, float], cel
 
 
 def assign_windows(points: List[Tuple[float, float]], raster: Tuple[float, float, float, float], cell: float, size: int,
-                   margin_pixels: int = 128) -> List[Tuple[SegmentationWindow, List[int]]]:
+                   margin_pixels: int = 128, is_canceled: Optional[Callable[[], bool]] = None
+                   ) -> List[Tuple[SegmentationWindow, List[int]]]:
     """Group points into as few windows as greedily found: each point lies ``margin_pixels`` inside its window.
+
+    A point joins the first window opened that holds it. The windows (all of one side) are indexed by
+    their top left corner on a grid of that side: a point is compared with the few whose corner is near,
+    not with every window opened before it (20 000 scattered points: 148 s, then 0.8 s; see
+    ``scripts/sam_window_planning_bench.py``).
+
+    Args:
+        is_canceled: Polled at each point; once True, the windows planned so far are returned.
 
     Returns:
         ``(window, indexes of its points)``, in the order the windows were opened.
     """
     margin = margin_pixels * cell
+    side = float(cell) * size
     windows: List[Tuple[SegmentationWindow, List[int]]] = []
+    corners: dict = {}  # (x_min, y_max) of a window -> its position in windows
+    grid: dict = {}  # cell of the grid holding the corner of windows -> their positions, in opening order
     for index, (x, y) in enumerate(points):
-        for window, members in windows:
-            if (window.x_min + margin <= x <= window.x_min + window.side - margin
-                    and window.y_max - window.side + margin <= y <= window.y_max - margin):
-                members.append(index)
-                break
-        else:
-            window = window_at(x, y, raster, cell, size)
-            same = [members for other, members in windows if (other.x_min, other.y_max) == (window.x_min, window.y_max)]
-            if same:  # a window kept in the raster near its edge: the point is as far inside as it can be
-                same[0].append(index)
-            else:
-                windows.append((window, [index]))
+        if is_canceled is not None and is_canceled():
+            break
+        # The windows holding (x, y) have x_min in [x - side + margin, x - margin] and y_max in [y + margin,
+        # y + side - margin]: their corner lies in these cells of the grid, one more each way for the rounding.
+        first = None
+        for column in range(math.floor((x - side + margin) / side) - 1, math.floor((x - margin) / side) + 2):
+            for row in range(math.floor((y + margin) / side) - 1, math.floor((y + side - margin) / side) + 2):
+                for position in grid.get((column, row), ()):
+                    if first is not None and position >= first:
+                        break
+                    window = windows[position][0]
+                    if (window.x_min + margin <= x <= window.x_min + window.side - margin
+                            and window.y_max - window.side + margin <= y <= window.y_max - margin):
+                        first = position
+                        break
+        if first is not None:
+            windows[first][1].append(index)
+            continue
+        window = window_at(x, y, raster, cell, size)
+        corner = (window.x_min, window.y_max)
+        if corner in corners:  # a window kept in the raster near its edge: the point is as far inside as it can be
+            windows[corners[corner]][1].append(index)
+            continue
+        corners[corner] = len(windows)
+        grid.setdefault((math.floor(window.x_min / side), math.floor(window.y_max / side)), []).append(len(windows))
+        windows.append((window, [index]))
     return windows
 
 
@@ -429,7 +456,8 @@ SERVICE_FINEST_SHARE = 1.0 / 8.0
 
 
 def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float], native_cell: float, size: int,
-                 point_view: float = PROMPT_POINT_VIEW_METRES) -> List[Tuple[SegmentationWindow, List[int]]]:
+                 point_view: float = PROMPT_POINT_VIEW_METRES, is_canceled: Optional[Callable[[], bool]] = None
+                 ) -> List[Tuple[SegmentationWindow, List[int]]]:
     """Windows to encode for ``prompts``, each with the indexes of the prompts it holds.
 
     A prompt needs a cell where its box fills at most :data:`PROMPT_BOX_FILL` of the window (a point:
@@ -440,6 +468,7 @@ def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float
         native_cell: Pixel size of the raster; 0 for a service: the finest cell a prompt needs is then
             used, no finer than :data:`SERVICE_FINEST_SHARE` of a point's view.
         point_view: Ground seen around a point prompt, in raster units.
+        is_canceled: Polled while the windows are planned; once True, what is planned so far is returned.
     """
     if not prompts:
         return []
@@ -466,7 +495,7 @@ def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float
         margin = int(min(size // 2 - 1, math.ceil(half_box) + 32))
         centres = [((prompts[i].box[0] + prompts[i].box[2]) / 2.0, (prompts[i].box[1] + prompts[i].box[3]) / 2.0)
                    if prompts[i].box else (prompts[i].x, prompts[i].y) for i in members]
-        for window, inner in assign_windows(centres, raster, cell, size, margin_pixels=margin):
+        for window, inner in assign_windows(centres, raster, cell, size, margin_pixels=margin, is_canceled=is_canceled):
             planned.append((window, [members[i] for i in inner]))
     return planned
 
@@ -789,6 +818,79 @@ def render_window(settings: Any, layer: Any, window: SegmentationWindow, is_canc
     return job.renderedImage()
 
 
+def raster_look(layer: Any, alpha_band: Optional[int] = None) -> dict:
+    """How ``layer`` is drawn, cloned for a worker (main thread): :func:`open_drawing` draws a source with it.
+
+    Its renderer, and the filters of its pipe the renderer does not carry: brightness and contrast,
+    hue and saturation, resampling.
+
+    Args:
+        alpha_band: The band the renderer reads as transparency, None to keep its own (the original
+            source of a raster filtered by FilterMate has not the alpha band of the derived one).
+    """
+    renderer = layer.renderer().clone() if layer.renderer() is not None else None
+    if renderer is not None and alpha_band is not None and hasattr(renderer, 'setAlphaBand'):
+        renderer.setAlphaBand(int(alpha_band))
+    look = {'renderer': renderer}
+    for key, filter_of in (('brightness', 'brightnessFilter'), ('hue', 'hueSaturationFilter'), ('resampler', 'resampleFilter')):
+        interface = getattr(layer, filter_of)() if hasattr(layer, filter_of) else None
+        look[key] = interface.clone() if interface is not None else None
+    return look
+
+
+def open_drawing(source: str, provider_key: str, look: dict) -> Any:
+    """A pipe drawing ``source`` as ``look`` says (:func:`raster_look`); None when the source cannot be read. Worker.
+
+    A bare provider, not a QgsRasterLayer: a layer computes the statistics of its default renderer
+    when it opens, one more read of the whole coverage (a WCS: a GetCoverage of all of it for each
+    window; see ``target_appliers._ProviderLayer.open``). The windows are read in the coordinates of
+    the layer as they are: a CRS the user set in QGIS on a file whose own is wrong or missing only
+    names them, there is no reprojection to get wrong.
+    """
+    from qgis.core import QgsDataProvider, QgsProviderRegistry, QgsRasterPipe
+    if look.get('renderer') is None:
+        return None
+    provider = QgsProviderRegistry.instance().createProvider(provider_key, source, QgsDataProvider.ProviderOptions())
+    if provider is None or not provider.isValid():
+        return None
+    pipe = QgsRasterPipe()
+    if not pipe.set(provider):
+        return None
+    for key in ('renderer', 'brightness', 'hue', 'resampler'):
+        if look.get(key) is not None and not pipe.set(look[key].clone()):
+            raise RuntimeError(f'the {key} of the layer does not fit its source')
+    return pipe
+
+
+def render_drawing(pipe: Any, window: SegmentationWindow, is_canceled: Any) -> QImage:
+    """The window drawn by ``pipe`` (:func:`open_drawing`) over black, as :func:`render_window` draws a layer.
+
+    The read of a service waits in its provider, which runs an event loop: the cancel reaches it
+    through the feedback.
+    """
+    from qgis.core import QgsRasterBlockFeedback
+    from qgis.PyQt.QtGui import QPainter
+    feedback = QgsRasterBlockFeedback()
+    timer = QTimer()
+    timer.setInterval(100)
+    timer.timeout.connect(lambda: feedback.cancel() if is_canceled() else None)
+    timer.start()
+    try:
+        block = pipe.last().block(1, window.rectangle(), window.size, window.size, feedback)
+    finally:
+        timer.stop()
+    image = QImage(window.size, window.size, QImage.Format.Format_ARGB32_Premultiplied)
+    image.fill(QColor(0, 0, 0, 255))
+    if is_canceled():
+        return image
+    if block is None or block.isEmpty() or feedback.errors():
+        raise RuntimeError('the layer could not be drawn')
+    painter = QPainter(image)
+    painter.drawImage(0, 0, block.image())
+    painter.end()
+    return image
+
+
 def image_to_rgb(image: QImage) -> Any:
     """Copy of the RGB bytes of ``image`` as a height x width x 3 uint8 array."""
     import numpy as np
@@ -803,53 +905,48 @@ def image_to_rgb(image: QImage) -> Any:
 class SegmentationEmbedTask(QgsTask):
     """Render the window of a layer and encode it, off the main thread.
 
-    Built on the main thread with a detached ``layer.renderer().clone()``.
+    Built on the main thread with what draws the layer, cloned (:func:`raster_look`); the source is
+    read as a bare provider in the worker (:func:`open_drawing`), in the coordinates of ``window``.
 
     Args:
+        renderer: A detached ``layer.renderer().clone()``, used when ``look`` is not given.
+        crs: CRS of ``window`` (the layer's).
         callback: ``callback(task, success)`` on the main thread; ``task.embedding``
             holds the result and ``task.error`` the reason of a failure.
+        look: :func:`raster_look` of the layer: its renderer and the filters of its pipe.
     """
 
     def __init__(self, source: str, provider_key: str, renderer: Any, crs: Any, window: SegmentationWindow,
-                 model: Any, callback: Any, context: Any = None) -> None:
+                 model: Any, callback: Any, look: Optional[dict] = None) -> None:
         super().__init__(QCoreApplication.translate('SegmentationEmbedTask', 'FilterMate: preparing the segmentation'),
                          QgsTask.Flag.CanCancel)
         self.source, self.provider_key = source, provider_key
-        self.renderer = renderer
+        self.look = dict(look) if look is not None else {'renderer': renderer}
         self.window = window
         self.model = model
         self.callback = callback
         self.embedding = None
         self.error = ''
         self.model_damaged = False  # the files of the model were refused: downloading them again can repair them
-        self.settings = QgsMapSettings()
-        self.settings.setDestinationCrs(crs)
-        if context is not None:
-            self.settings.setTransformContext(context)
-        self.settings.setOutputSize(QSize(window.size, window.size))
-        self.settings.setExtent(window.rectangle())
-        self.settings.setBackgroundColor(QColor(0, 0, 0, 255))
+        self.stopped = False  # set by the controller instead of a cancel while queued (SegmentationController._stop)
 
-    def _render(self, layer: Any) -> QImage:
-        """The layer alone in the window. Worker thread only (it waits for the job)."""
-        return render_window(self.settings, layer, self.window, self.isCanceled)
+    def _given_up(self) -> bool:
+        return self.stopped or self.isCanceled()
 
     def run(self) -> bool:
-        layer = None
+        pipe = None
         try:
-            if self.isCanceled():
+            if self._given_up():
                 return False
-            layer = QgsRasterLayer(self.source, 'FilterMate segmentation', self.provider_key)
-            if not layer.isValid():
+            pipe = open_drawing(self.source, self.provider_key, self.look)
+            self.look = None
+            if pipe is None:
                 raise RuntimeError('the layer could not be opened')
-            if self.renderer is not None:
-                layer.setRenderer(self.renderer)
-                self.renderer = None
-            image = self._render(layer)
-            if self.isCanceled():
+            image = render_drawing(pipe, self.window, self._given_up)
+            if self._given_up():
                 return False
             self.embedding = self.model.embed(image_to_rgb(image))
-            return not self.isCanceled()
+            return not self._given_up()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
             from . import sam_model
             self.error = str(exc)
@@ -857,8 +954,7 @@ class SegmentationEmbedTask(QgsTask):
             logger.warning(f"[FM5] segmentation window not encoded: {exc}", exc_info=True)
             return False
         finally:
-            self.settings.setLayers([])
-            layer = None
+            pipe = None  # noqa: F841 - its provider goes in the thread that made it
 
     def finished(self, result: bool) -> None:
         callback, self.callback = self.callback, None
@@ -882,12 +978,14 @@ class SimilarObjectsTask(QgsTask):
 
     def __init__(self, source: str, provider_key: str, renderer: Any, crs: Any, model: Any,
                  raster: Tuple[float, float, float, float], cell: float, points: List[Tuple[float, float]],
-                 reference_wkt: str, ratio: Tuple[float, float], shape: bool, callback: Any, context: Any = None,
+                 reference_wkt: str, ratio: Tuple[float, float], shape: bool, callback: Any,
                  existing: Optional[List[str]] = None, reference_features: Any = None,
-                 click_window: Optional[SegmentationWindow] = None, click_embedding: Any = None) -> None:
+                 click_window: Optional[SegmentationWindow] = None, click_embedding: Any = None,
+                 look: Optional[dict] = None) -> None:
         super().__init__(QCoreApplication.translate('SimilarObjectsTask', 'FilterMate: drawing the similar objects'),
                          QgsTask.Flag.CanCancel)
-        self.source, self.provider_key, self.renderer = source, provider_key, renderer
+        self.source, self.provider_key = source, provider_key
+        self.look = dict(look) if look is not None else {'renderer': renderer}  # as SegmentationEmbedTask
         self.model, self.raster, self.cell, self.points = model, raster, cell, list(points)
         self.reference_wkt, self.ratio, self.shape = reference_wkt, tuple(ratio), bool(shape)
         self.existing = list(existing or ())  # objects already in the panel: not drawn twice
@@ -903,25 +1001,22 @@ class SimilarObjectsTask(QgsTask):
         self.encoded = 0
         self.error = ''
         self.model_damaged = False
-        self.settings = QgsMapSettings()
-        self.settings.setDestinationCrs(crs)
-        if context is not None:
-            self.settings.setTransformContext(context)
-        self.settings.setBackgroundColor(QColor(0, 0, 0, 255))
+        self.stopped = False  # as SegmentationEmbedTask
+
+    def _given_up(self) -> bool:
+        return self.stopped or self.isCanceled()
 
     def run(self) -> bool:
         from qgis.core import QgsGeometry, QgsPointXY
         from .geometry_tools import compactness
-        layer = None
+        pipe = None
         try:
-            if self.isCanceled():
+            if self._given_up():
                 return False
-            layer = QgsRasterLayer(self.source, 'FilterMate segmentation', self.provider_key)
-            if not layer.isValid():
+            pipe = open_drawing(self.source, self.provider_key, self.look)
+            self.look = None
+            if pipe is None:
                 raise RuntimeError('the layer could not be opened')
-            if self.renderer is not None:
-                layer.setRenderer(self.renderer)
-                self.renderer = None
             reference = QgsGeometry.fromWkt(self.reference_wkt)
             reference_area, reference_shape = reference.area(), compactness(reference)
             kept: List[Any] = [reference] + [geometry for geometry in (QgsGeometry.fromWkt(wkt) for wkt in self.existing)
@@ -931,18 +1026,18 @@ class SimilarObjectsTask(QgsTask):
                                            self.click_window)
             done = 0
             for window, members, on_click in windows:
-                if self.isCanceled():
+                if self._given_up():
                     return False
                 if on_click:
                     embedding = self.click_embedding
                 else:
-                    image = render_window(self.settings, layer, window, self.isCanceled)
-                    if self.isCanceled():
+                    image = render_drawing(pipe, window, self._given_up)
+                    if self._given_up():
                         return False
                     embedding = self.model.embed(image_to_rgb(image))
                     self.encoded += 1
                 for index in members:
-                    if self.isCanceled():
+                    if self._given_up():
                         return False
                     done += 1
                     self.setProgress(100.0 * done / max(1, len(self.points)))
@@ -963,7 +1058,7 @@ class SimilarObjectsTask(QgsTask):
                             wkt = found.asWkt()
                             self.wkts.append(wkt)
                             self.features[wkt] = features
-            return not self.isCanceled()
+            return not self._given_up()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
             from . import sam_model
             self.error = str(exc) or type(exc).__name__
@@ -971,8 +1066,7 @@ class SimilarObjectsTask(QgsTask):
             logger.warning(f"[FM5] similar objects not drawn: {exc}", exc_info=True)
             return False
         finally:
-            self.settings.setLayers([])
-            layer = None
+            pipe = None  # noqa: F841 - its provider goes in the thread that made it
 
     def _looks_alike(self, embedding: Any, mask: Any, features: Any = None) -> bool:
         """Its SAM features point like the clicked object's (``SIMILAR_APPEARANCE_MIN``); True when either is unknown.
@@ -1005,11 +1099,12 @@ class ModelDownloadTask(QgsTask):
                          QgsTask.Flag.CanCancel)
         self.directory, self.callback, self.error = directory, callback, ''
         self.proxy = qgis_proxy_url()  # read here, on the main thread
+        self.stopped = False  # as SegmentationEmbedTask
 
     def run(self) -> bool:
         from . import sam_model
         try:
-            sam_model.download(self.directory, self.isCanceled, self.setProgress, self.proxy)
+            sam_model.download(self.directory, lambda: self.stopped or self.isCanceled(), self.setProgress, self.proxy)
             return True
         except sam_model.Canceled:
             return False

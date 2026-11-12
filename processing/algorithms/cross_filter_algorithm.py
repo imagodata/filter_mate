@@ -161,7 +161,12 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         return self.finish(report, feedback)
 
     def _segments(self, parameters, context, source, feedback):
-        """WKT of the polygons of the SEGMENTS layer in the CRS of the raster; empty without the layer."""
+        """WKT of the polygons of the SEGMENTS layer in the CRS of the raster; empty without the layer.
+
+        2026-11-12: a cancel request stops the algorithm (the filter ran with the objects read so far), and
+        curved polygons (CurvePolygon, MultiSurface, accepted by the parameter) are written with straight
+        segments, as POLYGON / MULTIPOLYGON (they were refused as segments).
+        """
         polygons = self.parameterAsSource(parameters, self.SEGMENTS, context)
         if polygons is None:
             return []
@@ -170,14 +175,15 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         wkts = []
         for feature in polygons.getFeatures():
             if feedback.isCanceled():
-                break
-            geometry = feature.geometry()
+                raise QgsProcessingException(self.tr("Canceled while the objects were read"))
+            geometry = feature.geometry()  # a copy: the feature of the source is left as it is
             if geometry is None or geometry.isEmpty():
                 continue
             try:
                 geometry.transform(transform)
             except Exception as exc:  # off the domain of the CRS of the raster
                 raise QgsProcessingException(self.tr("An object cannot be read in the CRS of the raster: {0}").format(exc))
+            geometry.convertToStraightSegment()
             wkts.append(geometry.asWkt())
         if not wkts:
             raise QgsProcessingException(self.tr("The objects layer holds no polygon"))

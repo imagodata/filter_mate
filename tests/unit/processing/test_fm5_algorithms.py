@@ -340,3 +340,76 @@ class TestResamplingDisclosure:
         assert len(notices) == int(resampled)
         if resampled:
             assert "Source raster" in notices[0] and "128x64" in notices[0]
+
+
+class _Shape:
+    """A geometry of the SEGMENTS layer: curved until convertToStraightSegment."""
+
+    def __init__(self, wkt):
+        self.wkt = wkt
+
+    def isEmpty(self):
+        return False
+
+    def transform(self, transform):
+        pass
+
+    def convertToStraightSegment(self):
+        self.wkt = self.wkt.replace("MULTISURFACE", "MULTIPOLYGON").replace("CURVEPOLYGON", "POLYGON")
+
+    def asWkt(self):
+        return self.wkt
+
+
+class _ShapeSource:
+    def __init__(self, shapes, feedback, cancel_after=None):
+        self.shapes, self.feedback, self.cancel_after = shapes, feedback, cancel_after
+
+    def sourceCrs(self):
+        return "EPSG:4326"
+
+    def getFeatures(self):
+        for index, shape in enumerate(self.shapes):
+            if self.cancel_after is not None and index >= self.cancel_after:
+                self.feedback.canceled = True
+            yield types.SimpleNamespace(geometry=lambda shape=shape: shape)
+
+
+class _CancelFeedback(_Feedback):
+    canceled = False
+
+    def isCanceled(self):
+        return self.canceled
+
+
+class _TransformContext(_Context):
+    def transformContext(self):
+        return None
+
+
+class TestRasterSegments:
+    """2026-11-12: the SEGMENTS layer of cross_filter_from_raster."""
+
+    def _segments(self, load, monkeypatch, source, feedback):
+        _, cross, _, _ = load()
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsCoordinateTransform", lambda *args: None, raising=False)
+        algorithm = cross.CrossFilterFromRasterAlgorithm()
+        algorithm.initAlgorithm()
+        raster = types.SimpleNamespace(crs=lambda: "EPSG:2154")
+        return algorithm._segments({"SEGMENTS": source}, _TransformContext(), raster, feedback)
+
+    def test_curved_polygons_are_written_with_straight_segments(self, load, monkeypatch):
+        feedback = _CancelFeedback()
+        source = _ShapeSource([_Shape("CURVEPOLYGON(CIRCULARSTRING(0 0, 1 1, 2 0, 1 -1, 0 0))"),
+                               _Shape("MULTISURFACE(CURVEPOLYGON(CIRCULARSTRING(5 5, 6 6, 7 5, 6 4, 5 5)))")], feedback)
+        wkts = self._segments(load, monkeypatch, source, feedback)
+        assert [wkt.split("(")[0] for wkt in wkts] == ["POLYGON", "MULTIPOLYGON"]
+        from fm_processing_test.core.domain.api_requests import segments_from_values
+        assert len(segments_from_values(wkts)) == 2  # accepted as segments (a curved WKT was refused)
+
+    def test_a_cancel_request_stops_instead_of_filtering_with_part_of_the_objects(self, load, monkeypatch):
+        feedback = _CancelFeedback()
+        source = _ShapeSource([_Shape("POLYGON((0 0, 1 0, 1 1, 0 0))") for _ in range(3)], feedback, cancel_after=1)
+        with pytest.raises(Exception, match="Canceled") as caught:
+            self._segments(load, monkeypatch, source, feedback)
+        assert type(caught.value).__name__ == "QgsProcessingException"

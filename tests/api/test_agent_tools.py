@@ -524,6 +524,14 @@ class TestRoutes:
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.post("/layers/style", json={"layer": "communes", "mode": "x"}).status_code == 422
         assert client.post("/layers/style", json={"layer": "nope", "mode": "single"}).status_code == 400
+        # 2026-11-12: NaN / Infinity (sent as JSON literals) and an inverted range are refused
+        for body in ('{"layer": "dem", "mode": "gray", "minimum": NaN, "maximum": 10}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 0, "maximum": Infinity}',
+                     '{"layer": "dem", "mode": "gray", "opacity": NaN}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 10, "maximum": 2}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 5, "maximum": 5}'):
+            response = client.post("/layers/style", content=body, headers={"Content-Type": "application/json"})
+            assert response.status_code == 422, body
         response = client.post("/layers/labels", json={"layer": "communes", "field": "nom", "size": 9})
         assert response.status_code == 200 and response.json()["labels"] is True
         assert client.post("/layers/labels", json={"layer": "communes", "size": 100}).status_code == 422
@@ -690,6 +698,34 @@ class TestCombinedFilters:
         assert combined("", "c = 3", "OR") == ("c = 3", "")
         with pytest.raises(ValueError):
             combined("a = 1", "c = 3", "XOR")
+
+    def test_and_not_without_a_filter_removes_the_condition_from_the_layer(self):
+        """2026-11-12: it applied the condition, the opposite of what AND NOT asks."""
+        from filtermate_api.filter_combine import combined
+        assert combined("", "\"class\" = 'major'", "AND NOT") == ("NOT (\"class\" = 'major')", "")
+        assert combined(None, "c = 3", "and not") == ("NOT (c = 3)", "")
+        assert combined("", "c = 3", "AND") == ("c = 3", "")
+
+    def test_an_empty_condition_keeps_the_filter(self):
+        """2026-11-12: it gave "(a = 1) AND ()"."""
+        from filtermate_api.filter_combine import combined
+        assert combined("a = 1", "  ", "AND") == ("a = 1", "")
+        assert combined("a = 1", "", "AND NOT") == ("a = 1", "")
+        assert combined("", "", "AND NOT") == ("", "")
+
+    def test_the_chat_excludes_from_an_unfiltered_layer(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset=""))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes",
+                            expression="\"class\" = 'major'", operator="AND NOT")
+        assert not error and answer["expression"] == "NOT (\"class\" = 'major')"
+        assert accessor._active["communes"] == answer["expression"]
+
+    def test_rest_and_not_on_an_unfiltered_layer_excludes(self, make_client):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset=""))
+        response = make_client(accessor).post("/filters/apply", json={
+            "layer_name": "communes", "expression": "\"class\" = 'major'", "operator": "AND NOT"})
+        assert response.status_code == 200, response.text
+        assert response.json()["expression"] == "NOT (\"class\" = 'major')"
 
     def test_the_chat_narrows_a_filtered_layer(self, tmp_path):
         accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))

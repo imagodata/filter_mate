@@ -129,6 +129,12 @@ try:
 except ImportError:
     from core.domain.stable_key import FEATURE_ID, FEATURE_ID_KEY, NONE, KeyChoice, choose_key, is_feature_id_key
 
+# 2026-11-12: the filter of a target without one (NOT (new) under AND NOT)
+try:
+    from ....filtermate_core.filter.expression_combiner import combine_without_old_subset
+except ImportError:  # imported from the repository root (tests)
+    from filtermate_core.filter.expression_combiner import combine_without_old_subset
+
 # Providers whose subset is a QGIS expression AND address features by ``$id`` (no fid column).
 FEATURE_ID_EXPRESSION_PROVIDERS = ('memory', 'delimitedtext')
 
@@ -712,11 +718,15 @@ class OGRExpressionBuilder(GeometricFilterPort):
     def _combine_with_old_subset(self, old_subset: Optional[str], combine_operator: Optional[str], new_filter: str) -> str:
         """Same rule as SpatialiteExpressionBuilder.apply_filter (2026-10-17).
 
-        The orchestrator passes an operator only with an attribute filter;
-        a previous spatial filter (geometric or key list) is replaced.
+        The orchestrator passes an operator only with an attribute filter, or
+        with no filter at all; a previous spatial filter (geometric or key
+        list) is replaced. 2026-11-12: with no filter, AND NOT gives
+        ``NOT (new)`` (the new selection taken out of the whole layer).
         """
         if old_subset and combine_operator and not self._is_geometric_filter(old_subset):
             return f"({old_subset}) {combine_operator} ({new_filter})"
+        if not old_subset:
+            return combine_without_old_subset(new_filter, combine_operator)
         return new_filter
 
     def _unfiltered_target(self, layer, old_subset=None, combine_operator=None):

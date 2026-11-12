@@ -283,6 +283,42 @@ class TestOldGeos:
         assert kept.area() == pytest.approx(30.0)
 
 
+class TestAndNotWithoutPreviousArea:
+    """2026-11-12: a target without a previous area under AND NOT keeps its extent minus the new area.
+
+    It kept the new area, the opposite (a vector layer without a filter now keeps NOT (new) alike).
+    """
+
+    def test_the_new_area_is_taken_out_of_the_extent(self, engine):
+        kept = engine._combine_geometry('', 'inside', _east_half(), None, 'AND NOT', fk.FakeRectangle(0, 0, 10, 10))
+        assert kept.area() == pytest.approx(50.0)
+        assert kept.boundingBox().xMaximum() == pytest.approx(5.0)
+
+    def test_nothing_new_keeps_the_whole_extent(self, engine):
+        kept = engine._combine_geometry('', 'inside', fk.FakeGeometry(), None, 'AND NOT', fk.FakeRectangle(0, 0, 10, 10))
+        assert kept.area() == pytest.approx(100.0)
+
+    @pytest.mark.parametrize("operator", ["AND", "OR", None])
+    def test_other_operators_keep_the_new_area(self, engine, operator):
+        new = _east_half()
+        assert engine._combine_geometry('', 'inside', new, None, operator, fk.FakeRectangle(0, 0, 10, 10)) is new
+
+    def test_raster_target_keeps_the_outside_of_the_selection(self, engine, monkeypatch):
+        calls = _warp_recorder(monkeypatch)
+        job = engine.RasterTargetJob(FakeRasterLayer('/data/dem.tif', fk.FakeCrs('EPSG:2154')), 'AND NOT')
+        job.compute(_east_half(), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
+        assert job.outcome.success and calls and not job.outcome.emptied
+        kept = fk.FakeGeometry.fromWkt(job._geometry_wkt)
+        assert kept.area() == pytest.approx(50.0) and kept.boundingBox().xMaximum() == pytest.approx(5.0)
+
+    @pytest.mark.parametrize("previous, operator, keeps", [
+        ('', 'AND NOT', True), ('a', 'AND NOT', True), ('a', 'OR', True), ('', 'OR', False),
+        ('a', 'AND', False), ('a', None, False),
+    ])
+    def test_keeps_previous(self, engine, previous, operator, keeps):
+        assert engine._keeps_previous(previous, operator) is keeps
+
+
 class TestSourceParts:
     def test_parts_kept_alive_with_their_engines(self, engine):
         """A QgsGeos engine points to its geometry: SourceParts keeps the geometries it was given."""
