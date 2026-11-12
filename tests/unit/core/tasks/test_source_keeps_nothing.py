@@ -217,6 +217,35 @@ def test_spatialite_filtered_source_showing_nothing_keeps_no_feature(qgis):
         mod.prepare_spatialite_source_geom(_spatialite_context(mod, _Filtered(), '"class" GLOB \'x*\''))
 
 
+@pytest.mark.parametrize("whole_layer", [True, False])
+def test_spatialite_selection_read_by_the_operator(qgis, monkeypatch, whole_layer):
+    """2026-11-12 (review): with an old subset keeping nothing, a filter that replaces it (or OR) keeps the
+    features of the new selection in the whole layer: read without the old subset, not refused. AND / AND NOT
+    read it through the old subset (as the dock does)."""
+    mod = _load("adapters.backends.spatialite.filter_executor", "adapters/backends/spatialite/filter_executor.py")
+
+    class _Empty(_Layer):
+        def subsetString(self):
+            return '"class" = \'none\''
+
+        def getFeatures(self, request=None):
+            self.requests.append(request)
+            return iter([])
+
+    unfiltered = _Layer(kept=[MagicMock(name="kept outside the old subset")])
+    monkeypatch.setattr(mod, "_unfiltered_copy", lambda layer: unfiltered)
+    context = _spatialite_context(mod, _Empty(), '"class" = \'major\'')
+    context.selection_reads_whole_layer = whole_layer
+    mode, metadata = mod.determine_spatialite_source_mode(context)
+    if not whole_layer:
+        with pytest.raises(_refusal_class(), match="keeps no feature"):
+            mod.prepare_spatialite_source_geom(context)
+        return
+    monkeypatch.setattr(mod, "process_spatialite_geometries", lambda features, context, cancel_check=None: "WKT")
+    result = mod.prepare_spatialite_source_geom(context)
+    assert result.success and result.wkt == "WKT"
+
+
 # ---------------------------------------------------------------------------
 # OGR
 # ---------------------------------------------------------------------------
@@ -312,3 +341,34 @@ def test_orchestrator_shows_the_refusal_and_leaves_the_targets(qgis):
 
     assert result['success'] is False
     assert result['message'] == "The source filter of 'routes' keeps no feature: the target layers were not filtered."
+    assert result['source_refused'] is True
+
+
+def _filter_task_method(name):
+    import ast
+    path = _ROOT / "core" / "tasks" / "filter_task.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for cls in (node for node in tree.body if isinstance(node, ast.ClassDef)):
+        for node in cls.body:
+            if isinstance(node, ast.FunctionDef) and node.name == name:
+                namespace = {}
+                exec(compile(ast.Module(body=[node], type_ignores=[]), str(path), "exec"), namespace)  # nosec B102
+                return namespace[name]
+    raise AssertionError(f"{name} not found")
+
+
+def test_a_refused_source_keeps_its_previous_filter():
+    """2026-11-12 (review): the task failed but its queued source subset was applied (0 feature) with no
+    history entry, so Undo did not bring the source back. A refusal now changes nothing."""
+    execute_filtering = _filter_task_method("execute_filtering")
+    source, other = MagicMock(name="source"), MagicMock(name="other")
+    refusal = {'success': False, 'message': "keeps no feature: nothing was filtered.", 'source_refused': True}
+    task = SimpleNamespace(
+        _filtering_orchestrator=SimpleNamespace(execute_filtering=lambda **kwargs: dict(refusal)),
+        task_parameters={}, source_layer=source, layers={}, layers_count=1, current_predicates={},
+        _initialize_current_predicates=None, execute_source_layer_filtering=None,
+        manage_distant_layers_geometric_filtering=None, isCanceled=None, setProgress=None,
+        _pending_subset_requests=[(source, "NOT (\n\"class\" = 'none'\n)"), (other, "kept")], message=None)
+    assert execute_filtering(task) is False
+    assert task._pending_subset_requests == [(other, "kept")]
+    assert task.message == "keeps no feature: nothing was filtered."

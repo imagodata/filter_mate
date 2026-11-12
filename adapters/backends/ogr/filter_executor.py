@@ -1175,7 +1175,10 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
     from ...qgis.source_capability_probe import capability_for_layer
     capability = capability_for_layer(layer)
     oapif = bool(capability and capability.provider_key == 'oapif')
-    if oapif and old_subset and combine_operator and combine_operator != 'AND':
+    if oapif and ((old_subset and combine_operator and combine_operator != 'AND')
+                  or (combine_operator or '').strip().upper() == 'AND NOT'):
+        # 2026-11-12 (review): AND NOT without a previous filter wrote the keys
+        # themselves there (no NOT of the keys is proved complete on the server)
         return refuse('unverified_filter')
     if oapif and not (old_subset and combine_operator == 'AND'):
         from ...qgis.remote_materializer import unfiltered_snapshot
@@ -1231,13 +1234,11 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
                 return refuse(outcome.reason)
             if complement:
                 return refuse('disjoint_partial')
-            if ((combine_operator or '').strip().upper() == 'AND NOT'
-                    and (not old_subset or not builder._is_geometric_filter(old_subset))):
+            if (combine_operator or '').strip().upper() == 'AND NOT':
                 # 2026-10-20: (old) AND NOT (partial keys) keeps the matching
                 # features never read. Same refusal as the API (VectorTargetJob).
                 # 2026-11-12: so does NOT (partial keys), written without a
-                # previous filter. A previous spatial filter is replaced by the
-                # keys (_combine_with_old_subset): incomplete, not wrong.
+                # previous filter or in place of a spatial one.
                 from qgis.PyQt.QtCore import QCoreApplication
                 builder.last_error = QCoreApplication.translate(
                     'VectorTargetJob', '{0} AND NOT would keep the features not read; the previous filter is kept.'

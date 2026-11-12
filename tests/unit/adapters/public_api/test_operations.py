@@ -1116,7 +1116,7 @@ class TestPointCloudAndNotWithoutFilter:
         return module
 
     @pytest.mark.parametrize("previous, operator, expected", [
-        ("", "AND NOT", "NOT (Classification = 2)"),
+        ("", "AND NOT", "NOT (\nClassification = 2\n)"),
         ("Z > 5", "AND NOT", "(Z > 5) AND NOT (Classification = 2)"),
         ("", "AND", "Classification = 2"),
     ])
@@ -1141,5 +1141,5 @@ class TestPointCloudAndNotWithoutFilter:
                                      selected_only=True, raster_selection=None,
                                      point_cloud_criteria="Classification = 6", source_operator="AND NOT",
                                      filter_source=True, footprint_resolution=2.0, max_pixels=None)
-        assert cloud.subset == "NOT (Classification = 6)"
-        assert job.details["subset"] == "NOT (Classification = 6)"
+        assert cloud.subset == "NOT (\nClassification = 6\n)"
+        assert job.details["subset"] == "NOT (\nClassification = 6\n)"

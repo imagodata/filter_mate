@@ -157,6 +157,7 @@ class SourceGeometryPreparer:
         param_buffer_type=0,
         param_buffer_expression=None,
         predicates=None,
+        selection_reads_whole_layer=False,
     ):
         """Prepare source geometry for Spatialite filtering.
 
@@ -178,6 +179,8 @@ class SourceGeometryPreparer:
             geometry_to_wkt_fn: Callback for WKT conversion.
             predicates: The task's spatial predicates (2026-10-16: part of
                 the source geometry cache key).
+            selection_reads_whole_layer: The source filter replaces the old
+                subset or ORs it (2026-11-12): the selection is read without it.
             get_optimization_thresholds_fn: Callback for optimization thresholds.
 
         Returns:
@@ -215,6 +218,7 @@ class SourceGeometryPreparer:
             geometry_to_wkt=geometry_to_wkt_fn,
             get_optimization_thresholds=get_optimization_thresholds_fn,
             predicates=predicates,
+            selection_reads_whole_layer=selection_reads_whole_layer,
         )
 
         backend_result = self._backend_services.prepare_spatialite_source_geom(context)

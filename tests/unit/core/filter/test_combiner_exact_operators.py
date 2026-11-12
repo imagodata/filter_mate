@@ -179,3 +179,16 @@ def test_and_not_without_old_subset_removes_the_new_selection_from_the_layer(tab
 @pytest.mark.parametrize("operator", ["AND", "OR", None])
 def test_other_operators_without_old_subset_give_the_new_expression(combine, operator):
     assert combine('"a" = 1', operator) == '"a" = 1'
+
+
+@pytest.mark.parametrize("combine", NO_OLD_COMBINERS)
+def test_a_trailing_comment_does_not_swallow_the_closing_parenthesis(table, combine):
+    """2026-11-12 (review): ``NOT ( x -- note )`` commented out its own parenthesis (a syntax error)."""
+    combined = combine('"a" = 1 -- the note of a user', 'AND NOT')
+    assert _fids(table, combined) == _fids(table, "1 = 1") - _fids(table, '"a" = 1')
+
+
+def test_the_cross_filter_combiner_survives_a_trailing_comment(table):
+    from core.domain.cross_filter import combine_subset
+    combined = combine_subset("", '"a" = 1 -- the note of a user', "AND NOT")
+    assert _fids(table, combined) == _fids(table, "1 = 1") - _fids(table, '"a" = 1')

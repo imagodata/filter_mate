@@ -57,6 +57,15 @@ _KEY_LIST_SUBSET_RE = re.compile(
     re.IGNORECASE,
 )
 _CONSTANT_SUBSETS = ("1 = 0", "1 = 1", "1=0", "1=1")
+# Shapes of the style / display expressions a layer subset may hold (see _determine_subset_strategy)
+_STYLE_PATTERNS = tuple(re.compile(pattern, re.IGNORECASE | re.DOTALL) for pattern in (
+    r'AND\s+TRUE\s*\)',                   # Rule-based style
+    r'THEN\s+true\b',                     # CASE THEN true
+    r'THEN\s+false\b',                    # CASE THEN false
+    r"coalesce\s*\([^)]+,\s*'",          # Display expression
+    r'SELECT\s+CASE\s+',                  # SELECT CASE expression
+    r'\(\s*CASE\s+WHEN\s+.+THEN\s+true',  # CASE WHEN ... THEN true
+))
 
 
 class FilterOrchestrator:
@@ -531,22 +540,38 @@ class FilterOrchestrator:
         # (...) or "ogc_fid" IN (...) accumulated as an attribute filter.
         is_fid_only_filter = self._is_key_list_subset(layer, old_subset)
 
-        # A style / display expression: one that returns no boolean (a field, coalesce("nom", '')...).
-        # 2026-11-12: patterns matched real filters, which were then replaced without a word:
-        # coalesce("nom", '') = 'route' (the native SQLite translation writes COALESCE(..., '')),
-        # CASE WHEN ... THEN true, ("a" = 1 AND TRUE).
-        is_style_expression = _is_standalone_display_expression(old_subset)
+        # A style / display expression: one of the shapes these patterns name that
+        # also returns no boolean (coalesce("nom", '') alone). 2026-11-12: the
+        # patterns alone matched real filters (coalesce("nom", '') = 'route', which
+        # the native SQLite translation writes; CASE WHEN ... THEN true), and the
+        # display test alone matched any call or column without a comparison
+        # ("actif", starts_with(...), regexp_match(...)): replaced without a word.
+        is_style_expression = (
+            any(pattern.search(old_subset) for pattern in _STYLE_PATTERNS)
+            and _is_standalone_display_expression(old_subset)
+        )
+
+        # 2026-11-12 (review): a replaced subset went with no operator, and the
+        # backends wrote the new selection itself: under AND NOT a second step
+        # kept what it was asked to remove. AND NOT keeps excluding: the keys of
+        # a previous step are combined, ``(keys) AND NOT (new)`` (plain SQL,
+        # exact); a spatial or style subset is replaced by ``NOT (new)``
+        # (combine_without_old_subset), never by ``new``.
+        and_not = (combine_operator or '').strip().upper() == 'AND NOT'
 
         # Apply strategy
         if is_geometric_filter:
             logger.debug(f"🔄 Existing subset on {layer.name()} contains GEOMETRIC filter - will be REPLACED")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             logger.debug("  → Reason: Cannot nest geometric filters (EXISTS, ST_*, __source)")
-            return None, None
+            return None, (combine_operator if and_not else None)
 
         elif is_fid_only_filter:
             logger.debug(f"🔄 Existing subset on {layer.name()} is FID filter from PREVIOUS spatial step")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
+            if and_not:
+                logger.debug("  → Strategy: AND NOT - the previous keys minus the new selection")
+                return old_subset, combine_operator
             logger.debug("  → Strategy: Keep for cache intersection, but DON'T combine in SQL")
             return old_subset, None  # combine_operator=None tells backend not to combine
 
@@ -554,7 +579,7 @@ class FilterOrchestrator:
             logger.debug(f"🔄 Existing subset on {layer.name()} contains STYLE expression - will be REPLACED")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             logger.debug("  → Reason: Style expressions cause type mismatch errors")
-            return None, None
+            return None, (combine_operator if and_not else None)
 
         else:
             # Simple attribute filter - combine with new geometric filter

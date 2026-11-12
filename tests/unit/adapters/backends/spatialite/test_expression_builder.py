@@ -693,6 +693,23 @@ class TestApplyFilterQueueRouting:
         callback.assert_not_called()
 
 
+class TestAndNotAfterASpatialFilter:
+    """2026-11-12 (review): a previous spatial filter is replaced; under AND NOT the new selection is still
+    excluded. The builder wrote the new selection itself, so a second AND NOT kept what it was to remove."""
+
+    @pytest.mark.parametrize("operator, expected", [
+        ("AND NOT", "NOT (\nST_Intersects(\"geom\", X)\n)"),
+        ("AND", "ST_Intersects(\"geom\", X)"),
+        ("OR", "ST_Intersects(\"geom\", X)"),
+    ])
+    def test_replaced_spatial_filter(self, mock_spatialite_layer, operator, expected):
+        callback = MagicMock()
+        builder = SpatialiteExpressionBuilder(task_params={"_subset_queue_callback": callback})
+        old = "NOT ( Intersects(\"geom\", GeomFromText('POINT(0 0)', 2154)) )"
+        assert builder.apply_filter(mock_spatialite_layer, 'ST_Intersects("geom", X)', old, operator) is True
+        assert callback.call_args.args[1] == expected
+
+
 # ===========================================================================
 # 2026-09-13: buffer already applied to the source WKT by the executor
 # ===========================================================================

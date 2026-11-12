@@ -328,10 +328,25 @@ def test_a_filter_that_looks_like_a_style_is_combined(subset):
     assert orchestrator._determine_subset_strategy(_layer(subset)) == (subset, "AND")
 
 
-@pytest.mark.parametrize("subset", ["coalesce(\"nom\", '')", "\"nom\"", "concat(\"a\", \"b\")"])
+@pytest.mark.parametrize("subset", ["coalesce(\"nom\", '')", "COALESCE(\"nom\", 'sans nom')"])
 def test_a_display_expression_is_still_replaced(subset):
     orchestrator = _orchestrator_with_operator("AND")
     assert orchestrator._determine_subset_strategy(_layer(subset)) == (None, None)
+
+
+@pytest.mark.parametrize("subset", [
+    "\"actif\"",                                   # a boolean column
+    "starts_with(\"nom\", 'Rue')",
+    "regexp_match(\"nom\", '^A')",
+    "instr(\"nom\", 'x')",
+    "array_contains(\"tags\", 'route')",
+    "coalesce(\"actif\", false)",
+])
+def test_a_boolean_function_or_column_is_combined(subset):
+    """2026-11-12 (review): any call or column without a comparison was taken for a style and replaced in silence;
+    only what the old patterns named AND returns no boolean (coalesce(field, 'text')) is a style now."""
+    orchestrator = _orchestrator_with_operator("AND")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (subset, "AND")
 
 
 @pytest.mark.parametrize("operator", ["AND", "OR", "AND NOT", None])
@@ -339,6 +354,21 @@ def test_a_target_without_filter_gets_the_operator(operator):
     """2026-11-12: (None, operator), so that AND NOT writes NOT (new) on a target without a filter."""
     orchestrator = _orchestrator_with_operator(operator)
     assert orchestrator._determine_subset_strategy(_layer('')) == (None, operator)
+
+
+@pytest.mark.parametrize("subset, expected", [
+    ('NOT ( "fid" IN (1, 2) )', ('NOT ( "fid" IN (1, 2) )', "AND NOT")),   # keys: combined, old minus new
+    ('"fid" IN (1, 2)', ('"fid" IN (1, 2)', "AND NOT")),
+    ('NOT ($id IN (1, 2))', ('NOT ($id IN (1, 2))', "AND NOT")),
+    ('ST_Intersects("geom", X)', (None, "AND NOT")),                    # spatial: replaced, then NOT (new)
+    ('NOT ( EXISTS (SELECT 1 FROM "s" AS __source WHERE ST_Intersects(a, b)) )', (None, "AND NOT")),
+    ("coalesce(\"nom\", '')", (None, "AND NOT")),                        # style: replaced, then NOT (new)
+])
+def test_and_not_after_a_previous_spatial_step_still_excludes(subset, expected):
+    """2026-11-12 (review): the replaced filters went with no operator, and the builders wrote the new selection
+    itself: a second AND NOT kept what it was asked to remove."""
+    orchestrator = _orchestrator_with_operator("AND NOT")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == expected
 
 
 @pytest.mark.parametrize("subset", ['"fid" IN (1, 2)', 'ST_Intersects("geom", X)'])
@@ -373,7 +403,7 @@ def test_postgresql_adapter_without_filter_writes_not_under_and_not(pg_adapter):
     adapter, applied = pg_adapter
     assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', None, 'AND NOT') is True
     assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', None, 'AND') is True
-    assert applied == ['NOT ( EXISTS (x) )', 'EXISTS (x)']
+    assert applied == ['NOT (\nEXISTS (x)\n)', 'EXISTS (x)']
 
 
 @pytest.mark.parametrize("operator, expected", [

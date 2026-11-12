@@ -139,9 +139,57 @@ def test_the_fixture_covers_the_strategies():
     assert {c['layer'] for c in _CASES} == {'gpkg_l93', 'spatialite', 'shp', 'gpkg_missing'}
 
 
+_PREDICATES = tuple(SpatialiteSqlBuilder.PREDICATE_FUNCTIONS.values())
+
+
+def _tested_for_one(sql):
+    """``sql`` with `` = 1`` after each predicate call, as the builder writes it since 2026-11-12.
+
+    SpatiaLite answers -1 for a NULL geometry, true in SQLite: ``ST_Intersects(NULL, ...)`` kept the features
+    without geometry, unless the R-tree prefilter happened to drop them. The answers of the fixture were
+    recorded in QGIS before; each predicate call (never nested in another) is closed, outside string literals.
+    """
+    if not sql or sql == USE_OGR_FALLBACK:
+        return sql
+    out, i = [], 0
+    while i < len(sql):
+        name = next((p for p in _PREDICATES if sql.startswith(p + '(', i)
+                     and (i == 0 or not (sql[i - 1].isalnum() or sql[i - 1] == '_'))), None)
+        if name is None:
+            out.append(sql[i])
+            i += 1
+            continue
+        depth, j, quoted = 0, i + len(name), False
+        while True:
+            char = sql[j]
+            if char == "'":
+                quoted = not quoted
+            elif not quoted and char == '(':
+                depth += 1
+            elif not quoted and char == ')':
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        out.append(sql[i:j + 1] + ' = 1')
+        i = j + 1
+    return ''.join(out)
+
+
 @pytest.mark.parametrize('case', _CASES, ids=[f'case{i}' for i in range(len(_CASES))])
 def test_same_sql_as_the_plugin_in_qgis(case, layers):
-    assert _build(case, layers) == case['expected']
+    assert _build(case, layers) == _tested_for_one(case['expected'])
+
+
+def test_each_predicate_is_tested_for_one():
+    """2026-11-12 (review): ``ST_Disjoint(NULL, ...)`` / ``ST_Intersects(NULL, ...)`` are -1 in SpatiaLite."""
+    builder = _Builder({'buffer_endcap_style': 'round', 'infos': {'layer_crs_authid': 'EPSG:2154'}})
+    sql = builder.build_expression(
+        layer_props={'layer': _Layer('spatialite', "dbname='/tmp/x.sqlite' table=\"roads\" (geometry)", 2154),
+                     'layer_name': 'target', 'layer_geometry_field': 'geom'},
+        predicates={'intersects': True, 'disjoint': True}, source_geom='POINT (1 2)', source_srid=2154)
+    assert sql.count(' = 1') == 2
+    assert sql.startswith('(ST_Intersects(') and ') = 1 OR ST_Disjoint(' in sql and sql.endswith(') = 1)')
 
 
 def test_apply_filter_and_supports_layer_are_the_hosts():

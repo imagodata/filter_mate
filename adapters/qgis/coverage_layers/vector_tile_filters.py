@@ -37,6 +37,8 @@ def combined_tile_filter(previous, expression, operator=None):
     the whole layer (``NOT (expression)``); it applied the expression.
     """
     op = (operator or '').strip().upper()
+    if previous and op == 'AND NOT' and not expression:
+        return previous  # 2026-11-12: nothing taken out (AND NOT (TRUE) hid everything)
     if previous and op in ('AND', 'OR', 'AND NOT'):
         return f'({previous}\n) {op} ({expression or "TRUE"}\n)'
     if op == 'AND NOT' and expression:

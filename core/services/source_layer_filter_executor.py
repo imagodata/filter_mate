@@ -53,6 +53,10 @@ class FilterExecutionResult:
     expression: str
     is_field_expression: Optional[Tuple[bool, str]] = None
     mode: str = "unknown"  # "all-features", "field-based", "standard", "feature-ids"
+    # 2026-11-12: the QGIS expression of the new selection alone (``expression``
+    # is the source filter, combined with the old subset: NOT (x) under AND NOT).
+    # Read by the fallbacks that find the source features when none were sent.
+    selection_expression: Optional[str] = None
 
 
 # =============================================================================
@@ -300,6 +304,7 @@ class SourceLayerFilterExecutor:
         result = False
         expression = ""
         is_field_expr = None
+        selection_expression = None
 
         # Process QGIS expression if provided
         if task_expression:
@@ -318,6 +323,8 @@ class SourceLayerFilterExecutor:
                     if context.apply_filter_and_update_subset_callback:
                         result = context.apply_filter_and_update_subset_callback(expression)
                         logger.info(f"   → filter applied result: {result}")
+                    if result:
+                        selection_expression = task_expression
         else:
             logger.info("   → No task_expression provided, will try fallback to feature IDs")
 
@@ -344,7 +351,8 @@ class SourceLayerFilterExecutor:
             success=result,
             expression=expression,
             is_field_expression=is_field_expr if isinstance(is_field_expr, tuple) else None,
-            mode="feature-ids" if not task_expression and result else "standard"
+            mode="feature-ids" if not task_expression and result else "standard",
+            selection_expression=selection_expression,
         )
 
 

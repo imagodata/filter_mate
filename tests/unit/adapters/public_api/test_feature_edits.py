@@ -307,6 +307,14 @@ class TestFailureHalfWay:
         answer = edits.update_features("routes", values={"nom": "x"}, expression='"class" = 1')
         assert answer["changed"] == 0 and answer["editing"] is False and layer.started == 0
 
+    def test_an_update_whose_every_change_fails_leaves_the_editing_mode(self):
+        """2026-11-12 (review): every changeAttributeValues refused, the layer stayed in editing mode."""
+        layer = _Layer(selected=[3, 4])
+        layer.changeAttributeValues = lambda fid, change: False
+        with pytest.raises(ValueError, match="could be changed"):
+            edits.update_features("routes", values={"nom": "x"}, selected_only=True)
+        assert not layer.editing and layer.rolled_back == 1
+
 
 class TestGeometryType:
     def test_a_single_part_multi_geometry_becomes_single(self):
