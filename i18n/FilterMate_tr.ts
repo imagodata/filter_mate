@@ -768,6 +768,31 @@ Onaylıyor musunuz?</translation>
         <translation>{}. adımdan önce durduruldu.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Canlı tarif: {} (kaynağı kaydedildi)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Canlı tarif: {}, {} üzerindeki düzenlemeler kaydedildiğinde yeniden çalışır.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} artık kendiliğinden çalışmıyor.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Canlı tarif: {} yalnızca ajanın standart veya özerk düzeyinde kendiliğinden çalışır.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>FilterMate meşgulken canlı bir tarifin kaynağı kaydedildi: tarifi Daha fazla &gt; Tarifler menüsünden yeniden çalıştırın.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Tarif olarak kaydet</translation>
@@ -871,6 +896,17 @@ Onaylıyor musunuz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}. adım çalıştırılmadı: aracısını ajan için kapattınız ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Ajan şu {} işlemi yapmak istiyor:
+{}
+
+Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Onaylıyor musunuz?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Model olmadan çalıştır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Kaynağı kaydedildiğinde yeniden çalıştır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Mümkün değil: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Hedefler kaynağı izler: bu tarifin bir kaynak katmanındaki düzenlemeler her kaydedildiğinde tarif, geri alabileceğiniz tek bir tur olarak kendiliğinden yeniden çalışır.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · canlı</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

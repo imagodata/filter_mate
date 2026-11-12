@@ -768,6 +768,31 @@ Gaat u akkoord?</translation>
         <translation>Gestopt vóór stap {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Levend recept: {} (de bron is opgeslagen)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Levend recept: {} wordt opnieuw uitgevoerd wanneer de bewerkingen van {} worden opgeslagen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} wordt niet meer vanzelf uitgevoerd.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Levend recept: {} wordt alleen vanzelf uitgevoerd op het standaard- of autonome niveau van de agent.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>De bron van een levend recept is opgeslagen terwijl FilterMate bezig was: voer het recept opnieuw uit via Meer &gt; Recepten.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Bewaren als recept</translation>
@@ -871,6 +896,17 @@ Gaat u akkoord?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Stap {} is niet uitgevoerd: u hebt het hulpmiddel ervan uitgezet voor de agent ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>De agent wil deze {} acties uitvoeren:
+{}
+
+Gaat u akkoord met alle? Nee voert er geen uit.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Gaat u akkoord?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Uitvoeren zonder het model</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Opnieuw uitvoeren wanneer de bron wordt opgeslagen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Niet mogelijk: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>De doelen volgen de bron: telkens wanneer de bewerkingen van een bronlaag van dit recept worden opgeslagen, wordt het recept vanzelf opnieuw uitgevoerd, als één beurt die u ongedaan kunt maken.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · live</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

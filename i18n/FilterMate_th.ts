@@ -768,6 +768,31 @@ Do you agree?</source>
         <translation>หยุดก่อนขั้นตอนที่ {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>สูตรแบบสด: {} (บันทึกแหล่งข้อมูลแล้ว)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>สูตรแบบสด: {} จะรันอีกครั้งเมื่อบันทึกการแก้ไขของ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} ไม่รันเองอัตโนมัติอีกต่อไป</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>สูตรแบบสด: {} จะทำงานเองเฉพาะในระดับมาตรฐานหรืออัตโนมัติของเอเจนต์เท่านั้น</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>แหล่งข้อมูลของสูตรแบบสดถูกบันทึกขณะที่ FilterMate กำลังทำงานอยู่: รันสูตรอีกครั้งจาก เพิ่มเติม &gt; สูตร</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>บันทึกเป็นสูตร</translation>
@@ -871,6 +896,17 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ขั้นตอนที่ {} ไม่ได้ทำงาน: คุณปิดเครื่องมือของขั้นตอนนี้สำหรับเอเจนต์ ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>เอเจนต์ต้องการทำ {} การกระทำนี้:
+{}
+
+คุณยอมรับทั้งหมดหรือไม่ ไม่ = ไม่ทำเลยสักรายการ</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>เรียกใช้โดยไม่ใช้โมเดล</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>รันอีกครั้งเมื่อบันทึกแหล่งข้อมูล</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>ทำไม่ได้: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>เป้าหมายจะตามแหล่งข้อมูล: ทุกครั้งที่บันทึกการแก้ไขของเลเยอร์ต้นทางของสูตรนี้ สูตรจะรันซ้ำเองเป็นหนึ่งรอบที่คุณเลิกทำได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · สด</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

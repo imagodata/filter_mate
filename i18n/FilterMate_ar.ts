@@ -768,6 +768,31 @@ Do you agree?</source>
         <translation>توقف قبل الخطوة {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>وصفة حية: {} (تم حفظ مصدرها)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>وصفة حية: يُعاد تشغيل {} عند حفظ تعديلات {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>لم يعد {} يعمل من تلقاء نفسه.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>وصفة حية: لن تعمل {} تلقائيًا إلا في المستوى القياسي أو المستقل للوكيل.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>تم حفظ مصدر وصفة حية أثناء انشغال FilterMate: أعد تشغيل الوصفة من المزيد &gt; الوصفات.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>حفظ كوصفة</translation>
@@ -871,6 +896,17 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>لم تُنفَّذ الخطوة {}: لقد أوقفت أداتها للوكيل ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>يريد الوكيل تنفيذ هذه الإجراءات ({}):
+{}
+
+هل توافق عليها كلها؟ «لا» لا تنفّذ أيًّا منها.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>تشغيل دون النموذج</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>إعادة التشغيل عند حفظ مصدرها</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>غير ممكن: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>تتبع الأهداف المصدر: كلما حُفظت تعديلات طبقة مصدر لهذه الوصفة، تُعاد الوصفة من تلقاء نفسها، في دور واحد يمكنك التراجع عنه.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · حية</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

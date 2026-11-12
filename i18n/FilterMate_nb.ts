@@ -768,6 +768,31 @@ Er du enig?</translation>
         <translation>Stoppet før trinn {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Levende oppskrift: {} (kilden er lagret)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Levende oppskrift: {} kjøres på nytt når endringene i {} lagres.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} kjøres ikke lenger av seg selv.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Levende oppskrift: {} kjører bare av seg selv på agentens standard- eller autonome nivå.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Kilden til en levende oppskrift ble lagret mens FilterMate var opptatt: kjør oppskriften på nytt fra Mer &gt; Oppskrifter.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Lagre som oppskrift</translation>
@@ -871,6 +896,17 @@ Er du enig?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Trinn {} ble ikke kjørt: du har slått av verktøyet for agenten ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agenten vil utføre disse {} handlingene:
+{}
+
+Godtar du alle? Nei utfører ingen av dem.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Er du enig?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Kjør uten modellen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Kjør på nytt når kilden lagres</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Ikke mulig: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Målene følger kilden: hver gang endringene i et kildelag for denne oppskriften lagres, kjøres oppskriften på nytt av seg selv, som én runde du kan angre.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · levende</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

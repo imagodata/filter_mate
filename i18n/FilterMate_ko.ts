@@ -768,6 +768,31 @@ Do you agree?</source>
         <translation>{}단계 전에 중지했습니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>라이브 레시피: {} (소스가 저장됨)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>라이브 레시피: {}은(는) {}의 편집 내용이 저장되면 다시 실행됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{}은(는) 더 이상 자동으로 실행되지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>라이브 레시피: {}은(는) 에이전트의 표준 또는 자율 수준에서만 스스로 실행됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>FilterMate가 작업 중일 때 라이브 레시피의 소스가 저장되었습니다. 더보기 &gt; 레시피에서 레시피를 다시 실행하세요.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>레시피로 저장</translation>
@@ -871,6 +896,17 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트에 대해 해당 도구를 꺼 두었습니다 ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>에이전트가 다음 {}개 작업을 하려고 합니다:
+{}
+
+모두 동의하시나요? 아니요를 누르면 하나도 실행되지 않습니다.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>모델 없이 실행</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>소스가 저장되면 다시 실행</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>불가능: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>대상은 소스를 따릅니다. 이 레시피의 소스 레이어 편집 내용이 저장될 때마다 레시피가 자동으로 다시 실행되며, 실행 취소할 수 있는 한 턴으로 처리됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · 라이브</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

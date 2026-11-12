@@ -7,7 +7,7 @@ Docker network:
 
     docker network create fm_pg_net
     docker run -d --name fm_pg --network fm_pg_net -e POSTGRES_PASSWORD=fm postgis/postgis:16-3.4
-    docker run --rm --network fm_pg_net -v "$PWD:/src:ro" -e FM_FIXTURES=/tmp/fm \\
+    docker run --init --rm --network fm_pg_net -v "$PWD:/src:ro" -e FM_FIXTURES=/tmp/fm \\
         -e FM_PG="host=fm_pg port=5432 dbname=postgres user=postgres password=fm" qgis/qgis:stable bash -c \\
         'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null && xvfb-run -a qgis --nologo \\
          --noversioncheck --profiles-path /tmp/p --code /src/tests/qgis_headless/run_postgis_check.py'

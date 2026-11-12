@@ -768,6 +768,31 @@ Apakah Anda setuju?</translation>
         <translation>Dihentikan sebelum langkah {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Resep langsung: {} (sumbernya telah disimpan)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Resep langsung: {} dijalankan lagi saat suntingan {} disimpan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} tidak lagi berjalan sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Resep hidup: {} hanya berjalan sendiri pada tingkat standar atau otonom agen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Sumber resep langsung disimpan saat FilterMate sibuk: jalankan ulang resep dari Lainnya &gt; Resep.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Simpan sebagai resep</translation>
@@ -871,6 +896,17 @@ Apakah Anda setuju?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Langkah {} tidak dijalankan: Anda mematikan alatnya untuk agen ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agen ingin melakukan {} tindakan ini:
+{}
+
+Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Apakah Anda setuju?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Jalankan tanpa model</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Jalankan lagi saat sumbernya disimpan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Tidak mungkin: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Target mengikuti sumber: setiap kali suntingan layer sumber resep ini disimpan, resep dijalankan lagi dengan sendirinya, sebagai satu giliran yang dapat Anda urungkan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · langsung</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

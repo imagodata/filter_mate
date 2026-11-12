@@ -768,6 +768,31 @@ Czy się zgadzasz?</translation>
         <translation>Zatrzymano przed krokiem {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Żywa receptura: {} (jej źródło zostało zapisane)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Żywa receptura: {} uruchomi się ponownie po zapisaniu edycji {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} nie uruchamia się już sama.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Żywy przepis: {} uruchomi się sam tylko na poziomie standardowym lub autonomicznym agenta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Źródło żywej receptury zostało zapisane, gdy FilterMate był zajęty: uruchom recepturę ponownie z Więcej &gt; Receptury.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Zapisz jako przepis</translation>
@@ -871,6 +896,17 @@ Czy się zgadzasz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Krok {} nie został wykonany: wyłączono jego narzędzie dla agenta ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agent chce wykonać te działania ({}):
+{}
+
+Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Czy się zgadzasz?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Uruchom bez modelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Uruchom ponownie po zapisaniu jej źródła</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Niemożliwe: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Cele podążają za źródłem: za każdym razem, gdy edycje warstwy źródłowej tej receptury zostaną zapisane, receptura uruchamia się ponownie sama, jako jedna tura, którą można cofnąć.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · żywa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

@@ -768,6 +768,31 @@ Do you agree?</source>
         <translation>चरण {} से पहले रोका गया।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>लाइव रेसिपी: {} (इसका स्रोत सहेजा गया)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>लाइव रेसिपी: {} फिर से चलती है जब {} के संपादन सहेजे जाते हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} अब अपने आप नहीं चलती।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>लाइव रेसिपी: {} केवल एजेंट के मानक या स्वायत्त स्तर पर ही अपने आप चलेगी।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>FilterMate के व्यस्त रहते समय एक लाइव रेसिपी का स्रोत सहेजा गया: रेसिपी को अधिक &gt; रेसिपी से फिर चलाएँ।</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>रेसिपी के रूप में सहेजें</translation>
@@ -871,6 +896,17 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>चरण {} नहीं चला: आपने एजेंट के लिए उसका टूल बंद कर दिया है ({})।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>एजेंट ये {} क्रियाएँ करना चाहता है:
+{}
+
+क्या आप सभी से सहमत हैं? नहीं चुनने पर कोई नहीं चलेगी।</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>मॉडल के बिना चलाएँ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>स्रोत सहेजे जाने पर फिर चलाएँ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>संभव नहीं: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>लक्ष्य स्रोत का अनुसरण करते हैं: इस रेसिपी की किसी स्रोत परत के संपादन सहेजे जाने पर हर बार रेसिपी अपने आप फिर चलती है, एक ऐसे चरण के रूप में जिसे आप पूर्ववत कर सकते हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · लाइव</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

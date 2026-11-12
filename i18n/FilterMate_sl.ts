@@ -768,6 +768,31 @@ Se strinjate?</translation>
         <translation>Ustavljeno pred korakom {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Živ recept: {} (njegov vir je shranjen)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Živ recept: {} se znova zažene, ko se shranijo urejanja {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} se ne zaganja več sam.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Živ recept: {} se bo sam zagnal le na standardni ali samostojni ravni agenta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Vir živega recepta je bil shranjen, medtem ko je bil FilterMate zaseden: znova zaženite recept prek Več &gt; Recepti.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Shrani kot recept</translation>
@@ -871,6 +896,17 @@ Se strinjate?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Korak {} ni bil izveden: orodje zanj ste izklopili za agenta ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agent želi izvesti ta dejanja ({}):
+{}
+
+Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Se strinjate?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Zaženi brez modela</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Znova zaženi ob shranjevanju vira</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Ni mogoče: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Cilji sledijo viru: vsakič, ko se shranijo urejanja izvornega sloja tega recepta, se recept sam znova zažene kot en korak, ki ga lahko razveljavite.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · živ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

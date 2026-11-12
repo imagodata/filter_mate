@@ -768,6 +768,31 @@ Do you agree?</source>
         <translation>ステップ {} の前で停止しました。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>ライブレシピ: {}(ソースが保存されました)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>ライブレシピ: {} は {} の編集が保存されると再実行されます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} は自動では再実行されなくなりました。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>ライブレシピ: {} が自動で実行されるのは、エージェントの標準または自律レベルのときだけです。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>FilterMate がビジー状態の間にライブレシピのソースが保存されました: その他 &gt; レシピ からレシピを再実行してください。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>レシピとして保存</translation>
@@ -871,6 +896,17 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ステップ {} は実行されませんでした: エージェント向けにそのツールをオフにしています ({})。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>エージェントは次の {} 件の操作を行おうとしています：
+{}
+
+すべてに同意しますか？「いいえ」ではどれも実行されません。</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>モデルなしで実行</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>ソースが保存されたら再実行</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>実行できません: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>ターゲットはソースに追従します: このレシピのソースレイヤーの編集が保存されるたびに、レシピは自動的に再実行されます。元に戻せる1ターンとして実行されます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · ライブ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

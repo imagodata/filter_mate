@@ -768,6 +768,31 @@ Adakah anda bersetuju?</translation>
         <translation>Dihentikan sebelum langkah {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Resipi langsung: {} (sumbernya telah disimpan)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Resipi langsung: {} dijalankan semula apabila suntingan {} disimpan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} tidak lagi berjalan dengan sendirinya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Resipi hidup: {} hanya berjalan sendiri pada tahap standard atau autonomi ejen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Sumber resipi langsung telah disimpan semasa FilterMate sibuk: jalankan semula resipi daripada Lagi &gt; Resipi.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Simpan sebagai resipi</translation>
@@ -871,6 +896,17 @@ Adakah anda bersetuju?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Langkah {} tidak dijalankan: anda mematikan alatnya untuk ejen ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Ejen mahu melakukan {} tindakan ini:
+{}
+
+Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Adakah anda bersetuju?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Jalankan tanpa model</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Jalankan semula apabila sumbernya disimpan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Tidak boleh: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Sasaran mengikut sumber: setiap kali suntingan lapisan sumber resipi ini disimpan, resipi dijalankan semula dengan sendirinya, sebagai satu giliran yang boleh anda buat asal.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · langsung</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

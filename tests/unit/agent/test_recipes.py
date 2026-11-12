@@ -6,8 +6,8 @@ import pytest
 
 from core.agent.permissions import AGENT_OWN, PermissionPolicy, RUN
 from core.agent.recipes import (
-    HEADER, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, kept, parse, plain, recipes_block,
-    saved, steps_of, summary, without,
+    HEADER, LIVE_TOOLS, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, fingerprint, followed_sources, kept,
+    live_problem, parse, plain, recipes_block, saved, steps_of, summary, with_live, without,
 )
 from core.agent.system_prompt import SYSTEM_PROMPT
 from core.agent.tool_catalog import CHAT_ONLY, REMOVE_RECIPE, SAVE_RECIPE, ToolSpec, chat_tools
@@ -158,3 +158,55 @@ class TestTools:
 
     def test_the_prompt_says_when_to_keep_one(self):
         assert "save_recipe" in SYSTEM_PROMPT and "without you" in SYSTEM_PROMPT
+
+
+def _cross(source="zones", target="communes"):
+    return {"tool": "cross_filter", "label": "cross",
+            "arguments": {"source_layer": source, "target_layers": [target], "predicates": ["Intersect"]}}
+
+
+class TestLive:
+    def test_a_recipe_follows_the_sources_of_its_cross_filters(self):
+        recipe = saved([], "A", "", [_cross(), _cross("zones", "ecoles"), _cross("rivieres")])[0]
+        assert followed_sources(recipe) == ["zones", "rivieres"]
+        assert live_problem(recipe) == ""
+
+    def test_what_cannot_run_at_every_save(self):
+        assert "no source" in live_problem(saved([], "A", "", _steps(1))[0])
+        export = {"tool": "export_layers", "arguments": {"layers": ["communes"]}, "label": "export"}
+        zoom = {"tool": "zoom_to", "arguments": {"layer": "communes"}, "label": "zoom"}
+        problem = live_problem(saved([], "A", "", [_cross(), export, zoom])[0])
+        assert "export_layers" in problem and "zoom_to" in problem
+        assert set(LIVE_TOOLS) >= {"cross_filter", "apply_filter", "set_layer_style"}
+        assert not set(LIVE_TOOLS) & {"export_layers", "update_features", "remove_layers", "run_algorithm", "zoom_to"}
+
+    def test_turned_on_and_off_and_kept(self):
+        recipes = saved(saved([], "A", "", [_cross()]), "B", "", _steps(1))
+        recipes = with_live(recipes, "r1", True)
+        assert recipes[0]["live"] is True and "live" not in recipes[1]
+        assert parse(dumps(recipes)) == recipes
+        assert summary(recipes)[0]["live"] is True and "live" not in summary(recipes)[1]
+        assert "live" not in with_live(recipes, "r1", False)[0]
+        with pytest.raises(RecipeError, match="no source"):
+            with_live(recipes, "r2", True)
+        with pytest.raises(RecipeError, match="no recipe"):
+            with_live(recipes, "r9", True)
+
+    def test_a_stored_live_flag_holds_only_for_a_recipe_that_may_follow(self):
+        """A project made by someone else cannot make an export run at every save."""
+        export = {"tool": "export_layers", "arguments": {"layers": ["communes"]}, "label": "export"}
+        stored = json.dumps([{"id": "r1", "name": "A", "live": True, "steps": [_cross(), export]},
+                             {"id": "r2", "name": "B", "live": "yes", "steps": [_cross()]},
+                             {"id": "r3", "name": "C", "live": True, "steps": [_cross()]}])
+        recipes = parse(stored)
+        assert [recipe.get("live") for recipe in recipes] == [None, None, True]
+
+    def test_saving_again_under_the_name_is_no_longer_live(self):
+        """New steps run at every save only once the user says so again (the model may save under a name)."""
+        recipes = with_live(saved([], "A", "", [_cross()]), "r1", True)
+        assert "live" not in saved(recipes, "A", "", [_cross("autre")])[0]
+
+    def test_the_fingerprint_follows_the_steps_only(self):
+        first = saved([], "A", "q", [_cross()])[0]
+        assert fingerprint(first) == fingerprint(dict(first, name="B", request="other", live=True))
+        assert fingerprint(first) != fingerprint(saved([], "A", "q", [_cross("autre")])[0])

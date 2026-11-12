@@ -73,6 +73,20 @@ def tool_turn(name, arguments, call_id="toolu_1"):
         {"type": "message_stop"})
 
 
+def tools_turn(*calls):
+    """One turn calling several tools: ``(name, arguments)`` each."""
+    events = [{"type": "message_start", "message": {"usage": {"input_tokens": 5, "output_tokens": 0}}}]
+    for index, (name, arguments) in enumerate(calls):
+        events += [{"type": "content_block_start", "index": index,
+                    "content_block": {"type": "tool_use", "id": f"toolu_m{index}", "name": name, "input": {}}},
+                   {"type": "content_block_delta", "index": index,
+                    "delta": {"type": "input_json_delta", "partial_json": json.dumps(arguments)}},
+                   {"type": "content_block_stop", "index": index}]
+    events += [{"type": "message_delta", "delta": {"stop_reason": "tool_use"}, "usage": {"output_tokens": 3}},
+               {"type": "message_stop"}]
+    return sse(*events)
+
+
 class Provider:
     """Answers each POST with the next scripted response: (status, headers, body) or "hang"."""
 
@@ -474,6 +488,9 @@ def check_chat(provider, layer, authcfg, work):
         return wait(lambda: not panel._working, seconds)
 
     chat.open_settings = lambda: False
+    # The settings a request asks for when it cannot be sent go to the dialog directly (not refused as open_settings is,
+    # 2026-11-12): a modal dialog, which would hold the bench, never answered.
+    chat._settings_dialog = lambda: False
     settings()
     chat._refresh_ready()
     wait(lambda: False, 0.05)
@@ -1102,6 +1119,7 @@ def check_chat(provider, layer, authcfg, work):
     check_widgets(chat, provider, settings, ask, layer)
     check_protected(chat, provider, settings, ask, layer)
     check_tool_rules(chat, provider, settings, ask, layer)
+    check_asked_together(chat, provider, settings, ask, layer)
     check_recipes(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
@@ -1168,6 +1186,32 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
     panel.clear_thread()
+
+
+def check_asked_together(chat, provider, settings, ask, layer):
+    """Several actions of one turn the user is asked about: one question, all or none."""
+    layer.setSubsetString("")
+    settings(autonomy="careful")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    turn = tools_turn(("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}),
+                      ("set_layer_style", {"layer": "communes", "mode": "single", "color": "#ff0000"}))
+    provider.reset((200, {}, turn), (200, {}, text_turn("ok")))
+    ask("filtre et colore les communes")
+    check("together: one question for the two changes of the turn", len(asked) == 1 and "2 actions" in asked[0] and
+          "communes" in asked[0], asked)
+    check("together: yes runs both", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    layer.setSubsetString("")
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    provider.reset((200, {}, turn), (200, {}, text_turn("ok")))
+    ask("filtre et colore les communes")
+    results = provider.requests[1]["body"]["messages"][-1]["content"]
+    check("together: no runs none of them", len(asked) == 1 and layer.subsetString() == "" and
+          all(part.get("is_error") and "declined" in part["content"] for part in results), results)
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
 
 
 def check_tool_rules(chat, provider, settings, ask, layer):
@@ -1454,10 +1498,100 @@ def check_recipes(chat, provider, settings, ask, layer):
     check("recipes: a failed step stops the recipe", chat.run_recipe("r9") is False and layer.subsetString() == "",
           layer.subsetString())
 
+    write_recipes(read_recipes() + [{"id": "r10", "name": "Deux pas", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": big, "label": "filtre"},
+        {"tool": "set_layer_style", "arguments": {"layer": "communes", "mode": "single", "color": "#00ff00"},
+         "label": "style"}]}])
+    chat._refresh_recipes()
+    settings(autonomy="careful")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    ran = chat.run_recipe("r10")
+    check("recipes: careful asks one question for the steps of the recipe", ran is not False and len(asked) == 1 and
+          "2 actions" in asked[0] and layer.subsetString() == '"pop" > 1000', (ran, asked, layer.subsetString()))
+    chat._ask_user = previous
+    settings()
+    layer.setSubsetString("")
+
+    check_live_recipes(chat, panel, layer)
     write_recipes([])
     chat._refresh_recipes()
     layer.setSubsetString("")
     panel.clear_thread()
+
+
+def check_live_recipes(chat, panel, layer):
+    """A live recipe: its cross filter runs again by itself when the edits of its source are saved."""
+    from qgis.core import QgsFeature, QgsGeometry, QgsProject, QgsRectangle, QgsVectorLayer
+    from filter_mate.adapters.agent.recipes_store import read_recipes, write_recipes
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+
+    zones = QgsVectorLayer("Polygon?crs=EPSG:2154&field=nom:string", "zones", "memory")
+    zone = QgsFeature(zones.fields())
+    zone.setGeometry(QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650010.5, 6860001.0)))  # 10 communes
+    zone.setAttributes(["centre"])
+    zones.dataProvider().addFeatures([zone])
+    QgsProject.instance().addMapLayer(zones)
+    layer.setSubsetString("")
+    cross = {"source_layer": "zones", "target_layers": ["communes"], "predicates": ["Intersect"], "selected_only": False}
+    write_recipes([{"id": "r1", "name": "Communes des zones", "request": "", "steps": [
+        {"tool": "cross_filter", "arguments": cross, "label": "cross"}]},
+        {"id": "r2", "name": "Export", "request": "", "steps": [
+            {"tool": "export_layers", "arguments": {"layers": ["communes"]}, "label": "export"}]}])
+    chat._refresh_recipes()
+    check("live: offered for a recipe with a cross filter, not for an export", panel.recipe_live["r1"].isEnabled()
+          and not panel.recipe_live["r2"].isEnabled() and not panel.recipe_live["r1"].isChecked())
+    panel.recipe_live["r1"].setChecked(True)
+    check("live: turned on from the menu, kept in the project, its source followed",
+          read_recipes()[0].get("live") is True and zones.id() in chat.followed_layer_ids(), chat.followed_layer_ids())
+    check("live: nothing runs before a save", layer.subsetString() == "", layer.subsetString())
+
+    zones.startEditing()
+    zones.changeGeometry(next(zones.getFeatures()).id(),
+                         QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650020.5, 6860001.0)))  # 20 communes
+    zones.commitChanges()
+    ran = wait(lambda: layer.subsetString() != "" and layer.featureCount() == 20, 15)
+    check("live: the save of the source filters the target again, by itself", ran,
+          (layer.subsetString()[:120], layer.featureCount()))
+    applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+    check("live: one turn of the history, named", applied and applied[-1]["request"].startswith("Live recipe"),
+          applied[-1:] if applied else None)
+
+    zones.startEditing()
+    zones.changeGeometry(next(zones.getFeatures()).id(),
+                         QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650005.5, 6860001.0)))  # 5 communes
+    zones.commitChanges()
+    check("live: and again at the next save", wait(lambda: layer.featureCount() == 5, 15), layer.featureCount())
+
+    panel.recipe_live["r1"].setChecked(False)
+    check("live: turned off, the source is no longer followed", not chat.followed_layer_ids()
+          and "live" not in read_recipes()[0], chat.followed_layer_ids())
+    zones.startEditing()
+    zones.changeGeometry(next(zones.getFeatures()).id(),
+                         QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650030.5, 6860001.0)))
+    zones.commitChanges()
+    wait(lambda: False, 2)
+    check("live: off, a save changes nothing", layer.featureCount() == 5, layer.featureCount())
+
+    # A project made by someone else may say a recipe is live: it runs by itself only once the user ticked it here.
+    write_recipes([{"id": "r1", "name": "Communes des zones", "request": "", "live": True, "steps": [
+        {"tool": "cross_filter", "arguments": cross, "label": "cross"}]}])
+    chat._refresh_recipes()
+    check("live: a live flag from the project file alone follows nothing, and shows unticked",
+          not chat.followed_layer_ids() and not panel.recipe_live["r1"].isChecked(), chat.followed_layer_ids())
+    panel.recipe_live["r1"].setChecked(True)
+    check("live: ticked here, followed", zones.id() in chat.followed_layer_ids())
+    from dataclasses import replace
+    from filter_mate.adapters.agent.settings import load_settings, save_settings
+    save_settings(replace(load_settings(), autonomy="advisor"))
+    chat._refresh_recipes()
+    check("live: nothing runs alone at the advisor level", not chat.followed_layer_ids())
+    save_settings(replace(load_settings(), autonomy="standard"))
+    chat._refresh_recipes()
+    QgsProject.instance().removeMapLayer(zones.id())
+    check("live: a source removed from the project is no longer followed", not chat.followed_layer_ids(),
+          chat.followed_layer_ids())
+    layer.setSubsetString("")
 
 
 def check_steps(chat, provider, settings, ask, layer):

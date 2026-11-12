@@ -768,6 +768,31 @@ Bạn có đồng ý không?</translation>
         <translation>Đã dừng trước bước {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Công thức trực tiếp: {} (nguồn của nó đã được lưu)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Công thức trực tiếp: {} chạy lại khi các chỉnh sửa của {} được lưu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} không còn tự chạy nữa.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Công thức tự động: {} chỉ tự chạy ở mức tiêu chuẩn hoặc tự chủ của tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Nguồn của một công thức trực tiếp đã được lưu khi FilterMate đang bận: hãy chạy lại công thức từ Thêm &gt; Công thức.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Lưu thành công thức</translation>
@@ -871,6 +896,17 @@ Bạn có đồng ý không?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Bước {} đã không chạy: bạn đã tắt công cụ của bước này cho tác nhân ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Tác tử muốn thực hiện {} hành động sau:
+{}
+
+Bạn có đồng ý với tất cả không? Không thì không hành động nào được chạy.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Bạn có đồng ý không?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Chạy không cần mô hình</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Chạy lại khi nguồn của nó được lưu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Không thể: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Các đích bám theo nguồn: mỗi khi các chỉnh sửa của một lớp nguồn của công thức này được lưu, công thức tự chạy lại, như một lượt bạn có thể hoàn tác.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · trực tiếp</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

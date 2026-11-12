@@ -768,6 +768,31 @@ Do you agree?</source>
         <translation>Διακόπηκε πριν από το βήμα {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Ζωντανή συνταγή: {} (η πηγή της αποθηκεύτηκε)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Ζωντανή συνταγή: η {} εκτελείται ξανά όταν αποθηκεύονται οι αλλαγές στο επίπεδο {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>Η {} δεν εκτελείται πλέον αυτόματα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Ζωντανή συνταγή: η {} θα εκτελείται μόνη της μόνο στο τυπικό ή στο αυτόνομο επίπεδο του πράκτορα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Η πηγή μιας ζωντανής συνταγής αποθηκεύτηκε ενώ το FilterMate ήταν απασχολημένο: εκτελέστε ξανά τη συνταγή από Περισσότερα &gt; Συνταγές.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Αποθήκευση ως συνταγή</translation>
@@ -871,6 +896,17 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: απενεργοποιήσατε το εργαλείο του για τον πράκτορα ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Ο πράκτορας θέλει να κάνει αυτές τις {} ενέργειες:
+{}
+
+Συμφωνείτε με όλες; Το Όχι δεν εκτελεί καμία.</translation>
     </message>
 </context>
 <context>
@@ -1075,6 +1111,26 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Εκτέλεση χωρίς το μοντέλο</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Επανεκτέλεση όταν αποθηκεύεται η πηγή της</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Δεν είναι δυνατό: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Οι στόχοι ακολουθούν την πηγή: κάθε φορά που αποθηκεύονται οι αλλαγές ενός επιπέδου πηγής αυτής της συνταγής, η συνταγή εκτελείται ξανά αυτόματα, ως ένας γύρος που μπορείτε να αναιρέσετε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · ζωντανή</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>
