@@ -45,13 +45,17 @@ class Project:
 
 
 class Effects:
-    """EffectsRecorder stand-in: a project note the turn kept, compared at its end."""
+    """EffectsRecorder stand-in: a project note the turn kept, compared at its end (the recorder of a step,
+    ``settings=False``, saw nothing)."""
+
+    def __init__(self, settings=True):
+        self._turn = settings
 
     def before_call(self, call, step=0):
         pass
 
     def finish(self):
-        return (("notes", "", (), ("a note",)),)
+        return (("notes", "", (), ("a note",)),) if self._turn else ()
 
 
 def _module(monkeypatch, name, **attrs):
@@ -167,3 +171,32 @@ def test_a_count_widget_does_not_count_a_web_service(monkeypatch, packages):
     monkeypatch.setattr(module, "widget_layer", lambda widget: layers[widget["layer_id"]])
     assert module.stat_value({"layer_id": "wfs", "aggregate": "count"}) is None
     assert module.stat_value({"layer_id": "local", "aggregate": "count"}) == 7.0
+
+
+def test_back_to_a_step_undoes_the_later_steps_and_their_settings_in_one_operation(monkeypatch, checkpoint_module):
+    """What the later steps did beside the filters and the settings they changed go back together, in an operation
+    whose effects run the other way: undone, it applies them again."""
+    import json
+    filter_state = importlib.import_module(f"{_PKG}.core.domain.filter_state")
+    holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
+    holder.project = Project([])
+    _module(monkeypatch, ".adapters.agent.plugin_settings", current_values=lambda paths: {"APP.B": 20})
+    style = ("style", "roads", "<before/>", "<after/>", "roads")
+    history.push(filter_state.CrossOperation(
+        checkpoint_module.HISTORY_KEY, (), steps=(("filter", ()), ("style", ())), step_effects=((), (style,)),
+        effects=(style, ("settings", "", json.dumps({"APP.B": 10}), json.dumps({"APP.B": 20}), 2))))
+    calls = []
+
+    def apply_effects(effects, undo, keep=frozenset(), presence=None):
+        calls.append((effects, undo, presence))
+        return (["done"] if presence is False else []), []
+    monkeypatch.setattr(checkpoint_module, "apply_effects", apply_effects)
+    done, _left = checkpoint_module.TurnCheckpoint().undo_to_step(1)
+    effects = calls[0][0]
+    settings = [effect for effect in effects if effect[0] == "settings"]
+    assert effects[0] == style and len(settings) == 1
+    # Undone (undo=True), it goes to what the setting held before the step.
+    assert json.loads(settings[0][2]) == {"APP.B": 10} and json.loads(settings[0][3]) == {"APP.B": 20}
+    assert [(undo, presence) for _effects, undo, presence in calls] == [(True, True), (True, False)]
+    pushed = history.undo_stack(checkpoint_module.HISTORY_KEY)[-1]
+    assert done == ["done"] and pushed.effects_reversed and pushed.effects == effects

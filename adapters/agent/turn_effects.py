@@ -28,6 +28,13 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
+
+What the user changed since in QGIS (the visibility of a layer, the CRS, a name, the style of a vector layer or the
+style it has on) is theirs: undo and redo put back only what is still as the turn left it, and name the rest
+(``_CHECKED``). Not checked: what is read as a whole collection (the tree, the bookmarks, the themes: a group ticked
+or a theme of the user's elsewhere would keep the agent's from being undone, and QGIS writes the themes back in
+another order), a selection (a filter empties it by itself), the style of a raster (its XML follows the filter), the
+widgets and notes (the agent's own). The edits, recipes and settings check in their own way.
 """
 from __future__ import annotations
 
@@ -272,7 +279,10 @@ def _selection(layer: Any) -> Optional[Tuple[int, ...]]:
 class EffectsRecorder:
     """Watches one turn: the state before its first touch of each thing, compared with the end of the turn."""
 
-    def __init__(self) -> None:
+    def __init__(self, settings: bool = True) -> None:
+        # False for the recorder of one step: the settings of a turn are recorded per call by the recorder of the turn,
+        # which alone takes what the agent applied (take_applied empties it).
+        self._record_settings = settings
         self._ids_before: Optional[Set[str]] = None
         self._removed: Dict[str, Tuple[str, Place, str, str]] = {}
         self._selection: Dict[str, Tuple[int, ...]] = {}
@@ -311,7 +321,7 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
-            elif name in SETTINGS_TOOLS:
+            elif name in SETTINGS_TOOLS and self._record_settings:
                 from .plugin_settings import current_values
                 paths = _setting_paths(arguments)
                 values = current_values(paths)
@@ -408,8 +418,10 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
-        from .plugin_settings import take_applied
-        applied = take_applied()  # what the agent set: a value the user put meanwhile stays theirs at undo
+        applied: Dict[str, Any] = {}
+        if self._record_settings:
+            from .plugin_settings import take_applied
+            applied = take_applied()  # what the agent set: a value the user put meanwhile stays theirs at undo
         if self._settings_calls:
             import json
             # Each call of the turn from the value before it to the value before the next call of the same setting
@@ -496,30 +508,100 @@ class EffectsRecorder:
             after = _style(layer) if layer is not None else None
             if after is not None and after != before:
                 effects.append(("style", layer_id, before, after, layer.name()))
-        self.__init__()
+        self.__init__(self._record_settings)
         return tuple(effects)
+
+
+# What the user may change in QGIS after a turn: put back only when still as the turn left it.
+_CHECKED = frozenset({"visibility", "project_crs", "layer_name", "current_style", "style"})
+_GONE = object()  # the layer of an effect is no longer in the project
+
+
+def _same(first: Any, second: Any) -> bool:
+    """Equal, a list and a tuple of the same items included (an effect may have gone through JSON)."""
+    def plain(value):
+        return tuple(plain(item) for item in value) if isinstance(value, (list, tuple)) else value
+    return plain(first) == plain(second)
+
+
+def _now(project: QgsProject, effect: Tuple[Any, ...]) -> Any:
+    """What the thing of a ``_CHECKED`` effect is now, read as the recorder reads it; ``_GONE`` without its layer."""
+    kind, layer_id = effect[0], effect[1]
+    if kind == "project_crs":
+        from ..public_api.project_control import crs_definition
+        return crs_definition(project.crs())
+    if kind == "visibility":
+        visible = _visible(project, layer_id)
+        return _GONE if visible is None else visible
+    layer = project.mapLayer(layer_id)
+    if layer is None:
+        return _GONE
+    if kind == "layer_name":
+        return layer.name()
+    if kind == "current_style":
+        from ..public_api.layer_tree import current_style
+        return current_style(layer)
+    # style: the XML of a raster follows its filter (a clip adds an alpha band), so only a vector one tells
+    return _style(layer) if isinstance(layer, QgsVectorLayer) else _GONE
+
+
+def _as_left(project: QgsProject, effect: Tuple[Any, ...]) -> str:
+    """The name of what an effect touched, as a list of what is left as it is says it."""
+    if effect[0] == "project_crs":
+        return _crs_label()
+    if not effect[1]:
+        return effect[0]
+    layer = project.mapLayer(effect[1])
+    return layer.name() if layer is not None else effect[1]
+
+
+def _where(project: QgsProject, effect: Tuple[Any, ...], undo: bool) -> str:
+    """"there" when the thing of a ``_CHECKED`` effect is already as wanted, "changed" when the user changed it
+    since the turn (or since it was undone), "" when it is as the turn left it, its layer is gone (the kind says what
+    then) or it cannot be read (put back as before these checks)."""
+    wanted, left_as = (effect[2], effect[3]) if undo else (effect[3], effect[2])
+    try:
+        now = _now(project, effect)
+    except Exception:  # noqa: BLE001 - a check that fails must not stop an undo half way
+        logger.debug("Agent undo: %s not checked", effect[0], exc_info=True)
+        return ""
+    if now is _GONE:
+        return ""
+    if _same(now, wanted):
+        return "there"
+    return "" if _same(now, left_as) else "changed"
 
 
 # What changes a layer itself (protected layers are left as they are); a selection or visibility only shows it.
 _LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "current_style", "edits"})
 
 
-def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool,
-                  keep: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str]]:
+def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSet[str] = frozenset(),
+                  presence: Optional[bool] = None) -> Tuple[List[str], List[str]]:
     """Undo (or apply again) what a turn did beside the filters: names of what changed, and of what could not.
 
-    What would change a layer whose id is in ``keep`` (protected from the agent) is left as it is.
+    What would change a layer whose id is in ``keep`` (protected from the agent) is left as it is. ``presence``: only
+    the layers added or removed (True), only the rest (False), or all (None): the layers come back before their
+    filters, and a selection after them (a filter empties it).
     """
     project = QgsProject.instance()
     done: List[str] = []
     left: List[str] = []
     for effect in (reversed(effects) if undo else effects):
         kind, layer_id = effect[0], effect[1]
+        if presence is not None and (kind in ("added", "removed")) != presence:
+            continue
         if kind in _LAYER_CHANGES and layer_id in keep:
             layer = project.mapLayer(layer_id)
             left.append(layer.name() if layer is not None else (effect[4] if len(effect) > 4 else layer_id))
             continue
         try:
+            if kind in _CHECKED:
+                where = _where(project, effect, undo)
+                if where == "changed":
+                    left.append(_as_left(project, effect))
+                if where:  # already as wanted: nothing done, nothing to say
+                    continue
             if kind in ("added", "removed"):
                 definition, place = effect[2], effect[3]
                 bring_back = (kind == "removed") == undo
@@ -657,7 +739,7 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool,
                     left.append(layer.name())
         except RuntimeError:
             logger.debug("Agent undo: %s of %s not applied", kind, layer_id, exc_info=True)
-            left.append(layer_id)
+            left.append(layer_id or kind)
     label = _settings_label()  # one settings effect per step: their label once
     return _once(done, label), _once(left, label)
 
