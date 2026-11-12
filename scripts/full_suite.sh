@@ -33,9 +33,13 @@ VIRTUAL_ENV="$VENV" uv pip install -q -r requirements-test.txt -r requirements-t
 
 status=0
 echo "== 1. venv $VENV"
+# pipefail and "|| true" would put the status of true in PIPESTATUS: read it with -e and pipefail off.
+set +e +o pipefail
 QT_QPA_PLATFORM=offscreen "$VENV/bin/python" -m pytest tests/ -o addopts= -p no:cacheprovider -q -rfEs "$@" \
-    | tee "$OUT/venv.txt" | grep -E '^(FAILED|ERROR) |[0-9]+ (passed|failed)' || true
-[ "${PIPESTATUS[0]}" -eq 0 ] || status=1
+    | tee "$OUT/venv.txt" | grep -E '^(FAILED|ERROR) |[0-9]+ (passed|failed)'
+pytest_status=${PIPESTATUS[0]}
+set -e -o pipefail
+[ "$pytest_status" -eq 0 ] || status=1
 
 # Skips for a missing import, the GDAL ones apart: they run in step 2.
 missing=$(grep -E '^SKIPPED' "$OUT/venv.txt" | grep -i -E "could not import|No module named" \
@@ -50,12 +54,15 @@ if [ -n "$gdal_files" ]; then
         status=1
     else
         echo "== 2. $IMAGE: $gdal_files"
+        set +e +o pipefail
         docker run --rm -e PYTHONDONTWRITEBYTECODE=1 -e QT_QPA_PLATFORM=offscreen \
             -v "$ROOT":/w/filter_mate:ro -w /w/filter_mate "$IMAGE" bash -c \
             "pip install -q --break-system-packages --root-user-action=ignore 'pytest<9.2' pytest-mock shapely pyproj numpy >/dev/null \
              && python3 -m pytest -o addopts= -p no:cacheprovider -q -rfEs $gdal_files" \
-            | tee "$OUT/gdal.txt" | grep -E '^(FAILED|ERROR) |[0-9]+ (passed|failed)' || true
-        [ "${PIPESTATUS[0]}" -eq 0 ] || status=1
+            | tee "$OUT/gdal.txt" | grep -E '^(FAILED|ERROR) |[0-9]+ (passed|failed)'
+        docker_status=${PIPESTATUS[0]}
+        set -e -o pipefail
+        [ "$docker_status" -eq 0 ] || status=1
         missing="$missing
 $(grep -E '^SKIPPED' "$OUT/gdal.txt" | grep -i -E "could not import|No module named|GDAL" | grep -v -i onnxruntime || true)"
     fi
