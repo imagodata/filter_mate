@@ -19,7 +19,7 @@ from ...adapters.agent.settings import (
 from ...adapters.agent import free_quota, transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import read_recipes, write_recipes
-from ...adapters.agent.bounded_http import abort_active
+from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, abort_active, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -203,14 +203,15 @@ class AgentChatController(QObject):
 
     def stop(self) -> None:
         """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""
-        abort_active()
+        abort_active(CHAT_WAITS)  # not the call of another application the MCP server is answering
         self._replay_stop = True
         if self._engine is not None:
             self._engine.cancel()
 
     def shutdown(self) -> None:
-        """The plugin unloads: nothing may arrive afterwards."""
+        """The plugin unloads: nothing may arrive afterwards, not even the answer of a call of another application."""
         self.stop()
+        abort_active()
         self._mcp.close()
         for layer in self._stat_layers.values():
             self._follow(layer, False)
@@ -657,7 +658,7 @@ class AgentChatController(QObject):
             return False
         values = load_settings()
         tools, handlers, _active = self.tools_and_handlers(values)
-        executor = ToolExecutor(tools, handlers)
+        executor = ToolExecutor(tools, self._chat_owned(handlers))
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)
         level = self._policy.level
@@ -847,8 +848,18 @@ class AgentChatController(QObject):
         session = AgentSession(provider, tools, self._prompt(values, reachable))
         if unreachable:
             self.panel.add_note(_tr("Not reachable for this conversation: {}").format(", ".join(unreachable)))
-        return ChatEngine(session, ToolExecutor(tools, handlers), QtTransport(self), self, self._checkpoint,
-                          defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
+        return ChatEngine(session, ToolExecutor(tools, self._chat_owned(handlers)), QtTransport(self), self,
+                          self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
+
+    @staticmethod
+    def _chat_owned(handlers) -> dict:
+        """The handlers as the chat runs them: what they wait for, the Stop of the chat ends, and nothing else does."""
+        def owned(handler):
+            def run(arguments):
+                with owned_by(CHAT_WAITS):
+                    return handler(arguments)
+            return run
+        return {name: owned(handler) for name, handler in handlers.items()}
 
     def _accessor(self) -> QGISFilterMateAccessor:
         return QGISFilterMateAccessor(self._plugin.get_public_api(), self._plugin)
@@ -960,7 +971,8 @@ class AgentChatController(QObject):
         if self._engine is None:
             self._building = True
             try:
-                self._engine = self._build_engine()
+                with owned_by(CHAT_WAITS):  # the connectors listed, the token of the free quota
+                    self._engine = self._build_engine()
             finally:
                 self._building = False
         if self._engine is None:
@@ -1042,7 +1054,7 @@ class AgentChatController(QObject):
         self._seen = None if read is None else project_state(*read)
 
     def _on_stop(self) -> None:
-        abort_active()  # a connector or a platform being waited for
+        abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
         if self._replaying:  # a recipe stops before its next step
             self._replay_stop = True
         if self._engine is not None:

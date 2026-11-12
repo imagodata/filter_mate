@@ -339,3 +339,25 @@ def test_the_action_bar_follows_the_turn(ctrl_module, controller, dock):
     assert states[-1] is False  # Undo and Ctrl+Z are off while the agent works
     transport.starts[0](_end_turn(ctrl_module))
     assert states[-1] is True
+
+
+# --- 7: Stop ends the waits of the chat, not those of another application ------------------------------------
+
+
+@pytest.mark.parametrize("stop", ["_on_stop", "stop"])
+def test_stop_leaves_the_calls_of_other_applications(ctrl_module, controller, stop):
+    bounded_http = ctrl_module._test_bounded_http
+    stopped = []
+    forget_client = bounded_http.on_abort(lambda: stopped.append("mcp client"))  # answered by the MCP server
+
+    def tool(arguments):
+        forget = bounded_http.on_abort(lambda: stopped.append("chat"))
+        getattr(controller, stop)()  # Stop pressed, or the dock closed, while the tool waits
+        forget()
+        return {}
+
+    controller._chat_owned({"tool": tool})["tool"]({})
+    assert stopped == ["chat"]
+    bounded_http.abort_active()  # without an owner: every wait, as before
+    assert stopped == ["chat", "mcp client"]
+    forget_client()

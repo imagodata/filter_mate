@@ -8,8 +8,9 @@ one: a 401 or a TLS error is a failure, not a dialog that a remote server gets t
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Callable, Dict, Mapping, Optional
+from typing import Callable, Dict, Iterator, Mapping, Optional
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QByteArray, QEventLoop, QTimer, QUrl
@@ -21,7 +22,9 @@ TOO_LARGE = "the server answered with too much data"
 TOO_LONG = "the server took too long to answer"
 STOPPED = "stopped"
 _USER_AGENT = b"FilterMate-QGIS-plugin"
-_ACTIVE = []
+CHAT = "chat"
+_ACTIVE = []  # (whose, stop) of each wait Stop can end
+_OWNER = [""]  # whose waits start now: CHAT inside owned_by(CHAT), "" for another application
 
 
 class HttpFailure(Exception):
@@ -35,10 +38,24 @@ class BoundedReply:
     content: bytes
 
 
-def abort_active() -> None:
-    """The user pressed Stop."""
-    for stop in list(_ACTIVE):
-        stop()
+@contextmanager
+def owned_by(owner: str) -> Iterator[None]:
+    """The waits started inside belong to ``owner``: its Stop ends them, never those of another application."""
+    previous, _OWNER[0] = _OWNER[0], owner
+    try:
+        yield
+    finally:
+        _OWNER[0] = previous
+
+
+def abort_active(owner: Optional[str] = None) -> None:
+    """The user pressed Stop: end the waits of ``owner`` (see owned_by), every wait when None.
+
+    The Stop of the chat must not cut the call of an MCP client being answered meanwhile.
+    """
+    for whose, stop in list(_ACTIVE):
+        if owner is None or whose == owner:
+            stop()
 
 
 def on_abort(stop: Callable[[], object]) -> Callable[[], None]:
@@ -46,11 +63,12 @@ def on_abort(stop: Callable[[], object]) -> Callable[[], None]:
 
     For another wait of the agent that lets the event loop run (a Processing algorithm).
     """
-    _ACTIVE.append(stop)
+    entry = (_OWNER[0], stop)
+    _ACTIVE.append(entry)
 
     def forget() -> None:
-        if stop in _ACTIVE:
-            _ACTIVE.remove(stop)
+        if entry in _ACTIVE:
+            _ACTIVE.remove(entry)
     return forget
 
 
@@ -126,7 +144,8 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
     reply.readyRead.connect(on_data)
     reply.metaDataChanged.connect(on_headers)
     reply.finished.connect(loop.quit)
-    _ACTIVE.append(on_stop)
+    entry = (_OWNER[0], on_stop)
+    _ACTIVE.append(entry)
     try:
         timer.start(timeout_ms)
         if not reply.isFinished():
@@ -143,7 +162,7 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
         tls_refused = no_answer and reply.error() == QNetworkReply.NetworkError.SslHandshakeFailedError
         cut = sink is not None and 200 <= status < 300 and (broken or not reply.isFinished())
     finally:
-        _ACTIVE.remove(on_stop)
+        _ACTIVE.remove(entry)
         reply.readyRead.disconnect(on_data)
         reply.metaDataChanged.disconnect(on_headers)
         reply.abort()
