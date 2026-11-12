@@ -16,10 +16,14 @@ Patterns à retenir :
   `<plugin>/logs/filtermate.log` (« Callback execution failed: … »), pas dans le journal QGIS.
 - Indice de lecture d'un journal client : l'absence des `QgsMessageLog` « Distant layers to filter (N) » / « Filtering
   N distant layers » situe l'échec entre le filtre source et la phase distante.
-Restes notés par la revue Opus (hors lot) : `service=` ignoré par `get_datasource_connexion_from_layer` (peut même
-ouvrir une base locale par défaut) ; MV de buffer par expression jamais créée (`param_buffer_expression` lu avant
-l'init, clé `buffer_expression` absente de `task_parameters['filtering']`) alors que `prepare_postgresql_source_geom`
-référence `…_buffer_expr_dump` au-delà de 10 000 entités ; DROP du reset non protégé (base en lecture seule).
+Suites : `service=` → #357 (`pg_connect.connect_kwargs_from_uri` = `QgsDataSourceUri::connectionInfo()` : avec
+un service ni host ni port, valeurs vides écartées car libpq ne remplit depuis le service que les mots-clés absents ;
+`connection_identity` pour toute clé de cache par base). Transaction laissée par `ensure_table_stats` → PR suivante.
+DROP du reset en lecture seule : non-problème (`execute_commands` attrape et fait rollback).
+**Reste ouvert** : buffer par expression sur source PG > 10 000 entités, cassé à 3 étages (MV jamais créée :
+`param_buffer_expression` lu avant l'init et clé `buffer_expression` absente ; si créée, elle prendrait l'ANCIEN
+subset car le nouveau est seulement en file ; la MV `_dump` = ST_Union sans clé alors que le builder y applique
+`__source."pk" IN …`). À reproduire sur PostGIS (Docker) avant de toucher : piste = toujours le mode inline.
 
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression
