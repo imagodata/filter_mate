@@ -51,6 +51,7 @@ from ...core.agent.tool_catalog import (
     VIEW_MAP, chat_tools,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
@@ -998,13 +999,45 @@ class AgentChatController(QObject):
     def _read_project(self):
         """``(layers, selections, view)`` now, as plain dicts; None when they cannot be read."""
         try:
-            accessor = self._accessor()
-            layers = [asdict(layer) for layer in accessor.list_layers()]
-            view = asdict(accessor.map_context())
+            layers = self._layer_rows()
+            view = asdict(self._accessor().map_context())
         except Exception:  # the request goes without it: the model reads the project with its tools
             logger.debug("Agent: project summary not read", exc_info=True)
             return None
         return layers, view.get("selections") or [], view
+
+    @staticmethod
+    def _layer_rows() -> list:
+        """What the summary of a request reads of ``list_layers``, in the order of the layer tree.
+
+        Read here, not through the accessor: its list_layers counts every vector layer, and featureCount() of a web
+        service or a remote file can be a request to its server, on the main thread, at each request and at the
+        end of each turn. Their count is left out (-1).
+        """
+        from ...adapters.public_api.introspection import tree_places
+        from ...adapters.public_api.operations import layer_kind
+        from ...adapters.qgis.coverage_layers.snapshots import registry
+        from ...adapters.qgis.source_capability_probe import feature_count_or_none
+        places, derived = tree_places() or {}, registry()
+        rows = []
+        for layer in QgsProject.instance().mapLayers().values():
+            try:
+                kind = layer_kind(layer)
+                if kind not in (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD) or not layer.isValid():
+                    continue
+                count = (feature_count_or_none(layer) if kind is LayerKind.VECTOR
+                         else layer.pointCount() if kind is LayerKind.POINT_CLOUD else None)
+                subset = (layer.subsetString() or "") if hasattr(layer, "subsetString") else ""
+                snapshot = derived.get(layer.id())
+                clip = "" if snapshot is None else ("filtermate:clip" if snapshot.geometry_wkt else "filtermate:selection")
+                rank, group, visible = places.get(layer.id(), (len(places), "", True))
+                rows.append((rank, {"layer_id": layer.id(), "name": layer.name(), "layer_kind": kind.value,
+                                    "feature_count": count if isinstance(count, int) else -1,
+                                    "crs_authid": layer.crs().authid(), "group": group, "visible": visible,
+                                    "active_filter_expression": subset or clip}))
+            except (RuntimeError, AttributeError):  # a layer deleted meanwhile: the others are still told
+                logger.debug("Agent: a layer left out of the summary", exc_info=True)
+        return [row for _rank, row in sorted(rows, key=lambda item: item[0])]
 
     def _project_context(self) -> str:
         """The map, the layers, their filters, the selections now and what the user changed since the last answer.

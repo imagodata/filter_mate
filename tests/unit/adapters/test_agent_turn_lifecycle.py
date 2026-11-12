@@ -123,3 +123,20 @@ def test_a_turn_kept_open_is_recorded(checkpoint_module):
     layer.subset = "x > 1"
     assert list(checkpoint.commit()) == ["roads"]
     assert history.can_undo(checkpoint_module.HISTORY_KEY)
+
+
+def test_a_count_widget_does_not_count_a_web_service(monkeypatch, packages):
+    """2026-11-12: featureCount() of a WFS layer can be a request to its server, at each refresh of the widgets."""
+    _module(monkeypatch, ".adapters.qgis.source_capability_probe",
+            feature_count_or_none=lambda layer: None if layer.remote else layer.featureCount())
+    for name in ("qgis.PyQt.QtCore",):
+        monkeypatch.setitem(sys.modules, name, MagicMock())
+    module = _load(monkeypatch, "adapters.agent.agent_widgets", "adapters/agent/agent_widgets.py")
+    wfs = MagicMock(remote=True)
+    wfs.featureCount.side_effect = AssertionError("a request to the server")
+    local = MagicMock(remote=False)
+    local.featureCount.return_value = 7
+    layers = {"wfs": wfs, "local": local}
+    monkeypatch.setattr(module, "widget_layer", lambda widget: layers[widget["layer_id"]])
+    assert module.stat_value({"layer_id": "wfs", "aggregate": "count"}) is None
+    assert module.stat_value({"layer_id": "local", "aggregate": "count"}) == 7.0

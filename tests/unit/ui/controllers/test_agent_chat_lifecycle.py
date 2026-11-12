@@ -361,3 +361,46 @@ def test_stop_leaves_the_calls_of_other_applications(ctrl_module, controller, st
     bounded_http.abort_active()  # without an owner: every wait, as before
     assert stopped == ["chat", "mcp client"]
     forget_client()
+
+
+# --- 8: the summary of a request does not count web services ---------------------------------------------------
+
+
+def test_the_summary_does_not_count_a_web_service(ctrl_module, controller, monkeypatch):
+    kinds = sys.modules[f"{_PKG}.core.domain.layer_kind"].LayerKind
+
+    class Layer:
+        def __init__(self, layer_id, remote, subset=""):
+            self._id, self.remote, self.subset, self.counted = layer_id, remote, subset, 0
+
+        def id(self):
+            return self._id
+
+        def name(self):
+            return self._id.upper()
+
+        def isValid(self):
+            return True
+
+        def featureCount(self):
+            self.counted += 1
+            return 12
+
+        def subsetString(self):
+            return self.subset
+
+        def crs(self):
+            return types.SimpleNamespace(authid=lambda: "EPSG:2154")
+
+    local, wfs = Layer("local", False, "a > 1"), Layer("wfs", True)
+    FakeQgsProject.project.layers = {"wfs": wfs, "local": local}
+    _module(monkeypatch, ".adapters.public_api.introspection",
+            tree_places=lambda: {"local": (0, "", True), "wfs": (1, "Base", False)})
+    _module(monkeypatch, ".adapters.public_api.operations", layer_kind=lambda layer: kinds.VECTOR)
+    _module(monkeypatch, ".adapters.qgis.coverage_layers.snapshots", registry=lambda: {})
+    _module(monkeypatch, ".adapters.qgis.source_capability_probe",
+            feature_count_or_none=lambda layer: None if layer.remote else layer.featureCount())
+    rows = controller._layer_rows()
+    assert wfs.counted == 0  # featureCount() of a web service can be a request to its server
+    assert [(row["name"], row["feature_count"], row["active_filter_expression"], row["group"], row["visible"])
+            for row in rows] == [("LOCAL", 12, "a > 1", "", True), ("WFS", -1, "", "Base", False)]

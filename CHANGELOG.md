@@ -26,6 +26,7 @@ All notable changes to FilterMate will be documented in this file.
 - **Opening another project during a request of AGENT no longer records a false turn.** The stopped request compared the closed project with the new one (notes, widgets, layer tree, themes, bookmarks, CRS, and its layers counted as added), and Undo could write the old project into the new one. A recipe being run stops too, as it does when the dock closes, and what other applications did in the closed project no longer shows in the thread of the next one.
 - **Undo and Ctrl+Z of the action bar wait for the end of a turn of AGENT**: they stayed on during the turn and did nothing.
 - **Stop in AGENT, or closing the dock, no longer cuts what another application asked for.** Stop ended every wait of the plugin, the download or the Processing algorithm of an MCP client included; it now ends only those of the chat. Unloading the plugin still ends them all.
+- **AGENT no longer counts the features of a web service at each request.** The summary of the project sent with each request, and read again at the end of each turn, counted every vector layer on the main thread: for a WFS layer that can be a request to its server, with QGIS frozen meanwhile. The count of a web service or a remote file is left out of the summary, and a count widget on such a layer shows nothing.
 
 ### Point clouds
 
