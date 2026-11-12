@@ -769,7 +769,7 @@ def prepare_ogr_source_geom(
         QgsVectorLayer or None: Prepared source geometry layer
 
     Raises:
-        SourceSelectionError: The source filter expression keeps no feature or
+        SourceSelectionError: The source selection keeps no feature or
             cannot be read (adapters/backends/source_refusal.py).
     """
     from qgis.core import QgsMessageLog, Qgis, QgsExpressionContext

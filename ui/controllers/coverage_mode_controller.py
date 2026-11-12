@@ -3109,7 +3109,7 @@ class CoverageModeController(BaseController):
 
     def _run_filter(self, layer: Any, hag_tried: bool = False) -> None:
         from ...core.domain.layer_kind import LayerKind
-        from ...core.domain.cross_filter import combine_subset
+        from ...core.domain.cross_filter import combine_subset, selection_subset
         from ...core.domain.filter_state import CrossOperation
         from ...adapters.qgis.coverage_layers.snapshots import registry, take_snapshot
         show_info, show_warning = _feedback()
@@ -3192,8 +3192,11 @@ class CoverageModeController(BaseController):
             from ...adapters.qgis.coverage_layers.source_jobs import PointCloudSourceJob
             if siblings:
                 self.service.history.push(CrossOperation(layer.id(), tuple(siblings), 'point cloud tiles'))
+            # 2026-11-12: the targets follow the selection, not the subset of the source
+            # (NOT (criteria) under AND NOT: every point but the selection)
             source_job = PointCloudSourceJob(layer, float(_option('point_cloud_footprint_resolution', 2.0)), before=before,
-                                             zone=self._zone_geometry())
+                                             zone=self._zone_geometry(),
+                                             selection=selection_subset(before.subset, expression, source_op))
         self._start_task(request, source_job)
 
     def _point_cloud_attributes(self, layer: Any) -> List[str]:

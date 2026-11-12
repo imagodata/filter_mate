@@ -10,6 +10,11 @@ writes the source filter into its EXISTS sub-query, so a source that keeps
 nothing never matches there. The file backends now refuse the filter with
 this error, shown to the user, instead of using the whole layer; nothing is
 filtered, the source keeps its previous filter too.
+
+The message names the selection, which these preparations read
+(FilterEngineTask._source_selection_qgis_expression), not the source filter:
+under AND NOT the source filter of a selection keeping nothing, NOT (x), keeps
+every feature.
 """
 
 
@@ -23,7 +28,7 @@ class SourceSelectionError(ValueError):
 
 
 def source_selection_refusal(layer_name: str, unreadable: bool = False) -> SourceSelectionError:
-    """The error for a source filter that keeps no feature, or that cannot be read.
+    """The error for a source selection that keeps no feature, or that cannot be read.
 
     Args:
         layer_name: Name of the source layer.
@@ -36,9 +41,9 @@ def source_selection_refusal(layer_name: str, unreadable: bool = False) -> Sourc
     if unreadable:
         text = QCoreApplication.translate(
             'SourceSelection',
-            "The source filter of '{0}' cannot be evaluated: nothing was filtered.")
+            "The selection of '{0}' cannot be evaluated: nothing was filtered.")
     else:
         text = QCoreApplication.translate(
             'SourceSelection',
-            "The source filter of '{0}' keeps no feature: nothing was filtered.")
+            "The selection of '{0}' keeps no feature: nothing was filtered.")
     return SourceSelectionError(text.format(layer_name))

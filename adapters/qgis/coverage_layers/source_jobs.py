@@ -490,18 +490,21 @@ class RasterSourceJob(SourceJob):
 
 
 class PointCloudSourceJob(SourceJob):
-    """Points kept by the selection (already applied as the layer subset)."""
+    """Points kept by the selection (the layer subset, unless ``selection`` is given)."""
 
     kind = LayerKind.POINT_CLOUD
 
     def __init__(self, layer, resolution: float = 2.0, before: Optional[LayerSnapshot] = None,
-                 zone: Optional[QgsGeometry] = None) -> None:
+                 zone: Optional[QgsGeometry] = None, selection: Optional[str] = None) -> None:
         """Footprint of the points kept by the subset of ``layer``, within ``zone`` when one was drawn.
 
         Args:
             zone: Polygon drawn with the Zone tool (layer CRS): the footprint is read inside its
                 bounding box and cut to it, so a polygon or a circle applies exactly to the targets
                 (the subset string of the cloud itself only knows its X / Y bounds).
+            selection: Subset of the points the targets are related to, when it is not the subset
+                of ``layer`` (2026-11-12: under AND NOT the layer keeps every point but the
+                selection; see cross_filter.selection_subset). None: the subset of ``layer``.
         """
         super().__init__(layer)
         if before is not None:
@@ -516,20 +519,20 @@ class PointCloudSourceJob(SourceJob):
         if layer.providerType() == 'vpc':
             self._error = "a virtual point cloud (VPC) cannot be a source: its points are read tile by tile"
             return
-        # The task reads its own copy of the layer (same source, same subset):
+        # The task reads its own copy of the layer (same source, subset of the selection):
         # the live layer may change (preview, removal) while the task runs, and
         # it is never read from the task thread.
         from .point_cloud_footprint import index_ready, open_point_cloud
         from .pdal_cli import is_remote_source
+        subset = layer.subsetString() if selection is None else selection
         if is_remote_source(layer.source()):
             if self._zone is None:
                 from .target_appliers import translate
                 self._error = translate('PointCloudSource', 'Draw a useful selection zone before reading a remote point cloud')
                 return
-            self._pending_remote = (layer.source(), f'{layer.name()}_footprint', layer.providerType(), layer.subsetString())
+            self._pending_remote = (layer.source(), f'{layer.name()}_footprint', layer.providerType(), subset)
             return  # opening a remote private layer can fetch its header: worker only
         copy = open_point_cloud(layer.source(), f"{layer.name()}_footprint", layer.providerType())
-        subset = layer.subsetString()
         # Spelled in parentheses: QGIS caches the decoded blocks under the
         # subset text, and the statistics task of the project layer may have
         # cached unfiltered blocks under its spelling (see open_point_cloud).
