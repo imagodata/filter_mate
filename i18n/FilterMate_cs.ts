@@ -847,6 +847,17 @@ Souhlasíte?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Krok {} nebyl proveden: vypnuli jste jeho nástroj pro agenta ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agent chce provést tyto akce ({}):
+{}
+
+Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

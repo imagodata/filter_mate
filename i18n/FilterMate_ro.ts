@@ -847,6 +847,17 @@ Sunteți de acord?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Pasul {} nu a fost executat: ați dezactivat instrumentul său pentru agent ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agentul vrea să facă aceste {} acțiuni:
+{}
+
+Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
