@@ -58,10 +58,26 @@ def layer_resolution(resolution: Optional[float], crs) -> float:
 
     A cloud in a geographic CRS is read and binned in degrees: 2.0 was taken as
     2 degrees (3 points read, a footprint of whole degrees keeping every target
-    feature). Degrees of latitude: the cells are as fine or finer across.
+    feature). Degrees of latitude: the cells are as fine or finer across. A
+    projected CRS in feet (a US State Plane) reads cells of 2 feet for 2 m
+    unless converted by its unit.
     """
     resolution = float(resolution or DEFAULT_RESOLUTION)
-    return resolution / METRES_PER_DEGREE if crs.isGeographic() else resolution
+    if crs.isGeographic():
+        return resolution / METRES_PER_DEGREE
+    return resolution * _units_per_metre(crs)
+
+
+def _units_per_metre(crs) -> float:
+    """Map units of a projected ``crs`` in one metre; 1 for metres or a unit QGIS cannot convert."""
+    from qgis.core import Qgis, QgsUnitTypes
+    units = getattr(Qgis, 'DistanceUnit', None)
+    metres = units.Meters if units is not None else QgsUnitTypes.DistanceUnit.DistanceMeters
+    try:
+        factor = float(QgsUnitTypes.fromUnitToUnitFactor(metres, crs.mapUnits()))
+    except Exception:  # noqa: BLE001 - an unknown unit: metres, as before
+        return 1.0
+    return factor if math.isfinite(factor) and factor > 0 else 1.0
 
 
 def point_cloud_exporter_class():

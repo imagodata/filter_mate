@@ -55,7 +55,7 @@ from qgis.core import QgsDoubleRange, QgsGeometry, QgsRectangle
 
 logger = logging.getLogger(__name__)
 
-# Cell size in metres (degrees for a cloud in a geographic CRS, see point_cloud_footprint.layer_resolution):
+# Cell size in metres (in degrees or feet for a cloud in such a CRS, see point_cloud_footprint.layer_resolution):
 # also the level of detail read, the clicked objects and the similar ones alike (see the module docstring).
 OBJECT_RESOLUTION = 1.0
 # The footprint of a class is read in these cells first, and kept in them for a class denser than
