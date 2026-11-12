@@ -273,13 +273,14 @@ class TestTheAgentUndoLeavesProtectedLayersAlone:
         monkeypatch.setattr(checkpoint, "QgsProject", SimpleNamespace(instance=lambda: project))
         monkeypatch.setattr(checkpoint, "take_snapshot", lambda layer, kind: _snapshot("x"))
 
-        def apply_effects(items, undo, keep=frozenset()):
-            effects.append(keep)
+        def apply_effects(items, undo, keep=frozenset(), presence=None):
+            effects.append((keep, presence))
             return [], []
         monkeypatch.setattr(checkpoint, "apply_effects", apply_effects)
         done, left = checkpoint.TurnCheckpoint().undo(keep=frozenset({"cadastre_id"}))
         assert restored == ["routes_id"] and done == ["routes"] and left == ["cadastre"]
-        assert effects == [frozenset({"cadastre_id"})]
+        # The layers added or removed, then the rest after the filters: each pass leaves the kept layers alone.
+        assert effects == [(frozenset({"cadastre_id"}), True), (frozenset({"cadastre_id"}), False)]
 
     def test_the_style_or_the_addition_of_a_kept_layer_is_not_undone(self, monkeypatch):
         effects_module = sys.modules[f"{_PKG}.adapters.agent.turn_effects"]

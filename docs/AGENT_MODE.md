@@ -378,10 +378,22 @@ each time the edits of one of its source layers are saved in QGIS (`afterCommitC
 - A turn also records what it does beside the filters (`adapters/agent/turn_effects.py`): layers added or removed,
   selections, visibility in the layer tree. Undo and redo apply them with the filters. A removed layer comes back from
   its definition, same id, at its place in its group; a layer kept in memory cannot, and the panel says so. Zooms and
-  exports are not undone.
-- **Steps.** The undo point takes the state of the layers before each change of a turn. The History page lists the steps
-  of the last request; "Undo back to here" puts its layers as they were before the chosen step, as a step of its own
-  that Undo takes back.
+  exports are not undone. What the user changed in QGIS since the turn (the visibility of a layer, the project CRS, a
+  layer name, the style of a vector layer or the style it has on) is theirs: undo and redo put back only what is still
+  as the turn left it, and the message names the rest. Not checked, put back as before: what is read as a whole
+  collection (the layer tree, the bookmarks, the map themes: a group ticked or a theme of the user's elsewhere would
+  keep the agent's from being undone, and QGIS writes the themes back in another order), a selection (a filter
+  empties it by itself), the style of a raster (its XML follows the filter), the widgets and notes (the agent's own).
+  The edits, recipes and settings check in their own way. Undo and redo go in three times: the layers added or
+  removed, then the filters (a filter needs its layer), then the rest (a filter empties a selection).
+- **Steps.** The undo point takes the state of the layers before each change of a turn, and what each change did beside
+  the filters (a style, a layer added, a name, a group...). The History page lists the steps of the last request that
+  changed something; "Undo back to here" puts the request as it was before the chosen step (its filters and what the
+  later steps did beside them, what the user changed since left as it is), as a step of its own that Undo takes back
+  (`step_effects` and `effects_reversed` of the `CrossOperation`): a layer a later step made is removed and comes back
+  with its filter, a layer a later step removed comes back as it was before the chosen step. Limits: a layer a task
+  of a step adds after the next step began counts in the next step; what a step changes without saying so (code,
+  Processing on a layer) is not in its effects.
 - **The action bar.** While AGENT is open, Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk this history; their
   tooltip names the request. Folded, they are the dock ones again.
 - **In the conversation.** `undo_agent_step`, a tool of the chat alone (not in REST nor in the MCP servers), takes back the

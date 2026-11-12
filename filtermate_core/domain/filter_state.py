@@ -123,6 +123,10 @@ class CrossOperation:
     # What a turn of the agent did beside the filters (layers added or removed, selections, visibility), as plain
     # tuples the host reads back: see adapters/agent/turn_effects.py.
     effects: Tuple[Tuple[Any, ...], ...] = ()
+    # What each step of ``steps`` did beside the filters, in the same order: "undo back to here" undoes it too.
+    step_effects: Tuple[Tuple[Tuple[Any, ...], ...], ...] = ()
+    # The effects go the other way: an operation that undid them ("undo back to here") applies them again when undone.
+    effects_reversed: bool = False
 
     @property
     def layer_ids(self) -> Tuple[str, ...]:

@@ -36,6 +36,9 @@ class TurnCheckpoint:
         self._before: Dict[str, Tuple[LayerSnapshot, LayerKind]] = {}
         self._steps: List[Tuple[str, Dict[str, LayerSnapshot]]] = []
         self._effects = EffectsRecorder()
+        # What each step did beside the filters (one per step of ``_steps``), and the recorder of the step under way.
+        self._step_effects: List[Tuple[Tuple[Any, ...], ...]] = []
+        self._step_recorder: Optional[EffectsRecorder] = None
         self._open = False
         # The request of the turn being run, kept as the description of its operation.
         self.label = ""
@@ -65,6 +68,7 @@ class TurnCheckpoint:
         The first state of a layer is what the turn restores; the state before each change is what "undo back to
         here" restores, step by step.
         """
+        self._close_step()
         self._open = True
         states: Dict[str, LayerSnapshot] = {}
         for layer in QgsProject.instance().mapLayers().values():
@@ -78,24 +82,44 @@ class TurnCheckpoint:
             if layer.id() not in self._before:
                 self._before[layer.id()] = (snapshot, kind)
         self._steps.append((self._label(call), states))
+        self._step_recorder = EffectsRecorder(settings=False)
         if call is not None:
             self._effects.before_call(call, len(self._steps) - 1)
+            try:  # what a step did is for "undo back to here" only: it never keeps a change from being made
+                self._step_recorder.before_call(call)
+            except Exception:  # noqa: BLE001
+                logger.debug("Agent undo: a step not recorded", exc_info=True)
 
-    def _step_record(self, after: Dict[str, LayerSnapshot],
-                     calls: Optional[List[int]] = None) -> Tuple[Tuple[str, Tuple[LayerSnapshot, ...]], ...]:
-        """For each step, the state before it of the layers it changed (next step's state, or the end of the turn).
+    def _close_step(self) -> None:
+        """The step under way ends (the next one begins, or the turn ends): what it did beside the filters."""
+        if self._step_recorder is not None:
+            recorder, self._step_recorder = self._step_recorder, None
+            try:
+                done = recorder.finish()
+            except Exception:  # noqa: BLE001 - the step is still listed by its filters; the turn undoes it whole
+                logger.debug("Agent undo: what a step did beside the filters not recorded", exc_info=True)
+                done = ()
+            self._step_effects.append(done)
 
-        ``calls`` receives the index of the call of each step kept (a step that changed no layer is not kept)."""
-        steps = []
+    def _step_record(self, after: Dict[str, LayerSnapshot], calls: Optional[List[int]] = None,
+                     settings_calls: FrozenSet[int] = frozenset()):
+        """``(steps, effects)``: for each step that changed something, the state before it of the layers it filtered
+        (next step's state, or the end of the turn), and what it did beside the filters.
+
+        A step that changed settings (``settings_calls``: their calls) is kept too, its settings undone by their own
+        effects. ``calls`` receives the index of the call of each step kept."""
+        steps, effects = [], []
         for index, (label, states) in enumerate(self._steps):
             following = self._steps[index + 1][1] if index + 1 < len(self._steps) else after
             changed = tuple(before for layer_id, before in states.items()
                             if layer_id in following and not following[layer_id].same_state(before))
-            if changed:
+            done = self._step_effects[index] if index < len(self._step_effects) else ()
+            if changed or done or index in settings_calls:
                 steps.append((label, changed))
+                effects.append(done)
                 if calls is not None:
                     calls.append(index)
-        return tuple(steps)
+        return tuple(steps), tuple(effects)
 
     @staticmethod
     def _settings_at_steps(effects, calls: List[int]):
@@ -120,6 +144,7 @@ class TurnCheckpoint:
         self._before = {}
         self._steps = []
         self._effects = EffectsRecorder()
+        self._step_effects, self._step_recorder = [], None
         try:
             from .plugin_settings import take_applied
             take_applied()  # what the agent applied in that turn is not an effect of the next one
@@ -131,6 +156,7 @@ class TurnCheckpoint:
         if not self._open:
             return ()
         self._open = False
+        self._close_step()
         project = QgsProject.instance()
         changes = []
         names: List[str] = []
@@ -143,13 +169,18 @@ class TurnCheckpoint:
             if after is not None and not after.same_state(before):
                 changes.append((before, after))
                 names.append(layer.name())
+        effects = self._effects.finish()
         calls: List[int] = []
-        steps = self._step_record(final, calls)
-        effects = self._settings_at_steps(self._effects.finish(), calls)
+        steps, step_effects = self._step_record(final, calls, frozenset(
+            effect[4] for effect in effects if effect[0] == "settings" and len(effect) > 4))
+        effects = self._settings_at_steps(effects, calls)
         self._before = {}
         self._steps = []
+        self._step_effects = []
+        several = len(steps) > 1
         _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
-                                                   steps=steps if len(steps) > 1 else (), effects=effects))
+                                                   steps=steps if several else (),
+                                                   step_effects=step_effects if several else (), effects=effects))
         for effect in effects:
             if effect[0] in ("added", "removed", "style", "edits", "layout", "join") and len(effect) > 4 \
                     and effect[4] not in names:
@@ -223,39 +254,78 @@ class TurnCheckpoint:
                 refused = True
         return names, left, refused
 
-    def undo_to_step(self, step: int, description: str = "") -> Tuple[List[str], List[str]]:
-        """The layers of the last turn as they were before its step ``step``: a new step of the history, undoable.
+    @staticmethod
+    def _effects_of(operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset(),
+                    presence: Optional[bool] = None):
+        """Apply the effects of ``operation`` towards its state before (``back``) or after; ``(done, left)``."""
+        reversed_ = getattr(operation, "effects_reversed", False)
+        return apply_effects(getattr(operation, "effects", ()), undo=back != reversed_, keep=keep, presence=presence)
 
-        Names of the layers changed, and of those left as they are (changed since, or refused).
+    def _move(self, operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset()):
+        """``operation`` to its state before (``back``) or after: ``(changed, left as they are, a layer refused)``.
+
+        The layers added or removed first (a filter needs its layer), then the filters, then the rest (a filter empties
+        a selection). When a layer refused, the layers go back and nothing else changes.
+        """
+        done, not_done = self._effects_of(operation, back, keep, presence=True)
+        names, left, refused = self._apply(operation, use_before=back, keep=keep)
+        if refused:
+            self._effects_of(operation, not back, presence=True)
+            return names, left, True
+        more, not_more = self._effects_of(operation, back, keep, presence=False)
+        return _merged(names, done + more), _merged(left, not_done + not_more), False
+
+    def undo_to_step(self, step: int, description: str = "") -> Tuple[List[str], List[str]]:
+        """The last turn as it was before its step ``step``: a new step of the history, undoable.
+
+        The filters of the layers, and what the steps did beside them (a style, a layer added, a name...), what the user
+        changed since left as it is. Names of what changed, and of what was left as it is (changed since, or refused).
         """
         history = _api_service().history
         stack = history.undo_stack(HISTORY_KEY)
         steps = getattr(stack[-1], "steps", ()) if stack else ()
         if not 0 <= step < len(steps):
             return [], []
-        settings = self._settings_back_to(getattr(stack[-1], "effects", ()), step)
+        step_effects = getattr(stack[-1], "step_effects", ())
+        # The settings go back by their own effects (one per step that changed them), turned the way of these:
+        # undone, they go to what the settings held before the step.
+        settings = tuple((kind, layer_id, after, before) + tuple(rest) for kind, layer_id, before, after, *rest
+                         in self._settings_back_to(getattr(stack[-1], "effects", ()), step))
+        effects = tuple(effect for done in step_effects[step:] for effect in done) + settings
         targets: Dict[str, LayerSnapshot] = {}
         for _label, befores in steps[step:]:
             for before in befores:
                 targets.setdefault(before.layer_id, before)  # the state before the first change at or after it
         project = QgsProject.instance()
-        pairs = []
-        for layer_id, target in targets.items():
-            layer = project.mapLayer(layer_id)
-            now = self._snapshot(layer, LayerKind(target.kind)) if layer is not None else None
-            if now is not None and not now.same_state(target):
-                pairs.append((now, target))
-        if not pairs and not settings:
+
+        def pairs_of(skip) -> List[Tuple[LayerSnapshot, LayerSnapshot]]:
+            pairs = []
+            for layer_id, target in targets.items():
+                layer = project.mapLayer(layer_id) if layer_id not in skip else None
+                now = self._snapshot(layer, LayerKind(target.kind)) if layer is not None else None
+                if now is not None and not now.same_state(target):
+                    pairs.append((now, target))
+            return pairs
+
+        # The filters of the layers there now (a layer a later step added is removed by the effects: undoing this
+        # operation brings it back first, then its filter), then of those the effects bring back (removed by a later
+        # step: back as it was then, filtered by the earlier steps).
+        pairs = pairs_of(())
+        if not pairs and not effects:
             return [], []
+        done, not_done = apply_effects(effects, undo=True, presence=True)
+        pairs += pairs_of({now.layer_id for now, _target in pairs})
+        # Its effects are those of the steps, undone: undoing this operation applies them again.
         operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=(description or steps[step][0])[:MAX_LABEL],
-                                   effects=settings)
+                                   effects=effects, effects_reversed=True)
         names, left, refused = self._apply(operation, use_before=False) if pairs else ([], [], False)
-        if refused:
+        if refused:  # a layer refused (being edited): the layers go back, it can be tried again
+            apply_effects(effects, undo=False, presence=True)
             return names, left
-        done, not_done = apply_effects(settings, undo=False)
-        if names or done:
+        more, not_more = apply_effects(effects, undo=True, presence=False)
+        if names or done or more:
             history.push(operation)
-        return _merged(names, done), _merged(left, not_done)
+        return _merged(names, done + more), _merged(left, not_done + not_more)
 
     @staticmethod
     def _settings_back_to(effects, step: int):
@@ -292,12 +362,10 @@ class TurnCheckpoint:
         operation = history.undo(HISTORY_KEY)
         if operation is None:
             return [], []
-        names, left, refused = self._apply(operation, use_before=True, keep=keep)
+        names, left, refused = self._move(operation, back=True, keep=keep)
         if refused:
             history.redo(HISTORY_KEY)
-            return names, left
-        done, not_done = apply_effects(getattr(operation, "effects", ()), undo=True, keep=keep)
-        return _merged(names, done), _merged(left, not_done)
+        return names, left
 
     def redo(self) -> Tuple[List[str], List[str]]:
         """Apply again the last turn undone: names of the layers changed, and of those left as they are."""
@@ -305,10 +373,7 @@ class TurnCheckpoint:
         operation = history.redo(HISTORY_KEY)
         if operation is None:
             return [], []
-        done, not_done = apply_effects(getattr(operation, "effects", ()), undo=False)  # layers first: filters need them
-        names, left, refused = self._apply(operation, use_before=False)
+        names, left, refused = self._move(operation, back=False)
         if refused:
-            apply_effects(getattr(operation, "effects", ()), undo=True)
             history.undo(HISTORY_KEY)
-            return names, left
-        return _merged(names, done), _merged(left, not_done)
+        return names, left

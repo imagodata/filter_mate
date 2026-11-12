@@ -1764,6 +1764,134 @@ def check_live_recipes(chat, panel, layer):
     layer.setSubsetString("")
 
 
+def check_steps_beside_filters(chat, provider, ask, layer):
+    """Undo back to a step undoes what the later steps did beside the filters; what the user changed since stays."""
+    from qgis.core import QgsProject, QgsVectorLayer
+
+    project = QgsProject.instance()
+    said = []
+    say = chat._say
+    chat._say = lambda text, error=False, offer_settings=False: said.append(text) or say(text, error, offer_settings)
+
+    def color():
+        symbol = layer.renderer().symbol() if hasattr(layer.renderer(), "symbol") else None
+        return symbol.color().name() if symbol is not None else layer.renderer().type()
+
+    color_before = color()
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}, "toolu_g")),
+                   (200, {}, tool_turn("set_layer_style", {"layer": "communes", "mode": "single", "color": "#ff0000"},
+                                       "toolu_h")),
+                   (200, {}, text_turn("Filtré et coloré.")))
+    ask("filtre et colore en rouge")
+    turns = [turn for turn in chat._checkpoint.turns() if turn.get("applied")]
+    steps = turns[-1].get("steps", []) if turns else []
+    check("steps: a style step is a step too", len(steps) == 2 and color() == "#ff0000", (steps, color()))
+    chat._on_undo_to_step(1)
+    check("steps: back to before the style step brings the style back, the filter stays",
+          color() == color_before and layer.subsetString() == '"pop" > 1000', (color(), layer.subsetString()))
+    chat._on_undo()
+    check("steps: undoing that step of the history styles again", color() == "#ff0000"
+          and layer.subsetString() == '"pop" > 1000', (color(), layer.subsetString()))
+    chat._on_undo()
+    check("steps: the turn still undoes whole", color() == color_before and layer.subsetString() == "",
+          (color(), layer.subsetString()))
+
+    provider.reset((200, {}, tool_turn("rename_layer", {"layer": "communes", "name": "Communes de l'agent"}, "toolu_i")),
+                   (200, {}, text_turn("Renommée.")))
+    ask("renomme les communes")
+    layer.setName("Communes à moi")
+    said.clear()
+    chat._on_undo()
+    check("changed since: a name the user changed after the turn stays, and the undo says so",
+          layer.name() == "Communes à moi" and said and "Communes à moi" in said[-1], (layer.name(), said))
+    layer.setName("communes")
+
+    provider.reset((200, {}, tool_turn("group_layers", {"layers": ["communes"], "group": "Groupe de l'agent"}, "toolu_j")),
+                   (200, {}, text_turn("Groupée.")))
+    ask("mets les communes dans un groupe")
+    root = project.layerTreeRoot()
+    grouped = root.findGroup("Groupe de l'agent") is not None
+    extra = QgsVectorLayer("Point?crs=EPSG:4326", "ajoutée ensuite", "memory")
+    project.addMapLayer(extra)
+    chat._on_undo()
+    check("changed since: a layer added after the turn does not keep its group from being undone",
+          grouped and root.findGroup("Groupe de l'agent") is None and root.findLayer(layer.id()).parent() is root,
+          (grouped, [child.name() for child in root.children()]))
+    project.removeMapLayer(extra.id())
+
+    previous = chat._ask_user
+    chat._ask_user = lambda title, text: True
+    # A theme undone, redone, undone again: QGIS writes the themes back in another order, which is no change.
+    provider.reset((200, {}, tool_turn("map_theme", {"action": "save", "name": "Vue de l'agent"}, "toolu_k")),
+                   (200, {}, text_turn("Thème gardé.")))
+    ask("garde cette vue")
+    themes = project.mapThemeCollection()
+    saved = themes.hasMapTheme("Vue de l'agent")
+    chat._on_undo()
+    chat._on_redo()
+    redone = themes.hasMapTheme("Vue de l'agent")
+    chat._on_undo()
+    check("changed since: a theme undone, redone and undone again is gone", saved and redone
+          and not themes.hasMapTheme("Vue de l'agent"), (saved, redone, themes.mapThemes()))
+
+    # A selection, then a filter that empties it: back to before the selection brings the first one back.
+    ids = sorted(layer.allFeatureIds())[:2]
+    layer.selectByIds(ids)
+    provider.reset((200, {}, tool_turn("select_features", {"layer": "communes", "expression": '"pop" > 1000'}, "toolu_l")),
+                   (200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 2000'}, "toolu_m")),
+                   (200, {}, text_turn("Sélection puis filtre.")))
+    ask("sélectionne puis filtre")
+    chat._on_undo_to_step(0)
+    check("steps: back to before a selection that a filter emptied brings the selection back",
+          sorted(layer.selectedFeatureIds()) == ids and layer.subsetString() == "",
+          (sorted(layer.selectedFeatureIds()), ids, layer.subsetString()))
+    chat._on_undo()
+    chat._on_undo()
+    layer.removeSelection()
+    layer.setSubsetString("")
+
+    # A layer made by a step and filtered by the next: back to before it removes it, undoing that brings it back
+    # filtered.
+    known = set(project.mapLayers())
+    provider.reset((200, {}, tool_turn("run_algorithm", {"algorithm_id": "native:buffer",
+                                                         "parameters": {"INPUT": "communes", "DISTANCE": 10},
+                                                         "names": {"OUTPUT": "Tampon étape"}}, "toolu_n")),
+                   (200, {}, tool_turn("apply_filter", {"layer_name": "Tampon étape", "expression": '"pop" > 1000'},
+                                       "toolu_o")),
+                   (200, {}, text_turn("Tampon filtré.")))
+    ask("tampon puis filtre")
+    made = [layer_id for layer_id in project.mapLayers() if layer_id not in known]
+    chat._on_undo_to_step(0)
+    removed = made and made[0] not in project.mapLayers()
+    chat._on_undo()
+    back = project.mapLayer(made[0]) if made else None
+    check("steps: undoing a back to before a made layer brings it back with its filter",
+          len(made) == 1 and removed and back is not None and back.subsetString() == '"pop" > 1000',
+          (made, removed, back.subsetString() if back is not None else None))
+    chat._on_undo()
+    check("steps: and the turn takes the layer back", not set(project.mapLayers()) - known,
+          set(project.mapLayers()) - known)
+
+    # A layer filtered by a step and removed by the next: back to before the filter brings it back unfiltered.
+    copy = QgsVectorLayer(layer.source(), "copie des communes", layer.providerType())
+    project.addMapLayer(copy)
+    copy_id = copy.id()
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": copy_id, "expression": '"pop" > 1000'}, "toolu_p")),
+                   (200, {}, tool_turn("remove_layers", {"layers": [copy_id]}, "toolu_q")),
+                   (200, {}, text_turn("Filtrée puis retirée.")))
+    ask("filtre la copie puis retire-la")
+    gone = copy_id not in project.mapLayers()
+    chat._on_undo_to_step(0)
+    copy = project.mapLayer(copy_id)
+    check("steps: back to before the filter of a layer removed since brings it back unfiltered",
+          gone and copy is not None and copy.subsetString() == "",
+          (gone, copy.subsetString() if copy is not None else None))
+    if project.mapLayer(copy_id) is not None:
+        project.removeMapLayer(copy_id)
+    chat._ask_user = previous
+    chat._say = say
+
+
 def check_steps(chat, provider, settings, ask, layer):
     """Lot 2 of the undo plan: the steps of a turn, and "undo back to here"."""
     panel = chat.panel
@@ -1790,6 +1918,8 @@ def check_steps(chat, provider, settings, ask, layer):
     chat._on_undo()
     check("steps: and the turn still undoes whole", layer.subsetString() == "", layer.subsetString())
     panel.show_thread()
+
+    check_steps_beside_filters(chat, provider, ask, layer)
 
     # Lot 4: "undo what you just did" in the conversation.
     settings()
