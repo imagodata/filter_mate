@@ -989,9 +989,10 @@ class AgentChatController(QObject):
             if self._policy.turned_off(call.name):
                 return self._policy.refusal_text(call.name, call.arguments)
             return self._policy.protection_refusal(call.name, call.arguments)
-        except Exception:  # a project closing: nothing to protect
+        except Exception:  # a change of layers is never let through unchecked; a read still runs
             logger.debug("Agent: protected layers not read", exc_info=True)
-            return ""
+            from ...core.agent.permissions import PROTECTION_UNREADABLE, changes_layers
+            return PROTECTION_UNREADABLE if changes_layers(call.name, call.arguments) else ""
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""

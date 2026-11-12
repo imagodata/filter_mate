@@ -58,11 +58,12 @@ class ProjectProtection:
                 if layer is not None]
 
     def favorite_layers(self, favorite_id: str) -> List[str]:
-        """The ids of the layers the favorite would change, found as applying it finds them."""
+        """The ids of the layers the favorite would change, found as applying it finds them.
+
+        Raises whatever stops the favorites from being read: the policy then refuses the favorite, never runs it
+        unchecked.
+        """
         if not read_ids():
             return []  # nothing protected: the favorite is not even read
         from ..public_api.operations import favorite_layers
-        try:
-            return [layer.id() for layer in favorite_layers(favorite_id)]
-        except Exception:  # the favorites cannot be read now: its apply says why, nothing to protect here
-            return []
+        return [layer.id() for layer in favorite_layers(favorite_id)]

@@ -331,6 +331,28 @@ class TestProtectedFavorites:
         assert "'cadastre'" in ToolExecutor.refused(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}),
                                                     policy).content
 
+    def test_protected_layers_that_cannot_be_read_refuse_a_change_never_a_read(self):
+        from core.agent.permissions import PROTECTED, PROTECTION_UNREADABLE
+
+        class Unreadable:
+            def name_of(self, reference):
+                raise RuntimeError("the project is closing")
+
+            names = favorite_layers = name_of
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Unreadable())
+        for name, arguments in (("apply_filter", {"layer_name": "a", "expression": "1"}),
+                                ("clear_filters", {"layers": ["a"]}), ("remove_layers", {"layers": ["a"]}),
+                                ("apply_favorite", {"favorite_id": "f"})):
+            call = ToolCallPart("c", name, arguments)
+            assert executor.verdict(call, policy) == PROTECTED, name
+            assert ToolExecutor.refused(call, policy).content == PROTECTION_UNREADABLE
+        assert policy.protection_refusal("clear_filters", {}) == PROTECTION_UNREADABLE  # every layer (REST)
+        for name, arguments in (("list_layers", {}), ("zoom_to", {"layer": "a"}),
+                                ("cross_filter", {"source_layer": "a", "target_layers": [], "predicates": ["Intersect"]})):
+            assert policy.protection_refusal(name, arguments) == "", name
+
     def test_a_protector_without_favorites_lets_them_run(self):
         executor = ToolExecutor(chat_tools(), {})
         policy = PermissionPolicy(protector=Protector("cadastre"))

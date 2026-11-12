@@ -71,6 +71,9 @@ AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_no
 PROTECTED_REFUSAL = ("Not done: the user protected {} from the agent in this project. Read them, use them as a source, "
                      "zoom to them, but never change them (filter, style, edit, rename, remove). Tell the user; do not "
                      "try another tool to change them.")
+# The layers the user protected cannot be read now (a project closing, favorites unavailable): nothing is changed.
+PROTECTION_UNREADABLE = ("Not done: the layers the user protected from the agent could not be read now, so no layer is "
+                         "changed. Tell the user; try again once the project is open and ready.")
 
 TURNED_OFF_REFUSAL = ("Not done: the user turned the tool {} off for the agent. Tell them; do not try another tool to "
                       "do the same thing.")
@@ -120,6 +123,11 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     if not references and name in ALL_WHEN_NONE:
         return None
     return references
+
+
+def changes_layers(name: str, arguments: Any) -> bool:
+    """Whether a call may change a layer: one it names, every layer (a clear without layers), those of a favorite."""
+    return name == "apply_favorite" or changed_layers(name, arguments if isinstance(arguments, dict) else {}) != []
 
 
 def _keeps_points(criteria: Any) -> bool:
@@ -189,19 +197,25 @@ class PermissionPolicy:
                 or ADVISOR_REFUSAL)
 
     def protection_refusal(self, name: str, arguments: Dict[str, Any]) -> str:
-        """What the model is told when the call would change a protected layer; "" when it would not."""
-        if self.protector is None:
-            return ""
+        """What the model is told when the call would change a protected layer; "" when it would not.
+
+        A call that changes layers is refused when the protected layers cannot be read: never let through unchecked.
+        """
+        if self.protector is None or not changes_layers(name, arguments):
+            return ""  # no protection, or nothing changed: nothing to read
         arguments = arguments if isinstance(arguments, dict) else {}
-        if name == "apply_favorite":
-            resolve = getattr(self.protector, "favorite_layers", None)
-            references = list(resolve(str(arguments.get("favorite_id", "")))) if resolve is not None else []
-        else:
-            references = changed_layers(name, arguments)
-        if references is None:
-            protected = list(self.protector.names())
-        else:
-            protected = [found for found in (self.protector.name_of(reference) for reference in references) if found]
+        references = changed_layers(name, arguments)
+        try:
+            if name == "apply_favorite":
+                resolve = getattr(self.protector, "favorite_layers", None)
+                references = list(resolve(str(arguments.get("favorite_id", "")))) if resolve is not None else []
+            if references is None:
+                protected = list(self.protector.names())
+            else:
+                protected = [found for found in (self.protector.name_of(reference) for reference in references)
+                             if found]
+        except Exception:  # a project closing, favorites that cannot be read: refused rather than unchecked
+            return PROTECTION_UNREADABLE
         if not protected:
             return ""
         return PROTECTED_REFUSAL.format(", ".join(repr(item) for item in dict.fromkeys(protected)))
