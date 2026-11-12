@@ -196,7 +196,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
 | edit buffer | `update_features`, `add_features`, `add_field` | with the turn, until the user saves |
 | irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |
-| outside | `open_world` changes (`add_layer`, `add_service_layer`, connectors) and `run_pyqgis` | no |
+| outside | `open_world` changes (`add_layer`, `add_service_layer`), every tool of a connector (its `readOnlyHint` is not trusted) and `run_pyqgis` | no |
 
 | Level | Runs alone | Asked | Refused |
 |---|---|---|---|
@@ -395,7 +395,7 @@ address, else its content type), its size, and whether the server gives parts of
 Rules: in the chat, only what is ticked can be used (REST and MCP callers hold the API key and are not limited by the
 ticks); a connector alone does not let `add_layer` read the web; a WFS layer must be listed by the service, which must keep
 its operations on its own host, and its URI is built by the plugin; every connector call stays in the thread; a connector
-tool not declared read-only asks the user first; a call is sent once, again only when the server lost the session; a server
+tool is a call outside even when the server declares it read-only (asked at every level, refused at advisor); a call is sent once, again only when the server lost the session; a server
 that does not answer is left out of the conversation and said so.
 
 Anything fetched from these servers goes through `adapters/agent/bounded_http.py`: redirects are not followed, total time and

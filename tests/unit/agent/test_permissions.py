@@ -49,7 +49,9 @@ class TestRiskClasses:
 
     def test_a_connector_that_changes_something_is_outside(self):
         assert risk_of(spec("mcp_x_send", open_world=True)) == OUTSIDE
-        assert risk_of(spec("mcp_x_read", open_world=True, read_only=True)) == READ
+        # A read of the plugin itself over the network (open data searches); a connector is never read only
+        # (test_mcp_and_sources.py).
+        assert risk_of(spec("search_x", open_world=True, read_only=True)) == READ
 
     def test_code_is_outside_whatever_its_flags(self):
         assert risk_of(spec("run_pyqgis")) == OUTSIDE
