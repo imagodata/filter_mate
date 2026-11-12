@@ -342,6 +342,38 @@ def check_style(project, gpkg, work):
         check("style: a raster has no labels nor categories", refused(style.set_labels, "bandes_style", "x")
               and refused(style.set_layer_style, "bandes_style", "categorized", field="x"))
         project.removeMapLayer(raster.id())
+    # Graduated classes read every value of the layer on the main thread: the cap of layer_statistics, lowered here.
+    from filter_mate.adapters.public_api import introspection as _introspection
+    kept_renderer = gpkg.renderer().clone()  # put back below: the layouts checked next draw its legend
+    kept_cap = _introspection.MAX_STAT_FEATURES
+    _introspection.MAX_STAT_FEATURES = 10
+    try:
+        message = refused(lambda: style.set_layer_style("communes", "graduated", field="pop"))
+        check("style: graduated classes refused past the features read", "more than 10 features" in message, message)
+        categories = style.set_layer_style("communes", "categorized", field="nom")
+        check("style: categories still made, they read distinct values only", categories["classes"] > 10, categories)
+    finally:
+        _introspection.MAX_STAT_FEATURES = kept_cap
+    # While FilterMate filters, a style or a layout from the agent (or REST, or MCP) waits: refused, nothing changed.
+    from filter_mate.adapters.public_api import operations as _operations
+    from filter_mate.filtermate_api.main_thread import QGISBusy
+    from filter_mate.filtermate_api.qgis_accessor import QGISFilterMateAccessor
+    renderer_before = gpkg.renderer().type()
+    _operations._RUNNING.append("a filter")
+    try:
+        for label, call in (("a style", lambda: QGISFilterMateAccessor._style("set_layer_style", "communes", "single")),
+                            ("a layout", lambda: QGISFilterMateAccessor._layouts("create_layout", "Occupé"))):
+            try:
+                call()
+                busy = ""
+            except QGISBusy as exc:
+                busy = str(exc)
+            check(f"style: {label} refused while FilterMate is busy", "a filter" in busy, busy)
+    finally:
+        _operations._RUNNING.clear()
+    check("style: nothing changed while busy", gpkg.renderer().type() == renderer_before and
+          project.layoutManager().layoutByName("Occupé") is None)
+    gpkg.setRenderer(kept_renderer)
 
 
 def check_edits(project, work):
