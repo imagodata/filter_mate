@@ -73,6 +73,11 @@
         <translation>Back to before: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Stop the request, or wait for its end, to open the settings.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="250"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="271"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="548"/>

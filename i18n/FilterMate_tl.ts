@@ -64,6 +64,11 @@
         <translation>Bumalik sa bago ang: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Ihinto ang kahilingan, o hintayin itong matapos, para buksan ang mga setting.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Walang i-uundo.</translation>

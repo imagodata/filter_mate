@@ -4626,9 +4626,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if extent is not None and self.current_layer is layer:
                 cache[key] = extent
 
+        # The wait cursor is counted with the other reads of the panel (ExploringController._remote_loading):
+        # a read that ends leaves it to one still running.
+        controller = self._exploring_ctrl
         submit_query(self, name, layer, self.tr("Loading filtered extent…"),
                      lambda task: collect_extent(task, request), deliver,
-                     self._set_expression_loading_state)
+                     controller._remote_loading if controller is not None else self._set_expression_loading_state)
         return None
 
     def _compute_zoom_extent_for_mode(self):
@@ -5153,9 +5156,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if done:
                         deliver(features)
                 elif mode == 'task':
+                    # The wait cursor is counted with the other reads of the panel (see _remote_filtered_extent).
                     submit_query(self, '_debounced_feature_query', layer, self.tr("Loading selected values…"),
                                  lambda task: list(task.features(request)), deliver,
-                                 self._set_expression_loading_state)
+                                 self._exploring_ctrl._remote_loading)
                 return
             try:
                 feature = self.current_layer.getFeature(fid)
@@ -5212,9 +5216,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 if self.current_layer is layer and on_complete is not None:
                     on_complete(features, expression, layer.id())
 
+            # The wait cursor is counted with the other reads of the panel (see _remote_filtered_extent).
+            controller = self._exploring_ctrl
             return submit_query(self, '_remote_expression_query', layer, self.tr("Loading selected values…"),
                                 lambda task: list(task.features(request)), deliver,
-                                self._set_expression_loading_state)
+                                controller._remote_loading if controller is not None
+                                else self._set_expression_loading_state)
         if not ASYNC_EXPRESSION_AVAILABLE or self._expression_manager is None:
             if on_error: on_error("Async evaluation not available", "")
             return None
@@ -7239,8 +7246,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             # Let all task delivery/cleanup slots, and a replacing submit, finish first.
             QTimer.singleShot(0, check)
 
-        task.taskCompleted.connect(settled)
-        task.taskTerminated.connect(settled)
+        # From finished() of the read, completed or terminated: never a Python function connected to
+        # taskCompleted / taskTerminated, which QGIS 4.2.2 on Windows died entering (async_query.submit_query).
+        task.when_settled(settled)
 
     def agent_has_focus(self) -> bool:
         """AGENT is open: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the agent."""
