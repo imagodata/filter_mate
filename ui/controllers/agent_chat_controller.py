@@ -175,15 +175,19 @@ class AgentChatController(QObject):
         self._journal_later = []
         trailer = add_page(self.panel)  # last: a failure before leaves the accordion untouched
         self._header_label = trailer if hasattr(trailer, "setText") else None
-        # Only now: a controller whose bridge or page failed is never shut down, and must not follow the project.
-        QgsProject.instance().cleared.connect(self._on_project_cleared)
-        QgsProject.instance().readProject.connect(self._on_project_read)
-        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
         try:
             self._sync_mcp()
         except Exception:  # the chat does not depend on it
             logger.exception("MCP server could not be set up")
-        self._refresh_ready()
+        try:
+            self._refresh_ready()
+        except Exception:
+            self._mcp.close()  # a controller that failed is never shut down: no server of it may stay listening
+            raise
+        # Last: a controller that failed before is never shut down, and must not follow the project.
+        QgsProject.instance().cleared.connect(self._on_project_cleared)
+        QgsProject.instance().readProject.connect(self._on_project_read)
+        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
 
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
@@ -383,12 +387,17 @@ class AgentChatController(QObject):
     def open_settings(self) -> bool:
         """Ask for the settings; True when saved.
 
-        Not while a request or a recipe runs (the link of an earlier error card stays clickable): another provider
-        would leave that request going on without its conversation.
+        Not while a request or a recipe runs, nor while its conversation is made (the link of an earlier error card
+        stays clickable): another provider would leave that request going on without its conversation, or the
+        conversation would be made of the former settings.
         """
-        if self._replaying or (self._engine is not None and self._engine.busy):
+        if self._building or self._replaying or (self._engine is not None and self._engine.busy):
             self._say(_tr("Stop the request, or wait for its end, to open the settings."), error=True)
             return False
+        return self._settings_dialog()
+
+    def _settings_dialog(self) -> bool:
+        """The settings dialog; True when saved."""
         values = load_settings()
         protected = set(read_protected())
         project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
@@ -747,8 +756,8 @@ class AgentChatController(QObject):
                 self.panel.add_note(note)
                 self._record("note", note)
                 self._say("")
-                self._flush_journal()
-                self._save_transcript()
+            self._flush_journal()  # what other applications did meanwhile (in the next project, when abandoned)
+            self._save_transcript()
             self._refresh_history()
         # Not _remember_project: what the recipe changed is the user's doing, and the next request is told so.
         return not stop and not abandoned
@@ -835,7 +844,7 @@ class AgentChatController(QObject):
         """A conversation from the settings; None, after saying why, when they are not complete."""
         values = load_settings()
         if not values.has_consent or not values.model:
-            if not self.open_settings():
+            if not self._settings_dialog():  # asked by the request being sent: not refused as open_settings is
                 return None
             values = load_settings()
             if not values.has_consent or not values.model:

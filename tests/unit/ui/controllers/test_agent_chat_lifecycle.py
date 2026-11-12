@@ -255,6 +255,19 @@ def test_settings_wait_for_the_end_of_the_turn(ctrl_module, controller, monkeypa
     assert dialogs == [] and controller._engine is engine and engine.busy
 
 
+def test_settings_wait_for_the_conversation_being_made(ctrl_module, controller, monkeypatch):
+    dialogs = []
+    monkeypatch.setattr(ctrl_module, "AgentSettingsDialog", lambda *args, **kwargs: dialogs.append(args))
+
+    def build():  # the connectors are listed: the event loop runs, an old error card is clicked
+        assert controller.open_settings() is False
+        return None
+
+    monkeypatch.setattr(controller, "_build_engine", build)
+    controller._on_send("go")
+    assert dialogs == []
+
+
 def test_a_conversation_left_while_its_tool_runs_ends_before_another_starts(ctrl_module, controller):
     seen = {}
 
@@ -365,6 +378,26 @@ def test_a_change_of_another_application_during_another_project_is_not_recorded(
     assert made[1].committed == 1
 
 
+def test_an_abandoned_recipe_lets_the_lines_of_other_applications_through(ctrl_module, controller, monkeypatch):
+    catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
+    write = catalog.ToolSpec("write", "Change something here.", {"type": "object", "properties": {}})
+    project, flushed = FakeQgsProject.project, []
+    monkeypatch.setattr(controller, "_log_action", lambda call, result, label, keep=True: flushed.append(label))
+    monkeypatch.setattr(controller, "label_of", lambda call, client: client)
+
+    def tool(arguments):
+        project.cleared.emit()
+        project.readProject.emit()
+        controller.journal(types.SimpleNamespace(name="apply_filter"), "result", "client")  # queued: the chat works
+        return {"ok": True}
+
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: ([write], {"write": tool}, []))
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "write", "arguments": {"n": 1}, "label": "one"}]}]
+    controller.run_recipe("r1")
+    assert controller._journal_later == [] and flushed == ["client"]
+
+
 def test_closing_the_dock_stops_a_recipe(ctrl_module, controller, monkeypatch):
     catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
     write = catalog.ToolSpec("write", "Change something here.", {"type": "object", "properties": {}})
@@ -471,6 +504,19 @@ def test_a_controller_whose_page_failed_does_not_follow_the_project(ctrl_module,
         ctrl_module.AgentChatController(add_page, MagicMock(), dock, ask_user=lambda title, text: True)
     project = FakeQgsProject.project
     assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
+
+
+def test_a_controller_failing_at_its_end_leaves_no_server_and_does_not_follow_the_project(ctrl_module, dock,
+                                                                                           monkeypatch):
+    def broken(self):
+        raise RuntimeError("no settings")
+
+    monkeypatch.setattr(ctrl_module.AgentChatController, "_refresh_ready", broken)
+    with pytest.raises(RuntimeError):
+        ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock, ask_user=lambda title, text: True)
+    project = FakeQgsProject.project
+    assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
+    assert FakeBridge.made[-1].closed == 1
 
 
 def test_shutdown_goes_on_when_a_step_fails(ctrl_module, controller):
