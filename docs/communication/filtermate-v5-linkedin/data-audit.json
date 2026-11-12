@@ -1,0 +1,186 @@
+{
+  "code_insee": "24520",
+  "date": "2026-10-21",
+  "extent_epsg2154": [
+    559000,
+    6422000,
+    560000,
+    6423000
+  ],
+  "pdal": {
+    "returncode": 0,
+    "stderr": ""
+  },
+  "rasters": {
+    "mnt_1m.tif": {
+      "size": [
+        1000,
+        1000
+      ],
+      "extent": [
+        559000.0,
+        6422000.0,
+        560000.0,
+        6423000.0
+      ],
+      "resolution": [
+        1.0,
+        -1.0
+      ],
+      "bands": [
+        {
+          "band": 1,
+          "name": "idw",
+          "nodata": -9999.0,
+          "valid_percent": 100.0,
+          "min": 128.19857788085938,
+          "max": 235.63182067871094
+        }
+      ]
+    },
+    "ortho_irc.tif": {
+      "size": [
+        4000,
+        4000
+      ],
+      "extent": [
+        559000.0,
+        6422000.0,
+        560000.0,
+        6423000.0
+      ],
+      "resolution": [
+        0.25,
+        -0.25
+      ],
+      "bands": [
+        {
+          "band": 1,
+          "name": "NIR",
+          "nodata": null,
+          "valid_percent": 100.0,
+          "min": 0.0,
+          "max": 255.0
+        },
+        {
+          "band": 2,
+          "name": "Red",
+          "nodata": null,
+          "valid_percent": 100.0,
+          "min": 21.0,
+          "max": 255.0
+        },
+        {
+          "band": 3,
+          "name": "Green",
+          "nodata": null,
+          "valid_percent": 100.0,
+          "min": 23.0,
+          "max": 255.0
+        }
+      ]
+    },
+    "ortho_rvb.tif": {
+      "size": [
+        4000,
+        4000
+      ],
+      "extent": [
+        559000.0,
+        6422000.0,
+        560000.0,
+        6423000.0
+      ],
+      "resolution": [
+        0.25,
+        -0.25
+      ],
+      "bands": [
+        {
+          "band": 1,
+          "name": "Red",
+          "nodata": null,
+          "valid_percent": 100.0,
+          "min": 15.0,
+          "max": 255.0
+        },
+        {
+          "band": 2,
+          "name": "Green",
+          "nodata": null,
+          "valid_percent": 100.0,
+          "min": 18.0,
+          "max": 255.0
+        },
+        {
+          "band": 3,
+          "name": "Blue",
+          "nodata": null,
+          "valid_percent": 100.0,
+          "min": 3.0,
+          "max": 255.0
+        }
+      ]
+    }
+  },
+  "vectors": {
+    "parcelle": {
+      "valid": true,
+      "count": 1561,
+      "crs": "EPSG:2154",
+      "subset": "",
+      "invalid_geometry_fids": [],
+      "empty_geometry_count": 0
+    },
+    "troncon_de_route": {
+      "valid": true,
+      "count": 553,
+      "crs": "EPSG:2154",
+      "subset": "",
+      "invalid_geometry_fids": [],
+      "empty_geometry_count": 0,
+      "duplicate_identifiers": 0,
+      "number_returned": 553,
+      "number_matched": 553
+    },
+    "batiment": {
+      "valid": true,
+      "count": 1528,
+      "crs": "EPSG:2154",
+      "subset": "",
+      "invalid_geometry_fids": [],
+      "empty_geometry_count": 0,
+      "duplicate_identifiers": 0,
+      "number_returned": 1528,
+      "number_matched": 1528
+    }
+  },
+  "lidar": {
+    "valid": true,
+    "point_count": 20948050,
+    "crs": "EPSG:2154",
+    "extent": [
+      559000.0,
+      6422000.0,
+      559999.99,
+      6422999.99
+    ]
+  },
+  "project_written": true,
+  "location": "Sarlat-la-Canéda",
+  "parcels": {
+    "source_commune_count": 15462,
+    "count_on_tile": 1561,
+    "invalid_ids": [],
+    "duplicates": 0,
+    "geometry_policy": "All parcels intersecting the tile, full geometries retained."
+  },
+  "dtm_preparation": {
+    "source": "LiDAR HD class 2 ground points; PDAL IDW, 3 m radius",
+    "raw_missing_pixels": 10759,
+    "interpolation": "GDAL FillNodata; maximum search distance 40 pixels; one smoothing iteration",
+    "crop": "Exact extent: 559000,6422000,560000,6423000",
+    "purpose": "Interpolate ground gaps beneath buildings. Demonstration derivative, not an official IGN DTM."
+  },
+  "orthophoto_preparation": "255 is no longer a NoData marker: saturated white pixels remain valid in the covered area."
+}

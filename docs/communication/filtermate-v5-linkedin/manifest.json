@@ -1,0 +1,226 @@
+{
+  "created": "2026-10-21T12:20:21.148704+02:00",
+  "language": "en",
+  "site": "Sarlat-la-Canéda, France",
+  "qgis": "4.2.3",
+  "article_word_count": 816,
+  "post_characters": 730,
+  "source_checkout_note": "Captured from a local working copy copied to an isolated QGIS profile. The repository was updated independently after capture; the packaging commit is recorded for context and does not identify the exact captured source tree.",
+  "datasets": {
+    "lidar_hd_sarlat.copc.laz": {
+      "bytes": 132127793,
+      "sha256": "b05119880ac69a0cc13fb178bac0b8f3e308271d5213eeb35f19476b72466e37"
+    },
+    "mnt_1m.tif": {
+      "bytes": 8276386,
+      "sha256": "7fa4be93d0c8fdd673d75db92c3a4fabafb74d1f915c61b4a06b2edb890409c2"
+    },
+    "ortho_irc.tif": {
+      "bytes": 8060201,
+      "sha256": "4fec00f3739a04c838bf4406819682d7d75014e6801a71a781523f0d1a1ff24f"
+    },
+    "ortho_rvb.tif": {
+      "bytes": 8158188,
+      "sha256": "79cfac2e8fe947e79a09f679b438ed3a32d39a7243dcabf1fb95cf777aa6e6b1"
+    },
+    "sarlat.gpkg": {
+      "bytes": 2301952,
+      "sha256": "37e707776c8a62450c8d6029289015776069b4011b8c856bb152e5d40a97bfa8"
+    }
+  },
+  "screenshots": [
+    {
+      "file": "screenshots/00_sarlat_overview.jpg",
+      "bytes": 3066588,
+      "sha256": "e8ba29144538114f1d99a9833a62212d14295bb7929478b1223d80ad378c0589"
+    },
+    {
+      "file": "screenshots/01_roads_buildings.jpg",
+      "bytes": 2678599,
+      "sha256": "cadd97fd50d8a276f3854fc6cc2a763b49b2a68d825bffc54c26f9e26cb62b47"
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar.jpg",
+      "bytes": 2264971,
+      "sha256": "386a45b5836d6786ad9140b6d178a9895bf21de312e4100423fd8316d2698433"
+    },
+    {
+      "file": "screenshots/03_slope_parcels.jpg",
+      "bytes": 3661364,
+      "sha256": "411f0371056fbc9cbb464a8106ef9000fe89ddad8a4c3756e12f88635833181e"
+    },
+    {
+      "file": "screenshots/04_ndvi_parcels.jpg",
+      "bytes": 3050630,
+      "sha256": "e484101b83716e9737f878d2086ee5cbfaba9f634c9fa05bdbf74328c75e686b"
+    },
+    {
+      "file": "screenshots/05_high_vegetation_roads.jpg",
+      "bytes": 2838314,
+      "sha256": "cb8de21b029bdfb2f779505aa5eaaa367e3469d5e3e2b1a811361ef481479515"
+    }
+  ],
+  "updated": "2026-10-21T12:51:04.429979+02:00",
+  "original_publication_checkout": "ac6c78b1836f4345b3c3d8b308057ea6e344cb78",
+  "source_checkout_at_packaging": "5ed151de45cf935239e28afd69afed26798fab00",
+  "widget_details": [
+    {
+      "file": "screenshots/01_roads_buildings-settings.jpg",
+      "bytes": 248509,
+      "sha256": "c2d6a9c79c8b8333421757b1af3e067acaffff6e605303547afda78080a31de1"
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar-settings.jpg",
+      "bytes": 258951,
+      "sha256": "311e1d4a3214c6b0dc438fe293ece0a332ecc747145992b63b6231bc9afb6642"
+    },
+    {
+      "file": "screenshots/03_slope_parcels-settings.jpg",
+      "bytes": 266450,
+      "sha256": "9e576bfe28770415081d2e1f8f2f6cedf121092c380a05ef6cd835d781e38ef0"
+    },
+    {
+      "file": "screenshots/04_ndvi_parcels-settings.jpg",
+      "bytes": 308948,
+      "sha256": "2f0b58dad38f73047c2b4616f781cc2e3271637840973a4a5629200272675660"
+    },
+    {
+      "file": "screenshots/05_high_vegetation_roads-settings.jpg",
+      "bytes": 321718,
+      "sha256": "07b5a0c1b5e4f194f5104ee5b0950d97bb07c17c4c5f5c0bfa73defd4c2c135b"
+    }
+  ],
+  "pdf": {
+    "file": "linkedin-article.pdf",
+    "bytes": 18579141,
+    "sha256": "4a906a2a73d20b27aa24749f4a4bc46ffd847b2cd1576c90593e87e7b027d550",
+    "pages": 12
+  },
+  "image_exports": [
+    {
+      "file": "screenshots/00_sarlat_overview-map.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/00_sarlat_overview-panel.jpg",
+      "width": 900,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/00_sarlat_overview-settings.jpg",
+      "width": 900,
+      "height": 1249
+    },
+    {
+      "file": "screenshots/00_sarlat_overview.jpg",
+      "width": 3030,
+      "height": 2070
+    },
+    {
+      "file": "screenshots/01_roads_buildings-map.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/01_roads_buildings-panel.jpg",
+      "width": 900,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/01_roads_buildings-settings.jpg",
+      "width": 900,
+      "height": 1172
+    },
+    {
+      "file": "screenshots/01_roads_buildings.jpg",
+      "width": 3030,
+      "height": 2070
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar-map.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar-panel.jpg",
+      "width": 900,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar-settings.jpg",
+      "width": 900,
+      "height": 1249
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar-terrain.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/02_church_dtm_lidar.jpg",
+      "width": 3030,
+      "height": 2070
+    },
+    {
+      "file": "screenshots/03_slope_parcels-map.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/03_slope_parcels-panel.jpg",
+      "width": 900,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/03_slope_parcels-settings.jpg",
+      "width": 900,
+      "height": 1432
+    },
+    {
+      "file": "screenshots/03_slope_parcels.jpg",
+      "width": 3030,
+      "height": 2070
+    },
+    {
+      "file": "screenshots/04_ndvi_parcels-map.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/04_ndvi_parcels-panel.jpg",
+      "width": 900,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/04_ndvi_parcels-settings.jpg",
+      "width": 900,
+      "height": 1594
+    },
+    {
+      "file": "screenshots/04_ndvi_parcels.jpg",
+      "width": 3030,
+      "height": 2070
+    },
+    {
+      "file": "screenshots/05_high_vegetation_roads-map.jpg",
+      "width": 1767,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/05_high_vegetation_roads-panel.jpg",
+      "width": 900,
+      "height": 1818
+    },
+    {
+      "file": "screenshots/05_high_vegetation_roads-settings.jpg",
+      "width": 900,
+      "height": 1573
+    },
+    {
+      "file": "screenshots/05_high_vegetation_roads.jpg",
+      "width": 3030,
+      "height": 2070
+    }
+  ]
+}

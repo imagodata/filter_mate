@@ -106,3 +106,15 @@ MEMORY.md
 memory/
 BOOTSTRAP.md
 .claude/settings.local.json
+
+# Communication material: only text, scripts and QGIS projects are versioned.
+# Data, captures, videos and publication zips stay local (several exceed 100 MB).
+docs/communication/**
+!docs/communication/**/
+!docs/communication/**/*.md
+!docs/communication/**/*.txt
+!docs/communication/**/*.srt
+!docs/communication/**/*.json
+!docs/communication/**/*.html
+!docs/communication/**/*.py
+!docs/communication/**/*.qgz

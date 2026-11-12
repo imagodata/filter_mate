@@ -1,0 +1,155 @@
+{
+  "language": "en",
+  "site": "Sarlat-la-Canéda, France",
+  "full_window_dimensions_px": [
+    3030,
+    2070
+  ],
+  "qgis_context": [
+    "Layers",
+    "Browser",
+    "menus",
+    "toolbars",
+    "status bar"
+  ],
+  "saved_widget_checks": {
+    "00_sarlat_overview": {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    "01_roads_buildings": {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    "02_church_dtm_lidar": {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    "03_slope_parcels": {
+      "kind": "slope",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0,
+        "quantity": 1.0,
+        "histogram": 1.0,
+        "minimum": 1.0,
+        "maximum": 1.0,
+        "coverage": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    "04_ndvi_parcels": {
+      "kind": "ndvi",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0,
+        "band roles": 1.0,
+        "NDVI expression": 1.0,
+        "coverage": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    "05_high_vegetation_roads": {
+      "kind": "lidar",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0,
+        "classes": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    }
+  },
+  "all_saved_critical_widgets_fully_visible": true,
+  "preparatory_check": {
+    "present": true,
+    "note": "The first pre-capture layout check ran before the dock settled. The subsequent overview check and all five scenario checks passed. The original log and recorded failure are retained."
+  },
+  "python_errors": [],
+  "scenario_results": {
+    "roads": {
+      "selected_road_segments": 9,
+      "buildings": 113,
+      "parcels": 106,
+      "buffer_m": 50,
+      "road": "Boulevard Henri Arlet"
+    },
+    "mixed_clip": {
+      "raster_clipped": true,
+      "point_cloud_clipped": true,
+      "buffer_m": 50,
+      "entry_point": "public Python API"
+    },
+    "slope": {
+      "slope_min_percent": 20,
+      "coverage_min_percent": 50,
+      "parcels": 321
+    },
+    "ndvi": {
+      "ndvi_min": 0.3,
+      "coverage_min_percent": 50,
+      "parcels": 12
+    },
+    "high_vegetation": {
+      "class": 5,
+      "buffer_m": 3,
+      "road_segments": 6,
+      "candidate_road_segments": 9,
+      "road": "Boulevard Henri Arlet"
+    }
+  },
+  "terrain_display": {
+    "input": "C:\\Users\\Simon\\AppData\\Local\\Temp\\fm_ln_vx790lor\\cache\\session_4acb0ed37f\\DTM___1_m_b378fd6d.vrt",
+    "source": "retained FilterMate public Python API output",
+    "minimum_m": 134.69711303710938,
+    "maximum_m": 151.1969757080078,
+    "valid_pixels": 18462,
+    "change": "QGIS linear grayscale display stretch; no data edits",
+    "output_size": [
+      1767,
+      1818
+    ]
+  },
+  "html_images": 12,
+  "local_links_resolve": true,
+  "pdf_pages": 12,
+  "pdf_images": 12,
+  "native_project_validation_retained": true,
+  "source_dataset_hashes_unchanged": true,
+  "visual_review": "Reviewed the six-window overview, full street-corridor capture, slope/NDVI/LiDAR control details and PDF terrain/NDVI pages."
+}
