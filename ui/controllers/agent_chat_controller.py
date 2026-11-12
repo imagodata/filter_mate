@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from dataclasses import asdict
 from typing import Optional, Tuple
 
@@ -19,7 +20,7 @@ from ...adapters.agent.settings import (
 from ...adapters.agent import free_quota, transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
-from ...adapters.agent.bounded_http import abort_active
+from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, abort_active, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -30,7 +31,8 @@ from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
 from ...core.agent.permissions import (
-    ADVISOR, ASK, AUTONOMOUS, PROTECTED, REFUSE, RUN, STANDARD, PermissionPolicy, level_note,
+    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, PROTECTED, REFUSE, RUN, STANDARD, TURNED_OFF, PermissionPolicy, level_note,
+    risk_of,
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
 from ...core.agent.recipes import (
@@ -51,6 +53,7 @@ from ...core.agent.tool_catalog import (
     VIEW_MAP, chat_tools,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
+from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
 from ...core.agent.transcript import entry as transcript_entry
@@ -139,12 +142,16 @@ class AgentChatController(QObject):
         # The level of the settings, and what the user allowed for the conversation under way.
         # The layers the user protected in the open project: refused to the chat, the recipes and other applications.
         self._protection = ProjectProtection()
-        self._policy = PermissionPolicy(load_settings().autonomy, protector=self._protection)
+        self._policy = PermissionPolicy(load_settings().autonomy, protector=self._protection,
+                                        rules=load_settings().rules)
         # Code is read in a dialog of its own; a test that answers the questions gets it in the text.
         self._ask_code = ((lambda title, text, code: ask_code(parent_widget, title, text, code)) if ask_user is None
                           else (lambda title, text, code: ask_user(title, text + "\n\n" + code)))
         self._parent_widget = parent_widget
         self._engine: Optional[ChatEngine] = None
+        # The request or recipe under way belongs to a conversation left (another project): what it still reports
+        # is not shown, and the engine is let go when it ends (_drop_engine).
+        self._abandoned = False
         self._checkpoint = TurnCheckpoint()
         self._checkpoint.describe = self.describe_call
         self._last_request = ""
@@ -179,11 +186,6 @@ class AgentChatController(QObject):
         self.panel.recipe_live_toggled.connect(self._on_live_toggled)
         self._restore_transcript()
         self._refresh_history()
-        QgsProject.instance().cleared.connect(self._on_project_cleared)
-        QgsProject.instance().readProject.connect(self._on_project_read)
-        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
-        QgsProject.instance().layersAdded.connect(self._on_layers_changed)
-        QgsProject.instance().layersRemoved.connect(self._on_layers_changed)
         self._mcp = AgentMcpBridge(self, self)
         self._journal_later = []
         trailer = add_page(self.panel)  # last: a failure before leaves the accordion untouched
@@ -192,7 +194,17 @@ class AgentChatController(QObject):
             self._sync_mcp()
         except Exception:  # the chat does not depend on it
             logger.exception("MCP server could not be set up")
-        self._refresh_ready()
+        try:
+            self._refresh_ready()
+        except Exception:
+            self._mcp.close()  # a controller that failed is never shut down: no server of it may stay listening
+            raise
+        # Last: a controller that failed before is never shut down, and must not follow the project.
+        QgsProject.instance().cleared.connect(self._on_project_cleared)
+        QgsProject.instance().readProject.connect(self._on_project_read)
+        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
+        QgsProject.instance().layersAdded.connect(self._on_layers_changed)
+        QgsProject.instance().layersRemoved.connect(self._on_layers_changed)
 
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
@@ -213,20 +225,32 @@ class AgentChatController(QObject):
         self.panel.set_ready(values.ready, "" if self._header_label is not None else destination)
 
     def stop(self) -> None:
-        """The dock closes: it can reopen on this same conversation."""
-        abort_active()
+        """The dock closes: it can reopen on this same conversation. A recipe stops before its next step."""
+        abort_active(CHAT_WAITS)  # not the call of another application the MCP server is answering
+        self._replay_stop = True
         if self._engine is not None:
             self._engine.cancel()
 
     def shutdown(self) -> None:
-        """The plugin unloads: nothing may arrive afterwards."""
-        self.stop()
-        self._mcp.close()
+        """The plugin unloads: nothing may arrive afterwards, not even the answer of a call of another application.
+
+        Each step runs even when one before failed.
+        """
+        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project):
+            try:
+                step()
+            except Exception:
+                logger.exception("Agent panel: a step of its shutdown failed")
+
+    def _unfollow_layers(self) -> None:
+        self._stat_timer.stop()
         for layer in self._stat_layers.values():
             self._follow(layer, False)
         self._stat_layers = {}
         self._follow_sources([])
         self._live_timer.stop()
+
+    def _disconnect_project(self) -> None:
         for signal, handler in ((QgsProject.instance().layersAdded, self._on_layers_changed),
                                 (QgsProject.instance().layersRemoved, self._on_layers_changed),
                                 (QgsProject.instance().cleared, self._on_project_cleared),
@@ -263,7 +287,7 @@ class AgentChatController(QObject):
         """Show again what this project's conversation looked like; the model does not remember it."""
         self._transcript_key = transcript_store.project_key()
         self._transcript = transcript_store.load(self._transcript_key)
-        self._engine = None
+        self._drop_engine()
         self.panel.input.forget()
         self.panel.clear_thread()
         if not self._transcript:
@@ -286,8 +310,12 @@ class AgentChatController(QObject):
         self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
+        self._show_undo_state()
+
+    def _show_undo_state(self) -> None:
+        """The action bar follows the history of the agent while AGENT is open: nothing to undo while it works."""
         request = getattr(self._parent_widget, "undoRedoStateRequested", None)
-        if request is not None:  # the action bar follows the history of the agent while AGENT is open
+        if request is not None:
             try:
                 request.emit()
             except (RuntimeError, TypeError):
@@ -357,6 +385,14 @@ class AgentChatController(QObject):
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
+        abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
+        # The turn under way, ended below, must not be recorded against the closed project, nor the change another
+        # application is making (its layers compared with the next project's, an Undo would remove them all).
+        self._checkpoint.discard()
+        self._mcp.forget_change()
+        self._replay_stop = True  # a recipe stops before its next step
+        if self._replaying:
+            self._abandoned = True
         self._last_request = ""
         self._request_calls, self._last_steps, self._last_steps_request = [], [], ""
         self._live_timer.stop()  # a save asked for on closing must not run a recipe on the next project
@@ -364,6 +400,7 @@ class AgentChatController(QObject):
         self._follow_sources([])
         if self._engine is not None:
             self._engine.cancel()
+        self._journal_later = []  # what other applications did in the closed project, kept for its thread
         self._transcript, self._transcript_key = [], ""
         self.panel.input.forget()
         self._reset_view()
@@ -372,14 +409,28 @@ class AgentChatController(QObject):
     # --- settings ---------------------------------------------------------------
 
     def open_settings(self) -> bool:
-        """Ask for the settings; True when saved."""
+        """Ask for the settings; True when saved.
+
+        Not while a request or a recipe runs, nor while its conversation is made (the link of an earlier error card
+        stays clickable): another provider would leave that request going on without its conversation, or the
+        conversation would be made of the former settings.
+        """
+        if self._building or self._replaying or (self._engine is not None and self._engine.busy):
+            self._say(_tr("Stop the request, or wait for its end, to open the settings."), error=True)
+            return False
+        return self._settings_dialog()
+
+    def _settings_dialog(self) -> bool:
+        """The settings dialog; True when saved."""
         values = load_settings()
         protected = set(read_protected())
         project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
                                      free_available=bool(free_quota_url()), mcp_error=self._mcp.error,
-                                     project_layers=project_layers)
+                                     project_layers=project_layers,
+                                     tools=[(tool.name, tool.title or tool.name, risk_of(tool))
+                                            for tool in chat_tools() if tool.name not in AGENT_OWN])
         try:
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return False
@@ -412,8 +463,10 @@ class AgentChatController(QObject):
                                         mcp_enabled=dialog.mcp_enabled.isChecked(), mcp_port=dialog.mcp_port.value(),
                                         mcp_token=dialog.chosen_mcp_token(),
                                         expert_python=dialog.expert_python.isChecked(),
-                                        autonomy=dialog.chosen_autonomy()))
+                                        autonomy=dialog.chosen_autonomy(),
+                                        tool_rules=json.dumps(dialog.chosen_tool_rules())))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
+            self._policy.rules = load_settings().rules
             if project_layers:
                 write_protected(dialog.chosen_protected())
         finally:
@@ -438,7 +491,7 @@ class AgentChatController(QObject):
         configured = accessor.configured_domains()  # portals allowed in the configuration file count as ticked
         configured_names = list(parse_extra_domains(configured))
         data_sources = [source for source in active if not source.is_connector]
-        left_out = set()
+        left_out = {name for name, rule in values.rules.items() if rule == "never"}  # turned off in the Tools tab
         if not values.send_values:
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
@@ -811,14 +864,15 @@ class AgentChatController(QObject):
             return False
         values = load_settings()
         tools, handlers, _active = self.tools_and_handlers(values)
-        executor = ToolExecutor(tools, handlers)
+        executor = ToolExecutor(tools, self._chat_owned(handlers))
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)
         level = self._policy.level
-        # Nothing allowed beforehand counts; the protected layers do.
+        # Nothing allowed beforehand counts; the protected layers and the exceptions of the Tools tab do.
         if live:
             level = STANDARD
-        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection)
+        policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection,
+                                  rules=values.rules)
         title = (_tr("Live recipe: {} (its source was saved)") if live else _tr("Recipe: {}")).format(recipe["name"])
         self._replaying, self._replay_stop = True, False
         self._checkpoint.label = title
@@ -832,6 +886,7 @@ class AgentChatController(QObject):
             self._record("user", title)
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
+        self._show_undo_state()
         done, stop = 0, ""
         try:
             for number, step in enumerate(recipe["steps"], 1):
@@ -845,7 +900,16 @@ class AgentChatController(QObject):
                     break
                 verdict = executor.verdict(call, policy)
                 if verdict == PROTECTED:
-                    stop = _tr("Step {} was not run: it would change a layer you protected from the agent ({}).").format(
+                    from ...core.agent.permissions import PROTECTION_UNREADABLE
+                    if policy.protection_refusal(call.name, call.arguments) == PROTECTION_UNREADABLE:
+                        stop = _tr("Step {} was not run: the layers you protected from the agent could not be read ({}).").format(
+                            number, step["label"])
+                    else:
+                        stop = _tr("Step {} was not run: it would change a layer you protected from the agent ({}).").format(
+                            number, step["label"])
+                    break
+                if verdict == TURNED_OFF:
+                    stop = _tr("Step {} was not run: you turned its tool off for the agent ({}).").format(
                         number, step["label"])
                     break
                 if level == ADVISOR and verdict == REFUSE:
@@ -861,6 +925,8 @@ class AgentChatController(QObject):
                     break
                 self.panel.add_step(self._describe(call))
                 result = executor.execute(call)
+                if self._abandoned:  # its project closed during the step
+                    break
                 self.panel.finish_steps(not result.is_error)
                 self._log_action(call, result, self._describe(call))
                 if result.is_error:
@@ -868,6 +934,7 @@ class AgentChatController(QObject):
                     break
                 done += 1
         finally:
+            abandoned, self._abandoned = self._abandoned, False
             self._replaying, self._replay_stop = False, False
             try:
                 self._checkpoint.commit()
@@ -875,17 +942,19 @@ class AgentChatController(QObject):
                 logger.exception("Recipe undo point could not be closed")
             self.panel.set_working(False)
             self.panel.clear_steps()
-            note = stop or _tr("Recipe done: {} steps, without the model. Undo takes it back as one turn.").format(done)
-            if stop and done:
-                note += " " + _tr("The {} steps before stay, and can be undone.").format(done)
-            self.panel.add_note(note)
-            self._record("note", note)
-            self._say("")
-            self._flush_journal()
+            if not abandoned:  # its project closed meanwhile: nothing of it goes in the thread of the next one
+                note = stop or _tr("Recipe done: {} steps, without the model. Undo takes it back as one turn.").format(
+                    done)
+                if stop and done:
+                    note += " " + _tr("The {} steps before stay, and can be undone.").format(done)
+                self.panel.add_note(note)
+                self._record("note", note)
+                self._say("")
+            self._flush_journal()  # what other applications did meanwhile (in the next project, when abandoned)
             self._save_transcript()
             self._refresh_history()
         # Not _remember_project: what the recipe changed is the user's doing, and the next request is told so.
-        return not stop
+        return not stop and not abandoned
 
     # --- widgets ----------------------------------------------------------------
 
@@ -924,6 +993,7 @@ class AgentChatController(QObject):
                 pass
 
     def _refresh_stats(self) -> None:
+        started = time.monotonic()
         try:
             widgets = agent_widgets.read_widgets()
         except Exception:
@@ -934,6 +1004,11 @@ class AgentChatController(QObject):
                 self.panel.widgets_strip.set_value(widget["id"], number_text(value))
             elif widget["kind"] == CHART:
                 self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
+        # Read on this thread, up to MAX_STAT_FEATURES features a widget: the next refresh waits three times as long as
+        # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change. One
+        # delay for all the widgets; a timer already counting is left alone (setInterval would start it again).
+        if not self._stat_timer.isActive():
+            self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""
@@ -961,7 +1036,12 @@ class AgentChatController(QObject):
         if not applied:
             raise ToolFailure("Nothing of the agent to undo in this project.")
         request = applied[-1].get("request") or ""
-        restored, left = self._checkpoint.undo()
+        try:  # the agent undoing its turn leaves the layers the user protected as they are
+            protected = frozenset(self._protection.ids())
+        except Exception:
+            from ...core.agent.permissions import PROTECTION_UNREADABLE
+            raise ToolFailure(PROTECTION_UNREADABLE) from None
+        restored, left = self._checkpoint.undo(keep=protected)
         self._forget_undone_steps(request)
         return {"undone": request, "restored": restored, "left": left}
 
@@ -969,7 +1049,7 @@ class AgentChatController(QObject):
         """A conversation from the settings; None, after saying why, when they are not complete."""
         values = load_settings()
         if not values.has_consent or not values.model:
-            if not self.open_settings():
+            if not self._settings_dialog():  # asked by the request being sent: not refused as open_settings is
                 return None
             values = load_settings()
             if not values.has_consent or not values.model:
@@ -997,8 +1077,18 @@ class AgentChatController(QObject):
         session = AgentSession(provider, tools, self._prompt(values, reachable))
         if unreachable:
             self.panel.add_note(_tr("Not reachable for this conversation: {}").format(", ".join(unreachable)))
-        return ChatEngine(session, ToolExecutor(tools, handlers), QtTransport(self), self, self._checkpoint,
-                          defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
+        return ChatEngine(session, ToolExecutor(tools, self._chat_owned(handlers)), QtTransport(self), self,
+                          self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
+
+    @staticmethod
+    def _chat_owned(handlers) -> dict:
+        """The handlers as the chat runs them: what they wait for, the Stop of the chat ends, and nothing else does."""
+        def owned(handler):
+            def run(arguments):
+                with owned_by(CHAT_WAITS):
+                    return handler(arguments)
+            return run
+        return {name: owned(handler) for name, handler in handlers.items()}
 
     def _accessor(self) -> QGISFilterMateAccessor:
         return QGISFilterMateAccessor(self._plugin.get_public_api(), self._plugin)
@@ -1068,8 +1158,23 @@ class AgentChatController(QObject):
         except (McpError, FilterRejected, QGISBusy) as exc:
             return str(exc)[:300]
 
-    def _reset_view(self) -> None:
+    def _drop_engine(self) -> None:
+        """Let go of the conversation; a request still running is stopped, and let go of only once really over.
+
+        ChatEngine.cancel() waits for a tool that spins the event loop: let go of before, the engine went on while
+        chat_busy() was false, a second request could start beside it, and its end closed the undo point of the new
+        turn. Until it ends, what it reports is not shown (_abandoned).
+        """
+        engine = self._engine
+        if engine is not None and engine.busy:
+            engine.cancel()
+            if engine.busy:
+                self._abandoned = True
+                return
         self._engine = None
+
+    def _reset_view(self) -> None:
+        self._drop_engine()
         self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         self._seen = None  # another conversation has seen nothing yet
         self.panel.clear_thread()
@@ -1089,11 +1194,14 @@ class AgentChatController(QObject):
         if self._mcp.busy:
             self._say(_tr("Another application is changing the project: try again in a moment."))
             return
-        self._policy.set_level(load_settings().autonomy)  # however the settings were saved
+        values = load_settings()  # however the settings were saved
+        self._policy.set_level(values.autonomy)
+        self._policy.rules = values.rules
         if self._engine is None:
             self._building = True
             try:
-                self._engine = self._build_engine()
+                with owned_by(CHAT_WAITS):  # the connectors listed, the token of the free quota
+                    self._engine = self._build_engine()
             finally:
                 self._building = False
         if self._engine is None:
@@ -1110,6 +1218,7 @@ class AgentChatController(QObject):
         self.panel.set_can_undo(False)
         summarized = self._engine.summarized
         self._engine.send(text, self._project_context())
+        self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
             note = _tr("The oldest requests of this conversation are now summed up in a few lines, to keep it short.")
             self.panel.add_note(note)
@@ -1118,13 +1227,45 @@ class AgentChatController(QObject):
     def _read_project(self):
         """``(layers, selections, view)`` now, as plain dicts; None when they cannot be read."""
         try:
-            accessor = self._accessor()
-            layers = [asdict(layer) for layer in accessor.list_layers()]
-            view = asdict(accessor.map_context())
+            layers = self._layer_rows()
+            view = asdict(self._accessor().map_context())
         except Exception:  # the request goes without it: the model reads the project with its tools
             logger.debug("Agent: project summary not read", exc_info=True)
             return None
         return layers, view.get("selections") or [], view
+
+    @staticmethod
+    def _layer_rows() -> list:
+        """What the summary of a request reads of ``list_layers``, in the order of the layer tree.
+
+        Read here, not through the accessor: its list_layers counts every vector layer, and featureCount() of a web
+        service or a remote file can be a request to its server, on the main thread, at each request and at the
+        end of each turn. Their count is left out (-1).
+        """
+        from ...adapters.public_api.introspection import tree_places
+        from ...adapters.public_api.operations import layer_kind
+        from ...adapters.qgis.coverage_layers.snapshots import registry
+        from ...adapters.qgis.source_capability_probe import feature_count_or_none
+        places, derived = tree_places() or {}, registry()
+        rows = []
+        for layer in QgsProject.instance().mapLayers().values():
+            try:
+                kind = layer_kind(layer)
+                if kind not in (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD) or not layer.isValid():
+                    continue
+                count = (feature_count_or_none(layer) if kind is LayerKind.VECTOR
+                         else layer.pointCount() if kind is LayerKind.POINT_CLOUD else None)
+                subset = (layer.subsetString() or "") if hasattr(layer, "subsetString") else ""
+                snapshot = derived.get(layer.id())
+                clip = "" if snapshot is None else ("filtermate:clip" if snapshot.geometry_wkt else "filtermate:selection")
+                rank, group, visible = places.get(layer.id(), (len(places), "", True))
+                rows.append((rank, {"layer_id": layer.id(), "name": layer.name(), "layer_kind": kind.value,
+                                    "feature_count": count if isinstance(count, int) else -1,
+                                    "crs_authid": layer.crs().authid(), "group": group, "visible": visible,
+                                    "active_filter_expression": subset or clip}))
+            except (RuntimeError, AttributeError):  # a layer deleted meanwhile: the others are still told
+                logger.debug("Agent: a layer left out of the summary", exc_info=True)
+        return [row for _rank, row in sorted(rows, key=lambda item: item[0])]
 
     def _project_context(self) -> str:
         """The map, the layers, their filters, the selections now and what the user changed since the last answer.
@@ -1158,12 +1299,16 @@ class AgentChatController(QObject):
                            if part)
 
     def protection_refusal(self, call: ToolCallPart) -> str:
-        """What a call that would change a protected layer is answered, for the MCP server too; "" otherwise."""
+        """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server
+        too; "" otherwise."""
         try:
+            if self._policy.turned_off(call.name):
+                return self._policy.refusal_text(call.name, call.arguments)
             return self._policy.protection_refusal(call.name, call.arguments)
-        except Exception:  # a project closing: nothing to protect
+        except Exception:  # a change of layers is never let through unchecked; a read still runs
             logger.debug("Agent: protected layers not read", exc_info=True)
-            return ""
+            from ...core.agent.permissions import PROTECTION_UNREADABLE, changes_layers
+            return PROTECTION_UNREADABLE if changes_layers(call.name, call.arguments) else ""
 
     def _remember_project(self) -> None:
         """The project as the agent leaves it: what differs at the next request is the user's doing."""
@@ -1171,7 +1316,7 @@ class AgentChatController(QObject):
         self._seen = None if read is None else project_state(*read)
 
     def _on_stop(self) -> None:
-        abort_active()  # a connector or a platform being waited for
+        abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
         if self._replaying:  # a recipe stops before its next step
             self._replay_stop = True
         if self._engine is not None:
@@ -1200,6 +1345,8 @@ class AgentChatController(QObject):
     # --- what the conversation does (ChatListener) --------------------------------
 
     def on_text(self, text: str) -> None:
+        if self._abandoned:
+            return
         self.panel.add_text(text)
         self._answer.append(text)
 
@@ -1295,10 +1442,14 @@ class AgentChatController(QObject):
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
     def on_tool_start(self, call: ToolCallPart) -> None:
+        if self._abandoned:
+            return
         self.panel.set_status(self._describe(call) + "…")
         self.panel.add_step(self._describe(call))
 
     def on_tool_end(self, call: ToolCallPart, result: ToolResultPart) -> None:
+        if self._abandoned:  # a tool of a conversation left, ending: its card belongs to no thread now
+            return
         if result.is_error:
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
         self.panel.finish_steps(not result.is_error)
@@ -1469,6 +1620,14 @@ class AgentChatController(QObject):
         return text
 
     def on_finished(self, outcome: ChatOutcome) -> None:
+        if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go
+            self._abandoned, self._engine = False, None
+            self._request_calls, self._answer = [], []
+            self.panel.set_working(False)
+            self.panel.clear_steps()
+            self._flush_journal()
+            self._refresh_history()
+            return
         steps = recipe_steps(self._request_calls, self._tools)
         if steps:  # what "Save the last request as a recipe" keeps
             self._last_steps, self._last_steps_request = steps, self._last_request

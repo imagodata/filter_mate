@@ -173,7 +173,8 @@ class TestRtreePrefilter:
             'ROWID IN (SELECT id FROM "rtree_batiment_geometrie" '
             'WHERE minx <= 12.0 AND maxx >= 10.0 AND miny <= 22.0 AND maxy >= 20.0) AND '
         )
-        assert expression.endswith("ST_Intersects(\"geometrie\", ST_MakeValid(ST_GeomFromText('POLYGON ((10 20, 12 20, 12 22, 10 22, 10 20))', 2154)))")
+        # 2026-11-12: "= 1", SpatiaLite answers -1 (true in SQLite) for a NULL geometry
+        assert expression.endswith("ST_Intersects(\"geometrie\", ST_MakeValid(ST_GeomFromText('POLYGON ((10 20, 12 20, 12 22, 10 22, 10 20))', 2154))) = 1")
 
     def test_buffer_grows_the_box(self, gpkg, monkeypatch):
         mod = _load()

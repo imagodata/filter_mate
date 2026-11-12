@@ -513,7 +513,7 @@
    "input_schema": {
     "properties": {
      "layer_name": {
-      "description": "Name of a VECTOR layer (not its id; the first vector layer of that name is used)",
+      "description": "A VECTOR layer: its id, or its name (an id first; by name, the first vector layer of that name)",
       "maxLength": 1000,
       "minLength": 1,
       "type": "string"

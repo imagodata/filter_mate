@@ -366,17 +366,27 @@ class ExploringController(BaseController, LayerSelectionMixin):
         self._remote_selection_result = None
         self._remote_selection_pending = None
         self._remote_selection_waiting = False
-        binding = getattr(self, '_remote_cache_layer', None)
-        if binding is not None:
-            for signal_name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):
-                try:
-                    getattr(binding, signal_name).disconnect(self._invalidate_remote_selection_cache)
-                except (RuntimeError, TypeError):
-                    pass
-            self._remote_cache_layer = None
+        # The watched layer may be gone (a project switch, a removed layer): its signals are never touched.
+        # Disconnecting them read freed memory if it was (#341). Deleting their receiver lets Qt drop the
+        # connections, whether the layer is still there or not.
+        receiver = getattr(self, '_remote_cache_receiver', None)
+        self._remote_cache_receiver = None
+        self._remote_cache_layer = None
+        if receiver is not None:
+            try:
+                receiver.deleteLater()
+            except RuntimeError:  # already gone with the application
+                pass
         for name in ('_values_query', '_zoom_query', '_selection_query', '_canvas_selection_query'):
             slot = getattr(self, name, None)
             if slot is not None:
+                slot.cancel()
+        # The reads of the dock hold the same lease of the wait cursor (_remote_loading) and deliver to its
+        # current layer only: once it changed they would keep the cursor up for nothing (30 to 120 s on a slow
+        # service), and the provider busy.
+        dock_reads = getattr(getattr(self, '_dockwidget', None), '__dict__', {})
+        for name, slot in list(dock_reads.items()):
+            if name in ('_debounced_feature_query', '_remote_expression_query') or name.startswith('_extent_query_'):
                 slot.cancel()
 
     def _remote_loading(self, loading):
@@ -670,7 +680,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
     def _remote_features(self, input=None, custom_expression=None):
         """Return cached selection data or schedule its cancellable read."""
-        from ...adapters.qgis.async_query import read_now, submit_query
+        from ...adapters.qgis.async_query import _watcher, read_now, submit_query
         from ...adapters.qgis.source_capability_probe import stable_key_for_layer
         from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
         dw = self._dockwidget
@@ -678,9 +688,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if self._current_layer is not layer:
             self.set_layer(layer)
         if getattr(self, '_remote_cache_layer', None) is not layer:
+            # To a receiver of the binding, deleted by _cancel_remote_reads (every layer change runs it), and
+            # with the controller at the latest.
             self._remote_cache_layer = layer
+            self._remote_cache_receiver = receiver = _watcher(self._invalidate_remote_selection_cache)
+            receiver.setParent(self)
             for signal_name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):
-                getattr(layer, signal_name).connect(self._invalidate_remote_selection_cache)
+                getattr(layer, signal_name).connect(receiver.changed)
         self._remote_selection_refused = False
         self._remote_selection_waiting = False
         request, expression = self._remote_selection_plan(layer, input, custom_expression)
@@ -863,8 +877,12 @@ class ExploringController(BaseController, LayerSelectionMixin):
         slot = getattr(self, '_selection_query', None)
         if self._remote_selection_waiting and slot is not None and slot.task is not None:
             signature = self._remote_selection_pending
+            generation = slot.generation
 
             def settled():
+                if not slot.accepts(generation):
+                    return  # replaced or cancelled: a result in the cache came from another read, maybe much later
+
                 def check():
                     try:
                         cached = self._remote_selection_result
@@ -875,7 +893,10 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         return
                 QTimer.singleShot(0, check)
 
-            slot.task.taskCompleted.connect(settled)
+            # From finished() of the read, never a Python function connected to its signals (see
+            # async_query.submit_query). A read that ends without its result fails the check: nothing flashes;
+            # nor does one replaced meanwhile.
+            slot.task.when_settled(settled)
             return True
         self._pending_identify = None
         geometries = [QgsGeometry(feature.geometry()) for feature in features

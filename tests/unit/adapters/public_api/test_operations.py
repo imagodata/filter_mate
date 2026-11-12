@@ -1074,3 +1074,72 @@ class TestFavoriteClips:
         report = operations.apply_favorite("toulouse", service=MagicMock(), project=favorite_world.project)
         assert report.ok and report.done == {"DEM": "mnt_wcs"}
         assert favorite_world.calls == [dict(synchronous=False, hooks=["canceled", "failed", "run"])]
+
+
+class TestPointCloudAndNotWithoutFilter:
+    """2026-11-12: AND NOT on a point cloud without a filter keeps every point but the criteria.
+
+    It was refused ("AND NOT needs an existing filter"), the source as the layers of filter_point_clouds.
+    """
+
+    class _Cloud:
+        def __init__(self, subset=""):
+            self.subset = subset
+
+        def id(self):
+            return "pc"
+
+        def name(self):
+            return "dalle"
+
+        def subsetString(self):
+            return self.subset
+
+        def setSubsetString(self, subset):
+            self.subset = subset
+            return True
+
+        def triggerRepaint(self):
+            pass
+
+    @pytest.fixture
+    def snapshots(self, monkeypatch):
+        module = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.snapshots")
+
+        def take_snapshot(layer, kind):
+            subset = layer.subsetString()
+            return types.SimpleNamespace(layer_id=layer.id(), subset=subset,
+                                         same_state=lambda other: other.subset == subset)
+
+        module.take_snapshot = take_snapshot
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        return module
+
+    @pytest.mark.parametrize("previous, operator, expected", [
+        ("", "AND NOT", "NOT (\nClassification = 2\n)"),
+        ("Z > 5", "AND NOT", "(Z > 5) AND NOT (Classification = 2)"),
+        ("", "AND", "Classification = 2"),
+    ])
+    def test_filter_point_clouds(self, idle, snapshots, monkeypatch, previous, operator, expected):
+        cloud = self._Cloud(previous)
+        monkeypatch.setattr(operations, "resolve_layer", lambda reference, project: cloud)
+        monkeypatch.setattr(operations, "layer_kind", lambda layer: operations.LayerKind.POINT_CLOUD)
+        service = types.SimpleNamespace(history=MagicMock())
+        report = operations.filter_point_clouds(["dalle"], "Classification = 2", operator=operator,
+                                                project=_Project(), service=service)
+        assert report.failed == {} and report.done == {"pc": "dalle"}
+        assert cloud.subset == expected
+
+    def test_point_cloud_source(self, snapshots, monkeypatch):
+        cloud = self._Cloud("")
+        jobs = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.source_jobs")
+        jobs.PointCloudSourceJob = lambda layer, resolution, before=None: types.SimpleNamespace(details={})
+        monkeypatch.setitem(sys.modules, jobs.__name__, jobs)
+        monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.coverage_layers"], "source_jobs", jobs,
+                            raising=False)
+        job = operations._source_job(cloud, operations.LayerKind.POINT_CLOUD, operations.OperationReport(),
+                                     selected_only=True, raster_selection=None,
+                                     point_cloud_criteria="Classification = 6", source_operator="AND NOT",
+                                     filter_source=True, footprint_resolution=2.0, max_pixels=None)
+        assert cloud.subset == "NOT (\nClassification = 6\n)"
+        assert job.details["subset"] == "NOT (\nClassification = 6\n)"

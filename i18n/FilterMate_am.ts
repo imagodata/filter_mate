@@ -64,6 +64,11 @@
         <translation>ከዚህ በፊት ወደነበረው ተመለስ: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>ቅንብሮቹን ለመክፈት ጥያቄውን ያቁሙ ወይም እስኪያልቅ ይጠብቁ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>የሚቀለበስ ምንም የለም።</translation>
@@ -832,6 +837,16 @@ Do you agree?</source>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>ደረጃ {} አልተሠራም፦ ከወኪሉ የጠበቁትን ንብርብር ይቀይር ነበር ({})።</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ደረጃ {} አልተካሄደም፦ ከወኪሉ የጠበቋቸው ንብርብሮች ሊነበቡ አልቻሉም ({})።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>ደረጃ {} አልተሠራም፦ መሣሪያውን ለወኪሉ አጥፍተዋል ({})።</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1430,6 +1445,81 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>ወኪሉ ያነባቸዋል እንደ ምንጭም ይጠቀምባቸዋል፣ ነገር ግን በፍጹም አይቀይራቸውም፦ ማጣሪያ፣ ቅጥ፣ አርትዖት፣ መስክ፣ ማጣመር፣ አዲስ ስም ወይም ማስወገድ የለም፣ በማንኛውም ደረጃ፣ በምግብ አዘገጃጀት ውስጥም ለሌሎች መተግበሪያዎችም። በፕሮጀክቱ ውስጥ ይቀመጣል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>ሁልጊዜ ፍቀድ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>ሁልጊዜ ጠይቅ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>ደረጃው እንደሚለው</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>በነባሪ እያንዳንዱ መሣሪያ የራስ ገዝነት ትርን ደረጃ ይከተላል። ልዩነት ለዚያ መሣሪያ ብቻ ይሠራል፦ «በጭራሽ» ከወኪሉ ደግሞ ይደብቀዋል፣ በአዘገጃጀቶችና ለሌሎች መተግበሪያዎችም ይከለክለዋል፤ «ሁልጊዜ ፍቀድ» ከአማካሪ ደረጃ አያልፍም፣ የPython ኮድም በእያንዳንዱ ሩጫ ይነበባል ይረጋገጣልም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>ዓይነት</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>በጭራሽ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>ደንብ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>መሣሪያ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>መሣሪያዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>የአርትዖት ማቋረጫ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>የማይመለስ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>ውጫዊ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>ፕሮጀክት</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>ያነባል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>እይታ</translation>
     </message>
 </context>
 <context>
@@ -8206,6 +8296,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>ይህን ንብርብር በማዕከሎቹ ለመፈተሽ በቀኝ በኩል ያለውን ካሬ ጠቅ ያድርጉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ማጣራት አይቻልም</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>የድር መሠረት ካርታ (WMS / WMTS / XYZ, ArcGIS MapServer)፦ ቀለሞች ብቻ፣ ሊጣራ አይችልም</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

@@ -48,6 +48,7 @@ from .accessor import (
     AlgorithmList,
     AlgorithmRun,
     FilterRejected,
+    LayerProtected,
     FeatureSample,
     FieldValues,
     IdentifyResult,
@@ -67,6 +68,11 @@ from .accessor import (
     ViewState,
 )
 from .main_thread import QGISBusy, run_on_main_thread
+
+try:
+    from ..core.agent.permissions import PROTECTION_UNREADABLE, PermissionPolicy, changes_layers
+except ImportError:  # the API package loaded on its own, with the plugin root on the path
+    from core.agent.permissions import PROTECTION_UNREADABLE, PermissionPolicy, changes_layers
 
 logger = logging.getLogger("filtermate_api.qgis_accessor")
 
@@ -130,6 +136,41 @@ def _unless_busy(fn, *args, **kwargs):
     if reason:
         raise QGISBusy(reason)
     return fn(*args, **kwargs)
+
+
+def _project_protection():
+    """The layers the user protected from the agent in the open project (adapters/agent/protected_layers.py)."""
+    return _plugin_module("adapters.agent.protected_layers").ProjectProtection()
+
+
+def _refuse_protected(tool: str, arguments: Dict[str, Any]) -> None:
+    """Raise :class:`LayerProtected` when the call ``tool(arguments)`` would change a layer the user protected.
+
+    Main thread. The rule of the chat and of the MCP server of the plugin (``core/agent/permissions.py``), with the
+    arguments of the chat tool: a REST client or the MCP server built on this API changes no protected layer either.
+    Protected layers that cannot be read refuse the change.
+    """
+    if not changes_layers(tool, arguments):
+        return
+    try:
+        protection = _project_protection()
+    except Exception:  # not importable, no project: never let a change through unchecked
+        logger.warning("Protected layers not read", exc_info=True)
+        raise LayerProtected(PROTECTION_UNREADABLE) from None
+    refusal = PermissionPolicy(protector=protection).protection_refusal(tool, arguments)
+    if refusal:
+        raise LayerProtected(refusal)
+
+
+def _shown_name(reference: str) -> str:
+    """The name of the layer ``reference`` designates by its id; ``reference`` itself otherwise. Main thread."""
+    try:
+        from qgis.core import QgsProject
+        layer = QgsProject.instance().mapLayer(reference)
+        name = layer.name() if layer is not None else reference
+    except Exception:  # what the status shows, never a reason to fail
+        return reference
+    return name if isinstance(name, str) else reference
 
 
 def _safe(callable_, default):
@@ -417,12 +458,17 @@ class QGISFilterMateAccessor:
     # Driving QGIS (agent mode)
     # ------------------------------------------------------------------
 
-    def _control(self, function_name: str, /, *args, module: str = "adapters.public_api.project_control", **kwargs):
+    def _control(self, function_name: str, /, *args, module: str = "adapters.public_api.project_control",
+                 changes: Optional[Dict[str, Any]] = None, **kwargs):
         """Call ``<module>.<function_name>`` of the plugin on the main thread, refused while FilterMate is busy.
 
         ``function_name`` is positional only: the function may take a ``name`` of its own (the layer it adds).
+        ``changes``: the arguments of the chat tool of that name that say which layers it changes, checked against
+        the layers the user protected.
         """
         def call():
+            if changes is not None:
+                _refuse_protected(function_name, changes)
             function = getattr(_plugin_module(module), function_name)
             try:
                 return _unless_busy(function, *args, **kwargs)
@@ -431,12 +477,13 @@ class QGISFilterMateAccessor:
         return run_on_main_thread(call)
 
     @staticmethod
-    def _style(name: str, *args, **kwargs):
-        """Call ``adapters.public_api.layer_style.<name>`` on the main thread."""
+    def _style(name: str, layer: str, *args, **kwargs):
+        """Call ``adapters.public_api.layer_style.<name>`` on the main thread, unless ``layer`` is protected."""
         def call():
+            _refuse_protected(name, {"layer": layer})
             function = getattr(_plugin_module("adapters.public_api.layer_style"), name)
             try:
-                return function(*args, **kwargs)
+                return function(layer, *args, **kwargs)
             except ValueError as exc:
                 raise FilterRejected(str(exc)) from None
         return run_on_main_thread(call)
@@ -467,12 +514,13 @@ class QGISFilterMateAccessor:
         return LayoutExport(**self._layouts("export_layout", name, folder, file_format=file_format, dpi=dpi))
 
     @staticmethod
-    def _edit(name: str, *args, **kwargs):
-        """Call ``adapters.public_api.feature_edits.<name>`` on the main thread."""
+    def _edit(name: str, layer: str, **kwargs):
+        """Call ``adapters.public_api.feature_edits.<name>`` on the main thread, unless ``layer`` is protected."""
         def call():
+            _refuse_protected(name, {"layer": layer})
             function = getattr(_plugin_module("adapters.public_api.feature_edits"), name)
             try:
-                return function(*args, **kwargs)
+                return function(layer, **kwargs)
             except ValueError as exc:
                 raise FilterRejected(str(exc)) from None
         return run_on_main_thread(call)
@@ -495,12 +543,14 @@ class QGISFilterMateAccessor:
     def add_field(self, layer: str, name: str, field_type: str = "text", length: int = 0,
                   formula: str = "") -> FieldAdded:
         return FieldAdded(**self._control("add_field", layer, name, field_type=field_type, length=length,
-                                          formula=formula, module="adapters.public_api.fields_joins"))
+                                          formula=formula, module="adapters.public_api.fields_joins",
+                                          changes={"layer": layer}))
 
     def join_layers(self, layer: str, join_layer: str, target_field: str, join_field: str,
                     fields: Optional[List[str]] = None, prefix: Optional[str] = None) -> JoinAdded:
         return JoinAdded(**self._control("join_layers", layer, join_layer, target_field, join_field, fields=fields,
-                                         prefix=prefix, module="adapters.public_api.fields_joins"))
+                                         prefix=prefix, module="adapters.public_api.fields_joins",
+                                         changes={"layer": layer}))
 
     def group_layers(self, layers: List[str], group: str = "", at_top: bool = True,
                      above: str = "") -> LayerTreeChange:
@@ -509,14 +559,16 @@ class QGISFilterMateAccessor:
 
     def rename_layer(self, layer: str, name: str, group: bool = False) -> LayerRename:
         return LayerRename(**self._control("rename_layer", layer, name, group=group,
-                                           module="adapters.public_api.layer_tree"))
+                                           module="adapters.public_api.layer_tree",
+                                           changes={"layer": layer, "group": group}))
 
     def bookmark(self, action: str, name: str = "", extent_wkt: str = "", crs: str = "") -> Bookmarks:
         return Bookmarks(**self._control("bookmark", action, name, extent_wkt=extent_wkt, crs=crs,
                                          module="adapters.public_api.layer_tree"))
 
     def map_theme(self, action: str, name: str = "") -> MapThemes:
-        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree"))
+        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree",
+                                         changes={"action": action, "name": name}))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))
@@ -532,7 +584,7 @@ class QGISFilterMateAccessor:
         return LayerSummary(**self._control("add_layer", source, name=name, kind=kind))
 
     def remove_layers(self, layers: List[str]) -> OperationResult:
-        result = self._control("remove_layers", layers)
+        result = self._control("remove_layers", layers, changes={"layers": list(layers)})
         return OperationResult(done=result["done"], failed=result["failed"])
 
     @staticmethod
@@ -586,6 +638,8 @@ class QGISFilterMateAccessor:
         source = operations.resolve_layer(source_layer, project)
         if source is None or _layer_kind(source) == "other":
             return None
+        _refuse_protected("cross_filter", {"source_layer": source_layer, "target_layers": list(target_layers),
+                                           "filter_source": filter_source, "point_cloud_criteria": point_cloud_criteria})
         try:
             if isinstance(raster_selection, dict) and "dock_objects" in raster_selection:
                 if raster_selection["dock_objects"]:
@@ -644,6 +698,7 @@ class QGISFilterMateAccessor:
         geometry = QgsGeometry.fromWkt(wkt)
         if not reference.isValid() or geometry.isNull():
             return CrossFilterResult(error="invalid geometry or CRS")
+        _refuse_protected("geometry_filter", {"target_layers": list(target_layers)})
         report = operations.cross_filter_by_geometry(geometry, reference, target_layers,
                                                      predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
                                                      coverage_min=coverage_min, operator=operator)
@@ -658,6 +713,7 @@ class QGISFilterMateAccessor:
         return run_on_main_thread(self._point_clouds_main_thread, list(layers), dict(criteria or {}), operator)
 
     def _point_clouds_main_thread(self, layers, criteria, operator):
+        _refuse_protected("point_cloud_filter", {"layers": list(layers)})
         try:
             operations = _plugin_module("adapters.public_api.operations")
             requests = _plugin_module("core.domain.api_requests")
@@ -677,9 +733,11 @@ class QGISFilterMateAccessor:
 
     def _clear_main_thread(self, layers):
         try:
-            report = _plugin_module("adapters.public_api.operations").clear_filters(layers)
+            operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
             return OperationResult(error=_unavailable(exc))
+        _refuse_protected("clear_filters", {"layers": list(layers)})  # none: every layer
+        report = operations.clear_filters(layers)
         _report_busy(report)
         if report.done:
             self._mark_applied(report.done_names[0], "rest_api:clear")
@@ -735,20 +793,20 @@ class QGISFilterMateAccessor:
         # pairs a rejection with its reason on the same main-thread call.
         if callable(getattr(type(self._public_api), 'apply_filter_strict', None)):
             callback = self._public_api.apply_filter_strict
+
+        def call():  # a layer the user protected from the agent is refused first, on the main thread too
+            _refuse_protected("apply_filter", {"layer_name": layer_name})
+            done = _unless_busy(callback, layer_name=layer_name, filter_expr=expression, source_plugin=source)
+            return done, _shown_name(layer_name) if done else layer_name
+
         try:
-            ok = run_on_main_thread(
-                _unless_busy,
-                callback,
-                layer_name=layer_name,
-                filter_expr=expression,
-                source_plugin=source,
-            )
+            ok, shown = run_on_main_thread(call)
         except ValueError as exc:
             self._last_error = str(exc)
             raise FilterRejected(str(exc)) from None
         if ok:
             self._last_applied_at = datetime.now(timezone.utc).isoformat()
-            self._last_applied_layer = layer_name
+            self._last_applied_layer = shown  # the chat applies by id: the status shows the name
             self._last_applied_source = source
             self._last_error = None
         else:
@@ -834,6 +892,7 @@ class QGISFilterMateAccessor:
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError:
             return None
+        _refuse_protected("apply_favorite", {"favorite_id": favorite_id})
         # Same replay as the dock's menu, the Python API and Processing: every
         # subset of the favorite (remote layers too, found by signature, id
         # then name), then its raster / point cloud clips.
@@ -889,8 +948,11 @@ class QGISFilterMateAccessor:
                                      (metadata.get(layer_id, {}).get('expression', '') if isinstance(metadata.get(layer_id), dict) else ''))
                                     for index, layer_id in enumerate(layer_ids)]
         try:
+            touched = [layer_id for layer_id, _subset in previous_filters]
+            if touched:  # the step sets the filters of these layers again: a protected one is refused
+                _refuse_protected("clear_filters", {"layers": touched})
             target_layer_name, target_expression, target_is_clear = self._reapply_previous_filters_inline(project, previous_filters)
-        except FilterRejected as exc:
+        except (FilterRejected, LayerProtected) as exc:
             if peek is None:
                 inverse = getattr(svc, 'redo' if direction == 'undo' else 'undo', None)
                 if callable(inverse):

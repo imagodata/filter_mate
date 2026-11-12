@@ -14,10 +14,12 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.processing_policy import (
-    FILE_DESTINATIONS, FORBIDDEN_TYPES, LAYER_DESTINATIONS, LAYER_INPUTS, MULTI_LAYER_INPUTS, matches, refusal,
+    FILE_DESTINATIONS, GIVEN_TYPES, INTERPOLATION_DATA, LAYER_DESTINATIONS, LAYER_INPUTS, MULTI_LAYER_INPUTS, matches,
+    refusal,
 )
 from ...core.agent.sql_guard import processing_expression_problem
-from .operations import _RUNNING, busy_reason, resolve_layer
+from ...core.domain.layer_kind import LayerKind
+from .operations import _RUNNING, busy_reason, layer_kind, resolve_layer
 
 logger = logging.getLogger('FilterMate.Processing')
 
@@ -33,6 +35,8 @@ _CRS_SUFFIX = r'(?:\s*\[[A-Za-z]+:[A-Za-z0-9_.]+\])?'
 _EXTENT = re.compile(rf'^\s*{_NUMBER}\s*,\s*{_NUMBER}\s*,\s*{_NUMBER}\s*,\s*{_NUMBER}{_CRS_SUFFIX}\s*$')
 _POINT = re.compile(rf'^\s*{_NUMBER}\s*,\s*{_NUMBER}{_CRS_SUFFIX}\s*$')
 _AUTHID = re.compile(r'^[A-Za-z]+:[A-Za-z0-9_.]+$')
+_INTEGER = re.compile(r'^\s*-?\d+\s*$')
+_ROW, _FIELD = '::|::', '::~::'  # how QGIS splits the inputs of an interpolation
 _TAGS = re.compile(r'<[^>]+>')
 
 
@@ -193,6 +197,11 @@ def _parameter(definition) -> Dict[str, Any]:
         row['value'] = '"EPSG:2154", or a layer of the project for its CRS'
     elif kind == 'expression':
         row['value'] = 'a QGIS expression (plain conditions and computations; functions outside a list are refused)'
+    elif kind == INTERPOLATION_DATA:
+        row['value'] = ('one row per input, joined by "::|::": "layer::~::value source::~::field index::~::source type", '
+                        'the layer a vector layer of the project (name or id), value source 0 a field (its index from '
+                        '0), 1 the Z or 2 the M of the geometries (field index -1), source type 0 points, 1 structure '
+                        'lines, 2 break lines; e.g. "points::~::0::~::3::~::0"')
     return row
 
 
@@ -207,7 +216,7 @@ def describe_algorithm(algorithm_id: str) -> Dict[str, Any]:
     for definition in algorithm.parameterDefinitions():
         if _hidden(definition):
             continue
-        if definition.type() in FORBIDDEN_TYPES or definition.type() in FILE_DESTINATIONS:
+        if definition.type() not in GIVEN_TYPES and definition.type() not in LAYER_DESTINATIONS:
             left_out.append(definition.name())
             continue
         parameters.append(_parameter(definition))
@@ -220,7 +229,8 @@ def describe_algorithm(algorithm_id: str) -> Dict[str, Any]:
     }
     if left_out:
         answer['left_out'] = left_out
-        answer['note'] = 'The parameters in left_out (files, folders, connections) cannot be given: they stay unset.'
+        answer['note'] = ('The parameters in left_out (files, folders, connections, types the agent cannot give) '
+                          'cannot be given: they stay unset.')
     return answer
 
 
@@ -236,6 +246,40 @@ def _project_layer(reference: Any, name: str):
     if layer is None:
         raise ValueError(f"{name}: {reference!r} is not a layer of the project (list_layers gives their names)")
     return layer
+
+
+def _interpolation_data(name: str, value: Any) -> str:
+    """The inputs of an interpolation written again, each source the id of a vector layer of the project.
+
+    QGIS opens each source from its text (``QgsProcessingUtils.variantToSource``), a path or a URL included.
+
+    Raises:
+        ValueError: A row that is not four fields, a field after the source that is not an integer or out of its
+            range (value source and source type 0 to 2, field index -1 to the last field), a source that is not a
+            vector layer of the project.
+    """
+    rows = value.split(_ROW) if isinstance(value, str) and value.strip() else [None]
+    written = []
+    for row in rows:
+        fields = row.split(_FIELD) if row is not None else []
+        if len(fields) != 4 or not all(_INTEGER.match(item) for item in fields[1:]):
+            raise ValueError(f'{name}: rows "layer::~::value source::~::field index::~::source type" joined by "::|::",'
+                             ' the last three integers (describe_algorithm says which)')
+        layer = _project_layer(fields[0], name)
+        if layer_kind(layer) is not LayerKind.VECTOR:
+            raise ValueError(f"{name}: '{layer.name()}' is not a vector layer")
+        if _ROW in layer.id() or _FIELD in layer.id():  # an id of a project file, written by anyone
+            raise ValueError(f"{name}: the id of '{layer.name()}' cannot be written in a row")
+        source, field, kind = (int(item) for item in fields[1:])
+        if not 0 <= source <= 2:
+            raise ValueError(f"{name}: the value source is 0 (a field), 1 (the Z) or 2 (the M), not {source}")
+        if not 0 <= kind <= 2:
+            raise ValueError(f"{name}: the source type is 0 (points), 1 (structure lines) or 2 (break lines), not {kind}")
+        if not -1 <= field < layer.fields().count():
+            raise ValueError(f"{name}: the field index of '{layer.name()}' is -1 or 0 to {layer.fields().count() - 1}, "
+                             f"not {field}")
+        written.append(_FIELD.join([layer.id(), str(source), str(field), str(kind)]))
+    return _ROW.join(written)
 
 
 def _enum_value(definition, value: Any) -> Any:
@@ -266,7 +310,7 @@ def _value(definition, value: Any) -> Any:
     """
     from qgis.core import QgsProcessingFeatureSourceDefinition
     kind, name = definition.type(), definition.name()
-    if kind in FORBIDDEN_TYPES or kind in FILE_DESTINATIONS:
+    if kind not in GIVEN_TYPES:  # a file, a connection, a PROJ operation, a type not known here
         raise ValueError(f"{name} ({kind}) cannot be given: it stays unset")
     if isinstance(value, dict) and kind != 'source':
         raise ValueError(f"{name}: an object is only taken by a source layer, as {{\"layer\": ..., \"selected_only\": true}}")
@@ -319,9 +363,11 @@ def _value(definition, value: Any) -> Any:
         return value
     if kind == 'enum':
         return _enum_value(definition, value)
+    if kind == INTERPOLATION_DATA:
+        return _interpolation_data(name, value)
     if isinstance(value, (dict,)):
         raise ValueError(f"{name}: an object is not taken here")
-    return value
+    return value  # PLAIN_TYPES: numbers, texts, fields...
 
 
 def _destination_path(definition) -> str:

@@ -258,6 +258,125 @@ def test_a_terminated_read_settles_too_and_a_failing_settlement_stays_inside_fin
     assert other.on_settled is None
 
 
+def _cancel_while_queued(module, monkeypatch):
+    """QgsTask::cancel() of a task still queued, as in QGIS 3.22 to master.
+
+    terminated() invokes processSubTasksForTermination on the calling (main)
+    thread, so the task manager calls finished(false) before cancel() returns.
+    """
+    def cancel(self):
+        if not self.cancelled:
+            self.cancelled = True
+            self.finished(False)
+    monkeypatch.setattr(module.QgsTask, 'cancel', cancel)
+
+
+def test_a_follower_of_a_read_is_called_from_finished_after_the_read_settled(module):
+    """#349 for the code that waits for a read (Filter or Identify clicked while the selection loads)."""
+    owner, layer = _owner_layer()
+    order = []
+    loading = MagicMock(side_effect=lambda on: order.append(('loading', on)))
+    task = module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    task.when_settled(lambda: order.append('follower'))
+    task.finished(True)
+    assert order == [('loading', True), ('loading', False), 'follower']
+    task.taskCompleted.connect.assert_not_called()
+    task.taskTerminated.connect.assert_not_called()
+
+
+@pytest.mark.parametrize('end', ['completed', 'failed', 'cancelled running', 'cancelled queued', 'replaced'])
+def test_a_follower_is_called_exactly_once_however_the_read_ends(module, monkeypatch, end):
+    owner, layer = _owner_layer()
+    if end in ('cancelled queued', 'replaced'):
+        _cancel_while_queued(module, monkeypatch)
+
+    def compute(task):
+        if end == 'failed':
+            raise ValueError('read failed')
+        return [1]
+
+    task = module.submit_query(owner, 'query', layer, 'read', compute, MagicMock())
+    follower = MagicMock()
+    task.when_settled(follower)
+    if end in ('completed', 'failed'):
+        task.finished(task.run())
+    elif end == 'cancelled running':
+        task.cancel()
+        task.finished(task.run())
+    elif end == 'cancelled queued':
+        owner.query.cancel()
+    else:
+        new = module.submit_query(owner, 'query', layer, 'read', compute, MagicMock())
+        follower.assert_called_once_with()
+        new.finished(new.run())
+    follower.assert_called_once_with()
+    task.finished(False)  # a second termination (a race in QGIS) follows nothing more
+    follower.assert_called_once_with()
+
+
+def test_a_failing_follower_neither_stops_the_others_nor_escapes_finished(module):
+    task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
+    first = MagicMock(side_effect=RuntimeError('wrapped C/C++ object has been deleted'))
+    second = MagicMock()
+    task.when_settled(first)
+    task.when_settled(second)
+    task.finished(False)  # logged, not raised into QGIS
+    first.assert_called_once_with()
+    second.assert_called_once_with()
+
+
+def test_a_follower_of_a_read_already_settled_is_called_at_once(module):
+    task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
+    task.finished(True)
+    follower = MagicMock()
+    task.when_settled(follower)
+    follower.assert_called_once_with()
+    task.finished(True)
+    follower.assert_called_once_with()
+
+
+def test_a_read_the_task_manager_never_took_settles_at_once(module):
+    """addTask raised: finished() would never come, the slot would keep the task and its loading lease."""
+    import sys
+    owner, layer = _owner_layer()
+    loading = MagicMock()
+    add = sys.modules['qgis.core'].QgsApplication.taskManager.return_value.addTask
+    add.side_effect = RuntimeError('wrapped C/C++ object of type QgsTaskManager has been deleted')
+    with pytest.raises(RuntimeError):
+        module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    task = add.call_args.args[0]
+    assert owner.query.task is None and owner.query.loading is None
+    assert [call.args for call in loading.call_args_list] == [(True,), (False,)]
+    module.WATCHERS[0].deleteLater.assert_called_once()
+    follower = MagicMock()
+    task.when_settled(follower)
+    follower.assert_called_once_with()
+    add.side_effect = None
+    module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    assert loading.call_args.args == (True,)  # the next read takes the lease again
+
+
+def test_a_settled_read_holds_its_followers_no_longer(module):
+    import gc
+    import weakref
+
+    class Dock:
+        followed = False
+
+        def follow(self):
+            self.followed = True
+
+    dock = Dock()
+    task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
+    task.when_settled(dock.follow)
+    task.finished(True)
+    assert dock.followed
+    gone = weakref.ref(dock)
+    del dock
+    gc.collect()
+    assert gone() is None
+
+
 def test_iterator_closes_when_consumer_stops_after_first_row(module):
     task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
     iterator = MagicMock()

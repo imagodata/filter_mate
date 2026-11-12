@@ -64,6 +64,11 @@
         <translation>Επιστροφή πριν από: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Σταματήστε το αίτημα ή περιμένετε να ολοκληρωθεί για να ανοίξετε τις ρυθμίσεις.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Τίποτα για αναίρεση.</translation>
@@ -832,6 +837,16 @@ Do you agree?</source>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: θα άλλαζε ένα επίπεδο που έχετε προστατέψει από τον πράκτορα ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Το βήμα {} δεν εκτελέστηκε: τα επίπεδα που προστατέψατε από τον πράκτορα δεν μπόρεσαν να διαβαστούν ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>Το βήμα {} δεν εκτελέστηκε: απενεργοποιήσατε το εργαλείο του για τον πράκτορα ({}).</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -1430,6 +1445,81 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
         <translation>Ο πράκτορας τα διαβάζει και τα χρησιμοποιεί ως πηγή, αλλά δεν τα αλλάζει ποτέ: κανένα φίλτρο, στυλ, επεξεργασία, πεδίο, σύνδεση, νέο όνομα ή αφαίρεση, σε οποιοδήποτε επίπεδο, και σε μια συνταγή και για άλλες εφαρμογές. Αποθηκεύεται στο έργο.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Να επιτρέπεται πάντα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Να ρωτά πάντα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Όπως λέει το επίπεδο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Από προεπιλογή κάθε εργαλείο ακολουθεί το επίπεδο της καρτέλας Αυτονομία. Μια εξαίρεση ισχύει μόνο για εκείνο το εργαλείο: το Ποτέ το κρύβει επίσης από τον πράκτορα και το απορρίπτει στις συνταγές και σε άλλες εφαρμογές· το Να επιτρέπεται πάντα δεν ξεπερνά το επίπεδο Σύμβουλος, και ο κώδικας Python διαβάζεται και επιβεβαιώνεται σε κάθε εκτέλεση.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Είδος</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Ποτέ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Κανόνας</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Εργαλείο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Εργαλεία</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>προσωρινή μνήμη επεξεργασίας</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>μη αναστρέψιμο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>εξωτερικό</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>έργο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>διαβάζει</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>προβολή</translation>
     </message>
 </context>
 <context>
@@ -8206,6 +8296,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Κάντε κλικ στο τετράγωνο δεξιά για να ελέγξετε αυτό το επίπεδο με τα κεντροειδή του</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>δεν φιλτράρεται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Διαδικτυακός χάρτης υποβάθρου (WMS / WMTS / XYZ, ArcGIS MapServer): μόνο χρώματα, δεν μπορεί να φιλτραριστεί</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

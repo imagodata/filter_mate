@@ -15,7 +15,7 @@ from .messages import (
 )
 from .providers.base import HttpRequest
 from .session import STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
-from .permissions import ASK, PROTECTED, REFUSE, PermissionPolicy
+from .permissions import ASK, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
@@ -188,7 +188,7 @@ class ChatEngine:
 
     def _run_one(self, call: ToolCallPart) -> ToolResultPart:
         verdict = self._executor.verdict(call, self._policy)
-        if verdict in (REFUSE, PROTECTED):
+        if verdict in (REFUSE, PROTECTED, TURNED_OFF):
             return self._executor.refused(call, self._policy)
         if verdict == ASK and not self._confirmed(call):
             return self._executor.declined(call)

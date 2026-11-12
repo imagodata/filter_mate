@@ -128,7 +128,8 @@ class PostgreSQLConnectionPool:
         min_connections: int = None,
         max_connections: int = None,
         sslmode: str = None,
-        enable_health_check: bool = True
+        enable_health_check: bool = True,
+        service: str = None
     ):
         """
         Initialize PostgreSQL connection pool.
@@ -143,6 +144,7 @@ class PostgreSQLConnectionPool:
             max_connections: Maximum pool size (default: 15)
             sslmode: SSL mode (optional)
             enable_health_check: Enable periodic health check (default: True)
+            service: pg_service.conf service of the layer (optional)
         """
         if not POSTGRESQL_AVAILABLE:
             raise RuntimeError("psycopg2 not available - cannot create connection pool")
@@ -153,6 +155,7 @@ class PostgreSQLConnectionPool:
         self.user = user
         self.password = password
         self.sslmode = sslmode
+        self.service = service
 
         self.min_connections = min_connections or self.DEFAULT_MIN_CONNECTIONS
         self.max_connections = max_connections or self.DEFAULT_MAX_CONNECTIONS
@@ -175,7 +178,7 @@ class PostgreSQLConnectionPool:
         self.stats = PoolStats()
 
         # Pool key for identification
-        self._pool_key = f"{host}:{port}/{database}"
+        self._pool_key = f"service={service} {host}:{port}/{database}" if service else f"{host}:{port}/{database}"
 
         logger.info(f"✓ PostgreSQL connection pool created for {self._pool_key} "
                    f"(min={self.min_connections}, max={self.max_connections})")
@@ -207,14 +210,17 @@ class PostgreSQLConnectionPool:
             self._pending_connections += 1
         try:
             connect_args = {
+                'service': self.service,
                 'host': self.host,
                 'port': self.port,
                 'dbname': self.database,
                 'user': self.user,
-                'password': self.password
+                'password': self.password,
+                'sslmode': self.sslmode,
             }
-            if self.sslmode:
-                connect_args['sslmode'] = self.sslmode
+            # 2026-11-12: an empty keyword counts as given for libpq and hides the
+            # value of the pg_service.conf service (psycopg2 drops only None)
+            connect_args = {key: value for key, value in connect_args.items() if value not in (None, '')}
             connect_args['connect_timeout'] = PG_CONNECT_TIMEOUT_SECONDS
 
             # PERF 2026-09-12: fast attempt (IPv4 hostaddr, no GSSAPI negotiation)
@@ -596,13 +602,14 @@ class PostgreSQLPoolManager:
 
         logger.info("✓ PostgreSQL Pool Manager initialized")
 
-    def _get_pool_key(self, host: str, port: str, database: str, user=None, password=None, sslmode=None) -> str:
+    def _get_pool_key(self, host: str, port: str, database: str, user=None, password=None, sslmode=None,
+                      service=None) -> str:
         """Identify the full connection policy without storing a password in keys or logs.
 
         A process-local HMAC also distinguishes credential rotations, without
         exposing a reusable, dictionary-guessable password digest.
         """
-        identity = json.dumps([host, port, database, user, password, sslmode]).encode('utf-8')
+        identity = json.dumps([host, port, database, user, password, sslmode, service]).encode('utf-8')
         return hmac.new(_POOL_IDENTITY_SECRET, identity, hashlib.sha256).hexdigest()
 
     def get_pool(
@@ -612,7 +619,8 @@ class PostgreSQLPoolManager:
         database: str,
         user: str = None,
         password: str = None,
-        sslmode: str = None
+        sslmode: str = None,
+        service: str = None
     ) -> PostgreSQLConnectionPool:
         """
         Get or create a connection pool for the specified database.
@@ -624,13 +632,14 @@ class PostgreSQLPoolManager:
             user: Username (required to select an identity)
             password: Password, or None for libpq authentication
             sslmode: SSL mode (optional)
+            service: pg_service.conf service of the layer (optional)
 
         Returns:
             PostgreSQLConnectionPool instance
         """
         if user is None:
             raise ValueError(f"Credentials required to select a pool for {host}:{port}/{database}")
-        pool_key = self._get_pool_key(host, port, database, user, password, sslmode)
+        pool_key = self._get_pool_key(host, port, database, user, password, sslmode, service)
 
         with self._pools_lock:
             if pool_key not in self._pools:
@@ -640,7 +649,8 @@ class PostgreSQLPoolManager:
                     database=database,
                     user=user,
                     password=password,
-                    sslmode=sslmode
+                    sslmode=sslmode,
+                    service=service
                 )
 
             return self._pools[pool_key]
@@ -653,7 +663,8 @@ class PostgreSQLPoolManager:
         user: str = None,
         password: str = None,
         sslmode: str = None,
-        timeout: float = None
+        timeout: float = None,
+        service: str = None
     ):
         """
         Get a connection from the appropriate pool.
@@ -662,11 +673,12 @@ class PostgreSQLPoolManager:
             host, port, database, user, password: Connection parameters
             sslmode: SSL mode
             timeout: Connection timeout
+            service: pg_service.conf service (optional)
 
         Returns:
             psycopg2 connection
         """
-        pool = self.get_pool(host, port, database, user, password, sslmode)
+        pool = self.get_pool(host, port, database, user, password, sslmode, service)
         conn = pool.get_connection(timeout)
         with self._pools_lock:
             self._borrowed[id(conn)] = (conn, pool)
@@ -702,7 +714,8 @@ class PostgreSQLPoolManager:
         user: str = None,
         password: str = None,
         sslmode: str = None,
-        timeout: float = None
+        timeout: float = None,
+        service: str = None
     ) -> Generator:
         """
         Context manager for getting a pooled connection.
@@ -712,7 +725,7 @@ class PostgreSQLPoolManager:
                 cursor = conn.cursor()
                 cursor.execute("SELECT ...")
         """
-        pool = self.get_pool(host, port, database, user, password, sslmode)
+        pool = self.get_pool(host, port, database, user, password, sslmode, service)
         with pool.connection(timeout) as conn:
             yield conn
 
@@ -749,8 +762,11 @@ class PostgreSQLPoolManager:
         sslmode = None
         if ssl_mode is not None:
             sslmode = source_uri.encodeSslMode(ssl_mode)
+        if sslmode == 'prefer':  # the default, never written by QGIS: would hide the service's own
+            sslmode = None
 
-        with self.connection(host, port, database, user, password, sslmode, timeout) as conn:
+        with self.connection(host, port, database, user, password, sslmode, timeout,
+                             service=source_uri.service()) as conn:
             yield conn
 
     def close_pool(self, host: str, port: str, database: str):
@@ -876,10 +892,14 @@ def get_pooled_connection_from_layer(layer) -> Tuple[Optional[Any], Optional[Any
     sslmode = None
     if ssl_mode is not None:
         sslmode = source_uri.encodeSslMode(ssl_mode)
+    if sslmode == 'prefer':  # the default, never written by QGIS: would hide the service's own
+        sslmode = None
 
     try:
         manager = get_pool_manager()
-        conn = manager.get_connection(host, port, database, user, password, sslmode)
+        # 2026-11-12: with the service of a layer read through pg_service.conf
+        conn = manager.get_connection(host, port, database, user, password, sslmode,
+                                      service=source_uri.service())
         return conn, source_uri
     except Exception as e:
         logger.error(f"Failed to get pooled connection for {layer.name()}: {e}")

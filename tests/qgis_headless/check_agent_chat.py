@@ -1101,6 +1101,7 @@ def check_chat(provider, layer, authcfg, work):
     check_autonomy(chat, provider, settings, ask, answers, layer)
     check_widgets(chat, provider, settings, ask, layer)
     check_protected(chat, provider, settings, ask, layer)
+    check_tool_rules(chat, provider, settings, ask, layer)
     check_recipes(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
@@ -1167,6 +1168,45 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
     panel.clear_thread()
+
+
+def check_tool_rules(chat, provider, settings, ask, layer):
+    """Exceptions of the Tools tab: never hides and refuses a tool, always ask asks at every call."""
+    from filter_mate.adapters.agent.settings import load_settings, target_of
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
+
+    dialog = AgentSettingsDialog(load_settings(), target_of, tools=[("zoom_to", "Zoom", 1), ("run_pyqgis", "Python", 5)])
+    check("rules: a Tools tab", any(dialog.tabs.tabText(i) == "Tools" for i in range(dialog.tabs.count())))
+    check("rules: code can never be always allowed", dialog._rule_boxes["run_pyqgis"].findData("allow") < 0)
+    dialog._rule_boxes["zoom_to"].setCurrentIndex(dialog._rule_boxes["zoom_to"].findData("never"))
+    check("rules: the choice is read back", dialog.chosen_tool_rules() == {"zoom_to": "never"}, dialog.chosen_tool_rules())
+    dialog.close()
+
+    filter_call = {"layer_name": "communes", "expression": '"pop" > 1000'}
+    layer.setSubsetString("")
+    settings(autonomy="autonomous", tool_rules='{"apply_filter": "never"}')
+    provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("Outil coupé.")))
+    ask("filtre les communes")
+    names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("rules: never hides the tool from the model", "apply_filter" not in names and "zoom_to" in names, names)
+    check("rules: never refuses it even when autonomous", result.get("is_error") is True and
+          "turned the tool 'apply_filter' off" in result["content"] and layer.subsetString() == "", result)
+    check("rules: other applications are refused too", "off" in chat.protection_refusal(ToolCallPart("m", "apply_filter",
+                                                                                                    filter_call)))
+    settings(tool_rules='{"apply_filter": "ask"}')
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    for _round in range(2):
+        provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("ok")))
+        ask("filtre les communes")
+    check("rules: always ask asks at every call", len(asked) == 2 and layer.subsetString() == '"pop" > 1000',
+          (len(asked), layer.subsetString()))
+    layer.setSubsetString("")
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
 
 
 def check_protected(chat, provider, settings, ask, layer):

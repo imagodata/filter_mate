@@ -179,3 +179,25 @@ class TestExpressionSurfaceNoData:
         surface = overlay.ExpressionSurface(layer, selection)
         assert surface.mask.tolist() == [[True, False], [False, False]]
         assert surface.kept_ratio == pytest.approx(1 / 3)  # 3 pixels with a value, 1 kept
+
+
+class TestObjectOutlineRemoved:
+    """2026-11-12: an outline no longer used stayed in the scene of the map, hidden (two more at each reload)."""
+
+    def test_its_band_leaves_the_scene(self):
+        removed = []
+        canvas = types.SimpleNamespace(scene=lambda: types.SimpleNamespace(removeItem=removed.append))
+        outline = overlay.ObjectOutline(canvas, hover=True)
+        outline.remove()  # never shown: nothing to remove
+        outline._band, outline._shown = "band", True
+        outline.remove()
+        assert removed == ["band"] and not outline.visible and outline.geometry() is None
+
+    def test_a_canvas_gone_is_no_error(self):
+        def gone():
+            raise RuntimeError("wrapped C/C++ object of type QgsMapCanvas has been deleted")
+
+        outline = overlay.ObjectOutline(types.SimpleNamespace(scene=gone))
+        outline._band = "band"
+        outline.remove()
+        assert outline._band is None

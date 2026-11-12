@@ -123,6 +123,7 @@ def ctrl_module(monkeypatch):
     kinds = {"vector": layer_kind.LayerKind.VECTOR, "raster": layer_kind.LayerKind.RASTER,
              "pc": layer_kind.LayerKind.POINT_CLOUD}
     capability.get_layer_kind = lambda layer: kinds.get(getattr(layer, "kind", None), layer_kind.LayerKind.OTHER)
+    capability.is_unlisted_vector_source_target = lambda layer: getattr(layer, "unlisted", False)
     monkeypatch.setitem(sys.modules, capability.__name__, capability)
     service = FakeService(filter_state.CrossOperationHistory())
     service_module = types.ModuleType(f"{_PKG}.core.services.cross_filter_service")
@@ -382,6 +383,41 @@ class TestVectorSourceTargets:
         controller.run_vector_source_task("undo", layers["v1"], [])
         assert ("undo", "v1") not in ctrl_module._test_service.calls
 
+    def test_targets_taken_off_the_list_are_not_clipped(self, ctrl_module, layers, monkeypatch):
+        """A raster checked, then its CROSS_FILTER option turned off (or a web basemap): left alone."""
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        ran = []
+        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids, run=None: ran.append(ids) or True)
+        layers["r1"].unlisted = True
+        controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        assert ran == [["p1"]]
+        assert [run.op_id for run in controller._linked_runs["v1"]] == [None, None]  # the second, vector only
+
+    @pytest.mark.parametrize("task_name", ["unfilter", "reset"])
+    def test_unfilter_reaches_a_clipped_target_taken_off_the_list(self, ctrl_module, layers, monkeypatch, task_name):
+        """Clipped, then its CROSS_FILTER option turned off: no longer in the list, still restored."""
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(ctrl_module, controller))
+        monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda: None, raising=False)
+        controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
+        layers["r1"].unlisted = True
+        controller.run_vector_source_task(task_name, layers["v1"], ["p1"])
+        assert ("unfilter", "v1", ("p1", "r1")) in ctrl_module._test_service.calls
+
+    def test_unfilter_leaves_a_listed_target_the_user_unchecked(self, ctrl_module, layers, monkeypatch):
+        """Still listed, unchecked: as for the vector engine, only the checked targets are restored."""
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(ctrl_module, controller))
+        monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
+        controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
+        controller.run_vector_source_task("unfilter", layers["v1"], ["p1"])
+        assert ("unfilter", "v1", ("p1",)) in ctrl_module._test_service.calls
+
     def test_filter_without_coverage_targets_records_unlinked_run(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         ran = []
@@ -490,6 +526,138 @@ class TestUndoRedoButtons:
         controller = ctrl_module.CoverageModeController(dock)
         controller.update_undo_redo_buttons()
         app.update_undo_redo_buttons.assert_called_once()
+
+    def test_agent_open_keeps_the_steps_of_the_agent(self, ctrl_module, layers):
+        """2026-11-12: a raster picked with AGENT open greyed out Undo / Redo while the agent had steps."""
+        undo, redo, app = MagicMock(), MagicMock(), MagicMock()
+        dock = _dock(pushButton_action_undo_filter=undo, pushButton_action_redo_filter=redo,
+                     tabTools_current_index=-1, filter_mate_app=app)
+        dock.agent_has_focus.return_value = True
+        controller = ctrl_module.CoverageModeController(dock)
+        controller._active_layer = layers["r1"]
+        controller.update_undo_redo_buttons()
+        app.update_undo_redo_buttons.assert_called_once()  # the app shows the history of the agent
+        undo.setEnabled.assert_not_called()
+        redo.setEnabled.assert_not_called()
+
+
+class _Canvas:
+    def __init__(self, tool):
+        self.tool = tool
+
+    def mapTool(self):
+        return self.tool
+
+    def setMapTool(self, tool):
+        self.tool = tool
+
+    def unsetMapTool(self, tool):
+        if self.tool is tool:
+            self.tool = None
+
+
+@pytest.mark.unit
+class TestDockClosed:
+    """2026-11-12: closing the dock (it is only hidden) takes every tool of the panels off the map."""
+
+    def _controller(self, ctrl_module, monkeypatch, canvas):
+        controller = ctrl_module.CoverageModeController(_dock())
+        iface = types.SimpleNamespace(mapCanvas=lambda: canvas)
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        return controller
+
+    def test_sam_tool_leaves_the_map(self, ctrl_module, monkeypatch):
+        canvas = _Canvas("pan")
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        sam_tool = object()
+        segmentation = MagicMock()
+        segmentation.on_map.side_effect = lambda: canvas.mapTool() is sam_tool
+        segmentation.deactivate.side_effect = lambda: controller._release_map_tool(sam_tool, "pan")
+        controller._segmentation = segmentation
+        canvas.setMapTool(sam_tool)
+        controller.release_map_tools()
+        segmentation.deactivate.assert_called_once_with()
+        assert canvas.mapTool() == "pan"  # the tool it replaced has the map back
+
+    def test_class_pipette_leaves_the_map(self, ctrl_module, monkeypatch):
+        class_tool = object()
+        canvas = _Canvas(class_tool)
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        controller._class_tool, controller._previous_class_map_tool = class_tool, "identify"
+        controller.release_map_tools()
+        assert canvas.mapTool() == "identify"
+
+    def test_pixel_picker_leaves_the_map_and_nothing_else_is_made(self, ctrl_module, monkeypatch):
+        pixel_tool = object()
+        canvas = _Canvas(pixel_tool)
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        controller._pixel_tool, controller._previous_map_tool = pixel_tool, "pan"
+        controller.release_map_tools()
+        assert canvas.mapTool() == "pan"
+        assert controller._segmentation is None and controller._extras is None  # not made only to be stopped
+
+    @staticmethod
+    def _sam(controller, canvas):
+        """SegmentationController stand-in: it remembers the tool it replaced and gives it back on deactivate()."""
+        sam = types.SimpleNamespace(tool=object(), previous=None)
+        sam.on_map = lambda: canvas.mapTool() is sam.tool
+
+        def activate():
+            sam.previous = canvas.mapTool()
+            canvas.setMapTool(sam.tool)
+
+        def deactivate():
+            previous, sam.previous = sam.previous, None
+            controller._release_map_tool(sam.tool, previous)
+        sam.activate, sam.deactivate = activate, deactivate
+        controller._segmentation = sam
+        return sam
+
+    @staticmethod
+    def _zone(controller, canvas):
+        """The Zone tool of the dock extras: it remembers the tool it replaced, as _start_pc_zone_tool did."""
+        zone = types.SimpleNamespace(tool=object(), previous=None, stops=0)
+        zone.zone_tool_on = lambda: canvas.mapTool() is zone.tool
+
+        def start():
+            zone.previous = canvas.mapTool()
+            canvas.setMapTool(zone.tool)
+
+        def stop_zone_tool():
+            zone.stops += 1
+            if canvas.mapTool() is not zone.tool:
+                zone.previous = None
+                return
+            previous, zone.previous = zone.previous, None
+            if previous is not None:
+                canvas.setMapTool(previous)
+            else:
+                canvas.unsetMapTool(zone.tool)
+        zone.start, zone.stop_zone_tool = start, stop_zone_tool
+        controller._extras = zone
+        return zone
+
+    def test_a_tool_given_back_leaves_in_turn(self, ctrl_module, monkeypatch):
+        """2026-11-12: SAM on the map, then Zone: closing the dock gave the map back to SAM, dock hidden."""
+        canvas = _Canvas("pan")
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        sam, zone = self._sam(controller, canvas), self._zone(controller, canvas)
+        sam.activate()
+        zone.start()  # the Zone of the rail remembers SAM
+        controller.release_map_tools()
+        assert canvas.mapTool() == "pan"
+
+    def test_each_tool_leaves_even_when_another_fails(self, ctrl_module, monkeypatch):
+        canvas = _Canvas("pan")
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        sam, zone = self._sam(controller, canvas), self._zone(controller, canvas)
+        zone.start()
+
+        def broken():
+            raise RuntimeError("wrapped C/C++ object has been deleted")
+        sam.on_map = broken  # a segmentation tool deleted with its panel
+        controller.release_map_tools()
+        assert canvas.mapTool() == "pan"
 
 
 @pytest.mark.unit

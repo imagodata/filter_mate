@@ -206,13 +206,15 @@ class TestInstallCommand:
         monkeypatch.setattr(sam_model.sys, 'executable', str(tmp_path / 'qgis-bin.exe'))
         monkeypatch.setattr(sam_model.sys, 'prefix', str(folder))
         monkeypatch.setattr(sam_model.sys, 'base_prefix', str(folder))
-        assert sam_model.install_command() == f'"{folder / "python.exe"}" -m pip install onnxruntime'
+        assert sam_model.install_command('/profile/py312') == \
+            f'"{folder / "python.exe"}" -m pip install --upgrade --target /profile/py312 onnxruntime'
 
     def test_nothing_found(self, tmp_path, monkeypatch):
         monkeypatch.setattr(sam_model.sys, 'executable', '')
         monkeypatch.setattr(sam_model.sys, 'prefix', str(tmp_path))
         monkeypatch.setattr(sam_model.sys, 'base_prefix', str(tmp_path))
-        assert sam_model.install_command() == 'python -m pip install onnxruntime'
+        assert sam_model.install_command('C:/QGIS profile/py312', ['numpy==1.26.4']) == \
+            'python -m pip install --upgrade --target "C:/QGIS profile/py312" numpy==1.26.4 onnxruntime'
 
 
 class TestProvider:
