@@ -24,6 +24,7 @@ All notable changes to FilterMate will be documented in this file.
 ### Filtering
 
 - **A source expression that keeps nothing no longer filters the targets by the whole source.** On a GeoPackage, SpatiaLite or file source with no filter yet, a custom expression matching no feature left the source empty while the target layers kept everything that touched any of its features, with a warning in the log only; an expression that could not be read did the same. The targets are now left as they are and the message bar says why. PostgreSQL sources were already right.
+- **An export writes the layer you ticked, even when two layers share its name.** The export looked layers up by their name and took the first one: with two layers called "communes", ticking the second wrote the first. Layers are now found by their id (single file, GeoPackage, one file or one ZIP per layer, streaming).
 
 ## [5.1.0] - 2026-11-10
 
