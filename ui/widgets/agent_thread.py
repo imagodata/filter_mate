@@ -18,6 +18,8 @@ from qgis.PyQt.QtWidgets import (
 )
 
 BUBBLE_SHARE = 0.88  # of the width of the thread
+ANSWER_DELAY_MS = 80  # the answer being written is drawn again at most so often, whatever the number of fragments
+ANSWER_CHARS_PER_MS = 40  # and less often as it grows: drawing it costs as much as its length
 DONE_COLOR = {"light": "#146a55", "dark": "#4fd1b0"}
 # Background, border, title of an error card (mockup: Error board).
 ERROR_COLORS = {"light": ("#fdf3f3", "#f0c2c2", "#8c1d1d"), "dark": ("#3a2224", "#6b3236", "#f2b8b8")}
@@ -58,6 +60,12 @@ def strong_markup(text: str, strong: Sequence[str]) -> str:
     return "".join(out)
 
 
+def plain_tooltip(text: str) -> str:
+    """``text`` as a tooltip shows it word for word: a tooltip starting with a known tag is taken for rich text (an
+    image it names is loaded); escaped in a paragraph that keeps spaces and line breaks, nothing of it is read."""
+    return f'<p style="white-space: pre-wrap;">{html.escape(text)}</p>' if text else ""
+
+
 def _plain_label(text: str, parent: QWidget, wrap: bool = True) -> QLabel:
     label = QLabel(parent)
     label.setTextFormat(Qt.TextFormat.PlainText)
@@ -73,7 +81,7 @@ class ElidedLabel(QLabel):
         super().__init__(parent)
         self.setTextFormat(Qt.TextFormat.PlainText)
         self._full = text
-        self.setToolTip(text)
+        self.setToolTip(plain_tooltip(text))
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self.setText(text)
 
@@ -200,6 +208,16 @@ class AgentThread(QScrollArea):
         self._fit_timer.setSingleShot(True)
         self._fit_timer.setInterval(0)
         self._fit_timer.timeout.connect(self._fit_height)
+        # The answer arrives in fragments of a few characters: drawing it again for each one lays out all its text
+        # each time, which grows with the answer. The fragments that come meanwhile are drawn at once (add_text).
+        self._answer_timer = QTimer(self)
+        self._answer_timer.setSingleShot(True)
+        self._answer_timer.timeout.connect(self._show_answer)
+        # Timers of the thread, not QTimer.singleShot: they never fire for a thread deleted meanwhile (unloading).
+        self._end_timer = QTimer(self)
+        self._end_timer.setSingleShot(True)
+        self._end_timer.setInterval(0)
+        self._end_timer.timeout.connect(self._scroll_to_end)
         self.refresh_look()
 
     # --- what the panel asks ---------------------------------------------------------
@@ -234,12 +252,15 @@ class AgentThread(QScrollArea):
         for item in self._items:
             self._drop(item.widget)
         self._items = []
+        self._answer_timer.stop()
         self._answer = None
         self._answer_raw = ""
         self._step_cards = []
         self._fit_timer.start()
 
     def end_answer(self) -> None:
+        if self._answer_timer.isActive():  # the answer as it ended, before what follows it
+            self._show_answer()
         self._answer = None
         self._answer_raw = ""
 
@@ -340,7 +361,12 @@ class AgentThread(QScrollArea):
         self._fit_timer.start()
 
     def add_text(self, text: str) -> None:
-        """More of the answer being written: one label per answer, its Markdown marks taken out."""
+        """More of the answer being written: one label per answer, its Markdown marks taken out.
+
+        Drawn a moment later with the fragments that came meanwhile: within ANSWER_DELAY_MS, more as it grows (a
+        tenth of a second for 4 000 characters, 0.3 s for 12 000), so that the panel keeps answering; at once when the
+        answer ends.
+        """
         self._answer_raw += text
         if self._answer is None:
             label = _plain_label("", self._content)
@@ -348,9 +374,13 @@ class AgentThread(QScrollArea):
             self._answer = _Item(label, "", "text",
                                  lambda palette, _dark: _sheet(label, f"font-size: 13px; color: {palette['fm_text']};"))
             self._append(self._answer)
-        shown = plain_markdown(self._answer_raw).strip("\n")
-        self._answer.widget.setText(shown)
         self._answer.plain = self._answer_raw
+        if not self._answer_timer.isActive():
+            self._answer_timer.start(max(ANSWER_DELAY_MS, len(self._answer_raw) // ANSWER_CHARS_PER_MS))
+
+    def _show_answer(self) -> None:
+        self._answer_timer.stop()
+        self._answer.widget.setText(plain_markdown(self._answer_raw).strip("\n"))
         self._fit_timer.start()
         self._follow_end()
 
@@ -439,7 +469,11 @@ class AgentThread(QScrollArea):
             self._follow_end()
 
     def _follow_end(self) -> None:
-        QTimer.singleShot(0, lambda: self.verticalScrollBar().setValue(self.verticalScrollBar().maximum()))
+        self._end_timer.start()
+
+    def _scroll_to_end(self) -> None:
+        bar = self.verticalScrollBar()
+        bar.setValue(bar.maximum())
 
     def _fit_bubble(self, bubble: QLabel) -> None:
         bubble.setMaximumWidth(max(80, int(self.viewport().width() * BUBBLE_SHARE)))

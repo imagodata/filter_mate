@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import math
+from decimal import ROUND_HALF_UP, Context, Decimal
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
 
 RANGE, VALUES, STAT, CHART = "range", "values", "stat", "chart"
@@ -32,6 +33,7 @@ AGGREGATES = ("count", "sum", "mean", "min", "max")
 MAX_WIDGETS = 12
 MAX_VALUES = 50
 MAX_TITLE = 60
+MAX_DECIMALS = 15  # what a float holds
 NOTHING = "1 = 0"  # every value unticked: the layer shows nothing, as the user asked
 
 Quote = Callable[[Any], str]
@@ -44,7 +46,16 @@ class WidgetError(ValueError):
 def _number(value: Any) -> Optional[float]:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    return float(value) if math.isfinite(value) else None
+    try:
+        number = float(value)
+    except OverflowError:  # an int beyond the largest float
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _rounded_as_before(value: float) -> float:
+    """``value`` with the 2 decimals a range showed in FilterMate 5.1, ties away from 0 as Qt rounds them."""
+    return float(Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP, context=Context(prec=400)))
 
 
 def _scalar(value: Any) -> bool:
@@ -70,6 +81,9 @@ def _clean(widget: Any) -> Optional[Dict[str, Any]]:
         start, end = _number(widget.get("low")), _number(widget.get("high"))
         start = low if start is None else min(max(start, low), high)
         end = high if end is None else min(max(end, start), high)
+        if not widget.get("integer"):  # a bound at an end, saved rounded by FilterMate 5.1 (0.125 saved 0.13)
+            start = low if start == _rounded_as_before(low) else start
+            end = high if end == _rounded_as_before(high) else end
         out.update(minimum=low, maximum=high, low=start, high=end,
                    integer=bool(widget.get("integer")))
     elif kind == VALUES:
@@ -147,6 +161,9 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
             raise WidgetError(f"{field!r} has no numeric values among the features shown: a range needs numbers.")
         if low == high:
             raise WidgetError(f"Every feature shown has the same value of {field!r} ({low:g}): nothing to choose.")
+        places = decimals({"integer": integer, "minimum": low, "maximum": high})
+        if round(low, places) == round(high, places):  # the two ends of the box would be one number
+            raise WidgetError(f"The values of {field!r} shown differ by too little for a range ({low!r} to {high!r}).")
         entry.update(minimum=low, maximum=high, low=low, high=high, integer=bool(integer))
     elif kind == VALUES:
         found = [value for value in (values or ()) if _scalar(value)]
@@ -171,6 +188,20 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
     if cleaned is None:  # make and _clean say the same thing; a difference is a bug here, not a model mistake
         raise WidgetError("This widget could not be made.")
     return cleaned
+
+
+def decimals(widget: Dict[str, Any]) -> int:
+    """The decimals a range widget shows its bounds with: none for whole numbers, else at least 2 and enough for a
+    hundredth of its span (a field between 0.001 and 0.005 is not rounded to 0), but never a step Qt 5 takes for no
+    change: it compares two numbers within 1e-12 of their size as equal (qFuzzyCompare)."""
+    if widget.get("integer"):
+        return 0
+    span = widget["maximum"] - widget["minimum"]
+    places = max(2, math.ceil(2 - math.log10(span) - 1e-9)) if 0 < span < math.inf else 2  # 1e-9: 2.0000000001 is 2
+    size = max(abs(widget["minimum"]), abs(widget["maximum"]))
+    if size > 0:
+        places = min(places, math.floor(11 - math.log10(size)))
+    return max(0, min(MAX_DECIMALS, places))
 
 
 def _format_number(value: float, integer: bool) -> str:
@@ -256,12 +287,17 @@ def histogram_bars(values: Iterable[Any], bins: int = HISTOGRAM_BINS) -> List[Di
     low, high = min(numbers), max(numbers)
     if low == high:
         return [{"low": low, "high": high, "count": len(numbers)}]
-    width = (high - low) / bins
+    # Each number by its place between low and high, never by a width: a tenth of the span may be below the smallest
+    # float (0 to 5e-324), and the span beyond the largest one (-1.7e308 to 1.7e308): then in halves, which fit.
+    halves = math.isinf(high - low)
+    span = high / 2 - low / 2 if halves else high - low
     counts = [0] * bins
     for number in numbers:
-        counts[min(int((number - low) / width), bins - 1)] += 1
-    return [{"low": low + index * width, "high": low + (index + 1) * width, "count": count}
-            for index, count in enumerate(counts)]
+        place = (number / 2 - low / 2 if halves else number - low) / span
+        counts[min(int(place * bins), bins - 1)] += 1
+    # An edge is a weighted mean of low and high: it never goes beyond them.
+    edges = [low * (1 - index / bins) + high * (index / bins) for index in range(bins + 1)]
+    return [{"low": edges[index], "high": edges[index + 1], "count": count} for index, count in enumerate(counts)]
 
 
 def without(widgets: Sequence[Dict[str, Any]], widget_id: str) -> List[Dict[str, Any]]:
