@@ -616,3 +616,146 @@ class TestFeatureCandidates:
 
     def test_a_tie_stays(self):
         assert not segmentation.closer_to_rejected([1.0, 1.0], [[1.0, 0.0]], [[0.0, 1.0]])
+
+
+class FakeInterface:
+    """A raster interface of a pipe (renderer, filter): clone() records the copies, setAlphaBand the band."""
+
+    def __init__(self, name, alpha=-1):
+        self.name, self.alpha, self.copies = name, alpha, []
+
+    def clone(self):
+        copy = FakeInterface(self.name, self.alpha)
+        self.copies.append(copy)
+        return copy
+
+    def setAlphaBand(self, band):
+        self.alpha = band
+
+    def alphaBand(self):
+        return self.alpha
+
+
+class FakePipe:
+    def __init__(self):
+        self.interfaces = []
+
+    def set(self, interface):
+        self.interfaces.append(interface)
+        return True
+
+    def last(self):
+        return self.interfaces[-1]
+
+
+class FakeFeedback:
+    def __init__(self):
+        self.canceled = False
+
+    def cancel(self):
+        self.canceled = True
+
+    def errors(self):
+        return []
+
+
+class TestDrawingWithoutALayer:
+    """2026-11-12: the tasks opened a QgsRasterLayer in the worker: statistics of the whole coverage of a WCS at each
+    window, the CRS of the file instead of the one the user set, and neither brightness nor contrast nor saturation."""
+
+    @staticmethod
+    def layer(alpha=4):
+        renderer, brightness = FakeInterface('renderer', alpha), FakeInterface('brightness')
+        hue, resampler = FakeInterface('hue'), FakeInterface('resampler')
+        return types.SimpleNamespace(renderer=lambda: renderer, brightnessFilter=lambda: brightness,
+                                     hueSaturationFilter=lambda: hue, resampleFilter=lambda: resampler)
+
+    def test_the_look_is_cloned_with_the_alpha_band_asked(self):
+        layer = self.layer(alpha=4)
+        look = segmentation.raster_look(layer, alpha_band=-1)
+        assert [look[key].name for key in ('renderer', 'brightness', 'hue', 'resampler')] == \
+            ['renderer', 'brightness', 'hue', 'resampler']
+        assert look['renderer'].alpha == -1 and layer.renderer().alpha == 4  # the layer keeps its own
+        assert segmentation.raster_look(layer)['renderer'].alpha == 4
+
+    @pytest.fixture
+    def registry(self, monkeypatch):
+        core = sys.modules['qgis.core']
+        opened, pipes = [], []
+
+        class Provider:
+            def __init__(self, valid):
+                self.valid = valid
+
+            def isValid(self):
+                return self.valid
+
+        def create(key, source, options):
+            opened.append((key, source, options))
+            return Provider('bad' not in source)
+
+        def pipe():
+            pipes.append(FakePipe())
+            return pipes[-1]
+
+        def no_layer(*_args):
+            raise AssertionError('a QgsRasterLayer was opened')
+
+        monkeypatch.setattr(core, 'QgsProviderRegistry', types.SimpleNamespace(
+            instance=lambda: types.SimpleNamespace(createProvider=create)), raising=False)
+        monkeypatch.setattr(core, 'QgsDataProvider', types.SimpleNamespace(ProviderOptions=lambda: 'options'), raising=False)
+        monkeypatch.setattr(core, 'QgsRasterPipe', pipe, raising=False)
+        monkeypatch.setattr(core, 'QgsRasterLayer', no_layer, raising=False)
+        return opened, pipes
+
+    def test_a_bare_provider_drawn_with_the_look_of_the_layer(self, registry):
+        opened, _pipes = registry
+        look = segmentation.raster_look(self.layer())
+        pipe = segmentation.open_drawing('https://example.org/wcs?coverage=dem', 'wcs', look)
+        assert opened == [('wcs', 'https://example.org/wcs?coverage=dem', 'options')]
+        assert [getattr(interface, 'name', 'provider') for interface in pipe.interfaces] == \
+            ['provider', 'renderer', 'brightness', 'hue', 'resampler']
+        assert all(interface is not look[interface.name] for interface in pipe.interfaces[1:])  # copies: the pipe owns them
+
+    def test_nothing_to_draw(self, registry):
+        assert segmentation.open_drawing('bad.tif', 'gdal', segmentation.raster_look(self.layer())) is None
+        assert segmentation.open_drawing('good.tif', 'gdal', {'renderer': None}) is None
+
+    def test_the_window_is_read_as_it_is(self, monkeypatch):
+        """The window in the layer CRS, its pixels, no reprojection: a CRS set by the user names the coordinates."""
+        fk.install(monkeypatch, segmentation)
+        monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterBlockFeedback', FakeFeedback, raising=False)
+        asked = []
+        block = types.SimpleNamespace(isEmpty=lambda: False, image=lambda: 'pixels')
+
+        def read(band, extent, width, height, feedback):
+            asked.append((band, extent, width, height))
+            return block
+
+        segmentation.render_drawing(types.SimpleNamespace(last=lambda: types.SimpleNamespace(block=read)), window(),
+                                    lambda: False)
+        assert asked == [(1, fk.FakeRectangle(100.0, 100.0, 180.0, 180.0), 8, 8)]
+
+    def test_a_block_not_drawn_is_an_error_unless_canceled(self, monkeypatch):
+        fk.install(monkeypatch, segmentation)
+        monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterBlockFeedback', FakeFeedback, raising=False)
+        empty = types.SimpleNamespace(isEmpty=lambda: True)
+        pipe = types.SimpleNamespace(last=lambda: types.SimpleNamespace(block=lambda *args: empty))
+        with pytest.raises(RuntimeError):
+            segmentation.render_drawing(pipe, window(), lambda: False)
+        segmentation.render_drawing(pipe, window(), lambda: True)
+
+    def test_the_tasks_draw_through_the_pipe(self, monkeypatch):
+        drawn = []
+        monkeypatch.setattr(segmentation, 'open_drawing', lambda source, key, look: drawn.append((source, key, look)) or 'pipe')
+        monkeypatch.setattr(segmentation, 'render_drawing', lambda pipe, w, canceled: drawn.append((pipe, w)) or 'image')
+        monkeypatch.setattr(segmentation, 'image_to_rgb', lambda image: 'rgb')
+        model = types.SimpleNamespace(embed=lambda rgb: {'rgb': rgb})
+        look = {'renderer': 'renderer', 'brightness': 'brightness'}
+        task = segmentation.SegmentationEmbedTask('/data/ortho.tif', 'gdal', None, 'crs', window(), model,
+                                                  lambda t, ok: None, look=look)
+        assert task.run() and task.embedding == {'rgb': 'rgb'}
+        assert drawn == [('/data/ortho.tif', 'gdal', look), ('pipe', window())]
+        given = segmentation.SegmentationEmbedTask('/data/ortho.tif', 'gdal', 'renderer', 'crs', window(), model,
+                                                   lambda t, ok: None)
+        assert given.look == {'renderer': 'renderer'}  # the callers that give a renderer alone (scripts)

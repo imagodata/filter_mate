@@ -19,7 +19,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional, Tuple
 
-from qgis.core import QgsMapRendererSequentialJob, QgsMapSettings, QgsRasterLayer, QgsRectangle, QgsTask
+from qgis.core import QgsMapRendererSequentialJob, QgsRectangle, QgsTask
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QSize, QThread, QTimer
 from qgis.PyQt.QtGui import QColor, QImage
 
@@ -818,6 +818,79 @@ def render_window(settings: Any, layer: Any, window: SegmentationWindow, is_canc
     return job.renderedImage()
 
 
+def raster_look(layer: Any, alpha_band: Optional[int] = None) -> dict:
+    """How ``layer`` is drawn, cloned for a worker (main thread): :func:`open_drawing` draws a source with it.
+
+    Its renderer, and the filters of its pipe the renderer does not carry: brightness and contrast,
+    hue and saturation, resampling.
+
+    Args:
+        alpha_band: The band the renderer reads as transparency, None to keep its own (the original
+            source of a raster filtered by FilterMate has not the alpha band of the derived one).
+    """
+    renderer = layer.renderer().clone() if layer.renderer() is not None else None
+    if renderer is not None and alpha_band is not None and hasattr(renderer, 'setAlphaBand'):
+        renderer.setAlphaBand(int(alpha_band))
+    look = {'renderer': renderer}
+    for key, filter_of in (('brightness', 'brightnessFilter'), ('hue', 'hueSaturationFilter'), ('resampler', 'resampleFilter')):
+        interface = getattr(layer, filter_of)() if hasattr(layer, filter_of) else None
+        look[key] = interface.clone() if interface is not None else None
+    return look
+
+
+def open_drawing(source: str, provider_key: str, look: dict) -> Any:
+    """A pipe drawing ``source`` as ``look`` says (:func:`raster_look`); None when the source cannot be read. Worker.
+
+    A bare provider, not a QgsRasterLayer: a layer computes the statistics of its default renderer
+    when it opens, one more read of the whole coverage (a WCS: a GetCoverage of all of it for each
+    window; see ``target_appliers._ProviderLayer.open``). The windows are read in the coordinates of
+    the layer as they are: a CRS the user set in QGIS on a file whose own is wrong or missing only
+    names them, there is no reprojection to get wrong.
+    """
+    from qgis.core import QgsDataProvider, QgsProviderRegistry, QgsRasterPipe
+    if look.get('renderer') is None:
+        return None
+    provider = QgsProviderRegistry.instance().createProvider(provider_key, source, QgsDataProvider.ProviderOptions())
+    if provider is None or not provider.isValid():
+        return None
+    pipe = QgsRasterPipe()
+    if not pipe.set(provider):
+        return None
+    for key in ('renderer', 'brightness', 'hue', 'resampler'):
+        if look.get(key) is not None and not pipe.set(look[key].clone()):
+            raise RuntimeError(f'the {key} of the layer does not fit its source')
+    return pipe
+
+
+def render_drawing(pipe: Any, window: SegmentationWindow, is_canceled: Any) -> QImage:
+    """The window drawn by ``pipe`` (:func:`open_drawing`) over black, as :func:`render_window` draws a layer.
+
+    The read of a service waits in its provider, which runs an event loop: the cancel reaches it
+    through the feedback.
+    """
+    from qgis.core import QgsRasterBlockFeedback
+    from qgis.PyQt.QtGui import QPainter
+    feedback = QgsRasterBlockFeedback()
+    timer = QTimer()
+    timer.setInterval(100)
+    timer.timeout.connect(lambda: feedback.cancel() if is_canceled() else None)
+    timer.start()
+    try:
+        block = pipe.last().block(1, window.rectangle(), window.size, window.size, feedback)
+    finally:
+        timer.stop()
+    image = QImage(window.size, window.size, QImage.Format.Format_ARGB32_Premultiplied)
+    image.fill(QColor(0, 0, 0, 255))
+    if is_canceled():
+        return image
+    if block is None or block.isEmpty() or feedback.errors():
+        raise RuntimeError('the layer could not be drawn')
+    painter = QPainter(image)
+    painter.drawImage(0, 0, block.image())
+    painter.end()
+    return image
+
+
 def image_to_rgb(image: QImage) -> Any:
     """Copy of the RGB bytes of ``image`` as a height x width x 3 uint8 array."""
     import numpy as np
@@ -832,49 +905,40 @@ def image_to_rgb(image: QImage) -> Any:
 class SegmentationEmbedTask(QgsTask):
     """Render the window of a layer and encode it, off the main thread.
 
-    Built on the main thread with a detached ``layer.renderer().clone()``.
+    Built on the main thread with what draws the layer, cloned (:func:`raster_look`); the source is
+    read as a bare provider in the worker (:func:`open_drawing`), in the coordinates of ``window``.
 
     Args:
+        renderer: A detached ``layer.renderer().clone()``, used when ``look`` is not given.
+        crs: CRS of ``window`` (the layer's).
         callback: ``callback(task, success)`` on the main thread; ``task.embedding``
             holds the result and ``task.error`` the reason of a failure.
+        look: :func:`raster_look` of the layer: its renderer and the filters of its pipe.
     """
 
     def __init__(self, source: str, provider_key: str, renderer: Any, crs: Any, window: SegmentationWindow,
-                 model: Any, callback: Any, context: Any = None) -> None:
+                 model: Any, callback: Any, look: Optional[dict] = None) -> None:
         super().__init__(QCoreApplication.translate('SegmentationEmbedTask', 'FilterMate: preparing the segmentation'),
                          QgsTask.Flag.CanCancel)
         self.source, self.provider_key = source, provider_key
-        self.renderer = renderer
+        self.look = dict(look) if look is not None else {'renderer': renderer}
         self.window = window
         self.model = model
         self.callback = callback
         self.embedding = None
         self.error = ''
         self.model_damaged = False  # the files of the model were refused: downloading them again can repair them
-        self.settings = QgsMapSettings()
-        self.settings.setDestinationCrs(crs)
-        if context is not None:
-            self.settings.setTransformContext(context)
-        self.settings.setOutputSize(QSize(window.size, window.size))
-        self.settings.setExtent(window.rectangle())
-        self.settings.setBackgroundColor(QColor(0, 0, 0, 255))
-
-    def _render(self, layer: Any) -> QImage:
-        """The layer alone in the window. Worker thread only (it waits for the job)."""
-        return render_window(self.settings, layer, self.window, self.isCanceled)
 
     def run(self) -> bool:
-        layer = None
+        pipe = None
         try:
             if self.isCanceled():
                 return False
-            layer = QgsRasterLayer(self.source, 'FilterMate segmentation', self.provider_key)
-            if not layer.isValid():
+            pipe = open_drawing(self.source, self.provider_key, self.look)
+            self.look = None
+            if pipe is None:
                 raise RuntimeError('the layer could not be opened')
-            if self.renderer is not None:
-                layer.setRenderer(self.renderer)
-                self.renderer = None
-            image = self._render(layer)
+            image = render_drawing(pipe, self.window, self.isCanceled)
             if self.isCanceled():
                 return False
             self.embedding = self.model.embed(image_to_rgb(image))
@@ -886,8 +950,7 @@ class SegmentationEmbedTask(QgsTask):
             logger.warning(f"[FM5] segmentation window not encoded: {exc}", exc_info=True)
             return False
         finally:
-            self.settings.setLayers([])
-            layer = None
+            pipe = None  # noqa: F841 - its provider goes in the thread that made it
 
     def finished(self, result: bool) -> None:
         callback, self.callback = self.callback, None
@@ -911,12 +974,14 @@ class SimilarObjectsTask(QgsTask):
 
     def __init__(self, source: str, provider_key: str, renderer: Any, crs: Any, model: Any,
                  raster: Tuple[float, float, float, float], cell: float, points: List[Tuple[float, float]],
-                 reference_wkt: str, ratio: Tuple[float, float], shape: bool, callback: Any, context: Any = None,
+                 reference_wkt: str, ratio: Tuple[float, float], shape: bool, callback: Any,
                  existing: Optional[List[str]] = None, reference_features: Any = None,
-                 click_window: Optional[SegmentationWindow] = None, click_embedding: Any = None) -> None:
+                 click_window: Optional[SegmentationWindow] = None, click_embedding: Any = None,
+                 look: Optional[dict] = None) -> None:
         super().__init__(QCoreApplication.translate('SimilarObjectsTask', 'FilterMate: drawing the similar objects'),
                          QgsTask.Flag.CanCancel)
-        self.source, self.provider_key, self.renderer = source, provider_key, renderer
+        self.source, self.provider_key = source, provider_key
+        self.look = dict(look) if look is not None else {'renderer': renderer}  # as SegmentationEmbedTask
         self.model, self.raster, self.cell, self.points = model, raster, cell, list(points)
         self.reference_wkt, self.ratio, self.shape = reference_wkt, tuple(ratio), bool(shape)
         self.existing = list(existing or ())  # objects already in the panel: not drawn twice
@@ -932,25 +997,18 @@ class SimilarObjectsTask(QgsTask):
         self.encoded = 0
         self.error = ''
         self.model_damaged = False
-        self.settings = QgsMapSettings()
-        self.settings.setDestinationCrs(crs)
-        if context is not None:
-            self.settings.setTransformContext(context)
-        self.settings.setBackgroundColor(QColor(0, 0, 0, 255))
 
     def run(self) -> bool:
         from qgis.core import QgsGeometry, QgsPointXY
         from .geometry_tools import compactness
-        layer = None
+        pipe = None
         try:
             if self.isCanceled():
                 return False
-            layer = QgsRasterLayer(self.source, 'FilterMate segmentation', self.provider_key)
-            if not layer.isValid():
+            pipe = open_drawing(self.source, self.provider_key, self.look)
+            self.look = None
+            if pipe is None:
                 raise RuntimeError('the layer could not be opened')
-            if self.renderer is not None:
-                layer.setRenderer(self.renderer)
-                self.renderer = None
             reference = QgsGeometry.fromWkt(self.reference_wkt)
             reference_area, reference_shape = reference.area(), compactness(reference)
             kept: List[Any] = [reference] + [geometry for geometry in (QgsGeometry.fromWkt(wkt) for wkt in self.existing)
@@ -965,7 +1023,7 @@ class SimilarObjectsTask(QgsTask):
                 if on_click:
                     embedding = self.click_embedding
                 else:
-                    image = render_window(self.settings, layer, window, self.isCanceled)
+                    image = render_drawing(pipe, window, self.isCanceled)
                     if self.isCanceled():
                         return False
                     embedding = self.model.embed(image_to_rgb(image))
@@ -1000,8 +1058,7 @@ class SimilarObjectsTask(QgsTask):
             logger.warning(f"[FM5] similar objects not drawn: {exc}", exc_info=True)
             return False
         finally:
-            self.settings.setLayers([])
-            layer = None
+            pipe = None  # noqa: F841 - its provider goes in the thread that made it
 
     def _looks_alike(self, embedding: Any, mask: Any, features: Any = None) -> bool:
         """Its SAM features point like the clicked object's (``SIMILAR_APPEARANCE_MIN``); True when either is unknown.

@@ -182,3 +182,71 @@ class TestInstallModel:
         FakeDownloadTask.made[0].progress_slots[0](50.0)
         FakeDownloadTask.made[0].finish(True)
         assert controller._host.calls == before and not controller.downloading()
+
+
+class FakeRenderer:
+    def __init__(self, alpha):
+        self.alpha = alpha
+
+    def alphaBand(self):
+        return self.alpha
+
+
+class FakeRaster:
+    def __init__(self, layer_id, source, alpha=-1):
+        self._id, self._source, self._renderer = layer_id, source, FakeRenderer(alpha)
+
+    def id(self):
+        return self._id
+
+    def source(self):
+        return self._source
+
+    def providerType(self):
+        return 'gdal'
+
+    def extent(self):
+        return types.SimpleNamespace(width=lambda: 100.0, height=lambda: 50.0)
+
+    def width(self):
+        return 400
+
+    def height(self):
+        return 200
+
+    def renderer(self):
+        return self._renderer
+
+
+class TestOriginalSource:
+    """2026-11-12: a raster filtered by FilterMate was drawn from its original source with the renderer of the derived
+    one, whose alpha band (added by FilterMate) the original source has not: an invalid block, a black window."""
+
+    @pytest.fixture
+    def alphas(self, ctrl_module, monkeypatch):
+        alphas = {}
+        snapshots = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.snapshots")
+        snapshots.registry = lambda: types.SimpleNamespace(original_alpha_band=alphas.get)
+        monkeypatch.setitem(sys.modules, snapshots.__name__, snapshots)
+        materialization = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.raster_materialization")
+        materialization.raster_reads_remotely = lambda provider, source: False
+        monkeypatch.setitem(sys.modules, materialization.__name__, materialization)
+        return alphas
+
+    def source_of(self, controller, layer, base):
+        controller._host._raster_capability = lambda _layer: types.SimpleNamespace(has_raw_values=True)
+        controller._host._base_raster = lambda _layer: base
+        return controller._window_source(layer)
+
+    def test_an_unfiltered_raster_keeps_its_renderer(self, controller, alphas):
+        layer = FakeRaster('ortho', '/data/ortho.tif', alpha=4)
+        assert self.source_of(controller, layer, layer) == ('/data/ortho.tif', 'gdal', 0.25, None)
+
+    def test_the_band_the_layer_had_on_its_original_source(self, controller, alphas):
+        layer, base = FakeRaster('ortho', '/cache/ortho.clip.vrt', alpha=4), FakeRaster('ortho', '/data/ortho.tif')
+        alphas['ortho'] = -1  # an RGB orthophoto: no alpha band before FilterMate added one to the derived VRT
+        assert self.source_of(controller, layer, base) == ('/data/ortho.tif', 'gdal', 0.25, -1)
+
+    def test_unknown_the_band_qgis_gave_the_original(self, controller, alphas):
+        layer, base = FakeRaster('ortho', '/cache/ortho.clip.vrt', alpha=5), FakeRaster('ortho', '/data/rgba.tif', alpha=4)
+        assert self.source_of(controller, layer, base)[3] == 4

@@ -65,11 +65,11 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
             self.OUTPUT, self.tr("Objects drawn by SAM"), QgsProcessing.SourceType.TypeVectorPolygon))
 
     def prepareAlgorithm(self, parameters, context, feedback):
-        """What the background needs of the raster (its source, CRS and style) and the model.
+        """What the background needs of the raster (its source, CRS and how it is drawn) and the model.
 
         From the toolbox it runs on the main thread; in a model, on the thread of the model.
         """
-        from ...adapters.qgis.coverage_layers.segmentation import find_provider, model_state
+        from ...adapters.qgis.coverage_layers.segmentation import find_provider, model_state, raster_look
         layer = self.parameterAsRasterLayer(parameters, self.RASTER, context)
         if layer is None or not layer.isValid():
             raise QgsProcessingException(self.tr("The raster cannot be read"))
@@ -82,17 +82,14 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
         extent = layer.extent()
         cells = [side / count for side, count in ((extent.width(), layer.width()), (extent.height(), layer.height()))
                  if count > 0 and side > 0]
-        self._raster = dict(source=layer.source(), provider=layer.providerType(), crs=layer.crs(),
-                            renderer=layer.renderer().clone() if layer.renderer() is not None else None,
-                            looks=_looks_of(layer),
+        self._raster = dict(source=layer.source(), provider=layer.providerType(), crs=layer.crs(), look=raster_look(layer),
                             bounds=(extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()),
                             native=min(cells) if len(cells) == 2 else 0.0)
         self._model = model
         return True
 
     def processAlgorithm(self, parameters, context, feedback):
-        from qgis.core import QgsCoordinateTransform, QgsFeature, QgsFeatureSink, QgsGeometry, QgsMapSettings, QgsRectangle
-        from qgis.PyQt.QtGui import QColor
+        from qgis.core import QgsCoordinateTransform, QgsFeature, QgsFeatureSink, QgsGeometry, QgsRectangle
         from ...adapters.qgis.coverage_layers import segmentation
         raster, model = self._raster, self._model
         source = self.parameterAsSource(parameters, self.FEATURES, context)
@@ -133,13 +130,10 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
         if feedback.isCanceled():
             return {self.OUTPUT: sink_id}
         feedback.pushInfo(self.tr("{0} feature(s) on the raster, {1} window(s) to prepare").format(len(prompts), len(windows)))
-        layer = _private_raster(raster)
-        if layer is None:
+        # A provider of its own, not a layer: no statistics of the whole coverage, the CRS of the project layer.
+        pipe = segmentation.open_drawing(raster['source'], raster['provider'], raster['look'])
+        if pipe is None:
             raise QgsProcessingException(self.tr("The raster cannot be read"))
-        settings = QgsMapSettings()
-        settings.setDestinationCrs(raster['crs'])
-        settings.setTransformContext(context.transformContext())
-        settings.setBackgroundColor(QColor(0, 0, 0, 255))
         crs_wkt = raster['crs'].toWkt()
         drawn = [None] * len(prompts)
         begin, prepared, failed, error = time.time(), 0, 0, ''
@@ -148,7 +142,7 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
                 if feedback.isCanceled():
                     break
                 try:  # one window that cannot be drawn (a tile of a service) loses its objects, not the run
-                    image = segmentation.render_window(settings, layer, window, feedback.isCanceled)
+                    image = segmentation.render_drawing(pipe, window, feedback.isCanceled)
                     if feedback.isCanceled():
                         break
                     embedding = model.embed(segmentation.image_to_rgb(image))
@@ -164,8 +158,7 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
                 prepared += 1
                 feedback.setProgress(100.0 * prepared / len(windows))
         finally:
-            settings.setLayers([])
-            layer = None
+            pipe = None  # noqa: F841 - its provider goes in the thread that made it
         if failed and failed == prepared:
             raise QgsProcessingException(self.tr("No window could be prepared: {0}").format(error))
         written = refused = 0
@@ -288,40 +281,3 @@ def _metres_to_units(crs):
     except Exception:  # noqa: BLE001 - an unknown unit: metres
         return 1.0
     return factor if factor and factor > 0 else 1.0
-
-
-def _looks_of(layer):
-    """Brightness, contrast, saturation and grey of the layer: the renderer alone does not carry them."""
-    looks = {}
-    brightness, hue = layer.brightnessFilter(), layer.hueSaturationFilter()
-    if brightness is not None:
-        looks.update(brightness=brightness.brightness(), contrast=brightness.contrast())
-        if hasattr(brightness, 'gamma'):
-            looks['gamma'] = brightness.gamma()
-    if hue is not None:
-        looks.update(saturation=hue.saturation(), grayscale=hue.grayscaleMode())
-    return looks
-
-
-def _private_raster(raster):
-    """A layer of its own for the background, with the CRS, renderer and looks of the project layer; None when invalid."""
-    from qgis.core import QgsRasterLayer
-    options = QgsRasterLayer.LayerOptions()
-    options.skipCrsValidation = True  # the CRS is set below: no question asked off the main thread
-    layer = QgsRasterLayer(raster['source'], 'FilterMate segmentation', raster['provider'], options)
-    if not layer.isValid():
-        return None
-    layer.setCrs(raster['crs'])  # a CRS the user set in QGIS, not the one of the file
-    if raster['renderer'] is not None:
-        layer.setRenderer(raster['renderer'].clone())
-    looks = raster.get('looks') or {}
-    brightness, hue = layer.brightnessFilter(), layer.hueSaturationFilter()
-    if brightness is not None and 'brightness' in looks:
-        brightness.setBrightness(looks['brightness'])
-        brightness.setContrast(looks['contrast'])
-        if 'gamma' in looks and hasattr(brightness, 'setGamma'):
-            brightness.setGamma(looks['gamma'])
-    if hue is not None and 'saturation' in looks:
-        hue.setSaturation(looks['saturation'])
-        hue.setGrayscaleMode(looks['grayscale'])
-    return layer
