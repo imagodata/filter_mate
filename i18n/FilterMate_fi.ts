@@ -467,6 +467,16 @@ Ajetaanko?</translation>
         <translation>Ei otettu käyttöön.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Odota, että pyyntö päättyy, ja napsauta sitten Käytä uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Nämä asetukset ovat muuttuneet sen jälkeen, kun agentti ehdotti niitä: pyydä sitä uudelleen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Tason {} muokkaus (tallentamatta)</translation>

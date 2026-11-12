@@ -490,17 +490,21 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   question. Always allow (tab Tools) works above Advisor; Yes for this conversation is not offered: each change is shown.
   A call that would change nothing, or that the tool refuses, is not asked. A recipe never keeps a change of the
   settings.
-- In the chat, a change of the settings is asked in the thread: a card lists each setting before and after, with
-  Apply and Cancel; the request waits for the answer as for a dialog, and Stop, another project or unloading the
-  plugin answer no. Another application (MCP) and the question for several actions of a turn keep their dialog.
+- In the chat, a change of the settings that the level asks is proposed in the thread: a card lists every setting
+  before and after (and what a profile leaves out), with Apply and Cancel, and the tool answers `proposed` without
+  changing anything. Apply applies exactly what the card shows, as a step of the history of its own (Undo takes it
+  back), and is refused when one of those settings changed since; the next request tells the model what the user
+  chose. Another application (MCP) and the question for several actions of a turn keep their dialog; the plan shown
+  there is frozen, and a profile changed on disk since is refused.
 - Undo: the value "after" is what the agent applied (a value the user set meanwhile stays theirs); back to before a
   step of the turn restores the settings changed from it.
 - `show_settings_link` (chat only, read-only) puts a button in the thread that opens a tab of the settings of the
   agent or selects a setting in the configuration tree: the agent shows what it may not change.
 - Profiles (`core/agent/settings_profile.py`): `export_settings_profile` writes the settings changed from their
-  default, never those the agent may not change, to `profiles/` of the export folder (asked like a file);
-  `apply_settings_profile` applies one by name or by the path of a .json file, asked like `change_settings`, and lists
-  what it left out.
+  default, never those the agent may not change, to `profiles/` of the export folder (asked like a file; an existing
+  profile is replaced only with `replace`); `apply_settings_profile` applies one by its name from that folder only
+  (never a path the model gives: a share or a probe of the disk), 40 changes at most, each shown, and lists what it
+  left out.
 - `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
 - Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
   and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt

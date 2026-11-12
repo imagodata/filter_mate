@@ -18,13 +18,18 @@ FORMAT = "filtermate-settings-profile"
 VERSION = 1
 MAX_BYTES = 256 * 1024
 MAX_SETTINGS = 200
+# What one profile may change at once: every row is shown to the user before anything changes.
+MAX_CHANGES = 40
+MAX_PATH = 200
+MAX_LEFT_OUT = 20
 _NAME = re.compile(r"[A-Za-z0-9 _.-]{1,60}")
+_RESERVED = re.compile(r"(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?", re.I)  # device names on Windows
 
 
 def file_name(name: str) -> str:
     """The file of a profile named ``name``; ``ValueError`` for a name that is not a plain short name."""
     name = name.strip()
-    if not _NAME.fullmatch(name) or name.startswith("."):
+    if not _NAME.fullmatch(name) or name.startswith(".") or _RESERVED.fullmatch(name.replace(" ", "_")):
         raise ValueError("a profile name is 1 to 60 letters, digits, spaces, dots, dashes or underscores")
     return name.replace(" ", "_") + ".json"
 
@@ -49,7 +54,7 @@ def read(text: str) -> Tuple[str, Dict[str, Any]]:
         raise ValueError("not a profile of FilterMate (not JSON)") from None
     if not isinstance(data, dict) or data.get("format") != FORMAT:
         raise ValueError("not a profile of FilterMate")
-    if data.get("version") != VERSION:
+    if type(data.get("version")) is not int or data.get("version") != VERSION:
         raise ValueError(f"a profile of version {data.get('version')!r}: this FilterMate reads version {VERSION}")
     settings = data.get("settings")
     if not isinstance(settings, dict) or len(settings) > MAX_SETTINGS \
@@ -64,11 +69,21 @@ def changes(settings: Sequence[Setting], profile_settings: Dict[str, Any]) -> Tu
 
     A setting unknown here, one the agent may not change, or a value its setting refuses is left out with its
     reason; the others are applied together."""
-    rows: List[Dict[str, Any]] = []
+    by_path: Dict[str, Dict[str, Any]] = {}  # one row per setting: a key written twice keeps its last value
     left_out: List[str] = []
     for path, value in profile_settings.items():
+        if len(path) > MAX_PATH:
+            left_out.append("a setting name too long")
+            continue
         try:
-            rows.extend(plan(settings, [{"path": path, "value": value}]))
+            for row in plan(settings, [{"path": path, "value": value}]):
+                by_path.pop(row["path"], None)
+                by_path[row["path"]] = row
         except ValueError as exc:
-            left_out.append(str(exc).replace("Nothing changed. ", "", 1))
+            left_out.append(str(exc).replace("Nothing changed. ", "", 1)[:MAX_PATH])
+    rows = list(by_path.values())
+    if sum(1 for row in rows if row["before"] != row["after"]) > MAX_CHANGES:
+        raise ValueError(f"a profile changes {MAX_CHANGES} settings at most")
+    if len(left_out) > MAX_LEFT_OUT:
+        left_out = left_out[:MAX_LEFT_OUT] + [f"and {len(left_out) - MAX_LEFT_OUT} more"]
     return rows, left_out

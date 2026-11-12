@@ -467,6 +467,16 @@ Pentru ce: {}
         <translation>Neaplicat.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Așteptați finalizarea cererii, apoi faceți din nou clic pe Aplică.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Aceste setări s-au schimbat de când agentul le-a propus: cereți-i din nou.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Editarea {} (nesalvată)</translation>

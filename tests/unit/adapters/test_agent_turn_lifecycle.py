@@ -148,6 +148,8 @@ def test_back_to_a_step_restores_the_settings_changed_from_it(monkeypatch, check
     assert json.loads(both[0][3]) == {"APP.A": 1, "APP.B": 10}
     now["APP.B"] = 10  # already back: nothing to do
     assert json.loads(checkpoint_module.TurnCheckpoint._settings_back_to(effects, 0)[0][3]) == {"APP.A": 1}
+    now["APP.A"] = 5  # the user changed it since the turn: theirs, left as it is
+    assert checkpoint_module.TurnCheckpoint._settings_back_to(effects, 0) == ()
 
 
 def test_a_count_widget_does_not_count_a_web_service(monkeypatch, packages):

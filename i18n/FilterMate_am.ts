@@ -467,6 +467,16 @@ Run it?</source>
         <translation>አልተተገበረም።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>ጥያቄው እስኪያልቅ ድረስ ይጠብቁ፣ ከዚያ እንደገና ተግብርን ጠቅ ያድርጉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>ወኪሉ ካቀረባቸው በኋላ እነዚህ ቅንብሮች ተለውጠዋል፦ እንደገና ይጠይቁት።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>የ{} ማስተካከያ (አልተቀመጠም)</translation>

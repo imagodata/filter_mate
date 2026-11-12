@@ -250,8 +250,9 @@ SETTINGS_TOOLS = (
         name=CHANGE_SETTINGS, title="Change settings of FilterMate",
         description=("Change settings of FilterMate itself (from describe_settings), all or none: each value is "
                      "checked against the choices or bounds of its setting. The user sees each setting before and "
-                     "after and says yes first, except how the panel looks at the autonomous level. Undone with the "
-                     "turn. Only when the user asks to change how FilterMate looks or works; read the setting first "
+                     "after and says yes first (in the chat, a card in the thread: the answer is then proposed and "
+                     "the next request says what they chose), except how the panel looks at the autonomous level. "
+                     "Undone with the turn. Only when the user asks to change how FilterMate looks or works; read the setting first "
                      "and say what it changes. The settings of the agent (APP.OPTIONS.AGENT), a name and local paths "
                      "are refused: tell the user where they are. Returns changed (path, before, after, effect: now, "
                      "next use or after restarting QGIS) and unchanged (already set)."),
@@ -278,24 +279,26 @@ SETTINGS_TOOLS = (
     ToolSpec(
         name=EXPORT_SETTINGS_PROFILE, title="Save the settings of FilterMate as a profile",
         description=("Write the settings of FilterMate the user changed from their default as a profile, a small "
-                     "JSON file to share with a team (folder profiles of the export folder; the same name replaces "
-                     "it). Never the settings of the agent, a name, a path, a key or an account. The user confirms "
-                     "the file. Returns path, name and settings (how many)."),
-        input_schema={"type": "object", "properties": {"name": _PROFILE_NAME},
-                      "required": ["name"], "additionalProperties": False},
+                     "JSON file to share with a team, in the folder profiles of the export folder. Never the settings "
+                     "of the agent, a name, a path, a key or an account. Asked like a file (the autonomous level "
+                     "writes it alone). An existing profile is replaced only with replace true, once the user agreed. "
+                     "Returns file, name and settings (how many)."),
+        input_schema={"type": "object", "properties": {
+            "name": _PROFILE_NAME,
+            "replace": {"type": "boolean", "default": False,
+                        "description": "Replace a profile of that name; only once the user agreed"}},
+            "required": ["name"], "additionalProperties": False},
         destructive=True),
     ToolSpec(
         name=APPLY_SETTINGS_PROFILE, title="Apply a profile of settings",
-        description=("Apply a profile of settings of FilterMate: by its name in the folder profiles of the export "
-                     "folder, or by the path of a .json file the user gives. Each setting is checked as with "
-                     "change_settings, and the user sees each one before and after and says yes; what the profile "
-                     "may not set (the settings of the agent, a name, a path, an unknown setting, a value out of "
-                     "bounds) is left out and listed. Undone with the turn. Returns changed, unchanged and left_out."),
-        input_schema={"type": "object", "properties": {
-            "name": _PROFILE_NAME,
-            "path": {"type": "string", "minLength": 1, "maxLength": 1000,
-                     "description": "Path of a profile file (.json) the user gave, instead of name"}},
-            "additionalProperties": False}),
+        description=("Apply a profile of settings of FilterMate by its name, from the folder profiles of the export "
+                     "folder (a profile from a colleague is copied there first). Each setting is checked as with "
+                     "change_settings and the user sees each one before and after; 40 changes at most. What the "
+                     "profile may not set (the settings of the agent, a name, a path, an unknown setting, a value out "
+                     "of bounds) is left out and listed. Returns changed, unchanged and left_out, or proposed when "
+                     "the user decides in the thread."),
+        input_schema={"type": "object", "properties": {"name": _PROFILE_NAME},
+                      "required": ["name"], "additionalProperties": False}),
 )
 
 LOAD_SKILL = "load_skill"

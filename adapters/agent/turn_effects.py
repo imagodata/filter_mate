@@ -290,8 +290,8 @@ class EffectsRecorder:
         self._edits: Dict[str, int] = {}
         self._layouts: Optional[Set[str]] = None
         self._crs: Optional[str] = None
-        self._settings: Dict[str, Any] = {}
-        self._settings_step: Dict[str, int] = {}
+        # (call of the turn, path, value before that call), in order: a setting changed twice has two records.
+        self._settings_calls: List[Tuple[int, str, Any]] = []
 
     def before_call(self, call: Any, step: int = 0) -> None:
         project = QgsProject.instance()
@@ -313,10 +313,9 @@ class EffectsRecorder:
                     self._selection[layer.id()] = selected
             elif name in SETTINGS_TOOLS:
                 from .plugin_settings import current_values
-                paths = [path for path in _setting_paths(arguments) if path not in self._settings]
-                self._settings.update(current_values(paths))
-                for path in paths:
-                    self._settings_step.setdefault(path, step)
+                paths = _setting_paths(arguments)
+                values = current_values(paths)
+                self._settings_calls.extend((step, path, values[path]) for path in paths if path in values)
             elif name in CRS_TOOLS:
                 if self._crs is None:
                     from ..public_api.project_control import crs_definition
@@ -409,17 +408,26 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
-        if self._settings:
+        from .plugin_settings import take_applied
+        applied = take_applied()  # what the agent set: a value the user put meanwhile stays theirs at undo
+        if self._settings_calls:
             import json
-            from .plugin_settings import take_applied
-            applied = take_applied()  # what the agent set: a value the user put meanwhile stays theirs at undo
-            changed = sorted(path for path, value in self._settings.items() if path in applied and applied[path] != value)
-            by_step: Dict[int, List[str]] = {}
-            for path in changed:
-                by_step.setdefault(self._settings_step.get(path, 0), []).append(path)
-            for step, paths in sorted(by_step.items()):
-                effects.append(("settings", "", json.dumps({path: self._settings[path] for path in paths}),
-                                json.dumps({path: applied[path] for path in paths}), step))
+            # Each call of the turn from the value before it to the value before the next call of the same setting
+            # (the last one: what the agent applied): undo walks them back, "back to a step" stops in between.
+            by_path: Dict[str, List[Tuple[int, Any]]] = {}
+            for step, path, before in self._settings_calls:
+                by_path.setdefault(path, []).append((step, before))
+            by_step: Dict[int, Tuple[Dict[str, Any], Dict[str, Any]]] = {}
+            for path, calls in by_path.items():
+                if path not in applied:
+                    continue
+                for index, (step, before) in enumerate(calls):
+                    after = calls[index + 1][1] if index + 1 < len(calls) else applied[path]
+                    if before != after:
+                        befores, afters = by_step.setdefault(step, ({}, {}))
+                        befores[path], afters[path] = before, after
+            for step, (befores, afters) in sorted(by_step.items()):
+                effects.append(("settings", "", json.dumps(befores), json.dumps(afters), step))
         if self._crs is not None:
             from ..public_api.project_control import crs_definition
             after_crs = crs_definition(project.crs())
@@ -650,4 +658,16 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool,
         except RuntimeError:
             logger.debug("Agent undo: %s of %s not applied", kind, layer_id, exc_info=True)
             left.append(layer_id)
-    return done, left
+    label = _settings_label()  # one settings effect per step: their label once
+    return _once(done, label), _once(left, label)
+
+
+def _once(names: List[str], label: str) -> List[str]:
+    kept, seen = [], False
+    for name in names:
+        if name == label:
+            if seen:
+                continue
+            seen = True
+        kept.append(name)
+    return kept

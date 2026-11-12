@@ -467,6 +467,16 @@ Ishga tushirilsinmi?</translation>
         <translation>Qo'llanmadi.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>So'rov tugashini kuting, so'ng Qo'llash tugmasini yana bosing.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Agent bu sozlamalarni taklif qilganidan beri ular o'zgardi: undan qaytadan so'rang.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} tahriri (saqlanmagan)</translation>

@@ -9,7 +9,7 @@ from dataclasses import asdict
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer
 from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
@@ -64,7 +64,7 @@ from ...filtermate_api.accessor import FilterRejected
 from ...filtermate_api.config import _default_export_root
 from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
-from .agent_mcp_bridge import AgentMcpBridge
+from .agent_mcp_bridge import NO_UNDO_POINT, AgentMcpBridge
 from ..widgets.agent_panel import (
     ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
     ask_with_conversation, level_short, preset_label,
@@ -156,9 +156,10 @@ class AgentChatController(QObject):
         self._abandoned = False
         self._checkpoint = TurnCheckpoint()
         self._links = []  # what the buttons of show_settings_link do, kept alive with the thread
-        # A change of the settings is asked in the thread (SettingsCard) unless a test answers the questions.
+        # A change of the settings is proposed in the thread (SettingsCard) unless a test answers the questions.
         self._card_questions = ask_user is None
-        self._settings_card = None  # the card waiting for an answer, if any
+        self._settings_cards = []  # the cards of the thread, kept alive with it
+        self._settings_outcomes = []  # what the user chose on a card since the last request, told to the model
         manager = getattr(parent_widget, '_config_model_manager', None)
         self._settings_applier = manager.apply_settings if manager is not None else None
         plugin_settings.set_applier(self._settings_applier)
@@ -245,8 +246,7 @@ class AgentChatController(QObject):
 
         Each step runs even when one before failed.
         """
-        for step in (self._decline_settings_card, self.stop, abort_active, self._mcp.close, self._unfollow_layers,
-                     self._disconnect_project,
+        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project,
                      lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
@@ -396,7 +396,6 @@ class AgentChatController(QObject):
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
-        self._decline_settings_card()
         abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
         # The turn under way, ended below, must not be recorded against the closed project, nor the change another
         # application is making (its layers compared with the next project's, an Undo would remove them all).
@@ -1238,6 +1237,7 @@ class AgentChatController(QObject):
         self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         self._seen = None  # another conversation has seen nothing yet
         self.panel.clear_thread()
+        self._links, self._settings_cards, self._settings_outcomes = [], [], []
 
     def new_conversation(self) -> None:
         """The user starts again: what this project's conversation kept is forgotten."""
@@ -1355,8 +1355,13 @@ class AgentChatController(QObject):
             protected = []
         guarded = ("Layers the user protected from the agent (read them, use them as a source, never change them): "
                    + json.dumps(protected, ensure_ascii=False) if protected else "")
-        return "\n\n".join(part for part in (summary, notes, listed, recipes, guarded, level_note(self._policy.level))
-                           if part)
+        decided = ""
+        if self._settings_outcomes:  # the cards of change_settings answered since the last request
+            decided = ("Settings changes you proposed, as the user decided them in the thread: "
+                       + "; ".join(self._settings_outcomes))
+            self._settings_outcomes = []
+        return "\n\n".join(part for part in (summary, notes, listed, recipes, guarded, decided,
+                                              level_note(self._policy.level)) if part)
 
     def protection_refusal(self, call: ToolCallPart) -> str:
         """What a call that would change a protected layer, or of a tool turned off, is answered, for the MCP server
@@ -1376,7 +1381,6 @@ class AgentChatController(QObject):
         self._seen = None if read is None else project_state(*read)
 
     def _on_stop(self) -> None:
-        self._decline_settings_card()
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
         if self._replaying:  # a recipe stops before its next step
             self._replay_stop = True
@@ -1503,8 +1507,7 @@ class AgentChatController(QObject):
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
             "export_settings_profile": lambda: _tr("Profile of settings saved: {}").format(args.get("name", "")),
-            "apply_settings_profile": lambda: _tr("Profile of settings applied: {}").format(
-                args.get("name") or str(args.get("path", ""))[-60:]),
+            "apply_settings_profile": lambda: _tr("Profile of settings applied: {}").format(args.get("name", "")),
             "get_setting": lambda: _tr("Reading the setting {}").format(args.get("path", "")),
             "change_settings": lambda: _tr("Settings of FilterMate: {}").format(", ".join(
                 str(change.get("path", "")).rsplit(".", 1)[-1] for change in (args.get("changes") or [])
@@ -1637,7 +1640,7 @@ class AgentChatController(QObject):
             detail = one_line(self._run_detail(call), 160)
             lines.append(f"{number}. {one_line(self._describe(call), 160)}" + (f" — {detail}" if detail else ""))
             if call.name in ("change_settings", "apply_settings_profile"):  # each setting before and after
-                lines.extend(f"    {line}" for line in self._settings_lines(call)[0][:MAX_LISTED])
+                lines.extend(f"    {line}" for line in self._settings_lines(call)[0])
         if len(calls) > MAX_LISTED:
             lines.append(f"(+{len(calls) - MAX_LISTED})")
         text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
@@ -1649,9 +1652,12 @@ class AgentChatController(QObject):
         rest of the conversation."""
         title = _tr("FilterMate agent")
         if call.name in ("change_settings", "apply_settings_profile") and self._card_questions:
-            if not self._settings_would_change(call):
-                return True  # nothing to show: every value is already set, or the tool refuses the call and says why
-            return self._ask_settings_card(call)
+            rows, left_out, problem = self._settings_plan(call)
+            plugin_settings.freeze(call.name, call.arguments, rows)
+            if not problem and any(row["before"] != row["after"] for row in rows):
+                self._propose_settings(call, rows, left_out)
+                plugin_settings.defer(call.name, call.arguments)  # the tool then says it is proposed
+            return True  # nothing changes now: the card applies, or nothing to show (already set, or refused)
         spec = self._tools.get(call.name)
         if spec is None or not self._policy.grantable(spec):  # code is read in its own dialog, at every run
             return bool(self._confirm(call, title))
@@ -1662,8 +1668,11 @@ class AgentChatController(QObject):
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
-        if call.name in ("change_settings", "apply_settings_profile") and not self._settings_would_change(call):
-            return True  # nothing to show: every value is already set, or the tool refuses the call and says why
+        if call.name in ("change_settings", "apply_settings_profile"):
+            rows, _left_out, problem = self._settings_plan(call)
+            plugin_settings.freeze(call.name, call.arguments, rows)
+            if problem or not any(row["before"] != row["after"] for row in rows):
+                return True  # nothing to show: every value is already set, or the tool refuses the call and says why
         if call.name == RUN_PYTHON:
             text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
                        "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "
@@ -1711,67 +1720,88 @@ class AgentChatController(QObject):
                 one_line(self._describe(call), 200), detail)
         return text
 
-    def _ask_settings_card(self, call: ToolCallPart) -> bool:
-        """The change asked in the thread: each setting before and after, Apply or Cancel. The request waits for the
-        answer as it waits for a dialog; Stop, another project or unloading the plugin answer no."""
-        lines, problem = self._settings_lines(call)
-        reason = call.arguments.get("reason") or call.arguments.get("name") or call.arguments.get("path") or ""
+    def _propose_settings(self, call: ToolCallPart, rows, left_out) -> None:
+        """A card in the thread: each setting before and after, Apply or Cancel. Nothing changes until Apply."""
+        reason = call.arguments.get("reason") or call.arguments.get("name") or ""
         texts = {"heading": _tr("The agent wants to change these settings of FilterMate"),
                  "note": _tr("They stay for every project; undoing the turn puts them back."),
                  "apply": _tr("Apply"), "cancel": _tr("Cancel"),
                  "accepted": _tr("Applied at your request."), "declined": _tr("Not applied.")}
-        card = self.panel.add_settings_card(texts, lines[:MAX_LISTED] or [one_line(problem, 300)],
-                                            one_line(str(reason), 300))
-        answer = {"value": False}
-        loop = QEventLoop()
+        changes = [dict(row) for row in rows if row["before"] != row["after"]]
+        card = self.panel.add_settings_card(texts, self._lines_of(changes, left_out), one_line(str(reason), 300))
+        card.apply_requested.connect(lambda: self._apply_settings_card(card, changes, str(reason)))
+        card.cancel_requested.connect(lambda: self._close_settings_card(card, changes, False))
+        self._settings_cards.append(card)
 
-        def answered(accepted: bool) -> None:
-            answer["value"] = bool(accepted)
-            loop.quit()
-        card.answered.connect(answered)
-        self._settings_card = card
+    def _close_settings_card(self, card, changes, applied: bool) -> None:
+        card.finish(applied)
+        self._settings_outcomes.append(("applied: " if applied else "declined: ")
+                                       + ", ".join(f"{row['path']} = {json.dumps(row['after'])}" for row in changes))
+
+    def _apply_settings_card(self, card, changes, reason: str) -> None:
+        """Apply clicked: the change as shown, as a step of the history of its own (undoable), outside any request."""
+        if self.chat_busy() or self._mcp.busy:
+            self._say(_tr("Wait for the end of the request, then click Apply again."), error=True)
+            return
+        now = plugin_settings.current_values([row["path"] for row in changes])
+        if any(now.get(row["path"]) != row["before"] for row in changes):
+            self._say(_tr("These settings changed since the agent proposed them: ask it again."), error=True)
+            self._close_settings_card(card, changes, False)
+            return
+        import uuid
+        call = ToolCallPart(uuid.uuid4().hex, "change_settings", {
+            "changes": [{"path": row["path"], "value": row["after"]} for row in changes], "reason": reason})
+        checkpoint = TurnCheckpoint()
+        checkpoint.describe = self.describe_call
+        checkpoint.label = self.describe_call(call)
+        self.panel.begin_step()
         try:
-            if not card.done:
-                loop.exec()
-        finally:
-            self._settings_card = None
-        return answer["value"]
-
-    def _decline_settings_card(self) -> None:
-        card, self._settings_card = self._settings_card, None
-        if card is not None:
-            try:
-                card.answer(False)
-            except RuntimeError:  # deleted with the thread
-                pass
-
-    @staticmethod
-    def _settings_would_change(call: ToolCallPart) -> bool:
-        try:
-            return any(row["before"] != row["after"]
-                       for row in plugin_settings.planned_any(call.name, call.arguments))
+            checkpoint.begin(call)
         except Exception:
-            return False
+            logger.exception("Agent: undo point of a card failed")
+            self._say(NO_UNDO_POINT, error=True)
+            return
+        try:
+            answer, failed = json.dumps(plugin_settings.apply_planned(changes), ensure_ascii=False), False
+        except ToolFailure as exc:
+            answer, failed = str(exc), True
+        finally:
+            checkpoint.commit()
+        self._log_action(call, ToolResultPart(call.call_id, answer, is_error=failed), self._describe(call))
+        self._close_settings_card(card, changes, not failed)
+        self._save_transcript()
+        self.history_changed()
+
+    def _settings_plan(self, call: ToolCallPart):
+        """(rows, left out, problem) of a settings call, read once for what the user sees."""
+        try:
+            if call.name == "apply_settings_profile":
+                rows, left_out, _name = plugin_settings.planned_profile(call.arguments)
+                return rows, left_out, ""
+            return plugin_settings.planned(call.arguments), [], ""
+        except Exception as exc:  # the tool will answer the model why
+            return [], [], str(exc)
 
     @staticmethod
-    def _settings_lines(call: ToolCallPart):
-        """Each setting the call changes, before and after, one line each; the problem when the call is refused."""
-        try:
-            rows = plugin_settings.planned_any(call.name, call.arguments)
-        except Exception as exc:  # the tool will answer the model why; the user sees what was asked
-            return [], str(exc)
+    def _lines_of(rows, left_out=()):
         effects = {"now": _tr("applied at once"), "next use": _tr("used from the next filter or export"),
                    "after restarting QGIS": _tr("after restarting QGIS")}
-        return [f"{one_line(row['where'], 120)}: {json.dumps(row['before'], ensure_ascii=False)} → "
-                f"{json.dumps(row['after'], ensure_ascii=False)} ({effects.get(row['effect'], row['effect'])})"
-                for row in rows if row["before"] != row["after"]], ""
+        lines = [f"{one_line(row['where'], 120)}: {json.dumps(row['before'], ensure_ascii=False)} → "
+                 f"{json.dumps(row['after'], ensure_ascii=False)} ({effects.get(row['effect'], row['effect'])})"
+                 for row in rows if row["before"] != row["after"]]
+        return lines + [f"✗ {one_line(reason, 160)}" for reason in left_out]
 
-    @classmethod
-    def _settings_text(cls, call: ToolCallPart) -> str:
+    def _settings_lines(self, call: ToolCallPart):
+        """Each setting the call changes, before and after, every one of them, and what a profile leaves out; the
+        problem when the call is refused."""
+        rows, left_out, problem = self._settings_plan(call)
+        return self._lines_of(rows, left_out), problem
+
+    def _settings_text(self, call: ToolCallPart) -> str:
         """Each setting before and after, as the user reads them before saying yes."""
-        lines, problem = cls._settings_lines(call)
-        listed = "\n".join(lines[:MAX_LISTED]) or one_line(problem, 300)
-        reason = call.arguments.get("reason") or call.arguments.get("name") or call.arguments.get("path") or ""
+        lines, problem = self._settings_lines(call)
+        listed = "\n".join(lines) or one_line(problem, 300)
+        reason = call.arguments.get("reason") or call.arguments.get("name") or ""
         return _tr("The agent wants to change these settings of FilterMate (they stay for every project; undoing "
                    "the turn puts them back):\n{}\n\nWhy: {}\n\nDo you agree?").format(
             listed, one_line(str(reason), 300))

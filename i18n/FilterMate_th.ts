@@ -467,6 +467,16 @@ Run it?</source>
         <translation>ไม่ได้นำไปใช้</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>โปรดรอให้คำขอเสร็จสิ้น แล้วคลิก นำไปใช้ อีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>การตั้งค่าเหล่านี้เปลี่ยนไปตั้งแต่เอเจนต์เสนอ: โปรดขอให้เอเจนต์เสนออีกครั้ง</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>การแก้ไข {} (ยังไม่บันทึก)</translation>

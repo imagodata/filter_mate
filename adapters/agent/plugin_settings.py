@@ -38,6 +38,49 @@ def take_applied() -> Dict[str, Any]:
     return taken
 
 
+# Calls the chat showed to the user as a card instead of running them (the controller marks them before they run):
+# their handler only says what is proposed. Keyed by the tool and its arguments.
+_deferred: List[str] = []
+
+
+def _key(name: str, arguments: Dict[str, Any]) -> str:
+    import json
+    return name + json.dumps(arguments, sort_keys=True, ensure_ascii=False, default=str)
+
+
+def defer(name: str, arguments: Dict[str, Any]) -> None:
+    """The next call of ``name`` with ``arguments`` proposes instead of changing: the user decides in the thread."""
+    _deferred.append(_key(name, arguments))
+
+
+def _take_deferred(name: str, arguments: Dict[str, Any]) -> bool:
+    key = _key(name, arguments)
+    if key in _deferred:
+        _deferred.remove(key)
+        return True
+    return False
+
+
+# The plan the user saw (a card or a dialog), by call: a profile changed on disk between the question and the run
+# is refused rather than applied unseen.
+_frozen: Dict[str, List[Dict[str, Any]]] = {}
+
+
+def freeze(name: str, arguments: Dict[str, Any], rows: List[Dict[str, Any]]) -> None:
+    _frozen[_key(name, arguments)] = [dict(row) for row in rows]
+
+
+def _check_frozen(name: str, arguments: Dict[str, Any], rows: List[Dict[str, Any]]) -> None:
+    shown = _frozen.pop(_key(name, arguments), None)
+    if shown is not None and [(row["path"], row["after"]) for row in shown] != [(row["path"], row["after"]) for row in rows]:
+        raise ToolFailure("Nothing changed: the profile changed since the user saw it. Tell them; call again to show "
+                          "it anew.")
+
+
+PROPOSED_NOTE = ("Shown to the user in the thread, with Apply and Cancel: nothing changed yet. Do not call it again; "
+                 "the next request says what they chose.")
+
+
 def set_applier(applier: Optional[Applier]) -> None:
     """The panel that applies a change (its ConfigModelManager.apply_settings)."""
     global _applier
@@ -114,25 +157,22 @@ def _profiles_folder():
 
 
 def _profile_file(arguments: Dict[str, Any]):
-    """The file a call of apply_settings_profile names; ``ValueError`` when it names none or a wrong one."""
-    from pathlib import Path
-    if arguments.get("path"):
-        path = Path(str(arguments["path"])).expanduser()
-        if path.suffix.lower() != ".json":
-            raise ValueError("a profile is a .json file")
-        return path
-    if arguments.get("name"):
-        return _profiles_folder() / settings_profile.file_name(str(arguments["name"]))
-    raise ValueError("give the name of a profile or the path of its file")
+    """The file of the profile a call names, in profiles/ of the export folder only: a team copies a profile there.
+    Never a path the model gives: it could point at another machine (a share) or probe which files exist."""
+    return _profiles_folder() / settings_profile.file_name(str(arguments.get("name", "")))
 
 
 def planned_profile(arguments: Dict[str, Any]):
     """(rows of plan, left out, name) of the profile a call names; ``ValueError`` when it cannot be read."""
+    import stat
     path = _profile_file(arguments)
     try:
-        if path.stat().st_size > settings_profile.MAX_BYTES:
-            raise ValueError(f"a profile is {settings_profile.MAX_BYTES // 1024} KB at most")
-        text = path.read_text(encoding="utf-8")
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode):  # a link, a pipe, a device: never read
+            raise ValueError(f"no profile {path.name}")
+        with open(path, "rb") as stream:
+            data = stream.read(settings_profile.MAX_BYTES + 1)
+        text = data.decode("utf-8")
     except FileNotFoundError:
         raise ValueError(f"no profile {path.name}") from None
     except (OSError, UnicodeDecodeError) as exc:
@@ -142,26 +182,28 @@ def planned_profile(arguments: Dict[str, Any]):
     return rows, left_out, name or path.stem
 
 
-def planned_any(name: str, arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """The rows a settings tool would change: change_settings or apply_settings_profile."""
-    if name == APPLY_SETTINGS_PROFILE:
-        return planned_profile(arguments)[0]
-    return planned(arguments)
-
-
 def _export_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
     try:
         file = settings_profile.file_name(str(arguments.get("name", "")))
         folder = _profiles_folder()
     except (ValueError, OSError) as exc:
         raise ToolFailure(str(exc)) from None
+    target = folder / file
+    if target.exists() and not arguments.get("replace"):
+        raise ToolFailure(f"A profile {file} exists already: ask the user, then call again with replace true to "
+                          f"replace it, or choose another name.")
     profile = settings_profile.build(settings_rows(), str(arguments["name"]))
     try:
         folder.mkdir(mode=0o700, parents=True, exist_ok=True)
-        (folder / file).write_text(settings_profile.dumps(profile), encoding="utf-8")
+        target.write_text(settings_profile.dumps(profile), encoding="utf-8")
     except OSError as exc:
         raise ToolFailure(f"The profile could not be written ({type(exc).__name__}).") from None
-    return {"path": str(folder / file), "name": profile["name"], "settings": len(profile["settings"])}
+    return {"file": f"{PROFILES_FOLDER}/{file}", "folder": "the export folder", "name": profile["name"],
+            "settings": len(profile["settings"])}
+
+
+def _row_out(row: Dict[str, Any]) -> Dict[str, Any]:
+    return {key: row[key] for key in ("path", "before", "after", "effect")}
 
 
 def _apply_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
@@ -169,7 +211,12 @@ def _apply_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
         rows, left_out, name = planned_profile(arguments)
     except ValueError as exc:
         raise ToolFailure(str(exc)) from None
-    answer = _apply_rows(rows)
+    _check_frozen(APPLY_SETTINGS_PROFILE, arguments, rows)
+    if _take_deferred(APPLY_SETTINGS_PROFILE, arguments):
+        answer: Dict[str, Any] = {"proposed": [_row_out(row) for row in rows if row["before"] != row["after"]],
+                                  "note": PROPOSED_NOTE}
+    else:
+        answer = apply_planned(rows)
     answer["profile"] = name
     if left_out:
         answer["left_out"] = left_out
@@ -181,10 +228,13 @@ def _change(arguments: Dict[str, Any]) -> Dict[str, Any]:
         rows = planned(arguments)
     except ValueError as exc:
         raise ToolFailure(str(exc)) from None
-    return _apply_rows(rows)
+    if _take_deferred(CHANGE_SETTINGS, arguments):
+        return {"proposed": [_row_out(row) for row in rows if row["before"] != row["after"]], "note": PROPOSED_NOTE}
+    return apply_planned(rows)
 
 
-def _apply_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+def apply_planned(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Apply rows of ``plan`` (checked already): the answer of change_settings; ToolFailure when nothing changed."""
     changes = [row for row in rows if row["before"] != row["after"]]
     unchanged = [row["path"] for row in rows if row["before"] == row["after"]]
     if not changes:
@@ -193,8 +243,9 @@ def _apply_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         apply_values({change["path"]: change["after"] for change in changes})
     except RuntimeError as exc:  # apply_settings put the configuration back
         raise ToolFailure(f"Nothing changed: {exc}.") from None
-    _applied.update({change["path"]: change["after"] for change in changes})
     now = leaf_values(current_config(), [change["path"] for change in changes])
+    # What the agent really set, for the undo of the turn (a path the panel did not take is not recorded).
+    _applied.update({change["path"]: change["after"] for change in changes if now.get(change["path"]) == change["after"]})
     answer: Dict[str, Any] = {
         "changed": [{key: change[key] for key in ("path", "before", "after", "effect")} for change in changes
                     if now.get(change["path"]) == change["after"]],

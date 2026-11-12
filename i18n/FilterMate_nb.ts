@@ -467,6 +467,16 @@ Kjøre den?</translation>
         <translation>Ikke brukt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Vent til forespørselen er ferdig, og klikk deretter på Bruk igjen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Disse innstillingene er endret siden agenten foreslo dem: spør den på nytt.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Redigering av {} (ikke lagret)</translation>

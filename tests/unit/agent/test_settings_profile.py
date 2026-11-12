@@ -62,7 +62,7 @@ def test_applying_a_profile_leaves_out_what_it_may_not_set(default):
 
 def test_file_names_are_plain():
     assert profile.file_name("Equipe SIG") == "Equipe_SIG.json"
-    for wrong in ("", "../x", ".hidden", "a/b", "x" * 61):
+    for wrong in ("", "../x", ".hidden", "a/b", "x" * 61, "NUL", "con.backup", "COM1"):
         with pytest.raises(ValueError):
             profile.file_name(wrong)
 
@@ -76,3 +76,31 @@ def test_profile_tools_permissions_and_recipes():
     assert PermissionPolicy(STANDARD, rules={APPLY_SETTINGS_PROFILE: RULE_ALLOW}).verdict(apply, by_name) == RUN
     assert export.destructive and PermissionPolicy(STANDARD).verdict(export, by_name) == ASK
     assert {APPLY_SETTINGS_PROFILE, EXPORT_SETTINGS_PROFILE} <= NOT_KEPT
+
+
+def test_a_profile_is_bounded_and_one_row_per_setting(default):
+    rows = read_settings(None, default)
+    planned, left_out = profile.changes(rows, {"APP.OPTIONS.QUERY_CACHE.max_size": 300,
+                                               "app.options.query_cache.max_size": 400,  # the same setting
+                                               "APP." + "X" * 300: 1})
+    assert [(row["path"], row["after"]) for row in planned] == [("APP.OPTIONS.QUERY_CACHE.max_size", 400)]
+    assert left_out == ["a setting name too long"]
+    many = {}
+    for row in rows:
+        if row.path.startswith("APP.OPTIONS.AGENT") or row.choices is not None and not isinstance(row.default, bool):
+            continue
+        if isinstance(row.default, bool):
+            many[row.path] = not row.default
+        elif isinstance(row.default, (int, float)) and (row.maximum is None or row.default + 1 <= row.maximum):
+            many[row.path] = row.default + 1
+    assert len(many) > profile.MAX_CHANGES
+    with pytest.raises(ValueError, match="at most"):
+        profile.changes(rows, many)
+    with pytest.raises(ValueError):
+        profile.read(json.dumps({"format": profile.FORMAT, "version": True, "settings": {}}))
+
+
+def test_the_autonomous_level_never_runs_a_profile_alone_even_with_changes_in_its_arguments():
+    apply = next(tool for tool in SETTINGS_TOOLS if tool.name == APPLY_SETTINGS_PROFILE)
+    look = {"name": "x", "changes": [{"path": "APP.DOCKWIDGET.UI_PROFILE", "value": "compact"}]}
+    assert PermissionPolicy(AUTONOMOUS).verdict(apply, look) == ASK

@@ -120,6 +120,11 @@ class TurnCheckpoint:
         self._before = {}
         self._steps = []
         self._effects = EffectsRecorder()
+        try:
+            from .plugin_settings import take_applied
+            take_applied()  # what the agent applied in that turn is not an effect of the next one
+        except Exception:
+            logger.debug("Agent undo: applied settings not forgotten", exc_info=True)
 
     def commit(self) -> Sequence[str]:
         """Record the turn when it changed something; names of the layers it changed."""
@@ -259,14 +264,20 @@ class TurnCheckpoint:
         import json
         from .plugin_settings import current_values
         wanted: Dict[str, Any] = {}
+        last: Dict[str, Any] = {}  # what the turn left each setting at
         for effect in effects:
-            if effect[0] == "settings" and len(effect) > 4 and effect[4] > step:
+            if effect[0] != "settings" or len(effect) <= 4:
+                continue
+            last.update(json.loads(effect[3]))
+            if effect[4] > step:
                 for path, value in json.loads(effect[2]).items():
                     wanted.setdefault(path, value)
         if not wanted:
             return ()
         now = current_values(wanted)
-        moved = {path: value for path, value in wanted.items() if now.get(path) != value}
+        # A setting the user changed since the turn is theirs: left as it is.
+        moved = {path: value for path, value in wanted.items()
+                 if now.get(path) != value and now.get(path) == last.get(path)}
         if not moved:
             return ()
         return (("settings", "", json.dumps({path: now.get(path) for path in moved}), json.dumps(moved), 0),)

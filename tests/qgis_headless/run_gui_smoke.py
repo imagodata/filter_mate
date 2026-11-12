@@ -576,33 +576,35 @@ def settings_call(changes, name="change_settings"):
                                  else changes)
 
 
-def answer_card_later(button_name, delay=300):
-    """Click a button of the settings card once it is in the thread (the request waits in a local loop)."""
-    def click():
-        card = agent_chat()._settings_card
-        if card is None:
-            QTimer.singleShot(100, click)
-            return
-        getattr(card, button_name).click()
-    QTimer.singleShot(delay, click)
-
-
 def s_agent_settings_card_check():
-    """A change of the settings asked in the thread: Apply runs it, Cancel and Stop do not."""
-    chat = agent_chat()
-    call = settings_call([{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 333}])
-    answer_card_later('apply_button')
-    applied = chat.confirm(call)
-    answer_card_later('cancel_button')
-    cancelled = chat.confirm(call)
-    QTimer.singleShot(300, chat._on_stop)
-    stopped = chat.confirm(call)
-    same = chat.confirm(settings_call([{'path': 'APP.OPTIONS.QUERY_CACHE.max_size',
-                                        'value': config_value('APP.OPTIONS.QUERY_CACHE.max_size')}]))
-    text = chat.panel.thread.toPlainText()
-    check('settings card: Apply yes, Cancel no, Stop no, nothing to change asks nothing',
-          applied is True and cancelled is False and stopped is False and same is True and chat._settings_card is None
-          and text.count('APP') >= 0 and '333' in text, f"{applied} {cancelled} {stopped} {same}")
+    """A change of the settings proposed in the thread: nothing changes until Apply, which is a step of its own
+    (undone by Undo); Cancel changes nothing; a proposal whose settings changed since is refused."""
+    chat, handlers, path = agent_chat(), agent_settings().settings_handlers(), 'APP.OPTIONS.QUERY_CACHE.max_size'
+    start = config_value(path)
+
+    def propose(value):
+        call = settings_call([{'path': path, 'value': value}])
+        asked = chat.confirm(call)
+        answer = handlers['change_settings'](call.arguments)  # what the engine runs next: a proposal, no change
+        return asked, answer, chat._settings_cards[-1]
+    asked, answer, card = propose(333)
+    proposed_only = asked is True and 'proposed' in answer and config_value(path) == start
+    card.apply_button.click()
+    applied = card.done and config_value(path) == 333
+    chat._on_undo()
+    undone = config_value(path) == start
+    _asked, _answer, card = propose(444)
+    card.cancel_button.click()
+    cancelled = card.done and config_value(path) == start
+    _asked, _answer, card = propose(555)
+    handlers['change_settings']({'changes': [{'path': path, 'value': 222}], 'reason': 'smoke'})
+    card.apply_button.click()
+    stale = card.done and config_value(path) == 222
+    handlers['change_settings']({'changes': [{'path': path, 'value': start}], 'reason': 'smoke'})
+    check('settings card: proposed, applied as a step and undone, cancelled, stale refused',
+          proposed_only and applied and undone and cancelled and stale and len(chat._settings_outcomes) >= 3,
+          f"{proposed_only} {applied} {undone} {cancelled} {stale} {chat._settings_outcomes}")
+    chat._settings_outcomes = []
     return waits(0.5)
 
 
@@ -626,7 +628,7 @@ def s_agent_settings_profile_check():
     handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 444}],
                                  'reason': 'smoke'})
     saved = handlers['export_settings_profile']({'name': 'smoke team'})
-    with open(saved['path'], encoding='utf-8') as stream:
+    with open(agent_settings()._profiles_folder() / 'smoke_team.json', encoding='utf-8') as stream:
         content = json.load(stream)
     handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 100}],
                                  'reason': 'smoke'})
@@ -639,6 +641,7 @@ def s_agent_settings_profile_check():
           f"saved={saved} applied={applied}")
     handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 100}],
                                  'reason': 'smoke'})
+    agent_chat().new_conversation()  # the checks of the AGENT section that follow expect its welcome
     return waits(0.5)
 
 

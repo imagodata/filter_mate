@@ -467,6 +467,16 @@ Run it?</source>
         <translation>Не применено.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Дождитесь завершения запроса, затем снова нажмите «Применить».</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Эти настройки изменились с тех пор, как агент их предложил: попросите его снова.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Правка слоя {} (не сохранено)</translation>

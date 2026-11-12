@@ -295,7 +295,7 @@ class PermissionPolicy:
             return ASK
         if rule == RULE_ALLOW:
             return RUN
-        if self.level == AUTONOMOUS and _display_only(arguments):
+        if self.level == AUTONOMOUS and spec.name == "change_settings" and _display_only(arguments):
             return RUN
         return ASK
 

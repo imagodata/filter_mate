@@ -467,6 +467,16 @@ Run it?</source>
         <translation>적용되지 않았습니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>요청이 끝날 때까지 기다린 후 적용을 다시 클릭하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>에이전트가 제안한 이후 이 설정이 변경되었습니다. 다시 요청하세요.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} 편집 (저장 안 됨)</translation>

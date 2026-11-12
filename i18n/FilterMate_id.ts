@@ -467,6 +467,16 @@ Jalankan?</translation>
         <translation>Tidak diterapkan.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Tunggu hingga permintaan selesai, lalu klik Terapkan lagi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Pengaturan ini telah berubah sejak agen mengusulkannya: minta lagi kepadanya.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Suntingan {} (belum disimpan)</translation>

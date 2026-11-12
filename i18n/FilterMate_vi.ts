@@ -467,6 +467,16 @@ Chạy không?</translation>
         <translation>Chưa áp dụng.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Hãy đợi yêu cầu kết thúc, rồi nhấp lại vào Áp dụng.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Các cài đặt này đã thay đổi kể từ khi tác tử đề xuất: hãy yêu cầu tác tử lại.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Chỉnh sửa {} (chưa lưu)</translation>

@@ -467,6 +467,16 @@ Run it?</source>
         <translation>लागू नहीं किया गया।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>अनुरोध पूरा होने तक प्रतीक्षा करें, फिर लागू करें पर दोबारा क्लिक करें।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>एजेंट द्वारा प्रस्तावित किए जाने के बाद ये सेटिंग्स बदल गई हैं: उससे फिर से पूछें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} का संपादन (सहेजा नहीं गया)</translation>

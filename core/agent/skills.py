@@ -70,9 +70,11 @@ To explain a setting, only read: describe_settings and get_setting change nothin
 - Exports: APP.OPTIONS.STREAMING_EXPORT, APP.OPTIONS.GPKG_PRESERVE_GROUPS.
 - Undo history: APP.OPTIONS.HISTORY.max_history_size.
 - Map after a filter: APP.OPTIONS.EXPLORATION.auto_zoom_on_filter.
-- To share a setup with a team: export_settings_profile writes the settings the user changed as a profile file;
-  apply_settings_profile applies one (by name, or the path of a .json file the user gives), asked like
-  change_settings; tell the user what it left out.
+- To share a setup with a team: export_settings_profile writes the settings the user changed as a profile file in
+  profiles/ of the export folder; apply_settings_profile applies one by its name from that folder (a colleague's
+  profile is copied there first), shown like change_settings; tell the user what it left out.
+- In the chat, a change you ask may come back as proposed: the user decides on a card in the thread. Do not call it
+  again; the next request says what they chose.
 
 ## Slow filters
 

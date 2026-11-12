@@ -1111,7 +1111,7 @@ class AgentSettingsDialog(QDialog):
         choices = [("", _tr("As the level says")), ("ask", _tr("Always ask")), ("allow", _tr("Always allow")),
                    ("never", _tr("Never"))]
         for name, title, risk in sorted(self._tools, key=lambda row: (row[2], row[1].lower())):
-            kind = settings_kind if name == "change_settings" else kinds.get(risk, "")
+            kind = settings_kind if name in ("change_settings", "apply_settings_profile") else kinds.get(risk, "")
             item = QTreeWidgetItem(self.tool_rules, [title, kind, ""])
             item.setToolTip(0, name)
             box = QComboBox(self.tool_rules)

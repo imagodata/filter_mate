@@ -467,6 +467,16 @@ Run it?</source>
         <translation>Δεν εφαρμόστηκε.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Περιμένετε να ολοκληρωθεί το αίτημα και, στη συνέχεια, κάντε ξανά κλικ στην Εφαρμογή.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Αυτές οι ρυθμίσεις άλλαξαν από τότε που τις πρότεινε ο πράκτορας: ζητήστε του τις ξανά.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Επεξεργασία του {} (μη αποθηκευμένη)</translation>

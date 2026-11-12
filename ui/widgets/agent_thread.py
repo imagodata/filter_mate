@@ -114,10 +114,12 @@ class _Item:
 
 
 class SettingsCard(QFrame):
-    """A change of the settings of FilterMate asked in the thread: each setting before and after, the reason, and
-    two buttons. ``answered`` carries the choice once; ``answer`` gives one from outside (Stop, project closed)."""
+    """A change of the settings of FilterMate proposed in the thread: each setting before and after, the reason, and
+    two buttons. Nothing changes until Apply: the controller applies the change then (``apply_requested``) and closes
+    the card with ``finish``."""
 
-    answered = pyqtSignal(bool)
+    apply_requested = pyqtSignal()
+    cancel_requested = pyqtSignal()
 
     def __init__(self, texts: dict, lines: Sequence[str], reason: str, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -152,14 +154,15 @@ class SettingsCard(QFrame):
         self.result = _plain_label("", self)
         self.result.setVisible(False)
         column.addWidget(self.result)
-        self.apply_button.clicked.connect(lambda: self.answer(True))
-        self.cancel_button.clicked.connect(lambda: self.answer(False))
+        self.apply_button.clicked.connect(lambda: None if self._done else self.apply_requested.emit())
+        self.cancel_button.clicked.connect(lambda: None if self._done else self.cancel_requested.emit())
 
     @property
     def done(self) -> bool:
         return self._done
 
-    def answer(self, accepted: bool) -> None:
+    def finish(self, accepted: bool) -> None:
+        """Applied or not: the buttons go, the outcome stays."""
         if self._done:
             return
         self._done = True
@@ -168,7 +171,6 @@ class SettingsCard(QFrame):
             button.setVisible(False)
         self.result.setText(self._texts["accepted" if accepted else "declined"])
         self.result.setVisible(True)
-        self.answered.emit(accepted)
 
     def restyle(self, palette: dict, _dark: bool) -> None:
         _sheet(self, f"QFrame#frame_agent_settings {{ background: {palette['fm_list']}; border: 1px solid"

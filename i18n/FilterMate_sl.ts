@@ -467,6 +467,16 @@ Jo zaženem?</translation>
         <translation>Ni uveljavljeno.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Počakajte, da se zahteva konča, nato znova kliknite Uveljavi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Te nastavitve so se spremenile, odkar jih je agent predlagal: vprašajte ga znova.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Urejanje plasti {} (ni shranjeno)</translation>

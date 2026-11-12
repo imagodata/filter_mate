@@ -467,6 +467,16 @@ Eseguirlo?</translation>
         <translation>Non applicato.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Attendi la fine della richiesta, poi fai di nuovo clic su Applica.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Queste impostazioni sono cambiate da quando l'agente le ha proposte: chiedigliele di nuovo.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Modifica di {} (non salvata)</translation>
