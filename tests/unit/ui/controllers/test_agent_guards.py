@@ -32,13 +32,66 @@ def _load():
     try:  # bound at import; taken out again so that no other test sees them
         return (importlib.import_module(f"{_PKG}.adapters.agent.protected_layers"),
                 importlib.import_module(f"{_PKG}.ui.controllers.agent_chat_controller"),
-                importlib.import_module(f"{_PKG}.ui.controllers.agent_mcp_bridge"))
+                importlib.import_module(f"{_PKG}.ui.controllers.agent_mcp_bridge"),
+                importlib.import_module(f"{_PKG}.adapters.public_api.layer_tree"))
     finally:
         for name in stubs:
             sys.modules.pop(name, None)
 
 
-protected_layers, chat_controller, mcp_bridge = _load()
+protected_layers, chat_controller, mcp_bridge, layer_tree = _load()
+
+
+def _layer(layer_id, style="default"):
+    return SimpleNamespace(id=lambda: layer_id, styleManager=lambda: SimpleNamespace(currentStyle=lambda: style))
+
+
+def _record(layer, style=None, checked=None):
+    """A layer of a map theme: its current style when it has several, its checked legend items when some are not."""
+    return SimpleNamespace(layer=lambda: layer, usingCurrentStyle=style is not None, currentStyle=style or "",
+                           usingLegendItems=checked is not None, checkedLegendItems=set(checked or ()))
+
+
+class TestMapThemes:
+    @pytest.fixture
+    def themes(self, monkeypatch):
+        """``now``: the layers shown and their state; ``theme``: the records of the theme "Vue"."""
+        state = {"now": [], "theme": []}
+        collection = SimpleNamespace(hasMapTheme=lambda name: name == "Vue",
+                                     mapThemeState=lambda name: SimpleNamespace(layerRecords=lambda: state["theme"]))
+        core = sys.modules["qgis.core"]
+        monkeypatch.setattr(core, "QgsProject", SimpleNamespace(
+            instance=lambda: SimpleNamespace(mapThemeCollection=lambda: collection)), raising=False)
+        monkeypatch.setattr(core, "QgsMapThemeCollection", SimpleNamespace(
+            createThemeFromCurrentState=lambda root, model: SimpleNamespace(layerRecords=lambda: state["now"])),
+            raising=False)
+        monkeypatch.setattr(layer_tree, "_model", lambda: (None, None))
+        monkeypatch.setattr(layer_tree, "_root", lambda: None)
+        return state
+
+    def test_the_layers_whose_style_or_legend_the_theme_would_change(self, themes):
+        same, styled, legend, hidden = (_layer("same"), _layer("styled", "default"), _layer("legend"),
+                                        _layer("hidden"))
+        themes["now"] = [_record(same), _record(styled, "default"), _record(legend)]
+        themes["theme"] = [_record(same), _record(styled, "night"), _record(legend, checked={"0"}), _record(hidden)]
+        # hidden now: its legend items are not recorded, so it counts
+        assert layer_tree.theme_changed_layers(" Vue ") == ["styled", "legend", "hidden"]
+
+    def test_same_style_and_legend_change_nothing_and_an_unknown_theme_nothing(self, themes):
+        layer = _layer("a", "night")
+        themes["now"] = [_record(layer, "night", checked={"1", "2"})]
+        themes["theme"] = [_record(layer, "night", checked={"2", "1"})]
+        assert layer_tree.theme_changed_layers("Vue") == []
+        assert layer_tree.theme_changed_layers("Ailleurs") == []
+
+    def test_the_protection_reads_the_theme_only_when_something_is_protected(self, monkeypatch):
+        fake = types.ModuleType("layer_tree")
+        fake.theme_changed_layers = lambda name: ["cadastre_id"] if name == "Vue" else []
+        monkeypatch.setitem(sys.modules, f"{_PKG}.adapters.public_api.layer_tree", fake)
+        monkeypatch.setattr(protected_layers, "read_ids", lambda project=None, strict=False: ["cadastre_id"])
+        assert protected_layers.ProjectProtection().theme_layers("Vue") == ["cadastre_id"]
+        monkeypatch.setattr(protected_layers, "read_ids", lambda project=None, strict=False: [])
+        assert protected_layers.ProjectProtection().theme_layers("Vue") == []
 
 
 class TestProtectionFailsClosed:

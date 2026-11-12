@@ -81,3 +81,10 @@ class ProjectProtection:
             return []  # nothing protected: the favorite is not even read
         from ..public_api.operations import favorite_layers
         return [layer.id() for layer in favorite_layers(favorite_id)]
+
+    def theme_layers(self, name: str) -> List[str]:
+        """The ids of the layers applying the map theme ``name`` would restyle (current style, legend items)."""
+        if not read_ids(strict=True):
+            return []  # nothing protected: the theme is not even read
+        from ..public_api.layer_tree import theme_changed_layers
+        return theme_changed_layers(name)

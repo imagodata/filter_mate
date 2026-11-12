@@ -556,7 +556,8 @@ class QGISFilterMateAccessor:
                                          module="adapters.public_api.layer_tree"))
 
     def map_theme(self, action: str, name: str = "") -> MapThemes:
-        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree"))
+        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree",
+                                         changes={"action": action, "name": name}))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))

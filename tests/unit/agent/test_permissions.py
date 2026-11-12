@@ -367,6 +367,27 @@ class TestProtectedFavorites:
                                 ("cross_filter", {"source_layer": "a", "target_layers": [], "predicates": ["Intersect"]})):
             assert policy.protection_refusal(name, arguments) == "", name
 
+    def test_a_map_theme_that_would_restyle_a_protected_layer_is_refused(self):
+        from core.agent.permissions import PROTECTED, changes_layers
+        read = []
+
+        class WithThemes(Protector):
+            def theme_layers(self, name):
+                read.append(name)
+                return {"Cadastre": ["cadastre_id"], "Routes": ["routes_id"]}.get(name, [])
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithThemes("cadastre"))
+        apply = ToolCallPart("c", "map_theme", {"action": "apply", "name": "Cadastre"})
+        assert executor.verdict(apply, policy) == PROTECTED
+        assert "'cadastre'" in ToolExecutor.refused(apply, policy).content
+        assert executor.verdict(ToolCallPart("c", "map_theme", {"action": "apply", "name": "Routes"}), policy) == RUN
+        read.clear()
+        for action in ("save", "remove", "list"):  # they change no layer: the theme is not even read
+            assert not changes_layers("map_theme", {"action": action, "name": "Cadastre"})
+            assert executor.verdict(ToolCallPart("c", "map_theme", {"action": action, "name": "Cadastre"}), policy) == RUN
+        assert read == []
+
     def test_a_protector_without_favorites_lets_them_run(self):
         executor = ToolExecutor(chat_tools(), {})
         policy = PermissionPolicy(protector=Protector("cadastre"))

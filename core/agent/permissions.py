@@ -104,6 +104,9 @@ class Protection(Protocol):
     def favorite_layers(self, favorite_id: str) -> Sequence[str]:
         """The ids of the layers a favorite would change: they are in the favorite, not in the call."""
 
+    def theme_layers(self, name: str) -> Sequence[str]:
+        """The ids of the layers applying the map theme ``name`` would restyle (current style, legend items)."""
+
 
 def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     """The layer references a call changes; None when it changes every layer (a clear without layers)."""
@@ -126,8 +129,12 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
 
 
 def changes_layers(name: str, arguments: Any) -> bool:
-    """Whether a call may change a layer: one it names, every layer (a clear without layers), those of a favorite."""
-    return name == "apply_favorite" or changed_layers(name, arguments if isinstance(arguments, dict) else {}) != []
+    """Whether a call may change a layer: one it names, every layer (a clear without layers), those of a favorite or
+    of a map theme applied (its current styles and legend items)."""
+    arguments = arguments if isinstance(arguments, dict) else {}
+    if name == "map_theme":
+        return arguments.get("action") == "apply"
+    return name == "apply_favorite" or changed_layers(name, arguments) != []
 
 
 def _keeps_points(criteria: Any) -> bool:
@@ -204,11 +211,8 @@ class PermissionPolicy:
         if self.protector is None or not changes_layers(name, arguments):
             return ""  # no protection, or nothing changed: nothing to read
         arguments = arguments if isinstance(arguments, dict) else {}
-        references = changed_layers(name, arguments)
         try:
-            if name == "apply_favorite":
-                resolve = getattr(self.protector, "favorite_layers", None)
-                references = list(resolve(str(arguments.get("favorite_id", "")))) if resolve is not None else []
+            references = self._references(name, arguments)
             if references is None:
                 protected = list(self.protector.names())
             else:
@@ -219,6 +223,15 @@ class PermissionPolicy:
         if not protected:
             return ""
         return PROTECTED_REFUSAL.format(", ".join(repr(item) for item in dict.fromkeys(protected)))
+
+    def _references(self, name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
+        """The layers the call changes, read in the project where the call does not name them: those of a favorite,
+        of a map theme. None: every layer."""
+        if name in ("apply_favorite", "map_theme"):
+            method, key = ("favorite_layers", "favorite_id") if name == "apply_favorite" else ("theme_layers", "name")
+            resolve = getattr(self.protector, method, None)
+            return list(resolve(str(arguments.get(key, "")))) if resolve is not None else []
+        return changed_layers(name, arguments)
 
     def verdict(self, spec) -> str:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec``."""
