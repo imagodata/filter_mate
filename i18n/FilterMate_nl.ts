@@ -64,6 +64,11 @@
         <translation>Terug naar voor: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Stop het verzoek, of wacht tot het klaar is, om de instellingen te openen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Niets om ongedaan te maken.</translation>

@@ -64,6 +64,11 @@
         <translation>Kembali ke sebelum: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Hentikan permintaan, atau tunggu sehingga ia selesai, untuk membuka tetapan.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Tiada apa untuk dibuat asal.</translation>
