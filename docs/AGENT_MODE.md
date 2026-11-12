@@ -306,6 +306,35 @@ nothing is sent, nothing is paid, and it works with no provider set up. `core/ag
   a step of the history.
 - The MCP servers do not offer these tools: recipes live in the panel of the dock. The model cannot run a recipe.
 
+### Live recipes
+
+A filter of FilterMate is a subset string written from the source as it was: when the source changes, the targets
+keep the old answer. A favorite does not help, it replays the same strings. A recipe does: its cross filter reads the
+source again at each run. So a recipe can be **live** (**⋯ > Recipes > *name* > Run again when its source is saved**):
+each time the edits of one of its source layers are saved in QGIS (`afterCommitChanges`), it runs again by itself.
+
+- What may be live (`live_problem` in `core/agent/recipes.py`): a recipe with at least one `cross_filter` (its
+  `source_layer` values are the layers followed), whose steps are all in `LIVE_TOOLS`: filters, selection, visibility,
+  style and labels. What writes (an export, an edit), adds or removes layers, runs Processing or moves the map is
+  refused: it would happen at every save. A stored `live` flag on any other recipe is dropped when the project is
+  read, so a project made by someone else cannot make an export run at every save.
+- Ticked by the user, on this computer: the project file keeps `live`, but a recipe runs by itself only once the
+  user ticked it here for these very steps (`approve_live` in `adapters/agent/recipes_store.py`: a hash of the project,
+  the recipe and its steps, in the QGIS settings). A project made by someone else, or a recipe saved again under the
+  same name by the agent, shows unticked and follows nothing. Nothing runs alone at the *advisor* and *careful* levels.
+- A live run asks nothing: at the usual level these steps run alone, and one that would ask (a layer protected from
+  the agent) stops it. It is one turn of the history, undone as one (it empties Redo, as any change does), and shows
+  in the thread as a note without leaving the history or the settings.
+- Several saves within 0.8 s run it once. While FilterMate or the chat works, or while a layer the recipe filters is
+  being edited (its filter cannot change then), it waits and tries again for about five minutes, then says so. A
+  source layer is found by its id, then by its name when one layer only has it; the layers followed are updated when
+  layers come or go, and on closing a project a pending run is dropped.
+- What a cross filter reads is read at each run: with `selected_only`, the selection of the moment, or what the source
+  shows when nothing is selected. A save through **Save changes and filter** of the dock runs the live recipes after
+  that filter, and they write their targets again.
+- Not followed: changes made outside QGIS (another user of a PostGIS table, a script writing the file), and a live
+  recipe whose source is the target of another one (a filter is not a save). Only the saves of this QGIS.
+
 ## History
 
 - Every turn that changed a layer is one `CrossOperation` under the key `filtermate_agent_turn` of the automation

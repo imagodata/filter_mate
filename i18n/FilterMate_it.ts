@@ -718,6 +718,31 @@ Sei d'accordo?</translation>
         <translation>Interrotta prima del passo {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Ricetta viva: {} (la sua sorgente è stata salvata)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Ricetta viva: {} viene rieseguita quando le modifiche di {} vengono salvate.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} non si riesegue più da sola.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Ricetta viva: {} si avvierà da sola solo al livello standard o autonomo dell'agente.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>La sorgente di una ricetta viva è stata salvata mentre FilterMate era occupato: riesegui la ricetta da Altro &gt; Ricette.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Salva come ricetta</translation>
@@ -1036,6 +1061,26 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Esegui senza il modello</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Riesegui quando la sua sorgente viene salvata</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Non possibile: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Le destinazioni seguono la sorgente: ogni volta che le modifiche di un livello sorgente di questa ricetta vengono salvate, la ricetta viene rieseguita da sola, come un turno che puoi annullare.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · viva</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>
