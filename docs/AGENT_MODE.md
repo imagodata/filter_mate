@@ -459,11 +459,17 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
 - what may run is a list of what is accepted: the providers `native` and `qgis` (GDAL, GRASS, SAGA, PDAL, scripts
   and models start other programs or run code nobody here has read), and an algorithm that makes at least one layer
   or only answers values (statistics). Selection, style, projection, index, truncation, import into a database,
-  upload and download make no layer: that alone leaves them out. Executors of SQL or Python, and the network
-  requests that make a layer, are refused by name. A parameter that needs a file, a folder, a database connection,
-  a layout or a map theme refuses the algorithm; an optional one stays unset;
+  upload and download make no layer: that alone leaves them out. Executors of SQL or Python, the network
+  requests that make a layer and the geocoder that sends addresses to Nominatim are refused by name. The types of
+  parameters are a list of what is accepted too (`GIVEN_TYPES`): layers, extent, point, CRS, expression, option, the
+  rows of an interpolation, and plain values (numbers, texts, fields, flags, tables, colours, dates, ranges, WKT,
+  bands, dataset groups). Any other type (a file, a folder, a database connection, a layout, a map theme, a PROJ
+  operation, which names a grid by path or URL, or a type of a later QGIS) refuses the algorithm when it is required
+  and stays unset when it is optional; `describe_algorithm` lists it in `left_out`;
 - inputs are layers of the project, never a path, a URI or a URL (QGIS would open them); an extent, a point or a CRS
-  is numbers, an authid or a project layer. Expressions go through a list a little wider than the one of
+  is numbers, an authid or a project layer. The rows of an IDW or TIN interpolation (`idw_interpolation_data`,
+  `source::~::value source::~::field index::~::source type` joined by `::|::`, whose source QGIS opens from its text)
+  are written again, each source the id of a vector layer of the project and the rest integers. Expressions go through a list a little wider than the one of
   `select_features` (math, text, geometry functions that only compute; nothing that reads another layer, a file or
   the environment, and no `eval`). Raster calculator expressions have their own parser and are not checked;
 - each layer an algorithm makes is written to a temporary file (GeoPackage, GeoTIFF) and added to the project: the
