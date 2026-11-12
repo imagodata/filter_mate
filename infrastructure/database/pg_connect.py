@@ -76,6 +76,40 @@ def resolve_pg_hostaddr(host: Optional[str]) -> Optional[str]:
     return result
 
 
+def connect_kwargs_from_uri(source_uri, user: Optional[str] = None, password: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Return the ``psycopg2.connect`` keywords of a PostgreSQL ``QgsDataSourceUri``.
+
+    2026-11-12: the ``service`` of a layer read through ``pg_service.conf`` was
+    left out, so libpq opened its defaults (localhost, the OS user): no
+    connection, or another database. libpq fills from the service only the
+    keywords not given, and an empty one counts as given (psycopg2 drops only
+    ``None``): empty values are left out. ``sslmode=prefer`` is the default of
+    QGIS, which never writes it, and of libpq: it would hide the service's own.
+
+    Args:
+        source_uri: QgsDataSourceUri of the layer
+        user, password: Credentials of an authentication configuration, which
+            replace the URI's when given
+
+    Returns:
+        Keywords for :func:`pg_connect_with_fallback`
+    """
+    ssl_mode = source_uri.sslMode()
+    kwargs = {
+        'service': source_uri.service(),
+        'host': source_uri.host(),
+        'port': source_uri.port(),
+        'dbname': source_uri.database(),
+        'user': source_uri.username() if user is None else user,
+        'password': source_uri.password() if password is None else password,
+        'sslmode': source_uri.encodeSslMode(ssl_mode) if ssl_mode is not None else None,
+    }
+    if kwargs['sslmode'] == 'prefer':
+        kwargs['sslmode'] = None
+    return {key: value for key, value in kwargs.items() if value is not None and value != ''}
+
+
 def build_connect_attempts(connect_kwargs: Dict[str, Any]):
     """Return the ordered list of ``(label, kwargs)`` attempts for :func:`pg_connect_with_fallback`."""
     fast = dict(connect_kwargs)
@@ -139,6 +173,7 @@ __all__ = [
     'PLAIN_CONNECT_TIMEOUT_SECONDS',
     'build_connect_attempts',
     'clear_hostaddr_cache',
+    'connect_kwargs_from_uri',
     'pg_connect_with_fallback',
     'resolve_pg_hostaddr',
 ]

@@ -158,3 +158,51 @@ class TestConnectWithFallback:
         monkeypatch.setattr(pg, "psycopg2", None)
         with pytest.raises(RuntimeError, match="psycopg2"):
             pg.pg_connect_with_fallback({"host": "x"})
+
+
+class FakeUri:
+    """The parts of QgsDataSourceUri read for a psycopg2 connection."""
+
+    def __init__(self, service='', host='', port='', database='', username='', password='', ssl='prefer'):
+        self._values = dict(service=service, host=host, port=port, database=database,
+                            username=username, password=password)
+        self._ssl = ssl
+
+    def __getattr__(self, name):
+        values = self.__dict__.get('_values', {})
+        if name in values:
+            return lambda: values[name]
+        raise AttributeError(name)
+
+    def sslMode(self):
+        return self._ssl
+
+    @staticmethod
+    def encodeSslMode(mode):
+        return mode
+
+
+@pytest.mark.unit
+class TestConnectKwargsFromUri:
+    """2026-11-12: a layer read through a pg_service.conf service was opened on libpq's defaults."""
+
+    def test_a_service_alone_lets_libpq_read_the_service_file(self, pg):
+        # an explicit empty host / dbname would hide the service's values
+        assert pg.connect_kwargs_from_uri(FakeUri(service='fibre')) == {'service': 'fibre'}
+
+    def test_explicit_parameters_go_with_the_service(self, pg):
+        kwargs = pg.connect_kwargs_from_uri(FakeUri(service='fibre', host='db', port='5433', database='gis',
+                                                    username='u', password='p'))
+
+        assert kwargs == {'service': 'fibre', 'host': 'db', 'port': '5433', 'dbname': 'gis',
+                          'user': 'u', 'password': 'p'}
+
+    def test_only_a_chosen_ssl_mode_is_passed(self, pg):
+        # prefer is the default of QGIS and of libpq, never written by QGIS either
+        assert 'sslmode' not in pg.connect_kwargs_from_uri(FakeUri(host='db', ssl='prefer'))
+        assert pg.connect_kwargs_from_uri(FakeUri(host='db', ssl='require'))['sslmode'] == 'require'
+
+    def test_credentials_of_an_authentication_configuration_replace_the_uri_ones(self, pg):
+        kwargs = pg.connect_kwargs_from_uri(FakeUri(host='db', username='uri_user'), user='auth_user', password='s')
+
+        assert kwargs['user'] == 'auth_user' and kwargs['password'] == 's'
