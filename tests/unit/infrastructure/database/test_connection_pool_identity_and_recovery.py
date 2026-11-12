@@ -199,3 +199,21 @@ def test_concurrent_connection_attempts_reserve_the_maximum_capacity(pools, monk
         worker.join(2)
     assert len(result) == 1 and pool._active_connections == 2
     pool.release_connection(result[0])
+
+
+def test_a_service_pool_connects_through_the_service_without_empty_parameters(pools, monkeypatch):
+    """2026-11-12: host='' sent to libpq hides the host of the pg_service.conf service."""
+    module, manager, _ = pools
+    seen = []
+
+    def connect(kwargs, label):
+        seen.append(dict(kwargs))
+        return Connection(kwargs.get('user'))
+
+    monkeypatch.setattr(module, 'pg_connect_with_fallback', connect)
+    fibre = manager.get_pool('', '', '', 'u', '', None, service='fibre')
+    other = manager.get_pool('', '', '', 'u', '', None, service='other')
+
+    assert fibre is not other
+    assert seen[0]['service'] == 'fibre'
+    assert not {'host', 'port', 'dbname', 'password'} & set(seen[0])

@@ -64,6 +64,11 @@
         <translation>Wróć do stanu sprzed: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Zatrzymaj żądanie lub poczekaj na jego zakończenie, aby otworzyć ustawienia.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Nie ma czego cofnąć.</translation>
