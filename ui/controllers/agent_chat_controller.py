@@ -9,7 +9,7 @@ from dataclasses import asdict
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
 from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
@@ -156,6 +156,9 @@ class AgentChatController(QObject):
         self._abandoned = False
         self._checkpoint = TurnCheckpoint()
         self._links = []  # what the buttons of show_settings_link do, kept alive with the thread
+        # A change of the settings is asked in the thread (SettingsCard) unless a test answers the questions.
+        self._card_questions = ask_user is None
+        self._settings_card = None  # the card waiting for an answer, if any
         manager = getattr(parent_widget, '_config_model_manager', None)
         self._settings_applier = manager.apply_settings if manager is not None else None
         plugin_settings.set_applier(self._settings_applier)
@@ -242,7 +245,8 @@ class AgentChatController(QObject):
 
         Each step runs even when one before failed.
         """
-        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project,
+        for step in (self._decline_settings_card, self.stop, abort_active, self._mcp.close, self._unfollow_layers,
+                     self._disconnect_project,
                      lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
@@ -392,6 +396,7 @@ class AgentChatController(QObject):
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
+        self._decline_settings_card()
         abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
         # The turn under way, ended below, must not be recorded against the closed project, nor the change another
         # application is making (its layers compared with the next project's, an Undo would remove them all).
@@ -1371,6 +1376,7 @@ class AgentChatController(QObject):
         self._seen = None if read is None else project_state(*read)
 
     def _on_stop(self) -> None:
+        self._decline_settings_card()
         abort_active(CHAT_WAITS)  # a connector or a platform the chat waits for, not a call of another application
         if self._replaying:  # a recipe stops before its next step
             self._replay_stop = True
@@ -1642,6 +1648,10 @@ class AgentChatController(QObject):
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the
         rest of the conversation."""
         title = _tr("FilterMate agent")
+        if call.name in ("change_settings", "apply_settings_profile") and self._card_questions:
+            if not self._settings_would_change(call):
+                return True  # nothing to show: every value is already set, or the tool refuses the call and says why
+            return self._ask_settings_card(call)
         spec = self._tools.get(call.name)
         if spec is None or not self._policy.grantable(spec):  # code is read in its own dialog, at every run
             return bool(self._confirm(call, title))
@@ -1700,6 +1710,40 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to do this:\n{}\n{}\n\nDo you agree?").format(
                 one_line(self._describe(call), 200), detail)
         return text
+
+    def _ask_settings_card(self, call: ToolCallPart) -> bool:
+        """The change asked in the thread: each setting before and after, Apply or Cancel. The request waits for the
+        answer as it waits for a dialog; Stop, another project or unloading the plugin answer no."""
+        lines, problem = self._settings_lines(call)
+        reason = call.arguments.get("reason") or call.arguments.get("name") or call.arguments.get("path") or ""
+        texts = {"heading": _tr("The agent wants to change these settings of FilterMate"),
+                 "note": _tr("They stay for every project; undoing the turn puts them back."),
+                 "apply": _tr("Apply"), "cancel": _tr("Cancel"),
+                 "accepted": _tr("Applied at your request."), "declined": _tr("Not applied.")}
+        card = self.panel.add_settings_card(texts, lines[:MAX_LISTED] or [one_line(problem, 300)],
+                                            one_line(str(reason), 300))
+        answer = {"value": False}
+        loop = QEventLoop()
+
+        def answered(accepted: bool) -> None:
+            answer["value"] = bool(accepted)
+            loop.quit()
+        card.answered.connect(answered)
+        self._settings_card = card
+        try:
+            if not card.done:
+                loop.exec()
+        finally:
+            self._settings_card = None
+        return answer["value"]
+
+    def _decline_settings_card(self) -> None:
+        card, self._settings_card = self._settings_card, None
+        if card is not None:
+            try:
+                card.answer(False)
+            except RuntimeError:  # deleted with the thread
+                pass
 
     @staticmethod
     def _settings_would_change(call: ToolCallPart) -> bool:

@@ -465,10 +465,10 @@ The catalog is JSON because that server needs pydantic and the MCP SDK, which QG
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's
 history, which is not what the agent did.
 
-Counts (2026-11-12): 47 tools in the catalog; the chat offers 58 at most (the catalog without those three, plus the 5
-tools of the plugin's own settings and skills, plus 9 of its own: `undo_agent_step`, the notes, `run_pyqgis`,
-`view_map`, the widgets and the recipes, some only under their setting); the MCP server of the plugin serves 51 (the
-chat's tools without its own, plus `map_image` and `contact_sheet`).
+Counts (2026-11-12): 47 tools in the catalog; the chat offers 61 at most (the catalog without those three, plus the 7
+tools of the plugin's own settings, profiles and skills, plus 10 of its own: `undo_agent_step`, the notes,
+`run_pyqgis`, `view_map`, the widgets, the recipes and `show_settings_link`, some only under their setting); the MCP
+server of the plugin serves 53 (the chat's tools without its own, plus `map_image` and `contact_sheet`).
 
 ### Settings of FilterMate and skills (2026-11-12)
 
@@ -490,6 +490,17 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   question. Always allow (tab Tools) works above Advisor; Yes for this conversation is not offered: each change is shown.
   A call that would change nothing, or that the tool refuses, is not asked. A recipe never keeps a change of the
   settings.
+- In the chat, a change of the settings is asked in the thread: a card lists each setting before and after, with
+  Apply and Cancel; the request waits for the answer as for a dialog, and Stop, another project or unloading the
+  plugin answer no. Another application (MCP) and the question for several actions of a turn keep their dialog.
+- Undo: the value "after" is what the agent applied (a value the user set meanwhile stays theirs); back to before a
+  step of the turn restores the settings changed from it.
+- `show_settings_link` (chat only, read-only) puts a button in the thread that opens a tab of the settings of the
+  agent or selects a setting in the configuration tree: the agent shows what it may not change.
+- Profiles (`core/agent/settings_profile.py`): `export_settings_profile` writes the settings changed from their
+  default, never those the agent may not change, to `profiles/` of the export folder (asked like a file);
+  `apply_settings_profile` applies one by name or by the path of a .json file, asked like `change_settings`, and lists
+  what it left out.
 - `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
 - Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
   and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt

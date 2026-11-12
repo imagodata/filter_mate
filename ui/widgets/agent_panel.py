@@ -837,6 +837,13 @@ class AgentPanel(QFrame):
     def begin_step(self) -> None:
         self.thread.begin_step()
 
+    def add_settings_card(self, texts: dict, lines, reason: str):
+        """A change of the settings of FilterMate asked in the thread, with Apply and Cancel (agent_thread)."""
+        self._show_conversation()
+        card = self.thread.add_settings_card(texts, lines, reason)
+        self._in_answer = False
+        return card
+
     def add_link(self, label: str, on_click) -> None:
         """A button the agent puts in the thread: the user goes to a setting when they want."""
         self._show_conversation()
