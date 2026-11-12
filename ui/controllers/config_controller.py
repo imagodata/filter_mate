@@ -461,6 +461,11 @@ class ConfigController(BaseController):
                     if hasattr(self.dockwidget, '_refresh_config_view_theme'):
                         self.dockwidget._refresh_config_view_theme()
 
+                # 2026-11-12: a new stylesheet gives the section headers of the QToolBox their size hint again
+                # (42 px instead of 34): the dimensions of the profile are applied again, as a profile change does.
+                if hasattr(self.dockwidget, 'apply_dynamic_dimensions'):
+                    self.dockwidget.apply_dynamic_dimensions()
+
                 changes_summary.append(f"Theme: {new_theme_value}")
                 self.theme_changed.emit(new_theme_value)
 
