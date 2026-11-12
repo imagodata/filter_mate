@@ -30,6 +30,7 @@ All notable changes to FilterMate will be documented in this file.
 - **The raster style of the REST API, the MCP servers and AGENT refuses bounds that are not numbers.** `minimum` / `maximum` given as NaN or Infinity, or a minimum not below the maximum, were applied as given; they are refused with a clear message (422 for the REST API).
 - **Exporting a print layout from AGENT or the REST API creates its sub-folder and never overwrites a file.** A new sub-folder of the export root made the export fail, and a file of the same name was replaced; the next free name is used (`Map_2.pdf`).
 - **A target filter that uses `coalesce(…, '…')` or `THEN true` is kept when a spatial filter is added to it.** Such a filter was taken for a style expression and replaced without a word (`coalesce("nom", '') = 'route'` then a spatial filter in AND: the attribute filter was gone). The attribute filter writing in SQLite produces `COALESCE("nom", '')`, which made it frequent. Only an expression that returns no boolean (a field, `coalesce("nom", '')` alone) is now replaced.
+- **Processing `cross_filter_from_raster` with a layer of objects (SEGMENTS).** Cancelling while the objects were read ran the filter with those read so far; it now stops. Curved polygons (CurvePolygon, MultiSurface) were refused with an unclear message; they are written with straight segments.
 
 ## [5.1.0] - 2026-11-10
 
