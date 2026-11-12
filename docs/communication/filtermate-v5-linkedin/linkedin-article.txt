@@ -1,0 +1,65 @@
+FilterMate 5: five practical ways to connect vectors, rasters and LiDAR in QGIS
+
+A street corridor, a survey site or a slope threshold can each become the starting point for a QGIS analysis. The next step is usually to carry that selection across several layers.
+
+FilterMate 5 brings vector, raster and LiDAR sources into the same filtering panel. Select features, pixels or points, define their spatial relationship to the target layers, and work with the result in the existing project.
+
+These five examples use a checked dataset from Sarlat-la-Canéda, France. Each includes a full QGIS view with its Layers panel and toolbars, followed by a larger view of the widgets that control the operation.
+
+1. Prepare a focused street corridor
+
+For a small works or survey dossier, start with a named street rather than the whole road hierarchy.
+
+Select the 9 segments of Boulevard Henri Arlet, choose Buildings and Parcels as targets, set Intersect and a 50 m buffer. The result retains 113 buildings and 106 parcels from the complete tile datasets.
+
+Read the widgets: the street-name expression identifies the source; the target list scopes the output; the buffer defines the corridor. Orange buildings and teal parcel outlines show the result over the RGB orthophoto.
+
+2. Give the DTM and LiDAR the same survey boundary
+
+Select the church building and apply a 50 m buffer to two targets: the 1 m digital terrain model and the LiDAR HD cloud.
+
+The building is outlined in yellow. Separate map views show the clipped terrain and point cloud so one does not hide the other. Both results remain in the project layers with their styles and can be exported for the same working area.
+
+Read the widgets: Single Selection identifies the church; the target list contains both the DTM and LiDAR; the predicate and buffer define their shared boundary.
+
+3. Find parcels dominated by steep ground
+
+Use the DTM as the source and choose Slope (%). Set the minimum to 20%, then require at least 50% coverage of each target parcel.
+
+321 parcels meet that rule on the tile. Amber pixels show the selected slope areas; teal outlines identify the retained parcels. The RGB orthophoto supplies context beneath the selection.
+
+Read the widgets: Quantity is Slope (%); the histogram and Min field define the pixel selection; coverage ≥ 50% controls how much of a parcel must overlap. A small intersection alone does not retain a parcel.
+
+4. Find parcels with a substantial vegetation signal
+
+Use the colour-infrared orthophoto and assign its band roles: NIR, red and green. Insert the NDVI > 0.3 preset, then filter parcels with at least 50% coverage.
+
+12 parcels pass on this tile. Green pixels show the selected image areas over the natural-colour background; teal outlines show the retained parcels.
+
+Read the widgets: BANDS makes the NIR/red mapping explicit; RASTER EXPRESSION shows the complete formula; the target and coverage fields turn that pixel selection into a parcel query. The spectral threshold is an exploratory criterion, not a land-cover classification.
+
+5. Check vegetation proximity on the same boulevard
+
+For a more focused LiDAR example, first make an explicit candidate layer containing the 9 Boulevard Henri Arlet road segments. The complete road dataset remains available in the project.
+
+Select LiDAR class 5 — High vegetation and apply an Intersect query with a 3 m buffer to that candidate layer. 6 of 9 segments meet the rule, giving a short list to inspect.
+
+Read the widgets: only class 5 is checked; the target name identifies the boulevard subset; the buffer is 3 m. The relationship is measured against the selected points’ footprint, not individual tree-to-road distances. This is a screening result, not a pruning diagnosis.
+
+What changes in version 5
+
+Each data type can be a source or target, opening nine filtering directions. Raster exploration adds histogram ranges, pipettes, band roles and spectral presets. LiDAR exploration adds classes, attribute conditions and height above a DTM.
+
+The workflow can be reused through favorites, nine Processing algorithms and four models, Python, the optional REST API and an MCP server. Remote-source support depends on the provider and operation, with bounded reads and cancellation support.
+
+Export vector formats or a GeoPackage with an embedded project, GeoTIFF/COG rasters, and LAS/LAZ/COPC point clouds. Height above a DTM and COPC writing require PDAL 2.4 or later.
+
+Try it on your own project
+
+FilterMate is free and open source under GPL v3, supporting QGIS 3.22 through 4.x. Point cloud layers require QGIS 3.26 or later.
+
+Find the code and releases (https://github.com/imagodata/filter_mate), release notes (https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md) and user guide (https://imagodata.github.io/filter_mate/guide.html).
+
+Which source-to-target combination would make your next QGIS task easier?
+
+Captured in QGIS 4.2.3. BD TOPO®, orthophotos and LiDAR HD © IGN; cadastre © DGFiP/Etalab, September 2026. Open Licence 2.0. The DTM is a demonstration derivative of LiDAR ground points with interpolated gaps. Settings views stack native widget crops to remove unused space; full-window screenshots are supplied separately.

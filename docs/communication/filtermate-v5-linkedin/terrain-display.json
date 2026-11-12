@@ -1,0 +1,12 @@
+{
+  "input": "C:\\Users\\Simon\\AppData\\Local\\Temp\\fm_ln_vx790lor\\cache\\session_4acb0ed37f\\DTM___1_m_b378fd6d.vrt",
+  "source": "retained FilterMate public Python API output",
+  "minimum_m": 134.69711303710938,
+  "maximum_m": 151.1969757080078,
+  "valid_pixels": 18462,
+  "change": "QGIS linear grayscale display stretch; no data edits",
+  "output_size": [
+    1767,
+    1818
+  ]
+}

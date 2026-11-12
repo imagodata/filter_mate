@@ -1168,6 +1168,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Només les eines que filtren, per a un ordinador lent</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama no ha llistat cap model a {}: escriviu-ne el nom d'un.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Models instal·lats a Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Marcat, el model local només rep les eines que llegeixen i filtren el projecte: aproximadament la meitat per llegir a cada petició. Mesurat amb qwen3.5:4b, totes les eines van respondre igual de bé o millor.</translation>

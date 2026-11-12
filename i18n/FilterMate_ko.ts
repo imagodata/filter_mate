@@ -1168,6 +1168,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>느린 컴퓨터를 위해 필터링 도구만</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama가 {}에서 모델을 나열하지 않았습니다. 모델 이름을 입력하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Ollama에 설치된 모델 ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>선택하면 로컬 모델은 프로젝트를 읽고 필터링하는 도구만 받아 요청마다 읽을 양이 약 절반이 됩니다. qwen3.5:4b로 측정했을 때 모든 도구로도 같거나 더 나은 답을 냈습니다.</translation>

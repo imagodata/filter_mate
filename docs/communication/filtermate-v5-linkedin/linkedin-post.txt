@@ -1,0 +1,16 @@
+FilterMate 5 connects vector, raster and LiDAR selections inside QGIS.
+
+The article walks through five focused tasks in Sarlat-la-Canéda:
+• A 50 m street corridor: 113 buildings and 106 parcels.
+• One survey boundary for a DTM and LiDAR cloud.
+• Parcels with at least 50% coverage by slopes ≥ 20%.
+• Parcels with at least 50% coverage by an NDVI > 0.3 selection.
+• High-vegetation proximity on a scoped boulevard network.
+
+Each example includes the normal QGIS window and a larger widget detail, so you can read the source criteria, targets, predicate, buffer and coverage settings.
+
+Free and open source: https://github.com/imagodata/filter_mate
+
+Which combination would you try first?
+
+#QGIS #GIS #LiDAR #OpenSource #Geospatial

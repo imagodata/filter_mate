@@ -1168,6 +1168,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Chỉ các công cụ lọc, cho máy tính chậm</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama không liệt kê mô hình nào tại {}: hãy nhập tên một mô hình.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Các mô hình đã cài trong Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Khi chọn, mô hình cục bộ chỉ nhận các công cụ đọc và lọc dự án: mỗi yêu cầu chỉ phải đọc khoảng một nửa. Đo với qwen3.5:4b, dùng mọi công cụ vẫn trả lời tốt bằng hoặc tốt hơn.</translation>

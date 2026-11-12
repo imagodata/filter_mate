@@ -160,3 +160,20 @@ class TestStream:
     def test_last_line_without_newline(self):
         data = lines({"message": {"content": "ok"}, "done": True}).rstrip(b"\n")
         assert turn_of(run(ollama().new_parser(), data)).message.text == "ok"
+
+
+class TestInstalledModels:
+    def test_the_chat_models_in_their_order_embeddings_left_out(self):
+        from core.agent.providers.ollama_chat import installed_models
+        payload = {"models": [
+            {"name": "qwen3.5:4b", "details": {"family": "qwen35"}},
+            {"name": "nomic-embed-text:latest", "details": {"family": "nomic-bert", "families": ["nomic-bert"]}},
+            {"name": "mxbai-embed-large"}, {"model": "qwen3:8b"}, {"name": "qwen3.5:4b"}, {"name": ""}, "odd", {}]}
+        assert installed_models(payload) == ["qwen3.5:4b", "qwen3:8b"]
+        for nothing in (None, {}, {"models": "x"}, [], "text"):
+            assert installed_models(nothing) == []
+
+    def test_where_ollama_lists_them(self):
+        from core.agent.providers.ollama_chat import tags_url
+        assert tags_url("") == "http://localhost:11434/api/tags"
+        assert tags_url("http://gpu.lan:11434/v1/") == "http://gpu.lan:11434/api/tags"

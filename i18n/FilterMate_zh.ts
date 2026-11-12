@@ -1168,6 +1168,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>仅筛选工具，适用于较慢的电脑</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama 在 {} 未列出任何模型：请输入模型名称。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Ollama 中已安装的模型（{}）。</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>勾选后，本地模型只获得读取和筛选项目的工具：每次请求要读的内容约减半。用 qwen3.5:4b 实测，使用全部工具时回答同样好或更好。</translation>

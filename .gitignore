@@ -104,5 +104,21 @@ TOOLS.md
 HEARTBEAT.md
 MEMORY.md
 memory/
+# 2026-11-12: also the symbolic link the memory-symlink hook creates in a worktree (a link is
+# a file for git, "memory/" does not match it); committed once, a pull replaced the main
+# checkout's memory folder by a link to itself and deleted its files.
+.claude/memory
 BOOTSTRAP.md
 .claude/settings.local.json
+
+# Communication material: only text, scripts and QGIS projects are versioned.
+# Data, captures, videos and publication zips stay local (several exceed 100 MB).
+docs/communication/**
+!docs/communication/**/
+!docs/communication/**/*.md
+!docs/communication/**/*.txt
+!docs/communication/**/*.srt
+!docs/communication/**/*.json
+!docs/communication/**/*.html
+!docs/communication/**/*.py
+!docs/communication/**/*.qgz

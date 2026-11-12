@@ -1,0 +1,56 @@
+{
+  "read": true,
+  "layers": [
+    {
+      "name": "Buildings",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/sarlat.gpkg|layername=batiment",
+      "source_exists": true,
+      "subset": ""
+    },
+    {
+      "name": "CIR orthophoto",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/ortho_irc.tif",
+      "source_exists": true,
+      "subset": ""
+    },
+    {
+      "name": "DTM — 1 m",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/mnt_1m.tif",
+      "source_exists": true,
+      "subset": ""
+    },
+    {
+      "name": "LiDAR HD",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/lidar_hd_sarlat.copc.laz",
+      "source_exists": true,
+      "subset": ""
+    },
+    {
+      "name": "Parcels",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/sarlat.gpkg|layername=parcelle",
+      "source_exists": true,
+      "subset": ""
+    },
+    {
+      "name": "RGB orthophoto",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/ortho_rvb.tif",
+      "source_exists": true,
+      "subset": ""
+    },
+    {
+      "name": "Road segments",
+      "valid": true,
+      "source": "C:/Users/Simon/AppData/Local/Temp/fm-linkedin-sarlat/publication/data/sarlat.gpkg|layername=troncon_de_route",
+      "source_exists": true,
+      "subset": ""
+    }
+  ],
+  "commune_coverage_fraction": 1.0,
+  "ok": true
+}

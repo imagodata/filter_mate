@@ -1,0 +1,232 @@
+{
+  "scenario_results": {
+    "roads": {
+      "selected_road_segments": 9,
+      "buildings": 113,
+      "parcels": 106,
+      "buffer_m": 50,
+      "road": "Boulevard Henri Arlet"
+    },
+    "mixed_clip": {
+      "raster_clipped": true,
+      "point_cloud_clipped": true,
+      "buffer_m": 50,
+      "entry_point": "public Python API"
+    },
+    "slope": {
+      "slope_min_percent": 20,
+      "coverage_min_percent": 50,
+      "parcels": 321
+    },
+    "ndvi": {
+      "ndvi_min": 0.3,
+      "coverage_min_percent": 50,
+      "parcels": 12
+    },
+    "high_vegetation": {
+      "class": 5,
+      "buffer_m": 3,
+      "road_segments": 6,
+      "candidate_road_segments": 9,
+      "road": "Boulevard Henri Arlet"
+    }
+  },
+  "widget_checks": [
+    {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 0.0
+      },
+      "dock_size": [
+        600,
+        1142
+      ]
+    },
+    {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    {
+      "kind": "vector",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    {
+      "kind": "slope",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0,
+        "quantity": 1.0,
+        "histogram": 1.0,
+        "minimum": 1.0,
+        "maximum": 1.0,
+        "coverage": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    {
+      "kind": "ndvi",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0,
+        "band roles": 1.0,
+        "NDVI expression": 1.0,
+        "coverage": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    },
+    {
+      "kind": "lidar",
+      "widgets": {
+        "targets": 1.0,
+        "predicate": 1.0,
+        "buffer": 1.0,
+        "classes": 1.0
+      },
+      "dock_size": [
+        600,
+        1212
+      ]
+    }
+  ],
+  "python_errors": [],
+  "checks": [
+    [
+      "PASS",
+      "data layers load"
+    ],
+    [
+      "PASS",
+      "plugin starts with iface"
+    ],
+    [
+      "FAIL",
+      "vector: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "dock open"
+    ],
+    [
+      "PASS",
+      "vector: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "saved 00_sarlat_overview.png"
+    ],
+    [
+      "PASS",
+      "1 named-street corridor returns useful subset"
+    ],
+    [
+      "PASS",
+      "vector: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "saved 01_roads_buildings.png"
+    ],
+    [
+      "PASS",
+      "2 public Python API mixed extraction succeeds"
+    ],
+    [
+      "PASS",
+      "2 real mixed clip"
+    ],
+    [
+      "PASS",
+      "vector: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "saved 02_church_dtm_lidar.png"
+    ],
+    [
+      "PASS",
+      "2 original sources restored"
+    ],
+    [
+      "PASS",
+      "3 slope selection"
+    ],
+    [
+      "PASS",
+      "3 slope result"
+    ],
+    [
+      "PASS",
+      "slope: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "saved 03_slope_parcels.png"
+    ],
+    [
+      "PASS",
+      "4 NDVI selection"
+    ],
+    [
+      "PASS",
+      "4 NDVI result"
+    ],
+    [
+      "PASS",
+      "ndvi: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "saved 04_ndvi_parcels.png"
+    ],
+    [
+      "PASS",
+      "5 scoped vegetation result"
+    ],
+    [
+      "PASS",
+      "lidar: critical widgets fully visible"
+    ],
+    [
+      "PASS",
+      "saved 05_high_vegetation_roads.png"
+    ]
+  ]
+}

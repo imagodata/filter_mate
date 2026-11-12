@@ -25,6 +25,7 @@ from ...core.agent.tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
 
+
 def skill_prompts():
     """The skills of the agent (core/agent/skills.py) as MCP prompts: the same instructions as load_skill."""
     from ...core.agent.skills import SKILLS

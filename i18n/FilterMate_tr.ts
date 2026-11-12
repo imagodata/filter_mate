@@ -1168,6 +1168,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Yavaş bir bilgisayar için yalnızca süzme araçları</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama {} adresinde hiçbir model listelemedi: bir modelin adını yazın.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Ollama'da yüklü modeller ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>İşaretlenince yerel model yalnızca projeyi okuyan ve süzen araçları alır: her istekte okunacak metin yaklaşık yarıya iner. qwen3.5:4b ile ölçüldüğünde tüm araçlarla yanıtlar aynı ya da daha iyiydi.</translation>

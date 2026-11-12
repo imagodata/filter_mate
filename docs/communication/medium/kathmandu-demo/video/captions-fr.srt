@@ -1,0 +1,33 @@
+1
+00:00:00,000 --> 00:00:05,000
+Une question de terrain. Deux filtres. Un résultat ciblé.
+NASA / USGS SRTM · © contributeurs OpenStreetMap.
+
+2
+00:00:05,000 --> 00:00:10,000
+Choisissez une entité comme source.
+
+3
+00:00:10,000 --> 00:00:14,000
+Ou sélectionnez plusieurs entités.
+
+4
+00:00:14,000 --> 00:00:20,000
+Ou utilisez une expression QGIS.
+
+5
+00:00:20,000 --> 00:00:29,000
+Explorez : Zoom · Identifier · Aperçu · Suivi · Lien · Plus · Réinitialiser.
+
+6
+00:00:29,000 --> 00:00:38,000
+Pente SRTM → routes | ≥ 18 % (illustratif, pas une norme).
+
+7
+00:00:38,000 --> 00:00:45,000
+Routes filtrées → écoles OSM | tampon de 150 m
+
+8
+00:00:45,000 --> 00:00:56,000
+14 routes · 2 écoles. GeoPackage prêt à partager.
+Pas une évaluation d’accès ou de sécurité.

@@ -1168,6 +1168,16 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <translation>Hanya alat yang memfilter, untuk komputer lambat</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama tidak menampilkan model apa pun di {}: ketik nama salah satunya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Model yang terpasang di Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Jika dicentang, model lokal hanya mendapat alat yang membaca dan memfilter proyek: sekitar separuh bacaan di setiap permintaan. Diukur dengan qwen3.5:4b, semua alat menjawab sama baiknya atau lebih baik.</translation>

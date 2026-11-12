@@ -1168,6 +1168,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Sekin kompyuter uchun faqat filtrlovchi vositalar</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama {} manzilida hech qanday model ko'rsatmadi: birining nomini yozing.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Ollama'ga o'rnatilgan modellar ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Belgilansa, mahalliy model faqat loyihani o'qiydigan va filtrlaydigan vositalarni oladi: har bir so'rovda o'qiladigan matn taxminan yarmiga kamayadi. qwen3.5:4b bilan o'lchanganda barcha vositalar bilan javoblar shunday yoki yaxshiroq bo'ldi.</translation>

@@ -1168,6 +1168,16 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Nur die Filterwerkzeuge, für einen langsamen Rechner</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama hat unter {} kein Modell aufgelistet: geben Sie den Namen eines Modells ein.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>In Ollama installierte Modelle ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Angehakt erhält das lokale Modell nur die Werkzeuge, die das Projekt lesen und filtern: etwa halb so viel zu lesen bei jeder Anfrage. Gemessen mit qwen3.5:4b antworteten alle Werkzeuge genauso gut oder besser.</translation>
