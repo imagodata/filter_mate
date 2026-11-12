@@ -64,6 +64,11 @@
         <translation>ከዚህ በፊት ወደነበረው ተመለስ: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>ቅንብሮቹን ለመክፈት ጥያቄውን ያቁሙ ወይም እስኪያልቅ ይጠብቁ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>የሚቀለበስ ምንም የለም።</translation>

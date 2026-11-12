@@ -64,6 +64,11 @@
         <translation>Vissza ez elé: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>A beállítások megnyitásához állítsa le a kérést, vagy várja meg a végét.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Nincs mit visszavonni.</translation>

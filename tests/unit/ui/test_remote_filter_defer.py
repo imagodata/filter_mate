@@ -17,11 +17,15 @@ def _methods(*names, **namespace):
 
 
 def _task():
-    return SimpleNamespace(error=None, taskCompleted=MagicMock(), taskTerminated=MagicMock())
+    task = SimpleNamespace(error=None, taskCompleted=MagicMock(), taskTerminated=MagicMock(), followers=[])
+    task.when_settled = task.followers.append
+    return task
 
 
-def _settled(task, signal='taskCompleted'):
-    return getattr(task, signal).connect.call_args.args[0]
+def _settled(task):
+    """What the filter follows its read with, called from finished() of the task (#349)."""
+    follower, = task.followers
+    return follower
 
 
 @pytest.fixture
@@ -48,6 +52,14 @@ def run_queued(timer):
         call.args[1]()
 
 
+def test_the_filter_follows_its_read_from_finished_never_from_a_signal_of_the_task(deferred):
+    """#349: QGIS 4.2.2 on Windows died entering a Python function connected to taskTerminated of a read."""
+    deferred.task.taskCompleted.connect.assert_not_called()
+    deferred.task.taskTerminated.connect.assert_not_called()
+    assert len(deferred.task.followers) == 1
+    deferred.timer.singleShot.assert_not_called()
+
+
 def test_completed_selection_resumes_filter(deferred):
     deferred.controller._remote_selection_result = ('requested', [], '"id" IN (1)')
     deferred.slot.task = None
@@ -61,22 +73,17 @@ def test_completed_selection_resumes_filter(deferred):
 @pytest.mark.parametrize('change', ['layer', 'cancelled', 'other selection', 'failure', 'dropped delivery'])
 def test_a_filter_that_cannot_resume_says_so(deferred, change):
     """M11: a data change, a cancel from the task manager, a changed selection... never drop it silently."""
-    signal = 'taskCompleted'
     deferred.slot.task = None
     if change == 'layer':
         deferred.controller._remote_selection_result = ('requested', [], '')
         deferred.dock.current_layer = object()
-    elif change == 'cancelled':
-        signal = 'taskTerminated'
     elif change == 'other selection':
-        signal = 'taskTerminated'
         deferred.slot.task = _task()
         deferred.controller._remote_selection_pending = 'another selection'
     elif change == 'failure':
-        signal = 'taskTerminated'
         deferred.task.error = RuntimeError('read failed')
-    # 'dropped delivery': completed, but the delivery was rejected (changed UI / subset): no cached result
-    _settled(deferred.task, signal)()
+    # 'cancelled': no result; 'dropped delivery': completed, but the delivery was rejected (changed UI / subset)
+    _settled(deferred.task)()
     run_queued(deferred.timer)
     deferred.dock.launchTaskEvent.assert_not_called()
     deferred.warning.assert_called_once()
@@ -88,7 +95,7 @@ def test_a_filter_follows_an_equivalent_replacement_read(deferred):
     """M1: the read it waits for is replaced by one of the same selection (pick debounce)."""
     replacement = _task()
     deferred.slot.task = replacement
-    _settled(deferred.task, 'taskTerminated')()
+    _settled(deferred.task)()
     run_queued(deferred.timer)
     deferred.warning.assert_not_called()
     deferred.dock.launchTaskEvent.assert_not_called()

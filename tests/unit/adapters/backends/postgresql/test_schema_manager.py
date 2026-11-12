@@ -233,6 +233,24 @@ class TestExecuteCommands:
         assert result is False
 
 
+class TestEnsureTableStatsTransaction:
+    """2026-11-12: the task reuses its psycopg2 connection (materialized views, whose
+    commands start with a "SELECT 1" check): a transaction left aborted here failed
+    that check with InFailedSqlTransaction, one left open stayed idle in transaction."""
+
+    def test_a_failure_rolls_the_transaction_back(self, mock_connexion, mock_cursor):
+        mock_cursor.execute.side_effect = Exception("permission denied for view pg_stat_user_tables")
+
+        assert ensure_table_stats(mock_connexion, "stats_fail", "zone_mro", "geom", use_cache=False) is False
+        mock_connexion.rollback.assert_called_once()
+
+    def test_a_table_already_analyzed_leaves_no_transaction_open(self, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = (True,)
+
+        assert ensure_table_stats(mock_connexion, "stats_ok", "zone_mro", "geom", use_cache=False) is True
+        mock_connexion.rollback.assert_called_once()   # a read: nothing to commit
+
+
 # ===========================================================================
 # Tests -- get_session_prefixed_name
 # ===========================================================================

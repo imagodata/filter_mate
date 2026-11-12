@@ -64,6 +64,11 @@
         <translation>Tilbage til før: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Stop forespørgslen, eller vent til den er færdig, for at åbne indstillingerne.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Intet at fortryde.</translation>

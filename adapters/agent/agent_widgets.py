@@ -143,7 +143,9 @@ def stat_value(widget: Dict[str, Any]) -> Optional[float]:
     if layer is None:
         return None
     if widget.get("aggregate") == "count":
-        count = layer.featureCount()
+        # featureCount() of a web service can ask its server, on the main thread, at each refresh: not read.
+        from ..qgis.source_capability_probe import feature_count_or_none
+        count = feature_count_or_none(layer)
         return float(count) if isinstance(count, int) and count >= 0 else None
     from ..public_api.introspection import layer_statistics
     try:

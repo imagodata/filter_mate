@@ -158,3 +158,95 @@ class TestConnectWithFallback:
         monkeypatch.setattr(pg, "psycopg2", None)
         with pytest.raises(RuntimeError, match="psycopg2"):
             pg.pg_connect_with_fallback({"host": "x"})
+
+
+class FakeUri:
+    """The parts of QgsDataSourceUri read for a psycopg2 connection."""
+
+    def __init__(self, service='', host='', port='', database='', username='', password='', ssl='prefer'):
+        self._values = dict(service=service, host=host, port=port, database=database,
+                            username=username, password=password)
+        self._ssl = ssl
+
+    def __getattr__(self, name):
+        values = self.__dict__.get('_values', {})
+        if name in values:
+            return lambda: values[name]
+        raise AttributeError(name)
+
+    def sslMode(self):
+        return self._ssl
+
+    @staticmethod
+    def encodeSslMode(mode):
+        return mode
+
+
+@pytest.mark.unit
+class TestConnectKwargsFromUri:
+    """2026-11-12: a layer read through a pg_service.conf service was opened on libpq's defaults."""
+
+    def test_a_service_alone_lets_libpq_read_the_service_file(self, pg):
+        # an explicit empty host / dbname would hide the service's values
+        assert pg.connect_kwargs_from_uri(FakeUri(service='fibre')) == {'service': 'fibre'}
+
+    def test_with_a_service_the_host_and_port_come_from_the_service_as_in_qgis(self, pg):
+        # QgsDataSourceUri::connectionInfo() writes neither host nor port with a service
+        kwargs = pg.connect_kwargs_from_uri(FakeUri(service='fibre', host='db', port='5433', database='gis',
+                                                    username='u', password='p'))
+
+        assert kwargs == {'service': 'fibre', 'dbname': 'gis', 'user': 'u', 'password': 'p'}
+
+    def test_a_password_goes_only_with_a_user(self, pg):
+        assert pg.connect_kwargs_from_uri(FakeUri(service='fibre', password='p')) == {'service': 'fibre'}
+
+    def test_only_a_chosen_ssl_mode_is_passed(self, pg):
+        # prefer is the default of QGIS and of libpq, never written by QGIS either
+        assert 'sslmode' not in pg.connect_kwargs_from_uri(FakeUri(host='db', ssl='prefer'))
+        assert pg.connect_kwargs_from_uri(FakeUri(host='db', ssl='require'))['sslmode'] == 'require'
+
+    def test_credentials_of_an_authentication_configuration_replace_the_uri_ones(self, pg):
+        kwargs = pg.connect_kwargs_from_uri(FakeUri(host='db', username='uri_user'), user='auth_user', password='s')
+
+        assert kwargs['user'] == 'auth_user' and kwargs['password'] == 's'
+
+    def test_an_authentication_without_user_keeps_the_uri_user(self, pg):
+        # PKI / OAuth2 configurations give an empty user name: QGIS keeps the URI's
+        kwargs = pg.connect_kwargs_from_uri(FakeUri(host='db', username='uri_user'), user='', password='')
+
+        assert kwargs['user'] == 'uri_user'
+
+
+@pytest.mark.unit
+class TestConnectionIdentity:
+    """2026-11-12: layers of two services shared the cache entry "::" (host:port:database)."""
+
+    def test_two_services_are_two_databases(self, pg):
+        assert pg.connection_identity(FakeUri(service='fibre')) != pg.connection_identity(FakeUri(service='other'))
+
+    def test_the_same_database_is_one_identity(self, pg):
+        assert (pg.connection_identity(FakeUri(host='db', database='gis', username='u'))
+                == pg.connection_identity(FakeUri(host='db', database='gis', username='u')))
+
+    def test_users_differ_and_no_password_is_kept(self, pg):
+        mine = pg.connection_identity(FakeUri(host='db', database='gis', username='u', password='secret'))
+
+        assert mine != pg.connection_identity(FakeUri(host='db', database='gis', username='v'))
+        assert 'secret' not in repr(mine)
+
+    def test_the_authentication_configuration_is_part_of_it(self, pg):
+        assert (pg.connection_identity(FakeUri(host='db'), authcfg='abc1234')
+                != pg.connection_identity(FakeUri(host='db'), authcfg='xyz9876'))
+
+
+@pytest.mark.unit
+class TestServiceAttempts:
+    """A service's own options (gssencmode, hostaddr) are not overridden by the fast attempt."""
+
+    def test_a_service_gets_one_attempt_without_forced_options(self, pg):
+        attempts = pg.build_connect_attempts({'service': 'fibre', 'dbname': 'gis'})
+
+        assert len(attempts) == 1
+        label, kwargs = attempts[0]
+        assert 'gssencmode' not in kwargs and 'hostaddr' not in kwargs
+        assert kwargs['connect_timeout'] == pg.PLAIN_CONNECT_TIMEOUT_SECONDS   # a worker never waits unbounded
