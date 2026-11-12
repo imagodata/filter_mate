@@ -69,6 +69,9 @@ CREATE_WIDGET = "create_widget"
 REMOVE_WIDGET = "remove_widget"
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
+SHOW_SETTINGS_LINK = "show_settings_link"
+# The tabs of the settings dialog of the agent a link may open (ui/widgets/agent_panel.AgentSettingsDialog).
+SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "other_applications")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
@@ -183,6 +186,21 @@ CHAT_ONLY = (
             "recipe_id": {"type": "string", "minLength": 1, "maxLength": 20}},
             "required": ["recipe_id"], "additionalProperties": False},
         chat_only=True),
+    ToolSpec(
+        name=SHOW_SETTINGS_LINK, title="Show the user where a setting is",
+        description=("Put a button in the thread that takes the user to a setting they change themselves: a tab of "
+                     "the settings of the agent (provider: provider, model, key; sources: open data and connectors; "
+                     "autonomy: level, protected layers, expert mode; tools: always ask, always allow or never by "
+                     "tool; other_applications: the MCP server), or a setting of FilterMate in the configuration "
+                     "tree (target setting, with its path). Use it with your answer when the user should change "
+                     "something you may not (the settings of the agent, APP.OPTIONS.AGENT, a name or a path), or "
+                     "asks where a setting is. It changes nothing; the user clicks when they want. Returns shown."),
+        input_schema={"type": "object", "properties": {
+            "target": {"type": "string", "enum": list(SETTINGS_TABS) + ["setting"]},
+            "path": {"type": "string", "maxLength": 200,
+                     "description": "For target setting: the path of the setting (from describe_settings)"}},
+            "required": ["target"], "additionalProperties": False},
+        read_only=True, chat_only=True),
 )
 
 
@@ -190,6 +208,10 @@ DESCRIBE_SETTINGS = "describe_settings"
 GET_SETTING = "get_setting"
 CHANGE_SETTINGS = "change_settings"
 DIAGNOSE_PERFORMANCE = "diagnose_performance"
+EXPORT_SETTINGS_PROFILE = "export_settings_profile"
+APPLY_SETTINGS_PROFILE = "apply_settings_profile"
+_PROFILE_NAME = {"type": "string", "minLength": 1, "maxLength": 60,
+                 "description": "Name of the profile: letters, digits, spaces, dots, dashes, underscores"}
 _SETTING_PATH = {"type": "string", "minLength": 1, "maxLength": 200,
                  "description": "Path of the setting, e.g. APP.OPTIONS.QUERY_CACHE.enabled (or its last parts)"}
 # The settings of FilterMate itself (config.json), read in the plugin: served by the chat and by the MCP server of the
@@ -228,8 +250,9 @@ SETTINGS_TOOLS = (
         name=CHANGE_SETTINGS, title="Change settings of FilterMate",
         description=("Change settings of FilterMate itself (from describe_settings), all or none: each value is "
                      "checked against the choices or bounds of its setting. The user sees each setting before and "
-                     "after and says yes first, except how the panel looks at the autonomous level. Undone with the "
-                     "turn. Only when the user asks to change how FilterMate looks or works; read the setting first "
+                     "after and says yes first (in the chat, a card in the thread: the answer is then proposed and "
+                     "the next request says what they chose), except how the panel looks at the autonomous level. "
+                     "Undone with the turn. Only when the user asks to change how FilterMate looks or works; read the setting first "
                      "and say what it changes. The settings of the agent (APP.OPTIONS.AGENT), a name and local paths "
                      "are refused: tell the user where they are. Returns changed (path, before, after, effect: now, "
                      "next use or after restarting QGIS) and unchanged (already set)."),
@@ -253,6 +276,29 @@ SETTINGS_TOOLS = (
                      "timings, operations, slowest, timeouts_logged, errors_logged, log_from, log_to."),
         input_schema={"type": "object", "properties": {}, "additionalProperties": False},
         read_only=True, idempotent=True),
+    ToolSpec(
+        name=EXPORT_SETTINGS_PROFILE, title="Save the settings of FilterMate as a profile",
+        description=("Write the settings of FilterMate the user changed from their default as a profile, a small "
+                     "JSON file to share with a team, in the folder profiles of the export folder. Never the settings "
+                     "of the agent, a name, a path, a key or an account. Asked like a file (the autonomous level "
+                     "writes it alone). An existing profile is replaced only with replace true, once the user agreed. "
+                     "Returns file, name and settings (how many)."),
+        input_schema={"type": "object", "properties": {
+            "name": _PROFILE_NAME,
+            "replace": {"type": "boolean", "default": False,
+                        "description": "Replace a profile of that name; only once the user agreed"}},
+            "required": ["name"], "additionalProperties": False},
+        destructive=True),
+    ToolSpec(
+        name=APPLY_SETTINGS_PROFILE, title="Apply a profile of settings",
+        description=("Apply a profile of settings of FilterMate by its name, from the folder profiles of the export "
+                     "folder (a profile from a colleague is copied there first). Each setting is checked as with "
+                     "change_settings and the user sees each one before and after; 40 changes at most. What the "
+                     "profile may not set (the settings of the agent, a name, a path, an unknown setting, a value out "
+                     "of bounds) is left out and listed. Returns changed, unchanged and left_out, or proposed when "
+                     "the user decides in the thread."),
+        input_schema={"type": "object", "properties": {"name": _PROFILE_NAME},
+                      "required": ["name"], "additionalProperties": False}),
 )
 
 LOAD_SKILL = "load_skill"

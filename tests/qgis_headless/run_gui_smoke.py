@@ -566,6 +566,85 @@ def s_agent_settings_undo_check():
     return settled()
 
 
+def agent_chat():
+    return dock()._agent_chat
+
+
+def settings_call(changes, name="change_settings"):
+    messages = importlib.import_module(f'{PACKAGE}.core.agent.messages')
+    return messages.ToolCallPart("smoke", name, {"changes": changes, "reason": "smoke"} if name == "change_settings"
+                                 else changes)
+
+
+def s_agent_settings_card_check():
+    """A change of the settings proposed in the thread: nothing changes until Apply, which is a step of its own
+    (undone by Undo); Cancel changes nothing; a proposal whose settings changed since is refused."""
+    chat, handlers, path = agent_chat(), agent_settings().settings_handlers(), 'APP.OPTIONS.QUERY_CACHE.max_size'
+    start = config_value(path)
+
+    def propose(value):
+        call = settings_call([{'path': path, 'value': value}])
+        asked = chat.confirm(call)
+        answer = handlers['change_settings'](call.arguments)  # what the engine runs next: a proposal, no change
+        return asked, answer, chat._settings_cards[-1]
+    asked, answer, card = propose(333)
+    proposed_only = asked is True and 'proposed' in answer and config_value(path) == start
+    card.apply_button.click()
+    applied = card.done and config_value(path) == 333
+    chat._on_undo()
+    undone = config_value(path) == start
+    _asked, _answer, card = propose(444)
+    card.cancel_button.click()
+    cancelled = card.done and config_value(path) == start
+    _asked, _answer, card = propose(555)
+    handlers['change_settings']({'changes': [{'path': path, 'value': 222}], 'reason': 'smoke'})
+    card.apply_button.click()
+    stale = card.done and config_value(path) == 222
+    handlers['change_settings']({'changes': [{'path': path, 'value': start}], 'reason': 'smoke'})
+    check('settings card: proposed, applied as a step and undone, cancelled, stale refused',
+          proposed_only and applied and undone and cancelled and stale and len(chat._settings_outcomes) >= 3,
+          f"{proposed_only} {applied} {undone} {cancelled} {stale} {chat._settings_outcomes}")
+    chat._settings_outcomes = []
+    return waits(0.5)
+
+
+def s_agent_settings_link_check():
+    """show_settings_link: a button that selects the setting in the configuration tree."""
+    d, chat = dock(), agent_chat()
+    shown = chat._settings_link_tool({'target': 'setting', 'path': 'APP.OPTIONS.QUERY_CACHE.max_size'})
+    chat._links[-1]()
+    QApplication.processEvents()
+    index = d.config_view.currentIndex()
+    toolbox = d.toolBox_tabTools
+    check('settings link: the configuration opens on the setting', toolbox.currentWidget() is d.CONFIGURATION
+          and index.isValid() and index.data() == 'max_size', f"{shown} -> {index.data() if index.isValid() else None}")
+    toolbox.setCurrentWidget(d.FILTERING)  # the checks that follow expect FILTERING open
+    return waits(0.5)
+
+
+def s_agent_settings_profile_check():
+    """A profile saved with the settings changed, then applied again after a change."""
+    handlers = agent_settings().settings_handlers()
+    handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 444}],
+                                 'reason': 'smoke'})
+    saved = handlers['export_settings_profile']({'name': 'smoke team'})
+    with open(agent_settings()._profiles_folder() / 'smoke_team.json', encoding='utf-8') as stream:
+        content = json.load(stream)
+    handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 100}],
+                                 'reason': 'smoke'})
+    applied = handlers['apply_settings_profile']({'name': 'smoke team'})
+    check('settings profile: saved without the agent settings, applied again',
+          content['settings'].get('APP.OPTIONS.QUERY_CACHE.max_size') == 444
+          and not any(key.startswith('APP.OPTIONS.AGENT') for key in content['settings'])
+          and config_value('APP.OPTIONS.QUERY_CACHE.max_size') == 444
+          and [row['path'] for row in applied['changed']] == ['APP.OPTIONS.QUERY_CACHE.max_size'],
+          f"saved={saved} applied={applied}")
+    handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 100}],
+                                 'reason': 'smoke'})
+    agent_chat().new_conversation()  # the checks of the AGENT section that follow expect its welcome
+    return waits(0.5)
+
+
 def s_qt6_enums_check():
     """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
     from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
@@ -1702,6 +1781,7 @@ def s_finish():
 
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
+         s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,

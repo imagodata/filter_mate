@@ -11,7 +11,7 @@ import html
 import re
 from typing import Callable, List, Optional, Sequence
 
-from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QFontMetrics
 from qgis.PyQt.QtWidgets import (
     QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QSizePolicy, QVBoxLayout, QWidget,
@@ -111,6 +111,82 @@ class _Item:
         self.plain = plain
         self.kind = kind
         self.look = look
+
+
+class SettingsCard(QFrame):
+    """A change of the settings of FilterMate proposed in the thread: each setting before and after, the reason, and
+    two buttons. Nothing changes until Apply: the controller applies the change then (``apply_requested``) and closes
+    the card with ``finish``."""
+
+    apply_requested = pyqtSignal()
+    cancel_requested = pyqtSignal()
+
+    def __init__(self, texts: dict, lines: Sequence[str], reason: str, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("frame_agent_settings")
+        self._texts = texts
+        self._done = False
+        column = QVBoxLayout(self)
+        column.setContentsMargins(10, 10, 10, 10)
+        column.setSpacing(6)
+        self.heading = _plain_label(texts["heading"], self)
+        column.addWidget(self.heading)
+        self.rows = [_plain_label(line, self) for line in lines]
+        for row in self.rows:
+            row.setObjectName("label_agent_settings_row")
+            column.addWidget(row)
+        self.reason = _plain_label(reason, self) if reason else None
+        if self.reason is not None:
+            column.addWidget(self.reason)
+        self.note = _plain_label(texts["note"], self)
+        column.addWidget(self.note)
+        buttons = QHBoxLayout()
+        buttons.setContentsMargins(0, 0, 0, 0)
+        self.apply_button = QPushButton(texts["apply"], self)
+        self.apply_button.setObjectName("pushButton_agent_settings_apply")
+        self.cancel_button = QPushButton(texts["cancel"], self)
+        self.cancel_button.setObjectName("pushButton_agent_settings_cancel")
+        for button in (self.apply_button, self.cancel_button):
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            buttons.addWidget(button)
+        buttons.addStretch(1)
+        column.addLayout(buttons)
+        self.result = _plain_label("", self)
+        self.result.setVisible(False)
+        column.addWidget(self.result)
+        self.apply_button.clicked.connect(lambda: None if self._done else self.apply_requested.emit())
+        self.cancel_button.clicked.connect(lambda: None if self._done else self.cancel_requested.emit())
+
+    @property
+    def done(self) -> bool:
+        return self._done
+
+    def finish(self, accepted: bool) -> None:
+        """Applied or not: the buttons go, the outcome stays."""
+        if self._done:
+            return
+        self._done = True
+        for button in (self.apply_button, self.cancel_button):
+            button.setEnabled(False)
+            button.setVisible(False)
+        self.result.setText(self._texts["accepted" if accepted else "declined"])
+        self.result.setVisible(True)
+
+    def restyle(self, palette: dict, _dark: bool) -> None:
+        _sheet(self, f"QFrame#frame_agent_settings {{ background: {palette['fm_list']}; border: 1px solid"
+                     f" {palette['fm_accent']}; border-radius: 6px; }} QFrame#frame_agent_settings QLabel {{"
+                     " background: transparent; border: none; padding: 0px; }")
+        _sheet(self.heading, f"font-weight: 600; color: {palette['fm_text']};")
+        for row in self.rows:
+            _sheet(row, f"font-size: 12px; color: {palette['fm_text']};")
+        for label in (self.reason, self.note, self.result):
+            if label is not None:
+                _sheet(label, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        _sheet(self.apply_button, f"QPushButton {{ font-size: 12px; font-weight: 600; padding: 4px 14px; border: none;"
+                                  f" border-radius: 6px; background: {palette['fm_accent']}; color: white; }}")
+        _sheet(self.cancel_button, f"QPushButton {{ font-size: 12px; padding: 4px 12px; border: 1px solid"
+                                   f" {palette['fm_group_border']}; border-radius: 6px; background: {palette['fm_list']};"
+                                   f" color: {palette['fm_text']}; }}")
 
 
 class ChangeCard(QFrame):
@@ -351,6 +427,33 @@ class AgentThread(QScrollArea):
                                f" padding: 4px 12px; border: 1px solid {palette['fm_danger']}; border-radius: 6px;"
                                f" background: {palette['fm_list']}; color: {strong}; }}")
         self._append(_Item(card, f"! {title}" + (f"\n   {detail}" if detail else ""), "error", look))
+        self.end_answer()
+
+    def add_settings_card(self, texts: dict, lines: Sequence[str], reason: str) -> "SettingsCard":
+        """A change of the settings asked in the thread (SettingsCard); the caller waits for ``answered``."""
+        card = SettingsCard(texts, lines, reason, self._content)
+        plain = "\n".join([texts["heading"], *(f"   {line}" for line in lines)] + ([f"   {reason}"] if reason else []))
+        self._append(_Item(card, plain, "settings", card.restyle))
+        self.end_answer()
+        return card
+
+    def add_link(self, label: str, on_click: Callable[[], None]) -> None:
+        """A button of the agent that takes the user somewhere (a tab of the settings, a setting)."""
+        row = QWidget(self._content)
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        button = QPushButton(label, row)
+        button.setObjectName("pushButton_agent_link")
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.clicked.connect(on_click)
+        layout.addWidget(button)
+        layout.addStretch(1)
+
+        def look(palette: dict, _dark: bool) -> None:
+            _sheet(button, f"QPushButton#pushButton_agent_link {{ font-size: 12px; font-weight: 500; padding: 4px 12px;"
+                           f" border: 1px solid {palette['fm_accent']}; border-radius: 6px;"
+                           f" background: {palette['fm_list']}; color: {palette['fm_accent']}; }}")
+        self._append(_Item(row, f"→ {label}", "link", look))
         self.end_answer()
 
     def set_hint(self, text: str) -> None:

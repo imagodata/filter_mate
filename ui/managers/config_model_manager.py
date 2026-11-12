@@ -297,6 +297,9 @@ class ConfigModelManager:
         if not getattr(dw, 'widgets_initialized', False) or not isinstance(dw.CONFIG_DATA, dict) \
                 or getattr(dw, 'config_model', None) is None:
             raise RuntimeError("the FilterMate panel is not ready")
+        if 'APP.DOCKWIDGET.LANGUAGE' in values and self._language_change_pending:
+            # The tree skips a change while one is pending, and the pending one would then be saved over it.
+            raise RuntimeError("a change of language is under way: try again in a moment")
         saved = copy.deepcopy(dw.CONFIG_DATA)
         try:
             missing = {path: value for path, value in values.items()
@@ -328,6 +331,31 @@ class ConfigModelManager:
             except Exception:
                 logger.exception("Configuration not put back after a failed change")
             raise RuntimeError(f"the settings could not be applied ({exc})") from exc
+
+    def reveal_setting(self, path):
+        """Open the CONFIGURATION section and select the row of the setting ``path``; False when it is not shown."""
+        dw = self.dockwidget
+        model = getattr(dw, 'config_model', None)
+        item = self._value_item(model, path.split(".")) if model is not None else None
+        view = getattr(dw, 'config_view', None)
+        if item is None or view is None:
+            return False
+        toolbox = getattr(dw, 'toolBox_tabTools', None)
+        page = getattr(dw, 'CONFIGURATION', None)
+        if toolbox is not None and page is not None and toolbox.indexOf(page) >= 0:
+            toolbox.setCurrentWidget(page)
+        container = getattr(dw, 'config_view_container', None)
+        if container is not None and hasattr(container, 'set_search_text'):
+            container.set_search_text("")  # a filter left in the search would hide the row
+        index = item.index().siblingAtColumn(0)
+        parent = index.parent()
+        while parent.isValid():
+            view.expand(parent)
+            parent = parent.parent()
+        view.setCurrentIndex(index)
+        view.scrollTo(index)
+        view.setFocus()
+        return True
 
     @staticmethod
     def _editable_leaf(item):

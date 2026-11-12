@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **A change of the settings is proposed in the thread.** The agent's change of a setting now shows as a card in the conversation, every setting before and after, with Apply and Cancel, instead of a dialog; nothing changes until you click Apply, which you can undo like any other step. When the agent may not change a setting itself (its own settings, a name, a path), it puts a button that opens the right tab of the agent settings, or selects the setting in the configuration. Ask it to save your settings as a profile to share with your team, or to apply one copied in the profiles folder of the export folder: a profile never holds the settings of the agent, a name or a path, and applying one is shown setting by setting. Undoing a turn leaves a setting you changed meanwhile as you set it, and going back to before a step restores the settings changed from it.
+
 ## [5.1.0] - 2026-11-12
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

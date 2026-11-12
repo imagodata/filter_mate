@@ -34,7 +34,7 @@ To explain a setting, only read: describe_settings and get_setting change nothin
   section) and everything in the settings dialog of the agent (provider, model, key, consent, autonomy level, tools,
   protected layers, expert mode, MCP server). change_settings refuses the first; the second is not reachable. Tell
   the user where it is: the configuration tree for APP.OPTIONS.AGENT, Agent settings (menu ⋯ of the AGENT panel)
-  for the rest. You may suggest what narrows the agent: protecting a layer (tab Autonomy), a tool set to
+  for the rest. In the chat, show_settings_link puts a button that opens that tab or shows that setting. You may suggest what narrows the agent: protecting a layer (tab Autonomy), a tool set to
   "always ask" or "never" (tab Tools), a lower level.
 - A name and local paths (APP.USER_IDENTITY, CROSS_FILTER cache_dir and pdal_path): only said set or empty; the user
   sets them in the configuration tree.
@@ -51,6 +51,11 @@ To explain a setting, only read: describe_settings and get_setting change nothin
 - Exports: APP.OPTIONS.STREAMING_EXPORT, APP.OPTIONS.GPKG_PRESERVE_GROUPS.
 - Undo history: APP.OPTIONS.HISTORY.max_history_size.
 - Map after a filter: APP.OPTIONS.EXPLORATION.auto_zoom_on_filter.
+- To share a setup with a team: export_settings_profile writes the settings the user changed as a profile file in
+  profiles/ of the export folder; apply_settings_profile applies one by its name from that folder (a colleague's
+  profile is copied there first), shown like change_settings; tell the user what it left out.
+- In the chat, a change you ask may come back as proposed: the user decides on a card in the thread. Do not call it
+  again; the next request says what they chose.
 
 ## Slow filters
 

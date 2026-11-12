@@ -12,9 +12,11 @@ from typing import Any, Callable, Dict, List, Optional
 
 from ...core.agent.settings_reference import (
     Setting, describe, get, leaf_values, load_default, plan, read_settings)
-from ...core.agent import skills
+from ...core.agent import settings_profile, skills
 from ...core.agent.performance import summary as performance_summary
-from ...core.agent.tool_catalog import CHANGE_SETTINGS, DESCRIBE_SETTINGS, DIAGNOSE_PERFORMANCE, GET_SETTING, LOAD_SKILL
+from ...core.agent.tool_catalog import (
+    APPLY_SETTINGS_PROFILE, CHANGE_SETTINGS, DESCRIBE_SETTINGS, DIAGNOSE_PERFORMANCE, EXPORT_SETTINGS_PROFILE, GET_SETTING,
+    LOAD_SKILL)
 from ...core.agent.tool_executor import ToolFailure
 
 logger = logging.getLogger("FilterMate")
@@ -23,6 +25,60 @@ _DEFAULT: Optional[Dict[str, Any]] = None
 # Applies {path: value} in the panel and returns the paths it applied; None while no panel is there.
 Applier = Callable[[Dict[str, Any]], List[str]]
 _applier: Optional[Applier] = None
+# The values the agent applied, by path, since the recorder of the turn last took them (turn_effects): the value
+# "after" of an undo is what the agent set, not what the setting holds at the end of the turn (the user may have
+# changed it meanwhile, and an undo must then leave it).
+_applied: Dict[str, Any] = {}
+
+
+def take_applied() -> Dict[str, Any]:
+    """The values the agent applied since the last call, and forget them."""
+    taken = dict(_applied)
+    _applied.clear()
+    return taken
+
+
+# Calls the chat showed to the user as a card instead of running them (the controller marks them before they run):
+# their handler only says what is proposed. Keyed by the tool and its arguments.
+_deferred: List[str] = []
+
+
+def _key(name: str, arguments: Dict[str, Any]) -> str:
+    import json
+    return name + json.dumps(arguments, sort_keys=True, ensure_ascii=False, default=str)
+
+
+def defer(name: str, arguments: Dict[str, Any]) -> None:
+    """The next call of ``name`` with ``arguments`` proposes instead of changing: the user decides in the thread."""
+    _deferred.append(_key(name, arguments))
+
+
+def _take_deferred(name: str, arguments: Dict[str, Any]) -> bool:
+    key = _key(name, arguments)
+    if key in _deferred:
+        _deferred.remove(key)
+        return True
+    return False
+
+
+# The plan the user saw (a card or a dialog), by call: a profile changed on disk between the question and the run
+# is refused rather than applied unseen.
+_frozen: Dict[str, List[Dict[str, Any]]] = {}
+
+
+def freeze(name: str, arguments: Dict[str, Any], rows: List[Dict[str, Any]]) -> None:
+    _frozen[_key(name, arguments)] = [dict(row) for row in rows]
+
+
+def _check_frozen(name: str, arguments: Dict[str, Any], rows: List[Dict[str, Any]]) -> None:
+    shown = _frozen.pop(_key(name, arguments), None)
+    if shown is not None and [(row["path"], row["after"]) for row in shown] != [(row["path"], row["after"]) for row in rows]:
+        raise ToolFailure("Nothing changed: the profile changed since the user saw it. Tell them; call again to show "
+                          "it anew.")
+
+
+PROPOSED_NOTE = ("Shown to the user in the thread, with Apply and Cancel: nothing changed yet. Do not call it again; "
+                 "the next request says what they chose.")
 
 
 def set_applier(applier: Optional[Applier]) -> None:
@@ -91,11 +147,94 @@ def planned(arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
     return plan(settings_rows(), arguments.get("changes") or [])
 
 
+PROFILES_FOLDER = "profiles"
+
+
+def _profiles_folder():
+    from ...filtermate_api.config import _default_export_root
+    from ...filtermate_api.export_root import prepare_export_root, resolve_export_folder
+    return resolve_export_folder(prepare_export_root(_default_export_root()), PROFILES_FOLDER)
+
+
+def _profile_file(arguments: Dict[str, Any]):
+    """The file of the profile a call names, in profiles/ of the export folder only: a team copies a profile there.
+    Never a path the model gives: it could point at another machine (a share) or probe which files exist."""
+    return _profiles_folder() / settings_profile.file_name(str(arguments.get("name", "")))
+
+
+def planned_profile(arguments: Dict[str, Any]):
+    """(rows of plan, left out, name) of the profile a call names; ``ValueError`` when it cannot be read."""
+    import stat
+    path = _profile_file(arguments)
+    try:
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode):  # a link, a pipe, a device: never read
+            raise ValueError(f"no profile {path.name}")
+        with open(path, "rb") as stream:
+            data = stream.read(settings_profile.MAX_BYTES + 1)
+        text = data.decode("utf-8")
+    except FileNotFoundError:
+        raise ValueError(f"no profile {path.name}") from None
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ValueError(f"the profile {path.name} cannot be read ({type(exc).__name__})") from None
+    name, values = settings_profile.read(text)
+    rows, left_out = settings_profile.changes(settings_rows(), values)
+    return rows, left_out, name or path.stem
+
+
+def _export_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        file = settings_profile.file_name(str(arguments.get("name", "")))
+        folder = _profiles_folder()
+    except (ValueError, OSError) as exc:
+        raise ToolFailure(str(exc)) from None
+    target = folder / file
+    if target.exists() and not arguments.get("replace"):
+        raise ToolFailure(f"A profile {file} exists already: ask the user, then call again with replace true to "
+                          f"replace it, or choose another name.")
+    profile = settings_profile.build(settings_rows(), str(arguments["name"]))
+    try:
+        folder.mkdir(mode=0o700, parents=True, exist_ok=True)
+        target.write_text(settings_profile.dumps(profile), encoding="utf-8")
+    except OSError as exc:
+        raise ToolFailure(f"The profile could not be written ({type(exc).__name__}).") from None
+    return {"file": f"{PROFILES_FOLDER}/{file}", "folder": "the export folder", "name": profile["name"],
+            "settings": len(profile["settings"])}
+
+
+def _row_out(row: Dict[str, Any]) -> Dict[str, Any]:
+    return {key: row[key] for key in ("path", "before", "after", "effect")}
+
+
+def _apply_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        rows, left_out, name = planned_profile(arguments)
+    except ValueError as exc:
+        raise ToolFailure(str(exc)) from None
+    _check_frozen(APPLY_SETTINGS_PROFILE, arguments, rows)
+    if _take_deferred(APPLY_SETTINGS_PROFILE, arguments):
+        answer: Dict[str, Any] = {"proposed": [_row_out(row) for row in rows if row["before"] != row["after"]],
+                                  "note": PROPOSED_NOTE}
+    else:
+        answer = apply_planned(rows)
+    answer["profile"] = name
+    if left_out:
+        answer["left_out"] = left_out
+    return answer
+
+
 def _change(arguments: Dict[str, Any]) -> Dict[str, Any]:
     try:
         rows = planned(arguments)
     except ValueError as exc:
         raise ToolFailure(str(exc)) from None
+    if _take_deferred(CHANGE_SETTINGS, arguments):
+        return {"proposed": [_row_out(row) for row in rows if row["before"] != row["after"]], "note": PROPOSED_NOTE}
+    return apply_planned(rows)
+
+
+def apply_planned(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Apply rows of ``plan`` (checked already): the answer of change_settings; ToolFailure when nothing changed."""
     changes = [row for row in rows if row["before"] != row["after"]]
     unchanged = [row["path"] for row in rows if row["before"] == row["after"]]
     if not changes:
@@ -105,6 +244,8 @@ def _change(arguments: Dict[str, Any]) -> Dict[str, Any]:
     except RuntimeError as exc:  # apply_settings put the configuration back
         raise ToolFailure(f"Nothing changed: {exc}.") from None
     now = leaf_values(current_config(), [change["path"] for change in changes])
+    # What the agent really set, for the undo of the turn (a path the panel did not take is not recorded).
+    _applied.update({change["path"]: change["after"] for change in changes if now.get(change["path"]) == change["after"]})
     answer: Dict[str, Any] = {
         "changed": [{key: change[key] for key in ("path", "before", "after", "effect")} for change in changes
                     if now.get(change["path"]) == change["after"]],
@@ -149,4 +290,5 @@ def _load_skill(arguments: Dict[str, Any]) -> Dict[str, Any]:
 def settings_handlers() -> Dict[str, Callable[[Dict[str, Any]], Any]]:
     """The handlers of the settings and skill tools, by name."""
     return {DESCRIBE_SETTINGS: _describe, GET_SETTING: _get, CHANGE_SETTINGS: _change,
-            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _load_skill}
+            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _load_skill,
+            EXPORT_SETTINGS_PROFILE: _export_profile, APPLY_SETTINGS_PROFILE: _apply_profile}
