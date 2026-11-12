@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import math
+from decimal import ROUND_HALF_UP, Context, Decimal
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
 
 RANGE, VALUES, STAT, CHART = "range", "values", "stat", "chart"
@@ -52,6 +53,11 @@ def _number(value: Any) -> Optional[float]:
     return number if math.isfinite(number) else None
 
 
+def _rounded_as_before(value: float) -> float:
+    """``value`` with the 2 decimals a range showed in FilterMate 5.1, ties away from 0 as Qt rounds them."""
+    return float(Decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP, context=Context(prec=400)))
+
+
 def _scalar(value: Any) -> bool:
     return value is None or isinstance(value, (str, int, float, bool))
 
@@ -75,6 +81,9 @@ def _clean(widget: Any) -> Optional[Dict[str, Any]]:
         start, end = _number(widget.get("low")), _number(widget.get("high"))
         start = low if start is None else min(max(start, low), high)
         end = high if end is None else min(max(end, start), high)
+        if not widget.get("integer"):  # a bound at an end, saved rounded by FilterMate 5.1 (0.125 saved 0.13)
+            start = low if start == _rounded_as_before(low) else start
+            end = high if end == _rounded_as_before(high) else end
         out.update(minimum=low, maximum=high, low=start, high=end,
                    integer=bool(widget.get("integer")))
     elif kind == VALUES:
@@ -152,6 +161,9 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
             raise WidgetError(f"{field!r} has no numeric values among the features shown: a range needs numbers.")
         if low == high:
             raise WidgetError(f"Every feature shown has the same value of {field!r} ({low:g}): nothing to choose.")
+        places = decimals({"integer": integer, "minimum": low, "maximum": high})
+        if round(low, places) == round(high, places):  # the two ends of the box would be one number
+            raise WidgetError(f"The values of {field!r} shown differ by too little for a range ({low!r} to {high!r}).")
         entry.update(minimum=low, maximum=high, low=low, high=high, integer=bool(integer))
     elif kind == VALUES:
         found = [value for value in (values or ()) if _scalar(value)]
@@ -180,13 +192,16 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
 
 def decimals(widget: Dict[str, Any]) -> int:
     """The decimals a range widget shows its bounds with: none for whole numbers, else at least 2 and enough for a
-    hundredth of its span (a field between 0.001 and 0.005 is not rounded to 0)."""
+    hundredth of its span (a field between 0.001 and 0.005 is not rounded to 0), but never a step Qt 5 takes for no
+    change: it compares two numbers within 1e-12 of their size as equal (qFuzzyCompare)."""
     if widget.get("integer"):
         return 0
     span = widget["maximum"] - widget["minimum"]
-    if not 0 < span < math.inf:
-        return 2
-    return min(MAX_DECIMALS, max(2, math.ceil(2 - math.log10(span) - 1e-9)))  # 1e-9: 2.0000000001 is 2
+    places = max(2, math.ceil(2 - math.log10(span) - 1e-9)) if 0 < span < math.inf else 2  # 1e-9: 2.0000000001 is 2
+    size = max(abs(widget["minimum"]), abs(widget["maximum"]))
+    if size > 0:
+        places = min(places, math.floor(11 - math.log10(size)))
+    return max(0, min(MAX_DECIMALS, places))
 
 
 def _format_number(value: float, integer: bool) -> str:

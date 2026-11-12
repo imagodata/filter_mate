@@ -100,9 +100,9 @@ class TestRange:
         state = _moved(_range(0.0, 10.0), high=3.0, low=7.0)
         assert (state["low"], state["high"]) == (7.0, 7.0)
 
-    def test_a_bound_an_older_version_rounded_at_an_end_is_put_back_at_the_end(self):
-        state = _moved(_range(0.125, 10.006, low=0.13), high=5.0)
-        assert state["low"] == 0.125
+    def test_a_bound_saved_rounded_at_an_end_by_5_1_stays_at_the_end(self):
+        stored = model.parse(model.dumps([_range(0.125, 0.9, low=0.13)]))[0]  # 3 decimals now: shown 0.130
+        assert model.condition(_moved(stored, high=0.5), _quote, repr) == '"f" <= 0.5'
 
     def test_whole_numbers_for_an_integer_field(self):
         widget = model.make([], model.RANGE, "L1", "communes", "", field="n", minimum=3, maximum=17, integer=True)
@@ -155,6 +155,44 @@ class TestStrip:
         assert [state["chosen"] for state in emitted] == [["a", "b"]]
         card = strip.cards["w1"]
         assert [card.values.item(row).checkState() == Qt.CheckState.Checked for row in range(3)] == [True, True, False]
+
+    def test_a_value_typed_without_enter_is_applied_before_a_redraw(self, strip):
+        widget = dict(_range(0.0, 10.0), id="w1")
+        strip.set_widgets([widget])
+        _run()
+        emitted = []
+        strip.changed.connect(emitted.append)
+        strip.cards["w1"].low.lineEdit().setText("4")  # typed, Enter not pressed
+        strip.set_widgets([widget, _stat(2)])
+        assert [state["low"] for state in emitted] == [4.0] and strip.cards["w1"].low.value() == 4.0
+
+    def test_a_widget_removed_or_changed_meanwhile_keeps_its_filter(self, strip):
+        strip.set_widgets([_values(1), _values(2)])
+        _run()
+        emitted = []
+        strip.changed.connect(emitted.append)
+        strip.cards["w1"].values.item(1).setCheckState(Qt.CheckState.Checked)
+        strip.set_widgets([_values(2)])  # its ✕ (or an undo) took it out of the project first
+        strip.cards["w2"].values.item(1).setCheckState(Qt.CheckState.Checked)
+        strip.set_widgets([_values(2, chosen=["c"])])  # an undo brought another state back
+        _run(strip_module.APPLY_DELAY_MS + 100)
+        assert emitted == [] and strip.cards["w2"].widget["chosen"] == ["c"]
+
+    def test_what_applying_before_a_redraw_answered_is_shown_on_the_new_card(self, strip):
+        strip.set_widgets([_values(1)])
+        _run()
+        strip.changed.connect(lambda state: strip.set_error(state["id"], "Refused by the layer."))
+        strip.cards["w1"].values.item(1).setCheckState(Qt.CheckState.Checked)
+        strip.set_widgets([_values(1), _stat(2)])
+        assert strip.cards["w1"].error.text() == "Refused by the layer."
+
+    def test_an_error_shown_makes_room_for_itself(self, strip):
+        strip.set_widgets([_stat(1), dict(_range(0.0, 1.0), id="w2")])
+        _run()
+        before = strip._area.height()
+        strip.set_error("w2", "The layer is being edited: save or discard its edits to filter it. " * 2)
+        _run()
+        assert strip._area.height() > before and not strip._area.verticalScrollBar().isVisible()
 
     def test_the_layer_name_in_a_tooltip_is_not_read_as_html(self, strip):
         strip.set_widgets([dict(_values(1), layer_name='<img src="file:///x.png">')])

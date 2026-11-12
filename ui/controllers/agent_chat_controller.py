@@ -760,8 +760,10 @@ class AgentChatController(QObject):
             elif widget["kind"] == CHART:
                 self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
         # Read on this thread, up to MAX_STAT_FEATURES features a widget: the next refresh waits three times as long as
-        # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change.
-        self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
+        # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change. One
+        # delay for all the widgets; a timer already counting is left alone (setInterval would start it again).
+        if not self._stat_timer.isActive():
+            self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""

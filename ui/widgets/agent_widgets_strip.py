@@ -153,6 +153,7 @@ class WidgetCard(QFrame):
         super().__init__(parent)
         self.setObjectName("frame_agent_widget")
         self.widget = dict(widget)
+        self.applied = dict(widget)  # the state drawn or last applied: what the project holds of this widget
         self._timer = QTimer(self)
         self._timer.setSingleShot(True)
         self._timer.setInterval(APPLY_DELAY_MS)
@@ -283,8 +284,6 @@ class WidgetCard(QFrame):
             other.setValue(moved.value())
             other.blockSignals(False)
             self.widget[other_key] = self.widget[key]
-        elif other.value() in (other.minimum(), other.maximum()):  # at an end, the end (an older version rounded it)
-            self.widget[other_key] = self._bound(other)
         self._timer.start()
 
     def _on_values(self, _item=None) -> None:
@@ -293,10 +292,14 @@ class WidgetCard(QFrame):
         self._timer.start()
 
     def _emit(self) -> None:
+        self.applied = dict(self.widget)
         self.changed.emit(dict(self.widget))
 
     def flush(self) -> bool:
         """Apply now what waits for the pause (tests, and a widget about to go); True when something was."""
+        for box in (self.low, self.high):
+            if box is not None:
+                box.interpretText()  # a value typed without Enter
         if not self._timer.isActive():
             return False
         self._timer.stop()
@@ -357,18 +360,20 @@ class WidgetsStrip(QFrame):
         if shape == self._shape and all(card.widget == states.get(key) for key, card in self.cards.items()):
             return
         # What was typed or ticked in the last moments is applied before its card goes, and drawn again as it is
-        # now: ``widgets`` was read before.
-        flushed = {key: card.widget for key, card in self.cards.items() if card.flush()}
+        # now (``widgets`` was read before), unless its widget was removed or changed meanwhile (✕, an undo): its
+        # filter stays as it was.
+        flushed = {key: card for key, card in self.cards.items() if states.get(key) == card.applied and card.flush()}
         for card in self.cards.values():
             self._column.removeWidget(card)  # deleteLater alone leaves it in the column, measured, until it goes
+            card.blockSignals(True)  # what hiding it commits is not applied
             card.hide()
             card.deleteLater()
         self.cards = {}
         for widget in widgets:
-            state = flushed.get(widget["id"])
-            if state is not None and _shape(state) == _shape(widget):
-                widget = dict(widget, **{key: state[key] for key in ("low", "high", "chosen") if key in state})
-            card = WidgetCard(widget, self._inner)
+            old = flushed.get(widget["id"])
+            card = WidgetCard(old.widget if old is not None else widget, self._inner)
+            if old is not None:  # with what applying it answered, said to the card that went
+                card.set_error(old.error.text())
             card.changed.connect(self.changed)
             card.remove_requested.connect(self.remove_requested)
             self._column.insertWidget(self._column.count() - 1, card)
@@ -385,7 +390,10 @@ class WidgetsStrip(QFrame):
         one counts for nothing. The height is fixed both ways: the scroll area keeps the size hint it had first.
         """
         self._inner.adjustSize()
-        self._area.setFixedHeight(min(self._inner.sizeHint().height(), STRIP_MAX_HEIGHT))
+        width = self._area.viewport().width()
+        column = self._column
+        height = column.totalHeightForWidth(width) if column.hasHeightForWidth() else self._inner.sizeHint().height()
+        self._area.setFixedHeight(min(height, STRIP_MAX_HEIGHT))
         self.updateGeometry()
 
     def set_value(self, widget_id: str, text: str) -> None:
@@ -403,6 +411,11 @@ class WidgetsStrip(QFrame):
         card = self.cards.get(widget_id)
         if card is not None:
             card.set_error(text)
+            self._fit_timer.start()
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt name
+        super().resizeEvent(event)
+        self._fit_timer.start()  # wrapped lines (an error) take another height at another width
 
     def refresh_look(self) -> None:
         palette = tokens(plugin_is_dark(self))

@@ -1039,7 +1039,7 @@ class AgentSettingsDialog(QDialog):
         for layer_id, name, protected in self._project_layers:
             item = QListWidgetItem(name, self.protected_layers)
             item.setData(Qt.ItemDataRole.UserRole, layer_id)
-            item.setToolTip(layer_id)
+            item.setToolTip(plain_tooltip(layer_id))
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked if protected else Qt.CheckState.Unchecked)
         protected_note = QLabel(_tr("The agent reads them and uses them as a source, but never changes them: no "
