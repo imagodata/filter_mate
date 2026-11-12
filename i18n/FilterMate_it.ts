@@ -813,6 +813,11 @@ Sei d'accordo?</translation>
         <translation>Il passo {} non è stato eseguito: modificherebbe un layer che hai protetto dall'agente ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Il passo {} non è stato eseguito: non è stato possibile leggere i layer protetti dall'agente ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Il passaggio {} non è stato eseguito: hai disattivato il suo strumento per l'agente ({}).</translation>

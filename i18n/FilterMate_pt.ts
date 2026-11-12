@@ -813,6 +813,11 @@ Você concorda?</translation>
         <translation>A etapa {} não foi executada: ela alteraria uma camada que você protegeu do agente ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>O passo {} não foi executado: não foi possível ler as camadas que protegeu do agente ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>A etapa {} não foi executada: você desativou a ferramenta dela para o agente ({}).</translation>

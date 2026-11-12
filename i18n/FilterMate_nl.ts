@@ -813,6 +813,11 @@ Gaat u akkoord?</translation>
         <translation>Stap {} is niet uitgevoerd: deze zou een laag wijzigen die u tegen de agent hebt beschermd ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Stap {} is niet uitgevoerd: de lagen die u tegen de agent hebt beschermd, konden niet worden gelezen ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Stap {} is niet uitgevoerd: u hebt het hulpmiddel ervan uitgezet voor de agent ({}).</translation>

@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>ደረጃ {} አልተሠራም፦ ከወኪሉ የጠበቁትን ንብርብር ይቀይር ነበር ({})።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ደረጃ {} አልተካሄደም፦ ከወኪሉ የጠበቋቸው ንብርብሮች ሊነበቡ አልቻሉም ({})።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ደረጃ {} አልተሠራም፦ መሣሪያውን ለወኪሉ አጥፍተዋል ({})።</translation>

@@ -813,6 +813,11 @@ Onaylıyor musunuz?</translation>
         <translation>{}. adım çalıştırılmadı: ajandan koruduğunuz bir katmanı değiştirecekti ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>{}. adım çalıştırılmadı: ajandan koruduğunuz katmanlar okunamadı ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}. adım çalıştırılmadı: aracısını ajan için kapattınız ({}).</translation>

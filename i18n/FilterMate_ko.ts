@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트로부터 보호한 레이어를 변경하게 됩니다({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>단계 {}이(가) 실행되지 않았습니다: 에이전트로부터 보호한 레이어를 읽을 수 없습니다 ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트에 대해 해당 도구를 꺼 두었습니다 ({}).</translation>

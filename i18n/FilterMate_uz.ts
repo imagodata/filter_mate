@@ -813,6 +813,11 @@ Rozimisiz?</translation>
         <translation>{}-qadam bajarilmadi: u agentdan himoya qilgan qatlamingizni o‘zgartirgan bo‘lardi ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>{}-qadam bajarilmadi: agentdan himoyalangan qatlamlarni o‘qib bo‘lmadi ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}-qadam bajarilmadi: uning vositasini agent uchun o'chirib qo'ygansiz ({}).</translation>

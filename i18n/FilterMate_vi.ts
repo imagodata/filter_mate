@@ -813,6 +813,11 @@ Bạn có đồng ý không?</translation>
         <translation>Bước {} không được chạy: bước này sẽ thay đổi một lớp bạn đã bảo vệ khỏi tác tử ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Bước {} không được chạy: không thể đọc các lớp bạn đã bảo vệ khỏi tác tử ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Bước {} đã không chạy: bạn đã tắt công cụ của bước này cho tác nhân ({}).</translation>

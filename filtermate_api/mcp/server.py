@@ -392,7 +392,7 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Apply a filter expression", idempotent=True))
     async def apply_filter(
         layer_name: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "Name of a VECTOR layer (not its id; the first vector layer of that name is used)"))],
+            "A VECTOR layer: its id, or its name (an id first; by name, the first vector layer of that name)"))],
         expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
             "Subset string: the provider's SQL WHERE clause, without the WHERE keyword. For a PostgreSQL, "
             "GeoPackage, Shapefile or Spatialite layer: \"population\" > 10000 AND \"dep\" = '31'. "

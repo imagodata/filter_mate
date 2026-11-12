@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>ไม่ได้เรียกใช้ขั้นตอนที่ {}: ขั้นตอนนี้จะเปลี่ยนชั้นข้อมูลที่คุณป้องกันไว้จากเอเจนต์ ({})</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ไม่ได้เรียกใช้ขั้นตอน {}: ไม่สามารถอ่านชั้นข้อมูลที่คุณป้องกันจากเอเจนต์ได้ ({})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ขั้นตอนที่ {} ไม่ได้ทำงาน: คุณปิดเครื่องมือของขั้นตอนนี้สำหรับเอเจนต์ ({})</translation>

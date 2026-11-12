@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>Шаг {} не выполнен: он изменил бы слой, который вы защитили от агента ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Шаг {} не выполнен: не удалось прочитать слои, защищённые от агента ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Шаг {} не выполнен: вы отключили его инструмент для агента ({}).</translation>

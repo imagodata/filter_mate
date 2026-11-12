@@ -813,6 +813,11 @@ Sunteți de acord?</translation>
         <translation>Pasul {} nu a fost executat: ar modifica un strat pe care l-ați protejat de agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Pasul {} nu a fost executat: straturile protejate de agent nu au putut fi citite ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Pasul {} nu a fost executat: ați dezactivat instrumentul său pentru agent ({}).</translation>

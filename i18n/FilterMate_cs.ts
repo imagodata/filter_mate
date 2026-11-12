@@ -813,6 +813,11 @@ Souhlasíte?</translation>
         <translation>Krok {} nebyl proveden: změnil by vrstvu, kterou jste chránili před agentem ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Krok {} nebyl proveden: vrstvy, které jste před agentem chránili, nelze přečíst ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Krok {} nebyl proveden: vypnuli jste jeho nástroj pro agenta ({}).</translation>

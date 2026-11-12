@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>El paso {} no se ejecutó: cambiaría una capa que usted protegió del agente ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>El paso {} no se ejecutó: no se pudieron leer las capas que protegió del agente ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>El paso {} no se ejecutó: desactivó su herramienta para el agente ({}).</translation>
