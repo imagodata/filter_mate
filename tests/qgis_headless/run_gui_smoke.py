@@ -628,7 +628,7 @@ def s_agent_settings_profile_check():
     handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 444}],
                                  'reason': 'smoke'})
     saved = handlers['export_settings_profile']({'name': 'smoke team'})
-    with open(agent_settings()._profiles_folder() / 'smoke_team.json', encoding='utf-8') as stream:
+    with open(agent_settings()._profiles_folder() / 'smoke team.json', encoding='utf-8') as stream:
         content = json.load(stream)
     handlers['change_settings']({'changes': [{'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 100}],
                                  'reason': 'smoke'})

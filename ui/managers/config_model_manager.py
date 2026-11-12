@@ -344,10 +344,7 @@ class ConfigModelManager:
         page = getattr(dw, 'CONFIGURATION', None)
         if toolbox is not None and page is not None and toolbox.indexOf(page) >= 0:
             toolbox.setCurrentWidget(page)
-        container = getattr(dw, 'config_view_container', None)
-        if container is not None and hasattr(container, 'set_search_text'):
-            container.set_search_text("")  # a filter left in the search would hide the row
-        index = item.index().siblingAtColumn(0)
+        index = item.index().siblingAtColumn(0)  # the search only highlights rows: the user's search stays
         parent = index.parent()
         while parent.isValid():
             view.expand(parent)

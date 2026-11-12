@@ -61,8 +61,9 @@ def test_applying_a_profile_leaves_out_what_it_may_not_set(default):
 
 
 def test_file_names_are_plain():
-    assert profile.file_name("Equipe SIG") == "Equipe_SIG.json"
-    for wrong in ("", "../x", ".hidden", "a/b", "x" * 61, "NUL", "con.backup", "COM1"):
+    assert profile.file_name("Equipe SIG") == "Equipe SIG.json"
+    assert profile.file_name("a b") != profile.file_name("a_b")  # one name, one file
+    for wrong in ("", "../x", ".hidden", "a/b", "x" * 61, "NUL", "con.backup", "COM1", "nul x", "team."):
         with pytest.raises(ValueError):
             profile.file_name(wrong)
 
