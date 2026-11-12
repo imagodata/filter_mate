@@ -664,9 +664,16 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False)
             "cache_write_tokens": session.usage.cache_write_tokens}
 
 
+SKILLS_PATH = Path(__file__).resolve().parent.parent / "skills"
+
+
 def load_cases(only: Optional[Sequence[str]] = None) -> List[Dict[str, Any]]:
+    """The shared cases, then those of each skill (skills/<name>/evals.json)."""
     with open(CASES_PATH, encoding="utf-8") as stream:
         cases = json.load(stream)["cases"]
+    for evals in sorted(SKILLS_PATH.glob("*/evals.json")):
+        with open(evals, encoding="utf-8") as stream:
+            cases += json.load(stream)["cases"]
     return [case for case in cases if not only or case["id"] in only]
 
 

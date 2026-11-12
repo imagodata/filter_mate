@@ -1,11 +1,15 @@
 ---
-name: filtermate-configuration
-description: Configure FilterMate through the MCP server of the FilterMate QGIS plugin: set FilterMate up for the user (look, language, messages, raster and point cloud options, timeouts, caches) and find why filters are slow. Use when the user asks to configure FilterMate, change how it looks or works, or why its filters are slow.
+name: configuration
+title: Configure FilterMate
+description: set FilterMate up for the user (look, language, messages, raster and point cloud options, timeouts, caches, profiles) and find why filters are slow
+metadata:
+  version: 1
+  plugin_min: 5.1.0
+  audience: chat, mcp
+  tools: describe_settings, get_setting, change_settings, diagnose_performance, show_settings_link, export_settings_profile, apply_settings_profile
+  risk: change
+  trust: builtin
 ---
-
-<!-- Generated from core/agent/skills.py by scripts/export_agent_skills.py: do not edit by hand. -->
-
-Needs the MCP server of FilterMate: in QGIS, Agent settings (menu ⋯ of the AGENT panel), tab Other applications: turn it on and copy the configuration for this application. Its tools carry the names below.
 
 # Configure FilterMate
 

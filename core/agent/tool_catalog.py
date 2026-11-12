@@ -302,7 +302,7 @@ SETTINGS_TOOLS = (
 )
 
 LOAD_SKILL = "load_skill"
-# Instructions for one kind of task, sent when the task comes rather than with every request (core/agent/skills.py).
+# Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by core/agent/skills.py).
 SKILL_TOOLS = (
     ToolSpec(
         name=LOAD_SKILL, title="Load the instructions of a task",

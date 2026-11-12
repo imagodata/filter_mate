@@ -27,10 +27,10 @@ logger = logging.getLogger("FilterMate.agent")
 
 
 def skill_prompts():
-    """The skills of the agent (core/agent/skills.py) as MCP prompts: the same instructions as load_skill."""
-    from ...core.agent.skills import SKILLS
+    """The skills of the agent (skills/<name>/, read by core/agent/skills.py) as MCP prompts: the same instructions as load_skill."""
+    from ...core.agent.skills import for_audience
     return tuple(McpPrompt(f"filtermate_{skill.name}", skill.title, skill.summary, skill.body)
-                 for skill in SKILLS.values())
+                 for skill in for_audience("mcp"))
 
 
 def settings_resources():

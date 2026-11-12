@@ -551,11 +551,14 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   (never a path the model gives: a share or a probe of the disk), 40 changes at most, each shown, and lists what it
   left out.
 - `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
-- Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
-  and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt
-  `filtermate_configuration` and the settings reference as the resource `filtermate://settings/reference`;
-  `skills/filtermate-configuration/SKILL.md` is the same text as an Agent Skill for an application connected to it
-  (`scripts/export_agent_skills.py`, checked by a test).
+- Skills: one folder each in `skills/` of the plugin, `SKILL.md` (header of an Agent Skill plus the fields of
+  FilterMate under `metadata`, then the instructions) and `evals.json` (its cases for the bench); the standard is
+  `skills/README.md`, checked by `tests/unit/agent/test_skills_standard.py`, read by `core/agent/skills.py` without
+  YAML. `configuration` says how to find, explain and change a setting, what never to change, and how to read the
+  timings of a slow filter. The MCP server of the plugin serves the skills of audience `mcp` as prompts
+  (`filtermate_configuration`) and the settings reference as the resource `filtermate://settings/reference`;
+  `skills/export/filtermate-<name>/SKILL.md` is the same text as an Agent Skill for an application connected to it
+  (`scripts/export_agent_skills.py`, checked by a test; not in the plugin zip).
 
 What the chat adds to the REST checks, because a model can be steered by what it reads:
 

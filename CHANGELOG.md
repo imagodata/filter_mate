@@ -6,6 +6,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### AGENT (experimental)
 
+- **Skills follow a standard.** Each skill of the agent is now a folder of the plugin, `skills/<name>/`, with its instructions (`SKILL.md`, the format of Agent Skills with the fields of FilterMate) and its test cases; the standard is `skills/README.md`, and the tests refuse a skill that names a tool or a setting that does not exist, tells the model to get around a question, or comes without a trap case.
 - **A change of the settings is proposed in the thread.** The agent's change of a setting now shows as a card in the conversation, every setting before and after, with Apply and Cancel, instead of a dialog; nothing changes until you click Apply, which you can undo like any other step. When the agent may not change a setting itself (its own settings, a name, a path), it puts a button that opens the right tab of the agent settings, or selects the setting in the configuration. Ask it to save your settings as a profile to share with your team, or to apply one copied in the profiles folder of the export folder: a profile never holds the settings of the agent, a name or a path, and applying one is shown setting by setting. Undoing a turn leaves a setting you changed meanwhile as you set it, and going back to before a step restores the settings changed from it.
 
 ### Filtering
