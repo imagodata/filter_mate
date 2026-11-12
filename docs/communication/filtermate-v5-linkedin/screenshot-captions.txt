@@ -1,0 +1,47 @@
+1. 01_roads_buildings.jpg
+Caption: A named-street corridor keeps the result small enough to inspect. The full QGIS interface remains visible.
+Alt text: Full QGIS view with Layers, Browser and toolbars, showing buildings and parcels within 50 metres of Boulevard Henri Arlet.
+
+2. 01_roads_buildings-settings.jpg
+Caption: Street expression, Buildings and Parcels targets, Intersect predicate and 50 m buffer.
+Alt text: Native FilterMate widget crops showing the named-street expression, Buildings and Parcels targets, Intersect and a 50 metre buffer.
+
+3. 02_church_dtm_lidar.jpg
+Caption: The yellow outline identifies the selected building. Both outputs use the same 50 m boundary.
+Alt text: Full QGIS window showing the selected church and clipped LiDAR, with the Layers list and FilterMate targets visible.
+
+4. 02_church_dtm_lidar-settings.jpg
+Caption: Single Selection, the two target layers and the 50 m buffer.
+Alt text: Native FilterMate widgets showing Church in Single Selection, DTM and LiDAR targets, Intersect and a 50 metre buffer.
+
+5. 02_church_dtm_lidar-terrain.jpg
+Caption: The original FilterMate DTM clip with a local grayscale contrast stretch.
+Alt text: QGIS-rendered DTM elevation inside the church buffer, with a yellow church outline and RGB context.
+
+6. 02_church_dtm_lidar-map.jpg
+Caption: Classified LiDAR clipped to the same church buffer.
+Alt text: QGIS-rendered LiDAR classification colours clipped to the church and its 50 metre buffer.
+
+7. 03_slope_parcels.jpg
+Caption: Amber: selected slope pixels. Teal outlines: parcels passing the 50% coverage criterion. Tile-wide count; the map shows a detail.
+Alt text: QGIS showing selected steep-ground pixels in amber and retained parcels in teal over a natural-colour orthophoto, beside the complete histogram and threshold widgets.
+
+8. 03_slope_parcels-settings.jpg
+Caption: Slope quantity, complete histogram, Min and Max fields, Parcels target and coverage ≥ 50%.
+Alt text: Large native widget detail showing Slope percent, the full histogram, a minimum of 20 percent, the Parcels target and 50 percent coverage.
+
+9. 04_ndvi_parcels.jpg
+Caption: Green: pixels matching NDVI > 0.3. Teal outlines: parcels passing the 50% coverage criterion. Tile-wide count; the map shows a detail.
+Alt text: Full QGIS view showing green selected vegetation pixels and retained parcels over an RGB orthophoto, with band roles and the full NDVI expression visible.
+
+10. 04_ndvi_parcels-settings.jpg
+Caption: All three band roles, the complete two-band NDVI expression, Parcels target and coverage ≥ 50%.
+Alt text: Native FilterMate widget close-up with NIR, red and green band roles, the complete NDVI greater than 0.3 formula, Parcels target and 50 percent coverage.
+
+11. 05_high_vegetation_roads.jpg
+Caption: A scoped LiDAR query checks the same boulevard instead of highlighting most of the town.
+Alt text: Full QGIS window with Layers and toolbars showing high-vegetation LiDAR points and matching road segments on Boulevard Henri Arlet.
+
+12. 05_high_vegetation_roads-settings.jpg
+Caption: Class 5 selected, the explicit boulevard candidate layer, Intersect and a 3 m buffer.
+Alt text: Large native FilterMate widgets showing High vegetation class 5, the Boulevard Henri Arlet target, Intersect and a 3 metre buffer.

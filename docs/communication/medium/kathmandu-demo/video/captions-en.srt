@@ -1,0 +1,33 @@
+1
+00:00:00,000 --> 00:00:05,000
+One terrain question. Two filters. A focused result.
+NASA / USGS SRTM · © OpenStreetMap contributors.
+
+2
+00:00:05,000 --> 00:00:10,000
+Choose one feature as the source.
+
+3
+00:00:10,000 --> 00:00:14,000
+Or choose several features.
+
+4
+00:00:14,000 --> 00:00:20,000
+Or use a QGIS expression.
+
+5
+00:00:20,000 --> 00:00:29,000
+Explore: Zoom · Identify · Preview · Track · Link · More · Reset.
+
+6
+00:00:29,000 --> 00:00:38,000
+SRTM slope → roads | ≥18% (illustrative, not a standard).
+
+7
+00:00:38,000 --> 00:00:45,000
+Filtered roads → OSM schools | 150 m buffer
+
+8
+00:00:45,000 --> 00:00:56,000
+14 roads · 2 schools. GeoPackage ready to share.
+Not an access or safety assessment.

@@ -1073,3 +1073,85 @@ Result: Que veux-tu faire dans cette session ?
   (onnxruntime excepté). Référence au 12/11 : 4 échecs `test_expression_builder` + `test_theme_icons` (artefact du test :
   faux paquet `_real_qt_theme_styles` sous lequel `from ..layout` ne remonte pas) côté venv, `test_canceled_selection_is_not_read`
   côté Docker.
+
+- [2026-10-30] Stratégie de communication FilterMate : série d'articles « One spatial question, one filter »,
+  centrés sur le mécanisme source → cible (vecteur/raster/LiDAR), puis adaptation en posts LinkedIn et courtes
+  démos. L'utilisateur ne veut pas réutiliser les exemples déjà publiés sur le site ou dans les assets existants :
+  tout article doit partir d'un cas original, avec données et résultat validés avant publication. Le brouillon Medium
+  fondé sur l'exemple LiDAR de Sarlat et son guide ont été supprimés à sa demande. Un brouillon Barsac PPRI → BD TOPO
+  a ensuite été remplacé à la demande par un cas international avec données libres et simples d'accès : SRTM
+  (USGS EarthExplorer, téléchargement gratuit avec compte) autour de Kathmandu → filtrage des routes OpenStreetMap
+  par pente, puis routes retenues → écoles OSM par proximité. Seuil de pente 18 % et tampon 150 m explicitement
+  illustratifs, pas des normes. Le workflow a été vérifié dans QGIS 4.2.3 avec FilterMate 5.0.1 : 14 routes retenues
+  sur 305, puis 2 écoles ; export GeoPackage vérifié. Article et guide dans `docs/communication/medium/`; stratégie :
+  `docs/communication/strategy.md`.
+- [2026-10-30] Vidéo Kathmandu produite pour l'article Medium SRTM + OSM (storyboard :
+  `docs/communication/medium/video-storyboard.md`). Master 55,5 s, 16:9 1080p H.264, capturé depuis la vraie fenêtre
+  QGIS sur l'écran 1 ; captions anglaises incrustées et sous-titres français séparés. Modes vectoriels single /
+  multiple / expression montrés comme alternatives, boutons Zoom et Selecting, vrai flux raster SRTM → routes OSM →
+  écoles OSM, puis export final. Pas de voix off ni de coupe sociale ; possibles suites. Les captures, projet et
+  GeoPackage final sont listés dans le guide de publication.
+- [2026-10-30] Priorité marketing du site FilterMate : montrer le workflow complet « question spatiale → filtres
+  enchaînés → inspection / affinement → export des seules couches finales ». Ne pas recycler les cas publiés pour
+  prouver le chaînage ; créer un nouveau cas multi-étapes validé et montrer chaque source, cible, opérateur et
+  état intermédiaire dans le même projet, avec Undo/Redo. Formulation préférée : pas d'exports/copies intermédiaires
+  manuels, plutôt que « tout en mémoire » : vecteurs utilisent des subset filters sans copie/suppression, tandis
+  que raster/nuage de points sont découpés dans des fichiers temporaires pendant le filtre. Export matérialise les
+  entités actuellement visibles des couches choisies. Stratégie et propositions FR/EN dans
+  `docs/communication/strategy.md`.
+- [2026-10-30] Extension marketing du workflow : les favoris sont des recettes de filtres réutilisables, rattachées
+  au projet (ou globales) ; ne pas promettre qu'un favori rejoue arbitrairement toute une chaîne/historique. JSON
+  permet import/export ; l'extension optionnelle `favorites_sharing`, avec QGIS Resource Sharing, permet de parcourir
+  des collections Git, forker un favori dans le projet et publier des recettes d'équipe. L'extension QFieldCloud
+  prend les couches actuellement filtrées, construit un projet compatible QFieldSync et le pousse vers QFieldCloud
+  pour préparation/utilisation dans QField ; ce n'est pas FilterMate exécuté dans l'application mobile QField.
+  Positionnement suggéré : « Enregistrez le filtre. Partagez la recette. Emportez le résultat sur le terrain. »
+  Rendre les dépendances optionnelles explicites. Détails stratégie : `docs/communication/strategy.md`.
+- [2026-10-30] Vidéo Kathmandu finale : capture effectuée dans QGIS natif Windows 4.2.3, avec FilterMate 5.0.1
+  chargé depuis le workspace WSL et un profil QGIS isolé. Master H.264/AAC final de 55,7 s en 1920×1080, avec
+  narration anglaise générée localement et captions anglaises incrustées ; sous-titres français séparés. La capture
+  montre les sélections single / multiple / expression, les boutons Exploring, le filtre raster SRTM → routes,
+  le filtre routes → écoles et l'export. Export Windows vérifié : 14 routes et 2 écoles. Le script `record_demo.py`
+  accepte `FILTERMATE_FFMPEG` pour utiliser un exécutable FFmpeg explicite ; les frames sont horodatées pour
+  conserver la durée réelle des opérations et les sous-titres sont résolus depuis le dossier vidéo. Le master du
+  dépôt est issu de la capture Windows. Guide, storyboard et article précisent désormais la capture et la narration.
+
+## [2026-11-10] AGENT et objets dessinés sur un raster (PR #301)
+- `map_context.drawn_objects` : seuls les objets qui sélectionnent dans le dock (cible objet + moteur SAM) ;
+  `raster_selection.dock_objects` est remplacé par les WKT dans l'accesseur QGIS, jamais envoyés au modèle.
+- `segment_objects` (tchat, MCP, `POST /objects/segment`) : `segment_from_features` sur le thread principal, marqué
+  `operations.running` (un appel REST en file est refusé au lieu de s'imbriquer), budget 20 s entre deux fenêtres,
+  sortie en GeoPackage temporaire comme `run_algorithm` (Rétablir la rouvre). Erreurs dites par
+  `SegmentFromFeaturesAlgorithm.told_reason` : jamais de traceback ni de chemin au modèle.
+- `QGISFilterMateAccessor._control` : premier paramètre positionnel seul, sinon le `name=` d'une couche entre en
+  collision (`add_layer` / `add_service_layer` levaient TypeError jusqu'en 5.1.0).
+- Un nouvel appel `tr(` dans un module absent de `i18n/FilterMate.pro` fait échouer `test_i18n_pro_sources` :
+  reconnaître les messages d'un algorithme dans l'algorithme lui-même.
+
+## [2026-11-11] Objets similaires SAM : candidats des features et tri garder/rejeter (PR #310)
+- Banc `scripts/sam_similar_candidates.py`, règle écrite dans son en-tête avant le run, décision par
+  `scripts/sam_similar_candidates_analysis.py` (shapely, sans QGIS). Adoptés : 10 pics de features après les
+  taches de couleur (`SIMILAR_FEATURE_CANDIDATES`, `SIMILAR_FEATURE_MIN`), tri après 3 décisions
+  (`SORT_AFTER_DECISIONS`, `closer_to_rejected`). Non adopté : features seules (plus précis, rappel inchangé).
+- Un message ajouté entre deux passes complètes de traduction : `scripts/i18n_add_message.py` puis
+  `scripts/i18n_release.sh` (lrelease Docker) et `scripts/i18n_check_qm.py`. `pylupdate5` brut défait les contextes
+  posés par les scripts de contexte (≈ 215 000 lignes) : ne pas committer sa sortie seule.
+
+## [2026-11-11] AGENT : objets semblables à un exemple (PR #312)
+- `similar_objects` (`adapters/public_api/drawn_objects.py`) : exemple = entité sélectionnée ou dernier objet du dock,
+  recherche par les seules features de SAM (variante « features seules » du banc `sam_similar_candidates.py` :
+  précision 0,55, rappel 0,20), fenêtres `search_windows` (64 max, 20 s), sortie GeoPackage temporaire. Le dock garde
+  l'union couleur + features (il peut trier à la main), l'agent la variante la plus précise (il ne le peut pas).
+- Avant `gh pr merge`, refaire `git fetch` : d'autres sessions fusionnent dans main entre la vérification et le merge.
+
+## [2026-11-11] Images de la carte pour le serveur MCP natif (PR #317)
+- `map_image` et `contact_sheet` (`MCP_ONLY`) : l'image part vers l'application qui la demande, jamais vers le
+  fournisseur du tchat ; un gestionnaire répond `WithImages`, `ToolResultPart.images` porte les images, le protocole
+  les envoie en blocs `image`. Lecture seule et open world : chaque envoi est journalisé dans le fil.
+- Juge visuel des similaires (`scripts/sam_vision_judge.py`, Haiku 5.5) non adopté : les erreurs sont des contours.
+  Haiku 5.5 refuse `temperature` et raisonne avant de répondre (prévoir des milliers de jetons de sortie).
+
+## [2026-11-11] Objets similaires : masque d'aire la plus proche, non adopté (PR #325)
+- `SamOnnxProvider.predict_by_area` (aires lues en basse résolution) : rappel en hausse, précision en forte baisse
+  (set C neuf : 0,50 → 0,21). La recherche garde le masque le mieux noté par SAM.
+- Méthode : quand le set A n'a servi à aucun réglage et contredit B, confirmation préenregistrée sur des données neuves.

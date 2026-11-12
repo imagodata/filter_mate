@@ -1,0 +1,127 @@
+[
+  {
+    "file": "screenshots/00_sarlat_overview-map.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/00_sarlat_overview-panel.jpg",
+    "width": 900,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/00_sarlat_overview-settings.jpg",
+    "width": 900,
+    "height": 1249
+  },
+  {
+    "file": "screenshots/00_sarlat_overview.jpg",
+    "width": 3030,
+    "height": 2070
+  },
+  {
+    "file": "screenshots/01_roads_buildings-map.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/01_roads_buildings-panel.jpg",
+    "width": 900,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/01_roads_buildings-settings.jpg",
+    "width": 900,
+    "height": 1172
+  },
+  {
+    "file": "screenshots/01_roads_buildings.jpg",
+    "width": 3030,
+    "height": 2070
+  },
+  {
+    "file": "screenshots/02_church_dtm_lidar-map.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/02_church_dtm_lidar-panel.jpg",
+    "width": 900,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/02_church_dtm_lidar-settings.jpg",
+    "width": 900,
+    "height": 1249
+  },
+  {
+    "file": "screenshots/02_church_dtm_lidar-terrain.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/02_church_dtm_lidar.jpg",
+    "width": 3030,
+    "height": 2070
+  },
+  {
+    "file": "screenshots/03_slope_parcels-map.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/03_slope_parcels-panel.jpg",
+    "width": 900,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/03_slope_parcels-settings.jpg",
+    "width": 900,
+    "height": 1432
+  },
+  {
+    "file": "screenshots/03_slope_parcels.jpg",
+    "width": 3030,
+    "height": 2070
+  },
+  {
+    "file": "screenshots/04_ndvi_parcels-map.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/04_ndvi_parcels-panel.jpg",
+    "width": 900,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/04_ndvi_parcels-settings.jpg",
+    "width": 900,
+    "height": 1594
+  },
+  {
+    "file": "screenshots/04_ndvi_parcels.jpg",
+    "width": 3030,
+    "height": 2070
+  },
+  {
+    "file": "screenshots/05_high_vegetation_roads-map.jpg",
+    "width": 1767,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/05_high_vegetation_roads-panel.jpg",
+    "width": 900,
+    "height": 1818
+  },
+  {
+    "file": "screenshots/05_high_vegetation_roads-settings.jpg",
+    "width": 900,
+    "height": 1573
+  },
+  {
+    "file": "screenshots/05_high_vegetation_roads.jpg",
+    "width": 3030,
+    "height": 2070
+  }
+]

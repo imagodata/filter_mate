@@ -1,0 +1,30 @@
+Data validation — Sarlat-la-Canéda — 21 October 2026
+
+AREA
+559000, 6422000, 560000, 6423000 in Lambert-93 (EPSG:2154): a 1 km² tile. Exact polygon intersection confirms that 100% lies inside Sarlat-la-Canéda (INSEE 24520).
+
+BUILDINGS AND ROADS
+1,528 BD TOPO buildings and 553 road segments. For both WFS responses, the returned count equals the total matched count. No empty or invalid geometries. Identifiers are unique.
+
+PARCELS
+The entire official DGFiP/Etalab municipal dataset was downloaded (September 2026 release, 15,462 parcels). All 1,561 parcels intersecting the tile were retained with their full geometry, including any part extending beyond the tile. No duplicate identifiers or empty/invalid geometries. This is a complete spatial extract for the tile, rather than the whole municipal dataset.
+
+LiDAR
+Local IGN tile LHD_FXX_0559_6423_PTS_O_LAMB93_IGN69.copc.laz.
+20,948,050 points. COPC provider and index load in QGIS 4.2.3, in EPSG:2154. File extent: 559000–559999.99 / 6422000–6422999.99. These checks validate the file and its coverage; they do not independently validate each point or classification.
+
+DTM
+A demonstration derivative generated from class 2 ground points using PDAL IDW, with a 3 m radius. The 1 m grid is cropped to exactly the same extent as the orthophotos (1000 × 1000 pixels).
+Ground gaps beneath buildings were interpolated using GDAL FillNodata with a maximum search distance of 40 pixels and one smoothing iteration. The final raster has 100% valid pixels. It is not an official IGN terrain model.
+
+ORTHOPHOTOS
+Official IGN RGB and colour-infrared imagery captured at 25 cm: 4000 × 4000 pixels, three bands, matching extents. CIR band order: NIR, red, green. RGB order: red, green, blue.
+The inherited value 255 was removed as a NoData marker so saturated white pixels remain valid within the covered area. Both final images have 100% valid pixels. JPEG compression, quality 92; spectral indices are demonstration selections whose interpretation depends on the imagery.
+
+PORTABLE PROJECT
+sarlat-verified-layers.qgz uses relative references to the data folder. All seven project layers are delivered without filters. Extract the entire folder before opening it, preferably to a normal local Windows path for GeoPackage access. project-validation.json records the native QGIS read-back checks.
+
+CAPTURE METHOD
+Six real QGIS views: one unfiltered overview and five filtered scenarios. The mixed DTM/LiDAR extraction uses FilterMate’s public Python API with the configured dock visible. The other scenarios drive the dock. The map is rendered by QGIS and placed into the canvas area of the window capture to ensure the render is complete. Full-window captures retain Layers, Browser, menus, toolbars and status bar. Separate settings details stack two native widget crops to remove unused space; the raw full docks are also supplied. All key controls in the six saved views passed visibility checks. One preparatory check ran before layout settled and failed; the subsequent overview check and every scenario check passed. The original log is retained in validation-logs/revised-linkedin_shots.log. The separate terrain map re-renders the original retained FilterMate VRT with a local grayscale display stretch (134.697–151.197 m) to show its relief; terrain-display.json records the range. Source raster values are unchanged. The cover combines the real street-corridor screenshot with English typography.
+
+Sources are recorded in sources.json. Detailed checks are in data-audit.json. Preparation and capture scripts are in scripts/. Existing user projects and datasets were not replaced.

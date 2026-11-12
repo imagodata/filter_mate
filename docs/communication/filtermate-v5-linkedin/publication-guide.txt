@@ -1,0 +1,17 @@
+Publishing the FilterMate 5 article on LinkedIn
+
+1. Review linkedin-article.html or the illustrated linkedin-article.pdf.
+2. Copy the title and body from linkedin-article.txt into LinkedIn’s article editor.
+3. Use linkedin-cover.jpg as the article cover.
+4. For each of the five examples, insert its full-window JPEG and its separate -settings.jpg detail at the positions shown in the HTML edition. The DTM/LiDAR example also supplies separate -terrain.jpg and -map.jpg views. screenshot-captions.txt contains captions and alt text.
+5. Use linkedin-post.txt as the accompanying post.
+
+SCREENSHOTS
+Full-window captures retain QGIS’s Layers panel, Browser, menus, toolbars and status bar. Native PNG originals and high-resolution JPEGs are supplied. The -panel files show the complete raw dock. The -settings files stack actual widget crops to remove unused space, keeping the criteria, targets, predicate, buffer and coverage readable. No controls were drawn or generated.
+
+00_sarlat_overview shows the complete source dataset before filtering. Views 01–05 show filtered results; their smaller parcel sets do not indicate incomplete source data. The slope and NDVI numbers apply to the whole tile; their maps show a detail. The vegetation example explicitly scopes its target to the nine Boulevard Henri Arlet segments.
+
+The mixed DTM/LiDAR operation uses the public Python API with the matching dock configuration visible. Other scenarios drive the dock. Data provenance and capture checks are in data-validation.txt and verification-summary.json.
+
+QGIS PROJECT
+The data folder and sarlat-verified-layers.qgz form the portable, unfiltered seven-layer project. Keep them together and extract the folder before opening it. The publication ZIP excludes the GIS datasets; the project ZIP includes them. The article and image assets in the publication ZIP are the revised edition.
