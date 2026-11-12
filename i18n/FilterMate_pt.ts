@@ -1043,6 +1043,26 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Receitas</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Oferecer todas as ferramentas ao modelo local</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Somente as ferramentas que filtram, para um computador lento</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Marcado, o modelo local recebe apenas as ferramentas que leem e filtram o projeto: cerca de metade do que ler em cada pedido. Medido com qwen3.5:4b, todas as ferramentas responderam tão bem ou melhor.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Desmarcado, um modelo local recebe as ferramentas que leem e filtram o projeto: cabem em uma GPU de 8 GB. Todas as ferramentas precisam de cerca do dobro da memória.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Salvar a última solicitação como receita…</translation>

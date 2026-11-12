@@ -1043,6 +1043,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>配方</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>向本地模型提供所有工具</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>仅筛选工具，适用于较慢的电脑</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>勾选后，本地模型只获得读取和筛选项目的工具：每次请求要读的内容约减半。用 qwen3.5:4b 实测，使用全部工具时回答同样好或更好。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>关闭时，本地模型只获得读取和筛选项目的工具：它们可在 8 GB 显存的 GPU 上运行。全部工具约需两倍的内存。</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>将上一个请求保存为配方…</translation>

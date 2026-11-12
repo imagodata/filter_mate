@@ -1043,6 +1043,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Συνταγές</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Όλα τα εργαλεία για το τοπικό μοντέλο</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Μόνο τα εργαλεία φιλτραρίσματος, για αργό υπολογιστή</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Όταν είναι επιλεγμένο, το τοπικό μοντέλο παίρνει μόνο τα εργαλεία που διαβάζουν και φιλτράρουν το έργο: περίπου το μισό κείμενο σε κάθε αίτημα. Με μέτρηση στο qwen3.5:4b, όλα τα εργαλεία απάντησαν εξίσου καλά ή καλύτερα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Όταν είναι ανενεργό, ένα τοπικό μοντέλο παίρνει τα εργαλεία που διαβάζουν και φιλτράρουν το έργο: χωρούν σε GPU 8 GB. Όλα τα εργαλεία χρειάζονται περίπου διπλάσια μνήμη.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Αποθήκευση του τελευταίου αιτήματος ως συνταγή…</translation>

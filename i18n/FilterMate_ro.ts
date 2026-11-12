@@ -1043,6 +1043,26 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Rețete</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Oferă toate instrumentele modelului local</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Doar instrumentele care filtrează, pentru un calculator lent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Bifat, modelul local primește doar instrumentele care citesc și filtrează proiectul: cam jumătate de citit la fiecare cerere. Măsurat cu qwen3.5:4b, toate instrumentele au răspuns la fel de bine sau mai bine.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Dezactivat, un model local primește instrumentele care citesc și filtrează proiectul: încap într-un GPU de 8 GB. Toate instrumentele necesită aproximativ dublul memoriei.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Salvează ultima cerere ca rețetă…</translation>

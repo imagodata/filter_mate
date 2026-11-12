@@ -483,7 +483,8 @@ class QGISFilterMateAccessor:
             _refuse_protected(name, {"layer": layer})
             function = getattr(_plugin_module("adapters.public_api.layer_style"), name)
             try:
-                return function(layer, *args, **kwargs)
+                # Refused while FilterMate filters: a style reads the layer the task is changing.
+                return _unless_busy(function, layer, *args, **kwargs)
             except ValueError as exc:
                 raise FilterRejected(str(exc)) from None
         return run_on_main_thread(call)
@@ -502,7 +503,8 @@ class QGISFilterMateAccessor:
         def call():
             function = getattr(_plugin_module("adapters.public_api.layouts"), name)
             try:
-                return function(*args, **kwargs)
+                # Refused while FilterMate filters: a layout drawn now would show filters half applied.
+                return _unless_busy(function, *args, **kwargs)
             except ValueError as exc:
                 raise FilterRejected(str(exc)) from None
         return run_on_main_thread(call)

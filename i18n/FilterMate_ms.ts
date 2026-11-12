@@ -1043,6 +1043,26 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <translation>Resipi</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Tawarkan semua alat kepada model setempat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Hanya alat yang menapis, untuk komputer perlahan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Jika ditanda, model setempat hanya mendapat alat yang membaca dan menapis projek: kira-kira separuh bacaan pada setiap permintaan. Diukur dengan qwen3.5:4b, semua alat menjawab sama baik atau lebih baik.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Jika dimatikan, model setempat mendapat alat yang membaca dan menapis projek: ia muat dalam GPU 8 GB. Semua alat memerlukan kira-kira dua kali ganda memori.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Simpan permintaan terakhir sebagai resipi…</translation>

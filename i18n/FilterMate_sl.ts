@@ -1043,6 +1043,26 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Recepti</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Ponudi lokalnemu modelu vsa orodja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Samo orodja, ki filtrirajo, za počasen računalnik</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Ob izbiri lokalni model dobi le orodja, ki berejo in filtrirajo projekt: pri vsaki zahtevi približno polovico manj branja. Pri merjenju s qwen3.5:4b so vsa orodja odgovorila enako dobro ali bolje.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Izklopljeno: lokalni model dobi orodja, ki berejo in filtrirajo projekt; ta gredo v GPU z 8 GB. Vsa orodja potrebujejo približno dvakrat več pomnilnika.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Shrani zadnjo zahtevo kot recept…</translation>

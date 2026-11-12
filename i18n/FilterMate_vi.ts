@@ -1043,6 +1043,26 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Công thức</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Cung cấp mọi công cụ cho mô hình cục bộ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Chỉ các công cụ lọc, cho máy tính chậm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Khi chọn, mô hình cục bộ chỉ nhận các công cụ đọc và lọc dự án: mỗi yêu cầu chỉ phải đọc khoảng một nửa. Đo với qwen3.5:4b, dùng mọi công cụ vẫn trả lời tốt bằng hoặc tốt hơn.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Khi tắt, mô hình cục bộ chỉ nhận các công cụ đọc và lọc dự án: chúng vừa với GPU 8 GB. Mọi công cụ cần khoảng gấp đôi bộ nhớ.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Lưu yêu cầu gần nhất thành công thức…</translation>
