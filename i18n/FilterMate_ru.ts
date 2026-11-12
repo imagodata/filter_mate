@@ -64,6 +64,11 @@
         <translation>Вернуться к состоянию до: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Остановите запрос или дождитесь его завершения, чтобы открыть настройки.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Нечего отменять.</translation>

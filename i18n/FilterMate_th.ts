@@ -64,6 +64,11 @@
         <translation>กลับไปก่อน: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>หยุดคำขอ หรือรอให้เสร็จสิ้น เพื่อเปิดการตั้งค่า</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>ไม่มีสิ่งที่ต้องเลิกทำ</translation>

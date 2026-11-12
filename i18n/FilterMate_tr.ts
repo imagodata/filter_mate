@@ -64,6 +64,11 @@
         <translation>Şundan önceye dön: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Ayarları açmak için isteği durdurun veya bitmesini bekleyin.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Geri alınacak bir şey yok.</translation>
