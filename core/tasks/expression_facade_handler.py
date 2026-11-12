@@ -89,8 +89,9 @@ class ExpressionFacadeHandler:
                   (source_layer, task_parameters, executor getters, etc.)
         """
         self.task = task
-        # (source filter, source selection) of the last combine_with_old_subset,
-        # recorded with the source filter once it is queued
+        # (source filter, source selection, selection read on the whole layer) of
+        # the last combine_with_old_subset, recorded with the source filter once
+        # it is queued
         self._pending_source_selection = None
 
     # =========================================================================
@@ -217,8 +218,22 @@ class ExpressionFacadeHandler:
         else:
             # FIX 2026-01-18: only takes the expression parameter
             combined = executor.combine_with_old_subset(expression)
-        self._pending_source_selection = (combined, self._source_selection(executor, expression, combined))
+        self._pending_source_selection = (combined, self._source_selection(executor, expression, combined),
+                                          self._selection_reads_whole_layer(executor))
         return combined
+
+    @staticmethod
+    def _selection_reads_whole_layer(executor):
+        """Whether the selection is read without the old subset of the source.
+
+        2026-11-12 (review): ExpressionBuilder reads the selection in QGIS when it
+        holds an EXISTS (PATH 3A), through the source layer, which keeps the old
+        subset during the task. Under OR and replace x is read on the whole layer,
+        as the SpatiaLite / OGR source preparations do (selection_reads_whole_layer
+        in FilterEngineTask.prepare_spatialite_source_geom).
+        """
+        operator = (getattr(executor, 'combine_operator', None) or '').strip().upper()
+        return operator not in ('AND', 'AND NOT')
 
     @staticmethod
     def _source_selection(executor, expression, combined):
@@ -429,7 +444,10 @@ class ExpressionFacadeHandler:
         # The selection of the source filter combine_with_old_subset just built;
         # None for any other filter (a key list): its selection is not known here
         pending, self._pending_source_selection = self._pending_source_selection, None
-        selection = pending[1] if pending is not None and pending[0] == expression else None
+        if pending is not None and pending[0] == expression:
+            _, selection, whole_layer = pending
+        else:
+            selection = whole_layer = None
 
         # Apply type casting for PostgreSQL to fix varchar/numeric comparison issues
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:
@@ -447,6 +465,8 @@ class ExpressionFacadeHandler:
             # ...and the targets are filtered by the selection, not by that subset
             # (NOT (x) under AND NOT, (old) OR (x) under OR; see _source_selection)
             self.task.task_parameters['source_selection_after_task'] = selection
+            # ...read on the whole layer, or through the old subset
+            self.task.task_parameters['source_selection_reads_whole_layer'] = whole_layer
 
         # Only build PostgreSQL SELECT for PostgreSQL providers
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:

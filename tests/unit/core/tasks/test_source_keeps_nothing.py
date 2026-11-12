@@ -317,6 +317,27 @@ def test_geometry_preparer_lets_the_refusal_through(qgis):
     ogr_callback.assert_not_called()  # no OGR fallback, no source layer used whole
 
 
+def test_geometry_preparer_lets_the_postgresql_refusal_through(qgis):
+    """2026-11-12 (review): ExpressionBuilder.check_source_selection, called by the PostgreSQL source
+    preparation, refuses before any target and before the OGR geometry of a PostgreSQL source."""
+    mod = _load("core.services.geometry_preparer", "core/services/geometry_preparer.py")
+    refusal = _refusal_class()
+    ogr_callback = MagicMock()
+
+    def postgresql_callback():
+        raise refusal("The selection of 'routes' keeps no feature: nothing was filtered.")
+
+    with pytest.raises(refusal):
+        mod.prepare_geometries_by_provider(
+            provider_list=['postgresql'], task_parameters={'task': {'features': []}},
+            source_layer=_Layer(), param_source_provider_type='postgresql', param_buffer_expression='',
+            layers_dict={'postgresql': [(MagicMock(), {})]}, prepare_postgresql_geom_callback=postgresql_callback,
+            prepare_spatialite_geom_callback=MagicMock(), prepare_ogr_geom_callback=ogr_callback,
+            logger=logging.getLogger("test"), postgresql_available=True)
+
+    ogr_callback.assert_not_called()
+
+
 def test_orchestrator_shows_the_refusal_and_leaves_the_targets(qgis):
     mod = _load("core.tasks.filtering_orchestrator", "core/tasks/filtering_orchestrator.py")
     refusal = _refusal_class()
