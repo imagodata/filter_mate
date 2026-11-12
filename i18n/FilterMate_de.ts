@@ -813,6 +813,11 @@ Sind Sie einverstanden?</translation>
         <translation>Schritt {} wurde nicht ausgeführt: Er würde einen Layer ändern, den Sie vor dem Agenten geschützt haben ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Schritt {} wurde nicht ausgeführt: Die vor dem Agenten geschützten Layer konnten nicht gelesen werden ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Schritt {} wurde nicht ausgeführt: Sie haben sein Werkzeug für den Agenten ausgeschaltet ({}).</translation>

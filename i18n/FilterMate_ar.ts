@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>لم تُنفَّذ الخطوة {}: كانت ستغيّر طبقة قمت بحمايتها من الوكيل ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>لم تُنفَّذ الخطوة {}: تعذّرت قراءة الطبقات التي حميتها من الوكيل ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>لم تُنفَّذ الخطوة {}: لقد أوقفت أداتها للوكيل ({}).</translation>

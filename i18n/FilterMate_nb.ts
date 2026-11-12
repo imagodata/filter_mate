@@ -813,6 +813,11 @@ Er du enig?</translation>
         <translation>Trinn {} ble ikke utført: det ville endre et lag du har beskyttet mot agenten ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Trinn {} ble ikke kjørt: lagene du har beskyttet mot agenten, kunne ikke leses ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Trinn {} ble ikke kjørt: du har slått av verktøyet for agenten ({}).</translation>

@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>ステップ {} は実行されませんでした：エージェントから保護したレイヤーを変更するためです（{}）。</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ステップ {} は実行されませんでした: エージェントから保護したレイヤーを読み取れませんでした ({})。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ステップ {} は実行されませんでした: エージェント向けにそのツールをオフにしています ({})。</translation>

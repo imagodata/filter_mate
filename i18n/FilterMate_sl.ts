@@ -813,6 +813,11 @@ Se strinjate?</translation>
         <translation>Korak {} ni bil izveden: spremenil bi sloj, ki ste ga zaščitili pred agentom ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Korak {} ni bil izveden: plasti, ki ste jih zaščitili pred agentom, ni bilo mogoče prebrati ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Korak {} ni bil izveden: orodje zanj ste izklopili za agenta ({}).</translation>
