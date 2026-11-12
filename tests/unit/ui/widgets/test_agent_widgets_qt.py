@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The widgets strip of the AGENT section, on real Qt widgets (PyQt5, offscreen).
+The widgets strip and the thread of the AGENT section, on real Qt widgets (PyQt5, offscreen).
 
 Loaded under a private package with ``qgis.PyQt`` pointing at PyQt5 for the import only (the root conftest mocks Qt
 for the other tests). Skipped without PyQt5 (the CI test job has none).
@@ -16,7 +16,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
-from PyQt5 import QtCore, QtGui  # noqa: E402
+from PyQt5 import QtCore, QtGui, sip  # noqa: E402
 
 _ROOT = pathlib.Path(__file__).resolve().parents[4]
 _PKG = "fm_agent_widgets_qt_test"
@@ -37,7 +37,7 @@ def _load():
             package.__path__ = [str(path)]
             sys.modules[_PKG + name] = package
         modules = [importlib.import_module(f"{_PKG}.{name}")
-                   for name in ("ui.widgets.agent_widgets_strip", "core.agent.widgets")]
+                   for name in ("ui.widgets.agent_widgets_strip", "ui.widgets.agent_thread", "core.agent.widgets")]
     finally:
         for name, previous in saved.items():
             if previous is None:
@@ -47,7 +47,7 @@ def _load():
     return (app, *modules)
 
 
-_APP, strip_module, model = _load()
+_APP, strip_module, thread_module, model = _load()
 Qt = QtCore.Qt
 
 
@@ -155,3 +155,57 @@ class TestStrip:
         assert [state["chosen"] for state in emitted] == [["a", "b"]]
         card = strip.cards["w1"]
         assert [card.values.item(row).checkState() == Qt.CheckState.Checked for row in range(3)] == [True, True, False]
+
+    def test_the_layer_name_in_a_tooltip_is_not_read_as_html(self, strip):
+        strip.set_widgets([dict(_values(1), layer_name='<img src="file:///x.png">')])
+        tooltip = strip.cards["w1"].title.toolTip()
+        assert "<img" not in tooltip and "&lt;img" in tooltip
+
+
+@pytest.fixture
+def thread():
+    from_tokens = importlib.import_module(f"{_PKG}.ui.styles.mockup_design").tokens
+    widget = thread_module.AgentThread(lambda: from_tokens(False), lambda: False, lambda: None)
+    widget.resize(400, 600)
+    widget.show()
+    yield widget
+    if not sip.isdeleted(widget):
+        widget.deleteLater()
+
+
+class TestThread:
+    def test_fragments_are_drawn_together_and_the_end_at_once(self, thread):
+        text = "Les routes **roads** dont `type` vaut primary.\n- un\n- deux\n" * 20
+        thread.add_text(text[:1])
+        label = thread._answer.widget
+        drawn = []
+        set_text = label.setText
+        label.setText = lambda shown: (drawn.append(shown), set_text(shown))
+        for start in range(1, len(text), 3):
+            thread.add_text(text[start:start + 3])
+        assert drawn == [] and thread.toPlainText() == text  # nothing drawn yet, nothing lost
+        _run(thread_module.ANSWER_DELAY_MS + 100)
+        assert len(drawn) == 1
+        thread.add_text("Fin.")
+        thread.end_answer()
+        assert drawn[-1] == thread_module.plain_markdown(text + "Fin.").strip("\n") and len(drawn) == 2
+
+    def test_a_long_answer_is_drawn_less_often(self, thread):
+        thread.add_text("x" * 12000)
+        assert thread._answer_timer.interval() == 12000 // thread_module.ANSWER_CHARS_PER_MS > 2 * thread_module.ANSWER_DELAY_MS
+
+    def test_following_the_end_of_a_thread_deleted_meanwhile_raises_nothing(self, thread, monkeypatch):
+        raised = []
+        monkeypatch.setattr(sys, "excepthook", lambda *error: raised.append(error))
+        thread.add_text("Une réponse")
+        thread._follow_end()
+        sip.delete(thread)  # the plugin unloaded while an answer was being written
+        _run(thread_module.ANSWER_DELAY_MS + 100)
+        assert raised == []
+
+    def test_an_expression_in_a_tooltip_is_not_read_as_html(self, thread):
+        thread.add_card("Filtre", True, '<b>"type"</b> = \'a\'\n  b', "1 / 2")
+        label = thread._items[-1].widget.findChild(thread_module.ElidedLabel)
+        assert label.toolTip() == ('<p style="white-space: pre-wrap;">&lt;b&gt;&quot;type&quot;&lt;/b&gt; = '
+                                   '&#x27;a&#x27;\n  b</p>')
+        assert thread_module.plain_tooltip("") == ""

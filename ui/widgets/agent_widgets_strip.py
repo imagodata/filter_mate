@@ -17,6 +17,7 @@ from qgis.PyQt.QtWidgets import (
 
 from ...core.agent.widgets import CATEGORIES, CHART, RANGE, VALUES, decimals
 from ..styles.mockup_design import plugin_is_dark, tokens
+from .agent_thread import plain_tooltip
 
 APPLY_DELAY_MS = 400  # a value typed or ticked is applied once the user pauses
 STRIP_MAX_HEIGHT = 260
@@ -164,7 +165,7 @@ class WidgetCard(QFrame):
         self.title = QLabel(widget["title"] or default_title(widget), self)
         self.title.setObjectName("label_agent_widget_title")
         self.title.setTextFormat(Qt.TextFormat.PlainText)
-        self.title.setToolTip(widget["layer_name"])
+        self.title.setToolTip(plain_tooltip(widget["layer_name"]))
         self.layer = QLabel(widget["layer_name"], self)
         self.layer.setObjectName("label_agent_widget_layer")
         self.layer.setTextFormat(Qt.TextFormat.PlainText)

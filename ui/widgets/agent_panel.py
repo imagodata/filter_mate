@@ -20,7 +20,7 @@ from qgis.PyQt.QtWidgets import (
     QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel
+from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
@@ -443,7 +443,8 @@ class AgentPanel(QFrame):
             state = "" if not layers else (_tr("applied") if turn.get("applied") else _tr("undone"))
             item = QListWidgetItem()
             item.setData(_TURN_ROLE, turn.get("request") or "")
-            item.setToolTip(f"{when}  {request}\n{layers or _tr('no change')}" + (f" · {state}" if state else ""))
+            item.setToolTip(plain_tooltip(f"{when}  {request}\n{layers or _tr('no change')}"
+                                          + (f" · {state}" if state else "")))
             self._history_row(item, when, request, layers or _tr("no change"), state, bool(turn.get("applied")),
                               palette, dark)
             if position == last_applied:  # the steps of the last request can be undone one by one
@@ -451,7 +452,7 @@ class AgentPanel(QFrame):
                     step = QListWidgetItem()
                     step.setData(_TURN_ROLE, "")
                     step.setData(_STEP_ROLE, number)
-                    step.setToolTip(label)
+                    step.setToolTip(plain_tooltip(label))
                     self._history_row(step, "", f"{number + 1}. {label}", "", "", True, palette, dark, step=True)
         self.history_list.scrollToBottom()
         self.history_count.setText(_tr("this project · {} turn(s)").format(len(turns)))
@@ -1244,7 +1245,7 @@ class AgentSettingsDialog(QDialog):
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
         item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         item.setData(0, _TURN_ROLE, source.id)
-        item.setToolTip(0, f"{source.note}\n{source.address}".strip())
+        item.setToolTip(0, plain_tooltip(f"{source.note}\n{source.address}".strip()))
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
