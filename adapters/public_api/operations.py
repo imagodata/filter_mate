@@ -618,8 +618,7 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
         point_cloud_criteria.to_subset_string() if point_cloud_criteria is not None else "")
     expression = (expression or "").strip()
     if expression:
-        if source_operator == "AND NOT" and not before.subset:
-            raise ValueError("AND NOT needs an existing filter on the point cloud source")
+        # 2026-11-12: AND NOT on an unfiltered cloud keeps every point but the criteria (combine_subset)
         subset = combine_subset(before.subset, expression, source_operator)
         if not layer.setSubsetString(subset):
             layer.setSubsetString(before.subset)
@@ -777,10 +776,7 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
             report.skipped[name] = "not a point cloud layer"
             continue
         before = take_snapshot(layer, LayerKind.POINT_CLOUD)
-        if operator == "AND NOT" and not before.subset:
-            # combine_subset would keep only the excluded points of an unfiltered cloud.
-            report.failed[name] = "AND NOT needs an existing filter on the layer"
-            continue
+        # 2026-11-12: AND NOT on an unfiltered cloud keeps every point but the criteria (combine_subset)
         subset = combine_subset(before.subset, expression, operator)
         if not layer.setSubsetString(subset):
             layer.setSubsetString(before.subset)

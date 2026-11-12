@@ -813,6 +813,11 @@ Hyväksytkö?</translation>
         <translation>Vaihetta {} ei suoritettu: se muuttaisi tasoa, jonka olet suojannut agentilta ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Vaihetta {} ei suoritettu: agentilta suojaamiasi tasoja ei voitu lukea ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Vaihetta {} ei suoritettu: olet poistanut sen työkalun käytöstä agentilta ({}).</translation>
@@ -8246,6 +8251,16 @@ Rasteri piirretään kuten kartalla, tyyleineen. SAM asennetaan kerran FilterMat
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Napsauta oikealla olevaa neliötä testataksesi tämän tason sentroideilla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ei suodatettavissa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Verkkotaustakartta (WMS / WMTS / XYZ, ArcGIS MapServer): vain värejä, sitä ei voi suodattaa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

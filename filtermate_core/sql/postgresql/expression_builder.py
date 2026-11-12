@@ -217,10 +217,10 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
             geom_expr = self._apply_centroid_transform(geom_expr, layer_props)
 
         # FIX v4.2.7: DO NOT apply buffer_expression to distant layer geometry!
-        # The buffer_expression is for the SOURCE layer and is already applied in the MV.
-        # When source_geom points to a buffer_expr MV (mv_xxx_buffer_expr_dump), the buffer
-        # is already baked into that MV's geometries. Applying it again to the distant layer
-        # would double-buffer and also fail because the CASE WHEN fields belong to the source.
+        # The buffer_expression is for the SOURCE layer: _build_exists_expression applies it
+        # to the source rows (__source), through its pre-computed buffer table or inline.
+        # Applying it to the distant layer would buffer the wrong geometry and fail, the
+        # fields of the expression belonging to the source.
         #
         # REMOVED: The buffer_expression should NOT be applied here for distant layers.
         # if buffer_expression:
@@ -1782,9 +1782,10 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
                 # Original aliasing logic for simple filters (FID IN, field = value, etc.)
                 # CRITICAL FIX v4.2.7 (2026-01-22): Proper aliasing of source_filter
                 #
-                # Problem: When using buffer_expression (MV), source_table is the MV name
-                # (mv_xxx_table_buffer_expr_dump) but source_filter contains the ORIGINAL
-                # table name ("ducts"."id" IN ...) or a simple filter ("nom" = 'value').
+                # Problem: source_table may not be the table the source_filter names
+                # (2026-11-12: it was a buffer expression view, no longer used) while
+                # source_filter contains the ORIGINAL table name ("ducts"."id" IN ...)
+                # or a simple filter ("nom" = 'value').
                 #
                 # Solution: Use original_source_table (passed from task_parameters) for aliasing.
                 # This ensures we replace the correct table name with __source.

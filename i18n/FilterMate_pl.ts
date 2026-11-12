@@ -813,6 +813,11 @@ Czy się zgadzasz?</translation>
         <translation>Krok {} nie został wykonany: zmieniłby warstwę chronioną przez Ciebie przed agentem ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Krok {} nie został wykonany: nie można odczytać warstw chronionych przed agentem ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Krok {} nie został wykonany: wyłączono jego narzędzie dla agenta ({}).</translation>
@@ -8246,6 +8251,16 @@ Raster jest rysowany tak jak na mapie, ze swoim stylem. SAM instaluje się raz z
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kliknij kwadrat po prawej, aby przetestować tę warstwę po centroidach</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nie można filtrować</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Internetowa mapa podkładowa (WMS / WMTS / XYZ, ArcGIS MapServer): tylko kolory, nie można jej filtrować</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

@@ -145,19 +145,25 @@ def _polygons(geometry: QgsGeometry) -> QgsGeometry:
 
 
 def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, side: CoverageSide,
-                      operator: Optional[str]) -> QgsGeometry:
+                      operator: Optional[str], extent: Optional[QgsRectangle] = None) -> QgsGeometry:
     """Combine the kept area of an already derived target with a new kept area.
 
     Both geometries are areas KEPT (outside already subtracted), so they
-    combine whatever their side.
+    combine whatever their side. 2026-11-12: a target without a previous area
+    under AND NOT keeps ``extent`` (its whole area) minus the new area, as a
+    vector layer without a filter keeps ``NOT (new)``; it kept the new area.
     """
-    if not previous_wkt or not operator:
+    if not operator:
         return new
+    op = operator.upper()
+    if not previous_wkt:
+        if op != 'AND NOT' or extent is None:
+            return new
+        previous_wkt = QgsGeometry.fromRect(extent).asWkt()
     # Polygons only: overlays of collections holding lines fail in older GEOS (QGIS 3.22 - 3.28).
     previous = _polygons(QgsGeometry.fromWkt(previous_wkt))
     if previous.isEmpty():
         return new
-    op = operator.upper()
     new = _polygons(new)
     if new.isEmpty():
         # Nothing new kept (outside of a source covering the whole layer):
@@ -173,8 +179,13 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
 
 
 def _keeps_previous(previous_subset: str, operator: Optional[str]) -> bool:
-    """True when nothing new combined with ``operator`` leaves the previous subset as it was (OR, AND NOT)."""
-    return bool((previous_subset or '').strip()) and (operator or '').strip().upper() in ('OR', 'AND NOT')
+    """True when nothing new combined with ``operator`` leaves the layer as it was.
+
+    OR with a previous subset, and AND NOT always (2026-11-12: without a
+    previous subset it removes the new selection from the whole layer).
+    """
+    op = (operator or '').strip().upper()
+    return op == 'AND NOT' or (op == 'OR' and bool((previous_subset or '').strip()))
 
 
 def _simplified_for_cutline(geometry: QgsGeometry, tolerance: float, max_vertices: int = 20000) -> QgsGeometry:
@@ -391,8 +402,9 @@ class VectorTargetJob(TargetJob):
             if complement:
                 self.outcome.message = _remote_message('disjoint_partial')
                 return None
-            if (self.operator or '').upper() == 'AND NOT' and self.before.subset:
-                # (old) AND NOT (keys): the matching features never read would stay.
+            if (self.operator or '').upper() == 'AND NOT':
+                # (old) AND NOT (keys), or NOT (keys) without a previous filter
+                # (2026-11-12): the matching features never read would stay.
                 self.outcome.message = translate(
                     'VectorTargetJob', '{0} AND NOT would keep the features not read; the previous filter is kept.'
                 ).format(_remote_message(outcome.reason))
@@ -726,7 +738,7 @@ class RasterTargetJob(TargetJob):
         if side is CoverageSide.OUTSIDE:
             geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
-                                     geometry, side, self.operator)
+                                     geometry, side, self.operator, self._extent)
         self._side = side
         kept = _kept_area(geometry)
         self.outcome.emptied = kept is None or not geometry.boundingBox().intersects(self._extent)
@@ -937,7 +949,7 @@ class PointCloudTargetJob(TargetJob):
         if side is CoverageSide.OUTSIDE:
             geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
-                                     geometry, side, self.operator)
+                                     geometry, side, self.operator, self._extent)
         # filters.crop takes polygons only: make_valid / an intersection can add lines and points.
         polygon = _kept_area(geometry)
         geometry = QgsGeometry.fromWkt(polygon) if polygon is not None else None

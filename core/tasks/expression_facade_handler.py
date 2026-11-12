@@ -209,6 +209,14 @@ class ExpressionFacadeHandler:
             str: Combined expression.
         """
         executor = self.task._get_attribute_executor()
+        if not getattr(executor, 'old_subset', None):
+            # 2026-11-12: no filter yet: NOT (new) under AND NOT, the new
+            # expression otherwise (the executor returns it whatever the operator).
+            try:
+                from ...filtermate_core.filter.expression_combiner import combine_without_old_subset
+            except ImportError:  # imported from the repository root (tests)
+                from filtermate_core.filter.expression_combiner import combine_without_old_subset
+            return combine_without_old_subset(expression, getattr(executor, 'combine_operator', None))
         # FIX 2026-01-18: only takes the expression parameter
         return executor.combine_with_old_subset(expression)
 
@@ -373,6 +381,9 @@ class ExpressionFacadeHandler:
         if hasattr(self.task, '_pending_subset_requests'):
             self.task._pending_subset_requests.append((self.task.source_layer, expression))
             logger.info(f"Queued source layer {self.task.source_layer.name()} for filter application in finished()")
+            # 2026-11-12: the source layer keeps its previous subset until finished();
+            # the distant filters read the one it will have (ExpressionBuilder)
+            self.task.task_parameters['source_subset_after_task'] = expression
 
         # Only build PostgreSQL SELECT for PostgreSQL providers
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:

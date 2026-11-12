@@ -220,8 +220,12 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
 def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 150) -> Dict[str, Any]:
     """Write a layout of the project into ``folder`` (resolved by the caller under the export root).
 
+    2026-11-12: ``folder`` is created when missing, as ``export_layers`` does (the export failed on a new
+    sub-folder), and an existing file is never overwritten: ``<name>_2.pdf``, ``<name>_3.pdf``... instead.
+
     Raises:
-        ValueError: An unknown layout or format, a resolution out of range, a failed export.
+        ValueError: An unknown layout or format, a resolution out of range, a folder that cannot be made, a
+            failed export.
     """
     from qgis.core import QgsLayoutExporter
     layout = _layout(name)
@@ -229,8 +233,14 @@ def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 1
         raise ValueError('format is pdf or png')
     if not 72 <= int(dpi) <= MAX_DPI:
         raise ValueError(f"dpi goes from 72 to {MAX_DPI}")
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except OSError as exc:
+        raise ValueError(f"the export folder could not be created ({exc.strerror or exc})") from None
     safe = ''.join(char if char.isalnum() or char in '-_ ' else '_' for char in layout.name()).strip() or 'layout'
-    path = os.path.join(folder, f"{safe}.{file_format}")
+    path, index = os.path.join(folder, f"{safe}.{file_format}"), 2
+    while os.path.exists(path):
+        path, index = os.path.join(folder, f"{safe}_{index}.{file_format}"), index + 1
     exporter = QgsLayoutExporter(layout)
     if file_format == 'pdf':
         settings = QgsLayoutExporter.PdfExportSettings()

@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트로부터 보호한 레이어를 변경하게 됩니다({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>단계 {}이(가) 실행되지 않았습니다: 에이전트로부터 보호한 레이어를 읽을 수 없습니다 ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트에 대해 해당 도구를 꺼 두었습니다 ({}).</translation>
@@ -8246,6 +8251,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>오른쪽 사각형을 클릭하면 이 레이어를 중심점으로 테스트합니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>필터링 불가</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>웹 배경 지도(WMS / WMTS / XYZ, ArcGIS MapServer): 색상만 있어 필터링할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

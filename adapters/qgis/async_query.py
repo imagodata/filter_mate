@@ -295,7 +295,12 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
     task.on_settled = settled
     if loading is not None and not keep_loading:
         loading(True)
-    QgsApplication.taskManager().addTask(task)
+    try:
+        QgsApplication.taskManager().addTask(task)
+    except Exception:
+        # Never added, so finished() never comes: settle the read here, or the slot keeps the task and its lease.
+        task.finished(False)
+        raise
     return task
 
 

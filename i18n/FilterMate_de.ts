@@ -813,6 +813,11 @@ Sind Sie einverstanden?</translation>
         <translation>Schritt {} wurde nicht ausgeführt: Er würde einen Layer ändern, den Sie vor dem Agenten geschützt haben ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Schritt {} wurde nicht ausgeführt: Die vor dem Agenten geschützten Layer konnten nicht gelesen werden ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Schritt {} wurde nicht ausgeführt: Sie haben sein Werkzeug für den Agenten ausgeschaltet ({}).</translation>
@@ -8246,6 +8251,16 @@ Das Raster wird wie in der Karte gezeichnet, mit seinem Stil. SAM wird einmalig 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Auf das Quadrat rechts klicken, um diesen Layer anhand seiner Zentroide zu testen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nicht filterbar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web-Hintergrundkarte (WMS / WMTS / XYZ, ArcGIS MapServer): nur Farben, sie kann nicht gefiltert werden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

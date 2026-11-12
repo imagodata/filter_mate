@@ -99,6 +99,14 @@ class AgentMcpBridge:
         rules = {name: rule for name, rule in load_settings().rules.items() if rule != RULE_ALLOW}
         return PermissionPolicy(rules=rules)
 
+    def _unavailable(self, call: ToolCallPart):
+        """Why a change, or a question to the user, cannot happen now; None when it can."""
+        if self._host.chat_busy():
+            return ToolResultPart(call.call_id, CHAT_IS_WORKING, is_error=True)
+        if QApplication.activeModalWidget() is not None:
+            return ToolResultPart(call.call_id, DIALOG_OPEN, is_error=True)
+        return None
+
     def _confirmed(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """None when the user agrees and the client still waits; otherwise what to answer."""
         key = (client, call.name)
@@ -115,10 +123,9 @@ class AgentMcpBridge:
         call = ToolCallPart(uuid.uuid4().hex, tool.name, arguments)
         if validate(arguments, tool.input_schema):  # refused by the executor, before anything reads them
             return self._executor.execute(call)
-        if not tool.read_only and self._host.chat_busy():
-            return ToolResultPart(call.call_id, CHAT_IS_WORKING, is_error=True)
-        if not tool.read_only and QApplication.activeModalWidget() is not None:
-            return ToolResultPart(call.call_id, DIALOG_OPEN, is_error=True)
+        unavailable = None if tool.read_only else self._unavailable(call)
+        if unavailable is not None:
+            return unavailable
         protected = self._host.protection_refusal(call)
         if protected:  # a layer the user protected in this project: refused to every application too
             refused = ToolResultPart(call.call_id, protected, is_error=True)
@@ -131,7 +138,9 @@ class AgentMcpBridge:
             self._journal(call, refused, client)
             return refused
         if verdict == ASK:
-            refusal = self._confirmed(call, client)
+            refusal = self._unavailable(call) if tool.read_only else None  # a read always asked: checked here
+            if refusal is None:
+                refusal = self._confirmed(call, client)
             if refusal is not None:
                 self._journal(call, refusal, client)
                 return refusal
@@ -139,12 +148,24 @@ class AgentMcpBridge:
         self._journal(call, result, client)
         return result
 
+    _change_checkpoint = None  # the undo point of the change being made, None between two
+
+    def forget_change(self) -> None:
+        """The project closes during a change: its undo point is not recorded.
+
+        Committed, it would compare the closed project with the next one (every layer of the new project added) and
+        an Undo would remove them all.
+        """
+        if self._change_checkpoint is not None:
+            self._change_checkpoint.discard()
+
     def _change(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """One change of another application is one step of the history of the panel."""
         checkpoint = TurnCheckpoint()
         checkpoint.describe = self._host.describe_call
         checkpoint.label = EXTERNAL_MARK + self._host.label_of(call, client)
         self.busy = True
+        self._change_checkpoint = checkpoint
         try:
             try:
                 checkpoint.begin(call)
@@ -154,6 +175,7 @@ class AgentMcpBridge:
             return self._executor.execute(call)
         finally:
             self.busy = False
+            self._change_checkpoint = None
             try:
                 checkpoint.commit()
                 self._host.history_changed()

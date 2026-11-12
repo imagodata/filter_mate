@@ -334,8 +334,16 @@ class ExpressionBuilder:
 
         logger.debug("      ✓ PostgreSQL backend detected - preparing source_filter...")
 
-        # Get source layer's existing subset string
-        source_subset = self.source_layer.subsetString() if self.source_layer else None
+        # The subset the source layer will have after this task (2026-11-12): its new
+        # filter is only queued, set on the main thread in finished(), so its
+        # subsetString() still holds the PREVIOUS one while the distant layers are
+        # filtered. This method was written when the new subset was already set: read
+        # the previous one, a buffer expression (which prefers the source subset to the
+        # selected features) filtered the distant layers by the previous selection.
+        # Without a record (all features / field-based modes) the subset does not change.
+        source_subset = self.task_parameters.get('source_subset_after_task')
+        if source_subset is None:
+            source_subset = self.source_layer.subsetString() if self.source_layer else None
         logger.debug("=" * 80)
         logger.debug("🔍 _prepare_source_filter: ANALYZING source_subset")
         logger.debug("=" * 80)
@@ -571,38 +579,13 @@ class ExpressionBuilder:
                 logger.warning("   ⚠️ No EXISTS clauses found in source_subset, using as-is")
                 source_filter = source_subset
 
-        elif has_buffer_expression and source_subset and not skip_source_subset:
-            # PRIORITY for buffer expression: Use source_subset (zone_pop spatial filter)
-            # This handles non-EXISTS source_subset with buffer expression
-            logger.debug("🎯 PostgreSQL EXISTS: BUFFER MODE - Prioritizing source_subset over task_features")
-            logger.debug(f"   buffer_expression: {str(self.buffer_expression)[:100]}...")
-            logger.debug(f"   source_subset preview: {source_subset[:200]}...")
-
-            # Try to parse and optimize source_subset
-            parsed_subset = self._parse_complex_where_clause(source_subset)
-
-            if parsed_subset['can_optimize']:
-                logger.debug(f"   → Optimization strategy: {parsed_subset['optimization_strategy']}")
-                logger.debug(f"      - EXISTS subqueries: {len(parsed_subset['exists_subqueries'])} (zone_pop)")
-                logger.debug(f"      - Field conditions: {len(parsed_subset['field_conditions'])}")
-
-                # Combine reusable components (EXISTS + field conditions)
-                combined_parts = []
-                for exists_info in parsed_subset['exists_subqueries']:
-                    combined_parts.append(exists_info['sql'])
-                combined_parts.extend(parsed_subset['field_conditions'])
-
-                source_filter = ' AND '.join(f'({part})' for part in combined_parts)
-                logger.debug(f"   ✅ Using optimized source_subset: {len(source_filter)} chars")
-            else:
-                # Use source_subset as-is
-                source_filter = source_subset
-                logger.debug(f"   ✅ Using source_subset as-is: {len(source_filter)} chars")
-
-            logger.debug(f"   ℹ️ Ignoring {len(task_features) if task_features else 0} task_features (custom expression) for spatial buffer filter")
-
         elif use_task_features:
-            # Non-buffer scenario: Use task_features
+            # The selected features, with or without a buffer expression (2026-11-12: a
+            # "BUFFER MODE" branch preferred the source subset to them. It read the
+            # previous subset (the new one is only queued during the task), then, given
+            # the new one, split it on AND / OR and joined the parts with AND: OR became
+            # AND, BETWEEN a syntax error, a literal holding AND another value. Without
+            # features, the subset is used as it is below.)
             logger.debug(f"🎯 PostgreSQL EXISTS: Using {len(task_features)} task_features (selection priority)")
 
             # FIX v4.2.7: If we have field values instead of QgsFeatures, build field-based filter
@@ -1594,14 +1577,17 @@ def build_combined_filter_expression(
     Returns:
         str: Combined filter expression
     """
+    from .expression_combiner import combine_without_old_subset
+
+    # 2026-11-12: no old subset: NOT ( new ) under AND NOT
     if not old_subset or not combine_operator:
-        return new_expression
+        return combine_without_old_subset(new_expression, combine_operator)
 
     # Sanitize old_subset to remove non-boolean display expressions
     if sanitize_fn:
         old_subset = sanitize_fn(old_subset)
         if not old_subset:
-            return new_expression
+            return combine_without_old_subset(new_expression, combine_operator)
 
     # 2026-10-17: always ( old ) OP ( new ). An old subset containing WHERE
     # (subquery, value) used to be re-joined unparenthesized.

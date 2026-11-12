@@ -35,8 +35,9 @@ tools, LayerKind = _load()
 OPTIONAL, HIDDEN = 8, 2
 
 
-def layer(layer_id, name, kind):
-    return SimpleNamespace(id=lambda: layer_id, name=lambda: name, kind=kind)
+def layer(layer_id, name, kind, fields=3):
+    return SimpleNamespace(id=lambda: layer_id, name=lambda: name, kind=kind,
+                           fields=lambda: SimpleNamespace(count=lambda: fields))
 
 
 @pytest.fixture
@@ -82,6 +83,11 @@ class TestInterpolationRows:
         ("points::~::0::~::0::~::0::~::x", "rows"),
         ("points::~::attribute::~::0::~::0", "rows"),
         ("points::~::0.5::~::0::~::0", "rows"),
+        ("points::~::3::~::0::~::0", "value source"),  # 0 a field, 1 the Z, 2 the M
+        ("points::~::-1::~::0::~::0", "value source"),
+        ("points::~::0::~::0::~::3", "source type"),  # 0 points, 1 structure lines, 2 break lines
+        ("points::~::0::~::3::~::0", "field index"),  # points has 3 fields: 0 to 2, or -1
+        ("points::~::0::~::-2::~::0", "field index"),
         ("", "rows"),
         (["points", 0, 0, 0], "rows"),
     ])

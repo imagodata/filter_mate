@@ -813,6 +813,11 @@ Apakah Anda setuju?</translation>
         <translation>Langkah {} tidak dijalankan: langkah itu akan mengubah lapisan yang Anda lindungi dari agen ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Langkah {} tidak dijalankan: layer yang Anda lindungi dari agen tidak dapat dibaca ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Langkah {} tidak dijalankan: Anda mematikan alatnya untuk agen ({}).</translation>
@@ -8246,6 +8251,16 @@ Raster digambar seperti di peta, dengan gayanya. SAM dipasang sekali dari grup P
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Klik kotak di sebelah kanan untuk menguji lapisan ini berdasarkan centroid-nya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>tidak dapat difilter</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Peta dasar web (WMS / WMTS / XYZ, ArcGIS MapServer): hanya warna, tidak dapat difilter</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

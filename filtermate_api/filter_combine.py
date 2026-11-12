@@ -15,15 +15,21 @@ def combined(previous: Optional[str], new: str, operator: Optional[str]) -> Tupl
     """The expression to apply, and the filter it replaces (empty when it keeps or extends it).
 
     ``operator`` None replaces the previous filter; AND narrows it, OR widens it, AND NOT takes the new
-    condition out of it.
+    condition out of it. Without a previous filter the new condition applies alone, and AND NOT takes it
+    out of the whole layer: ``NOT (new)`` (2026-11-12: it applied the condition, the opposite). An empty
+    new condition leaves the previous filter as it is under an operator (it gave ``(previous) AND ()``).
     """
     previous = (previous or "").strip()
     new = (new or "").strip()
-    if not operator or not previous:
+    if not operator:
         return new, previous
     op = operator.strip().upper()
     if op not in OPERATORS:
         raise ValueError(f"operator must be one of {', '.join(OPERATORS)}")
+    if not new:
+        return previous, ""
+    if not previous:
+        return (f"NOT ({new})" if op == "AND NOT" else new), ""
     if op == "AND NOT":
         return f"({previous}) AND NOT ({new})", ""
     return f"({previous}) {op} ({new})", ""

@@ -813,6 +813,11 @@ Egyetért?</translation>
         <translation>A(z) {}. lépés nem futott le: egy olyan réteget módosítana, amelyet az ügynök elől védett ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>A(z) {}. lépés nem futott le: az ügynök elől védett rétegek nem olvashatók ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>A(z) {}. lépés nem futott le: kikapcsolta az eszközét az ügynök számára ({}).</translation>
@@ -8246,6 +8251,16 @@ A raszter úgy kerül megrajzolásra, mint a térképen, a saját stílusával. 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kattintson a jobb oldali négyzetre, hogy ezt a réteget súlypontjai alapján tesztelje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nem szűrhető</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webes alaptérkép (WMS / WMTS / XYZ, ArcGIS MapServer): csak színek, nem szűrhető</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

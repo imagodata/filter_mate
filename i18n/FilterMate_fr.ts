@@ -818,6 +818,11 @@ Do you agree?</source>
         <translation>L'étape {} n'a pas été exécutée : elle changerait une couche que vous avez protégée de l'agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>L'étape {} n'a pas été exécutée : les couches que vous avez protégées de l'agent n'ont pas pu être lues ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>L'étape {} n'a pas été exécutée : vous avez coupé son outil pour l'agent ({}).</translation>
@@ -8283,6 +8288,16 @@ Le raster est dessiné comme sur la carte, avec son style. SAM s'installe une fo
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Cliquez sur le carré à droite pour tester cette couche par ses centroïdes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>non filtrable</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Fond de plan web (WMS / WMTS / XYZ, ArcGIS MapServer) : couleurs seulement, il ne peut pas être filtré</translation>
     </message>
 </context>
 <context>

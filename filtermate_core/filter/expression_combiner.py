@@ -113,6 +113,22 @@ def wrap_combination(old_subset: str, combine_operator: str, new_expression: str
     )
 
 
+def combine_without_old_subset(new_expression: str, combine_operator: Optional[str]) -> str:
+    """The filter of a layer that has none yet, under ``combine_operator``.
+
+    2026-11-12: AND NOT takes the new selection out of the whole layer,
+    ``NOT ( new )``, as ``( old ) AND NOT ( new )`` takes it out of the old
+    filter. The new expression was returned, so AND NOT on a layer without a
+    filter kept only what it was asked to remove. AND, OR and no operator
+    (replace) give the new expression. As with an old filter, a feature for
+    which the new expression is NULL is not kept.
+    """
+    if (new_expression and new_expression.strip()
+            and (combine_operator or '').strip().upper() == CombineOperator.NOT.value):
+        return f'NOT ( {_strip_where_prefix(new_expression)} )'
+    return new_expression
+
+
 def _ogr_statement_where(subset: str) -> Optional[str]:
     """WHERE body of an OGR subset written as a full ``SELECT`` statement.
 
@@ -575,9 +591,9 @@ def combine_with_old_subset(
     Returns:
         str: Combined expression
     """
-    # If no existing filter, return new expression
+    # No existing filter: the new expression, NOT ( new ) under AND NOT
     if not old_subset:
-        return new_expression
+        return combine_without_old_subset(new_expression, combine_operator)
 
     # If REPLACE operator (None), return new expression only
     if combine_operator is None:
@@ -739,15 +755,15 @@ def combine_with_old_filter(
     Returns:
         str: Combined or replaced expression
     """
-    # No existing filter
+    # No existing filter: the new expression, NOT (new) under AND NOT (2026-11-12)
     if not old_subset:
-        return new_expression
+        return combine_without_old_subset(new_expression, combine_operator)
 
     # Sanitize if callback provided
     if sanitize_fn:
         old_subset = sanitize_fn(old_subset)
         if not old_subset:
-            return new_expression
+            return combine_without_old_subset(new_expression, combine_operator)
 
     # Check if we should replace instead of combine
     should_replace, reasons = should_replace_old_subset(old_subset)

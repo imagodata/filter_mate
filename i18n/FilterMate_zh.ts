@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>步骤 {} 未执行：它会更改您已对代理设为保护的图层（{}）。</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>步骤 {} 未执行：无法读取您保护的、不允许代理修改的图层 ({})。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>步骤 {} 未运行：你已为智能体关闭了它的工具（{}）。</translation>
@@ -8246,6 +8251,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>点击右侧方块，以质心测试此图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>不可过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web 底图（WMS / WMTS / XYZ、ArcGIS MapServer）：仅有颜色，无法过滤</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

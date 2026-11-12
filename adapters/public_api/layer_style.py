@@ -117,8 +117,17 @@ def _graduated(layer, field: str, ramp, classes: int, method: str):
 
 
 def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[float]):
-    """``(minimum, maximum)`` given, or read from the statistics of the band (not for a web service)."""
+    """``(minimum, maximum)`` given, or read from the statistics of the band (not for a web service).
+
+    2026-11-12: a bound given must be a finite number, and the minimum below the maximum (NaN, Infinity and an
+    inverted range were applied as given).
+    """
+    for name, value in (('minimum', minimum), ('maximum', maximum)):
+        if value is not None and not math.isfinite(float(value)):
+            raise ValueError(f"{name} must be a finite number")
     if minimum is not None and maximum is not None:
+        if float(minimum) >= float(maximum):
+            raise ValueError(f"minimum ({minimum}) must be below maximum ({maximum})")
         return float(minimum), float(maximum)
     from .introspection import _is_web_service
     if _is_web_service(layer):
@@ -131,8 +140,13 @@ def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[fl
     stats = layer.dataProvider().bandStatistics(band, flags, layer.extent(), 250000)
     low = stats.minimumValue if minimum is None else float(minimum)
     high = stats.maximumValue if maximum is None else float(maximum)
-    if not (math.isfinite(low) and math.isfinite(high)) or low >= high:
+    if not (math.isfinite(low) and math.isfinite(high)):
         raise ValueError(f"band {band} of '{layer.name()}' has no range of values to stretch")
+    if low >= high:
+        if minimum is None and maximum is None:
+            raise ValueError(f"band {band} of '{layer.name()}' has no range of values to stretch")
+        raise ValueError(f"minimum ({low:g}) must be below maximum ({high:g}); band {band} of '{layer.name()}' "
+                         f"ranges from {stats.minimumValue:g} to {stats.maximumValue:g}")
     return low, high
 
 

@@ -35,6 +35,12 @@ except ImportError:  # imported from the repository root (tests)
         logger,
     )
 
+# 2026-11-12: the filter of a target without one (NOT (new) under AND NOT)
+try:
+    from ....filtermate_core.filter.expression_combiner import combine_without_old_subset
+except ImportError:  # imported from the repository root (tests)
+    from filtermate_core.filter.expression_combiner import combine_without_old_subset
+
 # Import safe_set_subset_string from infrastructure
 try:
     from ....infrastructure.database.sql_utils import safe_set_subset_string
@@ -111,6 +117,9 @@ class PostgreSQLExpressionBuilder(PostgreSQLSqlBuilder):
                     # Combine with attribute filter
                     final_expression = f"({old_subset}) {combine_operator} ({expression})"
                     self.log_info(f"✅ Combined with existing filter using {combine_operator}")
+            elif combine_operator and not old_subset:
+                # 2026-11-12: no filter yet: NOT (new) under AND NOT
+                final_expression = combine_without_old_subset(expression, combine_operator)
             else:
                 final_expression = expression
 

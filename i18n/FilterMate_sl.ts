@@ -813,6 +813,11 @@ Se strinjate?</translation>
         <translation>Korak {} ni bil izveden: spremenil bi sloj, ki ste ga zaščitili pred agentom ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Korak {} ni bil izveden: plasti, ki ste jih zaščitili pred agentom, ni bilo mogoče prebrati ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Korak {} ni bil izveden: orodje zanj ste izklopili za agenta ({}).</translation>
@@ -8246,6 +8251,16 @@ Raster se nariše tako kot na zemljevidu, s svojim slogom. SAM se namesti enkrat
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kliknite kvadratek desno, da ta sloj preizkusite po njegovih centroidih</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ni mogoče filtrirati</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Spletna podlaga (WMS / WMTS / XYZ, ArcGIS MapServer): samo barve, ni je mogoče filtrirati</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

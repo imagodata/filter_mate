@@ -1,6 +1,66 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] CHECKPOINT — tests PostGIS de bout en bout à faire (correctifs PG #355 / #357 / #358 / #363 / #368)
+Référence : `main` à `e646f291`. Ces correctifs sont vérifiés par la suite unitaire (8228 passés, seul échec connu
+`test_coverage_raster_target::test_canceled_selection_is_not_read`, antérieur) et des revues Opus, **jamais en QGIS
+sur PostGIS** : le 12/11, Docker Desktop n'a jamais démarré, pas de PostgreSQL local, `sudo` sous mot de passe.
+Cause du signalement client (« Task failed: Tâche échouée », source PG « Zones MRO » → 8 couches, Intersect) non
+confirmée : demander son `<plugin>/logs/filtermate.log` (« Callback execution failed: … »).
+À lancer avant de publier une version, dès qu'un PostGIS est disponible :
+1. `tests/qgis_headless/check_pg_buffer_expression.py` avec `FM_PG_SRC_COUNT=8000` puis `12000` (commande docker en
+   tête du fichier) : la cible doit compter autant d'entités que le comptage SQL (buffer `quad_segs=5`). Jamais
+   exécuté : corriger d'abord ce qui casse dans le scénario lui-même.
+2. `tests/qgis_headless/run_postgis_check.py` (vues matérialisées, connexions, tâches annulées).
+3. À écrire : couche via `service=` (pg_service.conf + `PGSERVICEFILE`) puis filtre géométrique multi-couches (#357) ;
+   couche dont psycopg2 ne peut pas se connecter (mot de passe non enregistré) : couches distantes filtrées, erreur
+   claire sinon (#355) ; deuxième filtre avec buffer par expression et opérateur OR sur une autre sélection (#368).
+
+## [2026-11-12] Cibles raster / nuage d'une source vecteur : options dédiées ; fond web grisé dans la liste
+Décision utilisateur : `CROSS_FILTER.vector_source_raster_targets` / `vector_source_point_cloud_targets` (on par
+défaut), en plus de `RASTER` / `POINT_CLOUD.enabled` (qui restent source ET cible). Source raster / nuage : options
+sans effet. API publique / REST / Processing / agent : non concernés (ils nomment leurs cibles).
+Patterns à retenir :
+- Une seule règle, `point_cloud_capability.is_listed_coverage_target(layer, vector_source)`, pour les deux chemins
+  de remplissage (FilteringController et le repli ComboboxPopulationManager) ; `is_unlisted_vector_source_target`
+  dans `CoverageModeController.run_vector_source_task` : 'filter' écarte (log info) une cible cochée puis retirée
+  par l'option ; 'unfilter' / 'reset' ajoutent les cibles retirées que des runs liés avaient découpées
+  (`_linked_targets`, pas d'autre cible décochée : même règle que le moteur vecteur). Pas dans
+  `split_coverage_targets`, partagé avec l'export.
+- Les cibles d'un lancement viennent de la liste (`get_layers_to_filter`) : une option changée la fait remplir de
+  nouveau par `PropertyController.refill_layers_to_filter` (édition en direct : ConfigController ; relecture du
+  disque : ConfigModelManager, là où RASTER.enabled est déjà suivi). Un clic n'enregistre rien : l'écran fait foi,
+  chaque ligne listée garde son état exact (décochée comprise) ; une cible cochée que l'option retire reste dans
+  `layers_to_filter` (en mémoire, comme sur le disque) et revient cochée avec l'option, jusqu'au lancement suivant
+  qui enregistre les cibles utilisées. Clé des cibles éteinte : rien d'enregistré. Ne PAS réutiliser
+  `_refresh_layers_to_filter` (allumage de la clé : la liste remplie clé éteinte n'affiche rien de coché, d'où
+  l'union avec l'enregistré) — revue Opus du 12/11.
+- Ligne grisée (`QgsCheckableComboBoxLayer.add_unfilterable_item`) : aucun flag, pas d'état coché, pas de
+  `layer_id` dans ses données (seulement `unfilterable_layer_id`) → jamais lue comme cible. Les écritures de case
+  du widget lui-même passent par `_checkable` ; le reste (remplissage, favoris, `_restore_checked_targets`, refill)
+  écrit sur le modèle mais ne coche qu'une ligne trouvée par `layer_id`. Piège Qt : survoler une ligne désactivée
+  laisse courante la dernière ligne activée (sauf liste faite seulement de lignes grisées : l'index 0 l'est), donc
+  le clic vise `indexAt(position)` (avant : cliquer la ligne grisée cochait la ligne survolée juste avant).
+- Écartés par les options : absents (pas grisés), l'option sert à alléger la liste. Fonds web grisés seulement là
+  où les rasters de valeurs sont listés. Masque des fonds web hors source : PR séparée, à venir.
+
+## [2026-11-12] Lot « audit-engine » : justesse des résultats (branche `claude/audit-engine`)
+- **AND NOT sans filtre existant = `NOT (x)` partout** (décision produit du 12/11) : cœur
+  (`combine_without_old_subset` de `expression_combiner`, `combine_subset`), source du dock (dans
+  `ExpressionFacadeHandler`, car `AttributeFilterExecutor` renvoie la nouvelle expression sans ancien subset),
+  cibles du dock (`_determine_subset_strategy` rend `(None, opérateur)` sans subset ; builders PG / Spatialite /
+  OGR et adaptateur legacy écrivent `NOT (new)`), rasters / nuages (emprise moins la nouvelle zone), tuiles
+  vectorielles, API REST / agent / nuages de l'API publique. Un filtre spatial précédent reste REMPLACÉ (et non
+  « ancien moins nouveau ») ; une cible de service lue en partie refuse AND NOT avec ou sans filtre.
+  Pièges : `NOT` au-dessus d'une sortie native OGR SQL contenant un AND (TRUE AND NULL = FALSE) ; une entité où
+  `x` est NULL n'est pas gardée.
+- **Source qui ne garde rien** (Spatialite / OGR) : `SourceSelectionError` (`adapters/backends/source_refusal.py`)
+  traverse le repli Spatialite → OGR de `geometry_preparer` et devient le message du filtre ; jamais la couche
+  entière. Restent des replis « couche entière » : SUBSET / SELECTION quand l'expression ne garde rien avec un
+  subset ou une sélection préalable, `EMERGENCY FALLBACK` de `geometry_preparer`, échec mémoire de TASK_PARAMS OGR.
+- Export par `layer_id` ; éditions de l'agent validées avant `startEditing`, `_abandon` = `destroyEditCommand` +
+  `rollBack` seulement si l'édition a ouvert le mode ; style raster refuse NaN / Inf / min ≥ max ; export de mise
+  en page crée son dossier et ne remplace pas ; « style » d'un subset cible = `_is_standalone_display_expression`.
 ## [2026-11-12] Audit segmentation / nuages (lot S, branche `claude/audit-segmentation`)
 - **Fenêtres SAM** : plus de `QgsRasterLayer` dans les tâches ni l'algorithme. `raster_look(layer, alpha)` clone sur
   le thread principal le moteur de rendu + les filtres du pipe (luminosité, teinte, rééchantillonnage) ;
@@ -39,10 +99,14 @@ Suites : `service=` → #357 (`pg_connect.connect_kwargs_from_uri` = `QgsDataSou
 un service ni host ni port, valeurs vides écartées car libpq ne remplit depuis le service que les mots-clés absents ;
 `connection_identity` pour toute clé de cache par base). Transaction laissée par `ensure_table_stats` → PR suivante.
 DROP du reset en lecture seule : non-problème (`execute_commands` attrape et fait rollback).
-**Reste ouvert** : buffer par expression sur source PG > 10 000 entités, cassé à 3 étages (MV jamais créée :
-`param_buffer_expression` lu avant l'init et clé `buffer_expression` absente ; si créée, elle prendrait l'ANCIEN
-subset car le nouveau est seulement en file ; la MV `_dump` = ST_Union sans clé alors que le builder y applique
-`__source."pk" IN …`). À reproduire sur PostGIS (Docker) avant de toucher : piste = toujours le mode inline.
+Buffer par expression : #363 (toujours inline ; la MV `_dump` n'était jamais créée et n'avait pas les colonnes que
+le builder EXISTS lit sur `__source`) et #368 (la sélection source de CE filtre : pendant la phase distante, le subset
+de la source est encore l'ANCIEN, il n'est posé que dans `finished()` ; `task_parameters['source_subset_after_task']`
+= subset mis en file ; branche « BUFFER MODE » supprimée, elle découpait le subset sur AND/OR et recollait en AND).
+Piège général à retenir : toute lecture de `source_layer.subsetString()` / `featureCount()` pendant la phase distante
+voit l'état d'avant la tâche. Restes connus : chaînage spatial (`spatial_chain`) qui ne garde que les EXISTS (la
+nouvelle sélection est perdue, table de buffers sur toute la source) ; PATH 3A ; scénario headless
+`tests/qgis_headless/check_pg_buffer_expression.py` jamais exécuté (pas de PostGIS : Docker indisponible).
 
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression
@@ -67,10 +131,32 @@ ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPac
 - **Replis qui relisent l'expression en QGIS** (`EXPRESSION_FALLBACK` OGR / Spatialite) : la tâche garde
   `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
   COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
-- **Reste** : mode hybride (PARTIAL : partie native + liste d'ids évaluée sur le préfiltre), PostgreSQL, fonctions
-  géométriques / `@variables` (constantes à replier), bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route'
-  par l'ancien chemin. Les 5 échecs de la suite complète (expression_builder PG / Spatialite, coverage_raster_target)
-  existent sur `main` ; les lancer dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre.
+- **Reste** : PostgreSQL, fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
+  `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin. Les 5 échecs de
+  la suite complète (expression_builder PG / Spatialite, coverage_raster_target) existent sur `main` ; les lancer
+  dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :
+  `test_no_unscoped_qt_enums` refuse `QgsFeatureRequest.NoGeometry`, écrire `QgsFeatureRequest.Flag.NoGeometry`).
+
+## [2026-11-12] Mode hybride (SQLite seulement) et durcissement de la traduction native
+- **Hybride** : traduction PARTIAL / NONE sur GeoPackage / SpatiaLite → QGIS évalue l'expression localement entité
+  par entité (pas le filtre compilé du provider : QGIS compile `=` sur réels sans sa tolérance) et le subset liste des
+  clés : partie native seule si QGIS n'en exclut rien, sinon la plus courte de `key IS NOT NULL AND (natif) AND NOT
+  (key IN (exclues))` et `key IS NOT NULL AND key IN (gardées)`. Le préfixe `key IS NOT NULL AND` empêche
+  `FilterOrchestrator._is_key_list_subset` de la prendre pour la liste d'une étape spatiale (il la remplacerait au
+  lieu de la combiner). Conditions : clé = champ de la source, unique et jamais NULL (lue sur toutes les entités),
+  `COLLATE BINARY` si texte, racine de l'expression = condition, couche pas en édition, ≤ 1 M entités et compte
+  connu, ≤ 100 000 clés, colonnes du texte QGIS de la partie native = colonnes traduites (`node.dump()` écrit sans
+  guillemets les champs `null`, `true`, `false`). Jamais sous NOT (AND NOT) ni à travers un autre subset que celui
+  combiné par AND (`AttributeFilterExecutor._keys_may_be_evaluated`).
+- **Pas sur OGR SQL** (mesuré GDAL 3.13) : liste IN refusée au-delà de ~5 000 valeurs, lue valeur par valeur à chaque
+  lecture (pas d'index même sur FID), clés texte sans la casse, `fid` = champ `fid` s'il existe, FID du Shapefile
+  renuméroté après repack. Table de vérité OGR SQL : seul `NOT (a AND b)` diverge (TRUE AND NULL = FALSE) ; une
+  écriture sans AND ne sert à rien, GDAL réécrit les NOT (De Morgan).
+- **Garde sanitizer** : toute sortie que `sanitize_subset_string` réécrirait est refusée (le sanitizer actuel efface
+  `COALESCE(...) GLOB ...`, `NOT ("nom d'usage" ...)`, tronque `COALESCE(abs(CAST(...`). Écritures : `x NOT GLOB p`,
+  parenthèses gardées devant une fonction, noms avec `'` refusés. Autres corrections : moins unaire seulement sur un
+  littéral (QGIS : `-NULL` d'un champ entier = 0, vérifié), réels SQLite écrits `(CAST(m AS REAL) / 2^k)` (SQLite
+  3.45 lit ~1 littéral décimal sur 4 000 à 1 ulp près).
 
 ## [2026-10-27] S0 : `filtermate_core/`, le cœur sans hôte (étape 1 du portage RustGIS / GeoLibre)
 Décision : extraire la sémantique de filtrage dans un paquet `filtermate_core/` sans QGIS / Qt / GDAL, vendu dans le
