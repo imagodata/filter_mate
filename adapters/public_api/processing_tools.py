@@ -254,8 +254,9 @@ def _interpolation_data(name: str, value: Any) -> str:
     QGIS opens each source from its text (``QgsProcessingUtils.variantToSource``), a path or a URL included.
 
     Raises:
-        ValueError: A row that is not four fields, a field after the source that is not an integer, a source that is
-            not a vector layer of the project.
+        ValueError: A row that is not four fields, a field after the source that is not an integer or out of its
+            range (value source and source type 0 to 2, field index -1 to the last field), a source that is not a
+            vector layer of the project.
     """
     rows = value.split(_ROW) if isinstance(value, str) and value.strip() else [None]
     written = []
@@ -269,7 +270,15 @@ def _interpolation_data(name: str, value: Any) -> str:
             raise ValueError(f"{name}: '{layer.name()}' is not a vector layer")
         if _ROW in layer.id() or _FIELD in layer.id():  # an id of a project file, written by anyone
             raise ValueError(f"{name}: the id of '{layer.name()}' cannot be written in a row")
-        written.append(_FIELD.join([layer.id()] + [str(int(item)) for item in fields[1:]]))
+        source, field, kind = (int(item) for item in fields[1:])
+        if not 0 <= source <= 2:
+            raise ValueError(f"{name}: the value source is 0 (a field), 1 (the Z) or 2 (the M), not {source}")
+        if not 0 <= kind <= 2:
+            raise ValueError(f"{name}: the source type is 0 (points), 1 (structure lines) or 2 (break lines), not {kind}")
+        if not -1 <= field < layer.fields().count():
+            raise ValueError(f"{name}: the field index of '{layer.name()}' is -1 or 0 to {layer.fields().count() - 1}, "
+                             f"not {field}")
+        written.append(_FIELD.join([layer.id(), str(source), str(field), str(kind)]))
     return _ROW.join(written)
 
 
