@@ -64,6 +64,11 @@
         <translation>Назад към състоянието преди: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Спрете заявката или изчакайте края ѝ, за да отворите настройките.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Няма какво да се отмени.</translation>
@@ -806,6 +811,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Стъпка {} не беше изпълнена: тя би променила слой, който сте защитили от агента ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Стъпка {} не беше изпълнена: слоевете, които сте защитили от агента, не можаха да бъдат прочетени ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Щракнете върху квадрата вдясно, за да тествате този слой по неговите центроиди</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>не може да се филтрира</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Уеб базова карта (WMS / WMTS / XYZ, ArcGIS MapServer): само цветове, не може да се филтрира</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

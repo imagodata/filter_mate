@@ -64,6 +64,11 @@
         <translation>العودة إلى ما قبل: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>أوقف الطلب أو انتظر انتهاءه لفتح الإعدادات.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>لا شيء للتراجع عنه.</translation>
@@ -806,6 +811,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>لم تُنفَّذ الخطوة {}: كانت ستغيّر طبقة قمت بحمايتها من الوكيل ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>لم تُنفَّذ الخطوة {}: تعذّرت قراءة الطبقات التي حميتها من الوكيل ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>انقر على المربع الأيمن لاختبار هذه الطبقة بنقاطها المركزية</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>غير قابل للتصفية</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>خريطة أساس من الويب (WMS / WMTS / XYZ، ArcGIS MapServer): ألوان فقط، لا يمكن تصفيتها</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

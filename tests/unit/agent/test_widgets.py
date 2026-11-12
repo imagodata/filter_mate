@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """Widgets the agent makes: their description, and the filter they write."""
 import json
+import math
 
 import pytest
 
 from core.agent.widgets import (
     CATEGORIES, CHART, HISTOGRAM, MAX_BARS, MAX_VALUES, MAX_WIDGETS, NOTHING, RANGE, STAT, VALUES, WidgetError,
-    category_bars, condition, dumps, histogram_bars, layer_filter, make, parse, replaced, summary, without,
+    category_bars, condition, decimals, dumps, histogram_bars, layer_filter, make, parse, replaced, summary, without,
 )
 
 pytestmark = pytest.mark.unit
@@ -63,6 +64,42 @@ class TestMake:
     def test_range_refused(self, changes, words):
         with pytest.raises(WidgetError, match=words):
             a_range(**changes)
+
+    def test_a_number_beyond_a_float_is_refused_not_raised(self):
+        with pytest.raises(WidgetError, match="numeric"):
+            a_range(maximum=10 ** 400)
+        assert parse(json.dumps([dict(a_range(), maximum=10 ** 400)])) == []
+
+    @pytest.mark.parametrize("minimum, maximum, integer, places", [
+        (3, 17, True, 0),
+        (0.125, 10.006, False, 2),  # as before for a span of a few units
+        (0.0, 1000.0, False, 2),  # never fewer than 2 for decimal numbers of an ordinary size
+        (0.001, 0.005, False, 5),  # a hundredth of the span still shows: not rounded to 0
+        (1234.5678, 1234.5679, False, 6),
+        (1e6, 1e6 + 1e-4, False, 4),  # not 6: a step of 1e-6 at 1e6 is no change for Qt 5 (1e-12 of the size)
+        (5e10, 5e10 + 1e9, False, 0),
+        (-1.7e308, 1.7e308, False, 0),  # a span beyond the largest float
+        (0.0, 1e-300, False, 15),  # at most as many as a float holds
+    ])
+    def test_decimals_follow_the_span_and_the_size(self, minimum, maximum, integer, places):
+        assert decimals({"minimum": minimum, "maximum": maximum, "integer": integer}) == places
+
+    @pytest.mark.parametrize("minimum, maximum", [(0.3, 0.1 + 0.2), (0.0, 1e-17), (1e6, 1e6 + 1e-6)])
+    def test_a_range_whose_ends_round_to_one_number_is_refused(self, minimum, maximum):
+        with pytest.raises(WidgetError, match="too little"):
+            a_range(minimum=minimum, maximum=maximum)
+
+    @pytest.mark.parametrize("stored, minimum, maximum, low, high", [
+        (dict(low=0.13), 0.125, 0.9, 0.125, 0.9),  # 0.125 shown 0.13: ties away from 0, as Qt
+        (dict(high=9.99), 0.0, 9.994, 0.0, 9.994),
+        (dict(low=-0.13), -0.125, 3.0, -0.125, 3.0),
+        (dict(low=0.5, high=0.75), 0.125, 0.9, 0.5, 0.75),  # chosen by the user: kept
+    ])
+    def test_a_bound_saved_rounded_at_an_end_by_5_1_is_read_as_that_end(self, stored, minimum, maximum, low, high):
+        widget = parse(dumps([dict(a_range(minimum=minimum, maximum=maximum), **stored)]))[0]
+        assert (widget["low"], widget["high"]) == (low, high)
+        assert condition(widget, qf, qv) == ("" if (low, high) == (minimum, maximum) else
+                                             '"pop" >= 0.5 AND "pop" <= 0.75')
 
     def test_too_many_values(self):
         with pytest.raises(WidgetError, match="range widget"):
@@ -215,3 +252,14 @@ class TestChart:
         assert bars[0]["low"] == 0 and bars[-1]["high"] == 10
         assert histogram_bars([3, 3]) == [{"low": 3.0, "high": 3.0, "count": 2}]
         assert histogram_bars([None]) == []
+
+    @pytest.mark.parametrize("values, low, high", [
+        ([-1.7e308, 1.7e308], -1.7e308, 1.7e308),  # high - low beyond the largest float
+        ([0, 5e-324], 0, 5e-324),  # a tenth of the span below the smallest float
+        ([10 ** 400, 1, 2, float("inf"), float("nan")], 1, 2),  # not finite, or beyond a float: left out
+    ])
+    def test_histogram_of_extreme_numbers(self, values, low, high):
+        bars = histogram_bars(values)
+        assert [bar["count"] for bar in bars] == [1] + [0] * 8 + [1]
+        assert bars[0]["low"] == low and bars[-1]["high"] == high
+        assert all(math.isfinite(bar[key]) for bar in bars for key in ("low", "high"))

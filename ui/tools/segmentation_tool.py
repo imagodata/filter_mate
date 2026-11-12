@@ -146,3 +146,14 @@ class SegmentationTool(QgsMapTool):
             except RuntimeError:  # the canvas is gone (plugin unloaded)
                 self._markers = []
                 return
+
+    def remove_items(self) -> None:
+        """Take the markers and the box out of the scene of the map, the tool going away: deleting it leaves them there."""
+        items = self._markers + ([self._band] if self._band is not None else [])
+        self._markers, self._band, self._shown = [], None, 0
+        try:
+            scene = self.canvas().scene()
+            for item in items:
+                scene.removeItem(item)
+        except RuntimeError:  # the canvas is gone (plugin unloaded)
+            pass

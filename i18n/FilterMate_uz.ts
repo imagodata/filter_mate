@@ -64,6 +64,11 @@
         <translation>Oldingi holatga qaytish: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Sozlamalarni ochish uchun so‘rovni to‘xtating yoki uning tugashini kuting.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Bekor qilinadigan narsa yo'q.</translation>
@@ -806,6 +811,11 @@ Rozimisiz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>{}-qadam bajarilmadi: u agentdan himoya qilgan qatlamingizni o‘zgartirgan bo‘lardi ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>{}-qadam bajarilmadi: agentdan himoyalangan qatlamlarni o‘qib bo‘lmadi ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ Raster xaritadagidek, o'z uslubi bilan chiziladi. SAM FilterMate panelining TANL
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Bu qatlamni markaziy nuqtalari bo‘yicha sinash uchun o‘ngdagi kvadratni bosing</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>filtrlab bo'lmaydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Veb asos xarita (WMS / WMTS / XYZ, ArcGIS MapServer): faqat ranglar, uni filtrlab bo'lmaydi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

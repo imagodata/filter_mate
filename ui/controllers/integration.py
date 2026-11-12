@@ -244,12 +244,13 @@ class ControllerIntegration:
 
         They are torn down when the plugin unloads (``teardown``); tearing them
         down here left the reopened dock without its raster / point cloud mode.
-        Only the pixel picker stops: it would keep the map tool while the
-        panel showing the pixel values is hidden.
+        Only the tools of the raster / point cloud panels leave the map (pixel
+        picker, SAM, class pipette, Zone): they would keep it while their
+        panel is hidden.
         """
         controller = self._point_cloud_ui_controller
         if controller is not None:
-            controller._deactivate_pixel_tool()
+            controller.release_map_tools()
 
     def _create_controllers(self) -> None:
         """Create all controller instances."""

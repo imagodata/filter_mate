@@ -64,6 +64,11 @@
         <translation>กลับไปก่อน: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>หยุดคำขอ หรือรอให้เสร็จสิ้น เพื่อเปิดการตั้งค่า</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>ไม่มีสิ่งที่ต้องเลิกทำ</translation>
@@ -806,6 +811,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>ไม่ได้เรียกใช้ขั้นตอนที่ {}: ขั้นตอนนี้จะเปลี่ยนชั้นข้อมูลที่คุณป้องกันไว้จากเอเจนต์ ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ไม่ได้เรียกใช้ขั้นตอน {}: ไม่สามารถอ่านชั้นข้อมูลที่คุณป้องกันจากเอเจนต์ได้ ({})</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>คลิกช่องสี่เหลี่ยมทางขวาเพื่อทดสอบเลเยอร์นี้ด้วยจุดศูนย์กลาง</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>กรองไม่ได้</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>แผนที่ฐานเว็บ (WMS / WMTS / XYZ, ArcGIS MapServer): มีเพียงสี จึงกรองไม่ได้</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

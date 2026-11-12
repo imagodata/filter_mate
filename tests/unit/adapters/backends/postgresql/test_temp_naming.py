@@ -7,7 +7,8 @@
   drops) on ``mv_<name>``: "relation does not exist", the filter failed.
 - prepare_postgresql_source_geom / build_spatial_join_query referenced
   ``mv_<name>_dump`` while MaterializedViewHandler creates
-  ``fm_temp_mv_<name>_dump``.
+  ``fm_temp_mv_<name>_dump`` (2026-11-12: a buffer expression no longer goes
+  through a view at all, see test_buffer_expression_large_source.py).
 - The task path used the ``filter_mate_temp`` schema, the v4 backend
   (mv_manager, backend.py, cleanup service, chain optimizer...)
   ``filtermate_temp``: the session cleanup of one never saw the MVs of the
@@ -151,17 +152,6 @@ def test_new_view_names_still_count_as_filtermate_views():
         '"fid" IN (SELECT "fm_temp_mv_s01_x"."fid" FROM "filter_mate_temp"."fm_temp_mv_s01_x")'
     )
     assert combine is False and "materialized view" in reason
-
-
-def test_buffer_expression_source_reads_the_dump_view_handler_creates():
-    geom, mv_name = executor.prepare_postgresql_source_geom(
-        source_table="demand_points", source_schema="ref", source_geom="geom",
-        buffer_expression='"homecount" * 2', session_id="s01",
-        mv_schema=constants.DEFAULT_TEMP_SCHEMA, source_feature_count=50000,
-    )
-    assert mv_name == "s01_demand_points_buffer_expr"
-    # MaterializedViewHandler: CREATE MATERIALIZED VIEW "<schema>"."fm_temp_mv_<mv_name>_dump"
-    assert geom == '"filter_mate_temp"."fm_temp_mv_s01_demand_points_buffer_expr_dump"."geom"'
 
 
 def test_one_temp_schema_constant():

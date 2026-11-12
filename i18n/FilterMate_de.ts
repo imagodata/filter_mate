@@ -64,6 +64,11 @@
         <translation>Zurück zu vor: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Stoppen Sie die Anfrage oder warten Sie ihr Ende ab, um die Einstellungen zu öffnen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Nichts rückgängig zu machen.</translation>
@@ -806,6 +811,11 @@ Sind Sie einverstanden?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Schritt {} wurde nicht ausgeführt: Er würde einen Layer ändern, den Sie vor dem Agenten geschützt haben ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Schritt {} wurde nicht ausgeführt: Die vor dem Agenten geschützten Layer konnten nicht gelesen werden ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ Das Raster wird wie in der Karte gezeichnet, mit seinem Stil. SAM wird einmalig 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Auf das Quadrat rechts klicken, um diesen Layer anhand seiner Zentroide zu testen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nicht filterbar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web-Hintergrundkarte (WMS / WMTS / XYZ, ArcGIS MapServer): nur Farben, sie kann nicht gefiltert werden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

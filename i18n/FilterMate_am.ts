@@ -64,6 +64,11 @@
         <translation>ከዚህ በፊት ወደነበረው ተመለስ: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>ቅንብሮቹን ለመክፈት ጥያቄውን ያቁሙ ወይም እስኪያልቅ ይጠብቁ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>የሚቀለበስ ምንም የለም።</translation>
@@ -806,6 +811,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>ደረጃ {} አልተሠራም፦ ከወኪሉ የጠበቁትን ንብርብር ይቀይር ነበር ({})።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ደረጃ {} አልተካሄደም፦ ከወኪሉ የጠበቋቸው ንብርብሮች ሊነበቡ አልቻሉም ({})።</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>ይህን ንብርብር በማዕከሎቹ ለመፈተሽ በቀኝ በኩል ያለውን ካሬ ጠቅ ያድርጉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ማጣራት አይቻልም</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>የድር መሠረት ካርታ (WMS / WMTS / XYZ, ArcGIS MapServer)፦ ቀለሞች ብቻ፣ ሊጣራ አይችልም</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

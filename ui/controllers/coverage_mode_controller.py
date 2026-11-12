@@ -2374,6 +2374,30 @@ class CoverageModeController(BaseController):
         previous, self._previous_map_tool = self._previous_map_tool, None
         self._release_map_tool(self._pixel_tool, previous)
 
+    def release_map_tools(self) -> None:
+        """The dock was closed (only hidden): each tool of the panels gives the map back to the tool it replaced.
+
+        Left on, SAM's tool would still encode on a click, draw its outline under the mouse and catch Esc / Enter /
+        G, and the pickers would write into a panel nobody sees. A tool given back can be another of ours (a Zone
+        that took over SAM): it leaves in turn. Each one leaves even when another failed.
+        """
+        extras = self._extras  # never made only to be stopped
+        steps = ((lambda: self._tool_on_map(self._pixel_tool), self._deactivate_pixel_tool),
+                 (lambda: self._segmentation is not None and self._segmentation.on_map(), self._stop_segmentation),
+                 (lambda: self._tool_on_map(self._class_tool), self._deactivate_class_tool),
+                 (lambda: extras is not None and extras.zone_tool_on(), lambda: extras.stop_zone_tool()))
+        for _round in steps:  # each tool can come back once, given back by another
+            released = False
+            for on_map, release in steps:
+                try:
+                    if on_map():
+                        release()
+                        released = True
+                except Exception as exc:  # a tool deleted with its panel: the others still leave
+                    logger.debug(f"[FM5] map tool not released: {exc}")
+            if not released:
+                return
+
     def _drop_map_tools(self) -> None:
         """Delete the pixel and class pickers (made again on demand); their destructor takes them off the
         canvas and out of the tool QGIS gives back after Pan / Zoom."""
@@ -3460,16 +3484,26 @@ class CoverageModeController(BaseController):
             return
         source_id = source.id()
         try:
+            # 2026-11-12: rasters / point clouds the CROSS_FILTER options took off the targets list.
+            from ...adapters.qgis.point_cloud_capability import is_unlisted_vector_source_target
             if task_name == 'filter':
                 run = _LinkedRun()  # gets its cross operation once the cross task really changed a layer
                 self._linked_runs.setdefault(source_id, []).append(run)
                 self._linked_redo[source_id] = []
+                unlisted = [i for i in coverage_ids if is_unlisted_vector_source_target(self._map_layer(i))]
+                if unlisted:  # checked before the option was turned off: not clipped
+                    logger.info(f"[FM5] targets of '{self._layer_name(source)}' left out, no longer listed: {unlisted}")
+                    coverage_ids = [i for i in coverage_ids if i not in unlisted]
                 if coverage_ids and self._vector_engine_filters_targets():
                     self._run_vector_source_filter(source, coverage_ids, run=run)
             elif task_name in ('unfilter', 'reset'):
                 # Same history rules as the vector engine: Unfilter records
                 # nothing (a later Undo goes back to before the last filter, for
-                # every layer), Reset clears the history.
+                # every layer), Reset clears the history. A target a linked run
+                # clipped before an option took it off the list is restored too.
+                coverage_ids = list(coverage_ids) + [
+                    i for i in self._linked_targets(source_id)
+                    if i not in coverage_ids and is_unlisted_vector_source_target(self._map_layer(i))]
                 if coverage_ids:
                     kinds = {i: _kind_of(self._map_layer(i)) for i in coverage_ids}
                     self._finish_restore(self.service.unfilter(source_id, coverage_ids, kinds, record=False))
@@ -3494,6 +3528,15 @@ class CoverageModeController(BaseController):
                         self._finish_restore(self.service.redo(source_id))
         except Exception as exc:
             logger.warning(f"[FM5] coverage targets of '{self._layer_name(source)}' not processed: {exc}", exc_info=True)
+
+    def _linked_targets(self, source_id: str) -> List[str]:
+        """Layers the linked runs of the vector source changed, as long as their step is still applied."""
+        op_ids = {run.op_id for run in self._linked_runs.get(source_id) or () if run.op_id is not None}
+        layer_ids: List[str] = []
+        for operation in self.service.history.undo_stack(source_id):
+            if operation.op_id in op_ids:
+                layer_ids.extend(i for i in operation.layer_ids if i not in layer_ids)
+        return layer_ids
 
     @staticmethod
     def _run_is_next(run: _LinkedRun, operation: Any) -> bool:
@@ -3656,10 +3699,12 @@ class CoverageModeController(BaseController):
         return layer_id is not None and self.service.can_redo(layer_id)
 
     def update_undo_redo_buttons(self) -> None:
-        if self._active_layer is None:
+        dw = self.dockwidget
+        agent_focus = getattr(dw, 'agent_has_focus', None)
+        # AGENT open: the buttons walk the steps of the agent, which the app shows (filter_mate_app.py).
+        if self._active_layer is None or (callable(agent_focus) and agent_focus() is True):
             self._call(self._app(), 'update_undo_redo_buttons')
             return
-        dw = self.dockwidget
         # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
         on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
         self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', on_filtering and self.can_undo())

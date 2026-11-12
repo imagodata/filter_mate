@@ -388,6 +388,16 @@ def execute_filter_action_postgresql(
         use_materialized_view = True
         mv_reason = f"custom buffer expression with {feature_count:,} features"
 
+    # 2026-11-12: a materialized view is made with the psycopg2 connection, which
+    # cannot always be opened from the layer's URI (see execute_filter_action_postgresql_direct);
+    # without it the filter is direct, QGIS applying the subset with its own connection
+    if use_materialized_view:
+        try:
+            get_connection_fn()
+        except Exception as e:  # catch-all safety net: no view without the connection, direct filter
+            logger.warning(f"[PostgreSQL] No materialized view ({mv_reason}), direct filter instead: {e}")
+            use_materialized_view = False
+
     if use_materialized_view:
         # Log strategy decision
         logger.info(
@@ -529,14 +539,26 @@ def execute_filter_action_postgresql_direct(
     # PERF 2026-09-12: both steps are timed. A 21 s stall was measured right here
     # on a 574-row source layer (pg_stats catalog scan) and was invisible in the
     # log because nothing between "Small dataset" and "queued" reported a time.
-    connexion = get_connection_fn()
-    connect_elapsed = time.time() - start_time
-    ensure_stats_fn(connexion, source_schema, source_table, source_geom)
-    stats_elapsed = time.time() - start_time - connect_elapsed
-    if connect_elapsed > 0.25 or stats_elapsed > 0.25:
-        logger.info(
-            f"⏱ pg_direct_prepare: connection {connect_elapsed * 1000:.0f} ms, "
-            f"table stats {stats_elapsed * 1000:.0f} ms ({source_schema}.{source_table})"
+    # 2026-11-12: the statistics are an optimisation and the only use of the
+    # psycopg2 connection here. QGIS applies the subset with its own connection,
+    # which psycopg2 cannot always open from the layer's URI (pg_service.conf,
+    # password asked at opening and not saved, authcfg other than Basic): the
+    # exception aborted the task after the source subset was queued, so the
+    # source layer was filtered and the distant layers never were.
+    try:
+        connexion = get_connection_fn()
+        connect_elapsed = time.time() - start_time
+        ensure_stats_fn(connexion, source_schema, source_table, source_geom)
+        stats_elapsed = time.time() - start_time - connect_elapsed
+        if connect_elapsed > 0.25 or stats_elapsed > 0.25:
+            logger.info(
+                f"⏱ pg_direct_prepare: connection {connect_elapsed * 1000:.0f} ms, "
+                f"table stats {stats_elapsed * 1000:.0f} ms ({source_schema}.{source_table})"
+            )
+    except Exception as e:  # catch-all safety net: the statistics are optional, the filter goes on
+        logger.warning(
+            f"[PostgreSQL] Table statistics skipped for {source_schema}.{source_table} "
+            f"after {(time.time() - start_time) * 1000:.0f} ms: {e}"
         )
 
     try:
@@ -665,7 +687,8 @@ def execute_filter_action_postgresql_materialized(
 
     # Generate session-unique view name for multi-client isolation
     # FIX v4.2.0: For custom buffer expressions, use source_table + '_buffer_expr' as base name
-    # This must match the name generated in filter_executor.prepare_postgresql_source_geom()
+    # (2026-11-12: prepare_postgresql_source_geom no longer names such a view; custom is
+    # never True in the task, see manage_layer_subset_strings)
     if custom and param_buffer_expression:
         base_name = sanitize_sql_identifier(source_table + '_buffer_expr')
         session_name = get_session_name_fn(base_name)
@@ -833,9 +856,16 @@ def execute_reset_action_postgresql(
     sql_drop += f' DROP MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{session_name}_dump" CASCADE;'
     sql_drop += f' DROP INDEX IF EXISTS {schema}_{session_name}_cluster CASCADE;'
 
-    connexion = get_connection_fn()
-    execute_commands_fn(connexion, [sql_drop])
-    logger.debug(f"[PostgreSQL] Materialized View Dropped - Schema: {schema} - Session: {session_name}")
+    # 2026-11-12: without a psycopg2 connection (see execute_filter_action_postgresql_direct)
+    # no view can be dropped, nor was one created by this connection; the filter is cleared
+    try:
+        connexion = get_connection_fn()
+    except Exception as e:  # catch-all safety net: the reset clears the filter without dropping views
+        connexion = None
+        logger.warning(f"[PostgreSQL] Reset of {layer.name()}: materialized views not dropped: {e}")
+    if connexion is not None:
+        execute_commands_fn(connexion, [sql_drop])
+        logger.debug(f"[PostgreSQL] Materialized View Dropped - Schema: {schema} - Session: {session_name}")
 
     # THREAD SAFETY: Queue subset clear for application in finished()
     queue_subset_fn(layer, '')

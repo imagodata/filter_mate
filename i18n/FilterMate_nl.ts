@@ -64,6 +64,11 @@
         <translation>Terug naar voor: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Stop het verzoek, of wacht tot het klaar is, om de instellingen te openen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Niets om ongedaan te maken.</translation>
@@ -806,6 +811,11 @@ Gaat u akkoord?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Stap {} is niet uitgevoerd: deze zou een laag wijzigen die u tegen de agent hebt beschermd ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Stap {} is niet uitgevoerd: de lagen die u tegen de agent hebt beschermd, konden niet worden gelezen ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ Het raster wordt getekend zoals op de kaart, met zijn stijl. SAM wordt eenmalig 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Klik op het vierkantje rechts om deze laag via zijn centroïden te testen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>niet filterbaar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webachtergrondkaart (WMS / WMTS / XYZ, ArcGIS MapServer): alleen kleuren, kan niet worden gefilterd</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

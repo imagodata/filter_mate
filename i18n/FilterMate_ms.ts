@@ -64,6 +64,11 @@
         <translation>Kembali ke sebelum: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Hentikan permintaan, atau tunggu sehingga ia selesai, untuk membuka tetapan.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Tiada apa untuk dibuat asal.</translation>
@@ -806,6 +811,11 @@ Adakah anda bersetuju?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Langkah {} tidak dijalankan: ia akan mengubah lapisan yang anda lindungi daripada ejen ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Langkah {} tidak dijalankan: lapisan yang anda lindungi daripada ejen tidak dapat dibaca ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ Raster dilukis seperti pada peta, dengan gayanya. SAM dipasang sekali daripada k
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Klik petak di sebelah kanan untuk menguji lapisan ini mengikut sentroidnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>tidak boleh ditapis</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Peta asas web (WMS / WMTS / XYZ, ArcGIS MapServer): warna sahaja, ia tidak boleh ditapis</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

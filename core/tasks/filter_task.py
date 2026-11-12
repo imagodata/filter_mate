@@ -357,6 +357,8 @@ class FilterEngineTask(QgsTask):
         self.layers = {}
         self.provider_list = []
         self.expression = None
+        self.source_qgis_expression = None
+        self.source_selection_expression = None
         self.is_field_expression = None
 
         self.has_feature_count_limit = True
@@ -907,6 +909,12 @@ class FilterEngineTask(QgsTask):
                 logger.warning(f"Error checking the task's PostgreSQL connection: {e}")
             self._task_postgresql_connection = None
 
+        # 2026-11-12: an attempt that failed is not made again by the same task: each one
+        # may wait for its connection timeouts, and a reset asks once per layer
+        failure = getattr(self, '_task_postgresql_connection_failure', None)
+        if failure:
+            raise Exception(failure)
+
         logger.debug("Opening the task's PostgreSQL connection from its source layer")
 
         if hasattr(self, 'source_layer') and self.source_layer is not None:
@@ -934,9 +942,10 @@ class FilterEngineTask(QgsTask):
         except (RuntimeError, OSError, AttributeError, KeyError) as e:
             logger.error(f"Failed to get connection from layer by ID: {e}")
 
-        raise Exception(
+        self._task_postgresql_connection_failure = (
             "No valid PostgreSQL connection available: could not obtain a connection from the layer."
         )
+        raise Exception(self._task_postgresql_connection_failure)
 
     def _initialize_source_layer(self):
         """Initialize source layer and basic layer count. Delegates to InitializationHandler."""
@@ -1073,6 +1082,13 @@ class FilterEngineTask(QgsTask):
                 logger.info(f"Action '{self.task_action}' completed via dispatcher: {result.message}")
             else:
                 logger.warning(f"Action '{self.task_action}' failed via dispatcher: {result.message}")
+                # 2026-11-12: the handler caught an exception of the action (its text in
+                # errors): its first line (an SQL error goes on with the statement)
+                # becomes the task message, or the message bar only says "Task failed".
+                # A message the action set itself is more precise: kept.
+                error_lines = str(result.errors[0]).strip().splitlines() if result.errors else []
+                if error_lines and not self.message:
+                    self.message = error_lines[0]
 
             return result.success
 
@@ -1411,10 +1427,26 @@ class FilterEngineTask(QgsTask):
 
         # Apply results to task instance
         self.expression = result_obj.expression
+        # The QGIS expression of a native SQL subset, for the fallbacks that
+        # evaluate the source filter in QGIS (None: self.expression is readable)
+        origins = getattr(self._attribute_executor, 'native_origins', None) or {}
+        self.source_qgis_expression = origins.get(self.expression) if isinstance(self.expression, str) else None
+        self.source_selection_expression = result_obj.selection_expression
         if result_obj.is_field_expression:
             self.is_field_expression = result_obj.is_field_expression
 
         return result_obj.success
+
+    def _source_selection_qgis_expression(self):
+        """The QGIS expression the fallbacks of the source geometry read the source features with.
+
+        2026-11-12 (review): the new selection as written first. The source filter
+        is combined with the old subset (NOT (x) under AND NOT: every feature when
+        x keeps none, the only case these fallbacks run in), and the QGIS
+        expression of a combined native filter cannot be found again.
+        """
+        return (getattr(self, 'source_selection_expression', None)
+                or getattr(self, 'source_qgis_expression', None) or getattr(self, 'expression', None))
 
     def _initialize_source_subset_and_buffer(self):
         """Initialize source subset and buffer parameters. Delegates to InitializationHandler."""
@@ -1498,11 +1530,9 @@ class FilterEngineTask(QgsTask):
             source_layer=self.source_layer,
             layers=self.layers,
             task_parameters=self.task_parameters,
-            param_buffer_expression=self.param_buffer_expression,
             param_source_provider_type=self.param_source_provider_type,
             provider_list=self.provider_list,
             initialize_source_subset_and_buffer_callback=self._initialize_source_subset_and_buffer,
-            ensure_buffer_expression_mv_exists_callback=self._ensure_buffer_expression_mv_exists,
             try_create_filter_chain_mv_callback=self._try_create_filter_chain_mv,
             prepare_geometries_by_provider_callback=self._prepare_geometries_by_provider,
             filter_all_layers_with_progress_callback=self._filter_all_layers_with_progress,
@@ -1572,7 +1602,7 @@ class FilterEngineTask(QgsTask):
         result = self._source_geom_preparer.prepare_spatialite_source_geom(
             source_layer=self.source_layer, task_parameters=self.task_parameters,
             is_field_expression=getattr(self, 'is_field_expression', None),
-            expression=getattr(self, 'expression', None),
+            expression=self._source_selection_qgis_expression(),
             param_source_new_subset=getattr(self, 'param_source_new_subset', None),
             param_buffer_value=getattr(self, 'param_buffer_value', None),
             param_buffer_segments=getattr(self, 'param_buffer_segments', 5),
@@ -1587,6 +1617,7 @@ class FilterEngineTask(QgsTask):
             geometry_to_wkt_fn=self._geometry_to_wkt,
             get_optimization_thresholds_fn=self._get_optimization_thresholds,
             predicates=self._predicate_names(),
+            selection_reads_whole_layer=self._get_source_combine_operator() not in ('AND', 'AND NOT'),
         )
         if result['success']:
             self.spatialite_source_geom = result['wkt']
@@ -1699,7 +1730,7 @@ class FilterEngineTask(QgsTask):
         result = self._source_geom_preparer.prepare_ogr_source_geom(
             source_layer=self.source_layer, task_parameters=self.task_parameters,
             is_field_expression=getattr(self, 'is_field_expression', None),
-            expression=getattr(self, 'expression', None),
+            expression=self._source_selection_qgis_expression(),
             param_source_new_subset=getattr(self, 'param_source_new_subset', None),
             has_to_reproject_source_layer=self.has_to_reproject_source_layer,
             source_layer_crs_authid=self.source_layer_crs_authid,
@@ -1767,10 +1798,6 @@ class FilterEngineTask(QgsTask):
     def _create_source_mv_if_needed(self, source_mv_info):
         """Create source materialized view with pre-computed buffer. Delegates to MaterializedViewHandler."""
         return self._mv_handler.create_source_mv_if_needed(source_mv_info)
-
-    def _ensure_buffer_expression_mv_exists(self):
-        """Ensure buffer expression MVs exist. Delegates to MaterializedViewHandler."""
-        return self._mv_handler.ensure_buffer_expression_mv_exists()
 
     def _try_create_filter_chain_mv(self):
         """Try to create filter chain MV optimization. Delegates to MaterializedViewHandler."""
@@ -2079,6 +2106,13 @@ class FilterEngineTask(QgsTask):
             self.message = result['message']
         if result.get('failed_layer_names'):
             self._failed_layer_names = result['failed_layer_names']
+        if result.get('source_refused'):
+            # 2026-11-12 (review): the source subset queued before the refusal was
+            # applied by finished() (0 feature) with no history entry: Undo did not
+            # bring the source back. A refused filter changes nothing.
+            self._pending_subset_requests = [
+                request for request in getattr(self, '_pending_subset_requests', [])
+                if request[0] is not self.source_layer]
         return result.get('success', False)
 
     def execute_unfiltering(self) -> bool:

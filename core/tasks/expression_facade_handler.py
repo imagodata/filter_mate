@@ -209,8 +209,25 @@ class ExpressionFacadeHandler:
             str: Combined expression.
         """
         executor = self.task._get_attribute_executor()
+        if not getattr(executor, 'old_subset', None):
+            return self._without_old_subset(executor, expression)
         # FIX 2026-01-18: only takes the expression parameter
         return executor.combine_with_old_subset(expression)
+
+    @staticmethod
+    def _without_old_subset(executor, expression):
+        """The source filter of a layer with no filter yet: NOT (new) under AND NOT, the new expression otherwise.
+
+        2026-11-12: AttributeFilterExecutor returns the new expression whatever the
+        operator when the layer has no subset (combine_with_old_subset and the key
+        list of build_feature_id_expression), which kept, under AND NOT, only what
+        it was asked to remove.
+        """
+        try:
+            from ...filtermate_core.filter.expression_combiner import combine_without_old_subset
+        except ImportError:  # imported from the repository root (tests)
+            from filtermate_core.filter.expression_combiner import combine_without_old_subset
+        return combine_without_old_subset(expression, getattr(executor, 'combine_operator', None))
 
     # =========================================================================
     # Feature ID expression building
@@ -233,6 +250,10 @@ class ExpressionFacadeHandler:
             features_list=features_list,
             is_numeric=self.task.task_parameters["infos"]["primary_key_is_numeric"]
         )
+        if result and not getattr(executor, 'old_subset', None):
+            # 2026-11-12 (review): a selected feature reloaded with its geometry gives
+            # no expression; its key list came back positive under AND NOT
+            result = self._without_old_subset(executor, result)
         # 2026-10-17: a refused key list (web service / virtual layer without key,
         # too many keys) reaches the message bar, not only the log.
         refusal = getattr(executor, 'last_refusal', None)
@@ -373,6 +394,9 @@ class ExpressionFacadeHandler:
         if hasattr(self.task, '_pending_subset_requests'):
             self.task._pending_subset_requests.append((self.task.source_layer, expression))
             logger.info(f"Queued source layer {self.task.source_layer.name()} for filter application in finished()")
+            # 2026-11-12: the source layer keeps its previous subset until finished();
+            # the distant filters read the one it will have (ExpressionBuilder)
+            self.task.task_parameters['source_subset_after_task'] = expression
 
         # Only build PostgreSQL SELECT for PostgreSQL providers
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:

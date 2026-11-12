@@ -64,6 +64,11 @@
         <translation>Quay lại trước: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Dừng yêu cầu, hoặc chờ nó kết thúc, để mở phần cài đặt.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Không có gì để hoàn tác.</translation>
@@ -806,6 +811,11 @@ Bạn có đồng ý không?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Bước {} không được chạy: bước này sẽ thay đổi một lớp bạn đã bảo vệ khỏi tác tử ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Bước {} không được chạy: không thể đọc các lớp bạn đã bảo vệ khỏi tác tử ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ Raster được vẽ như trên bản đồ, với kiểu hiển thị của nó
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Nhấp vào ô vuông bên phải để kiểm tra lớp này theo tâm của nó</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>không lọc được</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Bản đồ nền web (WMS / WMTS / XYZ, ArcGIS MapServer): chỉ có màu, không thể lọc</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

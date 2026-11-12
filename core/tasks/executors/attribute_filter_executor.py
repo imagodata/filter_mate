@@ -104,6 +104,10 @@ class AttributeFilterExecutor:
         self.combine_operator = combine_operator
         self.task_bridge = task_bridge
         self.geometry_field = geometry_field
+        # Native SQL written by process_qgis_expression -> the QGIS expression it
+        # came from: the source-geometry fallbacks evaluate an expression in QGIS,
+        # which cannot read GLOB, CAST or COLLATE.
+        self.native_origins = {}
 
         # Get layer field names
         self.field_names = [field.name() for field in layer.fields()]
@@ -273,8 +277,15 @@ class AttributeFilterExecutor:
         expression = " " + expression
         is_field_expression = QgsExpression().isFieldEqualityExpression(expression)
 
-        # Convert to provider-specific SQL
-        if self.provider_type == PROVIDER_POSTGRES:
+        # Convert to provider-specific SQL. The whole predicate written from its
+        # syntax tree for the layer's own source when every part is proven
+        # (native_dialect), or the proven part plus the keys QGIS kept for the
+        # rest (hybrid); otherwise the former text conversion.
+        native = self._native_subset(expression)
+        if native is not None:
+            self.native_origins[native] = expression.strip()
+            expression = native
+        elif self.provider_type == PROVIDER_POSTGRES:
             expression = self._convert_to_postgis(expression)
         elif self.provider_type == PROVIDER_SPATIALITE:
             expression = self._convert_to_spatialite(expression)
@@ -451,6 +462,44 @@ class AttributeFilterExecutor:
         except Exception:  # nosec B110 - no readable URI: the former default below
             pass
         return 'geometry'
+
+    def _native_subset(self, expression: str) -> Optional[str]:
+        """Native (or hybrid) subset of the expression for this layer's source, None when not proven."""
+        try:
+            from ....adapters.qgis.native_filter_translation import subset_for_layer
+            native = subset_for_layer(self.layer, expression, key_name=self.primary_key,
+                                      evaluate=self._keys_may_be_evaluated(),
+                                      negated='NOT' in (self.combine_operator or '').upper())
+        except Exception as e:  # catch-all: the former conversion stays the fallback
+            logger.debug(f"Native translation not available: {e}")
+            return None
+        if not isinstance(native, str) or not native:
+            return None
+        logger.info(f"Native translation: {native[:200]}")
+        return native
+
+    def _keys_may_be_evaluated(self) -> bool:
+        """Whether keys QGIS keeps now, through the layer, may stand for the expression in the new subset.
+
+        A list of keys keeps the same features as the expression but is never
+        NULL: under the NOT of an 'AND NOT' combination the rows where the
+        expression is NULL would come back. That NOT is written with an old
+        subset and, since 2026-11-12, without one too (``NOT (new)``,
+        ExpressionFacadeHandler.combine_with_old_subset). And the features are
+        read through the layer's current subset: right when the new subset is
+        ANDed with that same subset, wrong when it replaces it or is ORed with it.
+        """
+        operator = (self.combine_operator or '').upper()
+        old = (self.old_subset or '').strip()
+        if 'NOT' in operator:
+            return False
+        try:
+            current = (self.layer.subsetString() or '').strip()
+        except (RuntimeError, AttributeError):
+            return False
+        if not current:
+            return True
+        return bool(old) and operator == 'AND' and current == old
 
     def _convert_to_postgis(self, expression: str) -> str:
         """

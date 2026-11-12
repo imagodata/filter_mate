@@ -44,10 +44,11 @@ def _is_coverage_layer(layer) -> bool:
         return False
 
 
-def _is_coverage_target(layer) -> bool:
-    """Only value rasters and point clouds can be filter targets."""
-    from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
-    return _is_coverage_layer(layer) and not is_non_analysis_raster(layer)
+def _is_coverage_target(layer, vector_source) -> bool:
+    """Only value rasters and point clouds can be filter targets; under a vector source,
+    as the CROSS_FILTER options say."""
+    from ...adapters.qgis.point_cloud_capability import is_listed_coverage_target
+    return _is_coverage_layer(layer) and is_listed_coverage_target(layer, vector_source)
 
 
 class ComboboxPopulationManager:
@@ -512,6 +513,7 @@ class ComboboxPopulationManager:
 
             layer_props = dw.PROJECT_LAYERS[layer.id()]
             project = QgsProject.instance()
+            vector_source = isinstance(layer, QgsVectorLayer)
 
             # Get saved layers to filter
             has_layers = layer_props.get("filtering", {}).get(
@@ -566,7 +568,7 @@ class ComboboxPopulationManager:
                     layer_obj = project.mapLayer(layer_id)
                     if not layer_obj:
                         continue
-                    if not _is_coverage_target(layer_obj):
+                    if not _is_coverage_target(layer_obj, vector_source):
                         if not isinstance(layer_obj, QgsVectorLayer):
                             continue
                         # Skip non-spatial tables
@@ -592,11 +594,19 @@ class ComboboxPopulationManager:
                         item.setCheckState(Qt.CheckState.Unchecked)
                     item_index += 1
 
+                # Web basemaps: greyed and never checkable (FilteringController does the same).
+                from ...adapters.qgis.point_cloud_capability import is_listed_rendered_raster
+                for rendered in project.mapLayers().values():
+                    if rendered.id() != layer.id() and is_listed_rendered_raster(rendered, vector_source):
+                        layers_widget.add_unfilterable_item(
+                            dw.icon_per_geometry_type('GeometryType.Raster'),
+                            f"{rendered.name()} [{rendered.crs().authid()}]", rendered.id())
+
             logger.info(
                 f"populate_filtering_direct: Added {item_index} layers "
                 f"(source '{layer.name()}' excluded)"
             )
-            return item_index > 0
+            return layers_widget.count() > 0  # greyed web basemaps only: filled all the same
 
         except Exception as e:
             logger.error(

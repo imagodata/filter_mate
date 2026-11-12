@@ -64,7 +64,8 @@ _PREDICATES_DOC = (
 )
 _OPERATOR_DOC = (
     "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what "
-    "either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
+    "either keeps), AND NOT (remove the new selection from the previous filter, or from the whole layer when it "
+    "has none). Omit to replace the previous filter."
 )
 
 
@@ -391,7 +392,7 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Apply a filter expression", idempotent=True))
     async def apply_filter(
         layer_name: Annotated[str, Field(min_length=1, max_length=1000, description=(
-            "Name of a VECTOR layer (not its id; the first vector layer of that name is used)"))],
+            "A VECTOR layer: its id, or its name (an id first; by name, the first vector layer of that name)"))],
         expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
             "Subset string: the provider's SQL WHERE clause, without the WHERE keyword. For a PostgreSQL, "
             "GeoPackage, Shapefile or Spatialite layer: \"population\" > 10000 AND \"dep\" = '31'. "
@@ -517,7 +518,7 @@ def build_server(client: FilterMateClient) -> Any:
         criteria: Annotated[PointCloudCriteria, Field(description=(
             "Points to keep; at least one criterion is required"))],
         operator: Annotated[Optional[Operator], Field(description=(
-            _OPERATOR_DOC + " AND NOT needs an existing filter on each layer."))] = None,
+            _OPERATOR_DOC))] = None,
     ) -> Dict[str, Any]:
         """Keep only some points (by class, elevation, intensity, return number or expression) on point cloud layers.
 

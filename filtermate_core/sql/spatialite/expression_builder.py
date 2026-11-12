@@ -470,8 +470,10 @@ class SpatialiteSqlBuilder(GeometricFilterPort):
                 'Intersects'
             )
 
-            # Build expression
-            expr = f"{predicate_func}({geom_expr}, {source_geom_sql})"
+            # Build expression. 2026-11-12: "= 1": SpatiaLite answers -1 for a
+            # NULL geometry, true in SQLite (the features without geometry were
+            # kept, or not when the R-tree prefilter dropped them first).
+            expr = f"{predicate_func}({geom_expr}, {source_geom_sql}) = 1"
             predicate_expressions.append(expr)
 
         # Combine predicates

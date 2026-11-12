@@ -64,6 +64,11 @@
         <translation>Zpět před: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Chcete-li otevřít nastavení, zastavte požadavek nebo počkejte na jeho dokončení.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Není co vrátit.</translation>
@@ -806,6 +811,11 @@ Souhlasíte?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Krok {} nebyl proveden: změnil by vrstvu, kterou jste chránili před agentem ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Krok {} nebyl proveden: vrstvy, které jste před agentem chránili, nelze přečíst ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8234,6 +8244,16 @@ Rastr se kreslí tak, jak je na mapě, se svým stylem. SAM se instaluje jednou 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kliknutím na čtverec vpravo otestujete tuto vrstvu podle jejích centroidů</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nelze filtrovat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webová podkladová mapa (WMS / WMTS / XYZ, ArcGIS MapServer): pouze barvy, nelze ji filtrovat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

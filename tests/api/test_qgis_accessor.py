@@ -244,6 +244,13 @@ class TestApplyAndStatus:
         assert status.last_applied_source == "narractive"
         assert status.last_applied_at is not None
 
+    def test_status_names_the_layer_a_filter_by_id_went_to(self, accessor, public_api):
+        # The chat applies by id (a name may be shared): the status shows the name.
+        accessor.apply_filter("L1", '"x" = 1', "agent_chat")
+        assert accessor.get_filter_status().last_applied_layer == "communes"
+        accessor.apply_filter("roads", '"x" = 1', "rest_api")
+        assert accessor.get_filter_status().last_applied_layer == "roads"
+
     def test_status_idle_when_no_active_filters(self, accessor):
         status = accessor.get_filter_status()
         assert status.status == "idle"

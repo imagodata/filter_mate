@@ -64,6 +64,11 @@
         <translation>Επιστροφή πριν από: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Σταματήστε το αίτημα ή περιμένετε να ολοκληρωθεί για να ανοίξετε τις ρυθμίσεις.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Τίποτα για αναίρεση.</translation>
@@ -806,6 +811,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: θα άλλαζε ένα επίπεδο που έχετε προστατέψει από τον πράκτορα ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Το βήμα {} δεν εκτελέστηκε: τα επίπεδα που προστατέψατε από τον πράκτορα δεν μπόρεσαν να διαβαστούν ({}).</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Κάντε κλικ στο τετράγωνο δεξιά για να ελέγξετε αυτό το επίπεδο με τα κεντροειδή του</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>δεν φιλτράρεται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Διαδικτυακός χάρτης υποβάθρου (WMS / WMTS / XYZ, ArcGIS MapServer): μόνο χρώματα, δεν μπορεί να φιλτραριστεί</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

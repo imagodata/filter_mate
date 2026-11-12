@@ -12,6 +12,7 @@ not require pulling in ``filter_mate.core.optimization.config_provider``
 (which transitively imports the QGIS PyQt wrappers).
 """
 import ast
+import copy
 import importlib.util
 import json
 import os
@@ -477,6 +478,15 @@ class TestDefaultConfigRasterAndCrossFilterSections:
         assert section["cache_max_gb"]["value"] > 0
         assert section["pdal_path"]["value"] == ""
 
+    def test_vector_source_target_options(self, default_config):
+        """Rasters / point clouds listed as targets of a vector source: on by default, a choice in the tab."""
+        section = default_config["APP"]["OPTIONS"]["CROSS_FILTER"]
+        for key in ("vector_source_raster_targets", "vector_source_point_cloud_targets"):
+            assert set(section[key].keys()) == {"value", "choices", "description"}
+            assert section[key]["value"] is True
+            assert section[key]["choices"] == [True, False]
+            assert isinstance(section[key]["description"], str) and section[key]["description"]
+
     def test_sections_order(self, default_config):
         keys = list(default_config["APP"]["OPTIONS"].keys())
         assert keys[-3:] == ["POINT_CLOUD", "RASTER", "CROSS_FILTER"]
@@ -494,6 +504,47 @@ class TestDefaultConfigRasterAndCrossFilterSections:
                    if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "").endswith("_FORMATS")}
         assert set(section["raster_export_format"]["choices"]) == set(formats["RASTER_FORMATS"])
         assert set(section["point_cloud_export_format"]["choices"]) == set(formats["POINT_CLOUD_FORMATS"])
+
+
+class TestVectorSourceTargetOptionsMigration:
+    """2026-11-12: the two CROSS_FILTER options reach a configuration written before them, on."""
+
+    _KEYS = ("vector_source_raster_targets", "vector_source_point_cloud_targets")
+
+    def _user(self, default_config):
+        user = copy.deepcopy(default_config)
+        cross_filter = user["APP"]["OPTIONS"]["CROSS_FILTER"]
+        for key in self._KEYS:
+            del cross_filter[key]
+        cross_filter["point_cloud_clip"]["value"] = "bbox"
+        return user
+
+    def test_added_on_without_touching_the_other_values(self, config_helpers, default_config):
+        user = self._user(default_config)
+        assert config_helpers._migrate_config(user, default_config) is True
+        cross_filter = user["APP"]["OPTIONS"]["CROSS_FILTER"]
+        for key in self._KEYS:
+            assert cross_filter[key] == default_config["APP"]["OPTIONS"]["CROSS_FILTER"][key]
+            assert cross_filter[key]["value"] is True
+        assert cross_filter["point_cloud_clip"]["value"] == "bbox"
+        assert config_helpers._migrate_config(user, default_config) is False
+
+    def test_a_choice_of_the_user_is_kept(self, config_helpers, default_config):
+        user = self._user(default_config)
+        config_helpers._migrate_config(user, default_config)
+        user["APP"]["OPTIONS"]["CROSS_FILTER"]["vector_source_raster_targets"]["value"] = False
+        assert config_helpers._migrate_config(user, default_config) is False
+        assert user["APP"]["OPTIONS"]["CROSS_FILTER"]["vector_source_raster_targets"]["value"] is False
+
+    def test_the_file_is_written_back(self, config_helpers, default_config, tmp_path):
+        """load_migrated_config is how every config.json is read (start, Configuration tab)."""
+        path = tmp_path / "config.json"
+        path.write_text(json.dumps(self._user(default_config)), encoding="utf-8")
+        data = config_helpers.load_migrated_config(str(path), str(CONFIG_DEFAULT_PATH))
+        on_disk = json.loads(path.read_text(encoding="utf-8"))
+        for key in self._KEYS:
+            assert data["APP"]["OPTIONS"]["CROSS_FILTER"][key]["value"] is True
+            assert on_disk["APP"]["OPTIONS"]["CROSS_FILTER"][key]["value"] is True
 
 
 class TestShippedConfigJson:

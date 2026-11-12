@@ -100,6 +100,13 @@ class LayerSnapshot:
 
 
 _op_counter = itertools.count(1)
+# Effects of a turn of the agent that add a layer or remove it: they outlive the layer (adapters/agent/turn_effects.py).
+_LAYER_PRESENCE_EFFECTS = ("added", "removed")
+
+
+def _effect_on_layer(effect: Tuple[Any, ...], layer_id: str) -> bool:
+    """Whether an effect changed ``layer_id`` itself (selection, style, name...) rather than its presence."""
+    return len(effect) > 1 and effect[1] == layer_id and effect[0] not in _LAYER_PRESENCE_EFFECTS
 
 
 @dataclass(frozen=True)
@@ -237,22 +244,31 @@ class CrossOperationHistory:
         return DroppedStep(operation, from_undo)
 
     def forget_layer(self, layer_id: str) -> None:
-        """Forget a removed layer: its own history, and its changes in the operations of other sources.
+        """Forget a removed layer: its own history, and what the operations of other sources did to it.
 
         The other layers of an operation keep their (before, after) pair, so
         undoing it still restores them; the operation keeps its ``op_id`` and
-        is dropped only when the removed layer was all it changed.
+        is dropped only when nothing is left of it. Its ``effects`` stay but
+        those on the removed layer (its selection, style, name...); a layer a
+        turn removed stays too. A turn that added the layer keeps all of it:
+        undoing that turn is what removes the layer, redoing it brings the
+        layer back, and its filter keeps the derived file of the layer from
+        the cache (``history_sources`` reads the changes).
         """
         for stacks in (self._undo, self._redo):
             stacks.pop(layer_id, None)
             for key in list(stacks):
                 kept = []
                 for op in stacks[key]:
-                    if layer_id in op.layer_ids:
-                        changes = tuple(pair for pair in op.changes if pair[0].layer_id != layer_id)
-                        if not changes:
+                    if any(effect[:2] == ("added", layer_id) for effect in op.effects):
+                        kept.append(op)
+                        continue
+                    changes = tuple(pair for pair in op.changes if pair[0].layer_id != layer_id)
+                    effects = tuple(effect for effect in op.effects if not _effect_on_layer(effect, layer_id))
+                    if len(changes) != len(op.changes) or len(effects) != len(op.effects):
+                        if not changes and not effects:
                             continue
-                        op = replace(op, changes=changes)
+                        op = replace(op, changes=changes, effects=effects)
                     kept.append(op)
                 stacks[key] = kept
 

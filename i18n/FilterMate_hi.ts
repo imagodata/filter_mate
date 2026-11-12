@@ -64,6 +64,11 @@
         <translation>इससे पहले की स्थिति पर लौटें: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>सेटिंग्स खोलने के लिए अनुरोध रोकें या उसके समाप्त होने की प्रतीक्षा करें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>पूर्ववत करने के लिए कुछ नहीं।</translation>
@@ -806,6 +811,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
         <translation>चरण {} नहीं चलाया गया: यह उस परत को बदल देता जिसे आपने एजेंट से सुरक्षित किया है ({})।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>चरण {} नहीं चलाया गया: एजेंट से सुरक्षित की गई परतें पढ़ी नहीं जा सकीं ({})।</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -8252,6 +8262,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>इस परत को उसके केंद्रकों से जाँचने के लिए दाईं ओर के वर्ग पर क्लिक करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>फ़िल्टर नहीं किया जा सकता</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>वेब आधार मानचित्र (WMS / WMTS / XYZ, ArcGIS MapServer): केवल रंग, इसे फ़िल्टर नहीं किया जा सकता</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

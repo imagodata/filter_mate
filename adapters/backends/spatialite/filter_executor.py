@@ -85,6 +85,11 @@ class SpatialiteSourceContext:
     # New subset string
     param_source_new_subset: Optional[str] = None
 
+    # 2026-11-12: the new selection (``expression``) applies to the whole layer
+    # (the source filter replaces the old subset, or OR), not to the old subset
+    # (AND, AND NOT): read without the old subset when it must be read again.
+    selection_reads_whole_layer: bool = False
+
     # Buffer value (None = no buffer, float = buffer distance in meters)
     param_buffer_value: Optional[float] = None
 
@@ -463,14 +468,78 @@ def resolve_spatialite_features(
 
     else:  # FALLBACK
         logger.info("[Spatialite] === resolve_spatialite_features (FALLBACK MODE) ===")
-        from qgis.core import QgsMessageLog, Qgis
-        QgsMessageLog.logMessage(
-            f"⚠️ FALLBACK MODE: Using ALL {source_layer.featureCount()} features",
-            "FilterMate", Qgis.MessageLevel.Warning
-        )
-        features = _geometry_only_features(source_layer)
+        expression = _source_filter_expression(context)
+        if expression:
+            # 2026-11-12: the source filter queued for the main thread is not
+            # on the layer yet; read the features it keeps, never the whole
+            # layer (a custom expression keeping nothing filtered the targets
+            # by every source feature).
+            features = _features_matching(source_layer, expression)
+        else:
+            from qgis.core import QgsMessageLog, Qgis
+            QgsMessageLog.logMessage(
+                f"⚠️ FALLBACK MODE: Using ALL {source_layer.featureCount()} features",
+                "FilterMate", Qgis.MessageLevel.Warning
+            )
+            features = _geometry_only_features(source_layer)
 
     return features, recovery_attempted
+
+
+def _source_filter_expression(context: SpatialiteSourceContext) -> str:
+    """The expression that selects the source features, '' when the task has none."""
+    for candidate in (context.expression, context.param_source_new_subset):
+        if candidate and str(candidate).strip():
+            return str(candidate)
+    return ''
+
+
+def _unfiltered_copy(layer):
+    """A second layer on the data source of ``layer`` without its subset; None when it cannot be opened.
+
+    Same way as OGRExpressionBuilder._unfiltered_target (the subset removed from the URI).
+    """
+    try:
+        from qgis.core import QgsProviderRegistry, QgsVectorLayer
+        provider = layer.providerType()
+        if provider == 'memory':
+            return None
+        registry = QgsProviderRegistry.instance()
+        parts = dict(registry.decodeUri(provider, layer.source()))
+        for key in ('subset', 'sql', 'filter'):
+            parts.pop(key, None)
+        uri = registry.encodeUri(provider, parts) if parts else layer.source()
+        clone = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider)
+        if clone.isValid() and clone.subsetString():
+            clone.setSubsetString('')
+        if clone.isValid() and not clone.subsetString():
+            return clone
+    except Exception as exc:  # nosec B110 - read through the layer instead
+        logger.debug(f"[Spatialite] Unfiltered reading of {layer.name()} unavailable: {exc}")
+    logger.warning(f"[Spatialite] {layer.name()} cannot be read without its current filter")
+    return None
+
+
+def _features_matching(layer, expression: str) -> List:
+    """The source features ``expression`` keeps, read in QGIS.
+
+    2026-11-12: an expression that does not parse or fails to evaluate is
+    refused (``SourceSelectionError``); it used to leave the whole layer as
+    the source.
+    """
+    from qgis.core import QgsExpression, QgsFeatureRequest
+    from ..source_refusal import source_selection_refusal
+    expr = QgsExpression(expression)
+    if expr.hasParserError():
+        logger.error(f"[Spatialite] Source expression does not parse: {expr.parserErrorString()}")
+        raise source_selection_refusal(layer.name(), unreadable=True)
+    try:
+        features = list(layer.getFeatures(QgsFeatureRequest(expr)))
+    except Exception as e:
+        logger.error(f"[Spatialite] Source expression failed: {e}")
+        raise source_selection_refusal(layer.name(), unreadable=True) from e
+    logger.info(f"[Spatialite] Source expression keeps {len(features)} feature(s)")
+    return features
 
 
 def process_spatialite_geometries(
@@ -731,6 +800,10 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
 
     Returns:
         SpatialiteSourceResult with WKT and metadata
+
+    Raises:
+        SourceSelectionError: The source filter expression keeps no feature or
+            cannot be read (adapters/backends/source_refusal.py).
     """
     source_layer = context.source_layer
 
@@ -757,10 +830,6 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
     features, recovery_attempted = resolve_spatialite_features(context, mode, metadata)
 
     if not features:
-        # Handle expression fallback
-        filter_expression = context.expression
-        new_subset = context.param_source_new_subset
-
         if recovery_attempted:
             logger.error("[Spatialite] BLOCKING fallback - recovery was attempted")
             return SpatialiteSourceResult(
@@ -768,21 +837,26 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
                 error_message="Cannot recover source features. Verify selection before filtering."
             )
 
-        filter_to_use = filter_expression or new_subset
-        if filter_to_use and filter_to_use.strip():
-            try:
-                from qgis.core import QgsFeatureRequest, QgsExpression
-                expr = QgsExpression(filter_to_use)
-                if not expr.hasParserError():
-                    request = QgsFeatureRequest(expr)
-                    features = list(source_layer.getFeatures(request))
-                    logger.info(f"[Spatialite] Expression fallback: {len(features)} features")
-            except Exception as e:
-                logger.warning(f"[Spatialite] Expression fallback failed: {e}")
-
-        if not features:
-            features = _geometry_only_features(source_layer)
-            logger.info(f"[Spatialite] Final fallback: Using all {len(features)} features")
+        # Expression fallback. 2026-11-12: no "final fallback" to every feature
+        # of the layer any more: an expression that keeps nothing, or cannot be
+        # read, is refused (the targets were filtered by the whole source).
+        filter_to_use = _source_filter_expression(context)
+        if filter_to_use:
+            from ..source_refusal import SourceSelectionError, source_selection_refusal
+            if mode != SourceMode.FALLBACK:  # FALLBACK has just read it
+                scope = source_layer
+                if context.selection_reads_whole_layer and source_layer.subsetString():
+                    # 2026-11-12: replaced (or OR): an old subset keeping nothing
+                    # says nothing of the new selection
+                    scope = _unfiltered_copy(source_layer) or source_layer
+                try:
+                    features = _features_matching(scope, filter_to_use)
+                except SourceSelectionError:
+                    # The layer read by its mode showed nothing already; the
+                    # expression may be the SQL of its provider, not QGIS.
+                    features = []
+            if not features:
+                raise source_selection_refusal(source_layer.name())
 
     if not features:
         return SpatialiteSourceResult(

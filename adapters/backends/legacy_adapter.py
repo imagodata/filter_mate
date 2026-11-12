@@ -278,6 +278,13 @@ class BaseLegacyAdapter(GeometricFilterBackend):
             final_expr = expression
             if old_subset and combine_operator:
                 final_expr = f"({old_subset}) {combine_operator} ({expression})"
+            elif combine_operator:
+                # 2026-11-12: no filter yet: NOT (new) under AND NOT
+                try:
+                    from ...filtermate_core.filter.expression_combiner import combine_without_old_subset
+                except ImportError:  # imported from the repository root (tests)
+                    from filtermate_core.filter.expression_combiner import combine_without_old_subset
+                final_expr = combine_without_old_subset(expression, combine_operator)
 
             # 2026-10-17: a filter task's subset is queued for the main thread, as in the
             # PostgreSQL, SpatiaLite and OGR builders. Set here, from the worker, the subset
