@@ -1,6 +1,26 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] Source PostgreSQL sans connexion psycopg2 → « Tâche échouée », couches distantes jamais filtrées
+Signalement (journal client, Zones MRO → 8 couches, Intersect) : source filtrée, puis « Task failed » sans détail,
+aucun « Distant layers to filter » dans le journal QGIS. Cause : QGIS lit la couche avec SA connexion ; la connexion
+psycopg2 que FilterMate ouvre depuis l'URI (`get_datasource_connexion_from_layer`) peut échouer (service
+`pg_service.conf` non transmis, mot de passe demandé et non enregistré, authcfg non Basic) et
+`FilterEngineTask._get_valid_postgresql_connection` **lève** (contrat figé par un test). Le pas direct de la source
+l'appelait hors try pour de simples stats, après mise en file du subset de la source.
+Patterns à retenir :
+- La connexion psycopg2 est une **optimisation** (stats, MV) : tout appelant pour qui elle est optionnelle attrape
+  l'exception ; le chemin MV bascule en direct sans elle. Les exécuteurs distants tolèrent déjà `None`.
+- Une exception de `execute_filtering` est avalée par `CallbackActionHandler` : `_execute_task_action` recopie
+  désormais la 1re ligne de `result.errors[0]` dans `task.message`. Sinon, la trace est dans
+  `<plugin>/logs/filtermate.log` (« Callback execution failed: … »), pas dans le journal QGIS.
+- Indice de lecture d'un journal client : l'absence des `QgsMessageLog` « Distant layers to filter (N) » / « Filtering
+  N distant layers » situe l'échec entre le filtre source et la phase distante.
+Restes notés par la revue Opus (hors lot) : `service=` ignoré par `get_datasource_connexion_from_layer` (peut même
+ouvrir une base locale par défaut) ; MV de buffer par expression jamais créée (`param_buffer_expression` lu avant
+l'init, clé `buffer_expression` absente de `task_parameters['filtering']`) alors que `prepare_postgresql_source_geom`
+référence `…_buffer_expr_dump` au-delà de 10 000 entités ; DROP du reset non protégé (base en lecture seule).
+
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression
 (`filtermate_core/filter/native_dialect.py`, pur ; adaptateur `adapters/qgis/native_filter_translation.py`), et
