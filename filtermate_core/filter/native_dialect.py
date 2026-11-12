@@ -30,14 +30,20 @@ QGIS adapter), and only where the source gives the answer QGIS gives:
   bounds of the type of its value only (the engine reads the third operand
   with the type of the first two).
 
+Everywhere: the sign of a value that is not a literal is not written (QGIS
+reads -NULL of an integer or real field as 0, the sources as NULL); SQLite
+reads about one decimal literal in 4,000 one unit in the last place off, so
+reals are written as an integer significand over a power of two.
+
 Known limits, not detected: an integer arithmetic that overflows 64 bits
 (QGIS wraps, SQLite turns to a real), integer field values beyond 2^53
 (compared exactly by the source), data values that do not match the declared
 type of a SQLite column, and NaN produced from infinite field values.
 
 Only a top-level AND is split. What cannot be written is returned as QGIS
-text (``local_expression``), never dropped: the caller keeps its former path
-(evaluation by QGIS, list of keys) for a PARTIAL or NONE result.
+text (``local_expression``), never dropped. For a PARTIAL or NONE result on
+a SQLite source the caller may let QGIS evaluate the expression and list keys
+(:func:`hybrid_sql`); otherwise it keeps its former path.
 """
 import math
 import sys
@@ -68,8 +74,9 @@ _EPSILON = 4 * sys.float_info.epsilon
 # The largest integer a double holds exactly.
 _EXACT_INTEGER = 2 ** 53
 # Identifier spellings that OGR SQL does not read, or that the subset
-# sanitizer reads as a comment (it does not skip quoted identifiers).
-_IDENTIFIER_REFUSED = ('"', '\\', '--', '/*', '*/')
+# sanitizer misreads (it does not skip every quoted identifier: -- and /*
+# read as comments, an apostrophe as the start of a literal).
+_IDENTIFIER_REFUSED = ('"', "'", '\\', '--', '/*', '*/')
 # Other cases of k and s in a Unicode case-insensitive regular expression.
 _OTHER_CASES = {'k': 'K', 's': 'ſ'}
 
@@ -83,12 +90,25 @@ class NativeTranslation:
         sql: Native predicate of the translated AND operands ('' when none).
         local_expression: QGIS text of the operands left untranslated.
         reason: Why they were left (first reason of each, deduplicated).
+        native_expression: QGIS text of the translated operands (same
+            features as ``sql``), for an evaluation by QGIS.
+        native_columns: Fields the translated operands read.
+        predicate: Whether the expression is a condition (comparison,
+            AND / OR / NOT, IN, BETWEEN, LIKE, IS): its value is TRUE,
+            FALSE or NULL, never a number or a text read as a boolean.
+        composite: Whether ``sql`` holds AND, OR or NOT (the user's, or the
+            tolerance of a real's equality). OGR SQL gives FALSE to TRUE AND
+            NULL: such a subset must not be negated there.
     """
 
     status: TranslationStatus
     sql: str = ''
     local_expression: str = ''
     reason: str = ''
+    native_expression: str = ''
+    native_columns: frozenset = frozenset()
+    predicate: bool = False
+    composite: bool = False
 
 
 def _class(kind: str) -> str:
@@ -102,6 +122,8 @@ class _Writer:
         self.dialect = dialect
         self.types = types
         self.ands = 0  # AND written so far, user's or ours (OGR SQL: no NOT over one)
+        self.connectives = 0  # AND, OR, NOT written so far
+        self.columns = set()
 
     # -- values -----------------------------------------------------------------
 
@@ -115,6 +137,10 @@ class _Writer:
         if kind == 'literal':
             return self._literal(node.value)
         if kind == 'unary' and node.value == '-':
+            if node.children[0].kind != 'literal':
+                # QGIS: -NULL of an integer / real field is 0 (its value read as a
+                # number), the sources give NULL
+                raise Unsupported('The sign of a value that may be NULL')
             sql, type_ = self.value(node.children[0], depth + 1)
             if type_ not in _NUMERIC:
                 raise Unsupported('The sign of a value that is not a number')
@@ -135,6 +161,7 @@ class _Writer:
             raise Unsupported('Not a field of the data source: {}'.format(name))
         if any(part in name for part in _IDENTIFIER_REFUSED) or any(ord(char) < 32 for char in name):
             raise Unsupported('A field name that cannot be written safely: {}'.format(name))
+        self.columns.add(name)
         return '"' + name + '"', self.types[name] or OTHER
 
     def _literal(self, value) -> Tuple[str, str]:
@@ -155,6 +182,8 @@ class _Writer:
                 # no exponent: 1e-05 is written 0.00001
                 written = format(Decimal(repr(value)), 'f')
                 return (written if '.' in written else written + '.0'), REAL
+            if self.dialect == SQLITE:
+                return _sqlite_real(value), REAL
             return repr(value), REAL
         if isinstance(value, str):
             if '\x00' in value:
@@ -262,6 +291,7 @@ class _Writer:
         if kind == 'binary':
             operator = node.value
             if operator in ('AND', 'OR'):
+                self.connectives += 1
                 if operator == 'AND':
                     self.ands += 1
                 return '({} {} {})'.format(self.predicate(node.children[0], depth + 1), operator,
@@ -274,6 +304,7 @@ class _Writer:
                 return self._like(node, depth)
         if kind == 'unary' and node.value == 'NOT':
             before = self.ands
+            self.connectives += 1
             operand = self.predicate(node.children[0], depth + 1)
             if self.dialect == OGR_SQL and self.ands != before:
                 raise Unsupported('OGR SQL gives FALSE to TRUE AND NULL, so a NOT over an AND would keep it')
@@ -317,6 +348,7 @@ class _Writer:
             # qgsDoubleNear on the difference, as QGIS compares
             difference, _ = self._arithmetic(Node('binary', '-', node.children, node.text), depth)
             epsilon = self._literal(_EPSILON)[0]
+            self.connectives += 1
             if operator == '=':
                 self.ands += 1
                 return '({0} > -{1} AND {0} <= {1})'.format(difference, epsilon)
@@ -390,14 +422,49 @@ class _Writer:
                     glob.append('[' + lower + lower.upper() + _OTHER_CASES.get(lower, '') + ']')
                 else:
                     glob.append(char)
-            written = '{} GLOB {}'.format(left, self._literal(''.join(glob))[0])
-            return '(NOT ({}))'.format(written) if negated else '({})'.format(written)
+            return '({} {}GLOB {})'.format(left, 'NOT ' if negated else '', self._literal(''.join(glob))[0])
         raise Unsupported('LIKE is not the same in OGR SQL')
 
 
+def _sqlite_real(value: float) -> str:
+    """A real as SQLite reads it exactly: an integer significand over a power of two.
+
+    SQLite reads about one decimal literal in 4,000 one unit in the last place
+    off (3.45: ``-737867.403628`` -> ``-737867.4036280001``); an integer below
+    2^53 and a power of two are read exactly, and so is their quotient.
+    """
+    if value.is_integer() and abs(value) < 2 ** 63:
+        return 'CAST({} AS REAL)'.format(int(value))  # an integer a double holds: read exactly
+    fraction, exponent = math.frexp(value)
+    significand, exponent = int(fraction * (1 << 53)), exponent - 53
+    while significand % 2 == 0:
+        significand //= 2
+        exponent += 1
+    if exponent >= 0:
+        raise Unsupported('A real beyond the range written exactly for SQLite')
+    if -exponent <= 62:
+        return '(CAST({} AS REAL) / {})'.format(significand, 1 << -exponent)
+    if -exponent <= 124:
+        return '(CAST({} AS REAL) / {} / {})'.format(significand, 1 << 62, 1 << (-exponent - 62))
+    raise Unsupported('A real beyond the range written exactly for SQLite')
+
+
+def _is_predicate(node: Node) -> bool:
+    """Whether a condition is the root: its value is TRUE, FALSE or NULL."""
+    if node.kind in ('in', 'between'):
+        return True
+    if node.kind == 'unary':
+        return node.value == 'NOT'
+    return node.kind == 'binary' and node.value in ('AND', 'OR', 'IS', 'IS NOT') + _COMPARISONS + _LIKES
+
+
 def _strip_outer_parentheses(sql: str) -> str:
-    """``(a = 1)`` -> ``a = 1`` when the first parenthesis closes at the end."""
-    if not (sql.startswith('(') and sql.endswith(')')):
+    """``(a = 1)`` -> ``a = 1`` when the first parenthesis closes at the end.
+
+    Kept when the inside starts with a function or a keyword: the subset
+    sanitizer reads ``COALESCE(...) GLOB ...`` as a display expression.
+    """
+    if not (sql.startswith('(') and sql.endswith(')')) or sql[1:2].isalpha():
         return sql
     depth, quote = 0, ''
     for index, char in enumerate(sql):
@@ -431,7 +498,8 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
     if dialect not in DIALECTS:
         return NativeTranslation(TranslationStatus.NONE, local_expression=node.text,
                                  reason='Unknown dialect: {}'.format(dialect))
-    written, local, reasons = [], [], []
+    written, native, local, reasons, columns = [], [], [], [], set()
+    connectives = [0]
 
     def visit(part: Node) -> None:
         if part.kind == 'binary' and part.value == 'AND':
@@ -439,7 +507,11 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
                 visit(child)
             return
         try:
-            written.append(_Writer(dialect, types).predicate(part))
+            writer = _Writer(dialect, types)
+            written.append(writer.predicate(part))
+            native.append('(' + part.text + ')')
+            columns.update(writer.columns)
+            connectives[0] += writer.connectives
         except Unsupported as exc:
             local.append('(' + part.text + ')')
             reasons.append(str(exc))
@@ -452,8 +524,70 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
     status = TranslationStatus.PARTIAL if written and local else (
         TranslationStatus.NONE if local else TranslationStatus.FULL)
     sql = _strip_outer_parentheses(written[0]) if len(written) == 1 else ' AND '.join(written)
-    return NativeTranslation(status, sql, ' AND '.join(local), '; '.join(dict.fromkeys(reasons)))
+    return NativeTranslation(status, sql, ' AND '.join(local), '; '.join(dict.fromkeys(reasons)),
+                             ' AND '.join(native), frozenset(columns), _is_predicate(node),
+                             connectives[0] > 0 or len(written) > 1)
+
+
+# Hybrid subsets are written for SQLite only. OGR SQL (GDAL 3.13) refuses an
+# IN list beyond ~5,000 values, tests it value by value on every row at every
+# read (no index, even on FID), compares text keys without case and names a
+# field "fid" rather than the feature id when the layer has one.
+HYBRID_MAX_KEYS = 100_000
+
+
+def key_reference(name: str) -> str:
+    """The key column of a hybrid subset (SQLite)."""
+    if not name or any(part in name for part in _IDENTIFIER_REFUSED) or any(ord(char) < 32 for char in name):
+        raise Unsupported('A key name that cannot be written safely: {}'.format(name))
+    return '"' + name + '"'
+
+
+def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool) -> str:
+    """SQLite subset of a PARTIAL / NONE translation from the keys QGIS evaluated.
+
+    The subset keeps the same features as the expression (a TRUE / not TRUE
+    filter: it must not be negated, where FALSE and NULL differ). A list
+    starts with ``key IS NOT NULL AND``: the filter orchestrator reads a subset
+    that starts with ``key IN (`` as the key list of a previous spatial step,
+    which a new spatial filter replaces instead of combining with it.
+
+    Args:
+        native_sql: ``sql`` of the translation ('' for NONE).
+        passing: Keys of the features the whole expression keeps.
+        failing: Keys of the features the native part keeps and the whole
+            expression does not; None when there is no native part.
+        key: :func:`key_reference` of the key column, unique and never NULL.
+        numeric: Whether the key values are numbers (a text key is compared
+            ``COLLATE BINARY``, whatever the column's collation).
+
+    Returns:
+        The native part alone when nothing else excludes a feature, else the
+        shorter of ``(native) AND NOT (key IN (failing))`` and
+        ``key IN (passing)``; a contradiction when nothing is kept.
+    """
+    from .pk_formatter import SQL, format_key_literal
+
+    def listed(values) -> str:
+        if len(values) > HYBRID_MAX_KEYS:
+            raise Unsupported('{} keys, more than the {} listed in a subset'.format(len(values), HYBRID_MAX_KEYS))
+        literals = []
+        for value in values:
+            if is_null_value(value):
+                raise Unsupported('A NULL key cannot be listed')
+            literals.append(format_key_literal(value, numeric, SQL))
+        return ', '.join(literals)
+
+    column = key if numeric else key + ' COLLATE BINARY'
+    if native_sql and failing is not None:
+        if not failing:
+            return native_sql
+        if len(failing) < len(passing):
+            return '{} IS NOT NULL AND ({}) AND NOT ({} IN ({}))'.format(key, native_sql, column, listed(failing))
+    if not passing:
+        return '{0} <> {0}'.format(key)  # FALSE or NULL on every row
+    return '{} IS NOT NULL AND {} IN ({})'.format(key, column, listed(passing))
 
 
 __all__ = ['DIALECTS', 'NativeTranslation', 'OGR_SQL', 'POSTGRESQL', 'SQLITE', 'translate_native',
-           'INT', 'REAL', 'TEXT', 'BOOL', 'OTHER']
+           'HYBRID_MAX_KEYS', 'hybrid_sql', 'key_reference', 'INT', 'REAL', 'TEXT', 'BOOL', 'OTHER']

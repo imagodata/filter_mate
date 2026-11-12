@@ -131,10 +131,32 @@ ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPac
 - **Replis qui relisent l'expression en QGIS** (`EXPRESSION_FALLBACK` OGR / Spatialite) : la tâche garde
   `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
   COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
-- **Reste** : mode hybride (PARTIAL : partie native + liste d'ids évaluée sur le préfiltre), PostgreSQL, fonctions
-  géométriques / `@variables` (constantes à replier), bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route'
-  par l'ancien chemin. Les 5 échecs de la suite complète (expression_builder PG / Spatialite, coverage_raster_target)
-  existent sur `main` ; les lancer dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre.
+- **Reste** : PostgreSQL, fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
+  `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin. Les 5 échecs de
+  la suite complète (expression_builder PG / Spatialite, coverage_raster_target) existent sur `main` ; les lancer
+  dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :
+  `test_no_unscoped_qt_enums` refuse `QgsFeatureRequest.NoGeometry`, écrire `QgsFeatureRequest.Flag.NoGeometry`).
+
+## [2026-11-12] Mode hybride (SQLite seulement) et durcissement de la traduction native
+- **Hybride** : traduction PARTIAL / NONE sur GeoPackage / SpatiaLite → QGIS évalue l'expression localement entité
+  par entité (pas le filtre compilé du provider : QGIS compile `=` sur réels sans sa tolérance) et le subset liste des
+  clés : partie native seule si QGIS n'en exclut rien, sinon la plus courte de `key IS NOT NULL AND (natif) AND NOT
+  (key IN (exclues))` et `key IS NOT NULL AND key IN (gardées)`. Le préfixe `key IS NOT NULL AND` empêche
+  `FilterOrchestrator._is_key_list_subset` de la prendre pour la liste d'une étape spatiale (il la remplacerait au
+  lieu de la combiner). Conditions : clé = champ de la source, unique et jamais NULL (lue sur toutes les entités),
+  `COLLATE BINARY` si texte, racine de l'expression = condition, couche pas en édition, ≤ 1 M entités et compte
+  connu, ≤ 100 000 clés, colonnes du texte QGIS de la partie native = colonnes traduites (`node.dump()` écrit sans
+  guillemets les champs `null`, `true`, `false`). Jamais sous NOT (AND NOT) ni à travers un autre subset que celui
+  combiné par AND (`AttributeFilterExecutor._keys_may_be_evaluated`).
+- **Pas sur OGR SQL** (mesuré GDAL 3.13) : liste IN refusée au-delà de ~5 000 valeurs, lue valeur par valeur à chaque
+  lecture (pas d'index même sur FID), clés texte sans la casse, `fid` = champ `fid` s'il existe, FID du Shapefile
+  renuméroté après repack. Table de vérité OGR SQL : seul `NOT (a AND b)` diverge (TRUE AND NULL = FALSE) ; une
+  écriture sans AND ne sert à rien, GDAL réécrit les NOT (De Morgan).
+- **Garde sanitizer** : toute sortie que `sanitize_subset_string` réécrirait est refusée (le sanitizer actuel efface
+  `COALESCE(...) GLOB ...`, `NOT ("nom d'usage" ...)`, tronque `COALESCE(abs(CAST(...`). Écritures : `x NOT GLOB p`,
+  parenthèses gardées devant une fonction, noms avec `'` refusés. Autres corrections : moins unaire seulement sur un
+  littéral (QGIS : `-NULL` d'un champ entier = 0, vérifié), réels SQLite écrits `(CAST(m AS REAL) / 2^k)` (SQLite
+  3.45 lit ~1 littéral décimal sur 4 000 à 1 ulp près).
 
 ## [2026-10-27] S0 : `filtermate_core/`, le cœur sans hôte (étape 1 du portage RustGIS / GeoLibre)
 Décision : extraire la sémantique de filtrage dans un paquet `filtermate_core/` sans QGIS / Qt / GDAL, vendu dans le

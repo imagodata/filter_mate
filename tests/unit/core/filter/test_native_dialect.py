@@ -10,12 +10,15 @@ import pytest
 
 from filtermate_core.filter.expression_combiner import combine_with_old_subset
 from filtermate_core.filter.expression_sanitizer import sanitize_subset_string
-from filtermate_core.filter.native_dialect import OGR_SQL, POSTGRESQL, SQLITE, translate_native
-from filtermate_core.filter.server_dialect import Node, TranslationStatus
+from filtermate_core.filter.native_dialect import (
+    HYBRID_MAX_KEYS, OGR_SQL, POSTGRESQL, SQLITE, hybrid_sql, key_reference, translate_native,
+)
+from filtermate_core.filter.server_dialect import Node, TranslationStatus, Unsupported
 
 TYPES = {'id': 'int', 'pop': 'int', 'ratio': 'real', 'nom': 'text', 'code': 'text', 'actif': 'bool',
          'jour': 'other'}
 EPS = '8.881784197001252e-16'
+SQLITE_EPS = '(CAST(1 AS REAL) / 1125899906842624)'  # 2^-50, read exactly by SQLite
 
 
 def col(name):
@@ -93,6 +96,8 @@ def test_and_is_split_and_the_untranslated_operand_is_kept():
     assert result.sql == '"id" = 1'
     assert result.local_expression == '(' + bad.text + ')'
     assert 'regexp_replace' in result.reason
+    assert result.native_expression == '(' + good.text + ')'
+    assert translate_native(good, POSTGRESQL, TYPES).native_expression == '(' + good.text + ')'
 
 
 def test_or_and_not_are_never_split():
@@ -178,9 +183,10 @@ def test_unknown_dialect_is_none():
 
 def test_equality_of_a_real_is_written_with_the_qgis_tolerance():
     node = binary('=', col('ratio'), lit(0.5))
-    assert full(node, SQLITE) == '("ratio" - 0.5) > -{0} AND ("ratio" - 0.5) <= {0}'.format(EPS)
+    half = '(CAST(1 AS REAL) / 2)'
+    assert full(node, SQLITE) == '("ratio" - {1}) > -{0} AND ("ratio" - {1}) <= {0}'.format(SQLITE_EPS, half)
     assert full(binary('<>', col('ratio'), lit(0.5)), SQLITE) == (
-        '("ratio" - 0.5) <= -{0} OR ("ratio" - 0.5) > {0}'.format(EPS))
+        '("ratio" - {1}) <= -{0} OR ("ratio" - {1}) > {0}'.format(SQLITE_EPS, half))
     assert full(node, POSTGRESQL) == (
         '(CAST("ratio" AS double precision) - 0.5) > -{0} AND (CAST("ratio" AS double precision) - 0.5) <= {0}'
         .format(EPS))
@@ -189,7 +195,8 @@ def test_equality_of_a_real_is_written_with_the_qgis_tolerance():
 def test_ogr_sql_writes_reals_without_an_exponent():
     assert full(binary('<', col('ratio'), lit(1e-05)), OGR_SQL) == '"ratio" < 0.00001'
     assert full(binary('<', col('ratio'), lit(1e22)), OGR_SQL) == '"ratio" < 10000000000000000000000.0'
-    assert full(binary('<', col('ratio'), lit(1e-05)), SQLITE) == '"ratio" < 1e-05'
+    assert full(binary('<', col('ratio'), lit(1e-05)), SQLITE) == (
+        '"ratio" < (CAST(5902958103587057 AS REAL) / 4611686018427387904 / 128)')
     assert '0.0000000000000008881784197001252' in full(binary('=', col('ratio'), lit(0.5)), OGR_SQL)
 
 
@@ -214,9 +221,9 @@ def test_ogr_sql_never_writes_a_not_over_an_and():
     assert 'NOT over an AND' in refused(negation(binary('OR', both, binary('=', col('id'), lit(1)))), OGR_SQL)
     # the AND of a real's tolerance too
     assert 'NOT over an AND' in refused(negation(binary('=', col('ratio'), lit(0.5))), OGR_SQL)
-    assert full(negation(both), SQLITE) == 'NOT (("pop" > 5) AND ("ratio" < 2))'
+    assert full(negation(both), SQLITE) == '(NOT (("pop" > 5) AND ("ratio" < 2)))'
     either = binary('OR', binary('>', col('pop'), lit(5)), binary('<', col('ratio'), lit(2)))
-    assert full(negation(either), OGR_SQL) == 'NOT (("pop" > 5) OR ("ratio" < 2))'
+    assert full(negation(either), OGR_SQL) == '(NOT (("pop" > 5) OR ("ratio" < 2)))'
     assert full(binary('<>', col('ratio'), lit(0.5)), OGR_SQL)  # an OR, no NOT
 
 
@@ -226,7 +233,7 @@ def test_ogr_sql_between_takes_literal_bounds_of_the_value_type():
     assert refused(between(col('pop'), col('id'), lit(9.5)), OGR_SQL)
     assert refused(between(col('pop'), lit(3), lit(9.5)), OGR_SQL)
     assert refused(between(lit(2), col('pop'), lit(1), negated=True), OGR_SQL)
-    assert full(between(col('pop'), col('id'), lit(9.5)), SQLITE) == '"pop" BETWEEN "id" AND 9.5'
+    assert full(between(col('pop'), col('id'), lit(9.5)), SQLITE) == '"pop" BETWEEN "id" AND (CAST(19 AS REAL) / 2)'
 
 
 # -- PostgreSQL ---------------------------------------------------------------------
@@ -244,7 +251,8 @@ def test_postgresql_real_arithmetic_runs_in_double_precision():
 
 def test_postgresql_like_functions_and_case():
     assert full(binary('NOT ILIKE', col('nom'), lit('r%')), POSTGRESQL) == '"nom" NOT ILIKE \'r%\''
-    assert full(binary('=', function('upper', col('nom')), lit('ROUTE')), POSTGRESQL) == 'upper("nom") = \'ROUTE\''
+    # parentheses kept before a function: the sanitizer reads "COALESCE(...) GLOB" as a display expression
+    assert full(binary('=', function('upper', col('nom')), lit('ROUTE')), POSTGRESQL) == '(upper("nom") = \'ROUTE\')'
     node = binary('=', function('if', binary('>', col('pop'), lit(5)), lit('a'), col('nom')), lit('a'))
     assert full(node, POSTGRESQL) == '(CASE WHEN ("pop" > 5) THEN \'a\' ELSE "nom" END) = \'a\''
     assert refused(binary('=', function('upper', col('nom')), lit('X')), SQLITE)
@@ -348,7 +356,8 @@ def test_sqlite_null_logic_between_case_and_functions(table):
     node = binary('=', case(binary('>', col('pop'), lit(5)), lit('grand'), otherwise=lit('petit')), lit('petit'))
     assert ids(table, node) == [2, 4, 5, 7, 8, 9]  # a NULL condition takes ELSE, as in QGIS
     assert ids(table, binary('=', binary('||', col('nom'), lit('!')), lit('Route!'))) == [1]
-    assert ids(table, binary('<', Node('unary', '-', (col('pop'),), '-"pop"'), lit(-8))) == [1, 6]
+    # QGIS: -NULL of an integer field is 0, the sources give NULL: only the sign of a literal is written
+    assert 'may be NULL' in refused(binary('<', Node('unary', '-', (col('pop'),), '-"pop"'), lit(-8)), SQLITE)
     assert ids(table, binary('<', Node('unary', '-', (lit(-4),), '--4'), col('pop'))) == [1, 3, 6, 10]
 
 
@@ -398,3 +407,108 @@ def test_translated_sql_survives_the_combination_with_an_old_subset(table):
     combined = combine_with_old_subset(new, '"id" < 5', 'OR', provider_type='spatialite')
     rows = [row[0] for row in table.execute('SELECT id FROM t WHERE {} ORDER BY id'.format(combined))]  # nosec B608
     assert rows == [1, 2, 3, 4, 10]
+
+
+# -- writings the subset sanitizer and SQLite read as written ---------------------------
+
+def test_negated_globs_are_written_not_glob():
+    assert full(binary('NOT LIKE', col('nom'), lit('A%')), SQLITE) == '"nom" NOT GLOB \'A*\''
+    assert full(binary('NOT ILIKE', col('nom'), lit('a%')), SQLITE) == '"nom" NOT GLOB \'[aA]*\''
+
+
+def test_field_names_with_an_apostrophe_are_refused():
+    # the sanitizer took 'usage" GLOB ' for a literal and erased the subset
+    assert 'safely' in refused(binary('=', col("nom d'usage"), lit('x')), SQLITE, {"nom d'usage": 'text'})
+
+
+def test_sqlite_reals_are_written_exactly():
+    connection = sqlite3.connect(':memory:')
+    for value in (0.3, -737867.403628, 6656395.210250434, 1e-05, 2.5, 3.0, -4.0, 2.0 ** 62, 0.1 * 3):
+        node = binary('=', col('ratio'), lit(value))
+        sql = full(binary('<', col('ratio'), lit(value)), SQLITE).split(' < ', 1)[1]
+        assert connection.execute('SELECT ' + sql).fetchone()[0] == value  # nosec B608
+        assert 'e' not in sql.replace('CAST', '').replace('REAL', '')
+        assert full(node, SQLITE)
+    assert refused(binary('<', col('ratio'), lit(1e300)), SQLITE)
+    assert refused(binary('<', col('ratio'), lit(1e22)), SQLITE)
+    assert refused(binary('<', col('ratio'), lit(1e-300)), SQLITE)
+    assert full(binary('<', col('ratio'), lit(1e300)), POSTGRESQL) == '"ratio" < 1e+300'
+
+
+def test_translation_reports_its_columns_and_whether_it_is_a_condition():
+    good = binary('>', col('pop'), lit(5))
+    bad = binary('=', function('regexp_replace', col('nom'), lit('a'), lit('b')), lit('x'))
+    result = translate_native(binary('AND', good, bad), SQLITE, TYPES)
+    assert result.native_columns == frozenset({'pop'})
+    assert result.predicate
+    assert not translate_native(function('regexp_match', col('nom'), lit('a')), SQLITE, TYPES).predicate
+    assert translate_native(negation(good), SQLITE, TYPES).predicate
+    assert translate_native(between(col('pop'), lit(1), lit(2)), SQLITE, TYPES).predicate
+
+
+# -- hybrid subsets (SQLite): the native part plus the keys QGIS evaluated --------------------
+
+def test_key_reference():
+    assert key_reference('fid') == '"fid"'
+    assert key_reference('code_insee') == '"code_insee"'
+    for name in ('a"b', "l'id", '', None):
+        with pytest.raises(Unsupported):
+            key_reference(name)
+
+
+def test_hybrid_keeps_the_native_part_alone_when_qgis_excludes_nothing_from_it():
+    assert hybrid_sql('"pop" > 5', [1, 3], [], '"id"', True) == '"pop" > 5'
+
+
+def test_hybrid_lists_the_shorter_side():
+    assert hybrid_sql('"pop" > 5', [1, 3, 6], [9], '"id"', True) == (
+        '"id" IS NOT NULL AND ("pop" > 5) AND NOT ("id" IN (9))')
+    assert hybrid_sql('"pop" > 5', [1], [3, 6], '"id"', True) == '"id" IS NOT NULL AND "id" IN (1)'
+    assert hybrid_sql('', [2, 5], None, '"fid"', True) == '"fid" IS NOT NULL AND "fid" IN (2, 5)'
+
+
+def test_hybrid_keeps_nothing_with_a_contradiction():
+    assert hybrid_sql('"pop" > 5', [], [1, 3], '"id"', True) == '"id" <> "id"'
+    assert hybrid_sql('', [], None, '"fid"', True) == '"fid" <> "fid"'
+
+
+def test_hybrid_text_keys_are_compared_with_their_case():
+    assert hybrid_sql('', ["l'Isle", '01001'], None, '"code"', False) == (
+        '"code" IS NOT NULL AND "code" COLLATE BINARY IN (\'l\'\'Isle\', \'01001\')')
+    connection = sqlite3.connect(':memory:')
+    connection.execute('CREATE TABLE t (code TEXT COLLATE NOCASE)')
+    connection.executemany('INSERT INTO t VALUES (?)', [('a1',), ('A1',), ('b2',)])
+    sql = hybrid_sql('', ['a1'], None, '"code"', False)
+    assert [row[0] for row in connection.execute('SELECT code FROM t WHERE ' + sql)] == ['a1']  # nosec B608
+
+
+def test_hybrid_refuses_null_keys_and_too_long_lists():
+    with pytest.raises(Unsupported):
+        hybrid_sql('', [1, None], None, '"id"', True)
+    with pytest.raises(Unsupported):
+        hybrid_sql('', list(range(HYBRID_MAX_KEYS + 1)), None, '"id"', True)
+
+
+def test_hybrid_subset_keeps_what_the_expression_keeps(table):
+    # "pop" > 2 AND <something QGIS alone evaluates, here: an id parity>
+    translation = translate_native(binary('>', col('pop'), lit(2)), SQLITE, TYPES)
+    native_rows = [row[0] for row in table.execute('SELECT id FROM t WHERE ' + translation.sql)]  # nosec B608
+    kept = sorted(key for key in native_rows if key % 2 == 0)
+    excluded = [key for key in native_rows if key % 2]
+    for failing, expected in ((excluded, kept), ([], sorted(native_rows))):
+        sql = hybrid_sql(translation.sql, kept if failing else native_rows, failing, '"id"', True)
+        rows = [row[0] for row in table.execute('SELECT id FROM t WHERE {} ORDER BY id'.format(sql))]  # nosec B608
+        assert rows == expected
+    assert list(table.execute('SELECT id FROM t WHERE ' + hybrid_sql('', [], None, '"id"', True))) == []  # nosec B608
+
+
+def test_translation_reports_whether_it_holds_a_connective():
+    # OGR SQL: TRUE AND NULL is FALSE, so a negated AND / OR is left to the former conversion
+    assert not translate_native(binary('>', col('pop'), lit(5)), OGR_SQL, TYPES).composite
+    assert not translate_native(in_list(col('id'), [1, 2], negated=True), OGR_SQL, TYPES).composite
+    assert translate_native(binary('AND', binary('>', col('pop'), lit(5)), binary('<', col('ratio'), lit(2))),
+                            OGR_SQL, TYPES).composite
+    assert translate_native(binary('OR', binary('>', col('pop'), lit(5)), binary('<', col('ratio'), lit(2))),
+                            OGR_SQL, TYPES).composite
+    assert translate_native(negation(binary('>', col('pop'), lit(5))), OGR_SQL, TYPES).composite
+    assert translate_native(binary('=', col('ratio'), lit(0.5)), OGR_SQL, TYPES).composite  # its tolerance
