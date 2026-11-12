@@ -29,9 +29,10 @@ _RESERVED = re.compile(r"(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?", re.I)  # d
 def file_name(name: str) -> str:
     """The file of a profile named ``name``; ``ValueError`` for a name that is not a plain short name."""
     name = name.strip()
-    if not _NAME.fullmatch(name) or name.startswith(".") or _RESERVED.fullmatch(name.replace(" ", "_")):
+    if not _NAME.fullmatch(name) or name.startswith(".") or name.endswith(".") \
+            or _RESERVED.fullmatch(name.split(" ")[0]):
         raise ValueError("a profile name is 1 to 60 letters, digits, spaces, dots, dashes or underscores")
-    return name.replace(" ", "_") + ".json"
+    return name + ".json"
 
 
 def build(settings: Sequence[Setting], name: str) -> Dict[str, Any]:
