@@ -124,6 +124,23 @@ class ExportHandler:
         logger.warning(f"Layer '{layer_name}' not found in project")
         return None
 
+    def get_export_layer(self, project: Any, layer_item: Any) -> Optional[Any]:
+        """The project layer of a layer to export (layer info dict or name), by its id first.
+
+        2026-11-12: two layers may share a name, and the first of them was
+        exported whichever was ticked. The name is used only when the item has
+        no id; a layer whose id is gone is not found. Same rule as
+        ``core.export.layer_exporter.find_export_layer`` (not imported here:
+        this module loads without the export package).
+        """
+        if isinstance(layer_item, dict) and layer_item.get('layer_id'):
+            layer = project.mapLayer(layer_item['layer_id'])
+            if layer is None:
+                logger.warning(f"Layer '{layer_item.get('layer_name')}' ({layer_item['layer_id']}) not found in project")
+            return layer
+        layer_name = layer_item['layer_name'] if isinstance(layer_item, dict) else layer_item
+        return self.get_layer_by_name(project, layer_name)
+
     def save_layer_style(
         self,
         layer: Any,
@@ -165,8 +182,7 @@ class ExportHandler:
         """
         total = 0
         for layer_info in layers:
-            layer_name = layer_info['layer_name'] if isinstance(layer_info, dict) else layer_info
-            layer = self.get_layer_by_name(project, layer_name)
+            layer = self.get_export_layer(project, layer_info)
             if layer:
                 total += layer.featureCount()
         return total
@@ -342,7 +358,7 @@ class ExportHandler:
                     output_folder, f"{sanitize_filename(layer_name)}{ext}"
                 )
             result = layer_exporter.export_single_layer(
-                layer_name, single_output, projection, datatype, style_format, save_styles
+                layers[0], single_output, projection, datatype, style_format, save_styles
             )
             self._collect_warnings(result)
             export_success = result.success
@@ -608,7 +624,7 @@ class ExportHandler:
 
             for layer_info in layers:
                 layer_name = layer_info['layer_name'] if isinstance(layer_info, dict) else layer_info
-                layer = self.get_layer_by_name(project, layer_name)
+                layer = self.get_export_layer(project, layer_info)
 
                 if not layer:
                     logger.warning(f"Layer not found: {layer_name}")

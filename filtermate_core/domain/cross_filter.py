@@ -130,13 +130,17 @@ def combine_subset(previous: Optional[str], new: str, operator: Optional[str]) -
         operator: ``"AND"``, ``"AND NOT"``, ``"OR"`` or None (replace).
 
     Returns:
-        The subset string to apply.
+        The subset string to apply. Without a previous subset: ``new``, or
+        ``NOT (new)`` under AND NOT (2026-11-12: the new selection taken out
+        of the whole layer; it kept only that selection).
     """
     previous = (previous or "").strip()
     new = (new or "").strip()
-    if not previous or not operator:
+    if not operator:
         return new
     op = operator.strip().upper()
+    if not previous:
+        return f"NOT ({new})" if op == "AND NOT" and new else new
     if op not in COMBINE_OPERATORS:
         return new
     if not new:

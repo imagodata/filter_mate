@@ -24,7 +24,7 @@ import logging
 import sys
 from enum import Enum
 from dataclasses import dataclass
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Callable, Tuple
 
 try:
     from qgis.PyQt.QtCore import QCoreApplication
@@ -166,6 +166,34 @@ def get_extension_for_format(datatype: str) -> str:
     # Fallback: use lowercased datatype as extension (only safe for single-word names)
     clean = datatype.strip().lower().replace(' ', '_')
     return f'.{clean}'
+
+
+def export_layer_identity(layer_item) -> Tuple[str, Optional[str]]:
+    """``(name, layer id)`` of a layer to export: a layer info dict or a bare name.
+
+    The id is None for a bare name or a dict without ``layer_id``.
+    """
+    if isinstance(layer_item, dict):
+        return layer_item.get('layer_name', ''), layer_item.get('layer_id') or None
+    return layer_item, None
+
+
+def find_export_layer(project, layer_item, by_name: Callable[[str], Any]):
+    """The project layer of a layer to export.
+
+    2026-11-12: by its ``layer_id``: two layers may share a name, and
+    ``mapLayersByName(name)[0]`` exported the first of them whichever was
+    ticked. ``by_name`` (the name lookup) only when the item has no id; a
+    layer whose id is no longer in the project is not found, never replaced
+    by another layer of the same name.
+    """
+    layer_name, layer_id = export_layer_identity(layer_item)
+    if not layer_id:
+        return by_name(layer_name)
+    layer = project.mapLayer(layer_id) if project is not None else None
+    if layer is None:
+        logger.warning(f"Layer '{layer_name}' ({layer_id}) not found in project")
+    return layer
 
 
 # Sidecar file extensions per format. Used by cleanup_partial_export() to
@@ -541,7 +569,8 @@ class LayerExporter:
         Export a single layer to file.
 
         Args:
-            layer_name: Layer name to export
+            layer_name: Layer to export: its name, or its layer info dict
+                (found by its ``layer_id``, see ``find_export_layer``)
             output_path: Output file path
             projection: Target CRS or None to use layer's CRS
             datatype: Export format (e.g., 'SHP', 'GPKG')
@@ -552,7 +581,8 @@ class LayerExporter:
             ExportResult with export status
         """
         # Get layer
-        layer = self.get_layer_by_name(layer_name)
+        layer = self.get_export_layer(layer_name)
+        layer_name, _ = export_layer_identity(layer_name)
         if not layer:
             return ExportResult(
                 success=False,
@@ -684,8 +714,7 @@ class LayerExporter:
         # Collect layer objects
         layer_objects = []
         for layer_item in layer_names:
-            layer_name = layer_item['layer_name'] if isinstance(layer_item, dict) else layer_item
-            layer = self.get_layer_by_name(layer_name)
+            layer = self.get_export_layer(layer_item)
             if layer:
                 layer_objects.append(layer)
 
@@ -898,7 +927,7 @@ class LayerExporter:
 
             # Export layer
             layer_result = self.export_single_layer(
-                layer_name,
+                layer_name_item,
                 layer_output,
                 config.projection,
                 config.datatype,
@@ -1001,3 +1030,10 @@ class LayerExporter:
 
         logger.warning(f"Layer '{layer_name}' not found in project")
         return None
+
+    def get_export_layer(self, layer_item) -> Optional[QgsVectorLayer]:
+        """The project layer of a layer to export (name or layer info dict), by its id first.
+
+        See ``find_export_layer``.
+        """
+        return find_export_layer(self.project, layer_item, self.get_layer_by_name)

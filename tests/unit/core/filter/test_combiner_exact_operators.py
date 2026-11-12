@@ -144,3 +144,38 @@ def test_no_combine_operator_forced_to_and_in_the_v3_paths():
     for relative in ("core/tasks/v3_bridge_handler.py", "core/tasks/executors/spatial_filter_executor.py"):
         source = (root / relative).read_text(encoding="utf-8")
         assert "or 'AND'" not in source and "combine_operator='AND'" not in source, relative
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-12: AND NOT on a layer without a filter takes the new selection out
+# of the whole layer (NOT (new)); every combiner returned the new expression,
+# keeping only what AND NOT was asked to remove. AND, OR and replace give new.
+# ---------------------------------------------------------------------------
+
+NO_OLD_COMBINERS = [
+    pytest.param(lambda new, op: combine_with_old_subset(new, '', op, 'spatialite'), id="expression_combiner"),
+    pytest.param(lambda new, op: combine_with_old_subset(new, None, op, 'ogr'), id="expression_combiner_ogr"),
+    pytest.param(lambda new, op: combine_with_old_filter(new, None, op), id="combine_with_old_filter"),
+    pytest.param(lambda new, op: combine_with_old_filter(new, '"x" = 1', op, sanitize_fn=lambda subset: ''),
+                 id="combine_with_old_filter_sanitized_away"),
+    pytest.param(lambda new, op: build_combined_filter_expression(new, '', op), id="expression_builder"),
+    pytest.param(
+        lambda new, op: SubsetStringBuilder.__new__(SubsetStringBuilder).combine_expressions(new, None, op).expression,
+        id="subset_string_builder",
+    ),
+]
+
+
+@pytest.mark.parametrize("combine", NO_OLD_COMBINERS)
+@pytest.mark.parametrize("new", ['"a" = 1', '"a" = 1 OR "b" = 3', 'WHERE "b" = 2'])
+def test_and_not_without_old_subset_removes_the_new_selection_from_the_layer(table, combine, new):
+    combined = combine(new, 'AND NOT')
+    everything = _fids(table, "1 = 1")
+    assert _fids(table, combined) == everything - _fids(table, new.replace('WHERE ', '')), combined
+    assert combined.startswith("NOT (")
+
+
+@pytest.mark.parametrize("combine", NO_OLD_COMBINERS)
+@pytest.mark.parametrize("operator", ["AND", "OR", None])
+def test_other_operators_without_old_subset_give_the_new_expression(combine, operator):
+    assert combine('"a" = 1', operator) == '"a" = 1'

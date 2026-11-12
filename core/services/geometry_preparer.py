@@ -321,7 +321,14 @@ def prepare_geometries_by_provider(
             - 'spatialite_source_geom': WKT string or None
             - 'ogr_source_geom': QgsVectorLayer or None
             - 'spatialite_fallback_mode': bool flag
+
+    Raises:
+        SourceSelectionError: The source filter keeps no feature or cannot be
+            read. 2026-11-12: let through the SpatiaLite → OGR fallback, whose
+            failure ends in the source layer used whole below.
     """
+    from ...adapters.backends.source_refusal import SourceSelectionError
+
     # FIX 2026-01-16: CRITICAL - Use print() to force console output
 
     # Also log normally
@@ -508,6 +515,8 @@ def prepare_geometries_by_provider(
                     "v2.7.3: WARNING - Spatialite geometry preparation returned None!",
                     "FilterMate", Qgis.MessageLevel.Warning
                 )
+        except SourceSelectionError:
+            raise
         except Exception as e:
             if logger:
                 logger.warning(f"Spatialite geometry preparation failed: {e}")
@@ -582,6 +591,8 @@ def prepare_geometries_by_provider(
                         logger.error("OGR fallback also failed - no geometry available")
                     result['success'] = False
                     return result
+            except SourceSelectionError:
+                raise
             except Exception as e2:
                 if logger:
                     logger.error(f"OGR fallback failed: {e2}")

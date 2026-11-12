@@ -30,7 +30,10 @@ IN_BUFFER = ('The changes are in the edit buffer of the layer, not saved: the us
 
 
 def _editable_layer(reference: str, capability: str):
-    """The vector layer, in editing mode, when its source allows ``capability``.
+    """The vector layer, when its source allows ``capability``; put in editing mode by ``_start_editing``.
+
+    2026-11-12: it put the layer in editing mode at once, so an edit refused afterwards (unknown field, bad WKT,
+    nothing selected) left the layer in editing mode, with a transaction open in a transaction group.
 
     Raises:
         ValueError: Absent, not vector, read-only, its source does not allow it, or FilterMate is busy.
@@ -51,9 +54,37 @@ def _editable_layer(reference: str, capability: str):
     flags = getattr(QgsVectorDataProvider, 'Capability', QgsVectorDataProvider)
     if not (layer.dataProvider().capabilities() & getattr(flags, capability)):
         raise ValueError(f"the data source of '{layer.name()}' does not allow this edit")
-    if not layer.isEditable() and not layer.startEditing():
-        raise ValueError(f"'{layer.name()}' could not be put in editing mode")
     return layer
+
+
+def _start_editing(layer, text: str) -> bool:
+    """Put ``layer`` in editing mode if it is not, and begin the edit command ``text``.
+
+    Returns:
+        bool: True when this call put the layer in editing mode (``_abandon`` then leaves it).
+
+    Raises:
+        ValueError: QGIS refused the editing mode.
+    """
+    opened = False
+    if not layer.isEditable():
+        if not layer.startEditing():
+            raise ValueError(f"'{layer.name()}' could not be put in editing mode")
+        opened = True
+    layer.beginEditCommand(COMMAND_PREFIX + text[:120])
+    return opened
+
+
+def _abandon(layer, opened: bool) -> None:
+    """Revert the edit command in progress; leave the editing mode this edit entered.
+
+    2026-11-12: an edit failing half-way (some features added or deleted, then False) kept its changes in the
+    buffer while an error was returned. The buffer of a layer the user was already editing keeps all but this
+    command: only the editing mode this edit opened is rolled back (empty by then).
+    """
+    layer.destroyEditCommand()
+    if opened:
+        layer.rollBack()
 
 
 def _checked(expression: str, layer) -> str:
@@ -129,12 +160,10 @@ def _converted(layer, index: int, value: Any) -> Any:
         raise ValueError(f"{layer.fields().at(index).name()}: {exc}") from None
 
 
-def _command(layer, text: str):
-    layer.beginEditCommand(COMMAND_PREFIX + text[:120])
-
-
 def _answer(layer, **counts) -> Dict[str, Any]:
-    return {'layer_name': layer.name(), **counts, 'editing': True, 'unsaved': layer.isModified(), 'note': IN_BUFFER}
+    editing = bool(layer.isEditable())
+    return {'layer_name': layer.name(), **counts, 'editing': editing, 'unsaved': editing and layer.isModified(),
+            'note': IN_BUFFER}
 
 
 def update_features(layer: str, values: Optional[Dict[str, Any]] = None, formulas: Optional[Dict[str, str]] = None,
@@ -162,11 +191,13 @@ def update_features(layer: str, values: Optional[Dict[str, Any]] = None, formula
     if set(literal) & set(computed):
         raise ValueError('a field is given both a value and a formula')
     ids = _chosen_ids(found, expression, selected_only)
+    if not ids:
+        return _answer(found, changed=0)
     context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(found))
     for expression_object in computed.values():
         expression_object.prepare(context)
     changed = 0
-    _command(found, f"set {', '.join(list(values) + list(formulas))}")
+    opened = _start_editing(found, f"set {', '.join(list(values) + list(formulas))}")
     try:
         features = found.getFeatures(QgsFeatureRequest().setFilterFids(ids)) if computed else []
         rows = {feature.id(): feature for feature in features}
@@ -182,7 +213,7 @@ def update_features(layer: str, values: Optional[Dict[str, Any]] = None, formula
             if found.changeAttributeValues(fid, change):
                 changed += 1
     except Exception:
-        found.destroyEditCommand()
+        _abandon(found, opened)
         raise
     found.endEditCommand()
     return _answer(found, changed=changed)
@@ -198,11 +229,11 @@ def delete_features(layer: str, expression: str = '', selected_only: bool = Fals
     ids = _chosen_ids(found, expression, selected_only)
     if not ids:
         return _answer(found, deleted=0)
-    _command(found, f"delete {len(ids)} feature(s)")
-    ok = found.deleteFeatures(ids)
-    found.endEditCommand()
-    if not ok:
+    opened = _start_editing(found, f"delete {len(ids)} feature(s)")
+    if not found.deleteFeatures(ids):
+        _abandon(found, opened)  # none deleted: some could have been
         raise ValueError(f"the features of '{found.name()}' could not be deleted")
+    found.endEditCommand()
     return _answer(found, deleted=len(ids))
 
 
@@ -214,7 +245,8 @@ def add_features(layer: str, features: List[Dict[str, Any]], crs: str = '') -> D
         crs: CRS of the WKT, the CRS of the layer by default.
 
     Raises:
-        ValueError: A layer that cannot be edited, a bad geometry or CRS, a geometry of another type, a bad value.
+        ValueError: A layer that cannot be edited, a bad geometry or CRS, a geometry of another type or with more
+            parts than the layer holds, a bad value.
     """
     from qgis.core import (QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsFeature, QgsGeometry, QgsProject,
                            QgsWkbTypes)
@@ -241,19 +273,26 @@ def add_features(layer: str, features: List[Dict[str, Any]], crs: str = '') -> D
                 geometry.transform(transform)
             except Exception:  # QgsCsException: outside the domain of one of the CRS
                 raise ValueError(f"feature {number}: its coordinates do not fit the CRS {source_crs.authid()}") from None
-        if QgsWkbTypes.isMultiType(found.wkbType()) and not geometry.isMultipart():
-            geometry.convertToMultiType()
+        # 2026-11-12: the type of the layer: multi or single part, Z and M added (0) or dropped. A multi-part
+        # geometry used to be stored as such in a single-part layer, and Z / M were left as given.
+        coerced = geometry.coerceToType(found.wkbType())
+        if len(coerced) > 1:
+            raise ValueError(f"feature {number}: '{found.name()}' holds single-part geometries, this one has "
+                             f"{len(coerced)} parts: add each part as a feature")
+        if not coerced or coerced[0].isNull():
+            raise ValueError(f"feature {number}: cannot be stored as {QgsWkbTypes.displayString(found.wkbType())}")
+        geometry = coerced[0]
         feature = QgsFeature(found.fields())
         feature.setGeometry(geometry)
         for name, value in (item.get('attributes') or {}).items():
             index = _field(found, name)
             feature.setAttribute(index, _converted(found, index, value))
         made.append(feature)
-    _command(found, f"add {len(made)} feature(s)")
-    ok = found.addFeatures(made)
-    found.endEditCommand()
-    if not ok:
+    opened = _start_editing(found, f"add {len(made)} feature(s)")
+    if not found.addFeatures(made):
+        _abandon(found, opened)  # none added: some could have been
         raise ValueError(f"the features could not be added to '{found.name()}'")
+    found.endEditCommand()
     return _answer(found, added=len(made))
 
 

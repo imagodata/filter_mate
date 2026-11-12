@@ -306,7 +306,15 @@ class FilteringOrchestrator:
 
                 logger.info("\nCalling manage_distant_layers_geometric_filtering()...")
 
-                distant_result = manage_distant_layers_callback()
+                from ...adapters.backends.source_refusal import SourceSelectionError
+                try:
+                    distant_result = manage_distant_layers_callback()
+                except SourceSelectionError as refusal:
+                    # 2026-11-12: the source filter keeps no feature (or cannot be
+                    # read): the targets are left as they are, and the user is told.
+                    logger.warning(f"Distant layers not filtered: {refusal}")
+                    result['message'] = str(refusal)
+                    return result
 
                 if is_canceled_callback():
                     logger.warning("Task canceled during distant layers filtering")
