@@ -688,9 +688,11 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if self._current_layer is not layer:
             self.set_layer(layer)
         if getattr(self, '_remote_cache_layer', None) is not layer:
-            # To a receiver of the binding, deleted by _cancel_remote_reads (every layer change runs it).
+            # To a receiver of the binding, deleted by _cancel_remote_reads (every layer change runs it), and
+            # with the controller at the latest.
             self._remote_cache_layer = layer
             self._remote_cache_receiver = receiver = _watcher(self._invalidate_remote_selection_cache)
+            receiver.setParent(self)
             for signal_name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):
                 getattr(layer, signal_name).connect(receiver.changed)
         self._remote_selection_refused = False
@@ -875,8 +877,12 @@ class ExploringController(BaseController, LayerSelectionMixin):
         slot = getattr(self, '_selection_query', None)
         if self._remote_selection_waiting and slot is not None and slot.task is not None:
             signature = self._remote_selection_pending
+            generation = slot.generation
 
             def settled():
+                if not slot.accepts(generation):
+                    return  # replaced or cancelled: a result in the cache came from another read, maybe much later
+
                 def check():
                     try:
                         cached = self._remote_selection_result
@@ -888,7 +894,8 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 QTimer.singleShot(0, check)
 
             # From finished() of the read, never a Python function connected to its signals (see
-            # async_query.submit_query). A read that ends without its result fails the check: nothing flashes.
+            # async_query.submit_query). A read that ends without its result fails the check: nothing flashes;
+            # nor does one replaced meanwhile.
             slot.task.when_settled(settled)
             return True
         self._pending_identify = None
