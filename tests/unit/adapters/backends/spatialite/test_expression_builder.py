@@ -694,13 +694,15 @@ class TestApplyFilterQueueRouting:
 
 
 class TestAndNotAfterASpatialFilter:
-    """2026-11-12 (review): a previous spatial filter is replaced; under AND NOT the new selection is still
-    excluded. The builder wrote the new selection itself, so a second AND NOT kept what it was to remove."""
+    """2026-11-12 (review): a previous spatial filter is replaced under AND NOT; the new selection is still
+    excluded. The builder wrote the new selection itself, so a second AND NOT kept what it was to remove.
+
+    2026-11-12 (user decision): under AND and OR the previous spatial filter is combined, not replaced."""
 
     @pytest.mark.parametrize("operator, expected", [
         ("AND NOT", "NOT (\nST_Intersects(\"geom\", X)\n)"),
-        ("AND", "ST_Intersects(\"geom\", X)"),
-        ("OR", "ST_Intersects(\"geom\", X)"),
+        ("AND", "(NOT ( Intersects(\"geom\", GeomFromText('POINT(0 0)', 2154)) )) AND (ST_Intersects(\"geom\", X))"),
+        ("OR", "(NOT ( Intersects(\"geom\", GeomFromText('POINT(0 0)', 2154)) )) OR (ST_Intersects(\"geom\", X))"),
     ])
     def test_replaced_spatial_filter(self, mock_spatialite_layer, operator, expected):
         callback = MagicMock()

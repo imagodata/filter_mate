@@ -491,3 +491,54 @@ def test_the_chain_without_a_recorded_selection_is_unchanged(monkeypatch, refusa
 
     assert builder._prepare_source_filter("PostgreSQL") == f"({EXISTS_OLD})"
     assert requests == []
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-12 (user decision): a target subset combines its geometric filters,
+# ( EXISTS a ) OR ( EXISTS b ). Used later as the source subset, a union must
+# not be read as an intersection (the chain joins the EXISTS with AND) nor by
+# the body of its first EXISTS (the WHERE reuse of PATH 3A).
+# ---------------------------------------------------------------------------
+
+EXISTS_OTHER = ('EXISTS (SELECT 1 FROM "public"."fm_temp_buf_s_0123" AS __buffer '
+                'WHERE ST_Intersects("src"."geom", __buffer.buffered_geom))')
+
+
+def _all_features_task():
+    """All features / field-based modes: no selection recorded, the filtered layer is the source."""
+    task = MagicMock()
+    task.task_parameters = {"task": {"features": [], "expression": ""}, "param_source_table": "src",
+                            "param_combine_operator": "AND"}
+    return task
+
+
+def test_the_chain_reads_a_union_of_geometric_filters_by_its_features(monkeypatch, refusal):
+    layer, requests = _source_layer(kept=[4, 7], subset=f"({EXISTS_OLD}) OR ({EXISTS_OTHER})")
+    builder = _builder(monkeypatch, _all_features_task(), layer)
+    builder.buffer_expression = '"radius"'
+
+    assert builder._prepare_source_filter("PostgreSQL") == "<FIDS [4, 7]>"
+    assert [request.expression for request in requests] == [None]   # the layer read through its subset
+
+
+def test_the_chain_of_an_intersection_of_geometric_filters_is_unchanged(monkeypatch, refusal):
+    layer, requests = _source_layer(kept=[], subset=f"({EXISTS_OLD}) AND ({EXISTS_OTHER})")
+    builder = _builder(monkeypatch, _all_features_task(), layer)
+    builder.buffer_expression = '"radius"'
+
+    assert builder._prepare_source_filter("PostgreSQL") == f"({EXISTS_OLD}) AND ({EXISTS_OTHER})"
+    assert requests == []
+
+
+@pytest.mark.parametrize("subset", [
+    f"({EXISTS_OLD}) OR ({EXISTS_OTHER})",
+    f"({EXISTS_OLD}) AND ({EXISTS_OTHER})",
+])
+def test_path_3a_reads_combined_geometric_filters_by_their_features(monkeypatch, refusal, subset):
+    """More features than the inline threshold: the WHERE reuse read what follows the first WHERE only."""
+    layer, requests = _source_layer(kept=[4, 7], subset=subset)
+    layer.featureCount.return_value = 50_000
+    builder = _builder(monkeypatch, _all_features_task(), layer)
+
+    assert builder._prepare_source_filter("PostgreSQL") == "<FIDS [4, 7]>"
+    assert [request.expression for request in requests] == [None]

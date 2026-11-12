@@ -98,3 +98,29 @@ class TestCombineKeepsBalancedOldSubset:
 def test_none_operator_replaces_old_subset():
     # REPLACE mode: the combine option is off, the old subset is dropped.
     assert combine_with_old_subset(NEW_EXPRESSION, RTREE_OLD_SUBSET, None, 'spatialite') == NEW_EXPRESSION
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-12: has_or_outside_subqueries (a target subset combined under OR)
+# ---------------------------------------------------------------------------
+
+_EXISTS_A = 'EXISTS (SELECT 1 FROM "s"."a" AS __source WHERE ST_Intersects("t"."geom", __source."geom"))'
+_EXISTS_B = 'EXISTS (SELECT 1 FROM "s"."b" AS __source WHERE "x" = 1 OR "y" = 2)'
+
+
+@pytest.mark.parametrize("expression, expected", [
+    (f"({_EXISTS_A}) OR ({_EXISTS_B})", True),
+    (f"(({_EXISTS_A}) OR ({_EXISTS_B})) AND ({_EXISTS_A})", True),        # at any depth
+    (f"(\"nature\" = 'x') OR ({_EXISTS_A})", True),
+    (f"({_EXISTS_A}) AND ({_EXISTS_B})", False),                          # the OR is inside the subquery
+    (f"(\"t\".\"geom\" && (SELECT ST_Extent(g) FROM s WHERE a OR b)) AND {_EXISTS_A}", False),
+    (f"NOT ({_EXISTS_A})", False),
+    ("\"nature\" = 'x OR y'", False),                                    # a literal
+    ("\"OR\" = 1", False),                                                # a quoted name
+    ("\"color\" = 1", False),
+    ("", False),
+    (None, False),
+])
+def test_has_or_outside_subqueries(expression, expected):
+    from core.filter.expression_combiner import has_or_outside_subqueries
+    assert has_or_outside_subqueries(expression) is expected

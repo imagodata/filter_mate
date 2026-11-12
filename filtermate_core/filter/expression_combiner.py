@@ -282,6 +282,46 @@ def extract_exists_clauses(expression: str) -> List[Dict[str, str]]:
     return exists_clauses
 
 
+_SUBQUERY_START = re.compile(r'\(\s*SELECT\b', re.IGNORECASE)
+
+
+def has_or_outside_subqueries(expression: str) -> bool:
+    """Whether an ``OR`` joins parts of ``expression`` outside its ``(SELECT ...)`` subqueries.
+
+    2026-11-12: a target subset now combines a new geometric filter with the
+    previous one under OR, ``(EXISTS (...)) OR (EXISTS (...))``. The filter
+    chain, which joins the EXISTS clauses of a source subset with AND, must
+    not read that union as an intersection. Literals, quoted names and the
+    bodies of the subqueries (an EXISTS, an envelope prefilter) are ignored.
+
+    Args:
+        expression: SQL subset string.
+
+    Returns:
+        True when an OR combines top-level parts (at any parenthesis depth).
+    """
+    if not expression:
+        return False
+    masked, _ = mask_quoted(expression)
+    kept, i = [], 0
+    for match in _SUBQUERY_START.finditer(masked):
+        if match.start() < i:
+            continue  # inside a subquery already skipped
+        kept.append(masked[i:match.start()])
+        depth, j = 0, match.start()
+        while j < len(masked):
+            if masked[j] == '(':
+                depth += 1
+            elif masked[j] == ')':
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        i = j + 1
+    kept.append(masked[i:])
+    return bool(re.search(r'\bOR\b', ' '.join(kept), re.IGNORECASE))
+
+
 def adapt_exists_for_nested_context(
     exists_sql: str,
     original_table: str,

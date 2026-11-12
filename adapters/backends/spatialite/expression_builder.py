@@ -150,9 +150,11 @@ class SpatialiteExpressionBuilder(SpatialiteSqlBuilder):
 
             # Combine with existing filter if needed
             if old_subset and combine_operator:
-                if self._is_geometric_filter(old_subset):
-                    self.log_info("Replacing geometric filter in old_subset")
-                    # 2026-11-12 (review): replaced, AND NOT still excludes: NOT (new)
+                # 2026-11-12 (user decision): a previous spatial filter is combined
+                # under AND / OR (FilterOrchestrator._determine_subset_strategy);
+                # only AND NOT replaces it, and still excludes: NOT (new)
+                if self._is_geometric_filter(old_subset) and combine_operator.strip().upper() == 'AND NOT':
+                    self.log_info("Replacing geometric filter in old_subset (AND NOT)")
                     final_expression = combine_without_old_subset(expression, combine_operator)
                 else:
                     final_expression = f"({old_subset}) {combine_operator} ({expression})"

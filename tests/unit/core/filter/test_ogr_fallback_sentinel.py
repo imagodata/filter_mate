@@ -265,17 +265,19 @@ def test_hybrid_attribute_subsets_are_not_taken_for_spatial_key_lists():
             assert orchestrator_module.FilterOrchestrator._is_key_list_subset(_layer(subset, pk), subset) is False
 
 
-@pytest.mark.parametrize("subset, expected", [
-    ('"cleabs" IN (\'TRON1\')', ('"cleabs" IN (\'TRON1\')', None)),      # replaced, not combined
-    ('"nature" = \'Route\'', ('"nature" = \'Route\'', "AND")),            # attribute: combined
-    ('ST_Intersects("geom", X)', (None, None)),                          # spatial: replaced
+@pytest.mark.parametrize("subset, operator, expected", [
+    ('"cleabs" IN (\'TRON1\')', None, ('"cleabs" IN (\'TRON1\')', None)),    # no operator: replaced
+    ('"cleabs" IN (\'TRON1\')', "AND", ('"cleabs" IN (\'TRON1\')', "AND")),  # 2026-11-12: combined
+    ('"nature" = \'Route\'', "AND", ('"nature" = \'Route\'', "AND")),        # attribute: combined
+    ('ST_Intersects("geom", X)', None, (None, None)),                      # no operator: replaced
+    ('ST_Intersects("geom", X)', "AND", ('ST_Intersects("geom", X)', "AND")),  # 2026-11-12: combined
 ])
-def test_subset_strategy_treats_every_key_list_as_spatial(monkeypatch, subset, expected):
+def test_subset_strategy_treats_every_key_list_as_spatial(monkeypatch, subset, operator, expected):
     orchestrator = orchestrator_module.FilterOrchestrator(
         task_parameters={}, subset_queue_callback=MagicMock(), parent_task=MagicMock(),
         get_predicates_callback=lambda: {},
     )
-    monkeypatch.setattr(orchestrator, "_get_combine_operator", lambda: "AND")
+    monkeypatch.setattr(orchestrator, "_get_combine_operator", lambda: operator)
     assert orchestrator._determine_subset_strategy(_layer(subset, "cleabs")) == expected
 
 
@@ -371,11 +373,72 @@ def test_and_not_after_a_previous_spatial_step_still_excludes(subset, expected):
     assert orchestrator._determine_subset_strategy(_layer(subset)) == expected
 
 
-@pytest.mark.parametrize("subset", ['"fid" IN (1, 2)', 'ST_Intersects("geom", X)'])
-def test_previous_spatial_filter_is_still_replaced_whatever_the_operator(subset):
-    orchestrator = _orchestrator_with_operator("OR")
+# ---------------------------------------------------------------------------
+# 2026-11-12 (user decision): a new geometric filter combines with the subset of
+# a previous spatial step under OR and AND (it replaced it: OR and AND then kept
+# the new selection only). No operator still replaces; AND NOT is unchanged
+# (above); a style expression is still replaced.
+# ---------------------------------------------------------------------------
+
+_PREVIOUS_SPATIAL_SUBSETS = [
+    '"fid" IN (1, 2)',                                                     # OGR / SQLite key list
+    '"fid" IN (SELECT value FROM json_each(\'[1,2]\'))',
+    'ST_Intersects("geom", X)',
+    'EXISTS (SELECT 1 FROM "public"."fm_temp_buf_s_0123" AS __buffer '
+    'WHERE ST_Intersects("t"."geom", __buffer.buffered_geom))',           # PostgreSQL buffer table
+    '("t"."geom" && (SELECT ST_Extent(__source."geom") FROM "public"."s" AS __source)) AND '
+    'EXISTS (SELECT 1 FROM "public"."s" AS __source WHERE ST_Intersects("t"."geom", __source."geom"))',
+    'ROWID IN (SELECT id FROM "rtree_t_geom" WHERE minx <= 1.0) AND '
+    'Intersects("geom", GeomFromText(\'POINT(0 0)\', 2154)) = 1',          # GeoPackage, inline
+    '(EXISTS (SELECT 1 FROM "s" AS __source WHERE ST_Intersects(a, b))) OR '
+    '(EXISTS (SELECT 1 FROM "s" AS __source WHERE ST_Intersects(a, c)))',  # already combined
+]
+
+
+@pytest.mark.parametrize("operator", ["OR", "AND"])
+@pytest.mark.parametrize("subset", _PREVIOUS_SPATIAL_SUBSETS)
+def test_previous_spatial_filter_is_combined_under_or_and_and(subset, operator):
+    orchestrator = _orchestrator_with_operator(operator)
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (subset, operator)
+
+
+@pytest.mark.parametrize("subset", _PREVIOUS_SPATIAL_SUBSETS)
+def test_previous_spatial_filter_is_replaced_without_operator(subset):
+    orchestrator = _orchestrator_with_operator(None)
     old_subset, operator = orchestrator._determine_subset_strategy(_layer(subset))
     assert operator is None
+    assert old_subset in (None, subset)   # a key list is kept for no combination ("fid" IN: (old, None))
+
+
+# The SpatiaLite inline form (Intersects(...), no ST_ name) is no geometric subset for the
+# orchestrator: it goes with its operator, and the SpatiaLite / OGR builders replace it under
+# AND NOT themselves (_is_geometric_filter), as before.
+@pytest.mark.parametrize("subset", [s for s in _PREVIOUS_SPATIAL_SUBSETS if 'EXISTS' in s or 'ST_' in s])
+def test_and_not_still_replaces_a_previous_geometric_filter(subset):
+    orchestrator = _orchestrator_with_operator("AND NOT")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (None, "AND NOT")
+
+
+@pytest.mark.parametrize("operator", ["OR", "AND"])
+@pytest.mark.parametrize("subset", ["coalesce(\"nom\", '')", "COALESCE(\"nom\", 'sans nom')"])
+def test_a_display_expression_is_still_replaced_under_or_and_and(subset, operator):
+    orchestrator = _orchestrator_with_operator(operator)
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (None, None)
+
+
+@pytest.mark.parametrize("operator, expected", [
+    ("OR", '(EXISTS (old)) OR (EXISTS (x))'),
+    ("AND", '(EXISTS (old)) AND (EXISTS (x))'),
+    ("AND NOT", 'NOT (\nEXISTS (x)\n)'),
+    (None, 'EXISTS (x)'),
+])
+def test_postgresql_adapter_combines_a_previous_geometric_filter(pg_adapter, operator, expected):
+    """The orchestrator's strategy, then the PostgreSQL adapter: the subset that reaches the layer."""
+    adapter, applied = pg_adapter
+    orchestrator = _orchestrator_with_operator(operator)
+    old_subset, combine = orchestrator._determine_subset_strategy(_layer('EXISTS (old)'))
+    assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', old_subset, combine) is True
+    assert applied == [expected]
 
 
 @pytest.fixture

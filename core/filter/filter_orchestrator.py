@@ -495,10 +495,14 @@ class FilterOrchestrator:
         Determine whether to REPLACE or COMBINE existing subset string.
 
         Strategy:
-        - REPLACE: If subset contains geometric patterns (EXISTS, ST_*, __source)
+        - NO OPERATOR (combination unchecked): REPLACE, whatever the subset
+          (a key list of a previous step is returned with ``None``)
+        - COMBINE under AND / OR: an attribute filter, the subset of a previous
+          geometric filter (EXISTS, ST_*, __source) and the key list of a
+          previous spatial step alike (2026-11-12, user decision)
+        - AND NOT: a previous geometric filter is REPLACED by ``NOT (new)``; a
+          key list or an attribute filter gives ``(old) AND NOT (new)``
         - REPLACE: If subset is a style/display expression (returns no boolean)
-        - COMBINE: If subset is simple attribute filter (preserve user's filter)
-        - SPECIAL: If FID-only filter from previous step, keep for cache but don't combine in SQL
         - NO SUBSET: ``(None, operator)``; the backends write ``NOT (new)`` under AND NOT
 
         Args:
@@ -559,20 +563,35 @@ class FilterOrchestrator:
         # (combine_without_old_subset), never by ``new``.
         and_not = (combine_operator or '').strip().upper() == 'AND NOT'
 
+        # 2026-11-12 (user decision): a new geometric filter COMBINES with the
+        # subset of a previous spatial step under AND / OR, as it does with an
+        # attribute filter: (old) OR (new) is the union, (old) AND (new) the
+        # intersection. They used to be replaced, OR and AND then kept the new
+        # selection only. The combination is written at the top level, never
+        # nested: each EXISTS keeps its own aliases (__source, __buffer), and the
+        # temp objects the old subset reads (buffer tables, source selection MVs)
+        # are not dropped by a later filter task: only by reset / unfilter, by
+        # the session cleanup, and those of a canceled task when no subset in
+        # place names them (FinishedHandler.handle_finished, _drop_deferred_views).
+        combines = (combine_operator or '').strip().upper() in ('AND', 'OR')
+
         # Apply strategy
         if is_geometric_filter:
-            logger.debug(f"🔄 Existing subset on {layer.name()} contains GEOMETRIC filter - will be REPLACED")
+            logger.debug(f"🔄 Existing subset on {layer.name()} contains GEOMETRIC filter")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
-            logger.debug("  → Reason: Cannot nest geometric filters (EXISTS, ST_*, __source)")
+            if combines:
+                logger.debug(f"  → Strategy: COMBINED with {combine_operator}")
+                return old_subset, combine_operator
+            logger.debug("  → Strategy: REPLACED (no combine operator, or AND NOT: NOT (new))")
             return None, (combine_operator if and_not else None)
 
         elif is_fid_only_filter:
             logger.debug(f"🔄 Existing subset on {layer.name()} is FID filter from PREVIOUS spatial step")
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
-            if and_not:
-                logger.debug("  → Strategy: AND NOT - the previous keys minus the new selection")
+            if and_not or combines:
+                logger.debug(f"  → Strategy: COMBINED with {combine_operator}")
                 return old_subset, combine_operator
-            logger.debug("  → Strategy: Keep for cache intersection, but DON'T combine in SQL")
+            logger.debug("  → Strategy: REPLACED (no combine operator)")
             return old_subset, None  # combine_operator=None tells backend not to combine
 
         elif is_style_expression:

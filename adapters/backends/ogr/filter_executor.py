@@ -1251,7 +1251,9 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
             builder.user_warnings.append(_remote_message(outcome.reason))
         keys = outcome.keys
     builder.remote_materialization_outcome = outcome
-    refusal = builder._key_list_refusal(layer, len(keys))
+    # 2026-11-12: the keys of a previous step kept by the combination go to the server too
+    listed = len(keys) if oapif else builder._listed_keys(old_subset, combine_operator, len(keys))
+    refusal = builder._key_list_refusal(layer, listed)
     if refusal:
         builder.last_error = refusal
         builder.user_warnings.append(refusal)

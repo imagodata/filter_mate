@@ -532,7 +532,7 @@ class ExpressionBuilder:
         self.task_parameters.get('param_source_schema')
 
         # Import filter chaining utilities
-        from .expression_combiner import detect_filter_chain_scenario
+        from .expression_combiner import detect_filter_chain_scenario, has_or_outside_subqueries
 
         # Detect the filter chaining scenario
         scenario, context = detect_filter_chain_scenario(
@@ -550,6 +550,11 @@ class ExpressionBuilder:
         # It is read like any selection below (its features, or PATH 3A); those
         # features are within the old subset, so the old EXISTS holds for them.
         chains_the_source_subset = self.task_parameters.get('source_selection_after_task') is None
+        # 2026-11-12: a target subset now combines its geometric filters under OR,
+        # ( EXISTS a ) OR ( EXISTS b ): the chain below joins the EXISTS with AND,
+        # the intersection. Such a source is read by its features (PATH 3A).
+        if chains_the_source_subset and has_or_outside_subqueries(source_subset):
+            chains_the_source_subset = False
         if scenario in ('spatial_chain', 'spatial_chain_with_custom') and chains_the_source_subset:
             # FILTER CHAINING MODE: Extract EXISTS from source_subset for combination
             logger.debug("🔗 FILTER CHAIN MODE: Extracting EXISTS clauses for chaining")
@@ -652,7 +657,14 @@ class ExpressionBuilder:
                     MAX_INLINE_FEATURES = 1000
                     MAX_EXPRESSION_LENGTH = 10000
 
-                if filtered_count > MAX_INLINE_FEATURES:
+                # 2026-11-12: several EXISTS, or parts joined by OR (geometric filters
+                # combined on this layer when it was a target): the WHERE reuse below
+                # reads what follows the first WHERE only. Its features are read
+                # instead (exact; a long key list goes to a source selection MV, see
+                # _generate_fid_filter).
+                combined_subset = (len(context['spatial_exists_clauses']) > 1
+                                   or has_or_outside_subqueries(source_subset))
+                if filtered_count > MAX_INLINE_FEATURES and not combined_subset:
                     # OPTIMIZATION: Use original source_subset as-is for distant layers
                     # Instead of extracting all FIDs, we can create a subquery or temp table
                     logger.debug(f"   ⚡ OPTIMIZATION: {filtered_count} features > {MAX_INLINE_FEATURES} threshold")

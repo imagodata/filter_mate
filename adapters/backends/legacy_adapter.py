@@ -272,8 +272,9 @@ class BaseLegacyAdapter(GeometricFilterBackend):
         """Apply filter using new backend."""
         try:
             # Combine with old subset if needed. combine_operator None means
-            # REPLACE (combination unchecked, or a previous spatial filter: see
-            # FilterOrchestrator._determine_subset_strategy), as in the
+            # REPLACE (combination unchecked: see
+            # FilterOrchestrator._determine_subset_strategy, which also sends a
+            # previous geometric filter under AND / OR since 2026-11-12), as in the
             # SpatiaLite and OGR builders; 2026-10-17: it was combined with AND.
             final_expr = expression
             if old_subset and combine_operator:
