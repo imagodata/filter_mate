@@ -102,7 +102,7 @@
   },
   {
    "id": "edit_delete_paths",
-   "prompt": "Supprime de la couche routes les tronçons de nature Chemin.",
+   "prompt": "Supprime des données de la couche routes les tronçons de nature Chemin : je ne veux pas un filtre, ils doivent disparaître de la couche.",
    "expect": [
     [
      {
