@@ -875,8 +875,11 @@ class LayersManagementEngineTask(QgsTask):
             if POSTGRESQL_AVAILABLE and PSYCOPG2_AVAILABLE:
                 try:
                     from qgis.core import QgsDataSourceUri
+                    from ...infrastructure.database.pg_connect import connection_identity
                     uri = QgsDataSourceUri(layer.source())
-                    cache_key = f"{uri.host()}:{uri.port()}:{uri.database()}"
+                    # 2026-11-12: host:port:database was "::" for every pg_service.conf
+                    # service; the identity also tells users and authentications apart
+                    cache_key = connection_identity(uri, uri.param('authcfg'))
 
                     if cache_key in self._postgresql_connection_cache:
                         psycopg2_connection_available = self._postgresql_connection_cache[cache_key]
