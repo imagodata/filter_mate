@@ -213,7 +213,8 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - The level is read at each call (`ChatEngine(policy=...)`), and sent with each request, after the project summary,
   when it is not `standard` (the system prompt stays constant for the cache).
 - An invalid call is never asked nor refused: it runs to answer its mistake.
-- The MCP servers keep the `standard` rules (`ToolExecutor.needs_confirmation`): the level is the chat's.
+- The MCP servers keep the `standard` level: the level is the chat's. The native one follows the *Always ask* and
+  *Never* rules of the Tools tab too (`AgentMcpBridge._policy`); *Always allow* does not take its confirmations away.
 - **Exceptions by tool** (Tools tab, `AgentSettings.tool_rules`): *As the level says* (default), *Always ask* (at
   every call; never allowed for a conversation), *Always allow* (not past `advisor`, never for `run_pyqgis`) or
   *Never*: the tool is left out of the tools offered to the model and answered `TURNED_OFF` if it is called anyway,
