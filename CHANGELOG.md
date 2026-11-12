@@ -19,7 +19,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Dock
 
-- **Filter or Identify clicked while the selection of a web service loads: the crash path of the reads closed there too.** The filter or the identify waiting for the read was started by a Python function connected to the end signals of the read task, the path on which QGIS 4.2.2 on Windows crashed three times when a read was replaced or cancelled; it now follows the read from the task itself (`finished()`), as the read does. A layer change no longer disconnects the cache of the selection from a layer that may be gone after a project switch: its signals go to a receiver deleted instead.
+- **Filter or Identify clicked while the selection of a web service loads: the crash path of the reads closed there too.** The filter or the identify waiting for the read was started by a Python function connected to the end signals of the read task, the path on which QGIS 4.2.2 on Windows crashed three times when a read was replaced or cancelled; it now follows the read from the task itself (`finished()`), as the read does. A layer change no longer disconnects the cache of the selection from a layer that may be gone after a project switch: its signals go to a receiver deleted instead. The wait cursor of the panel stays while another read still runs.
 
 ### Point clouds
 
