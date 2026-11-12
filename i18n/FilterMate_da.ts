@@ -1043,6 +1043,26 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <translation>Opskrifter</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Giv den lokale model alle værktøjer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Kun værktøjerne der filtrerer, til en langsom computer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Markeret får den lokale model kun de værktøjer, der læser og filtrerer projektet: cirka halvt så meget at læse ved hver forespørgsel. Målt med qwen3.5:4b svarede alle værktøjer lige så godt eller bedre.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Slået fra får en lokal model de værktøjer, der læser og filtrerer projektet: de passer til en GPU med 8 GB. Alle værktøjer kræver omtrent dobbelt så meget hukommelse.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Gem den seneste anmodning som opskrift…</translation>

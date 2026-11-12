@@ -1043,6 +1043,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>레시피</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>로컬 모델에 모든 도구 제공</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>느린 컴퓨터를 위해 필터링 도구만</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>선택하면 로컬 모델은 프로젝트를 읽고 필터링하는 도구만 받아 요청마다 읽을 양이 약 절반이 됩니다. qwen3.5:4b로 측정했을 때 모든 도구로도 같거나 더 나은 답을 냈습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>끄면 로컬 모델은 프로젝트를 읽고 필터링하는 도구만 받으며, 8 GB GPU에 들어갑니다. 모든 도구를 쓰려면 약 두 배의 메모리가 필요합니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>마지막 요청을 레시피로 저장…</translation>

@@ -11,7 +11,7 @@ from core.agent.messages import (
 from core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
 from core.agent.providers.base import ProviderConfig
 from core.agent.providers.ollama_chat import CONTEXT_STEPS, context_for, native_base
-from core.agent.tool_catalog import ToolSpec, chat_tools
+from core.agent.tool_catalog import FILTERING_NOTE, FILTERING_TOOLS, ToolSpec, chat_tools, filtering_only
 from core.agent.system_prompt import SYSTEM_PROMPT
 
 pytestmark = pytest.mark.unit
@@ -65,15 +65,29 @@ class TestRequest:
         assert body["options"] == {"num_ctx": CONTEXT_STEPS[0]}
         assert "authorization" not in request.headers
 
-    def test_the_tools_of_the_chat_fit_the_first_step(self):
-        """The system prompt and every tool of the chat: about 71,000 characters, well past Ollama's 4096 tokens."""
-        request = ollama().build_request(SYSTEM_PROMPT, [Message(ROLE_USER, (TextPart("bonjour"),))], chat_tools())
+    def test_every_tool_asks_for_32k_the_filtering_ones_for_16k(self):
+        """The system prompt and every tool of the chat: about 73,000 characters, well past Ollama's 4096 tokens."""
+        hello = [Message(ROLE_USER, (TextPart("bonjour"),))]
+        request = ollama().build_request(SYSTEM_PROMPT, hello, chat_tools())
         assert len(request.body) > 60_000
-        assert json.loads(request.body)["options"]["num_ctx"] == CONTEXT_STEPS[0]
+        assert json.loads(request.body)["options"]["num_ctx"] == 32_768
+        request = ollama().build_request(SYSTEM_PROMPT + FILTERING_NOTE, hello, filtering_only(chat_tools()))
+        assert json.loads(request.body)["options"]["num_ctx"] == 16_384
+
+    def test_the_filtering_tools_are_tools_of_the_chat_that_read_and_filter(self):
+        names = {tool.name for tool in chat_tools()}
+        assert FILTERING_TOOLS <= names
+        kept = filtering_only(chat_tools())
+        assert {tool.name for tool in kept} == FILTERING_TOOLS
+        for missing in ("run_algorithm", "set_layer_style", "update_features", "remove_layers", "run_pyqgis",
+                        "create_widget", "add_layer"):
+            assert missing not in FILTERING_TOOLS
+        assert "every tool" in FILTERING_NOTE
 
     def test_context_steps(self):
+        assert CONTEXT_STEPS == (16_384, 32_768, 65_536)
         assert context_for(1_000) == CONTEXT_STEPS[0]
-        assert context_for(150_000) == CONTEXT_STEPS[1]
+        assert context_for(75_000) == CONTEXT_STEPS[1]
         assert context_for(10_000_000) == CONTEXT_STEPS[-1]
 
     @pytest.mark.parametrize("url, base", [
@@ -136,6 +150,12 @@ class TestStream:
         events = run(ollama().new_parser(), data)
         assert any(isinstance(event, StreamFailure) for event in events)
         assert not any(isinstance(event, TurnComplete) for event in events)
+
+    def test_a_turn_that_only_thought_ends_the_request(self):
+        data = lines({"message": {"content": "", "thinking": "rien à ajouter"}, "done": False},
+                     {"message": {"content": ""}, "done": True, "done_reason": "stop"})
+        turn = turn_of(run(ollama().new_parser(), data))
+        assert turn.stop_reason == STOP_END and turn.message.parts == ()
 
     def test_last_line_without_newline(self):
         data = lines({"message": {"content": "ok"}, "done": True}).rstrip(b"\n")
