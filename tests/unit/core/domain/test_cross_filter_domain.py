@@ -184,15 +184,22 @@ class TestSnapshotsAndHistory:
         assert not history.can_undo("agent")
 
     def test_forget_keeps_the_layer_a_turn_added(self):
-        """Undoing a turn removes the layer it added: the turn, now to redo, must still bring it back."""
+        """Undoing a turn removes the layer it added: the turn, now to redo, must still bring it back.
+
+        2026-11-12: with its filter too. A raster added then clipped in the same turn keeps its derived file alive
+        through the changes of the turn (history_sources reads them): dropped, the cache deleted the file and redo
+        loaded a layer pointing to nothing.
+        """
         history = CrossOperationHistory()
-        turn = CrossOperation("agent", ((self._snap("new", "x"), self._snap("new", "y")),),
+        clipped = LayerSnapshot("new", "raster", source="/cache/cut.vrt", provider="gdal", derived=True,
+                                original_source="/data/dem.tif", original_provider="gdal")
+        turn = CrossOperation("agent", ((self._snap("new", "/data/dem.tif"), clipped),),
                               effects=(("added", "new", "<qlr/>", ((), 0), "New"), ("style", "new", "<a/>", "<b/>", "New")))
         history.push(turn)
         history.undo("agent")
         history.forget_layer("new")  # what removing the added layer on undo triggers
-        kept = history.peek_redo("agent")
-        assert kept.op_id == turn.op_id and kept.effects == (("added", "new", "<qlr/>", ((), 0), "New"),)
+        assert history.peek_redo("agent") is turn  # nothing of the layer is forgotten
+        assert "/cache/cut.vrt" in {after.source for _before, after in history.peek_redo("agent").changes}
 
 
 class TestRasterSelection:
