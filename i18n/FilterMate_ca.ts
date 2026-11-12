@@ -813,6 +813,11 @@ Hi esteu d'acord?</translation>
         <translation>El pas {} no s'ha executat: canviaria una capa que heu protegit de l'agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>El pas {} no s'ha executat: no s'han pogut llegir les capes que heu protegit de l'agent ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>El pas {} no s'ha executat: heu desactivat la seva eina per a l'agent ({}).</translation>
@@ -8246,6 +8251,16 @@ El ràster es dibuixa com al mapa, amb el seu estil. SAM s'instal·la una sola v
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Feu clic al quadrat de la dreta per provar aquesta capa pels seus centroides</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>no filtrable</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Mapa base web (WMS / WMTS / XYZ, ArcGIS MapServer): només colors, no es pot filtrar</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

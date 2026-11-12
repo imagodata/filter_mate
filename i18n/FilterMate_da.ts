@@ -813,6 +813,11 @@ Er du enig?</translation>
         <translation>Trin {} blev ikke udført: det ville ændre et lag, du har beskyttet mod agenten ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Trin {} blev ikke kørt: de lag, du har beskyttet mod agenten, kunne ikke læses ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Trin {} blev ikke kørt: du har slået dets værktøj fra for agenten ({}).</translation>
@@ -8246,6 +8251,16 @@ Rasteret tegnes som på kortet, med sin stil. SAM installeres én gang fra grupp
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Klik på firkanten til højre for at teste dette lag via dets centroider</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>kan ikke filtreres</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webbaggrundskort (WMS / WMTS / XYZ, ArcGIS MapServer): kun farver, det kan ikke filtreres</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

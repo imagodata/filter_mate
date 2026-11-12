@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>चरण {} नहीं चलाया गया: यह उस परत को बदल देता जिसे आपने एजेंट से सुरक्षित किया है ({})।</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>चरण {} नहीं चलाया गया: एजेंट से सुरक्षित की गई परतें पढ़ी नहीं जा सकीं ({})।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>चरण {} नहीं चला: आपने एजेंट के लिए उसका टूल बंद कर दिया है ({})।</translation>
@@ -8246,6 +8251,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>इस परत को उसके केंद्रकों से जाँचने के लिए दाईं ओर के वर्ग पर क्लिक करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>फ़िल्टर नहीं किया जा सकता</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>वेब आधार मानचित्र (WMS / WMTS / XYZ, ArcGIS MapServer): केवल रंग, इसे फ़िल्टर नहीं किया जा सकता</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

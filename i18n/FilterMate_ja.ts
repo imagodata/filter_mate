@@ -813,6 +813,11 @@ Do you agree?</source>
         <translation>ステップ {} は実行されませんでした：エージェントから保護したレイヤーを変更するためです（{}）。</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>ステップ {} は実行されませんでした: エージェントから保護したレイヤーを読み取れませんでした ({})。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ステップ {} は実行されませんでした: エージェント向けにそのツールをオフにしています ({})。</translation>
@@ -8246,6 +8251,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>右側の四角をクリックすると、このレイヤを重心でテストします</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>フィルタ不可</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web 背景地図 (WMS / WMTS / XYZ、ArcGIS MapServer): 色のみのため、フィルタできません</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

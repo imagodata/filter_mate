@@ -394,6 +394,9 @@ class ExpressionFacadeHandler:
         if hasattr(self.task, '_pending_subset_requests'):
             self.task._pending_subset_requests.append((self.task.source_layer, expression))
             logger.info(f"Queued source layer {self.task.source_layer.name()} for filter application in finished()")
+            # 2026-11-12: the source layer keeps its previous subset until finished();
+            # the distant filters read the one it will have (ExpressionBuilder)
+            self.task.task_parameters['source_subset_after_task'] = expression
 
         # Only build PostgreSQL SELECT for PostgreSQL providers
         if self.task.param_source_provider_type == PROVIDER_POSTGRES:

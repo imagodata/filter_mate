@@ -182,6 +182,7 @@ class ConfigController(BaseController):
 
             # Compared after the save: the tree shows translated section names
             layer_kinds_before = self._layer_kind_flags()
+            target_options_before = self._target_option_flags()
 
             # Apply the change handler
             changes_summary: List[str] = []
@@ -198,6 +199,7 @@ class ConfigController(BaseController):
             # Save immediately
             self._save_configuration()
             self._apply_layer_kinds_change(layer_kinds_before, changes_summary)
+            self._apply_target_options_change(target_options_before, changes_summary)
 
             if changes_summary:
                 logger.info(f"Applied live: {', '.join(changes_summary)}")
@@ -235,6 +237,29 @@ class ConfigController(BaseController):
         if callable(apply_options):
             QTimer.singleShot(0, apply_options)
             changes_summary.append(f"layer kinds (point clouds={after[0]}, rasters={after[1]})")
+
+    @staticmethod
+    def _target_option_flags() -> Optional[tuple]:
+        """``(rasters, point clouds)`` listed as targets of a vector source (CROSS_FILTER); None when unreadable."""
+        try:
+            from ...adapters.qgis.point_cloud_capability import (
+                is_vector_source_point_cloud_targets_enabled, is_vector_source_raster_targets_enabled)
+            return is_vector_source_raster_targets_enabled(), is_vector_source_point_cloud_targets_enabled()
+        except Exception as e:
+            logger.debug(f"Target options unreadable: {e}")
+            return None
+
+    def _apply_target_options_change(self, before: Optional[tuple], changes_summary: List[str]) -> None:
+        """CROSS_FILTER ``vector_source_raster_targets`` / ``vector_source_point_cloud_targets`` switched:
+        fill the FILTERING targets list again, each listed layer kept as it is on screen (PropertyController)."""
+        after = self._target_option_flags()
+        if before is None or after is None or after == before:
+            return
+        integration = getattr(self.dockwidget, '_controller_integration', None)
+        properties = getattr(integration, 'property_controller', None)
+        if properties is not None:
+            QTimer.singleShot(0, properties.refill_layers_to_filter)
+            changes_summary.append(f"targets of a vector source (rasters={after[0]}, point clouds={after[1]})")
 
     # === Immediate (Live Preview) Changes ===
 

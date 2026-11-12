@@ -813,6 +813,11 @@ Onaylıyor musunuz?</translation>
         <translation>{}. adım çalıştırılmadı: ajandan koruduğunuz bir katmanı değiştirecekti ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>{}. adım çalıştırılmadı: ajandan koruduğunuz katmanlar okunamadı ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}. adım çalıştırılmadı: aracısını ajan için kapattınız ({}).</translation>
@@ -8246,6 +8251,16 @@ Raster, haritadaki gibi, stiliyle birlikte çizilir. SAM, FilterMate panelinin P
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Bu katmanı merkez noktalarıyla test etmek için sağdaki kareye tıklayın</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>filtrelenemez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web altlık haritası (WMS / WMTS / XYZ, ArcGIS MapServer): yalnızca renkler, filtrelenemez</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

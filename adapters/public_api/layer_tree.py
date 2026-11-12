@@ -299,6 +299,37 @@ def map_theme(action: str, name: str = "") -> Dict[str, Any]:
     return answer
 
 
+def theme_changed_layers(name: str) -> List[str]:
+    """Ids of the layers applying the map theme ``name`` would restyle: another current style, or other legend items
+    checked. Read as QGIS records a theme from the map now (``createThemeFromCurrentState``); a layer of the theme
+    hidden now counts, since its legend items are not recorded.
+    """
+    from qgis.core import QgsMapThemeCollection, QgsProject
+    collection = QgsProject.instance().mapThemeCollection()
+    text = str(name or "").strip()
+    if not collection.hasMapTheme(text):
+        return []
+    model, _keep = _model()
+    now = {record.layer().id(): record
+           for record in QgsMapThemeCollection.createThemeFromCurrentState(_root(), model).layerRecords()
+           if record.layer() is not None}
+    changed = []
+    for record in collection.mapThemeState(text).layerRecords():
+        layer = record.layer()
+        if layer is None:
+            continue
+        current = now.get(layer.id())
+        restyled = record.usingCurrentStyle and record.currentStyle != layer.styleManager().currentStyle()
+        if restyled or current is None or _legend_items(record) != _legend_items(current):
+            changed.append(layer.id())
+    return changed
+
+
+def _legend_items(record):
+    """The legend items a theme record checks; None: every one (QGIS checks them all when it records none)."""
+    return frozenset(record.checkedLegendItems) if record.usingLegendItems else None
+
+
 def themes_xml() -> str:
     """Every map theme of the project as XML, to bring them back as they were."""
     from qgis.core import QgsProject

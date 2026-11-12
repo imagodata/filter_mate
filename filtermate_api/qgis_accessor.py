@@ -162,6 +162,17 @@ def _refuse_protected(tool: str, arguments: Dict[str, Any]) -> None:
         raise LayerProtected(refusal)
 
 
+def _shown_name(reference: str) -> str:
+    """The name of the layer ``reference`` designates by its id; ``reference`` itself otherwise. Main thread."""
+    try:
+        from qgis.core import QgsProject
+        layer = QgsProject.instance().mapLayer(reference)
+        name = layer.name() if layer is not None else reference
+    except Exception:  # what the status shows, never a reason to fail
+        return reference
+    return name if isinstance(name, str) else reference
+
+
 def _safe(callable_, default):
     """Call ``callable_()`` and return ``default`` on any exception.
 
@@ -556,7 +567,8 @@ class QGISFilterMateAccessor:
                                          module="adapters.public_api.layer_tree"))
 
     def map_theme(self, action: str, name: str = "") -> MapThemes:
-        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree"))
+        return MapThemes(**self._control("map_theme", action, name, module="adapters.public_api.layer_tree",
+                                         changes={"action": action, "name": name}))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))
@@ -784,16 +796,17 @@ class QGISFilterMateAccessor:
 
         def call():  # a layer the user protected from the agent is refused first, on the main thread too
             _refuse_protected("apply_filter", {"layer_name": layer_name})
-            return _unless_busy(callback, layer_name=layer_name, filter_expr=expression, source_plugin=source)
+            done = _unless_busy(callback, layer_name=layer_name, filter_expr=expression, source_plugin=source)
+            return done, _shown_name(layer_name) if done else layer_name
 
         try:
-            ok = run_on_main_thread(call)
+            ok, shown = run_on_main_thread(call)
         except ValueError as exc:
             self._last_error = str(exc)
             raise FilterRejected(str(exc)) from None
         if ok:
             self._last_applied_at = datetime.now(timezone.utc).isoformat()
-            self._last_applied_layer = layer_name
+            self._last_applied_layer = shown  # the chat applies by id: the status shows the name
             self._last_applied_source = source
             self._last_error = None
         else:

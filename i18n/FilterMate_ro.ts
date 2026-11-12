@@ -813,6 +813,11 @@ Sunteți de acord?</translation>
         <translation>Pasul {} nu a fost executat: ar modifica un strat pe care l-ați protejat de agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Pasul {} nu a fost executat: straturile protejate de agent nu au putut fi citite ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Pasul {} nu a fost executat: ați dezactivat instrumentul său pentru agent ({}).</translation>
@@ -8246,6 +8251,16 @@ Rasterul este desenat ca pe hartă, cu stilul său. SAM se instalează o singur�
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Faceți clic pe pătratul din dreapta pentru a testa acest strat după centroizi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nu poate fi filtrat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Hartă de bază web (WMS / WMTS / XYZ, ArcGIS MapServer): doar culori, nu poate fi filtrată</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

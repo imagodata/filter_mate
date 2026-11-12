@@ -33,6 +33,12 @@ class Protection:
     def favorite_layers(self, favorite_id):
         return ["L1"] if favorite_id == "fav-cadastre" else ["L2"]
 
+    def theme_layers(self, name):
+        return ["L1"] if name == "Cadastre" else []
+
+    def layers_joining(self, references):
+        return ["L1"] if "owners" in references else []
+
 
 @pytest.fixture
 def operations(monkeypatch):
@@ -90,6 +96,8 @@ WRITES = [
     ("join_layers", lambda a: a.join_layers("cadastre", "routes", "a", "a")),
     ("rename_layer", lambda a: a.rename_layer("cadastre", "parcelles")),
     ("remove_layers", lambda a: a.remove_layers(["routes", "cadastre"])),
+    ("map_theme apply", lambda a: a.map_theme("apply", "Cadastre")),
+    ("remove_layers joined by it", lambda a: a.remove_layers(["owners"])),
 ]
 
 

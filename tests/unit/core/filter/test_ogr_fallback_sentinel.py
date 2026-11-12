@@ -251,6 +251,20 @@ def test_key_list_subsets_of_previous_spatial_steps(subset, pk, key_list):
     assert orchestrator_module.FilterOrchestrator._is_key_list_subset(_layer(subset, pk), subset) is key_list
 
 
+def test_hybrid_attribute_subsets_are_not_taken_for_spatial_key_lists():
+    """A hybrid attribute filter (native_dialect.hybrid_sql) stays an attribute filter, 2026-11-12.
+
+    Read as the key list of a previous spatial step, it would be replaced by
+    the next spatial filter instead of being combined with it.
+    """
+    from filtermate_core.filter.native_dialect import hybrid_sql
+    for subset in (hybrid_sql('', [2, 5], None, '"fid"', True),
+                   hybrid_sql('"fid" IN (1, 2, 3)', [1, 2], [3], '"fid"', True),
+                   hybrid_sql('', ['a1'], None, '"code"', False)):
+        for pk in ('fid', 'code'):
+            assert orchestrator_module.FilterOrchestrator._is_key_list_subset(_layer(subset, pk), subset) is False
+
+
 @pytest.mark.parametrize("subset, expected", [
     ('"cleabs" IN (\'TRON1\')', ('"cleabs" IN (\'TRON1\')', None)),      # replaced, not combined
     ('"nature" = \'Route\'', ('"nature" = \'Route\'', "AND")),            # attribute: combined

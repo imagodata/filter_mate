@@ -813,6 +813,11 @@ Sumasang-ayon ka ba?</translation>
         <translation>Hindi pinatakbo ang hakbang {}: babaguhin nito ang isang layer na pinrotektahan mo mula sa agent ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Hindi pinatakbo ang hakbang {}: hindi mabasa ang mga layer na pinoprotektahan mo mula sa agent ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Hindi pinatakbo ang hakbang {}: pinatay mo ang tool nito para sa ahente ({}).</translation>
@@ -8246,6 +8251,16 @@ Iginuguhit ang raster tulad ng sa mapa, kasama ang estilo nito. Isang beses lang
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>I-click ang parisukat sa kanan para subukan ang layer na ito gamit ang mga centroid nito</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>hindi mafi-filter</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): kulay lamang, hindi ito mafi-filter</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

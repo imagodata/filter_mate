@@ -55,6 +55,10 @@ CHANGED_LAYERS = {
 }
 # Without any layer named, these act on every layer.
 ALL_WHEN_NONE = frozenset({"clear_filters"})
+# QGIS takes a removed layer out of the joins of the layers that join it: those change too. Editing a joined layer
+# writes nothing in the layers that join it (an editable join writes from the layer that holds it into the joined one,
+# and a cascaded delete goes the same way): they only show its new values, as from a source.
+JOINED_CHANGES = frozenset({"remove_layers"})
 
 # The highest class that runs without asking, at each level.
 _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL}
@@ -104,20 +108,26 @@ class Protection(Protocol):
     def favorite_layers(self, favorite_id: str) -> Sequence[str]:
         """The ids of the layers a favorite would change: they are in the favorite, not in the call."""
 
+    def theme_layers(self, name: str) -> Sequence[str]:
+        """The ids of the layers applying the map theme ``name`` would restyle (current style, legend items)."""
+
+    def layers_joining(self, references: Sequence[str]) -> Sequence[str]:
+        """The ids of the layers that join one of ``references`` (a vector join)."""
+
 
 def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     """The layer references a call changes; None when it changes every layer (a clear without layers)."""
     if name == "rename_layer" and arguments.get("group"):
         return []  # a group of the tree, not a layer
-    references: List[str] = []
+    references: List[str] = []  # "" too: it resolves to the first layer whose name is empty
     for key in CHANGED_LAYERS.get(name, ()):
         value = arguments.get(key)
-        if isinstance(value, str) and value:
+        if isinstance(value, str):
             references.append(value)
         elif isinstance(value, list):
-            references.extend(item for item in value if isinstance(item, str) and item)
+            references.extend(item for item in value if isinstance(item, str))
     source = arguments.get("source_layer")
-    if name == "cross_filter" and isinstance(source, str) and source and (
+    if name == "cross_filter" and isinstance(source, str) and (
             arguments.get("filter_source") or _keeps_points(arguments.get("point_cloud_criteria"))):
         references.append(source)
     if not references and name in ALL_WHEN_NONE:
@@ -126,8 +136,12 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
 
 
 def changes_layers(name: str, arguments: Any) -> bool:
-    """Whether a call may change a layer: one it names, every layer (a clear without layers), those of a favorite."""
-    return name == "apply_favorite" or changed_layers(name, arguments if isinstance(arguments, dict) else {}) != []
+    """Whether a call may change a layer: one it names, every layer (a clear without layers), those of a favorite or
+    of a map theme applied (its current styles and legend items)."""
+    arguments = arguments if isinstance(arguments, dict) else {}
+    if name == "map_theme":
+        return arguments.get("action") == "apply"
+    return name == "apply_favorite" or changed_layers(name, arguments) != []
 
 
 def _keeps_points(criteria: Any) -> bool:
@@ -204,21 +218,31 @@ class PermissionPolicy:
         if self.protector is None or not changes_layers(name, arguments):
             return ""  # no protection, or nothing changed: nothing to read
         arguments = arguments if isinstance(arguments, dict) else {}
-        references = changed_layers(name, arguments)
         try:
-            if name == "apply_favorite":
-                resolve = getattr(self.protector, "favorite_layers", None)
-                references = list(resolve(str(arguments.get("favorite_id", "")))) if resolve is not None else []
+            references = self._references(name, arguments)
             if references is None:
                 protected = list(self.protector.names())
             else:
                 protected = [found for found in (self.protector.name_of(reference) for reference in references)
-                             if found]
+                             if found is not None]  # a protected layer may have an empty name
         except Exception:  # a project closing, favorites that cannot be read: refused rather than unchecked
             return PROTECTION_UNREADABLE
         if not protected:
             return ""
         return PROTECTED_REFUSAL.format(", ".join(repr(item) for item in dict.fromkeys(protected)))
+
+    def _references(self, name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
+        """The layers the call changes, read in the project where the call does not name them: those of a favorite,
+        of a map theme, those that join a layer removed. None: every layer."""
+        if name in ("apply_favorite", "map_theme"):
+            method, key = ("favorite_layers", "favorite_id") if name == "apply_favorite" else ("theme_layers", "name")
+            resolve = getattr(self.protector, method, None)
+            return list(resolve(str(arguments.get(key, "")))) if resolve is not None else []
+        references = changed_layers(name, arguments)
+        joining = getattr(self.protector, "layers_joining", None)
+        if references and name in JOINED_CHANGES and joining is not None:
+            references = references + list(joining(references))
+        return references
 
     def verdict(self, spec) -> str:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec``."""

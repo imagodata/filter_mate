@@ -813,6 +813,11 @@ Rozimisiz?</translation>
         <translation>{}-qadam bajarilmadi: u agentdan himoya qilgan qatlamingizni o‘zgartirgan bo‘lardi ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>{}-qadam bajarilmadi: agentdan himoyalangan qatlamlarni o‘qib bo‘lmadi ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}-qadam bajarilmadi: uning vositasini agent uchun o'chirib qo'ygansiz ({}).</translation>
@@ -8246,6 +8251,16 @@ Raster xaritadagidek, o'z uslubi bilan chiziladi. SAM FilterMate panelining TANL
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Bu qatlamni markaziy nuqtalari bo‘yicha sinash uchun o‘ngdagi kvadratni bosing</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>filtrlab bo'lmaydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Veb asos xarita (WMS / WMTS / XYZ, ArcGIS MapServer): faqat ranglar, uni filtrlab bo'lmaydi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

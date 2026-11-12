@@ -813,6 +813,11 @@ Godkänner du?</translation>
         <translation>Steg {} kördes inte: det skulle ändra ett lager som du har skyddat mot agenten ({}).</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Steg {} kördes inte: lagren som du har skyddat mot agenten kunde inte läsas ({}).</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Steg {} kördes inte: du har stängt av dess verktyg för agenten ({}).</translation>
@@ -8246,6 +8251,16 @@ Rastret ritas som på kartan, med sin stil. SAM installeras en gång från grupp
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Klicka på rutan till höger för att testa detta lager med dess centroider</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>kan inte filtreras</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webbakgrundskarta (WMS / WMTS / XYZ, ArcGIS MapServer): endast färger, den kan inte filtreras</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

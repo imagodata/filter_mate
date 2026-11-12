@@ -450,8 +450,8 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
         """
         Find a vector layer by id, then by name, in the current QGIS project.
 
-        An id names one layer; a name may be shared by several, and the first
-        vector layer of that name is taken.
+        An id names one layer (none when it is not a vector one); a name may be
+        shared by several, and the first vector layer of that name is taken.
 
         Args:
             layer_name: Layer id or name to search for.
@@ -461,8 +461,8 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
         """
         project = QgsProject.instance()
         layer = project.mapLayer(layer_name)
-        if isinstance(layer, QgsVectorLayer):
-            return layer
+        if layer is not None:  # an id names that layer alone, never a layer named like it
+            return layer if isinstance(layer, QgsVectorLayer) else None
         layers = project.mapLayersByName(layer_name)
         for layer in layers:
             if isinstance(layer, QgsVectorLayer):
