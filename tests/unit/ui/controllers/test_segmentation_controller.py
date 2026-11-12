@@ -329,3 +329,108 @@ class TestVisibleExtent:
         assert controller._visible_extent() == 'the raster'
         controller._transform = lambda: types.SimpleNamespace(transformBoundingBox=lambda extent: f'{extent} reprojected')
         assert controller._visible_extent() == 'the world reprojected'
+
+
+class FakeOutline:
+    def __init__(self):
+        self.removed = False
+
+    def hide(self):
+        pass
+
+    def remove(self):
+        self.removed = True
+
+
+class TestLeftovers:
+    """2026-11-12: proposals left on the map once the tool left it; outlines and markers left in the scene of the map."""
+
+    def test_the_proposals_go_with_the_tool(self, controller):
+        controller._host._show_picker_state = lambda shown: None
+        controller._proposals = [('POLYGON((0 0,1 0,1 1,0 0))', 'POLYGON((5 5,6 5,6 6,5 5))')]
+        controller._on_tool_left()
+        assert controller.proposal_count() == 0 and ('set_proposal_count', 0) in controller._host.calls
+
+    def test_drop_takes_the_outlines_and_the_markers_out_of_the_scene(self, controller):
+        outlines = [FakeOutline(), FakeOutline()]
+        controller._outline, controller._proposal_outline = outlines
+        removed = []
+        controller.tool = types.SimpleNamespace(remove_items=lambda: removed.append('items'), clear_markers=lambda: None,
+                                                deleteLater=lambda: removed.append('deleted'))
+        controller._host._tool_on_map = lambda tool: False
+        controller._host._release_map_tool = lambda tool, previous: None
+        controller.drop()
+        assert all(outline.removed for outline in outlines) and removed == ['items', 'deleted']
+        assert controller._outline is None and controller._proposal_outline is None and controller.tool is None
+
+    def test_the_tool_takes_its_items_out(self, monkeypatch):
+        removed = []
+
+        class MapTool:
+            def __init__(self, canvas):
+                self._canvas = canvas
+
+            def canvas(self):
+                return self._canvas
+
+            def setCursor(self, cursor):
+                pass
+
+        gui = types.ModuleType("qgis.gui")
+        gui.QgsMapTool, gui.QgsRubberBand, gui.QgsVertexMarker = MapTool, object, object
+        monkeypatch.setitem(sys.modules, "qgis.gui", gui)
+        spec = importlib.util.spec_from_file_location(f"{_PKG}_tool", _ROOT / "ui/tools/segmentation_tool.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        canvas = types.SimpleNamespace(scene=lambda: types.SimpleNamespace(removeItem=removed.append))
+        tool = module.SegmentationTool(canvas)
+        tool._markers, tool._band, tool._shown = ['cross', 'x'], 'box', 1
+        tool.remove_items()
+        assert removed == ['cross', 'x', 'box'] and tool._markers == [] and tool._band is None
+
+
+class FakeTask:
+    def __init__(self, status):
+        self._status, self.canceled, self.stopped = status, False, False
+
+    def status(self):
+        return self._status
+
+    def cancel(self):
+        self.canceled = True
+
+
+class TestQueuedTasks:
+    """2026-11-12: a search stopped while queued was never canceled (QGIS 3.22) and ran to its end, some 20 s of CPU."""
+
+    @pytest.fixture(autouse=True)
+    def statuses(self, monkeypatch):
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsTask",
+                            types.SimpleNamespace(TaskStatus=types.SimpleNamespace(Running='running')), raising=False)
+
+    def test_a_queued_task_is_flagged_not_canceled(self, ctrl_module):
+        queued, running = FakeTask('queued'), FakeTask('running')
+        ctrl_module.SegmentationController._stop(queued)
+        ctrl_module.SegmentationController._stop(running)
+        assert (queued.stopped, queued.canceled) == (True, False) and running.canceled
+
+    def test_escape_stops_the_encoding_and_the_search(self, controller):
+        encoding, search = FakeTask('queued'), FakeTask('running')
+        controller._task, controller._search = encoding, search
+        controller.cancel()
+        assert encoding.stopped and not encoding.canceled and search.canceled
+        assert controller._task is None and controller._search is None
+
+    def test_a_task_flagged_gives_up_as_it_starts(self, monkeypatch):
+        _fakes, real = _real_segmentation()
+        opened = []
+        monkeypatch.setattr(real, 'open_drawing', lambda *args: opened.append(args))
+        window = real.SegmentationWindow(0.0, 8.0, 1.0, 8)
+        embed = real.SegmentationEmbedTask('/data/ortho.tif', 'gdal', 'renderer', 'crs', window, object(), None)
+        search = real.SimilarObjectsTask('/data/ortho.tif', 'gdal', 'renderer', types.SimpleNamespace(toWkt=lambda: ''),
+                                         object(), (0.0, 0.0, 8.0, 8.0), 1.0, [(1.0, 1.0)], 'POLYGON EMPTY', (0.5, 2.0),
+                                         False, None)
+        for task in (embed, search):
+            task.stopped = True
+            assert task.run() is False
+        assert opened == []

@@ -928,21 +928,25 @@ class SegmentationEmbedTask(QgsTask):
         self.embedding = None
         self.error = ''
         self.model_damaged = False  # the files of the model were refused: downloading them again can repair them
+        self.stopped = False  # set by the controller instead of a cancel while queued (SegmentationController._stop)
+
+    def _given_up(self) -> bool:
+        return self.stopped or self.isCanceled()
 
     def run(self) -> bool:
         pipe = None
         try:
-            if self.isCanceled():
+            if self._given_up():
                 return False
             pipe = open_drawing(self.source, self.provider_key, self.look)
             self.look = None
             if pipe is None:
                 raise RuntimeError('the layer could not be opened')
-            image = render_drawing(pipe, self.window, self.isCanceled)
-            if self.isCanceled():
+            image = render_drawing(pipe, self.window, self._given_up)
+            if self._given_up():
                 return False
             self.embedding = self.model.embed(image_to_rgb(image))
-            return not self.isCanceled()
+            return not self._given_up()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
             from . import sam_model
             self.error = str(exc)
@@ -997,13 +1001,17 @@ class SimilarObjectsTask(QgsTask):
         self.encoded = 0
         self.error = ''
         self.model_damaged = False
+        self.stopped = False  # as SegmentationEmbedTask
+
+    def _given_up(self) -> bool:
+        return self.stopped or self.isCanceled()
 
     def run(self) -> bool:
         from qgis.core import QgsGeometry, QgsPointXY
         from .geometry_tools import compactness
         pipe = None
         try:
-            if self.isCanceled():
+            if self._given_up():
                 return False
             pipe = open_drawing(self.source, self.provider_key, self.look)
             self.look = None
@@ -1018,18 +1026,18 @@ class SimilarObjectsTask(QgsTask):
                                            self.click_window)
             done = 0
             for window, members, on_click in windows:
-                if self.isCanceled():
+                if self._given_up():
                     return False
                 if on_click:
                     embedding = self.click_embedding
                 else:
-                    image = render_drawing(pipe, window, self.isCanceled)
-                    if self.isCanceled():
+                    image = render_drawing(pipe, window, self._given_up)
+                    if self._given_up():
                         return False
                     embedding = self.model.embed(image_to_rgb(image))
                     self.encoded += 1
                 for index in members:
-                    if self.isCanceled():
+                    if self._given_up():
                         return False
                     done += 1
                     self.setProgress(100.0 * done / max(1, len(self.points)))
@@ -1050,7 +1058,7 @@ class SimilarObjectsTask(QgsTask):
                             wkt = found.asWkt()
                             self.wkts.append(wkt)
                             self.features[wkt] = features
-            return not self.isCanceled()
+            return not self._given_up()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
             from . import sam_model
             self.error = str(exc) or type(exc).__name__
@@ -1091,11 +1099,12 @@ class ModelDownloadTask(QgsTask):
                          QgsTask.Flag.CanCancel)
         self.directory, self.callback, self.error = directory, callback, ''
         self.proxy = qgis_proxy_url()  # read here, on the main thread
+        self.stopped = False  # as SegmentationEmbedTask
 
     def run(self) -> bool:
         from . import sam_model
         try:
-            sam_model.download(self.directory, self.isCanceled, self.setProgress, self.proxy)
+            sam_model.download(self.directory, lambda: self.stopped or self.isCanceled(), self.setProgress, self.proxy)
             return True
         except sam_model.Canceled:
             return False

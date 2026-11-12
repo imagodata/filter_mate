@@ -59,13 +59,18 @@ class SegmentationController:
 
     @staticmethod
     def _stop(task: Any) -> None:
-        """Cancel a task QGIS says runs; any other is left to finish, its callback ignored (the generation moved on).
+        """Cancel a task QGIS says runs; any other gives up as it starts (``task.stopped``), its callback ignored.
 
         QGIS 3.22 deletes a queued task canceled while the thread pool already holds its runnable:
         the run that follows reads a deleted object and QGIS crashes (2026-11-10, the Escape of a click
-        whose area was not prepared yet). A status that cannot be read counts as not running.
+        whose area was not prepared yet; later that day a task deleted for want of a Python reference was
+        found behind that Escape, see ``_running``, and this rule stayed). A queued task is therefore not
+        canceled but flagged: its run() reads the flag first and between its windows, instead of drawing
+        a search nobody waits for (some 20 s of CPU). A status that cannot be read counts as not running.
         """
         try:
+            if hasattr(task, 'stopped'):
+                task.stopped = True
             if not hasattr(task, 'status'):
                 task.cancel()  # not a QgsTask (a stand-in): nothing queued to protect
                 return
@@ -105,8 +110,10 @@ class SegmentationController:
         self._status(self.tr("Click an object, or draw a box around it"))
 
     def _on_tool_left(self) -> None:
-        """The tool left the map (another QGIS tool too): its markers went, the prompts go with them."""
+        """The tool left the map (another QGIS tool too, a reset of the panel): its markers went, the prompts and
+        the proposals go with them (Keep all would add objects whose clicked object may be gone)."""
         self.cancel()
+        self._set_proposals([])
         self._host._show_picker_state(False)
 
     def deactivate(self) -> None:
@@ -126,9 +133,17 @@ class SegmentationController:
         self._session, self._session_layer = None, ''
         self._groups, self._current = [], None
         self._set_proposals([])
+        # Out of the scene of the map: hidden, the outlines and the markers of the tool stayed there, two more
+        # outlines at each reload of the plugin and the markers of a tool at each change of layer.
+        for name in ('_outline', '_proposal_outline'):
+            outline = getattr(self, name)
+            setattr(self, name, None)
+            if outline is not None:
+                outline.remove()
         tool, self.tool = self.tool, None
         if tool is not None:
             try:
+                tool.remove_items()
                 tool.deleteLater()
             except RuntimeError:
                 pass  # already deleted (QGIS closing)
@@ -137,10 +152,11 @@ class SegmentationController:
         """Forget the prompts, the window being encoded and the search running; the objects stay."""
         self._generation += 1
         self._pending = []
-        self._task = None  # the encoding is short: left to finish, its result ignored (never canceled, see _stop)
-        search, self._search = self._search, None
-        if search is not None:
-            self._stop(search)
+        for name in ('_task', '_search'):  # their callbacks return at once (the generation moved on)
+            task = getattr(self, name)
+            setattr(self, name, None)
+            if task is not None:
+                self._stop(task)
         if self._hover_timer is not None:
             self._hover_timer.stop()
         if self._session is not None:
