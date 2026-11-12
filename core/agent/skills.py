@@ -149,12 +149,17 @@ SKILLS: Dict[str, Skill] = read_folder(SKILLS_DIR)
 
 
 def for_audience(audience: str, offered: Optional[set] = None) -> List[Skill]:
-    """The skills of ``audience`` (chat or mcp) whose required tools are all offered."""
+    """The skills of ``audience`` (chat or mcp) whose required tools are all offered (None: no tool known to be
+    offered, so only the skills that require none)."""
     return [skill for skill in SKILLS.values() if audience in skill.audience
-            and (offered is None or set(skill.requires) <= offered)]
+            and set(skill.requires) <= (offered or set())]
 
 
 NAMES: Tuple[str, ...] = tuple(skill.name for skill in for_audience("chat"))
+
+
+def names(offered: Optional[set] = None) -> Tuple[str, ...]:
+    return tuple(skill.name for skill in for_audience("chat", offered))
 
 
 def skill_list(offered: Optional[set] = None) -> str:
@@ -162,10 +167,11 @@ def skill_list(offered: Optional[set] = None) -> str:
     return "; ".join(f"{skill.name}: {skill.summary}" for skill in for_audience("chat", offered))
 
 
-def load(name: str) -> Dict[str, str]:
-    """The answer of load_skill; ``KeyError`` for an unknown skill."""
+def load(name: str, offered: Optional[set] = None) -> Dict[str, str]:
+    """The answer of load_skill; ``KeyError`` for an unknown skill, or one whose required tools are not offered
+    (``offered`` None: no check, for a caller that offers every tool)."""
     skill = SKILLS[name]
-    if "chat" not in skill.audience:
+    if "chat" not in skill.audience or (offered is not None and not set(skill.requires) <= offered):
         raise KeyError(name)
     return {"skill": skill.name, "title": skill.title, "instructions": skill.body}
 

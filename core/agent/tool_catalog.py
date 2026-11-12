@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from .skills import NAMES as SKILL_NAMES, skill_list
+from .skills import names as skill_names, skill_list
 
 CATALOG_PATH = Path(__file__).with_name("tool_catalog.json")
 
@@ -303,15 +303,19 @@ SETTINGS_TOOLS = (
 
 LOAD_SKILL = "load_skill"
 # Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by core/agent/skills.py).
-SKILL_TOOLS = (
-    ToolSpec(
+def skill_tool(offered: Optional[set] = None) -> ToolSpec:
+    """load_skill, listing the skills whose required tools are among ``offered`` (the pyqgis skill: the expert mode)."""
+    return ToolSpec(
         name=LOAD_SKILL, title="Load the instructions of a task",
         description=("Load the instructions for one kind of task, before doing it: they say how to work and where to "
-                     "look. Call it once per conversation and task, then follow them. Skills: " + skill_list() + "."),
-        input_schema={"type": "object", "properties": {"name": {"type": "string", "enum": list(SKILL_NAMES)}},
+                     "look. Call it once per conversation and task, then follow them. Skills: "
+                     + skill_list(offered) + "."),
+        input_schema={"type": "object", "properties": {"name": {"type": "string", "enum": list(skill_names(offered))}},
                       "required": ["name"], "additionalProperties": False},
-        read_only=True, idempotent=True),
-)
+        read_only=True, idempotent=True)
+
+
+SKILL_TOOLS = (skill_tool(),)
 
 
 def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:

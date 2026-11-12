@@ -52,7 +52,7 @@ from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.tool_catalog import (
     ADD_NOTE, CREATE_WIDGET, FILTERING_NOTE, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
-    VIEW_MAP, chat_tools, filtering_only,
+    LOAD_SKILL, VIEW_MAP, chat_tools, filtering_only, skill_tool,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -552,6 +552,9 @@ class AgentChatController(QObject):
         if KIND_STAC not in kinds:
             left_out.add(IMAGERY_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
+        offered = {tool.name for tool in tools}
+        # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on)
+        tools = [skill_tool(offered) if tool.name == LOAD_SKILL else tool for tool in tools]
         if self.local_filtering(values):
             tools = list(filtering_only(tools))
         # A connector alone does not open the web to add_layer: only a data source the user ticked does.
@@ -559,7 +562,7 @@ class AgentChatController(QObject):
                                   allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
-        handlers.update(settings_handlers())
+        handlers.update(settings_handlers(offered))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool

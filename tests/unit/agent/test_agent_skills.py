@@ -2,6 +2,8 @@
 """Skills of the agent (core/agent/skills.py), the timings of diagnose_performance (core/agent/performance.py) and
 the prompts and resources of the native MCP server."""
 import json
+
+import pytest
 import re
 import subprocess
 import sys
@@ -11,7 +13,7 @@ from core.agent.mcp_server import McpPrompt, McpProtocol, McpResource, RequestHe
 from core.agent.performance import summary
 from core.agent.settings_reference import read_settings
 from core.agent.skills import SKILLS, agent_skill_file, load, skill_list
-from core.agent.tool_catalog import LOAD_SKILL, SKILL_TOOLS, chat_tools
+from core.agent.tool_catalog import LOAD_SKILL, SKILL_TOOLS, chat_tools, skill_tool
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -27,8 +29,16 @@ def test_every_setting_a_skill_names_exists():
 
 def test_load_skill_lists_every_skill_and_loads_its_body():
     tool = next(tool for tool in SKILL_TOOLS if tool.name == LOAD_SKILL)
-    assert tool.read_only and tool.input_schema["properties"]["name"]["enum"] == list(SKILLS)
+    plain = [name for name, skill in SKILLS.items() if "chat" in skill.audience and not skill.requires]
+    assert tool.read_only and tool.input_schema["properties"]["name"]["enum"] == plain
     assert "configuration:" in skill_list() and skill_list() in tool.description
+    # a skill that requires a tool is offered only with it: pyqgis with the expert mode
+    assert "pyqgis" not in plain
+    expert = skill_tool({"run_pyqgis"})
+    assert "pyqgis" in expert.input_schema["properties"]["name"]["enum"] and "pyqgis:" in expert.description
+    with pytest.raises(KeyError):
+        load("pyqgis", offered={"list_layers"})
+    assert load("pyqgis", offered={"run_pyqgis"})["skill"] == "pyqgis"
     loaded = load("configuration")
     assert loaded["instructions"].startswith("# Configure FilterMate")
     assert LOAD_SKILL in {tool.name for tool in chat_tools()}
