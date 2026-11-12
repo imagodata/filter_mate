@@ -212,12 +212,8 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
         return None, None
 
     try:
-        host = source_uri.host()
-        port = source_uri.port()
-        dbname = source_uri.database()
-        username = source_uri.username()
-        password = source_uri.password()
-        ssl_mode = source_uri.sslMode()
+        # The URI's credentials, unless an authentication configuration gives others
+        username = password = None
 
         if authcfg_id is not None:
             try:
@@ -229,24 +225,13 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
             except Exception as auth_err:
                 logger.debug(f"Auth config loading failed: {auth_err}")
 
-        # Build connection kwargs
-        connect_kwargs = {
-            'user': username,
-            'password': password,
-            'host': host,
-            'port': port,
-            'database': dbname
-        }
-        # Remove None values
-        connect_kwargs = {k: v for k, v in connect_kwargs.items() if v is not None and v != ''}
-
-        if ssl_mode is not None:
-            connect_kwargs['sslmode'] = source_uri.encodeSslMode(ssl_mode)
+        # 2026-11-12: with the service of a layer read through pg_service.conf
+        from ..database.pg_connect import connect_kwargs_from_uri, pg_connect_with_fallback
+        connect_kwargs = connect_kwargs_from_uri(source_uri, username, password)
 
         # PERF 2026-09-12: fast attempt (IPv4 hostaddr, no GSSAPI negotiation,
         # short timeout) then plain parameters — a 15-21 s stall per filter was
         # measured inside psycopg2.connect() for a server answering in ms.
-        from ..database.pg_connect import pg_connect_with_fallback
         try:
             layer_label = f"layer '{layer.name()}'"
         except (RuntimeError, AttributeError):

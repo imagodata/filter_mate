@@ -53,6 +53,39 @@ def test_files_connections_and_layouts():
         assert refusal("native:x", "native", [(kind.upper(), kind, True), ("OUTPUT", "sink", False)]) == "", kind
 
 
+# Types of the parameters of the algorithms allowed in QGIS 3.44.6, besides layers, extents, points, CRS, formulas,
+# options and destinations; then simple ones that exist in other versions.
+PLAIN = ["number", "field", "string", "boolean", "distance", "band", "area", "scale", "matrix", "duration",
+         "raster_calc_expression", "relief_colors", "meshdatasetgroups", "meshdatasettime", "color", "datetime", "range",
+         "geometry", "volume", "attribute", "pointcloudattribute"]
+
+
+@pytest.mark.parametrize("kind", PLAIN + ["idw_interpolation_data", "source", "multilayer", "extent", "point", "crs",
+                                          "expression", "enum"])
+def test_known_types_are_given(kind):
+    assert refusal("native:x", "native", [("P", kind, False), ("OUTPUT", "sink", False)]) == ""
+
+
+@pytest.mark.parametrize("kind", ["coordinateoperation", "alignrasterlayers", "annotation", "a_type_of_tomorrow",
+                                  "dxflayers", "tininputlayers", "vectortilewriterlayers"])
+def test_a_type_not_known_as_safe_is_refused_when_required_and_left_unset_when_optional(kind):
+    # A PROJ operation names a grid by path or URL; other types carry paths or layers outside the project.
+    assert kind in refusal("native:x", "native", [("P", kind, False), ("OUTPUT", "sink", False)])
+    assert refusal("native:x", "native", [("P", kind, True), ("OUTPUT", "sink", False)]) == ""
+
+
+def test_interpolations_run_their_rows_are_rewritten_by_the_adapter():
+    idw = [("INTERPOLATION_DATA", "idw_interpolation_data", False), ("DISTANCE_COEFFICIENT", "number", False),
+           ("EXTENT", "extent", False), ("PIXEL_SIZE", "number", False), ("OUTPUT", "rasterDestination", False)]
+    assert refusal("qgis:idwinterpolation", "qgis", idw) == ""
+
+
+def test_what_sends_data_out_is_refused_by_name():
+    for algorithm in ("native:batchnominatimgeocoder", "native:openurl"):
+        assert algorithm in DENIED
+        assert refusal(algorithm, "native", BUFFER)
+
+
 def test_deprecated():
     assert "deprecated" in refusal("native:old", "native", BUFFER, deprecated=True)
 

@@ -18,6 +18,29 @@ _Auto-maintained by project agent_
 - Export par `layer_id` ; éditions de l'agent validées avant `startEditing`, `_abandon` = `destroyEditCommand` +
   `rollBack` seulement si l'édition a ouvert le mode ; style raster refuse NaN / Inf / min ≥ max ; export de mise
   en page crée son dossier et ne remplace pas ; « style » d'un subset cible = `_is_standalone_display_expression`.
+## [2026-11-12] Source PostgreSQL sans connexion psycopg2 → « Tâche échouée », couches distantes jamais filtrées
+Signalement (journal client, Zones MRO → 8 couches, Intersect) : source filtrée, puis « Task failed » sans détail,
+aucun « Distant layers to filter » dans le journal QGIS. Cause : QGIS lit la couche avec SA connexion ; la connexion
+psycopg2 que FilterMate ouvre depuis l'URI (`get_datasource_connexion_from_layer`) peut échouer (service
+`pg_service.conf` non transmis, mot de passe demandé et non enregistré, authcfg non Basic) et
+`FilterEngineTask._get_valid_postgresql_connection` **lève** (contrat figé par un test). Le pas direct de la source
+l'appelait hors try pour de simples stats, après mise en file du subset de la source.
+Patterns à retenir :
+- La connexion psycopg2 est une **optimisation** (stats, MV) : tout appelant pour qui elle est optionnelle attrape
+  l'exception ; le chemin MV bascule en direct sans elle. Les exécuteurs distants tolèrent déjà `None`.
+- Une exception de `execute_filtering` est avalée par `CallbackActionHandler` : `_execute_task_action` recopie
+  désormais la 1re ligne de `result.errors[0]` dans `task.message`. Sinon, la trace est dans
+  `<plugin>/logs/filtermate.log` (« Callback execution failed: … »), pas dans le journal QGIS.
+- Indice de lecture d'un journal client : l'absence des `QgsMessageLog` « Distant layers to filter (N) » / « Filtering
+  N distant layers » situe l'échec entre le filtre source et la phase distante.
+Suites : `service=` → #357 (`pg_connect.connect_kwargs_from_uri` = `QgsDataSourceUri::connectionInfo()` : avec
+un service ni host ni port, valeurs vides écartées car libpq ne remplit depuis le service que les mots-clés absents ;
+`connection_identity` pour toute clé de cache par base). Transaction laissée par `ensure_table_stats` → PR suivante.
+DROP du reset en lecture seule : non-problème (`execute_commands` attrape et fait rollback).
+**Reste ouvert** : buffer par expression sur source PG > 10 000 entités, cassé à 3 étages (MV jamais créée :
+`param_buffer_expression` lu avant l'init et clé `buffer_expression` absente ; si créée, elle prendrait l'ANCIEN
+subset car le nouveau est seulement en file ; la MV `_dump` = ST_Union sans clé alors que le builder y applique
+`__source."pk" IN …`). À reproduire sur PostGIS (Docker) avant de toucher : piste = toujours le mode inline.
 
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression

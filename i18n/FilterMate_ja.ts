@@ -64,6 +64,11 @@
         <translation>次の前の状態に戻る: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>設定を開くには、リクエストを停止するか、終了するまでお待ちください。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>元に戻す操作はありません。</translation>

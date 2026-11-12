@@ -64,6 +64,11 @@
         <translation>Înapoi la înainte de: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Opriți cererea sau așteptați să se termine pentru a deschide setările.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Nimic de anulat.</translation>
