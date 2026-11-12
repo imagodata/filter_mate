@@ -173,6 +173,7 @@ class TestFilterMatePublicAPIApplyFilter:
 
         project = MagicMock()
         project.mapLayersByName.return_value = [layer]
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -192,6 +193,7 @@ class TestFilterMatePublicAPIApplyFilter:
         """apply_filter returns False and emits error when layer not found."""
         project = MagicMock()
         project.mapLayersByName.return_value = []
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -210,6 +212,7 @@ class TestFilterMatePublicAPIApplyFilter:
 
         project = MagicMock()
         project.mapLayersByName.return_value = [layer]
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -226,6 +229,7 @@ class TestFilterMatePublicAPIApplyFilter:
 
         project = MagicMock()
         project.mapLayersByName.return_value = [layer]
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -245,6 +249,7 @@ class TestFilterMatePublicAPIApplyFilter:
 
         project = MagicMock()
         project.mapLayersByName.return_value = [layer]
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -261,6 +266,7 @@ class TestFilterMatePublicAPIApplyFilter:
         layer = _make_layer("communes", valid=True)
         project = MagicMock()
         project.mapLayersByName.return_value = [layer]
+        project.mapLayer.return_value = None  # a name, not an id
         expression = "id IN (" + ",".join(str(i) for i in range(20000)) + ")"
 
         with patch.object(_mod, "QgsProject") as mock_qgs, patch.object(_mod, "logger") as logger:
@@ -283,6 +289,7 @@ class TestFilterMatePublicAPIClearFilter:
 
         project = MagicMock()
         project.mapLayersByName.return_value = [layer]
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -301,6 +308,7 @@ class TestFilterMatePublicAPIClearFilter:
         """clear_filter returns False when layer not found."""
         project = MagicMock()
         project.mapLayersByName.return_value = []
+        project.mapLayer.return_value = None  # a name, not an id
 
         with patch.object(_mod, "QgsProject") as mock_qgs:
             mock_qgs.instance.return_value = project
@@ -309,6 +317,46 @@ class TestFilterMatePublicAPIClearFilter:
             result = api.clear_filter("nonexistent")
             assert result is False
             api.error_occurred.emit.assert_called_once()
+
+
+class TestFilterMatePublicAPIFindsALayerById:
+    """A layer id names one layer; a name may be shared by several, and the first vector layer of it is taken."""
+
+    def _run(self, mock_plugin, call, by_id, by_name):
+        project = MagicMock()
+        project.mapLayer.side_effect = lambda reference: by_id.get(reference)
+        project.mapLayersByName.side_effect = lambda reference: list(by_name.get(reference, []))
+        with patch.object(_mod, "QgsProject") as mock_qgs:
+            mock_qgs.instance.return_value = project
+            with patch.object(_mod, "QgsVectorLayer", new=MagicMock):
+                api = _make_api(mock_plugin)
+                api._safe_set_subset = MagicMock(return_value=True)
+                result = call(api)
+        return api, result
+
+    def test_apply_filter_by_id_among_layers_of_the_same_name(self, mock_plugin):
+        first, second = _make_layer("communes"), _make_layer("communes")
+        api, result = self._run(mock_plugin, lambda api: api.apply_filter("L2", "id = 1", "agent"),
+                                {"L2": second}, {"communes": [first, second]})
+        assert result is True
+        api._safe_set_subset.assert_called_once_with(second, "id = 1")
+        api.filter_applied.emit.assert_called_once_with("communes", "id = 1", "agent")  # the name, as before
+
+    def test_clear_filter_by_id(self, mock_plugin):
+        first, second = _make_layer("communes", subset="a"), _make_layer("communes", subset="b")
+        api, result = self._run(mock_plugin, lambda api: api.clear_filter("L2"), {"L2": second},
+                                {"communes": [first, second]})
+        assert result is True
+        second.setSubsetString.assert_called_with("")
+        first.setSubsetString.assert_not_called()
+        api.filter_cleared.emit.assert_called_once_with("communes", "external")
+
+    def test_an_id_of_another_kind_is_read_as_a_name(self, mock_plugin):
+        vector = _make_layer("mnt")
+        api, result = self._run(mock_plugin, lambda api: api.apply_filter("mnt", "id = 1"),
+                                {"mnt": types.SimpleNamespace(name=lambda: "raster")}, {"mnt": [vector]})
+        assert result is True
+        api._safe_set_subset.assert_called_once_with(vector, "id = 1")
 
 
 class TestFilterMatePublicAPIClearAllFilters:
