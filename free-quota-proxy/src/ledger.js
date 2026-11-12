@@ -2,7 +2,11 @@
 
 const RESERVATION_LIFETIME_MS = 15 * 60 * 1000;
 export const REGISTRATIONS_PER_IP_PER_DAY = 3;
-export const REGISTRATIONS_PER_DAY = 200; // what ends many addresses at once; 400 tokens would already spend the budget
+// What ends many addresses at once: 50 tokens at 0.50 $ are 25 $ a day at most, so the 200 $ of a month last 8 days of an
+// attack instead of 2, time enough to read the alerts below and act.
+export const REGISTRATIONS_PER_DAY = 50;
+// Parts of the monthly budget that, once spent, are told once a month (see `alertsDue`).
+export const BUDGET_ALERTS = [0.5, 0.8, 0.95];
 export const REQUESTS_PER_MINUTE = 30; // a single question can take a dozen calls in a few seconds
 export const REQUESTS_PER_DAY = 300;
 export const CONCURRENT_REQUESTS = 2;
@@ -112,6 +116,17 @@ export class Ledger {
     const id = crypto.randomUUID();
     await this.storage.put({ total, [`u:${userId}`]: user, [`i:${ipId}`]: ip, [`r:${id}`]: { user: userId, ip: ipId, amount, at: now } });
     return { id };
+  }
+
+  /** The parts of `BUDGET_ALERTS` now spent and not told yet this month, marked told. A new month forgets them. */
+  async alertsDue() {
+    const total = (await this.storage.get("total")) || empty();
+    const due = [];
+    for (const part of BUDGET_ALERTS) {
+      if (total.spent >= part * this.limits.budget && !(await this.storage.get(`alert:${part}`))) due.push(part);
+    }
+    if (due.length) await this.storage.put(Object.fromEntries(due.map((part) => [`alert:${part}`, true])));
+    return due;
   }
 
   async settle(id, amount) {

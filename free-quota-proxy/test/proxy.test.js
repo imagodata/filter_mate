@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { CONCURRENT_REQUESTS, Ledger, REGISTRATIONS_PER_DAY, REGISTRATIONS_PER_IP_PER_DAY, REQUESTS_PER_DAY, REQUESTS_PER_MINUTE, validLimits } from "../src/ledger.js";
+import { BUDGET_ALERTS, CONCURRENT_REQUESTS, Ledger, REGISTRATIONS_PER_DAY, REGISTRATIONS_PER_IP_PER_DAY, REQUESTS_PER_DAY, REQUESTS_PER_MINUTE, validLimits } from "../src/ledger.js";
 import { MAX_BODY, MAX_OUTPUT, StreamMeter, amountToCharge, buildUpstreamBody, costOf, groupOfAddress, hasPrice, worstCase } from "../src/rules.js";
 
 const MODEL = "claude-haiku-5-5";
@@ -297,4 +297,23 @@ test("new accounts per address are limited for the day", async () => {
   assert.ok(await instance.register("j"));
   clock.now += 24 * 3600 * 1000;
   assert.ok(await instance.register("i"));
+});
+
+test("a part of the budget is told once, when it is spent, and again the next month", async () => {
+  const { instance, clock } = ledger({ budget: 1000, user: 10000, ip: 10000 });
+  assert.deepEqual(BUDGET_ALERTS, [0.5, 0.8, 0.95]);
+  await instance.settle((await instance.reserve("a", "i1", 400)).id, 400);
+  assert.deepEqual(await instance.alertsDue(), []);
+  await instance.settle((await instance.reserve("b", "i2", 100)).id, 100);
+  assert.deepEqual(await instance.alertsDue(), [0.5]);
+  assert.deepEqual(await instance.alertsDue(), []);
+  await instance.settle((await instance.reserve("c", "i3", 460)).id, 460);
+  assert.deepEqual(await instance.alertsDue(), [0.8, 0.95]);
+  clock.now += 40 * 24 * 3600 * 1000;
+  await instance.settle((await instance.reserve("d", "i4", 600)).id, 600);
+  assert.deepEqual(await instance.alertsDue(), [0.5]);
+});
+
+test("at most 50 new tokens a day for everyone", () => {
+  assert.equal(REGISTRATIONS_PER_DAY, 50);
 });
