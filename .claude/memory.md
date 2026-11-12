@@ -1,6 +1,24 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] Lot « audit-engine » : justesse des résultats (branche `claude/audit-engine`)
+- **AND NOT sans filtre existant = `NOT (x)` partout** (décision produit du 12/11) : cœur
+  (`combine_without_old_subset` de `expression_combiner`, `combine_subset`), source du dock (dans
+  `ExpressionFacadeHandler`, car `AttributeFilterExecutor` renvoie la nouvelle expression sans ancien subset),
+  cibles du dock (`_determine_subset_strategy` rend `(None, opérateur)` sans subset ; builders PG / Spatialite /
+  OGR et adaptateur legacy écrivent `NOT (new)`), rasters / nuages (emprise moins la nouvelle zone), tuiles
+  vectorielles, API REST / agent / nuages de l'API publique. Un filtre spatial précédent reste REMPLACÉ (et non
+  « ancien moins nouveau ») ; une cible de service lue en partie refuse AND NOT avec ou sans filtre.
+  Pièges : `NOT` au-dessus d'une sortie native OGR SQL contenant un AND (TRUE AND NULL = FALSE) ; une entité où
+  `x` est NULL n'est pas gardée.
+- **Source qui ne garde rien** (Spatialite / OGR) : `SourceSelectionError` (`adapters/backends/source_refusal.py`)
+  traverse le repli Spatialite → OGR de `geometry_preparer` et devient le message du filtre ; jamais la couche
+  entière. Restent des replis « couche entière » : SUBSET / SELECTION quand l'expression ne garde rien avec un
+  subset ou une sélection préalable, `EMERGENCY FALLBACK` de `geometry_preparer`, échec mémoire de TASK_PARAMS OGR.
+- Export par `layer_id` ; éditions de l'agent validées avant `startEditing`, `_abandon` = `destroyEditCommand` +
+  `rollBack` seulement si l'édition a ouvert le mode ; style raster refuse NaN / Inf / min ≥ max ; export de mise
+  en page crée son dossier et ne remplace pas ; « style » d'un subset cible = `_is_standalone_display_expression`.
+
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression
 (`filtermate_core/filter/native_dialect.py`, pur ; adaptateur `adapters/qgis/native_filter_translation.py`), et
