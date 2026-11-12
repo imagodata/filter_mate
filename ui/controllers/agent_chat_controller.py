@@ -171,13 +171,14 @@ class AgentChatController(QObject):
         self.panel.recipe_remove_requested.connect(self._on_remove_recipe)
         self._restore_transcript()
         self._refresh_history()
-        QgsProject.instance().cleared.connect(self._on_project_cleared)
-        QgsProject.instance().readProject.connect(self._on_project_read)
-        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
         self._mcp = AgentMcpBridge(self, self)
         self._journal_later = []
         trailer = add_page(self.panel)  # last: a failure before leaves the accordion untouched
         self._header_label = trailer if hasattr(trailer, "setText") else None
+        # Only now: a controller whose bridge or page failed is never shut down, and must not follow the project.
+        QgsProject.instance().cleared.connect(self._on_project_cleared)
+        QgsProject.instance().readProject.connect(self._on_project_read)
+        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
         try:
             self._sync_mcp()
         except Exception:  # the chat does not depend on it
@@ -210,13 +211,23 @@ class AgentChatController(QObject):
             self._engine.cancel()
 
     def shutdown(self) -> None:
-        """The plugin unloads: nothing may arrive afterwards, not even the answer of a call of another application."""
-        self.stop()
-        abort_active()
-        self._mcp.close()
+        """The plugin unloads: nothing may arrive afterwards, not even the answer of a call of another application.
+
+        Each step runs even when one before failed.
+        """
+        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project):
+            try:
+                step()
+            except Exception:
+                logger.exception("Agent panel: a step of its shutdown failed")
+
+    def _unfollow_layers(self) -> None:
+        self._stat_timer.stop()
         for layer in self._stat_layers.values():
             self._follow(layer, False)
         self._stat_layers = {}
+
+    def _disconnect_project(self) -> None:
         for signal, handler in ((QgsProject.instance().cleared, self._on_project_cleared),
                                 (QgsProject.instance().readProject, self._on_project_read),
                                 (QgsProject.instance().fileNameChanged, self._on_file_name_changed)):

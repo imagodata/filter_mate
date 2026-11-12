@@ -404,3 +404,27 @@ def test_the_summary_does_not_count_a_web_service(ctrl_module, controller, monke
     assert wfs.counted == 0  # featureCount() of a web service can be a request to its server
     assert [(row["name"], row["feature_count"], row["active_filter_expression"], row["group"], row["visible"])
             for row in rows] == [("LOCAL", 12, "a > 1", "", True), ("WFS", -1, "", "Base", False)]
+
+
+# --- 9: a controller half built, a shutdown that goes on -------------------------------------------------------
+
+
+def test_a_controller_whose_page_failed_does_not_follow_the_project(ctrl_module, dock):
+    def add_page(page):
+        raise RuntimeError("no accordion")
+
+    with pytest.raises(RuntimeError):
+        ctrl_module.AgentChatController(add_page, MagicMock(), dock, ask_user=lambda title, text: True)
+    project = FakeQgsProject.project
+    assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
+
+
+def test_shutdown_goes_on_when_a_step_fails(ctrl_module, controller):
+    project, stopped = FakeQgsProject.project, []
+    forget = ctrl_module._test_bounded_http.on_abort(lambda: stopped.append("mcp client"))
+    controller._mcp.close_error = RuntimeError("wrapped C/C++ object has been deleted")
+    controller.shutdown()
+    assert stopped == ["mcp client"]  # unloading, nothing may arrive afterwards
+    assert controller._mcp.closed == 1
+    assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
+    forget()
