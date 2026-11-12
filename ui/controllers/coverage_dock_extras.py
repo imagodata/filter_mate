@@ -1048,11 +1048,14 @@ class CoverageDockExtras(QObject):
         if current is self._pc_zone_tool:
             return
         controller = self._controller
+        segmentation = getattr(controller, '_segmentation', None)
         if current is not None and current is getattr(controller, '_class_tool', None):
             # Take over the tool the picker would have restored: never restore the picker itself.
             current, controller._previous_class_map_tool = controller._previous_class_map_tool, None
         elif current is not None and current is getattr(controller, '_pixel_tool', None):
             current, controller._previous_map_tool = controller._previous_map_tool, None
+        elif current is not None and segmentation is not None and current is segmentation.tool:
+            current, segmentation._previous_tool = segmentation._previous_tool, None  # nor SAM's tool
         self._pc_zone_previous_tool = current
         canvas.setMapTool(self._pc_zone_tool)
 
@@ -1073,9 +1076,12 @@ class CoverageDockExtras(QObject):
     def _on_pc_zone_tool_deactivated(self) -> None:
         """Another map tool took over: the buttons follow, and that tool inherits ours."""
         controller = self._controller
-        if getattr(controller, '_previous_map_tool', None) is self._pc_zone_tool:
-            # The raster pixel picker just remembered the zone tool: hand it the tool before ours.
-            controller._previous_map_tool = self._pc_zone_previous_tool
+        # A picker or SAM that just remembered the zone tool gets the tool before ours: given back, the zone tool
+        # would come back without its button (or, with the dock closed, no tool at all).
+        for holder, name in ((controller, '_previous_map_tool'), (controller, '_previous_class_map_tool'),
+                             (getattr(controller, '_segmentation', None), '_previous_tool')):
+            if holder is not None and getattr(holder, name, None) is self._pc_zone_tool:
+                setattr(holder, name, self._pc_zone_previous_tool)
         self._pc_zone_previous_tool = None
         self._sync_zone_buttons(False)
 

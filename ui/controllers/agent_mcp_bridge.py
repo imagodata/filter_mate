@@ -139,12 +139,24 @@ class AgentMcpBridge:
         self._journal(call, result, client)
         return result
 
+    _change_checkpoint = None  # the undo point of the change being made, None between two
+
+    def forget_change(self) -> None:
+        """The project closes during a change: its undo point is not recorded.
+
+        Committed, it would compare the closed project with the next one (every layer of the new project added) and
+        an Undo would remove them all.
+        """
+        if self._change_checkpoint is not None:
+            self._change_checkpoint.discard()
+
     def _change(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """One change of another application is one step of the history of the panel."""
         checkpoint = TurnCheckpoint()
         checkpoint.describe = self._host.describe_call
         checkpoint.label = EXTERNAL_MARK + self._host.label_of(call, client)
         self.busy = True
+        self._change_checkpoint = checkpoint
         try:
             try:
                 checkpoint.begin(call)
@@ -154,6 +166,7 @@ class AgentMcpBridge:
             return self._executor.execute(call)
         finally:
             self.busy = False
+            self._change_checkpoint = None
             try:
                 checkpoint.commit()
                 self._host.history_changed()
