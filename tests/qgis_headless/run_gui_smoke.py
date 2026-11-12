@@ -487,6 +487,85 @@ def s_ui_profile_check():
           ui_config.get_profile() is ui_config.detect_profile_from_screen(), ui_config.get_profile().name)
 
 
+# --- the agent changes settings of FilterMate (change_settings, 2026-11-12) ---------------------------------------
+
+def agent_settings():
+    return importlib.import_module(f'{PACKAGE}.adapters.agent.plugin_settings')
+
+
+def config_value(path):
+    ENV_VARS = importlib.import_module(f'{PACKAGE}.config.config').ENV_VARS
+    node = ENV_VARS['CONFIG_DATA']
+    for key in path.split('.'):
+        node = node[key]
+    return node['value'] if isinstance(node, dict) else node
+
+
+def saved_value(path):
+    ENV_VARS = importlib.import_module(f'{PACKAGE}.config.config').ENV_VARS
+    with open(ENV_VARS['CONFIG_JSON_PATH'], encoding='utf-8') as stream:
+        node = json.load(stream)
+    for key in path.split('.'):
+        node = node[key]
+    return node['value'] if isinstance(node, dict) else node
+
+
+def s_agent_settings():
+    """change_settings as the chat runs it once the user said yes: the panel applies it like an edit of the tree."""
+    handlers = agent_settings().settings_handlers()
+    STATE['settings_before'] = {path: config_value(path) for path in (
+        'APP.DOCKWIDGET.COLORS.ACTIVE_THEME', 'APP.OPTIONS.QUERY_CACHE.max_size', 'APP.OPTIONS.RASTER.enabled')}
+    record_layer_kind_counts()
+    answer = handlers['change_settings']({'changes': [
+        {'path': 'APP.DOCKWIDGET.COLORS.ACTIVE_THEME', 'value': 'dark'},
+        {'path': 'APP.OPTIONS.QUERY_CACHE.max_size', 'value': 222},
+        {'path': 'APP.OPTIONS.RASTER.enabled', 'value': False}], 'reason': 'smoke'})
+    STATE['settings_answer'] = answer
+    return lambda: not registered('dem') and tasks_idle()
+
+
+def s_agent_settings_check():
+    d = dock()
+    answer = STATE['settings_answer']
+    changed = {row['path']: row for row in answer.get('changed', [])}
+    item = config_value_item(['APP', 'DOCKWIDGET', 'COLORS', 'ACTIVE_THEME'])
+    shown = item.data(Qt.ItemDataRole.UserRole) if item is not None else None
+    theme = getattr(getattr(d, '_theme_manager', None), 'current_theme', None)
+    theme = theme() if callable(theme) else theme
+    check('change_settings: three settings changed, in memory, on disk and in the tree',
+          len(changed) == 3 and not answer.get('failed') and config_value('APP.OPTIONS.QUERY_CACHE.max_size') == 222
+          and saved_value('APP.OPTIONS.QUERY_CACHE.max_size') == 222
+          and isinstance(shown, dict) and shown.get('value') == 'dark', f"answer={answer} tree={shown}")
+    check('change_settings: the theme follows at once', theme == 'dark', f"theme={theme}")
+    check('change_settings: rasters switched off as from the tree (unregistered, gone from the list)',
+          not registered('dem') and 'dem' not in current_layer_list() and STATE['kind_counts'] == (0, 1),
+          f"counts={STATE['kind_counts']}")
+    failure = None
+    try:
+        agent_settings().settings_handlers()['change_settings']({'changes': [
+            {'path': 'APP.OPTIONS.AGENT.open_data_domains', 'value': 'evil.example.org'}], 'reason': 'smoke'})
+    except Exception as exc:  # ToolFailure
+        failure = str(exc)
+    check('change_settings: the settings of the agent are refused', failure is not None and 'agent itself' in failure
+          and config_value('APP.OPTIONS.AGENT.open_data_domains') != 'evil.example.org', str(failure)[:120])
+    effects = importlib.import_module(f'{PACKAGE}.adapters.agent.turn_effects')
+    before = {path: STATE['settings_before'][path] for path in changed}
+    after = {path: row['after'] for path, row in changed.items()}
+    record_layer_kind_counts()
+    STATE['settings_undo'] = effects.apply_effects((('settings', '', json.dumps(before), json.dumps(after)),), undo=True)
+    return lambda: registered('dem') and tasks_idle()
+
+
+def s_agent_settings_undo_check():
+    done, left = STATE['settings_undo']
+    values = {path: config_value(path) for path in STATE['settings_before']}
+    check('undoing the turn puts the settings back, rasters registered again',
+          done and not left and values == STATE['settings_before'] and registered('dem')
+          and saved_value('APP.OPTIONS.QUERY_CACHE.max_size') == STATE['settings_before']['APP.OPTIONS.QUERY_CACHE.max_size'],
+          f"done={done} left={left} values={values}")
+    return settled()
+
+
 def s_qt6_enums_check():
     """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
     from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
@@ -1622,7 +1701,8 @@ def s_finish():
 
 
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
-         s_ui_profile_check, s_qt6_enums_check, s_pick_before_late_refresh,
+         s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
+         s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,

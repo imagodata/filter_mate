@@ -4,6 +4,7 @@ import pytest
 
 from core.agent.chat_engine import ChatEngine
 from core.agent.messages import STOP_TOOL_USE, ToolCallPart
+from core.agent.permissions import SETTINGS_TOOLS as SETTINGS_WRITES
 from core.agent.permissions import (
     ADVISOR, ADVISOR_REFUSAL, AGENT_OWN, ASK, AUTONOMOUS, BUFFER, CAREFUL, DEFAULT_LEVEL, LEVELS, LOCAL, OUTSIDE, PROJECT, READ,
     REFUSE, RUN, STANDARD, VIEW, PermissionPolicy, level_note, level_or_default, risk_of,
@@ -81,6 +82,8 @@ class TestLevels:
     def test_what_each_level_runs_alone(self, level, runs, asks):
         policy = PermissionPolicy(level)
         for tool in chat_tools():
+            if tool.name in SETTINGS_WRITES:  # asked at every level, the look of the panel aside (test_settings_reference)
+                continue
             expected = RUN if risk_of(tool) in runs or tool.name in AGENT_OWN else ASK
             assert policy.verdict(tool) == expected, (level, tool.name)
             assert risk_of(tool) in runs | asks

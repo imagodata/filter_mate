@@ -278,6 +278,78 @@ class ConfigModelManager:
         except Exception as e:
             logger.error(f"Error reloading configuration model: {e}")
 
+    def apply_settings(self, values):
+        """Settings changed by the agent (``{"APP.OPTIONS.X.y": value}``, checked by core.agent.settings_reference),
+        applied as if the user had edited them in the configuration tree.
+
+        CONFIG_DATA takes the values, the tree is built again from it (its signal off, so nothing fires twice),
+        the file is written, then each changed setting goes through the handler of an edit in the tree
+        (data_changed_configuration_model): the theme, the profile, the action bar, the language, the layer kinds
+        and the timers follow exactly as they do for the user. Returns the paths applied.
+        """
+        from ...config.config import ENV_VARS
+        from ...core.agent.settings_reference import set_leaf
+        dw = self.dockwidget
+        if not getattr(dw, 'widgets_initialized', False) or not isinstance(dw.CONFIG_DATA, dict):
+            raise RuntimeError("the FilterMate panel is not ready")
+        for path, value in values.items():
+            set_leaf(dw.CONFIG_DATA, path, value)
+        live = ENV_VARS.get("CONFIG_DATA")
+        if isinstance(live, dict) and live is not dw.CONFIG_DATA:
+            live.clear()
+            live.update(dw.CONFIG_DATA)
+        else:
+            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
+        self.disconnect_config_model_signal()
+        try:
+            from ...ui.widgets.json_view.model import JsonModel
+            dw.config_model = JsonModel(data=dw.CONFIG_DATA, editable_keys=False, editable_values=True,
+                                        plugin_dir=dw.plugin_dir)
+            container = getattr(dw, 'config_view_container', None)
+            if container is not None:
+                container.model = dw.config_model  # sets the model of its view too
+            elif getattr(dw, 'config_view', None) is not None:
+                dw.config_view.setModel(dw.config_model)
+                dw.config_view.model = dw.config_model
+        finally:
+            self.connect_config_model_signal()
+        config_path = ENV_VARS.get('CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
+        atomic_json_write(config_path, self._sanitize_for_json(dw.CONFIG_DATA), indent=4)
+        applied = []
+        for path in values:
+            item = self._value_item(dw.config_model, path.split("."))
+            if item is None:
+                logger.warning(f"Setting {path} not found in the configuration tree: applied at its next use")
+                continue
+            self.data_changed_configuration_model(item)
+            applied.append(path)
+        return applied
+
+    @staticmethod
+    def _value_item(model, keys):
+        """The value item (column 1) of the leaf ``keys`` in the configuration tree, None when absent.
+
+        A section shown under its ``_display_name`` keeps its JSON key in the UserRole of its key item."""
+        from qgis.PyQt.QtCore import Qt
+        parent = model.invisibleRootItem()
+        for depth, key in enumerate(keys):
+            found = None
+            for row in range(parent.rowCount()):
+                key_item = parent.child(row, 0)
+                if key_item is None:
+                    continue
+                original = key_item.data(Qt.ItemDataRole.UserRole)
+                name = original if isinstance(original, str) and original else key_item.data(Qt.ItemDataRole.DisplayRole)
+                if name == key:
+                    found = (key_item, parent.child(row, 1))
+                    break
+            if found is None:
+                return None
+            if depth == len(keys) - 1:
+                return found[1]
+            parent = found[0]
+        return None
+
     @staticmethod
     def _sanitize_for_json(obj):
         """Recursively remove non-JSON-serializable values from a data structure.

@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+from .skills import NAMES as SKILL_NAMES, skill_list
+
 CATALOG_PATH = Path(__file__).with_name("tool_catalog.json")
 
 # Left out of the chat. undo_filter / redo_filter only walk the dock's history, not what
@@ -184,9 +186,92 @@ CHAT_ONLY = (
 )
 
 
+DESCRIBE_SETTINGS = "describe_settings"
+GET_SETTING = "get_setting"
+CHANGE_SETTINGS = "change_settings"
+DIAGNOSE_PERFORMANCE = "diagnose_performance"
+_SETTING_PATH = {"type": "string", "minLength": 1, "maxLength": 200,
+                 "description": "Path of the setting, e.g. APP.OPTIONS.QUERY_CACHE.enabled (or its last parts)"}
+# The settings of FilterMate itself (config.json), read in the plugin: served by the chat and by the MCP server of the
+# plugin, not by the REST API.
+SETTINGS_TOOLS = (
+    ToolSpec(
+        name=DESCRIBE_SETTINGS, title="Find settings of FilterMate",
+        description=("Find the settings of FilterMate itself (its configuration: interface, language, theme, "
+                     "performance, timeouts, caches, raster and point cloud options), with their value, default, "
+                     "choices or bounds and what they do. Without arguments: the sections. With query (English words "
+                     "of the setting: theme, timeout, cache, language...) or section: the settings found. It reads, "
+                     "it changes nothing. Use it when the user asks what a setting does, how FilterMate is set up, or "
+                     "how to make it faster or look otherwise; never guess a setting. The settings of the agent "
+                     "(provider, key, autonomy, tools) are not here: they are in its own settings dialog. Returns "
+                     "sections, or settings (path, value, description, default when changed, choices, min, max) and "
+                     "matched."),
+        input_schema={"type": "object", "properties": {
+            "query": {"type": "string", "maxLength": 200, "description": "Words of the setting, in English"},
+            "section": {"type": "string", "maxLength": 200,
+                        "description": "Section path (APP.OPTIONS.QUERY_CACHE), name (QUERY_CACHE) or title (Interface)"},
+            "changed_only": {"type": "boolean", "default": False,
+                             "description": "Only the settings whose value differs from the default"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 60, "default": 25}},
+            "additionalProperties": False},
+        read_only=True, idempotent=True),
+    ToolSpec(
+        name=GET_SETTING, title="Read one setting of FilterMate",
+        description=("Read one setting of FilterMate by its path (from describe_settings): its value, default, "
+                     "choices or bounds, what it does, where it is in the configuration tree (where) and whether the "
+                     "user changed it. A name, local paths and folders are only said set or empty. Returns path, "
+                     "value, description, where, changed, and default, choices, min, max, section when they apply."),
+        input_schema={"type": "object", "properties": {"path": _SETTING_PATH},
+                      "required": ["path"], "additionalProperties": False},
+        read_only=True, idempotent=True),
+    ToolSpec(
+        name=CHANGE_SETTINGS, title="Change settings of FilterMate",
+        description=("Change settings of FilterMate itself (from describe_settings), all or none: each value is "
+                     "checked against the choices or bounds of its setting. The user sees each setting before and "
+                     "after and says yes first, except how the panel looks at the autonomous level. Undone with the "
+                     "turn. Only when the user asks to change how FilterMate looks or works; read the setting first "
+                     "and say what it changes. The settings of the agent (APP.OPTIONS.AGENT), a name and local paths "
+                     "are refused: tell the user where they are. Returns changed (path, before, after, effect: now, "
+                     "next use or after restarting QGIS) and unchanged (already set)."),
+        input_schema={"type": "object", "properties": {
+            "changes": {"type": "array", "minItems": 1, "maxItems": 10, "items": {
+                "type": "object", "properties": {
+                    "path": _SETTING_PATH,
+                    "value": {"type": ["string", "number", "boolean"],
+                              "description": "New value, of the type of the setting (one of its choices when it has)"}},
+                "required": ["path", "value"], "additionalProperties": False}},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 300,
+                       "description": "Why, in one sentence the user reads before saying yes"}},
+            "required": ["changes", "reason"], "additionalProperties": False}),
+    ToolSpec(
+        name=DIAGNOSE_PERFORMANCE, title="Read the timings of FilterMate",
+        description=("Read the timings FilterMate logged (its log file on this machine): by operation (count, median, "
+                     "max, last, in ms) and the slowest ones with their layer, and how many timeouts and errors were "
+                     "logged. cascade_filter is a whole filter in the background, layer_filter one layer of it, "
+                     "apply_subset_layer and set_subset the main thread (QGIS frozen meanwhile). Use it when the user "
+                     "says FilterMate is slow, before proposing a setting. It reads, it changes nothing. Returns "
+                     "timings, operations, slowest, timeouts_logged, errors_logged, log_from, log_to."),
+        input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+        read_only=True, idempotent=True),
+)
+
+LOAD_SKILL = "load_skill"
+# Instructions for one kind of task, sent when the task comes rather than with every request (core/agent/skills.py).
+SKILL_TOOLS = (
+    ToolSpec(
+        name=LOAD_SKILL, title="Load the instructions of a task",
+        description=("Load the instructions for one kind of task, before doing it: they say how to work and where to "
+                     "look. Call it once per conversation and task, then follow them. Skills: " + skill_list() + "."),
+        input_schema={"type": "object", "properties": {"name": {"type": "string", "enum": list(SKILL_NAMES)}},
+                      "required": ["name"], "additionalProperties": False},
+        read_only=True, idempotent=True),
+)
+
+
 def chat_tools(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:
     """The tools the chat offers."""
-    return tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + CHAT_ONLY
+    return (tuple(tool for tool in load_catalog(path) if tool.name not in NOT_IN_CHAT) + SETTINGS_TOOLS + SKILL_TOOLS
+            + CHAT_ONLY)
 
 
 MAP_IMAGE = "map_image"

@@ -58,6 +58,51 @@
         <translation>የመጨረሻውን ጥያቄ መቀልበስ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1260"/>
+        <source>Reading the settings of FilterMate</source>
+        <translation>የFilterMate ቅንብሮችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>Reading the setting {}</source>
+        <translation>ቅንብሩን {} በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
+        <source>Settings of FilterMate: {}</source>
+        <translation>የFilterMate ቅንብሮች፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>applied at once</source>
+        <translation>ወዲያውኑ ተፈጻሚ ይሆናል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>used from the next filter or export</source>
+        <translation>ከሚቀጥለው ማጣሪያ ወይም ወደ ውጭ መላክ ጀምሮ ጥቅም ላይ ይውላል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
+        <source>after restarting QGIS</source>
+        <translation>QGISን እንደገና ከጀመሩ በኋላ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1462"/>
+        <source>The agent wants to change these settings of FilterMate (they stay for every project; undoing the turn puts them back):
+{}
+
+Why: {}
+
+Do you agree?</source>
+        <translation>ወኪሉ እነዚህን የFilterMate ቅንብሮች ለመቀየር ይፈልጋል (ለሁሉም ፕሮጀክቶች ይቆያሉ፤ ዙሩን መቀልበስ ወደነበሩበት ይመልሳቸዋል)፦
+{}
+
+ምክንያት፦ {}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="247"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
         <source>Back to before: {}</source>
@@ -360,6 +405,11 @@ Run it?</source>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>የፕሮጀክት CRS</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="56"/>
+        <source>settings of FilterMate</source>
+        <translation>የFilterMate ቅንብሮች</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>

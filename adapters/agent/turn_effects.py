@@ -20,7 +20,9 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
   after the commands of the turn (``adapters/public_api/feature_edits.py``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
-* ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT.
+* ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT;
+* ``("settings", "", before, after)``: settings of FilterMate (config.json) the turn changed, as JSON
+  ``{path: value}``; not of the project, but undone with the turn that changed them.
 
 A layer kept in memory has no definition that holds its features: removing it cannot be undone, and adding it
 cannot be redone once undone (it would come back empty); both say so. The layers the agent makes are files.
@@ -46,6 +48,26 @@ TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
 CRS_TOOLS = ("set_project_crs",)
+SETTINGS_TOOLS = ("change_settings",)
+
+
+def _settings_label() -> str:
+    from qgis.PyQt.QtCore import QCoreApplication
+    return QCoreApplication.translate("AgentChat", "settings of FilterMate")
+
+
+def _setting_paths(arguments: Dict[str, Any]) -> List[str]:
+    """The settings a change_settings call names, as their full paths (an unknown one is left out)."""
+    from .plugin_settings import settings_rows
+    from ...core.agent.settings_reference import get
+    rows = settings_rows()
+    paths = []
+    for change in arguments.get("changes") or ():
+        try:
+            paths.append(get(rows, str(change.get("path", "")))["path"])
+        except (LookupError, AttributeError):
+            continue
+    return paths
 
 
 def _crs_label() -> str:
@@ -255,6 +277,7 @@ class EffectsRecorder:
         self._edits: Dict[str, int] = {}
         self._layouts: Optional[Set[str]] = None
         self._crs: Optional[str] = None
+        self._settings: Dict[str, Any] = {}
 
     def before_call(self, call: Any) -> None:
         project = QgsProject.instance()
@@ -274,6 +297,10 @@ class EffectsRecorder:
                 selected = _selection(layer) if layer is not None else None
                 if selected is not None and layer.id() not in self._selection:
                     self._selection[layer.id()] = selected
+            elif name in SETTINGS_TOOLS:
+                from .plugin_settings import current_values
+                paths = [path for path in _setting_paths(arguments) if path not in self._settings]
+                self._settings.update(current_values(paths))
             elif name in CRS_TOOLS:
                 if self._crs is None:
                     from ..public_api.project_control import crs_definition
@@ -366,6 +393,14 @@ class EffectsRecorder:
             after = _visible(project, layer_id)
             if after is not None and after != before:
                 effects.append(("visibility", layer_id, before, after))
+        if self._settings:
+            import json
+            from .plugin_settings import current_values
+            after_settings = current_values(self._settings)
+            changed = sorted(path for path, value in self._settings.items() if after_settings.get(path) != value)
+            if changed:
+                effects.append(("settings", "", json.dumps({path: self._settings[path] for path in changed}),
+                                json.dumps({path: after_settings.get(path) for path in changed})))
         if self._crs is not None:
             from ..public_api.project_control import crs_definition
             after_crs = crs_definition(project.crs())
@@ -565,6 +600,19 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool,
                 else:
                     write_recipes(recipes_parse(effect[2] if undo else effect[3]), project)
                     done.append(_recipes_label())
+            elif kind == "settings":
+                import json
+                from .plugin_settings import apply_values, current_values
+                wanted, expected = json.loads(effect[2] if undo else effect[3]), json.loads(effect[3] if undo else effect[2])
+                # A setting the user changed since is theirs: left as it is, the others put back.
+                now = current_values(wanted)
+                kept = {path: value for path, value in wanted.items() if now.get(path) == expected.get(path)}
+                try:
+                    apply_values(kept)
+                except RuntimeError:
+                    left.append(_settings_label())
+                else:
+                    (done if len(kept) == len(wanted) else left).append(_settings_label())
             elif kind == "notes":
                 from .project_notes_store import write_notes
                 write_notes(list(effect[2] if undo else effect[3]), project)
