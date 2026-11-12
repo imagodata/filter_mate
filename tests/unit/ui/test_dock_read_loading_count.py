@@ -7,6 +7,9 @@ the EXPLORING controller instead, which counts every read of the panel.
 """
 import ast
 import builtins
+import importlib.util
+import sys
+import types
 from pathlib import Path
 from types import MethodType, SimpleNamespace
 from unittest.mock import MagicMock
@@ -33,7 +36,7 @@ def _method(path, name, submit=None):
         return original_import(module, globals, locals, fromlist, level)
 
     namespace = {'__builtins__': dict(vars(builtins), __import__=import_fake), 'logger': MagicMock(),
-                 'QgsFeatureRequest': MagicMock(), 'QgsRectangle': MagicMock()}
+                 'QgsFeatureRequest': MagicMock(), 'QgsRectangle': MagicMock(), 'Qt': MagicMock()}
     exec(compile(ast.Module(body=[node], type_ignores=[]), str(ROOT / path), 'exec'), namespace)
     return namespace[name]
 
@@ -78,3 +81,79 @@ def test_a_read_that_ends_leaves_the_cursor_to_a_read_still_running():
     assert [call.args for call in dock._set_expression_loading_state.call_args_list] == [(True,)]
     lease(False)
     assert [call.args for call in dock._set_expression_loading_state.call_args_list] == [(True,), (False,)]
+
+
+@pytest.fixture
+def async_query(monkeypatch):
+    """adapters/qgis/async_query.py over a QgsTask without Qt (as in tests/unit/adapters/qgis/test_async_query.py)."""
+    core = types.ModuleType('qgis.core')
+
+    class Task:
+        class Flag:
+            CanCancel = 1
+
+        def __init__(self, *args):
+            self.cancelled = False
+
+        def setDependentLayers(self, layers):
+            pass
+
+        def cancel(self):  # still queued: QGIS calls finished(false) before cancel() returns
+            if not self.cancelled:
+                self.cancelled = True
+                self.finished(False)
+
+        def isCanceled(self):
+            return self.cancelled
+
+    core.QgsTask = Task
+    core.QgsFeedback = MagicMock(side_effect=lambda: MagicMock())
+    core.QgsVectorLayerFeatureSource = MagicMock(side_effect=lambda layer: MagicMock())
+    core.QgsExpression = MagicMock()
+    core.QgsApplication = MagicMock()
+    monkeypatch.setitem(sys.modules, 'qgis.core', core)
+    spec = importlib.util.spec_from_file_location('async_query_cursor_test', ROOT / 'adapters/qgis/async_query.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, '_watcher', lambda callback: SimpleNamespace(changed=callback, deleteLater=MagicMock()))
+    monkeypatch.setattr(module, 'unsafe_virtual_fields', lambda layer: set())
+    return module
+
+
+def _layer(name):
+    return MagicMock(**{'id.return_value': name, 'source.return_value': 'source', 'subsetString.return_value': '',
+                        'providerType.return_value': 'wfs'})
+
+
+def test_a_layer_change_takes_the_reads_of_the_dock_off_the_wait_cursor(async_query):
+    """A filtered extent of the layer left (30 to 120 s on a slow service) kept the cursor of the next layer."""
+    dock = SimpleNamespace(_set_expression_loading_state=MagicMock())
+    controller = SimpleNamespace(_dockwidget=dock)
+    for name in ('_remote_loading', '_cancel_remote_reads'):
+        setattr(controller, name, MethodType(_method('ui/controllers/exploring_controller.py', name), controller))
+    lease = controller._remote_loading
+    left, current = _layer('left'), _layer('current')
+    for owner, attribute in ((dock, '_extent_query_left'), (dock, '_debounced_feature_query'),
+                             (dock, '_remote_expression_query'), (controller, '_selection_query')):
+        async_query.submit_query(owner, attribute, left, 'read', lambda task: None, MagicMock(), lease)
+    controller._cancel_remote_reads()  # set_layer(current)
+    read = async_query.submit_query(controller, '_selection_query', current, 'read', lambda task: [], MagicMock(), lease)
+    read.finished(read.run())
+    assert [call.args for call in dock._set_expression_loading_state.call_args_list] == [
+        (True,), (False,), (True,), (False,)]
+    assert controller._remote_loading_count == 0
+
+
+@pytest.mark.parametrize('count, removed', [(1, False), (0, True)])
+def test_a_direct_removal_leaves_the_cursor_to_a_read_still_running(count, removed):
+    """The expression debounce, the local evaluator... took the cursor away while a read of the panel ran."""
+    widgets = {name: MagicMock() for name in (
+        'mFieldExpressionWidget_exploring_single_selection', 'mFeaturePickerWidget_exploring_single_selection',
+        'mFieldExpressionWidget_exploring_multiple_selection',
+        'checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection',
+        'mFieldExpressionWidget_exploring_custom_selection')}
+    dock = SimpleNamespace(_exploring_ctrl=SimpleNamespace(_remote_loading_count=count), **widgets)
+    MethodType(_method('filter_mate_dockwidget.py', '_set_expression_loading_state'), dock)(False, None)
+    assert all(widget.setCursor.called is removed for widget in widgets.values())
+    MethodType(_method('filter_mate_dockwidget.py', '_set_expression_loading_state'), dock)(True, None)
+    assert all(widget.setCursor.called for widget in widgets.values())

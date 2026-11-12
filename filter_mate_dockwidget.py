@@ -2056,7 +2056,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self._set_expression_loading_state(False, groupbox)
 
     def _set_expression_loading_state(self, loading: bool, groupbox: str = None):
-        """v4.0 Sprint 16: Update loading state for expression widgets."""
+        """v4.0 Sprint 16: Update loading state for expression widgets.
+
+        The wait cursor stays while a read of the panel in a task runs: the
+        last one to end takes it away (ExploringController._remote_loading).
+        """
+        if not loading and getattr(getattr(self, '_exploring_ctrl', None), '_remote_loading_count', 0) > 0:
+            return
         self._expression_loading = loading
         try:
             cursor, widgets = (Qt.CursorShape.WaitCursor if loading else Qt.CursorShape.PointingHandCursor), []
