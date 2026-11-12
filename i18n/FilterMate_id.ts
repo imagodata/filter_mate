@@ -8248,6 +8248,16 @@ Raster digambar seperti di peta, dengan gayanya. SAM dipasang sekali dari grup P
         <translation>Klik kotak di sebelah kanan untuk menguji lapisan ini berdasarkan centroid-nya</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>tidak dapat difilter</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Peta dasar web (WMS / WMTS / XYZ, ArcGIS MapServer): hanya warna, tidak dapat difilter</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Pilih semua lapisan vektor</translation>

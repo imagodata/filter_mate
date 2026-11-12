@@ -8248,6 +8248,16 @@ Das Raster wird wie in der Karte gezeichnet, mit seinem Stil. SAM wird einmalig 
         <translation>Auf das Quadrat rechts klicken, um diesen Layer anhand seiner Zentroide zu testen</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nicht filterbar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web-Hintergrundkarte (WMS / WMTS / XYZ, ArcGIS MapServer): nur Farben, sie kann nicht gefiltert werden</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Alle Vektorlayer auswählen</translation>

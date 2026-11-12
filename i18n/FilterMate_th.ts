@@ -8248,6 +8248,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>คลิกช่องสี่เหลี่ยมทางขวาเพื่อทดสอบเลเยอร์นี้ด้วยจุดศูนย์กลาง</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>กรองไม่ได้</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>แผนที่ฐานเว็บ (WMS / WMTS / XYZ, ArcGIS MapServer): มีเพียงสี จึงกรองไม่ได้</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>เลือกเลเยอร์เวกเตอร์ทั้งหมด</translation>

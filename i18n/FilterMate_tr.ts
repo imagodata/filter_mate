@@ -8248,6 +8248,16 @@ Raster, haritadaki gibi, stiliyle birlikte çizilir. SAM, FilterMate panelinin P
         <translation>Bu katmanı merkez noktalarıyla test etmek için sağdaki kareye tıklayın</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>filtrelenemez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web altlık haritası (WMS / WMTS / XYZ, ArcGIS MapServer): yalnızca renkler, filtrelenemez</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Tüm vektör katmanlarını seç</translation>

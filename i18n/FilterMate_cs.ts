@@ -8230,6 +8230,16 @@ Rastr se kreslí tak, jak je na mapě, se svým stylem. SAM se instaluje jednou 
         <translation>Kliknutím na čtverec vpravo otestujete tuto vrstvu podle jejích centroidů</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nelze filtrovat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webová podkladová mapa (WMS / WMTS / XYZ, ArcGIS MapServer): pouze barvy, nelze ji filtrovat</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Vybrat všechny vektorové vrstvy</translation>

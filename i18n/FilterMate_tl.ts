@@ -8248,6 +8248,16 @@ Iginuguhit ang raster tulad ng sa mapa, kasama ang estilo nito. Isang beses lang
         <translation>I-click ang parisukat sa kanan para subukan ang layer na ito gamit ang mga centroid nito</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>hindi mafi-filter</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): kulay lamang, hindi ito mafi-filter</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Piliin ang lahat ng vector na layer</translation>

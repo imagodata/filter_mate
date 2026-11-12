@@ -8248,6 +8248,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>Щракнете върху квадрата вдясно, за да тествате този слой по неговите центроиди</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>не може да се филтрира</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Уеб базова карта (WMS / WMTS / XYZ, ArcGIS MapServer): само цветове, не може да се филтрира</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Избор на всички векторни слоеве</translation>

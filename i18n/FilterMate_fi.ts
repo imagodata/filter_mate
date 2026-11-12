@@ -8248,6 +8248,16 @@ Rasteri piirretään kuten kartalla, tyyleineen. SAM asennetaan kerran FilterMat
         <translation>Napsauta oikealla olevaa neliötä testataksesi tämän tason sentroideilla</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ei suodatettavissa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Verkkotaustakartta (WMS / WMTS / XYZ, ArcGIS MapServer): vain värejä, sitä ei voi suodattaa</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Valitse kaikki vektoritasot</translation>

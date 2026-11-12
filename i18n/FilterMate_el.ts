@@ -8248,6 +8248,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>Κάντε κλικ στο τετράγωνο δεξιά για να ελέγξετε αυτό το επίπεδο με τα κεντροειδή του</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>δεν φιλτράρεται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Διαδικτυακός χάρτης υποβάθρου (WMS / WMTS / XYZ, ArcGIS MapServer): μόνο χρώματα, δεν μπορεί να φιλτραριστεί</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Επιλογή όλων των διανυσματικών επιπέδων</translation>
