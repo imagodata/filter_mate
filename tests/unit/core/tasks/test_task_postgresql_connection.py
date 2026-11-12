@@ -108,3 +108,20 @@ def test_no_connection_is_an_error():
 
     with pytest.raises(Exception, match="No valid PostgreSQL connection"):
         get(_task(_Layer("db_one")))
+
+
+def test_a_failed_connection_is_not_tried_again_by_the_same_task():
+    """2026-11-12: each attempt may wait for its timeouts; a reset asks once per layer."""
+    calls = []
+
+    def opener(layer):
+        calls.append(layer)
+        return None, None
+
+    get = _method(opener)
+    task = _task(_Layer("db_one"))
+    for _ in range(3):
+        with pytest.raises(Exception, match="No valid PostgreSQL connection"):
+            get(task)
+
+    assert len(calls) == 1
