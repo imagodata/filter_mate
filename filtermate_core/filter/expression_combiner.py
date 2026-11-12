@@ -352,10 +352,10 @@ def _top_level_operands(masked: str, operator: str) -> List[str]:
     pattern = re.compile(r'\bAND\b(?!\s+NOT\b)' if operator == 'AND' else r'\bOR\b', re.IGNORECASE)
     operands, depth, start = [], 0, 0
     for match in re.finditer(r'[()]|' + pattern.pattern, text, re.IGNORECASE):
-        token = match.group()
-        if token == '(':
+        part = match.group()
+        if part == '(':
             depth += 1
-        elif token == ')':
+        elif part == ')':
             depth -= 1
         elif depth == 0:
             operands.append(text[start:match.start()])
