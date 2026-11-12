@@ -113,7 +113,7 @@ class SourceGeometryPreparer:
             # Fallback if not cached
             source_fc = source_layer.featureCount() if source_layer else None
             logger.warning(f"   Using fresh featureCount (not cached): {source_fc}")
-        logger.info(f"   source_feature_count: {source_fc} (threshold=10000)")
+        logger.info(f"   source_feature_count: {source_fc}")
 
         result_geom, mv_name = self._backend_services.prepare_postgresql_source_geom(
             source_table=source_table, source_schema=source_schema,

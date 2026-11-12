@@ -18,6 +18,25 @@ _Auto-maintained by project agent_
 - Export par `layer_id` ; éditions de l'agent validées avant `startEditing`, `_abandon` = `destroyEditCommand` +
   `rollBack` seulement si l'édition a ouvert le mode ; style raster refuse NaN / Inf / min ≥ max ; export de mise
   en page crée son dossier et ne remplace pas ; « style » d'un subset cible = `_is_standalone_display_expression`.
+## [2026-11-12] Audit segmentation / nuages (lot S, branche `claude/audit-segmentation`)
+- **Fenêtres SAM** : plus de `QgsRasterLayer` dans les tâches ni l'algorithme. `raster_look(layer, alpha)` clone sur
+  le thread principal le moteur de rendu + les filtres du pipe (luminosité, teinte, rééchantillonnage) ;
+  `open_drawing` ouvre la source en provider seul dans le worker (pas de statistiques : un WCS n'est plus relu en
+  entier à chaque fenêtre) et `render_drawing` lit le bloc de la fenêtre dans les coordonnées de la couche (un SCR
+  corrigé par l'utilisateur ne fait que nommer ces coordonnées). `render_window` reste pour l'API publique. Une
+  couche filtrée par FilterMate est dessinée depuis sa source d'origine avec la bande alpha d'origine (le VRT dérivé
+  d'un raster entier sans NoData a une bande alpha en plus). `QgsRasterBlockFeedback.errors()` et
+  `Distribution.files` : ce dernier omet les fichiers manquants sous Python 3.12, lire RECORD soi-même.
+- **Tâches en file** : la règle « ne pas annuler une QgsTask en file (3.22) » est gardée (non réfutée, même si le
+  plantage d'origine venait d'une référence Python perdue) ; `_stop` pose `task.stopped`, lu par `run()`.
+- **onnxruntime** : `--target` ignore le numpy de QGIS → `numpy==<version de QGIS>` épinglé ; installation coupée
+  détectée par RECORD (`python_dependencies.is_intact`), `--upgrade` dès que le dossier n'est pas vide ; commande à
+  la main avec le même `--target`.
+- **Nuages** : relecture d'une classe à 1 m bornée à `FINE_POINTS_LIMIT` = 200 000 points (l'estimation ×4 depuis
+  2 m est fausse pour la végétation : 13 047 points à 2 m, 9,6 s à 1 m) ; la passer en tâche demande un
+  rafraîchissement différé dans `coverage_mode_controller`. Résolutions converties par l'unité du SCR (pieds).
+- Non vérifié dans QGIS réel : rendu par pipe (local, WMS/XYZ, WCS), bande alpha, nuage en pieds.
+
 ## [2026-11-12] Source PostgreSQL sans connexion psycopg2 → « Tâche échouée », couches distantes jamais filtrées
 Signalement (journal client, Zones MRO → 8 couches, Intersect) : source filtrée, puis « Task failed » sans détail,
 aucun « Distant layers to filter » dans le journal QGIS. Cause : QGIS lit la couche avec SA connexion ; la connexion

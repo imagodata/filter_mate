@@ -25,8 +25,9 @@ footprint under the click, holes filled), whose parts of an area like the clicke
 are kept (:func:`raster_adapter.similar_area_bounds`), and of a shape like theirs
 with *same shape* (compactness, as on a raster). It is read in cells of 2 m first
 and, for a class of :data:`FINE_CLASS_POINTS` points at most there, again in cells
-of 1 m; a denser class (the high vegetation of a tile) keeps its cells of 2 m and
-the clicked objects are measured again in them (:func:`class_footprint`). The
+of 1 m, a read stopped at :data:`FINE_POINTS_LIMIT` points; a denser class (the high
+vegetation of a tile), or one whose read in cells of 1 m was stopped, keeps its cells
+of 2 m and the clicked objects are measured again in them (:func:`class_footprint`). The
 clicked objects and the parts are measured alike: same cells, same closing, holes filled.
 
 Measured 2026-11-11 on the LiDAR HD tile of the test project (Cerdagne), against
@@ -55,13 +56,17 @@ from qgis.core import QgsDoubleRange, QgsGeometry, QgsRectangle
 
 logger = logging.getLogger(__name__)
 
-# Cell size in metres (degrees for a cloud in a geographic CRS, see point_cloud_footprint.layer_resolution):
+# Cell size in metres (in degrees or feet for a cloud in such a CRS, see point_cloud_footprint.layer_resolution):
 # also the level of detail read, the clicked objects and the similar ones alike (see the module docstring).
 OBJECT_RESOLUTION = 1.0
 # The footprint of a class is read in these cells first, and kept in them for a class denser than
 # FINE_CLASS_POINTS points there (about four times as many at 1 m: 200 000 points, some 10 to 15 s).
 COARSE_RESOLUTION = 2.0
 FINE_CLASS_POINTS = 50000
+# The read again in cells of 1 m stops at this many points, and the cells of 2 m are kept: the 10 to 15 s above, on the
+# main thread, at most. The four times was an estimate; a class whose points thin out more at 2 m (the low vegetation
+# of the tile of scripts/pc_object_cost.py: 13 047 points at 2 m, 9.6 s at 1 m) read up to CLASS_POINTS_LIMIT points.
+FINE_POINTS_LIMIT = 4 * FINE_CLASS_POINTS
 # Half side in metres of the first window read around a click: 64 m, a house, a tree, a block of flats.
 OBJECT_WINDOW_START = 32.0
 # Largest half side: 128 m. Read on the main thread at each click (every class: identify cannot filter);
@@ -414,7 +419,8 @@ def class_footprint(layer, code: int, base_subset: str = '', resolution: Optiona
     project layer keeps its filter and its preview) on the main thread, its gaps closed as the
     clicked objects' (``erode_cells``, see :func:`grow_object`). Without ``resolution`` (metres),
     in cells of :data:`COARSE_RESOLUTION` first, then again in those of the clicked objects when
-    the class is light enough (:func:`footprint_resolution`); ``resolution`` of the result says which.
+    the class is light enough (:func:`footprint_resolution`) and that read stays under
+    :data:`FINE_POINTS_LIMIT` points; ``resolution`` of the result says which.
 
     Raises:
         RuntimeError: The cloud cannot be read, or refused the class (the reason).
@@ -432,8 +438,8 @@ def class_footprint(layer, code: int, base_subset: str = '', resolution: Optiona
     if not copy.setSubsetString(subset):
         raise RuntimeError(f"the class was rejected by the point cloud: {subset[:120]}")
 
-    def read(metres: float):
-        result = footprint_geometry(copy, layer_resolution(metres, layer.crs()), points_limit=points_limit,
+    def read(metres: float, limit: int = points_limit):
+        result = footprint_geometry(copy, layer_resolution(metres, layer.crs()), points_limit=limit,
                                     dilate_cells=OBJECT_DILATE_CELLS, erode_cells=erode_cells,
                                     check=selection_check(subset))
         result.resolution = float(metres)
@@ -445,9 +451,9 @@ def class_footprint(layer, code: int, base_subset: str = '', resolution: Optiona
         result = read(COARSE_RESOLUTION)
         fine = footprint_resolution(result.points_read, result.truncated)
         if fine != COARSE_RESOLUTION and not result.coarse:
-            again = read(fine)
-            # Cut at the points limit, or in cells widened by the grid limit (a cloud of several km):
-            # the complete read in the coarse cells, the clicked objects measured again in them.
+            again = read(fine, min(int(points_limit), FINE_POINTS_LIMIT))
+            # Cut at the points limit (FINE_POINTS_LIMIT: a few seconds at most), or in cells widened by the grid limit
+            # (a cloud of several km): the complete read in the coarse cells, the clicked objects measured again in them.
             if not again.truncated and not again.coarse:
                 result = again
     logger.info(f"⏱ [FM5] point cloud class {int(code)} footprint: {result.points_read} points read, cells of "
