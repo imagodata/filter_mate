@@ -64,6 +64,11 @@
         <translation>Oldingi holatga qaytish: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Sozlamalarni ochish uchun so‘rovni to‘xtating yoki uning tugashini kuting.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Bekor qilinadigan narsa yo'q.</translation>

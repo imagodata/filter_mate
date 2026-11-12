@@ -231,6 +231,14 @@ class TestFindProvider:
         monkeypatch.setattr(sam_model, 'SamOnnxProvider', fail)
         assert segmentation.find_provider() is None
 
+    def test_a_runtime_cut_short_is_offered_again(self, monkeypatch):
+        """2026-11-12: an install of onnxruntime cut short was found, taken as installed and never repaired."""
+        self.ready(monkeypatch)
+        dependencies = fk.load("adapters.qgis.python_dependencies")
+        monkeypatch.setattr(dependencies, 'is_intact', lambda package: package != 'onnxruntime')
+        assert segmentation.model_state() == segmentation.ModelState(False, True)
+        assert segmentation.find_provider() is None
+
     def test_an_unknown_profile_is_not_installed(self, monkeypatch):
         sam_model = fk.load("sam_model")
         monkeypatch.setattr(sam_model, 'runtime_available', lambda: True)
@@ -402,6 +410,73 @@ class TestWindowMapping:
         assert w.to_map(column, row) == pytest.approx((123.0, 150.0))
 
 
+class TestWindowPlanningCost:
+    """2026-11-12: the windows of the Processing algorithm were planned in a time quadratic in the points (20 000: 148 s)."""
+
+    RASTER = (0.0, 0.0, 100000.0, 100000.0)
+
+    @staticmethod
+    def quadratic(points, raster, cell, size, margin_pixels=128):
+        """The planning before the grid index, the reference of the windows and of their order."""
+        margin = margin_pixels * cell
+        windows = []
+        for index, (x, y) in enumerate(points):
+            for window, members in windows:
+                if (window.x_min + margin <= x <= window.x_min + window.side - margin
+                        and window.y_max - window.side + margin <= y <= window.y_max - margin):
+                    members.append(index)
+                    break
+            else:
+                window = segmentation.window_at(x, y, raster, cell, size)
+                same = [m for other, m in windows if (other.x_min, other.y_max) == (window.x_min, window.y_max)]
+                if same:
+                    same[0].append(index)
+                else:
+                    windows.append((window, [index]))
+        return [(w.x_min, w.y_max, members) for w, members in windows]
+
+    @staticmethod
+    def plan(points, raster, cell, size, margin_pixels=128):
+        return [(w.x_min, w.y_max, members) for w, members in
+                segmentation.assign_windows(points, raster, cell, size, margin_pixels)]
+
+    @pytest.mark.parametrize('margin', [0, 128, 500])
+    def test_the_same_windows_as_before(self, margin):
+        import random
+        rng = random.Random(7)
+        points = [(rng.uniform(0, 100000.0), rng.uniform(0, 100000.0)) for _ in range(400)]
+        for _ in range(20):  # clusters, and points along the edge of the raster
+            cx, cy = rng.uniform(0, 100000.0), rng.uniform(0, 100000.0)
+            points += [(min(max(cx + rng.gauss(0, 150.0), 0.0), 100000.0), min(max(cy + rng.gauss(0, 150.0), 0.0), 100000.0))
+                       for _ in range(30)]
+        points += [(99990.0 - rng.uniform(0, 300.0), rng.uniform(0, 100000.0)) for _ in range(100)]
+        points += [(float(x * 64), float(y * 64)) for x in range(12) for y in range(12)]  # on the lines of the grid
+        assert self.plan(points, self.RASTER, 0.25, 1024, margin) == self.quadratic(points, self.RASTER, 0.25, 1024, margin)
+
+    def test_scattered_points_are_planned_quickly(self):
+        import random
+        import time
+        rng = random.Random(11)
+        points = [(rng.uniform(0, 100000.0), rng.uniform(0, 100000.0)) for _ in range(20000)]
+        begin = time.perf_counter()
+        windows = segmentation.assign_windows(points, self.RASTER, 0.25, 1024)
+        assert time.perf_counter() - begin < 15.0  # 148 s before, under 1 s after
+        assert sorted(index for _w, members in windows for index in members) == list(range(20000))
+
+    def test_a_cancel_stops_the_planning(self):
+        asked = []
+
+        def canceled():
+            asked.append(True)
+            return len(asked) > 3
+
+        points = [(1000.0 * i, 1000.0 * i) for i in range(1, 50)]
+        windows = segmentation.assign_windows(points, self.RASTER, 0.25, 1024, is_canceled=canceled)
+        assert sum(len(members) for _w, members in windows) == 3
+        prompts = [segmentation.Prompt(x, y) for x, y in points]
+        assert segmentation.plan_prompts(prompts, self.RASTER, 0.25, 1024, is_canceled=lambda: True) == []
+
+
 class TestWindowsAtTheEdge:
     """A window kept inside the raster near its edge must serve every point there, not be encoded once per point."""
 
@@ -541,3 +616,146 @@ class TestFeatureCandidates:
 
     def test_a_tie_stays(self):
         assert not segmentation.closer_to_rejected([1.0, 1.0], [[1.0, 0.0]], [[0.0, 1.0]])
+
+
+class FakeInterface:
+    """A raster interface of a pipe (renderer, filter): clone() records the copies, setAlphaBand the band."""
+
+    def __init__(self, name, alpha=-1):
+        self.name, self.alpha, self.copies = name, alpha, []
+
+    def clone(self):
+        copy = FakeInterface(self.name, self.alpha)
+        self.copies.append(copy)
+        return copy
+
+    def setAlphaBand(self, band):
+        self.alpha = band
+
+    def alphaBand(self):
+        return self.alpha
+
+
+class FakePipe:
+    def __init__(self):
+        self.interfaces = []
+
+    def set(self, interface):
+        self.interfaces.append(interface)
+        return True
+
+    def last(self):
+        return self.interfaces[-1]
+
+
+class FakeFeedback:
+    def __init__(self):
+        self.canceled = False
+
+    def cancel(self):
+        self.canceled = True
+
+    def errors(self):
+        return []
+
+
+class TestDrawingWithoutALayer:
+    """2026-11-12: the tasks opened a QgsRasterLayer in the worker: statistics of the whole coverage of a WCS at each
+    window, the CRS of the file instead of the one the user set, and neither brightness nor contrast nor saturation."""
+
+    @staticmethod
+    def layer(alpha=4):
+        renderer, brightness = FakeInterface('renderer', alpha), FakeInterface('brightness')
+        hue, resampler = FakeInterface('hue'), FakeInterface('resampler')
+        return types.SimpleNamespace(renderer=lambda: renderer, brightnessFilter=lambda: brightness,
+                                     hueSaturationFilter=lambda: hue, resampleFilter=lambda: resampler)
+
+    def test_the_look_is_cloned_with_the_alpha_band_asked(self):
+        layer = self.layer(alpha=4)
+        look = segmentation.raster_look(layer, alpha_band=-1)
+        assert [look[key].name for key in ('renderer', 'brightness', 'hue', 'resampler')] == \
+            ['renderer', 'brightness', 'hue', 'resampler']
+        assert look['renderer'].alpha == -1 and layer.renderer().alpha == 4  # the layer keeps its own
+        assert segmentation.raster_look(layer)['renderer'].alpha == 4
+
+    @pytest.fixture
+    def registry(self, monkeypatch):
+        core = sys.modules['qgis.core']
+        opened, pipes = [], []
+
+        class Provider:
+            def __init__(self, valid):
+                self.valid = valid
+
+            def isValid(self):
+                return self.valid
+
+        def create(key, source, options):
+            opened.append((key, source, options))
+            return Provider('bad' not in source)
+
+        def pipe():
+            pipes.append(FakePipe())
+            return pipes[-1]
+
+        def no_layer(*_args):
+            raise AssertionError('a QgsRasterLayer was opened')
+
+        monkeypatch.setattr(core, 'QgsProviderRegistry', types.SimpleNamespace(
+            instance=lambda: types.SimpleNamespace(createProvider=create)), raising=False)
+        monkeypatch.setattr(core, 'QgsDataProvider', types.SimpleNamespace(ProviderOptions=lambda: 'options'), raising=False)
+        monkeypatch.setattr(core, 'QgsRasterPipe', pipe, raising=False)
+        monkeypatch.setattr(core, 'QgsRasterLayer', no_layer, raising=False)
+        return opened, pipes
+
+    def test_a_bare_provider_drawn_with_the_look_of_the_layer(self, registry):
+        opened, _pipes = registry
+        look = segmentation.raster_look(self.layer())
+        pipe = segmentation.open_drawing('https://example.org/wcs?coverage=dem', 'wcs', look)
+        assert opened == [('wcs', 'https://example.org/wcs?coverage=dem', 'options')]
+        assert [getattr(interface, 'name', 'provider') for interface in pipe.interfaces] == \
+            ['provider', 'renderer', 'brightness', 'hue', 'resampler']
+        assert all(interface is not look[interface.name] for interface in pipe.interfaces[1:])  # copies: the pipe owns them
+
+    def test_nothing_to_draw(self, registry):
+        assert segmentation.open_drawing('bad.tif', 'gdal', segmentation.raster_look(self.layer())) is None
+        assert segmentation.open_drawing('good.tif', 'gdal', {'renderer': None}) is None
+
+    def test_the_window_is_read_as_it_is(self, monkeypatch):
+        """The window in the layer CRS, its pixels, no reprojection: a CRS set by the user names the coordinates."""
+        fk.install(monkeypatch, segmentation)
+        monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterBlockFeedback', FakeFeedback, raising=False)
+        asked = []
+        block = types.SimpleNamespace(isEmpty=lambda: False, image=lambda: 'pixels')
+
+        def read(band, extent, width, height, feedback):
+            asked.append((band, extent, width, height))
+            return block
+
+        segmentation.render_drawing(types.SimpleNamespace(last=lambda: types.SimpleNamespace(block=read)), window(),
+                                    lambda: False)
+        assert asked == [(1, fk.FakeRectangle(100.0, 100.0, 180.0, 180.0), 8, 8)]
+
+    def test_a_block_not_drawn_is_an_error_unless_canceled(self, monkeypatch):
+        fk.install(monkeypatch, segmentation)
+        monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterBlockFeedback', FakeFeedback, raising=False)
+        empty = types.SimpleNamespace(isEmpty=lambda: True)
+        pipe = types.SimpleNamespace(last=lambda: types.SimpleNamespace(block=lambda *args: empty))
+        with pytest.raises(RuntimeError):
+            segmentation.render_drawing(pipe, window(), lambda: False)
+        segmentation.render_drawing(pipe, window(), lambda: True)
+
+    def test_the_tasks_draw_through_the_pipe(self, monkeypatch):
+        drawn = []
+        monkeypatch.setattr(segmentation, 'open_drawing', lambda source, key, look: drawn.append((source, key, look)) or 'pipe')
+        monkeypatch.setattr(segmentation, 'render_drawing', lambda pipe, w, canceled: drawn.append((pipe, w)) or 'image')
+        monkeypatch.setattr(segmentation, 'image_to_rgb', lambda image: 'rgb')
+        model = types.SimpleNamespace(embed=lambda rgb: {'rgb': rgb})
+        look = {'renderer': 'renderer', 'brightness': 'brightness'}
+        task = segmentation.SegmentationEmbedTask('/data/ortho.tif', 'gdal', None, 'crs', window(), model,
+                                                  lambda t, ok: None, look=look)
+        assert task.run() and task.embedding == {'rgb': 'rgb'}
+        assert drawn == [('/data/ortho.tif', 'gdal', look), ('pipe', window())]
+        given = segmentation.SegmentationEmbedTask('/data/ortho.tif', 'gdal', 'renderer', 'crs', window(), model,
+                                                   lambda t, ok: None)
+        assert given.look == {'renderer': 'renderer'}  # the callers that give a renderer alone (scripts)

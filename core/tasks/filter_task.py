@@ -908,6 +908,12 @@ class FilterEngineTask(QgsTask):
                 logger.warning(f"Error checking the task's PostgreSQL connection: {e}")
             self._task_postgresql_connection = None
 
+        # 2026-11-12: an attempt that failed is not made again by the same task: each one
+        # may wait for its connection timeouts, and a reset asks once per layer
+        failure = getattr(self, '_task_postgresql_connection_failure', None)
+        if failure:
+            raise Exception(failure)
+
         logger.debug("Opening the task's PostgreSQL connection from its source layer")
 
         if hasattr(self, 'source_layer') and self.source_layer is not None:
@@ -935,9 +941,10 @@ class FilterEngineTask(QgsTask):
         except (RuntimeError, OSError, AttributeError, KeyError) as e:
             logger.error(f"Failed to get connection from layer by ID: {e}")
 
-        raise Exception(
+        self._task_postgresql_connection_failure = (
             "No valid PostgreSQL connection available: could not obtain a connection from the layer."
         )
+        raise Exception(self._task_postgresql_connection_failure)
 
     def _initialize_source_layer(self):
         """Initialize source layer and basic layer count. Delegates to InitializationHandler."""
@@ -1074,6 +1081,13 @@ class FilterEngineTask(QgsTask):
                 logger.info(f"Action '{self.task_action}' completed via dispatcher: {result.message}")
             else:
                 logger.warning(f"Action '{self.task_action}' failed via dispatcher: {result.message}")
+                # 2026-11-12: the handler caught an exception of the action (its text in
+                # errors): its first line (an SQL error goes on with the statement)
+                # becomes the task message, or the message bar only says "Task failed".
+                # A message the action set itself is more precise: kept.
+                error_lines = str(result.errors[0]).strip().splitlines() if result.errors else []
+                if error_lines and not self.message:
+                    self.message = error_lines[0]
 
             return result.success
 
@@ -1503,11 +1517,9 @@ class FilterEngineTask(QgsTask):
             source_layer=self.source_layer,
             layers=self.layers,
             task_parameters=self.task_parameters,
-            param_buffer_expression=self.param_buffer_expression,
             param_source_provider_type=self.param_source_provider_type,
             provider_list=self.provider_list,
             initialize_source_subset_and_buffer_callback=self._initialize_source_subset_and_buffer,
-            ensure_buffer_expression_mv_exists_callback=self._ensure_buffer_expression_mv_exists,
             try_create_filter_chain_mv_callback=self._try_create_filter_chain_mv,
             prepare_geometries_by_provider_callback=self._prepare_geometries_by_provider,
             filter_all_layers_with_progress_callback=self._filter_all_layers_with_progress,
@@ -1772,10 +1784,6 @@ class FilterEngineTask(QgsTask):
     def _create_source_mv_if_needed(self, source_mv_info):
         """Create source materialized view with pre-computed buffer. Delegates to MaterializedViewHandler."""
         return self._mv_handler.create_source_mv_if_needed(source_mv_info)
-
-    def _ensure_buffer_expression_mv_exists(self):
-        """Ensure buffer expression MVs exist. Delegates to MaterializedViewHandler."""
-        return self._mv_handler.ensure_buffer_expression_mv_exists()
 
     def _try_create_filter_chain_mv(self):
         """Try to create filter chain MV optimization. Delegates to MaterializedViewHandler."""

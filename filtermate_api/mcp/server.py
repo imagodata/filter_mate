@@ -64,7 +64,8 @@ _PREDICATES_DOC = (
 )
 _OPERATOR_DOC = (
     "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what "
-    "either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
+    "either keeps), AND NOT (remove the new selection from the previous filter, or from the whole layer when it "
+    "has none). Omit to replace the previous filter."
 )
 
 
@@ -517,7 +518,7 @@ def build_server(client: FilterMateClient) -> Any:
         criteria: Annotated[PointCloudCriteria, Field(description=(
             "Points to keep; at least one criterion is required"))],
         operator: Annotated[Optional[Operator], Field(description=(
-            _OPERATOR_DOC + " AND NOT needs an existing filter on each layer."))] = None,
+            _OPERATOR_DOC))] = None,
     ) -> Dict[str, Any]:
         """Keep only some points (by class, elevation, intensity, return number or expression) on point cloud layers.
 

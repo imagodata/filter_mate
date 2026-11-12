@@ -1594,14 +1594,17 @@ def build_combined_filter_expression(
     Returns:
         str: Combined filter expression
     """
+    from .expression_combiner import combine_without_old_subset
+
+    # 2026-11-12: no old subset: NOT ( new ) under AND NOT
     if not old_subset or not combine_operator:
-        return new_expression
+        return combine_without_old_subset(new_expression, combine_operator)
 
     # Sanitize old_subset to remove non-boolean display expressions
     if sanitize_fn:
         old_subset = sanitize_fn(old_subset)
         if not old_subset:
-            return new_expression
+            return combine_without_old_subset(new_expression, combine_operator)
 
     # 2026-10-17: always ( old ) OP ( new ). An old subset containing WHERE
     # (subquery, value) used to be re-joined unparenthesized.

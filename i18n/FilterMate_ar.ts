@@ -64,6 +64,11 @@
         <translation>العودة إلى ما قبل: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>أوقف الطلب أو انتظر انتهاءه لفتح الإعدادات.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>لا شيء للتراجع عنه.</translation>

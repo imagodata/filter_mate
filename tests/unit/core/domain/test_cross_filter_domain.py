@@ -97,6 +97,9 @@ class TestSubsets:
 
     @pytest.mark.parametrize("previous,operator,expected", [
         ("", "AND", "x"),
+        ("", "OR", "x"),
+        ("", None, "x"),
+        ("", "AND NOT", "NOT (x)"),   # 2026-11-12: taken out of the whole layer (it kept only x)
         ("a = 1", None, "x"),
         ("a = 1", "AND", "(a = 1) AND (x)"),
         ("a = 1", "OR", "(a = 1) OR (x)"),
@@ -162,6 +165,37 @@ class TestSnapshotsAndHistory:
         assert kept.changes == second.changes[1:]
         assert history.peek_undo("v") is first
         assert not history.can_undo("v2")  # nothing left of an operation on the removed layer alone
+
+    def test_forget_keeps_a_turn_that_did_something_else(self):
+        """2026-11-12: a turn of the agent that filtered the removed layer and styled another one stays undoable."""
+        history = CrossOperationHistory()
+        turn = CrossOperation("agent", ((self._snap("a", "x"), self._snap("a", "y")),),
+                              effects=(("style", "b", "<old/>", "<new/>", "B"),
+                                       ("selection", "a", (1,), (1, 2)), ("notes", "", ("n",), ("n", "m"))))
+        history.push(turn)
+        history.forget_layer("a")
+        kept = history.peek_undo("agent")
+        assert kept.op_id == turn.op_id and kept.changes == ()
+        # What the turn did to the removed layer goes with it, as its filter did; the rest stays.
+        assert kept.effects == (("style", "b", "<old/>", "<new/>", "B"), ("notes", "", ("n",), ("n", "m")))
+
+    def test_forget_drops_a_turn_that_only_touched_the_removed_layer(self):
+        history = CrossOperationHistory()
+        history.push(CrossOperation("agent", ((self._snap("a", "x"), self._snap("a", "y")),),
+                                    effects=(("style", "a", "<old/>", "<new/>", "A"),)))
+        history.forget_layer("a")
+        assert not history.can_undo("agent")
+
+    def test_forget_keeps_the_layer_a_turn_added(self):
+        """Undoing a turn removes the layer it added: the turn, now to redo, must still bring it back."""
+        history = CrossOperationHistory()
+        turn = CrossOperation("agent", ((self._snap("new", "x"), self._snap("new", "y")),),
+                              effects=(("added", "new", "<qlr/>", ((), 0), "New"), ("style", "new", "<a/>", "<b/>", "New")))
+        history.push(turn)
+        history.undo("agent")
+        history.forget_layer("new")  # what removing the added layer on undo triggers
+        kept = history.peek_redo("agent")
+        assert kept.op_id == turn.op_id and kept.effects == (("added", "new", "<qlr/>", ((), 0), "New"),)
 
 
 class TestRasterSelection:

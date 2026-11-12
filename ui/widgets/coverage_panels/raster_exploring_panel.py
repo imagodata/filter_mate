@@ -2756,7 +2756,7 @@ class RasterExploringPanel(QWidget):
     def set_segmentation_readiness(self, runtime_available: bool, model_installed: bool, downloading: bool = False,
                                    installing_runtime: bool = False, runtime_failed: bool = False) -> None:
         """Say what SAM still lacks; without it the object targets use the colour engine, objects drawn before keep filtering."""
-        from ....adapters.qgis.coverage_layers.sam_model import install_command
+        from ....adapters.qgis.python_dependencies import manual_command
         was_sam = self._sam_active()
         was_ready = self.segmentation_ready()
         self._model_runtime, self._model_installed = bool(runtime_available), bool(model_installed)
@@ -2771,7 +2771,7 @@ class RasterExploringPanel(QWidget):
         elif runtime_failed:
             self._segment_install_label.setText(self.tr(
                 "onnxruntime could not be installed automatically (see the FilterMate log). In a terminal "
-                "(the OSGeo4W Shell on Windows), run {0} then restart QGIS.").format(install_command()))
+                "(the OSGeo4W Shell on Windows), run {0} then restart QGIS.").format(manual_command()))
         elif not ready:
             self._segment_install_label.setText(self.tr(
                 "Objects are found by their colour. SAM draws them from the image, far better on buildings "

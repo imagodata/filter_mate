@@ -64,6 +64,11 @@
         <translation>Torna a prima di: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Interrompi la richiesta, o attendi che finisca, per aprire le impostazioni.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Niente da annullare.</translation>
