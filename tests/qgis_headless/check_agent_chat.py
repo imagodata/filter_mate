@@ -474,6 +474,8 @@ def check_chat(provider, layer, authcfg, work):
         return wait(lambda: not panel._working, seconds)
 
     chat.open_settings = lambda: False
+    # A request sent without consent opens the settings itself (#367): no modal dialog may wait in a headless run.
+    chat._settings_dialog = lambda: False
     settings()
     chat._refresh_ready()
     wait(lambda: False, 0.05)
