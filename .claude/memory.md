@@ -1,6 +1,21 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] CHECKPOINT — tests PostGIS de bout en bout à faire (correctifs PG #355 / #357 / #358 / #363 / #368)
+Référence : `main` à `e646f291`. Ces correctifs sont vérifiés par la suite unitaire (8228 passés, seul échec connu
+`test_coverage_raster_target::test_canceled_selection_is_not_read`, antérieur) et des revues Opus, **jamais en QGIS
+sur PostGIS** : le 12/11, Docker Desktop n'a jamais démarré, pas de PostgreSQL local, `sudo` sous mot de passe.
+Cause du signalement client (« Task failed: Tâche échouée », source PG « Zones MRO » → 8 couches, Intersect) non
+confirmée : demander son `<plugin>/logs/filtermate.log` (« Callback execution failed: … »).
+À lancer avant de publier une version, dès qu'un PostGIS est disponible :
+1. `tests/qgis_headless/check_pg_buffer_expression.py` avec `FM_PG_SRC_COUNT=8000` puis `12000` (commande docker en
+   tête du fichier) : la cible doit compter autant d'entités que le comptage SQL (buffer `quad_segs=5`). Jamais
+   exécuté : corriger d'abord ce qui casse dans le scénario lui-même.
+2. `tests/qgis_headless/run_postgis_check.py` (vues matérialisées, connexions, tâches annulées).
+3. À écrire : couche via `service=` (pg_service.conf + `PGSERVICEFILE`) puis filtre géométrique multi-couches (#357) ;
+   couche dont psycopg2 ne peut pas se connecter (mot de passe non enregistré) : couches distantes filtrées, erreur
+   claire sinon (#355) ; deuxième filtre avec buffer par expression et opérateur OR sur une autre sélection (#368).
+
 ## [2026-11-12] Cibles raster / nuage d'une source vecteur : options dédiées ; fond web grisé dans la liste
 Décision utilisateur : `CROSS_FILTER.vector_source_raster_targets` / `vector_source_point_cloud_targets` (on par
 défaut), en plus de `RASTER` / `POINT_CLOUD.enabled` (qui restent source ET cible). Source raster / nuage : options
