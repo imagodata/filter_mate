@@ -550,14 +550,14 @@ HYBRID_MAX_KEYS = 100_000
 
 
 def key_reference(name: str) -> str:
-    """The key column of a hybrid subset (SQLite)."""
+    """The key column of a hybrid subset (SQLite, PostgreSQL)."""
     if not name or any(part in name for part in _IDENTIFIER_REFUSED) or any(ord(char) < 32 for char in name):
         raise Unsupported('A key name that cannot be written safely: {}'.format(name))
     return '"' + name + '"'
 
 
-def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool) -> str:
-    """SQLite subset of a PARTIAL / NONE translation from the keys QGIS evaluated.
+def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, dialect: str = SQLITE) -> str:
+    """Subset of a PARTIAL / NONE translation from the keys QGIS evaluated (SQLite, PostgreSQL).
 
     The subset keeps the same features as the expression (a TRUE / not TRUE
     filter: it must not be negated, where FALSE and NULL differ). A list
@@ -571,8 +571,11 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool) -> st
         failing: Keys of the features the native part keeps and the whole
             expression does not; None when there is no native part.
         key: :func:`key_reference` of the key column, unique and never NULL.
-        numeric: Whether the key values are numbers (a text key is compared
-            ``COLLATE BINARY``, whatever the column's collation).
+        numeric: Whether the key values are numbers. A SQLite text key is
+            compared ``COLLATE BINARY``, whatever the column's collation; a
+            PostgreSQL one as it is (a deterministic collation compares bytes,
+            and a COLLATE would refuse a uuid key and leave its index unused).
+        dialect: ``sqlite`` or ``postgresql``.
 
     Returns:
         The native part alone when nothing else excludes a feature, else the
@@ -591,7 +594,9 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool) -> st
             literals.append(format_key_literal(value, numeric, SQL))
         return ', '.join(literals)
 
-    column = key if numeric else key + ' COLLATE BINARY'
+    if dialect not in (SQLITE, POSTGRESQL):
+        raise Unsupported('Hybrid subsets are written for SQLite and PostgreSQL only')
+    column = key if numeric or dialect == POSTGRESQL else key + ' COLLATE BINARY'
     if native_sql and failing is not None:
         if not failing:
             return native_sql

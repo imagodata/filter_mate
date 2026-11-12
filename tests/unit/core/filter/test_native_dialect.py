@@ -522,3 +522,17 @@ def test_translation_reports_whether_it_holds_a_connective():
                             OGR_SQL, TYPES).composite
     assert translate_native(negation(binary('>', col('pop'), lit(5))), OGR_SQL, TYPES).composite
     assert translate_native(binary('=', col('ratio'), lit(0.5)), OGR_SQL, TYPES).composite  # its tolerance
+
+
+def test_postgresql_hybrid_lists_keys_without_a_collation():
+    # 2026-11-12: a COLLATE would refuse a uuid key and leave the key's index unused
+    assert hybrid_sql('', ['a1', 'b2'], None, '"code"', False, POSTGRESQL) == (
+        '"code" IS NOT NULL AND "code" IN (\'a1\', \'b2\')')
+    assert hybrid_sql('"pop" > 5', [1, 3, 6], [9], '"id"', True, POSTGRESQL) == (
+        '"id" IS NOT NULL AND ("pop" > 5) AND NOT ("id" IN (9))')
+    assert hybrid_sql('', ['a1'], None, '"code"', False) == '"code" IS NOT NULL AND "code" COLLATE BINARY IN (\'a1\')'
+
+
+def test_hybrid_is_not_written_for_ogr_sql():
+    with pytest.raises(Unsupported):
+        hybrid_sql('', [1], None, '"fid"', True, OGR_SQL)

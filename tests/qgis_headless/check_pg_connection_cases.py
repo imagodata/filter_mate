@@ -12,8 +12,8 @@ FilterMate on PostGIS: three cases of the 2026-11-12 PostgreSQL fixes (QGIS GUI 
   unfilter, then a filter with a buffer expression (the materialized-view path): the distant layers
   are filtered all the same.
 - ``native``: attribute filters of the source written in the native SQL of PostgreSQL (ILIKE, the
-  tolerance of a real equality, a float division), each compared with QGIS's own answer, then a
-  geometric filter from the source filtered that way.
+  tolerance of a real equality, a float division) or as a hybrid list of keys (regexp_match), each
+  compared with QGIS's own answer, then a geometric filter from the source filtered that way.
 - ``or_buffer``: a first filter with a buffer expression from a selection holding OR and BETWEEN,
   then a second one on another selection with the OR operator, to the same target and to a new one
   (#368: the distant layers followed the previous subset of the source, its OR written as AND).
@@ -454,6 +454,7 @@ NATIVE_EXPRESSIONS = [
     '"id" / 400 > 4.5',                   # a float division in QGIS, an integer one in PostgreSQL
     '"nom" LIKE \'R%\' AND "id" <= 300',
     '"nom" IS NULL OR "ratio" >= 2',
+    'regexp_match("nom", \'^R\') > 0 AND "id" <= 500',  # left to QGIS in part: a hybrid list of keys
 ]
 if os.environ.get('FM_PG_NATIVE_ONLY'):  # a part of the text of the expressions to run
     NATIVE_EXPRESSIONS = [text for text in NATIVE_EXPRESSIONS if os.environ['FM_PG_NATIVE_ONLY'] in text]
