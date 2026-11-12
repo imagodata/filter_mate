@@ -53,6 +53,7 @@ ROWS = [
     (11, 6, 0.3, 'Route\nNord', '6'),
     (12, 1, 0.2, '\u017faint', 's'),        # long s
     (13, 4, 0.7, 'Kelvin \u212a', 'k'),     # Kelvin sign
+    (14, 8, 6656395.210250434, 'Grand', '14'),  # SQLite 3.45 reads this literal one ulp off
 ]
 
 # (expression, dialects that MUST write it entirely)
@@ -79,9 +80,12 @@ CASES = [
     ('"ratio" * 3 = 0.3', ALL),                     # 0.30000000000000004: qgsDoubleNear
     ('"ratio" * 3 <> 0.3', ALL),
     ('"ratio" = 0.3', ALL),
-    ('-"pop" < -8', ALL),
+    ('-"pop" < -8', ()),                                # QGIS: -NULL of an integer field is 0
     ('"pop" > -5', ALL),
     ('"ratio" = 0.00001', ALL),
+    ('"ratio" = 6656395.210250434', ALL),
+    ('"ratio" >= 6656395.210250434', ALL),
+    ('"ratio" < 6656395.210250434', ALL),
     ('"pop" / 2 > 3', ALL),
     ('"pop" / 2 = 3.5', ALL),
     ('"pop" / -2.5 < -1', ALL),
@@ -117,7 +121,12 @@ CASES = [
     ('lower("nom") = \'été\'', ('postgresql',)),
     ('floor("ratio") = 2', ('postgresql',)),
     ('ceil("ratio") = 2', ('postgresql',)),
+    ('coalesce("nom", \'\') LIKE \'R%\'', DB),         # the sanitizer took COALESCE(...) GLOB for a display
+    ('"nom" NOT LIKE \'A%\'', DB),
+    ('coalesce("pop", 0) > 5 AND "ratio" < 3', DB),
     # left to QGIS today: printed with their reason, compared when written
+    ('-"pop" > -1', ()),                                # QGIS: -NULL of an integer field is 0
+    ('-"pop" IS NULL', ()),
     ('length("nom") = 5', ()),
     ('coalesce("pop") = 3', ()),
     ('"ratio" IN (0.5, 1.5)', ()),
@@ -273,6 +282,72 @@ def executor_path(label, layer, provider_type):
         report(status, f"{label} executor: {text}", f"sql={processed!r} expected={expected} got={got}")
 
 
+# Expressions the translation leaves (in part) to QGIS: QGIS evaluates them, the
+# subset lists keys (hybrid). Through the plugin's own entry, with its key.
+HYBRID_CASES = [
+    '"nom" = \'route\'',                                   # Shapefile: OGR SQL ignores case
+    '"pop" > 5 AND regexp_match("nom", \'^R\') > 0',
+    '"pop" > 5 AND regexp_match("nom", \'zzz\') > 0',      # nothing kept
+    '"pop" > 5 AND length("nom") >= 0',                    # QGIS excludes nothing from the native part
+    '"pop" >= 0 AND "nom" <> \'r*ute\'',                   # Shapefile: few keys excluded
+    '"code" > 9',
+    'length("nom") = 5',
+    'regexp_match("nom", \'^R\') > 0 OR "pop" > 5',
+    '"ratio" IN (0.5, 1.5)',
+    'NOT ("pop" > 5 AND "ratio" < 2)',                     # Shapefile: a NOT over an AND
+    '-"pop" > -1',                                         # QGIS: -NULL of an integer field is 0
+    '-"pop" IS NULL',
+    'coalesce(abs("pop"), 7) > 6',                         # the sanitizer truncates COALESCE(abs(CAST(...
+    '"ratio" = 6656395.210250434 AND regexp_match("nom", \'^G\') > 0',
+]
+# (old subset, combine operator, expression): hybrid with AND only, the former path otherwise
+COMBINED_CASES = [
+    ('"pop" > 2', 'AND', 'regexp_match("nom", \'o\') > 0'),
+    ('"pop" > 2', 'AND', '"nom" = \'route\' OR "nom" = \'Route\''),
+    ('"pop" > 2', 'OR', 'regexp_match("nom", \'o\') > 0'),
+    ('"pop" > 2', 'AND NOT', 'regexp_match("nom", \'o\') > 0'),
+    ('"pop" > 2', None, 'regexp_match("nom", \'o\') > 0'),
+]
+
+
+def run_executor(layer, provider_type, text, old=None, operator=None):
+    """process_qgis_expression, combination with the old subset and safe_set_subset_string, as the task runs them."""
+    from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
+    layer.setSubsetString(old or '')
+    executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key='fid',
+                                       old_subset=old, combine_operator=operator)
+    processed, _ = executor.process_qgis_expression(text)
+    combined = executor.combine_with_old_subset(processed) if processed else None
+    accepted = bool(combined) and executor.apply_filter(combined)
+    got = keys(layer) if accepted else None
+    layer.setSubsetString('')
+    return processed in executor.native_origins, combined, got
+
+
+def hybrid_path(label, layer, provider_type):
+    """The plugin's entry on expressions left to QGIS: the hybrid subset keeps what QGIS keeps.
+
+    Hybrid subsets are written for SQLite sources only: on a Shapefile these
+    cases take the former conversion (OLD, printed, not asserted).
+    """
+    for text in HYBRID_CASES:
+        layer.setSubsetString('')
+        expected = reference(layer, text)
+        written, subset, got = run_executor(layer, provider_type, text)
+        status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
+        report(status, f"{label} hybrid: {text}", f"subset={subset!r:.160} expected={expected} got={got}")
+    for old, operator, text in COMBINED_CASES:
+        layer.setSubsetString('')
+        joined = {'AND': '({}) AND ({})', 'OR': '({}) OR ({})', 'AND NOT': '({}) AND NOT ({})'}.get(operator, '{1}')
+        expected = reference(layer, joined.format(old, text))
+        written, subset, got = run_executor(layer, provider_type, text, old, operator)
+        status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
+        if operator != 'AND' and written:
+            status = 'FAIL'  # a list of keys read through the old subset, or negated: never written
+        report(status, f"{label} combined {operator}: {old} / {text}",
+               f"subset={subset!r:.160} expected={expected} got={got}")
+
+
 def main():
     work = tempfile.mkdtemp(prefix='fm_native_')
     plugins = os.path.join(work, 'plugins')
@@ -298,6 +373,7 @@ def main():
         try:
             compare(label, layer)
             executor_path(label, layer, provider_type)
+            hybrid_path(label, layer, provider_type)
         except Exception as exc:
             traceback.print_exc()
             report('FAIL', f"{label} raised {type(exc).__name__}: {exc}")
