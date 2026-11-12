@@ -1,8 +1,8 @@
 # Point d'étape — Audit profond du 12/11/2026 (régressions depuis v5.0.2)
 
-**Date** : 2026-11-12, fin de journée (2ᵉ version du point d'étape)
+**Date** : 2026-11-12, fin de journée (3ᵉ version du point d'étape)
 **Référence** : `v5.0.2` (06/11) → `main`. 279 commits entre les deux au début de l'audit.
-**État** : 11 PR de l'audit fusionnées (#356 → #370). Une branche est en vérification : `claude/audit-engine-followup`.
+**État** : les 12 PR de l'audit sont fusionnées (#356 → #374). Plus aucune branche de l'audit en attente ; restent la compilation des `.qm` et les « Restes connus ».
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## Décisions prises par Simon pendant l'audit
 
-1. **`AND NOT` sans filtre existant** donne `NOT (expr)`, c'est-à-dire toute la couche moins la sélection, partout : dock, API, agent, cœur. Fait dans #365 ; le suivi en cours corrige le cas d'un filtre précédent remplacé.
+1. **`AND NOT` sans filtre existant** donne `NOT (expr)`, c'est-à-dire toute la couche moins la sélection, partout : dock, API, agent, cœur. Fait dans #365, et dans #374 pour le cas d'un filtre précédent remplacé.
 2. **Couches protégées de l'agent** : la protection vaut aussi pour l'API REST et le serveur MCP adossé au REST (403). Fait dans #361 et #369.
 3. **CI** : rester désactivée.
 4. **Cibles raster / LiDAR d'une source vecteur.**
@@ -49,20 +49,9 @@
 | #367 | suivi de #359 | Les outils des panneaux se passent l'outil qu'ils ont remplacé (Zone / SAM). `abort_active` et le checkpoint MCP jetés au changement de projet. `forget_layer` avec un effet `added`. |
 | #369 | suivi de #361 | Un id trouve sa couche ou rien. Référence vide contrôlée. `map_theme apply` sur une couche protégée refusé. Couches jointes à une couche retirée. Entrée protégée illisible. Undo de l'agent. Bornes IDW. `sql_guard` ASCII. |
 | #370 | options de cibles | `vector_source_raster_targets` / `vector_source_point_cloud_targets`. Fonds web grisés et non cochables. Rafraîchissement qui garde exactement les coches de l'utilisateur. |
+| #374 | suivi de #365 | `AND NOT` après un filtre remplacé : vraie combinaison avec une liste de clés, `NOT (nouveau)` après un filtre spatial ; avant, le second `AND NOT` gardait ce qu'il devait retirer. Repli liste d'ids et OGC API Features. Expression « style » limitée à `coalesce(champ, 'texte')` : #365 remplaçait en silence `regexp_match(...)`, une colonne booléenne… Source vide lue telle qu'écrite et refus sans filtrage. SpatiaLite `prédicat = 1` (géométrie NULL). Noms de table GPKG uniques. Suite : 8 546 réussis ; tests de fumée en QGIS 3.44.6 identiques à `main`. |
 
 **Traductions** : les nouvelles chaînes de #359, #369 et #370 sont dans les 34 `.ts`, mais **les `.qm` ne sont pas recompilés** (voir « Restes »).
-
-## En vérification
-
-`claude/audit-engine-followup` : suivi de #365 après sa revue, qui avait trouvé des résultats faux en silence.
-- **`AND NOT` après un filtre remplacé** : avec une liste de clés précédente, vraie combinaison `(clés) AND NOT (nouveau)` ; avec un filtre spatial ou de style précédent, `NOT (nouveau)`. Avant, le second `AND NOT` gardait ce qu'il devait retirer.
-- **Repli liste d'ids de la source** : même règle.
-- **OGC API Features** : refuse `AND NOT` sans filtre.
-- **Expression « style »** réduite à `coalesce(champ, 'texte')`. #365 remplaçait en silence `regexp_match(...)`, une colonne booléenne, etc.
-- **Source vide** : la nouvelle sélection est lue telle qu'écrite, et un refus ne filtre plus rien.
-- **SpatiaLite** : `prédicat = 1`, pour qu'une géométrie NULL ne soit plus gardée selon la présence d'un index R-tree.
-- **Points mineurs** : export GeoPackage avec des noms de table uniques, `NOT (\nx\n)`, PNG multipage.
-- **Vérification en cours** : suite complète et tests de fumée moteur en QGIS 3.44.6, dans `.claude/worktrees/audit3/filter_mate` (`verify/engine-followup`). `main` a reçu entre-temps #373 (traduction native, mode hybride) : à refusionner avant de pousser.
 
 ## Restes connus (non traités)
 
