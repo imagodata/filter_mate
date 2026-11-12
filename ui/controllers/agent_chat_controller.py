@@ -1496,6 +1496,9 @@ class AgentChatController(QObject):
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
+            "export_settings_profile": lambda: _tr("Profile of settings saved: {}").format(args.get("name", "")),
+            "apply_settings_profile": lambda: _tr("Profile of settings applied: {}").format(
+                args.get("name") or str(args.get("path", ""))[-60:]),
             "get_setting": lambda: _tr("Reading the setting {}").format(args.get("path", "")),
             "change_settings": lambda: _tr("Settings of FilterMate: {}").format(", ".join(
                 str(change.get("path", "")).rsplit(".", 1)[-1] for change in (args.get("changes") or [])
@@ -1627,7 +1630,7 @@ class AgentChatController(QObject):
         for number, call in enumerate(calls[:MAX_LISTED], 1):
             detail = one_line(self._run_detail(call), 160)
             lines.append(f"{number}. {one_line(self._describe(call), 160)}" + (f" — {detail}" if detail else ""))
-            if call.name == "change_settings":  # each setting before and after, as when it is asked alone
+            if call.name in ("change_settings", "apply_settings_profile"):  # each setting before and after
                 lines.extend(f"    {line}" for line in self._settings_lines(call)[0][:MAX_LISTED])
         if len(calls) > MAX_LISTED:
             lines.append(f"(+{len(calls) - MAX_LISTED})")
@@ -1649,7 +1652,7 @@ class AgentChatController(QObject):
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
-        if call.name == "change_settings" and not self._settings_would_change(call):
+        if call.name in ("change_settings", "apply_settings_profile") and not self._settings_would_change(call):
             return True  # nothing to show: every value is already set, or the tool refuses the call and says why
         if call.name == RUN_PYTHON:
             text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
@@ -1687,7 +1690,7 @@ class AgentChatController(QObject):
         elif call.name == "remove_layers":
             text = _tr("The agent wants to remove these layers from the project (their files stay, their styles and "
                        "filters here are lost):\n{}\n\nDo you agree?").format(layers)
-        elif call.name == "change_settings":
+        elif call.name in ("change_settings", "apply_settings_profile"):
             text = self._settings_text(call)
         elif call.name == "export_layers":
             text = _tr("The agent wants to export these layers to files:\n{}\n\nDo you agree?").format(layers)
@@ -1701,7 +1704,8 @@ class AgentChatController(QObject):
     @staticmethod
     def _settings_would_change(call: ToolCallPart) -> bool:
         try:
-            return any(row["before"] != row["after"] for row in plugin_settings.planned(call.arguments))
+            return any(row["before"] != row["after"]
+                       for row in plugin_settings.planned_any(call.name, call.arguments))
         except Exception:
             return False
 
@@ -1709,7 +1713,7 @@ class AgentChatController(QObject):
     def _settings_lines(call: ToolCallPart):
         """Each setting the call changes, before and after, one line each; the problem when the call is refused."""
         try:
-            rows = plugin_settings.planned(call.arguments)
+            rows = plugin_settings.planned_any(call.name, call.arguments)
         except Exception as exc:  # the tool will answer the model why; the user sees what was asked
             return [], str(exc)
         effects = {"now": _tr("applied at once"), "next use": _tr("used from the next filter or export"),
@@ -1723,9 +1727,10 @@ class AgentChatController(QObject):
         """Each setting before and after, as the user reads them before saying yes."""
         lines, problem = cls._settings_lines(call)
         listed = "\n".join(lines[:MAX_LISTED]) or one_line(problem, 300)
+        reason = call.arguments.get("reason") or call.arguments.get("name") or call.arguments.get("path") or ""
         return _tr("The agent wants to change these settings of FilterMate (they stay for every project; undoing "
                    "the turn puts them back):\n{}\n\nWhy: {}\n\nDo you agree?").format(
-            listed, one_line(str(call.arguments.get("reason", "")), 300))
+            listed, one_line(str(reason), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go

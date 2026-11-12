@@ -12,9 +12,11 @@ from typing import Any, Callable, Dict, List, Optional
 
 from ...core.agent.settings_reference import (
     Setting, describe, get, leaf_values, load_default, plan, read_settings)
-from ...core.agent import skills
+from ...core.agent import settings_profile, skills
 from ...core.agent.performance import summary as performance_summary
-from ...core.agent.tool_catalog import CHANGE_SETTINGS, DESCRIBE_SETTINGS, DIAGNOSE_PERFORMANCE, GET_SETTING, LOAD_SKILL
+from ...core.agent.tool_catalog import (
+    APPLY_SETTINGS_PROFILE, CHANGE_SETTINGS, DESCRIBE_SETTINGS, DIAGNOSE_PERFORMANCE, EXPORT_SETTINGS_PROFILE, GET_SETTING,
+    LOAD_SKILL)
 from ...core.agent.tool_executor import ToolFailure
 
 logger = logging.getLogger("FilterMate")
@@ -102,11 +104,87 @@ def planned(arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
     return plan(settings_rows(), arguments.get("changes") or [])
 
 
+PROFILES_FOLDER = "profiles"
+
+
+def _profiles_folder():
+    from ...filtermate_api.config import _default_export_root
+    from ...filtermate_api.export_root import prepare_export_root, resolve_export_folder
+    return resolve_export_folder(prepare_export_root(_default_export_root()), PROFILES_FOLDER)
+
+
+def _profile_file(arguments: Dict[str, Any]):
+    """The file a call of apply_settings_profile names; ``ValueError`` when it names none or a wrong one."""
+    from pathlib import Path
+    if arguments.get("path"):
+        path = Path(str(arguments["path"])).expanduser()
+        if path.suffix.lower() != ".json":
+            raise ValueError("a profile is a .json file")
+        return path
+    if arguments.get("name"):
+        return _profiles_folder() / settings_profile.file_name(str(arguments["name"]))
+    raise ValueError("give the name of a profile or the path of its file")
+
+
+def planned_profile(arguments: Dict[str, Any]):
+    """(rows of plan, left out, name) of the profile a call names; ``ValueError`` when it cannot be read."""
+    path = _profile_file(arguments)
+    try:
+        if path.stat().st_size > settings_profile.MAX_BYTES:
+            raise ValueError(f"a profile is {settings_profile.MAX_BYTES // 1024} KB at most")
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise ValueError(f"no profile {path.name}") from None
+    except (OSError, UnicodeDecodeError) as exc:
+        raise ValueError(f"the profile {path.name} cannot be read ({type(exc).__name__})") from None
+    name, values = settings_profile.read(text)
+    rows, left_out = settings_profile.changes(settings_rows(), values)
+    return rows, left_out, name or path.stem
+
+
+def planned_any(name: str, arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """The rows a settings tool would change: change_settings or apply_settings_profile."""
+    if name == APPLY_SETTINGS_PROFILE:
+        return planned_profile(arguments)[0]
+    return planned(arguments)
+
+
+def _export_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        file = settings_profile.file_name(str(arguments.get("name", "")))
+        folder = _profiles_folder()
+    except (ValueError, OSError) as exc:
+        raise ToolFailure(str(exc)) from None
+    profile = settings_profile.build(settings_rows(), str(arguments["name"]))
+    try:
+        folder.mkdir(mode=0o700, parents=True, exist_ok=True)
+        (folder / file).write_text(settings_profile.dumps(profile), encoding="utf-8")
+    except OSError as exc:
+        raise ToolFailure(f"The profile could not be written ({type(exc).__name__}).") from None
+    return {"path": str(folder / file), "name": profile["name"], "settings": len(profile["settings"])}
+
+
+def _apply_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        rows, left_out, name = planned_profile(arguments)
+    except ValueError as exc:
+        raise ToolFailure(str(exc)) from None
+    answer = _apply_rows(rows)
+    answer["profile"] = name
+    if left_out:
+        answer["left_out"] = left_out
+    return answer
+
+
 def _change(arguments: Dict[str, Any]) -> Dict[str, Any]:
     try:
         rows = planned(arguments)
     except ValueError as exc:
         raise ToolFailure(str(exc)) from None
+    return _apply_rows(rows)
+
+
+def _apply_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     changes = [row for row in rows if row["before"] != row["after"]]
     unchanged = [row["path"] for row in rows if row["before"] == row["after"]]
     if not changes:
@@ -161,4 +239,5 @@ def _load_skill(arguments: Dict[str, Any]) -> Dict[str, Any]:
 def settings_handlers() -> Dict[str, Callable[[Dict[str, Any]], Any]]:
     """The handlers of the settings and skill tools, by name."""
     return {DESCRIBE_SETTINGS: _describe, GET_SETTING: _get, CHANGE_SETTINGS: _change,
-            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _load_skill}
+            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _load_skill,
+            EXPORT_SETTINGS_PROFILE: _export_profile, APPLY_SETTINGS_PROFILE: _apply_profile}

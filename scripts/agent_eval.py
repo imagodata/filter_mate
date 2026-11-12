@@ -494,6 +494,9 @@ class SimulatedProject:
             "get_setting": self._get_setting,
             "change_settings": self._change_settings,
             "load_skill": lambda args: load_skill(args["name"]),
+            "export_settings_profile": lambda args: {"path": f"profiles/{args['name']}.json", "name": args["name"],
+                                                     "settings": 0},
+            "apply_settings_profile": lambda args: {"changed": [], "unchanged": [], "profile": args.get("name", "")},
             "show_settings_link": lambda args: {"shown": f"{args['target']} {args.get('path', '')}".strip()},
             # A slow PostgreSQL filter, as FilterMate logs it.
             "diagnose_performance": lambda _args: performance_summary([

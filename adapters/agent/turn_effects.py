@@ -50,7 +50,7 @@ TREE_TOOLS = ("group_layers", "map_theme")
 EDIT_TOOLS = ("update_features", "delete_features", "add_features", "add_field")
 LAYOUT_TOOLS = ("create_layout",)
 CRS_TOOLS = ("set_project_crs",)
-SETTINGS_TOOLS = ("change_settings",)
+SETTINGS_TOOLS = ("change_settings", "apply_settings_profile")
 
 
 def _settings_label() -> str:
@@ -61,11 +61,16 @@ def _settings_label() -> str:
 def _setting_paths(arguments: Dict[str, Any]) -> List[str]:
     """The settings a change_settings call may change, as their full paths: an unknown one, or one the agent may
     not change (its own settings, private values), is left out, so an undo never writes it."""
-    from .plugin_settings import settings_rows
+    from .plugin_settings import planned_profile, settings_rows
     from ...core.agent.settings_reference import get, refusal
     rows = settings_rows()
     by_path = {row.path: row for row in rows}
     paths = []
+    if "changes" not in arguments:  # apply_settings_profile: the settings of its file the profile may set
+        try:
+            return [row["path"] for row in planned_profile(arguments)[0]]
+        except ValueError:
+            return []
     for change in arguments.get("changes") or ():
         try:
             path = get(rows, str(change.get("path", "")))["path"]

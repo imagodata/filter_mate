@@ -208,6 +208,10 @@ DESCRIBE_SETTINGS = "describe_settings"
 GET_SETTING = "get_setting"
 CHANGE_SETTINGS = "change_settings"
 DIAGNOSE_PERFORMANCE = "diagnose_performance"
+EXPORT_SETTINGS_PROFILE = "export_settings_profile"
+APPLY_SETTINGS_PROFILE = "apply_settings_profile"
+_PROFILE_NAME = {"type": "string", "minLength": 1, "maxLength": 60,
+                 "description": "Name of the profile: letters, digits, spaces, dots, dashes, underscores"}
 _SETTING_PATH = {"type": "string", "minLength": 1, "maxLength": 200,
                  "description": "Path of the setting, e.g. APP.OPTIONS.QUERY_CACHE.enabled (or its last parts)"}
 # The settings of FilterMate itself (config.json), read in the plugin: served by the chat and by the MCP server of the
@@ -271,6 +275,27 @@ SETTINGS_TOOLS = (
                      "timings, operations, slowest, timeouts_logged, errors_logged, log_from, log_to."),
         input_schema={"type": "object", "properties": {}, "additionalProperties": False},
         read_only=True, idempotent=True),
+    ToolSpec(
+        name=EXPORT_SETTINGS_PROFILE, title="Save the settings of FilterMate as a profile",
+        description=("Write the settings of FilterMate the user changed from their default as a profile, a small "
+                     "JSON file to share with a team (folder profiles of the export folder; the same name replaces "
+                     "it). Never the settings of the agent, a name, a path, a key or an account. The user confirms "
+                     "the file. Returns path, name and settings (how many)."),
+        input_schema={"type": "object", "properties": {"name": _PROFILE_NAME},
+                      "required": ["name"], "additionalProperties": False},
+        destructive=True),
+    ToolSpec(
+        name=APPLY_SETTINGS_PROFILE, title="Apply a profile of settings",
+        description=("Apply a profile of settings of FilterMate: by its name in the folder profiles of the export "
+                     "folder, or by the path of a .json file the user gives. Each setting is checked as with "
+                     "change_settings, and the user sees each one before and after and says yes; what the profile "
+                     "may not set (the settings of the agent, a name, a path, an unknown setting, a value out of "
+                     "bounds) is left out and listed. Undone with the turn. Returns changed, unchanged and left_out."),
+        input_schema={"type": "object", "properties": {
+            "name": _PROFILE_NAME,
+            "path": {"type": "string", "minLength": 1, "maxLength": 1000,
+                     "description": "Path of a profile file (.json) the user gave, instead of name"}},
+            "additionalProperties": False}),
 )
 
 LOAD_SKILL = "load_skill"

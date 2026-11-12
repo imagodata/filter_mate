@@ -70,6 +70,9 @@ To explain a setting, only read: describe_settings and get_setting change nothin
 - Exports: APP.OPTIONS.STREAMING_EXPORT, APP.OPTIONS.GPKG_PRESERVE_GROUPS.
 - Undo history: APP.OPTIONS.HISTORY.max_history_size.
 - Map after a filter: APP.OPTIONS.EXPLORATION.auto_zoom_on_filter.
+- To share a setup with a team: export_settings_profile writes the settings the user changed as a profile file;
+  apply_settings_profile applies one (by name, or the path of a .json file the user gives), asked like
+  change_settings; tell the user what it left out.
 
 ## Slow filters
 
