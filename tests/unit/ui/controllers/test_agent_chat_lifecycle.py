@@ -51,6 +51,7 @@ class FakeSignal:
 class FakeProject:
     def __init__(self):
         self.cleared, self.readProject, self.fileNameChanged = FakeSignal(), FakeSignal(), FakeSignal()
+        self.layersAdded, self.layersRemoved = FakeSignal(), FakeSignal()  # followed for the live recipes
         self.layers = {}
 
     def mapLayers(self):
@@ -58,6 +59,9 @@ class FakeProject:
 
     def mapLayer(self, layer_id):
         return self.layers.get(layer_id)
+
+    def mapLayersByName(self, name):
+        return [layer for layer in self.layers.values() if getattr(layer, "name", lambda: "")() == name]
 
 
 class FakeQgsProject:
