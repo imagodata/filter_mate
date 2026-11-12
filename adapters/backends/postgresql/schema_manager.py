@@ -215,6 +215,10 @@ def ensure_table_stats(connexion, schema: str, table: str, geom_field: str, use_
         geom_field: Geometry column name (kept for logging / cache key)
         use_cache: Skip the query when the table was already verified
 
+    The transaction of the connection is ended (2026-11-12): committed after an
+    ANALYZE, rolled back otherwise. Do not call it with uncommitted work on
+    ``connexion``: a table already analyzed would roll that work back.
+
     Returns:
         bool: True if stats exist or were created, False on error
     """
