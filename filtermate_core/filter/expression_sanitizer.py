@@ -61,8 +61,9 @@ _TOPLEVEL_BOOLEAN_MARKERS = (
     '=', '!=', '<>', '>', '<', '>=', '<=',
     ' IN ', ' IN(', ' NOT IN ',
     ' LIKE ', ' ILIKE ', ' SIMILAR TO ',
-    # SQLite: the native translation writes LIKE / ILIKE as GLOB (2026-11-12)
-    ' GLOB ',
+    # SQLite: the native translation writes LIKE / ILIKE as GLOB (2026-11-12), always before a literal
+    # (scrubbed to ''): a column named glob is not an operator
+    " GLOB ''",
     ' IS NULL', ' IS NOT NULL',
     ' AND ', ' OR ',
     ' BETWEEN ',
@@ -86,12 +87,27 @@ def _skip_quoted_identifier(expr: str, i: int) -> int:
 def _strip_toplevel_string_literals(expr: str) -> str:
     """Replace single-quoted literals and double-quoted identifiers with
     placeholders so characters inside them (notably '<', '>', '=', a quote or
-    a parenthesis of a field name such as "nom d'usage") don't fool the scans."""
+    a parenthesis of a field name such as "nom d'usage") don't fool the scans.
+
+    A comment becomes a visible ``#``: a quote inside it must not open a
+    literal or an identifier that swallows what follows (``NOT(1=1 /* " */);
+    DROP TABLE t; -- ")``), and a comment after a call stays something that
+    trails it (S3, see :func:`_is_balanced_boolean_function_call`)."""
     out = []
     i = 0
     n = len(expr)
     while i < n:
         c = expr[i]
+        if c == '-' and i + 1 < n and expr[i + 1] == '-':
+            while i < n and expr[i] not in ('\n', '\r'):
+                i += 1
+            out.append('#')
+            continue
+        if c == '/' and i + 1 < n and expr[i + 1] == '*':
+            end = expr.find('*/', i + 2)
+            i = n if end == -1 else end + 2
+            out.append('#')
+            continue
         if c == '"':
             i = _skip_quoted_identifier(expr, i)
             out.append('""')

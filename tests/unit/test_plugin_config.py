@@ -255,4 +255,39 @@ class TestModuleAliasesReleasedOnUnload:
         last = unload.body[-1]
         assert isinstance(last, ast.Try) and "_forget_module_aliases" in ast.unparse(last), (
             "unload() must release the module aliases as its last step")
-        assert "_forget_module_aliases(__name__.split('.')[0])" in source
+        assert "_forget_module_aliases(package, _qgis_tracked_modules(package))" in ast.unparse(unload.body[-1])
+        assert "package = __name__.split('.')[0]" in source
+
+    def test_what_qgis_did_not_track_is_dropped_except_qt_resources(self, monkeypatch):
+        namespace = _load([], {}, module_level=("_forget_module_aliases",))
+        tracked_module = types.ModuleType("fmpkg.adapters.y")
+        parent_only = types.ModuleType("fmpkg.core")  # imported as the parent of a module: QGIS never tracked it
+        by_importlib = types.ModuleType("fmpkg.extensions.z")
+        resources = types.ModuleType("fmpkg.resources_extra")
+        resources.qCleanupResources = lambda: None  # QGIS cleans it up only while it is in sys.modules
+        moved = types.ModuleType("fmpkg.filtermate_core.domain.x")
+        entries = {"fmpkg.adapters.y": tracked_module, "fmpkg.core": parent_only, "fmpkg.extensions.z": by_importlib,
+                   "fmpkg.resources_extra": resources, "fmpkg.core.domain.x": moved,
+                   "fmpkg.filtermate_core.domain.x": moved, "otherpkg.core": types.ModuleType("otherpkg.core")}
+        for key, module in entries.items():
+            monkeypatch.setitem(sys.modules, key, module)
+        tracked = {"fmpkg", "fmpkg.adapters.y", "fmpkg.filtermate_core.domain.x"}
+
+        removed = namespace["_forget_module_aliases"]("fmpkg", tracked)
+
+        assert sorted(removed) == ["fmpkg.core", "fmpkg.core.domain.x", "fmpkg.extensions.z"]
+        for key in ("fmpkg.adapters.y", "fmpkg.resources_extra", "fmpkg.filtermate_core.domain.x", "otherpkg.core"):
+            assert key in sys.modules
+
+    def test_tracked_names_are_read_from_qgis_utils(self, monkeypatch):
+        namespace = _load([], {}, module_level=("_qgis_tracked_modules",))
+        utils = types.ModuleType("qgis.utils")
+        utils._plugin_modules = {"fmpkg": {"fmpkg", "fmpkg.a"}}
+        qgis_pkg = types.ModuleType("qgis")
+        qgis_pkg.utils = utils
+        monkeypatch.setitem(sys.modules, "qgis", qgis_pkg)
+        monkeypatch.setitem(sys.modules, "qgis.utils", utils)
+        assert namespace["_qgis_tracked_modules"]("fmpkg") == {"fmpkg", "fmpkg.a"}
+        assert namespace["_qgis_tracked_modules"]("unknown") is None
+        del utils._plugin_modules
+        assert namespace["_qgis_tracked_modules"]("fmpkg") is None

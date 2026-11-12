@@ -398,3 +398,22 @@ class TestNativeTranslationSubsets:
     def test_operator_inside_an_identifier_is_not_a_filter(self):
         # "a = b" is a column name, not a comparison: still a display expression
         assert sanitize_subset_string("COALESCE(\"a = b\", '')") == ''
+
+    def test_quote_in_a_comment_does_not_hide_a_chained_statement(self):
+        # S3 (2026-04-29): a quote inside a comment opened a false identifier or literal that swallowed the rest
+        for expr in ("NOT(1=1 /* \" */); DROP TABLE t; -- \")",
+                     "EXISTS(SELECT 1 /* \" */); DROP TABLE t; -- \")",
+                     "NOT(1=1 -- \"\n); DROP TABLE t; -- \"\n)",
+                     "NOT(1=1 /* ' */); DROP TABLE t; -- ')"):
+            assert sanitize_subset_string(expr) == '', expr
+
+    def test_comment_inside_a_boolean_call_is_kept(self):
+        expr = "NOT (\"a\" = 1 /* note */)"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_a_column_named_glob_is_not_an_operator(self):
+        assert sanitize_subset_string("COALESCE(x, '') || glob || 'y'") == ''
+
+    def test_not_glob_is_a_filter(self):
+        expr = "COALESCE(\"nom\", '') NOT GLOB '[rR]*'"
+        assert sanitize_subset_string(expr) == expr

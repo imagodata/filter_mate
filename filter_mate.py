@@ -64,25 +64,52 @@ def _clear_layer_database(db_path):
         conn.close()
 
 
-def _forget_module_aliases(package):
-    """Drop the ``sys.modules`` entries of ``package`` that name a module under another name.
+def _forget_module_aliases(package, tracked=None):
+    """Drop the ``sys.modules`` entries of ``package`` that QGIS would leave behind on unload.
 
-    The compatibility shims of the modules moved to ``filtermate_core`` register
-    the moved module under their old name (``filter_mate.core.domain.x`` is
-    ``filter_mate.filtermate_core.domain.x``). QGIS tracks what a plugin imports
-    by the ``__name__`` of each module and removes those names when the plugin
-    unloads, so these aliases were left behind: after an update or a reload in
-    the session, the old names still gave the previous code next to the fresh
-    one (two copies of each class, ``isinstance`` and ``except`` failing across
-    them). Returns the names removed.
+    QGIS tracks what a plugin imports by the ``__name__`` of each module and
+    removes those names after ``unload()`` (``qgis.utils._unloadPluginModules``).
+    Left behind were:
+
+    - the aliases of the compatibility shims of the modules moved to
+      ``filtermate_core`` (``filter_mate.core.domain.x`` is the module
+      ``filter_mate.filtermate_core.domain.x``), always dropped here;
+    - the packages imported only as parents of a module, and the modules
+      loaded through ``importlib``, which QGIS never tracked: dropped when
+      ``tracked`` (the names QGIS tracked for this plugin) is given.
+
+    After an update or a reload in the session, those names still gave the
+    previous code next to the fresh one (two copies of each class,
+    ``isinstance`` and ``except`` failing across them). A module QGIS tracked is
+    left to QGIS, and so is a Qt resource module (``qCleanupResources``), which
+    QGIS cleans up only while it is still in ``sys.modules``.
+
+    Returns:
+        The names removed.
     """
     import sys
     prefix = package + '.'
-    aliases = [key for key, module in list(sys.modules.items())
-               if key.startswith(prefix) and module is not None and getattr(module, '__name__', key) != key]
-    for key in aliases:
-        sys.modules.pop(key, None)
-    return aliases
+    removed = []
+    for key, module in list(sys.modules.items()):
+        if not key.startswith(prefix) or module is None:
+            continue
+        alias = getattr(module, '__name__', key) != key
+        untracked = (tracked is not None and key not in tracked
+                     and not hasattr(module, 'qCleanupResources'))
+        if alias or untracked:
+            sys.modules.pop(key, None)
+            removed.append(key)
+    return removed
+
+
+def _qgis_tracked_modules(package):
+    """The module names QGIS tracked for ``package`` (``qgis.utils._plugin_modules``), None when unknown."""
+    try:
+        import qgis.utils
+        tracked = getattr(qgis.utils, '_plugin_modules', {}).get(package)
+    except Exception:  # a private name of QGIS: never fail an unload on it
+        return None
+    return set(tracked) if tracked else None
 
 
 class FilterMate:
@@ -1558,10 +1585,11 @@ class FilterMate:
         self.app = None
         self.pluginIsActive = False
 
-        # Last: QGIS removes the plugin's modules after unload() by their own names only.
+        # Last: QGIS removes after unload() only the modules it tracked, by their own names.
         try:
-            removed = _forget_module_aliases(__name__.split('.')[0])
-            logger.debug(f"FilterMate: {len(removed)} module alias(es) released")
+            package = __name__.split('.')[0]
+            removed = _forget_module_aliases(package, _qgis_tracked_modules(package))
+            logger.debug(f"FilterMate: {len(removed)} module name(s) QGIS would keep released")
         except Exception as e:  # never fail an unload on this
             logger.debug(f"FilterMate: module aliases not released: {e}")
 
