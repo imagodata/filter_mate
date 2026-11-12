@@ -1581,10 +1581,12 @@ def check_live_recipes(chat, panel, layer):
           not chat.followed_layer_ids() and not panel.recipe_live["r1"].isChecked(), chat.followed_layer_ids())
     panel.recipe_live["r1"].setChecked(True)
     check("live: ticked here, followed", zones.id() in chat.followed_layer_ids())
-    chat._policy.set_level("advisor")
+    from dataclasses import replace
+    from filter_mate.adapters.agent.settings import load_settings, save_settings
+    save_settings(replace(load_settings(), autonomy="advisor"))
     chat._refresh_recipes()
     check("live: nothing runs alone at the advisor level", not chat.followed_layer_ids())
-    chat._policy.set_level("standard")
+    save_settings(replace(load_settings(), autonomy="standard"))
     chat._refresh_recipes()
     QgsProject.instance().removeMapLayer(zones.id())
     check("live: a source removed from the project is no longer followed", not chat.followed_layer_ids(),

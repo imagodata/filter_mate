@@ -658,7 +658,7 @@ class AgentChatController(QObject):
     def _armed(self, recipe) -> bool:
         """A live recipe runs by itself only once the user ticked it here, for these steps, at the usual level or more:
         a project made by someone else may say it is live, it is not enough; advisor and careful run nothing alone."""
-        if not recipe.get("live") or self._policy.level not in (STANDARD, AUTONOMOUS):
+        if not recipe.get("live") or load_settings().autonomy not in (STANDARD, AUTONOMOUS):
             return False
         try:
             return live_approved(transcript_store.project_key(), recipe)
@@ -780,7 +780,7 @@ class AgentChatController(QObject):
             approve_live(transcript_store.project_key(), recipe, on)
         self._refresh_recipes()
         if recipe is not None:
-            if on and self._policy.level not in (STANDARD, AUTONOMOUS):
+            if on and load_settings().autonomy not in (STANDARD, AUTONOMOUS):
                 note = _tr("Live recipe: {} will run by itself at the standard or autonomous level of the agent only.")
                 note = note.format(recipe["name"])
             elif on:
