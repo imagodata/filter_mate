@@ -997,12 +997,11 @@ class TaskParameterBuilder:
         # A simple field like "drop_ID" or "name" should NOT filter the source layer
         # because it's just a display field, not a filter condition
         if expression and expression.strip():
-            expr_upper = expression.upper().strip()
-            # Check for comparison operators - if present, it's a filter expression
-            comparison_operators = ['=', '>', '<', '!', ' IN ', ' LIKE ', ' AND ', ' OR ', ' IS ', ' NOT ', ' BETWEEN ']
-            has_comparison = any(op in expr_upper for op in comparison_operators)
-
-            if not has_comparison:
+            # 2026-11-12: the shared test (words outside quotes). The former list held
+            # ' LIKE ' but not ' ILIKE ': a custom selection "nom" ILIKE 'x' never
+            # filtered the source layer.
+            from ..core.filter.sql_quotes import has_comparison_operator
+            if not has_comparison_operator(expression):
                 # Expression has no comparison operators - it's a simple field name
                 logger.info(
                     f"FilterMate: Custom selection with simple field '{expression}' (no operators) - "
