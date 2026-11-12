@@ -111,8 +111,9 @@ def _problem(expression: str, functions: frozenset, variables: frozenset) -> str
             end = _quoted_end(expression, index)
             if end < 0:
                 return "a quote is never closed"
-            if char == "'" and "\\" in expression[index:end]:
-                return "a text value cannot hold a backslash"
+            if "\\" in expression[index:end]:
+                # Where a backslash escapes a quote (MySQL through OGR), the text or the name would end elsewhere.
+                return "a text value cannot hold a backslash" if char == "'" else "a quoted name cannot hold a backslash"
             if char == '"' and _next_char(expression, end) == "(":
                 return "a quoted name cannot be called as a function"
             index, previous = end, "value"

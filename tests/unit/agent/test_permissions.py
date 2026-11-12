@@ -49,7 +49,9 @@ class TestRiskClasses:
 
     def test_a_connector_that_changes_something_is_outside(self):
         assert risk_of(spec("mcp_x_send", open_world=True)) == OUTSIDE
-        assert risk_of(spec("mcp_x_read", open_world=True, read_only=True)) == READ
+        # A read of the plugin itself over the network (open data searches); a connector is never read only
+        # (test_mcp_and_sources.py).
+        assert risk_of(spec("search_x", open_world=True, read_only=True)) == READ
 
     def test_code_is_outside_whatever_its_flags(self):
         assert risk_of(spec("run_pyqgis")) == OUTSIDE
@@ -241,6 +243,31 @@ class TestProtectedLayers:
         assert changed_layers("rename_layer", {"layer": "Fond", "group": True}) == []
         assert changed_layers("clear_filters", {}) is None and changed_layers("clear_filters", {"layers": []}) is None
 
+    def test_a_cross_filter_changes_its_source_when_it_masks_it_or_filters_its_points(self):
+        from core.agent.permissions import changed_layers
+        # filter_source masks a raster source; point cloud criteria stay in the subset of the source after the run.
+        assert changed_layers("cross_filter", {"source_layer": "mnt", "target_layers": ["a"], "filter_source": True}) \
+            == ["a", "mnt"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": [],
+                                               "point_cloud_criteria": {"classes": [6]}}) == ["lidar"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": ["a"],
+                                               "point_cloud_criteria": {"z_min": 0}}) == ["a", "lidar"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": ["a"],
+                                               "point_cloud_criteria": "Classification = 6"}) == ["a", "lidar"]
+        # Criteria that keep nothing in particular, or no mask: the source is only read.
+        for arguments in ({"filter_source": False}, {"point_cloud_criteria": {"classes": [], "expression": " "}},
+                          {"point_cloud_criteria": None}, {"point_cloud_criteria": ""}):
+            assert changed_layers("cross_filter", {"source_layer": "s", "target_layers": ["a"], **arguments}) == ["a"]
+
+    def test_a_protected_source_masked_or_filtered_by_a_cross_filter_is_refused(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre"))
+        for extra in ({"filter_source": True}, {"point_cloud_criteria": {"classes": [6]}}):
+            call = ToolCallPart("c", "cross_filter", {"source_layer": "cadastre", "target_layers": ["routes"],
+                                                      "predicates": ["Intersect"], **extra})
+            assert executor.verdict(call, policy) == PROTECTED, extra
+
     @pytest.mark.parametrize("level", LEVELS)
     def test_a_change_of_a_protected_layer_is_refused_at_every_level(self, level):
         from core.agent.permissions import PROTECTED
@@ -303,6 +330,28 @@ class TestProtectedFavorites:
         assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-2"}), policy) == RUN
         assert "'cadastre'" in ToolExecutor.refused(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}),
                                                     policy).content
+
+    def test_protected_layers_that_cannot_be_read_refuse_a_change_never_a_read(self):
+        from core.agent.permissions import PROTECTED, PROTECTION_UNREADABLE
+
+        class Unreadable:
+            def name_of(self, reference):
+                raise RuntimeError("the project is closing")
+
+            names = favorite_layers = name_of
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Unreadable())
+        for name, arguments in (("apply_filter", {"layer_name": "a", "expression": "1"}),
+                                ("clear_filters", {"layers": ["a"]}), ("remove_layers", {"layers": ["a"]}),
+                                ("apply_favorite", {"favorite_id": "f"})):
+            call = ToolCallPart("c", name, arguments)
+            assert executor.verdict(call, policy) == PROTECTED, name
+            assert ToolExecutor.refused(call, policy).content == PROTECTION_UNREADABLE
+        assert policy.protection_refusal("clear_filters", {}) == PROTECTION_UNREADABLE  # every layer (REST)
+        for name, arguments in (("list_layers", {}), ("zoom_to", {"layer": "a"}),
+                                ("cross_filter", {"source_layer": "a", "target_layers": [], "predicates": ["Intersect"]})):
+            assert policy.protection_refusal(name, arguments) == "", name
 
     def test_a_protector_without_favorites_lets_them_run(self):
         executor = ToolExecutor(chat_tools(), {})
