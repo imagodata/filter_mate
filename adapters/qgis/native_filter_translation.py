@@ -42,6 +42,9 @@ HYBRID_MAX_FEATURES = 1_000_000
 # Any other storage (a database or a service opened through OGR) is not translated.
 _SQLITE_STORAGES = ('gpkg', 'sqlite')
 _OGR_SQL_STORAGES = ('esri shapefile', 'mapinfo file', 'geojson', 'geojsonseq', 'flatgeobuf')
+# OGR SQL storages whose texts reach the engine as UTF-8 (measured, GDAL 3.10 and 3.12): LIKE's _
+# and % match characters there. MapInfo hands over the bytes of its charset (_ matches one byte).
+_UTF8_TEXT_STORAGES = ('esri shapefile', 'geojson', 'flatgeobuf')
 
 # QVariant.Type / QMetaType.Type ids (the same numbers in Qt 5 and Qt 6).
 _BOOL_ID, _INT_IDS, _DOUBLE_ID, _STRING_ID = 1, (2, 3, 4, 5), 6, 10
@@ -99,12 +102,40 @@ def field_types(fields, dialect):
     return types
 
 
-def translate_for_layer(layer, expression):
+def case_sensitive_like(layer):
+    """Whether the OGR SQL LIKE of ``layer``'s source keeps the case of texts and reads characters.
+
+    OGR SQL compares texts with = and IN without their case. Its LIKE keeps
+    the case from GDAL 3.1 on, unless the configuration option
+    OGR_SQL_LIKE_AS_ILIKE is set, and its _ and % match characters where the
+    texts are read as UTF-8 (Shapefile, GeoJSON, FlatGeobuf; measured with
+    GDAL 3.10 and 3.12).
+    """
+    try:
+        if native_dialect_for_layer(layer) != OGR_SQL:
+            return False
+        if (layer.dataProvider().storageType() or '').lower() not in _UTF8_TEXT_STORAGES:
+            return False
+        from osgeo import gdal
+        if int(gdal.VersionInfo('VERSION_NUM')) < 3010000:
+            return False
+        option = gdal.GetConfigOption('OGR_SQL_LIKE_AS_ILIKE')
+        # CPLTestBool: any value but NO / FALSE / OFF / 0 sets it
+        return option is None or option.strip().upper() in ('NO', 'FALSE', 'OFF', '0')
+    except Exception as exc:  # nosec B110 - no GDAL information: texts stay to the former conversion
+        logger.debug('OGR SQL LIKE not known to keep the case: %s', exc)
+        return False
+
+
+def translate_for_layer(layer, expression, texts_as_like=False):
     """Write ``expression`` for the data source of ``layer``.
 
     Args:
         layer: Vector layer whose subset string is native SQL.
         expression: QGIS attribute predicate.
+        texts_as_like: OGR SQL: write texts compared outside a NOT with LIKE
+            when :func:`case_sensitive_like` holds. The subset must then not
+            be negated by the caller.
 
     Returns:
         NativeTranslation, or None when the layer's subset is not a language
@@ -130,7 +161,8 @@ def translate_for_layer(layer, expression):
     except (Unsupported, RecursionError):
         return NativeTranslation(TranslationStatus.NONE, local_expression=expression,
                                  reason='Expression complexity limit exceeded')
-    return translate_native(tree, dialect, field_types(fields, dialect))
+    return translate_native(tree, dialect, field_types(fields, dialect),
+                            case_sensitive_like=texts_as_like and case_sensitive_like(layer))
 
 
 def native_subset(layer, expression):
@@ -151,7 +183,8 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
             filter than the one it will be combined with by AND.
         negated: Whether the subset will be written under NOT (AND NOT). OGR
             SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
-            NOT is then left to the former conversion.
+            NOT is then left to the former conversion, and so are texts (only
+            written with LIKE outside any NOT, :func:`case_sensitive_like`).
 
     Returns:
         The native SQL of the whole expression, else (``evaluate``, SQLite
@@ -162,7 +195,8 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
     try:
         if native_dialect_for_layer(layer) not in APPLIED_DIALECTS:
             return None
-        result = translate_for_layer(layer, expression)
+        # OGR SQL texts are written with LIKE outside any NOT, never under the NOT of AND NOT
+        result = translate_for_layer(layer, expression, texts_as_like=not negated)
     except Exception as exc:  # catch-all: the former conversion stays the fallback
         logger.warning('Native translation failed, former conversion used: %s', exc)
         return None

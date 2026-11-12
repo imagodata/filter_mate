@@ -236,6 +236,121 @@ def test_ogr_sql_between_takes_literal_bounds_of_the_value_type():
     assert full(between(col('pop'), col('id'), lit(9.5)), SQLITE) == '"pop" BETWEEN "id" AND (CAST(19 AS REAL) / 2)'
 
 
+# -- OGR SQL: texts compared with a case-sensitive LIKE ----------------------------------
+
+def like(node, types=TYPES):
+    result = translate_native(node, OGR_SQL, types, case_sensitive_like=True)
+    assert result.status == TranslationStatus.FULL, result.reason
+    return result.sql
+
+
+def not_like(node):
+    result = translate_native(node, OGR_SQL, TYPES, case_sensitive_like=True)
+    assert result.status == TranslationStatus.NONE
+    assert not result.sql
+    return result.reason
+
+
+def test_ogr_text_equality_is_written_as_a_case_sensitive_like():
+    # = and IN ignore case in OGR SQL, LIKE does not (GDAL 3.1+): QGIS's own answer
+    assert like(binary('=', col('nom'), lit('Route'))) == '"nom" LIKE \'Route\''
+    assert like(binary('=', lit('Route'), col('nom'))) == '"nom" LIKE \'Route\''
+    assert like(binary('=', col('nom'), lit("l'Ariège"))) == '"nom" LIKE \'l\'\'Ariège\''
+    assert like(binary('=', col('nom'), lit(''))) == '"nom" LIKE \'\''
+    # a wildcard in the text, or two fields: = would ignore case, left to the former conversion
+    assert 'without their case' in not_like(binary('=', col('nom'), lit('route_66')))
+    assert 'without their case' in not_like(binary('=', col('nom'), lit('50%')))
+    assert 'without their case' in not_like(binary('=', col('nom'), col('code')))
+
+
+def test_ogr_text_in_is_written_as_likes_up_to_the_limit():
+    from filtermate_core.filter.native_dialect import OGR_LIKE_LIST_MAX
+    assert OGR_LIKE_LIST_MAX == 10
+    assert like(in_list(col('nom'), ['a'])) == '"nom" LIKE \'a\''
+    assert like(in_list(col('nom'), ['a', 'b'])) == '"nom" LIKE \'a\' OR "nom" LIKE \'b\''
+    values = ['v{}'.format(index) for index in range(OGR_LIKE_LIST_MAX)]
+    assert like(in_list(col('nom'), values)) == ' OR '.join('"nom" LIKE \'{}\''.format(v) for v in values)
+    assert 'more than 10' in not_like(in_list(col('nom'), values + ['v10']))
+    assert not_like(in_list(col('nom'), ['a', 'b_c']))
+    assert translate_native(in_list(col('nom'), ['a', 'b']), OGR_SQL, TYPES, case_sensitive_like=True).composite
+    assert not translate_native(in_list(col('nom'), ['a']), OGR_SQL, TYPES, case_sensitive_like=True).composite
+
+
+def test_ogr_like_and_ascii_ilike_are_written_as_they_are():
+    assert like(binary('LIKE', col('nom'), lit('Route%'))) == '"nom" LIKE \'Route%\''
+    assert like(binary('LIKE', col('nom'), lit('%été'))) == '"nom" LIKE \'%été\''
+    assert like(binary('ILIKE', col('nom'), lit('route%'))) == '"nom" ILIKE \'route%\''
+    # _ matches one byte where the data is not read as UTF-8 (MapInfo); OGR ILIKE folds neither K nor ſ
+    assert '_' in not_like(binary('LIKE', col('nom'), lit('Route_Nord')))
+    assert not_like(binary('LIKE', col('nom'), lit('a\\%')))
+    assert 'k or s' in not_like(binary('ILIKE', col('nom'), lit('saint')))
+    assert 'k or s' in not_like(binary('ILIKE', col('nom'), lit('% K')))
+    assert 'k or s' in not_like(binary('ILIKE', col('nom'), lit('été')))
+
+
+@pytest.mark.parametrize('pattern, written', [
+    ('Route%%', 'Route%'), ('%%Route', '%Route'), ('Ro%%%te', 'Ro%te'), ('%%', '%'), ('%%e%%', '%e%'), ('%', '%'),
+])
+def test_ogr_like_writes_each_run_of_percent_as_one(pattern, written):
+    # OGR SQL drops a text that ends where a trailing %% starts ('Route' LIKE 'Route%%', '' LIKE '%%')
+    assert like(binary('LIKE', col('nom'), lit(pattern))) == '"nom" LIKE \'{}\''.format(written)
+    assert like(binary('ILIKE', col('nom'), lit(pattern))) == '"nom" ILIKE \'{}\''.format(written)
+
+
+def test_ogr_texts_never_under_a_not_nor_for_a_negation():
+    # NOT (x LIKE 'a') would be written over a NULL text: left to the former conversion
+    assert not_like(binary('<>', col('nom'), lit('Route')))
+    assert not_like(in_list(col('nom'), ['a', 'b'], negated=True))
+    assert not_like(binary('NOT LIKE', col('nom'), lit('R%')))
+    assert not_like(binary('NOT ILIKE', col('nom'), lit('r%')))
+    assert not_like(negation(binary('=', col('nom'), lit('Route'))))
+    assert not_like(negation(binary('OR', binary('>', col('pop'), lit(5)), binary('LIKE', col('nom'), lit('R%')))))
+    # ordering and mixed types stay refused
+    assert not_like(binary('<', col('nom'), lit('m')))
+    assert not_like(binary('=', col('code'), lit(10)))
+    # a NOT over a number next to a text outside it
+    node = binary('OR', negation(binary('>', col('pop'), lit(5))), binary('=', col('nom'), lit('Route')))
+    assert like(node) == '(NOT ("pop" > 5)) OR ("nom" LIKE \'Route\')'
+
+
+def test_ogr_texts_inside_and_or():
+    node = binary('AND', binary('>', col('pop'), lit(5)), binary('=', col('nom'), lit('Route')))
+    assert like(node) == '("pop" > 5) AND ("nom" LIKE \'Route\')'
+    node = binary('OR', binary('=', col('nom'), lit('route')), binary('IS', col('nom'), lit(None)))
+    assert like(node) == '("nom" LIKE \'route\') OR ("nom" IS NULL)'
+
+
+def test_ogr_texts_are_asked_for_and_only_change_ogr_sql():
+    node = binary('=', col('nom'), lit('Route'))
+    assert 'case' in refused(node, OGR_SQL)  # not asked: refused as before
+    for dialect in (POSTGRESQL, SQLITE):
+        assert (translate_native(node, dialect, TYPES, case_sensitive_like=True)
+                == translate_native(node, dialect, TYPES))
+    assert like(binary('>', col('pop'), lit(5))) == '"pop" > 5'
+
+
+def _ogr_texts_written():
+    nodes = [
+        binary('=', col('nom'), lit('Route')),
+        binary('=', col('nom'), lit("l'Ariège")),
+        in_list(col('nom'), ['a', "l'b"]),
+        in_list(col('nom'), ['v{}'.format(index) for index in range(10)]),
+        binary('LIKE', col('nom'), lit('Route%%')),
+        binary('ILIKE', col('nom'), lit('%route%')),
+        binary('AND', binary('>', col('pop'), lit(5)), binary('=', col('nom'), lit('Route'))),
+        binary('OR', binary('=', col('nom'), lit('route')), binary('IS', col('nom'), lit(None))),
+    ]
+    return [translate_native(node, OGR_SQL, TYPES, case_sensitive_like=True).sql for node in nodes]
+
+
+@pytest.mark.parametrize('sql', _ogr_texts_written())
+def test_the_subset_sanitizer_leaves_an_ogr_text_like_unchanged(sql):
+    assert sql
+    assert sanitize_subset_string(sql, text_fields={'nom', 'code'}) == sql
+    combined = combine_with_old_subset(sql, '"pop" > 2', 'OR', provider_type='ogr')
+    assert sanitize_subset_string(combined, text_fields={'nom', 'code'}) == combined
+
+
 # -- PostgreSQL ---------------------------------------------------------------------
 
 def test_postgresql_division_is_float_and_null_on_zero():
