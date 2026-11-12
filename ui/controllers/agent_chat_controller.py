@@ -360,8 +360,11 @@ class AgentChatController(QObject):
 
     def _on_project_cleared(self) -> None:
         """What was said is about the layers of the project that just went away. What is stored stays."""
-        # First: the turn under way, ended below, must not be recorded against the closed project.
+        abort_active(CHAT_WAITS)  # a tool of the chat waiting (Processing, a download) ends: its project is gone
+        # The turn under way, ended below, must not be recorded against the closed project, nor the change another
+        # application is making (its layers compared with the next project's, an Undo would remove them all).
         self._checkpoint.discard()
+        self._mcp.forget_change()
         self._replay_stop = True  # a recipe stops before its next step
         if self._replaying:
             self._abandoned = True

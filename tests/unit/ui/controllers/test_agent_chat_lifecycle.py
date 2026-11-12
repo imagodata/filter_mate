@@ -100,10 +100,16 @@ class FakeCheckpoint:
 
 
 class FakeBridge:
+    made = []
+
     def __init__(self, host, parent):
         self.listening, self.busy, self.error = False, False, ""
         self.close_error = None
-        self.closed = 0
+        self.closed = self.forgotten = 0
+        FakeBridge.made.append(self)
+
+    def forget_change(self):
+        self.forgotten += 1
 
     def sync(self):
         pass
@@ -309,6 +315,54 @@ def test_another_project_stops_a_recipe_quietly(ctrl_module, controller, monkeyp
     assert controller._checkpoint.committed == 0
     controller.panel.add_note.assert_not_called()  # its end is not written in the thread of the next project
     assert not controller.chat_busy()
+
+
+def test_another_project_ends_what_the_chat_waits_for(ctrl_module, controller):
+    """2026-11-12: the tool left behind went on waiting (Processing has no time limit) in the closed project."""
+    bounded_http, stopped = ctrl_module._test_bounded_http, []
+
+    def tool(arguments):
+        forget = bounded_http.on_abort(lambda: stopped.append("chat"))
+        FakeQgsProject.project.cleared.emit()
+        forget()
+        return {"ok": True}
+
+    engine, transport = _engine(ctrl_module, controller, controller._chat_owned({"write": tool})["write"])
+    controller._on_send("go")
+    transport.starts[0](_tool_turn(ctrl_module))
+    assert stopped == ["chat"]
+
+
+def test_another_project_forgets_the_change_of_another_application(ctrl_module, controller):
+    FakeQgsProject.project.cleared.emit()
+    assert controller._mcp.forgotten == 1  # its undo point is not recorded either
+
+
+def test_a_change_of_another_application_during_another_project_is_not_recorded(ctrl_module, monkeypatch):
+    """2026-11-12: committed after the project changed, every layer of the new project was "added" by the change."""
+    _module(monkeypatch, ".adapters.agent.native_mcp")
+    _module(monkeypatch, ".adapters.public_api.map_images", handlers=lambda: {})
+    bridge_module = _load(monkeypatch, "ui.controllers.real_agent_mcp_bridge", "ui/controllers/agent_mcp_bridge.py")
+    catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
+    executor = sys.modules[f"{_PKG}.core.agent.tool_executor"]
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    made = []
+    monkeypatch.setattr(bridge_module, "TurnCheckpoint", lambda: made.append(FakeCheckpoint()) or made[-1])
+    host = types.SimpleNamespace(describe_call=str, label_of=lambda call, client: client, history_changed=lambda: None)
+    bridge = bridge_module.AgentMcpBridge(host, None)
+    write = catalog.ToolSpec("write", "Change something here.", {"type": "object", "properties": {}})
+
+    def tool(arguments):
+        bridge.forget_change()  # what the chat does when the project is cleared during the change
+        return {"ok": True}
+
+    bridge._executor = executor.ToolExecutor([write], {"write": tool})
+    bridge._change(messages.ToolCallPart("c1", "write", {}), "client")
+    assert made[0].discarded == 1 and made[0].committed == 0
+    bridge.forget_change()  # between two changes: nothing to forget
+    bridge._executor = executor.ToolExecutor([write], {"write": lambda arguments: {"ok": True}})
+    bridge._change(messages.ToolCallPart("c2", "write", {}), "client")
+    assert made[1].committed == 1
 
 
 def test_closing_the_dock_stops_a_recipe(ctrl_module, controller, monkeypatch):
