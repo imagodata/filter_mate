@@ -92,6 +92,18 @@ class TestFilterGuard:
     def test_anything_else_is_refused(self, expression):
         assert filter_problem(expression)
 
+    @pytest.mark.parametrize("expression", [
+        '"x" = 1 OR foo\u02bcbar', '"x" = \u02bc1\u02bc', '"x"\u00a0= 1', '"x" = 1\u2028OR 1=1', '"x" = \uff12',
+        '"x" = \u0661', "ann\u00e9e > 2000",  # outside quotes, ASCII only: a name with an accent is quoted
+        "\"x\" = 'a\uff3c'", '"a\uff02" = 1', "\"x\" = 'a\uff07'",  # full-width backslash and quotes, even quoted
+    ])
+    def test_outside_quotes_ascii_only_and_no_full_width_escape_inside(self, expression):
+        assert filter_problem(expression)
+        assert expression_problem(expression)
+
+    def test_a_quoted_name_or_text_with_an_accent_still_passes(self):
+        assert filter_problem("\"ann\u00e9e\" > 2000 AND \"nom\" = 'B\u00e9ziers'\t") == ""
+
     @pytest.mark.parametrize("expression", ['"a\\"" OR sleep(5) #".x', '"a\\"" OR sleep(5) #".x = 1', '"a\\" = 1',
                                             '"C:\\data" = 1'])
     def test_a_backslash_in_a_quoted_name_is_refused(self, expression):
