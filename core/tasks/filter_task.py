@@ -908,6 +908,12 @@ class FilterEngineTask(QgsTask):
                 logger.warning(f"Error checking the task's PostgreSQL connection: {e}")
             self._task_postgresql_connection = None
 
+        # 2026-11-12: an attempt that failed is not made again by the same task: each one
+        # may wait for its connection timeouts, and a reset asks once per layer
+        failure = getattr(self, '_task_postgresql_connection_failure', None)
+        if failure:
+            raise Exception(failure)
+
         logger.debug("Opening the task's PostgreSQL connection from its source layer")
 
         if hasattr(self, 'source_layer') and self.source_layer is not None:
@@ -935,9 +941,10 @@ class FilterEngineTask(QgsTask):
         except (RuntimeError, OSError, AttributeError, KeyError) as e:
             logger.error(f"Failed to get connection from layer by ID: {e}")
 
-        raise Exception(
+        self._task_postgresql_connection_failure = (
             "No valid PostgreSQL connection available: could not obtain a connection from the layer."
         )
+        raise Exception(self._task_postgresql_connection_failure)
 
     def _initialize_source_layer(self):
         """Initialize source layer and basic layer count. Delegates to InitializationHandler."""
@@ -1074,6 +1081,13 @@ class FilterEngineTask(QgsTask):
                 logger.info(f"Action '{self.task_action}' completed via dispatcher: {result.message}")
             else:
                 logger.warning(f"Action '{self.task_action}' failed via dispatcher: {result.message}")
+                # 2026-11-12: the handler caught an exception of the action (its text in
+                # errors): its first line (an SQL error goes on with the statement)
+                # becomes the task message, or the message bar only says "Task failed".
+                # A message the action set itself is more precise: kept.
+                error_lines = str(result.errors[0]).strip().splitlines() if result.errors else []
+                if error_lines and not self.message:
+                    self.message = error_lines[0]
 
             return result.success
 
