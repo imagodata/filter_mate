@@ -1,6 +1,34 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] Cibles raster / nuage d'une source vecteur : options dédiées ; fond web grisé dans la liste
+Décision utilisateur : `CROSS_FILTER.vector_source_raster_targets` / `vector_source_point_cloud_targets` (on par
+défaut), en plus de `RASTER` / `POINT_CLOUD.enabled` (qui restent source ET cible). Source raster / nuage : options
+sans effet. API publique / REST / Processing / agent : non concernés (ils nomment leurs cibles).
+Patterns à retenir :
+- Une seule règle, `point_cloud_capability.is_listed_coverage_target(layer, vector_source)`, pour les deux chemins
+  de remplissage (FilteringController et le repli ComboboxPopulationManager) ; `is_unlisted_vector_source_target`
+  dans `CoverageModeController.run_vector_source_task` : 'filter' écarte (log info) une cible cochée puis retirée
+  par l'option ; 'unfilter' / 'reset' ajoutent les cibles retirées que des runs liés avaient découpées
+  (`_linked_targets`, pas d'autre cible décochée : même règle que le moteur vecteur). Pas dans
+  `split_coverage_targets`, partagé avec l'export.
+- Les cibles d'un lancement viennent de la liste (`get_layers_to_filter`) : une option changée la fait remplir de
+  nouveau par `PropertyController.refill_layers_to_filter` (édition en direct : ConfigController ; relecture du
+  disque : ConfigModelManager, là où RASTER.enabled est déjà suivi). Un clic n'enregistre rien : l'écran fait foi,
+  chaque ligne listée garde son état exact (décochée comprise) ; une cible cochée que l'option retire reste dans
+  `layers_to_filter` (en mémoire, comme sur le disque) et revient cochée avec l'option, jusqu'au lancement suivant
+  qui enregistre les cibles utilisées. Clé des cibles éteinte : rien d'enregistré. Ne PAS réutiliser
+  `_refresh_layers_to_filter` (allumage de la clé : la liste remplie clé éteinte n'affiche rien de coché, d'où
+  l'union avec l'enregistré) — revue Opus du 12/11.
+- Ligne grisée (`QgsCheckableComboBoxLayer.add_unfilterable_item`) : aucun flag, pas d'état coché, pas de
+  `layer_id` dans ses données (seulement `unfilterable_layer_id`) → jamais lue comme cible. Les écritures de case
+  du widget lui-même passent par `_checkable` ; le reste (remplissage, favoris, `_restore_checked_targets`, refill)
+  écrit sur le modèle mais ne coche qu'une ligne trouvée par `layer_id`. Piège Qt : survoler une ligne désactivée
+  laisse courante la dernière ligne activée (sauf liste faite seulement de lignes grisées : l'index 0 l'est), donc
+  le clic vise `indexAt(position)` (avant : cliquer la ligne grisée cochait la ligne survolée juste avant).
+- Écartés par les options : absents (pas grisés), l'option sert à alléger la liste. Fonds web grisés seulement là
+  où les rasters de valeurs sont listés. Masque des fonds web hors source : PR séparée, à venir.
+
 ## [2026-11-12] Lot « audit-engine » : justesse des résultats (branche `claude/audit-engine`)
 - **AND NOT sans filtre existant = `NOT (x)` partout** (décision produit du 12/11) : cœur
   (`combine_without_old_subset` de `expression_combiner`, `combine_subset`), source du dock (dans

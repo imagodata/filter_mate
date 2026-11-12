@@ -8253,6 +8253,16 @@ Rasterul este desenat ca pe hartă, cu stilul său. SAM se instalează o singur�
         <translation>Faceți clic pe pătratul din dreapta pentru a testa acest strat după centroizi</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nu poate fi filtrat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Hartă de bază web (WMS / WMTS / XYZ, ArcGIS MapServer): doar culori, nu poate fi filtrată</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Selectare toate straturile vectoriale</translation>

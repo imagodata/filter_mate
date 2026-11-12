@@ -8257,6 +8257,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Click the square on the right to test this layer by its centroids</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>not filterable</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</translation>
+    </message>
 </context>
 <context>
     <name>RangeHistogramWidget</name>

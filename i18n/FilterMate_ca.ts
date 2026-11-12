@@ -8253,6 +8253,16 @@ El ràster es dibuixa com al mapa, amb el seu estil. SAM s'instal·la una sola v
         <translation>Feu clic al quadrat de la dreta per provar aquesta capa pels seus centroides</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>no filtrable</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Mapa base web (WMS / WMTS / XYZ, ArcGIS MapServer): només colors, no es pot filtrar</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Selecciona totes les capes vectorials</translation>

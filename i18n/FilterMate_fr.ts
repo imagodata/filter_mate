@@ -8289,6 +8289,16 @@ Le raster est dessiné comme sur la carte, avec son style. SAM s'installe une fo
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Cliquez sur le carré à droite pour tester cette couche par ses centroïdes</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>non filtrable</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Fond de plan web (WMS / WMTS / XYZ, ArcGIS MapServer) : couleurs seulement, il ne peut pas être filtré</translation>
+    </message>
 </context>
 <context>
     <name>RangeHistogramWidget</name>

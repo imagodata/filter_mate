@@ -8253,6 +8253,16 @@ Raster jest rysowany tak jak na mapie, ze swoim stylem. SAM instaluje się raz z
         <translation>Kliknij kwadrat po prawej, aby przetestować tę warstwę po centroidach</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nie można filtrować</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Internetowa mapa podkładowa (WMS / WMTS / XYZ, ArcGIS MapServer): tylko kolory, nie można jej filtrować</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Zaznacz wszystkie warstwy wektorowe</translation>

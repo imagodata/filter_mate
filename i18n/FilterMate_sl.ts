@@ -8253,6 +8253,16 @@ Raster se nariše tako kot na zemljevidu, s svojim slogom. SAM se namesti enkrat
         <translation>Kliknite kvadratek desno, da ta sloj preizkusite po njegovih centroidih</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ni mogoče filtrirati</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Spletna podlaga (WMS / WMTS / XYZ, ArcGIS MapServer): samo barve, ni je mogoče filtrirati</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Izberi vse vektorske plasti</translation>

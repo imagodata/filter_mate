@@ -8253,6 +8253,16 @@ Rasteret tegnes som på kortet, med sin stil. SAM installeres én gang fra grupp
         <translation>Klik på firkanten til højre for at teste dette lag via dets centroider</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>kan ikke filtreres</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webbaggrundskort (WMS / WMTS / XYZ, ArcGIS MapServer): kun farver, det kan ikke filtreres</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Vælg alle vektorlag</translation>

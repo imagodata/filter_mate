@@ -8253,6 +8253,16 @@ O raster é desenhado como no mapa, com o seu estilo. O SAM é instalado uma só
         <translation>Clique no quadrado à direita para testar esta camada pelos seus centroides</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>não filtrável</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Mapa base web (WMS / WMTS / XYZ, ArcGIS MapServer): apenas cores, não pode ser filtrado</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Selecionar todas as camadas vetoriais</translation>

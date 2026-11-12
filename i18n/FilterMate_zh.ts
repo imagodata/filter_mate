@@ -8253,6 +8253,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>点击右侧方块，以质心测试此图层</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>不可过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web 底图（WMS / WMTS / XYZ、ArcGIS MapServer）：仅有颜色，无法过滤</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>选择所有矢量图层</translation>

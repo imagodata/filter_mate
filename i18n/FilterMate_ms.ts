@@ -8253,6 +8253,16 @@ Raster dilukis seperti pada peta, dengan gayanya. SAM dipasang sekali daripada k
         <translation>Klik petak di sebelah kanan untuk menguji lapisan ini mengikut sentroidnya</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>tidak boleh ditapis</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Peta asas web (WMS / WMTS / XYZ, ArcGIS MapServer): warna sahaja, ia tidak boleh ditapis</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Pilih semua lapisan vektor</translation>

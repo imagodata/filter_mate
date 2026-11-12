@@ -8253,6 +8253,16 @@ Het raster wordt getekend zoals op de kaart, met zijn stijl. SAM wordt eenmalig 
         <translation>Klik op het vierkantje rechts om deze laag via zijn centroïden te testen</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>niet filterbaar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webachtergrondkaart (WMS / WMTS / XYZ, ArcGIS MapServer): alleen kleuren, kan niet worden gefilterd</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Alle vectorlagen selecteren</translation>

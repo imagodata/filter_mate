@@ -420,6 +420,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
             layer_props = dockwidget.PROJECT_LAYERS[layer.id()]
             project = QgsProject.instance()
+            # Rasters / point clouds under a vector source: as the CROSS_FILTER options say.
+            vector_source = isinstance(layer, QgsVectorLayer)
 
             # DIAGNOSTIC v4.0.5: Log PROJECT_LAYERS state
             logger.info(f"🔍 DIAGNOSTIC: PROJECT_LAYERS has {len(dockwidget.PROJECT_LAYERS)} entries")
@@ -518,13 +520,16 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 if not layer_obj:
                     skipped_reasons.append(f"{layer_name}: layer_obj is None (not in project)")
                     continue
-                from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
+                from ...adapters.qgis.point_cloud_capability import is_listed_coverage_target, is_non_analysis_raster
                 if is_non_analysis_raster(layer_obj):
                     skipped_reasons.append(f"{layer_name}: rendered or unsupported raster")
                     continue
                 if is_coverage_layer(layer_obj):
                     # FilterMate 5: raster / point cloud targets, clipped by the source geometry.
-                    pass
+                    if not is_listed_coverage_target(layer_obj, vector_source):
+                        skipped_reasons.append(f"{layer_name}: raster / point cloud targets of a vector source "
+                                               f"turned off (CROSS_FILTER)")
+                        continue
                 elif not isinstance(layer_obj, QgsVectorLayer):
                     skipped_reasons.append(f"{layer_name}: not QgsVectorLayer")
                     continue
@@ -578,6 +583,13 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
             from ...adapters.qgis.coverage_layers.vector_tile_filters import append_targets
             append_targets(layers_widget, project, layers_to_filter)
+
+            # Web basemaps: greyed and never checkable, so that their absence from the targets says why.
+            from ...adapters.qgis.point_cloud_capability import is_listed_rendered_raster
+            for rendered in project.mapLayers().values():
+                if rendered.id() != layer.id() and is_listed_rendered_raster(rendered, vector_source):
+                    layers_widget.add_unfilterable_item(dockwidget.icon_per_geometry_type('GeometryType.Raster'),
+                                                        f"{rendered.name()} [{rendered.crs().authid()}]", rendered.id())
             logger.info(f"✓ populate_layers_checkable_combobox: Added {layers_widget.count()} layers (source layer '{layer.name()}' excluded)")
             logger.info("=== populate_layers_checkable_combobox END ===")
             return True

@@ -8253,6 +8253,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>इस परत को उसके केंद्रकों से जाँचने के लिए दाईं ओर के वर्ग पर क्लिक करें</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>फ़िल्टर नहीं किया जा सकता</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>वेब आधार मानचित्र (WMS / WMTS / XYZ, ArcGIS MapServer): केवल रंग, इसे फ़िल्टर नहीं किया जा सकता</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>सभी वेक्टर परतें चुनें</translation>

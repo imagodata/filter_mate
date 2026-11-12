@@ -8253,6 +8253,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>右側の四角をクリックすると、このレイヤを重心でテストします</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>フィルタ不可</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web 背景地図 (WMS / WMTS / XYZ、ArcGIS MapServer): 色のみのため、フィルタできません</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>すべてのベクタレイヤーを選択</translation>

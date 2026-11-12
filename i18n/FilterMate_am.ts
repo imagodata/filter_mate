@@ -8253,6 +8253,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>ይህን ንብርብር በማዕከሎቹ ለመፈተሽ በቀኝ በኩል ያለውን ካሬ ጠቅ ያድርጉ</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>ማጣራት አይቻልም</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>የድር መሠረት ካርታ (WMS / WMTS / XYZ, ArcGIS MapServer)፦ ቀለሞች ብቻ፣ ሊጣራ አይችልም</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>ሁሉንም የቬክተር ንብርብሮች ምረጥ</translation>

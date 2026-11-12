@@ -8253,6 +8253,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>오른쪽 사각형을 클릭하면 이 레이어를 중심점으로 테스트합니다</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>필터링 불가</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>웹 배경 지도(WMS / WMTS / XYZ, ArcGIS MapServer): 색상만 있어 필터링할 수 없습니다</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>모든 벡터 레이어 선택</translation>

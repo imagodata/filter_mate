@@ -8253,6 +8253,16 @@ Raster được vẽ như trên bản đồ, với kiểu hiển thị của nó
         <translation>Nhấp vào ô vuông bên phải để kiểm tra lớp này theo tâm của nó</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>không lọc được</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Bản đồ nền web (WMS / WMTS / XYZ, ArcGIS MapServer): chỉ có màu, không thể lọc</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Chọn tất cả các lớp vector</translation>

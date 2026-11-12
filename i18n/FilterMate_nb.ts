@@ -8253,6 +8253,16 @@ Rasteret tegnes som på kartet, med sin stil. SAM installeres én gang fra grupp
         <translation>Klikk på ruten til høyre for å teste dette laget med sentroidene</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>kan ikke filtreres</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Nettbakgrunnskart (WMS / WMTS / XYZ, ArcGIS MapServer): bare farger, det kan ikke filtreres</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Velg alle vektorlag</translation>

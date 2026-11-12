@@ -8253,6 +8253,16 @@ A raszter úgy kerül megrajzolásra, mint a térképen, a saját stílusával. 
         <translation>Kattintson a jobb oldali négyzetre, hogy ezt a réteget súlypontjai alapján tesztelje</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nem szűrhető</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webes alaptérkép (WMS / WMTS / XYZ, ArcGIS MapServer): csak színek, nem szűrhető</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Az összes vektorréteg kijelölése</translation>

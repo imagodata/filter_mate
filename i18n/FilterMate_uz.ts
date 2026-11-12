@@ -8253,6 +8253,16 @@ Raster xaritadagidek, o'z uslubi bilan chiziladi. SAM FilterMate panelining TANL
         <translation>Bu qatlamni markaziy nuqtalari bo‘yicha sinash uchun o‘ngdagi kvadratni bosing</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>filtrlab bo'lmaydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Veb asos xarita (WMS / WMTS / XYZ, ArcGIS MapServer): faqat ranglar, uni filtrlab bo'lmaydi</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Barcha vektor qatlamlarni tanlash</translation>

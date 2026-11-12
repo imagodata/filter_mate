@@ -14,7 +14,10 @@ live); only the class resolution is cached, see :func:`reset_capability_cache`.
 Since FilterMate 5 it also knows about ``QgsRasterLayer`` (flag
 ``APP.OPTIONS.RASTER.enabled``) and classifies any layer into a
 :class:`~core.domain.layer_kind.LayerKind`; the module keeps its historical
-name because every caller already imports it.
+name because every caller already imports it. It also says which rasters and
+point clouds the dock lists as targets of a vector source (options
+``APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets`` /
+``vector_source_point_cloud_targets``).
 """
 import functools
 import logging
@@ -51,6 +54,31 @@ def is_raster_filtering_enabled() -> bool:
         return _get_option_bool(cfg.get('enabled'), False)
     except (ImportError, AttributeError, TypeError):
         return False
+
+
+def _cross_filter_option(name: str) -> bool:
+    """Live value of ``APP.OPTIONS.CROSS_FILTER.<name>``, True when unset (both target options are on by default)."""
+    try:
+        from ...config.config import ENV_VARS, _get_option_bool
+        cfg = (
+            ENV_VARS.get('CONFIG_DATA', {})
+            .get('APP', {})
+            .get('OPTIONS', {})
+            .get('CROSS_FILTER', {})
+        )
+        return _get_option_bool(cfg.get(name), True)
+    except (ImportError, AttributeError, TypeError):
+        return True
+
+
+def is_vector_source_raster_targets_enabled() -> bool:
+    """Live value of ``APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets`` (True when unset)."""
+    return _cross_filter_option('vector_source_raster_targets')
+
+
+def is_vector_source_point_cloud_targets_enabled() -> bool:
+    """Live value of ``APP.OPTIONS.CROSS_FILTER.vector_source_point_cloud_targets`` (True when unset)."""
+    return _cross_filter_option('vector_source_point_cloud_targets')
 
 
 def get_qgis_version_int() -> int:
@@ -271,6 +299,40 @@ def layer_kind_by_class(layer: Any) -> Any:
 def is_coverage_layer(layer: Any) -> bool:
     """True for a usable raster or point cloud layer (non-vector FilterMate layer)."""
     return is_point_cloud_layer(layer) or is_raster_layer(layer)
+
+
+def is_listed_coverage_target(layer: Any, vector_source: bool) -> bool:
+    """True for a raster of values / a point cloud the dock lists as a target of the source.
+
+    Under a vector source, rasters and point clouds also need their option
+    ``APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets`` /
+    ``vector_source_point_cloud_targets``. The REST API, Processing and the
+    agent name their targets: these options are not theirs.
+    """
+    if is_point_cloud_layer(layer):
+        return not vector_source or is_vector_source_point_cloud_targets_enabled()
+    if is_raster_layer(layer) and not is_non_analysis_raster(layer):
+        return not vector_source or is_vector_source_raster_targets_enabled()
+    return False
+
+
+def is_listed_rendered_raster(layer: Any, vector_source: bool) -> bool:
+    """True for a rendered raster (WMS / WMTS / XYZ, ArcGIS MapServer) shown greyed among the targets.
+
+    It is listed, never checkable, where the rasters of values are listed,
+    so that a web basemap missing from the targets says why.
+    """
+    return (is_raster_layer(layer) and is_non_analysis_raster(layer)
+            and (not vector_source or is_vector_source_raster_targets_enabled()))
+
+
+def is_unlisted_vector_source_target(layer: Any) -> bool:
+    """True for a raster / point cloud the dock does not list under a vector source.
+
+    A rendered raster, or one whose CROSS_FILTER option was turned off after
+    it was checked: it is not clipped. Vector and vector tile layers never are.
+    """
+    return is_coverage_layer(layer) and not is_listed_coverage_target(layer, True)
 
 
 def get_filterable_layer_types() -> Tuple[type, ...]:
