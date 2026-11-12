@@ -227,13 +227,10 @@ def test_teardown_disconnects_the_coverage_controller_from_the_project(integrati
 
 def test_closing_the_dock_keeps_the_controllers(integration, project):
     coverage = integration.coverage_controller
-    coverage._deactivate_pixel_tool = MagicMock()
-    coverage._stop_segmentation = MagicMock()
-    coverage._deactivate_class_tool = MagicMock()
+    coverage.release_map_tools = MagicMock()
     integration.on_dock_closed()
-    coverage._deactivate_pixel_tool.assert_called_once_with()
-    coverage._stop_segmentation.assert_called_once_with()  # 2026-11-12: SAM's tool left the map with the dock
-    coverage._deactivate_class_tool.assert_called_once_with()
+    # 2026-11-12: every tool of the panels, SAM's included, leaves the map (test_coverage_mode_controller)
+    coverage.release_map_tools.assert_called_once_with()
     assert integration.coverage_controller is coverage
     assert project.readProject.slots == [coverage._on_project_read]
     assert all(controller.calls == ['setup'] for controller in _stubs(integration))
