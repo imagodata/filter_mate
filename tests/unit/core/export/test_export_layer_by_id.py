@@ -138,3 +138,16 @@ def test_export_handler_counts_the_layers_ticked():
     total = ExportHandler().calculate_total_features([{"layer_id": "second", "layer_name": "communes"}], project)
 
     assert total == 3
+
+
+def test_gpkg_export_of_two_layers_of_the_same_name_keeps_both_tables(le, tmp_path, monkeypatch):
+    """2026-11-12 (review): the reprojecting GeoPackage export named each table after its layer, and
+    CreateOrOverwriteLayer replaced the first "communes" by the second."""
+    exporter = le.LayerExporter(project=_Project([FIRST, SECOND]))
+    monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock(), raising=False)
+    written = []
+    le.writer.writeAsVectorFormatV3 = MagicMock(
+        side_effect=lambda layer, path, context, options: written.append(options.layerName) or (0, "", "", ""))
+    result = exporter._export_to_gpkg_reproject([FIRST, SECOND], str(tmp_path / "out.gpkg"), MagicMock())
+    assert result.success is True
+    assert written == ["communes", "communes_2"]
