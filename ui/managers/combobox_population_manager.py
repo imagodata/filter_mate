@@ -606,7 +606,7 @@ class ComboboxPopulationManager:
                 f"populate_filtering_direct: Added {item_index} layers "
                 f"(source '{layer.name()}' excluded)"
             )
-            return item_index > 0
+            return layers_widget.count() > 0  # greyed web basemaps only: filled all the same
 
         except Exception as e:
             logger.error(

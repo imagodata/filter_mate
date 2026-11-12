@@ -847,7 +847,7 @@ class TestTargetListsFollowTheOptions:
         self._stub_dock_modules(monkeypatch)
         return types.SimpleNamespace(
             widgets_initialized=True, has_loaded_layers=True, PROJECT_LAYERS=project_layers, app=None,
-            current_layer=layers[0], layers={layer.id(): layer for layer in layers},
+            current_layer=layers[0], layers={layer.id(): layer for layer in layers}, project=project,
             widgets={"FILTERING": {"LAYERS_TO_FILTER": {"WIDGET": _TargetList()}}},
             icon_per_geometry_type=lambda geometry_type: None)
 
@@ -931,6 +931,14 @@ class TestTargetListsFollowTheOptions:
         targets = self._fill(monkeypatch, dock, path, source_id="dem")
         assert targets.rows == ["roads", "parcels", "dtm", "lidar"]
         assert [layer_id for layer_id, _ in targets.greyed] == ["osm"]
+
+    @pytest.mark.parametrize("path", ["controller", "direct"])
+    def test_a_list_of_greyed_basemaps_only_is_filled_all_the_same(self, monkeypatch, dock, path):
+        for layer_id in ("parcels", "dem", "dtm", "lidar"):
+            del dock.PROJECT_LAYERS[layer_id]
+            del dock.project._layers[layer_id]
+        targets = self._fill(monkeypatch, dock, path)  # asserts that the filling reports success
+        assert targets.rows == [] and [layer_id for layer_id, _ in targets.greyed] == ["osm"]
 
     @pytest.mark.parametrize("path", ["controller", "direct"])
     def test_a_web_basemap_source_is_not_listed_greyed(self, monkeypatch, dock, path):

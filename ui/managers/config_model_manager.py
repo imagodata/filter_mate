@@ -433,7 +433,7 @@ class ConfigModelManager:
         properties = getattr(integration, 'property_controller', None)
         if properties is not None:
             from qgis.PyQt.QtCore import QTimer
-            QTimer.singleShot(0, properties.refresh_layers_to_filter)
+            QTimer.singleShot(0, properties.refill_layers_to_filter)
             logger.info(f"Targets of a vector source changed by the configuration reload "
                         f"(rasters={after[0]}, point clouds={after[1]})")
 

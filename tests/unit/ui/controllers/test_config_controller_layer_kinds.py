@@ -135,7 +135,7 @@ def test_target_option_switch_fills_the_targets_list_again(controller_class):
     summary = []
     controller._apply_target_options_change((True, True), summary)
     properties = controller.dockwidget._controller_integration.property_controller
-    timer.singleShot.assert_called_once_with(0, properties.refresh_layers_to_filter)
+    timer.singleShot.assert_called_once_with(0, properties.refill_layers_to_filter)
     controller.dockwidget.filter_mate_app.apply_layer_kind_options.assert_not_called()
     assert summary and 'rasters=False' in summary[0]
 
@@ -180,7 +180,7 @@ def test_edit_compares_target_options_around_the_save(controller_class):
     controller.data_changed_configuration_model(item)
 
     properties = controller.dockwidget._controller_integration.property_controller
-    assert calls == ['save', ('schedule', properties.refresh_layers_to_filter)]
+    assert calls == ['save', ('schedule', properties.refill_layers_to_filter)]
 
 
 def test_configuration_reload_fills_the_targets_list_again(monkeypatch):
@@ -209,7 +209,7 @@ def test_configuration_reload_fills_the_targets_list_again(monkeypatch):
     manager._realign_target_options((True, True))  # unchanged: nothing
     timer.singleShot.assert_not_called()
     manager._realign_target_options((True, True))
-    timer.singleShot.assert_called_once_with(0, dock._controller_integration.property_controller.refresh_layers_to_filter)
+    timer.singleShot.assert_called_once_with(0, dock._controller_integration.property_controller.refill_layers_to_filter)
 
 
 def test_show_error_reaches_the_message_bar_with_the_message_first(controller_class, monkeypatch):

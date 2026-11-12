@@ -251,14 +251,14 @@ class ConfigController(BaseController):
 
     def _apply_target_options_change(self, before: Optional[tuple], changes_summary: List[str]) -> None:
         """CROSS_FILTER ``vector_source_raster_targets`` / ``vector_source_point_cloud_targets`` switched:
-        fill the FILTERING targets list again, keeping the layers checked on screen that stay listed."""
+        fill the FILTERING targets list again, each listed layer kept as it is on screen (PropertyController)."""
         after = self._target_option_flags()
         if before is None or after is None or after == before:
             return
         integration = getattr(self.dockwidget, '_controller_integration', None)
         properties = getattr(integration, 'property_controller', None)
         if properties is not None:
-            QTimer.singleShot(0, properties.refresh_layers_to_filter)
+            QTimer.singleShot(0, properties.refill_layers_to_filter)
             changes_summary.append(f"targets of a vector source (rasters={after[0]}, point clouds={after[1]})")
 
     # === Immediate (Live Preview) Changes ===

@@ -562,7 +562,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
 
     @staticmethod
     def _checkable(item):
-        """False for a row added by add_unfilterable_item: nothing checks it."""
+        """False for a row added by add_unfilterable_item: the check writes of this widget skip it."""
         return item is not None and item.isCheckable()
 
     def setItemCheckState(self, i, state=None):
@@ -646,8 +646,8 @@ class QgsCheckableComboBoxLayer(QComboBox):
                 toggled.setData(not toggled.data(CENTROID_ROLE), CENTROID_ROLE)
                 self.centroidsChanged.emit(self.centroid_layer_ids())
                 return True
-            # The row under the click: the current row never is a greyed one (Qt keeps the last
-            # enabled row current), so clicking a greyed row toggled the row hovered before it.
+            # The row under the click, not the current row: hovering a greyed row leaves the last
+            # enabled row current, so a click on a greyed row toggled the row hovered before it.
             index = self.view().indexAt(position)
             item = self.model().itemFromIndex(index)
             if self._checkable(item):

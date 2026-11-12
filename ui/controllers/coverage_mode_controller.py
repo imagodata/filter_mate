@@ -3472,19 +3472,26 @@ class CoverageModeController(BaseController):
             return
         source_id = source.id()
         try:
+            # 2026-11-12: rasters / point clouds the CROSS_FILTER options took off the targets list.
+            from ...adapters.qgis.point_cloud_capability import is_unlisted_vector_source_target
             if task_name == 'filter':
                 run = _LinkedRun()  # gets its cross operation once the cross task really changed a layer
                 self._linked_runs.setdefault(source_id, []).append(run)
                 self._linked_redo[source_id] = []
-                # 2026-11-12: a raster / point cloud checked before its CROSS_FILTER option was turned off.
-                from ...adapters.qgis.point_cloud_capability import is_unlisted_vector_source_target
-                coverage_ids = [i for i in coverage_ids if not is_unlisted_vector_source_target(self._map_layer(i))]
+                unlisted = [i for i in coverage_ids if is_unlisted_vector_source_target(self._map_layer(i))]
+                if unlisted:  # checked before the option was turned off: not clipped
+                    logger.info(f"[FM5] targets of '{self._layer_name(source)}' left out, no longer listed: {unlisted}")
+                    coverage_ids = [i for i in coverage_ids if i not in unlisted]
                 if coverage_ids and self._vector_engine_filters_targets():
                     self._run_vector_source_filter(source, coverage_ids, run=run)
             elif task_name in ('unfilter', 'reset'):
                 # Same history rules as the vector engine: Unfilter records
                 # nothing (a later Undo goes back to before the last filter, for
-                # every layer), Reset clears the history.
+                # every layer), Reset clears the history. A target a linked run
+                # clipped before an option took it off the list is restored too.
+                coverage_ids = list(coverage_ids) + [
+                    i for i in self._linked_targets(source_id)
+                    if i not in coverage_ids and is_unlisted_vector_source_target(self._map_layer(i))]
                 if coverage_ids:
                     kinds = {i: _kind_of(self._map_layer(i)) for i in coverage_ids}
                     self._finish_restore(self.service.unfilter(source_id, coverage_ids, kinds, record=False))
@@ -3509,6 +3516,15 @@ class CoverageModeController(BaseController):
                         self._finish_restore(self.service.redo(source_id))
         except Exception as exc:
             logger.warning(f"[FM5] coverage targets of '{self._layer_name(source)}' not processed: {exc}", exc_info=True)
+
+    def _linked_targets(self, source_id: str) -> List[str]:
+        """Layers the linked runs of the vector source changed, as long as their step is still applied."""
+        op_ids = {run.op_id for run in self._linked_runs.get(source_id) or () if run.op_id is not None}
+        layer_ids: List[str] = []
+        for operation in self.service.history.undo_stack(source_id):
+            if operation.op_id in op_ids:
+                layer_ids.extend(i for i in operation.layer_ids if i not in layer_ids)
+        return layer_ids
 
     @staticmethod
     def _run_is_next(run: _LinkedRun, operation: Any) -> bool:

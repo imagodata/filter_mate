@@ -586,7 +586,7 @@ class PropertyController(BaseController):
 
             # Special: refresh layers list when has_layers_to_filter is activated
             if property_path[1] == 'has_layers_to_filter':
-                self.refresh_layers_to_filter()
+                self._refresh_layers_to_filter()
 
         elif input_data is False:
             if "ON_FALSE" in custom_functions:
@@ -688,8 +688,8 @@ class PropertyController(BaseController):
             except Exception as e:
                 logger.debug(f"Could not reconnect {widget_path}: {e}")
 
-    def refresh_layers_to_filter(self) -> None:
-        """Refresh layers_to_filter combobox (also when a CROSS_FILTER option of its rasters / point clouds changed)."""
+    def _refresh_layers_to_filter(self) -> None:
+        """Refresh layers_to_filter combobox."""
         dw = self.dockwidget
 
         if not hasattr(dw, 'manageSignal'):
@@ -733,6 +733,53 @@ class PropertyController(BaseController):
         props = (getattr(dw, 'PROJECT_LAYERS', None) or {}).get(layer.id() if layer is not None else None)
         if isinstance(props, dict):
             props.setdefault("filtering", {})["layers_to_filter"] = _checked_target_ids(combo)
+
+    def refill_layers_to_filter(self) -> None:
+        """Fill the targets list again after a CROSS_FILTER option of its rasters / point clouds changed.
+
+        Unlike switching the targets key on (_refresh_layers_to_filter, where the list was filled
+        with the key off and shows nothing checked), the list on screen is what the user chose: a
+        click is not saved, so each listed layer keeps its state on screen exactly, unchecked ones
+        included. A target the option takes off the list stays in the saved targets and comes back
+        checked with the option, until a launch saves the targets it used. Saved in memory while the
+        key is on, as a launch would (the project variable is written by the next launch).
+        """
+        dw = self.dockwidget
+        if not hasattr(dw, 'manageSignal'):
+            return
+        try:
+            from qgis.PyQt.QtCore import Qt
+            dw.manageSignal(["FILTERING", "LAYERS_TO_FILTER"], 'disconnect')
+            combo = getattr(dw, 'checkableComboBoxLayer_filtering_layers_to_filter', None)
+            listed_before = set(_listed_target_ids(combo))
+            checked_before = _checked_target_ids(combo)
+            layer = getattr(dw, 'current_layer', None)
+            if hasattr(dw, 'filtering_populate_layers_chekableCombobox'):
+                dw.filtering_populate_layers_chekableCombobox(layer)
+            props = (getattr(dw, 'PROJECT_LAYERS', None) or {}).get(layer.id() if layer is not None else None)
+            filtering = props.get("filtering") if isinstance(props, dict) else None
+            filtering = filtering if isinstance(filtering, dict) else {}
+            saved = list(filtering.get("layers_to_filter") or [])
+            key_on = bool(filtering.get("has_layers_to_filter"))
+            model = combo.model() if combo is not None else None
+            listed_now = []
+            for row in range(model.rowCount() if model is not None else 0):
+                item = model.item(row)
+                data = item.data(Qt.ItemDataRole.UserRole) if item is not None else None
+                if not (isinstance(data, dict) and data.get("layer_id")):
+                    continue  # a greyed web basemap (no layer_id): never checked
+                layer_id = data["layer_id"]
+                listed_now.append(layer_id)
+                back = layer_id not in listed_before and key_on and layer_id in saved  # listed again by the option
+                item.setCheckState(Qt.CheckState.Checked if layer_id in checked_before or back
+                                   else Qt.CheckState.Unchecked)
+            if key_on and isinstance(props, dict) and "filtering" in props:
+                hidden = [i for i in saved + checked_before if i not in listed_now
+                          and (i in checked_before or i not in listed_before)]
+                filtering["layers_to_filter"] = _checked_target_ids(combo) + list(dict.fromkeys(hidden))
+            dw.manageSignal(["FILTERING", "LAYERS_TO_FILTER"], 'connect', 'checkedItemsChanged')
+        except Exception as e:
+            logger.warning(f"Could not fill layers_to_filter again: {e}")
 
     # ─────────────────────────────────────────────────────────────────
     # Buffer Styling
@@ -1304,6 +1351,21 @@ def _checked_target_ids(combo) -> list:
         if item is None or item.checkState() != Qt.CheckState.Checked:
             continue
         data = item.data(Qt.ItemDataRole.UserRole)
+        if isinstance(data, dict) and data.get("layer_id"):
+            ids.append(data["layer_id"])
+    return ids
+
+
+def _listed_target_ids(combo) -> list:
+    """Ids of every layer of the FILTERING targets list, checked or not (greyed rows have none)."""
+    if combo is None or not hasattr(combo, 'model'):
+        return []
+    from qgis.PyQt.QtCore import Qt
+    model = combo.model()
+    ids = []
+    for row in range(model.rowCount()):
+        item = model.item(row)
+        data = item.data(Qt.ItemDataRole.UserRole) if item is not None else None
         if isinstance(data, dict) and data.get("layer_id"):
             ids.append(data["layer_id"])
     return ids
