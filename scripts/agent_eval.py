@@ -697,8 +697,8 @@ def expected_script(case: Dict[str, Any]) -> List[Dict[str, Any]]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--live", action="store_true", help="call the provider (costs money)")
-    parser.add_argument("--prompt", choices=("current", "legacy"), default="current",
-                        help="legacy: the system prompt of 5.1.0, every domain in it (the A/B of the skills)")
+    parser.add_argument("--prompt", choices=("current", "skills"), default="current",
+                        help="skills: the system prompt with the domains taken out into skills (the A/B of the skills)")
     parser.add_argument("--provider", choices=sorted(PRESETS), default="anthropic")
     parser.add_argument("--model", help="model name; required with --live")
     parser.add_argument("--base-url", help="instead of the provider's usual address")
@@ -717,10 +717,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     results = []
     filtering = args.tools == "filtering"
     legacy_prompt = ""
-    if args.prompt == "legacy":
+    if args.prompt == "skills":
         sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from agent_eval_prompts import LEGACY_SYSTEM_PROMPT  # noqa: E402
-        legacy_prompt = LEGACY_SYSTEM_PROMPT
+        from agent_eval_prompts import SKILLS_SYSTEM_PROMPT  # noqa: E402
+        legacy_prompt = SKILLS_SYSTEM_PROMPT
     for case in load_cases(args.case):
         if filtering and not fits(case, FILTERING_TOOLS):
             continue
