@@ -488,6 +488,9 @@ def check_chat(provider, layer, authcfg, work):
         return wait(lambda: not panel._working, seconds)
 
     chat.open_settings = lambda: False
+    # The settings a request asks for when it cannot be sent go to the dialog directly (not refused as open_settings is,
+    # 2026-11-12): a modal dialog, which would hold the bench, never answered.
+    chat._settings_dialog = lambda: False
     settings()
     chat._refresh_ready()
     wait(lambda: False, 0.05)
