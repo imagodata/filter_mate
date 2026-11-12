@@ -404,3 +404,37 @@ class TestThreadSafety:
         task.signals.finished.connect.call_args_list[-1].args[0]()  # _on_task_done
         assert slots == []
 
+
+# ---------------------------------------------------------------------------
+# 2026-11-12: the variables of the project and the layer, read on the main thread
+# ---------------------------------------------------------------------------
+
+class TestVariables:
+
+    def test_prepare_reads_the_scalar_variables_of_the_expression_on_the_main_thread(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake.expression_string = '"id" > @seuil AND @layer IS NOT NULL'
+        fake.layer.isValid.return_value = True
+        context = MagicMock()
+        context.variable.side_effect = lambda name: {'seuil': '1500', 'layer': object()}[name]
+        with patch.object(_EET_MODULE, 'QgsExpression') as mock_expr_cls, \
+             patch.object(_EET_MODULE, 'QgsExpressionContext', return_value=context), \
+             patch.object(_EET_MODULE, 'QgsExpressionContextUtils') as utils:
+            mock_expr_cls.return_value.referencedVariables.return_value = {'seuil', 'layer'}
+            ExpressionEvaluationTask._prepare_feature_source(fake)
+        utils.globalProjectLayerScopes.assert_called_once_with(fake.layer)
+        assert fake._variables == {'seuil': '1500'}  # a layer object is never handed to the worker
+
+    def test_the_worker_request_holds_the_variables_read_before(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake._variables = {'seuil': '1500'}
+        with patch.object(_EET_MODULE, 'QgsExpression'), \
+             patch.object(_EET_MODULE, 'QgsFeatureRequest') as mock_req_cls, \
+             patch.object(_EET_MODULE, 'QgsExpressionContextScope') as scope_cls, \
+             patch.object(_EET_MODULE, 'QgsExpressionContext') as context_cls:
+            ExpressionEvaluationTask._build_feature_request(fake)
+        scope_cls.return_value.setVariable.assert_called_once_with('seuil', '1500')
+        context_cls.return_value.appendScope.assert_called_once_with(scope_cls.return_value)
+        mock_req_cls.return_value.setExpressionContext.assert_called_once_with(context_cls.return_value)
+        fake.layer.fields.assert_not_called()
+

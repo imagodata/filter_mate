@@ -42,6 +42,22 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
+def _with_layer_context(request, layer):
+    """The request with the global, project and layer variables of ``layer``.
+
+    2026-11-12: a request filtered by an expression has no context of its own:
+    a custom selection "id" > @seuil read every variable as NULL and selected
+    nothing, while the filter task (which evaluates in that context) filtered.
+    """
+    try:
+        from qgis.core import QgsExpressionContext, QgsExpressionContextUtils
+        request.setExpressionContext(QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer)))
+    except Exception:  # nosec B110 - no context: the request evaluates without variables, as before
+        pass
+    return request
+
+
 # _remote_zoom_request: nothing narrows the zoom, use the provider extent.
 WHOLE_LAYER = object()
 
@@ -546,7 +562,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
             expression = custom_expression.strip()
             if should_skip_expression_for_filtering(expression)[0]:
                 return None, expression
-            return request.setFilterExpression(expression), expression
+            return _with_layer_context(request.setFilterExpression(expression), layer), expression
         if isinstance(input, QgsFeature):
             # The same request as the picker's own: one read for a pick and a Filter click.
             return request.setFilterFids([input.id()]), ''
@@ -2265,7 +2281,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
             # Reload all features matching the custom expression
             try:
                 layer = self._dockwidget.current_layer
-                request = QgsFeatureRequest().setFilterExpression(expression)
+                request = _with_layer_context(QgsFeatureRequest().setFilterExpression(expression), layer)
                 features = list(layer.getFeatures(request))
                 logger.debug(f"Custom expression matched {len(features)} features")
             except Exception as e:
@@ -2505,7 +2521,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 if expression:
                     try:
                         layer = self._dockwidget.current_layer
-                        request = QgsFeatureRequest().setFilterExpression(expression)
+                        request = _with_layer_context(QgsFeatureRequest().setFilterExpression(expression), layer)
                         features = list(layer.getFeatures(request))
                         logger.debug(f"Reloaded {len(features)} features from expression")
                     except Exception as e:

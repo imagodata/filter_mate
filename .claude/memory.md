@@ -138,12 +138,62 @@ couche PG est compilé côté serveur (ILIKE de PostgreSQL), la référence QGIS
 - **Replis qui relisent l'expression en QGIS** (`EXPRESSION_FALLBACK` OGR / Spatialite) : la tâche garde
   `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
   COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
-- **Reste** : fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
+- **Reste** : (`@variables` et coordonnées faites, section suivante), hybride sur OGR SQL et sous
   `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin (traité pour =, IN,
   LIKE, ILIKE hors NOT : section « Textes sur OGR SQL » ci-dessous). Les 5 échecs de
   la suite complète (expression_builder PG / Spatialite, coverage_raster_target) existent sur `main` ; les lancer
   dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :
   `test_no_unscoped_qt_enums` refuse `QgsFeatureRequest.NoGeometry`, écrire `QgsFeatureRequest.Flag.NoGeometry`).
+
+## [2026-11-12] Traduction native : `@variables` repliées, coordonnées de `$geometry` (branche `claude/native-geom-variables`)
+Décision utilisateur. **Variables** : `@x` / `var('x')` (fonction `var` + littéral dans l'arbre) remplacées par leur
+valeur lue dans les portées globale / projet / couche (`constant_variables` : portée la plus interne, gardée si
+`scope.isStatic(name)` et valeur NULL / bool / nombre / texte ; `isStatic` existe en 3.44 et 4.2, pas sur le contexte).
+Liste noire en plus côté pur (`row_number`, `geometry`, `feature`, `id`, `map_*`, `canvas_*`, `atlas_*`, `layout_*`,
+`symbol_*`, `_*`…). Pas de repli dans une fonction non lue par l'écrivain (`with_variable`, `aggregate`…). **Le subset
+est statique** : une variable changée ensuite ne refiltre pas (comme tout subset FilterMate). QGIS replie aussi les
+variables statiques au `prepare` (`with_variable('seuil', 9, "pop" > @seuil)` y vaut `"pop" > 5`, mesuré).
+- **Texte lu comme nombre** : une variable de projet / couche est TOUJOURS un texte (`setLayerVariable(l, 'v', 7)` →
+  '7'). QGIS compare nombre et texte numérique comme nombres (pas deux textes) → `"pop" > '5'` écrit `"pop" > 5` ;
+  seulement `[+-]?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?` (ni espace, ni `.5`, ni chiffres Unicode), comparaisons seules
+  (IN, BETWEEN, arithmétique refusés). Un texte qui sous-déborde (`'1e-400'`, `'2.4e-324'`) : `QString::toDouble`
+  échoue, QGIS compare les textes → refusé ; un sous-normal (`'3e-324'`, `'1e-310'`) est un nombre pour QGIS (mesuré).
+- **Géométrie, mesuré bit à bit** (2 000 géométries réelles par type, QGIS 4.2.3 / 3.44.15, PostGIS 3.4, GDAL 3.10 /
+  3.12) : `x_min/x_max/y_min/y_max` = PostGIS `ST_XMin(CAST(g AS geometry))` couches de points et de lignes (0 écart,
+  arcs / compound compris) — PAS les polygones : la boîte PostGIS d'un CURVEPOLYGON / MULTISURFACE prend tous les
+  anneaux (QGIS la coquille : 30 contre 10), et une colonne générique lue en polygones en contient (revue) ; GPKG
+  `ST_MinX` (fonctions GDAL propres, enveloppe de l'en-tête du blob) couches de POINTS seulement (enveloppe GDAL d'un
+  polygone : anneau hors coquille 6 contre 1 ; d'un arc : 430/500 diffèrent ; une couche de lignes peut stocker
+  l'un ou l'autre). Un en-tête faux écrit par un autre outil que GDAL n'est pas détecté. `x/y/$x/$y` : PostGIS couche de points
+  seulement, en CASE (une colonne `geometry` générique lue `type=Point` donne aussi des MULTIPOINT ; x = centroïde,
+  $x = 1er point, multipoint vide = 0 dans QGIS ; `$x` d'un MULTIPOINT EMPTY fait planter QGIS 4.2.3). Refusés :
+  `area` (1 997/2 000 diffèrent : sommation), `length/perimeter` (arcs : ~730/1 000 diffèrent, et une couche PG
+  « LineString » sur colonne générique lit des arcs, mesuré), `num_points` (compound curve, POINT EMPTY = 1 dans QGIS),
+  `$area/$length/$perimeter` (ellipsoïde / unités du projet), tout en OGR SQL. GPKG : `ST_Length`, `ST_X`, `ST_NPoints`
+  marchent dans les images Docker mais viennent de SpatiaLite (`spatialite_version()` = 5.1.0) → non utilisés.
+- **Piège NaN** : une géométrie vide donne NaN, et QGIS **s'arrête sur une erreur d'évaluation** (« Cannot convert
+  'nan' to double ») au premier usage : l'entité n'est pas gardée (QgsFeatureRequest) ; SQL lit NULL et continue.
+  Identique via comparaison, arithmétique, abs, BETWEEN, NOT, AND de tête ; différent sous OR (`NULL OR TRUE`), CASE /
+  if, AND sous NOT (`NULL AND FALSE` = FALSE), IS NULL, coalesce → refusés (`_Writer.alternatives`). L'hybride refuse
+  toute erreur d'évaluation (ancien chemin, qui écrit `x_min("geom")` : invalide sur PG). Sous AND NOT, une
+  traduction géométrique avec AND / OR / NOT (`NativeTranslation.geometric` + `composite`) → ancien chemin :
+  `NOT (NULL AND FALSE)` = TRUE garderait la géométrie vide (3 FAIL mesurés sans cette garde). Pas de valeur
+  géométrique comme borne de BETWEEN (un AND caché : `20 NOT BETWEEN NULL AND 10` = TRUE). Sous l'OR d'une
+  combinaison avec un ancien subset : non refusé, sémantique d'union des ensembles gardés (QGIS évaluant `old OR new`
+  s'arrête aussi sur le NaN quand `old` est FALSE / NULL → non gardé des deux côtés).
+- **Variables relues ailleurs (revue)** : les replis source SpatiaLite FALLBACK / OGR EXPRESSION_FALLBACK relisent le
+  texte QGIS du subset natif (`source_qgis_expression`) → `source_refusal.selection_request` (contexte global /
+  projet / couche, thread de la tâche comme la traduction et l'hybride) ; sans lui 0 entité → filtre refusé (15 FAIL).
+  EXPLORING : `exploring_custom_selection` du dock (lecture réelle d'une couche locale / PG, le banc GUI attendait 120 s
+  → la tâche QGIS « Installing Open Sans » échouait et cassait le contrôle final en ltr) et l'évaluation asynchrone
+  (`scalar_variables` lu sur le fil principal, une portée de valeurs simples au worker) ; les lectures en worker de
+  `async_query` refusent déjà les variables (UNSAFE → lecture sur le fil principal). Un cache de sélection garde
+  l'ancienne valeur si la variable change (comme le subset).
+- **Hybride** : `node.dump()` écrit un réel avec 17 décimales au plus (1e-30 → `0`, -1e-30 → `- 0`, mesuré) →
+  `NativeTranslation.native_exact` ; sinon la partie native est écartée de l'évaluation QGIS.
+- **Contrôle** (après revue) : `check_native_translation.py` 864 PASS / 0 FAIL / 639 SKIP / 196 OLD en 4.2.3 et 3.44.15, bases
+  `fm_hyb` (UTF-8) et `fm_c` (C) ; avant : 541 / 0 / 252 / 112. Sa référence géométrique compte une erreur
+  d'évaluation comme « non gardée » (`errors_drop`). Banc GUI `FM_PG_CASE=native` 13/13 en stable et ltr.
 
 ## [2026-11-12] Mode hybride étendu à PostgreSQL (décision utilisateur)
 Les expressions que la traduction PostgreSQL refuse (regexp_match, texte comparé à un nombre, signe d'un NULL…)

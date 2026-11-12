@@ -11,15 +11,15 @@ import logging
 try:
     from ...core.filter.server_dialect import TranslationStatus, Unsupported
     from ...filtermate_core.filter.native_dialect import (
-        BOOL, INT, OGR_SQL, OTHER, POSTGRESQL, REAL, SQLITE, TEXT, NativeTranslation, hybrid_sql, key_reference,
-        translate_native,
+        BOOL, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT, NativeGeometry,
+        NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native, uses_geometry,
     )
     from ...filtermate_core.filter.pk_formatter import is_null_value
 except ImportError:  # plugin root on sys.path in pure unit tests
     from core.filter.server_dialect import TranslationStatus, Unsupported
     from filtermate_core.filter.native_dialect import (
-        BOOL, INT, OGR_SQL, OTHER, POSTGRESQL, REAL, SQLITE, TEXT, NativeTranslation, hybrid_sql, key_reference,
-        translate_native,
+        BOOL, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT, NativeGeometry,
+        NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native, uses_geometry,
     )
     from filtermate_core.filter.pk_formatter import is_null_value
 
@@ -162,7 +162,78 @@ def translate_for_layer(layer, expression, texts_as_like=False):
         return NativeTranslation(TranslationStatus.NONE, local_expression=expression,
                                  reason='Expression complexity limit exceeded')
     return translate_native(tree, dialect, field_types(fields, dialect),
-                            case_sensitive_like=texts_as_like and case_sensitive_like(layer))
+                            case_sensitive_like=texts_as_like and case_sensitive_like(layer),
+                            variables=constant_variables(layer, referenced_variables(tree)),
+                            geometry=native_geometry(layer) if uses_geometry(tree) else None)
+
+
+def constant_variables(layer, names):
+    """Values of the variables ``names`` that are constants where ``layer`` is filtered.
+
+    Read in the global, project and layer scopes (the innermost that holds a
+    name gives its value, as QGIS reads it), kept when QGIS marks the variable
+    static and its value is NULL, a boolean, a number or a text. The subset
+    is written with these values once: like every FilterMate subset it does
+    not follow a later change of a variable (the filter must be applied
+    again). A variable of the feature, the map, a layout... is not in these
+    scopes and stays unknown (not written). Called from the filter task's
+    thread, as the hybrid subset already builds this context there.
+    """
+    if not names:
+        return {}
+    from qgis.core import QgsExpressionContextUtils
+    values = {}
+    scopes = list(reversed(QgsExpressionContextUtils.globalProjectLayerScopes(layer)))
+    for name in names:
+        scope = next((scope for scope in scopes if scope.hasVariable(name)), None)
+        if scope is None or not scope.isStatic(name):
+            continue
+        value = scope.variable(name)
+        if is_null_value(value) or isinstance(value, (bool, int, float, str)):
+            values[name] = None if is_null_value(value) else value
+    return values
+
+
+def native_geometry(layer):
+    """The geometry column of ``layer`` for the geometric functions written natively, or None.
+
+    PostGIS (PostgreSQL provider) and GeoPackage files read by GDAL, whose
+    functions were compared with QGIS; not SpatiaLite (another blob, not
+    compared) nor GDAL's SpatiaLite functions on a GeoPackage (only where GDAL
+    is built with SpatiaLite).
+    """
+    from qgis.core import QgsDataSourceUri, QgsWkbTypes
+    try:
+        dialect = native_dialect_for_layer(layer)
+        provider = layer.dataProvider()
+        if dialect == POSTGRESQL:
+            source = POSTGIS
+        elif dialect == SQLITE and (layer.providerType() or '').lower() == 'ogr' and (
+                provider.storageType() or '').lower() == 'gpkg':
+            source = GEOPACKAGE
+        else:
+            return None
+        getter = getattr(provider, 'geometryColumnName', None)
+        column = getter() if callable(getter) else ''
+        if not column and source == POSTGIS:
+            column = QgsDataSourceUri(provider.dataSourceUri()).geometryColumn()
+        kind = _geometry_kind(layer)
+        if not column or kind is None:
+            return None
+        return NativeGeometry(column, kind, source, QgsWkbTypes.isCurvedType(layer.wkbType()))
+    except Exception as exc:  # nosec B110 - deleted layer, provider without a geometry column
+        logger.debug('No geometry column for the native translation: %s', exc)
+        return None
+
+
+def _geometry_kind(layer):
+    """``point``, ``line`` or ``polygon``: the layer's geometry type (the same numbers in QGIS 3 and 4)."""
+    value = layer.geometryType()
+    value = getattr(value, 'value', value)  # a Qt 6 enum
+    try:
+        return {0: 'point', 1: 'line', 2: 'polygon'}.get(int(value))
+    except (TypeError, ValueError):
+        return None
 
 
 def native_subset(layer, expression):
@@ -184,7 +255,9 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
         negated: Whether the subset will be written under NOT (AND NOT). OGR
             SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
             NOT is then left to the former conversion, and so are texts (only
-            written with LIKE outside any NOT, :func:`case_sensitive_like`).
+            written with LIKE outside any NOT, :func:`case_sensitive_like`),
+            and, on every source, a coordinate of the geometry with AND, OR
+            or NOT (``NativeTranslation.geometric``).
 
     Returns:
         The native SQL of the whole expression, else (``evaluate``, SQLite
@@ -204,6 +277,10 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
         return None
     if negated and result.composite and native_dialect_for_layer(layer) == OGR_SQL:
         logger.info('Native SQL left aside: OGR SQL would negate an AND / OR (TRUE AND NULL is FALSE there)')
+        return None
+    if negated and result.composite and result.geometric:
+        # an empty geometry: NOT (NULL AND FALSE) is TRUE, QGIS stops on the NaN and keeps nothing
+        logger.info('Native SQL left aside: a coordinate of the geometry under the NOT of AND NOT, with AND / OR')
         return None
     native_sql = result.sql
     if native_sql and not _survives_sanitizer(layer, native_sql):
@@ -284,7 +361,11 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
     for parsed in filter(None, (whole, native)):
         if parsed.hasParserError() or not parsed.prepare(context):
             raise Unsupported('QGIS cannot prepare the expression: {}'.format(parsed.parserErrorString()))
-    if native is not None and set(native.referencedColumns()) != set(result.native_columns):
+    if native is not None and not result.native_exact:
+        # node.dump() wrote a number of the native part differently (1e-30 as 0): its QGIS text is not its SQL
+        logger.info('Native part left aside: its QGIS text does not give back its numbers')
+        native, native_sql = None, ''
+    elif native is not None and set(native.referencedColumns()) != set(result.native_columns):
         # node.dump() writes the fields "null", "true", "false" unquoted: other values
         logger.info('Native part left aside: its QGIS text reads %s, not %s',
                     sorted(native.referencedColumns()), sorted(result.native_columns))
@@ -325,4 +406,5 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
     return subset
 
 
-__all__ = ['field_types', 'native_dialect_for_layer', 'native_subset', 'subset_for_layer', 'translate_for_layer']
+__all__ = ['constant_variables', 'field_types', 'native_dialect_for_layer', 'native_geometry', 'native_subset',
+           'subset_for_layer', 'translate_for_layer']
