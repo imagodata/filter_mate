@@ -482,10 +482,37 @@ The catalog is JSON because that server needs pydantic and the MCP SDK, which QG
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's
 history, which is not what the agent did.
 
-Counts (2026-11-11): 47 tools in the catalog; the chat offers 53 at most (the catalog without those three, plus 9 of its
-own: `undo_agent_step`, the notes, `run_pyqgis`, `view_map`, the widgets and the recipes, some only under their
-setting); the MCP server of the plugin serves 46 (the chat's tools without its own, plus `map_image` and
-`contact_sheet`).
+Counts (2026-11-12): 47 tools in the catalog; the chat offers 58 at most (the catalog without those three, plus the 5
+tools of the plugin's own settings and skills, plus 9 of its own: `undo_agent_step`, the notes, `run_pyqgis`,
+`view_map`, the widgets and the recipes, some only under their setting); the MCP server of the plugin serves 51 (the
+chat's tools without its own, plus `map_image` and `contact_sheet`).
+
+### Settings of FilterMate and skills (2026-11-12)
+
+`describe_settings`, `get_setting`, `change_settings` and `diagnose_performance` work on FilterMate itself, not on the
+project; `load_skill` loads the instructions of a task. They are declared in `core/agent/tool_catalog.py`
+(`SETTINGS_TOOLS`, `SKILL_TOOLS`), served by the chat and the MCP server of the plugin, not by the REST API.
+
+- The settings are the leaves of `config/config.default.json` under `APP`, hidden ones left out
+  (`core/agent/settings_reference.py`); the values come from the configuration in use. A name and local paths
+  (`PRIVATE`) are only said set or empty. `knowledge/SETTINGS_REFERENCE.md` is generated from the same rows
+  (`scripts/export_config_reference.py`, checked by a test).
+- `change_settings` is all or none: each value is checked against the choices, bounds and type of its setting. It
+  refuses the section `APP.OPTIONS.AGENT` (an agent never widens what it may reach) and the private values; the settings
+  dialog of the agent is not reachable at all. The panel applies a change as an edit of the configuration tree would
+  (`ConfigModelManager.apply_settings`): the theme, the profile, the action bar, the language, the layer kinds and the
+  timers follow at once; undoing the turn puts the values back, except a setting the user changed since.
+- Permissions: asked at every level, *Advisor* included (the user reads each setting before and after); at the
+  *Autonomous* level, a change of `APP.DOCKWIDGET` alone (how the panel looks, `FEEDBACK_LEVEL` aside) runs without a
+  question. Always allow (tab Tools) works above Advisor; Yes for this conversation is not offered: each change is shown.
+  A call that would change nothing, or that the tool refuses, is not asked. A recipe never keeps a change of the
+  settings.
+- `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
+- Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
+  and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt
+  `filtermate_configuration` and the settings reference as the resource `filtermate://settings/reference`;
+  `skills/filtermate-configuration/SKILL.md` is the same text as an Agent Skill for an application connected to it
+  (`scripts/export_agent_skills.py`, checked by a test).
 
 What the chat adds to the REST checks, because a model can be steered by what it reads:
 

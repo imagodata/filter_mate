@@ -58,6 +58,51 @@
         <translation>Αναίρεση του τελευταίου αιτήματος</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1260"/>
+        <source>Reading the settings of FilterMate</source>
+        <translation>Ανάγνωση των ρυθμίσεων του FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>Reading the setting {}</source>
+        <translation>Ανάγνωση της ρύθμισης {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
+        <source>Settings of FilterMate: {}</source>
+        <translation>Ρυθμίσεις του FilterMate: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>applied at once</source>
+        <translation>εφαρμόζεται αμέσως</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>used from the next filter or export</source>
+        <translation>λαμβάνεται υπόψη από το επόμενο φιλτράρισμα ή την επόμενη εξαγωγή</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
+        <source>after restarting QGIS</source>
+        <translation>μετά την επανεκκίνηση του QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1462"/>
+        <source>The agent wants to change these settings of FilterMate (they stay for every project; undoing the turn puts them back):
+{}
+
+Why: {}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να αλλάξει αυτές τις ρυθμίσεις του FilterMate (ισχύουν για όλα τα έργα· η αναίρεση του γύρου τις επαναφέρει):
+{}
+
+Γιατί: {}
+
+Συμφωνείτε;</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="247"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
         <source>Back to before: {}</source>
@@ -360,6 +405,11 @@ Run it?</source>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>ΣΣΑ του έργου</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="56"/>
+        <source>settings of FilterMate</source>
+        <translation>ρυθμίσεις του FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>

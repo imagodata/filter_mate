@@ -58,6 +58,51 @@
         <translation>Hoàn tác yêu cầu gần nhất</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1260"/>
+        <source>Reading the settings of FilterMate</source>
+        <translation>Đang đọc các cài đặt của FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>Reading the setting {}</source>
+        <translation>Đang đọc cài đặt {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
+        <source>Settings of FilterMate: {}</source>
+        <translation>Các cài đặt của FilterMate: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>applied at once</source>
+        <translation>được áp dụng ngay</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>used from the next filter or export</source>
+        <translation>được dùng từ lần lọc hoặc xuất tiếp theo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
+        <source>after restarting QGIS</source>
+        <translation>sau khi khởi động lại QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1462"/>
+        <source>The agent wants to change these settings of FilterMate (they stay for every project; undoing the turn puts them back):
+{}
+
+Why: {}
+
+Do you agree?</source>
+        <translation>Tác tử muốn thay đổi các cài đặt này của FilterMate (áp dụng cho mọi dự án; hoàn tác lượt này sẽ khôi phục lại):
+{}
+
+Lý do: {}
+
+Quý vị có đồng ý không?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="247"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="248"/>
         <source>Back to before: {}</source>
@@ -360,6 +405,11 @@ Chạy không?</translation>
         <location filename="../adapters/agent/turn_effects.py" line="42"/>
         <source>project CRS</source>
         <translation>hệ tọa độ dự án</translation>
+    </message>
+    <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="56"/>
+        <source>settings of FilterMate</source>
+        <translation>các cài đặt của FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>

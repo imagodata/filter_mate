@@ -278,6 +278,151 @@ class ConfigModelManager:
         except Exception as e:
             logger.error(f"Error reloading configuration model: {e}")
 
+    def apply_settings(self, values):
+        """Settings changed by the agent (``{"APP.OPTIONS.X.y": value}``, checked by core.agent.settings_reference),
+        applied as the user edits them in the configuration tree.
+
+        Each setting the tree shows gets its new value the way the editor of its row sets it (ChoicesType /
+        ConfigValueType.setModelData: the text shown, then the value): the tree emits itemChanged and the usual
+        handlers run, the theme, the profile, the action bar, the language, the layer kinds and the timers follow,
+        and the configuration is saved, exactly as for the user. A setting missing from the tree (a leaf the user's
+        config.json lacks) is written in CONFIG_DATA from the defaults, the tree is built again and saved.
+
+        All or none: when an edit fails, CONFIG_DATA, the tree and the file go back to what they were. Returns the
+        paths applied.
+        """
+        import copy
+        from ...config.config import ENV_VARS
+        dw = self.dockwidget
+        if not getattr(dw, 'widgets_initialized', False) or not isinstance(dw.CONFIG_DATA, dict) \
+                or getattr(dw, 'config_model', None) is None:
+            raise RuntimeError("the FilterMate panel is not ready")
+        saved = copy.deepcopy(dw.CONFIG_DATA)
+        try:
+            missing = {path: value for path, value in values.items()
+                       if not self._editable_leaf(self._value_item(dw.config_model, path.split(".")))}
+            if missing:
+                self._add_missing_leaves(missing, ENV_VARS)
+            applied = []
+            for path, value in values.items():
+                item = self._value_item(dw.config_model, path.split("."))
+                if not self._editable_leaf(item):
+                    raise RuntimeError(f"{path} is not in the configuration tree")
+                if path in missing:
+                    self.data_changed_configuration_model(item)  # already holds its value: run the handlers
+                else:
+                    self._edit_leaf(item, value)  # itemChanged: the handlers of an edit in the tree
+                applied.append(path)
+            return applied
+        except Exception as exc:  # all or none: the configuration in use goes back to what it was
+            logger.warning(f"Settings of the agent not applied: {exc}")
+            kinds_before, targets_before = self._layer_kind_flags(), self._target_option_flags()
+            dw.CONFIG_DATA.clear()
+            dw.CONFIG_DATA.update(saved)
+            self._sync_env(ENV_VARS)
+            try:
+                self._rebuild_tree()
+                self._write_config(ENV_VARS)
+                self._realign_layer_kinds(kinds_before)
+                self._realign_target_options(targets_before)
+            except Exception:
+                logger.exception("Configuration not put back after a failed change")
+            raise RuntimeError(f"the settings could not be applied ({exc})") from exc
+
+    @staticmethod
+    def _editable_leaf(item):
+        """A value item of the tree holding a setting (its value in a dict with 'value'), as the editors expect."""
+        if item is None:
+            return False
+        from qgis.PyQt.QtCore import Qt
+        data = item.data(Qt.ItemDataRole.UserRole)
+        return isinstance(data, dict) and 'value' in data
+
+    @staticmethod
+    def _edit_leaf(item, value):
+        """What the editor of the row does (datatypes.ChoicesType / ConfigValueType.setModelData)."""
+        from qgis.PyQt.QtCore import Qt
+        data = dict(item.data(Qt.ItemDataRole.UserRole))
+        data['value'] = value
+        display = 'true' if value is True else 'false' if value is False else str(value)
+        choices, labels = data.get('choices'), data.get('available_translations')
+        if isinstance(choices, list) and labels and value in choices:  # LANGUAGE shows names, not codes
+            index = choices.index(value)
+            if len(labels) == len(choices) - 1:
+                display = 'auto' if index == 0 else labels[index - 1]
+            elif len(labels) == len(choices):
+                display = labels[index]
+        item.setData(display, Qt.ItemDataRole.DisplayRole)
+        item.setData(data, Qt.ItemDataRole.UserRole)
+
+    def _add_missing_leaves(self, values, ENV_VARS):
+        """Leaves the tree does not show: written in CONFIG_DATA from the defaults, the tree built again, saved."""
+        from ...core.agent.settings_reference import load_default, set_leaf
+        dw = self.dockwidget
+        default = load_default()
+        for path, value in values.items():
+            set_leaf(dw.CONFIG_DATA, path, value, default)
+        self._sync_env(ENV_VARS)
+        self._rebuild_tree()
+        self._write_config(ENV_VARS)
+
+    def _write_config(self, ENV_VARS):
+        dw = self.dockwidget
+        config_path = ENV_VARS.get('CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
+        atomic_json_write(config_path, self._sanitize_for_json(dw.CONFIG_DATA), indent=4)
+
+    def _sync_env(self, ENV_VARS):
+        """ENV_VARS follows CONFIG_DATA, the same dict when it can (other holders keep their reference)."""
+        dw = self.dockwidget
+        live = ENV_VARS.get("CONFIG_DATA")
+        if isinstance(live, dict) and live is not dw.CONFIG_DATA:
+            live.clear()
+            live.update(dw.CONFIG_DATA)
+        else:
+            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
+
+    def _rebuild_tree(self):
+        """The configuration tree built again from CONFIG_DATA, its signal off meanwhile."""
+        dw = self.dockwidget
+        self.disconnect_config_model_signal()
+        try:
+            from ...ui.widgets.json_view.model import JsonModel
+            dw.config_model = JsonModel(data=dw.CONFIG_DATA, editable_keys=False, editable_values=True,
+                                        plugin_dir=dw.plugin_dir)
+            container = getattr(dw, 'config_view_container', None)
+            if container is not None:
+                container.model = dw.config_model  # sets the model of its view too
+            elif getattr(dw, 'config_view', None) is not None:
+                dw.config_view.setModel(dw.config_model)
+                dw.config_view.model = dw.config_model
+        finally:
+            self.connect_config_model_signal()
+
+    @staticmethod
+    def _value_item(model, keys):
+        """The value item (column 1) of the leaf ``keys`` in the configuration tree, None when absent.
+
+        A section shown under its ``_display_name`` keeps its JSON key in the UserRole of its key item."""
+        from qgis.PyQt.QtCore import Qt
+        parent = model.invisibleRootItem()
+        for depth, key in enumerate(keys):
+            found = None
+            for row in range(parent.rowCount()):
+                key_item = parent.child(row, 0)
+                if key_item is None:
+                    continue
+                original = key_item.data(Qt.ItemDataRole.UserRole)
+                name = original if isinstance(original, str) and original else key_item.data(Qt.ItemDataRole.DisplayRole)
+                if name == key:
+                    found = (key_item, parent.child(row, 1))
+                    break
+            if found is None:
+                return None
+            if depth == len(keys) - 1:
+                return found[1]
+            parent = found[0]
+        return None
+
     @staticmethod
     def _sanitize_for_json(obj):
         """Recursively remove non-JSON-serializable values from a data structure.

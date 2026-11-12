@@ -103,7 +103,7 @@ class ToolExecutor:
             return RUN
         if policy.protection_refusal(call.name, call.arguments):
             return PROTECTED
-        return policy.verdict(tool)
+        return policy.verdict(tool, call.arguments)
 
     @staticmethod
     def declined(call: ToolCallPart) -> ToolResultPart:

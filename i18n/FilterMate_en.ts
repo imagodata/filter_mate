@@ -336,6 +336,11 @@ Run it?</translation>
         <translation>project CRS</translation>
     </message>
     <message>
+        <location filename="../../adapters/agent/turn_effects.py" line="56"/>
+        <source>settings of FilterMate</source>
+        <translation>settings of FilterMate</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Edit of {} (not saved)</translation>
@@ -597,6 +602,51 @@ Do you agree?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="612"/>
         <source>Undo of the last request</source>
         <translation>Undo of the last request</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1260"/>
+        <source>Reading the settings of FilterMate</source>
+        <translation>Reading the settings of FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>Reading the setting {}</source>
+        <translation>Reading the setting {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1262"/>
+        <source>Settings of FilterMate: {}</source>
+        <translation>Settings of FilterMate: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>applied at once</source>
+        <translation>applied at once</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
+        <source>used from the next filter or export</source>
+        <translation>used from the next filter or export</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
+        <source>after restarting QGIS</source>
+        <translation>after restarting QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1462"/>
+        <source>The agent wants to change these settings of FilterMate (they stay for every project; undoing the turn puts them back):
+{}
+
+Why: {}
+
+Do you agree?</source>
+        <translation>The agent wants to change these settings of FilterMate (they stay for every project; undoing the turn puts them back):
+{}
+
+Why: {}
+
+Do you agree?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>

@@ -71,6 +71,10 @@ BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 CODE_TOOLS = frozenset({"run_pyqgis"})
 # What the user asks of the agent about its own work: its history, its notes and its recipes. They run at every level.
 AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe"})
+# The settings of FilterMate itself (config.json, a file of this machine, kept beyond the project): always shown to
+# the user before and after, at every level, advisor included (2026-11-12, decided with the user); at the autonomous
+# level, how the panel looks changes without a question. The settings of the agent are refused by the tool itself.
+SETTINGS_TOOLS = frozenset({"change_settings"})
 
 PROTECTED_REFUSAL = ("Not done: the user protected {} from the agent in this project. Read them, use them as a source, "
                      "zoom to them, but never change them (filter, style, edit, rename, remove). Tell the user; do not "
@@ -87,8 +91,9 @@ ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing 
                    "choose another level in the settings of the agent. Do not try another tool to do it.")
 
 _LEVEL_NOTES = {
-    ADVISOR: ("Level of autonomy chosen by the user: advisor. Only the tools that read run; every change is refused. "
-              "Answer the question, and for a change describe the steps and the tools you would use."),
+    ADVISOR: ("Level of autonomy chosen by the user: advisor. Only the tools that read run; every change is refused, "
+              "except change_settings, which the user reads and confirms. Answer the question, and for a change "
+              "describe the steps and the tools you would use."),
     CAREFUL: ("Level of autonomy chosen by the user: careful. Every change of the project, filters included, is shown "
               "to the user before it runs; a declined one is their choice: ask what they want instead."),
     AUTONOMOUS: ("Level of autonomy chosen by the user: autonomous. Exports, removals and deletions run without a "
@@ -173,6 +178,8 @@ def risk_of(spec) -> int:
     """The risk class of a tool (a ``ToolSpec``), from its name first, then from what its flags say it does."""
     if spec.name in CODE_TOOLS:
         return OUTSIDE
+    if spec.name in SETTINGS_TOOLS:
+        return LOCAL
     if spec.read_only:
         return READ
     if spec.open_world:
@@ -184,6 +191,20 @@ def risk_of(spec) -> int:
     if spec.name in BUFFER_TOOLS:
         return BUFFER
     return PROJECT
+
+
+def _display_only(arguments: Optional[Dict[str, Any]]) -> bool:
+    """Whether a change_settings call only changes how the panel looks (APP.DOCKWIDGET)."""
+    changes = (arguments or {}).get("changes") if isinstance(arguments, dict) else None
+    if not isinstance(changes, list) or not changes:
+        return False
+    paths = [str(change.get("path", "")).strip().upper() for change in changes if isinstance(change, dict)]
+    return len(paths) == len(changes) and all(path.startswith("APP.DOCKWIDGET.") and path not in _NOT_LOOK
+                                              for path in paths)
+
+
+# Under APP.DOCKWIDGET but not how the panel looks: fewer messages may hide a warning the user should read.
+_NOT_LOOK = frozenset({"APP.DOCKWIDGET.FEEDBACK_LEVEL"})
 
 
 def level_note(level: str) -> str:
@@ -244,13 +265,15 @@ class PermissionPolicy:
             references = references + list(joining(references))
         return references
 
-    def verdict(self, spec) -> str:
-        """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec``."""
+    def verdict(self, spec, arguments: Optional[Dict[str, Any]] = None) -> str:
+        """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec`` with ``arguments``."""
         if spec.name in AGENT_OWN:
             return RUN
         rule = self.rules.get(spec.name)
         if rule == RULE_NEVER:
             return TURNED_OFF
+        if spec.name in SETTINGS_TOOLS:
+            return self._settings_verdict(spec, rule, arguments)
         risk = risk_of(spec)
         if rule == RULE_ASK:  # at every call, what was allowed for the conversation included
             return REFUSE if self.level == ADVISOR and risk > READ else ASK
@@ -264,9 +287,21 @@ class PermissionPolicy:
             return RUN
         return ASK
 
+    def _settings_verdict(self, spec, rule: Optional[str], arguments: Optional[Dict[str, Any]]) -> str:
+        """A change of the settings of FilterMate: asked at every level (advisor too: the user reads it and says yes),
+        run alone at the autonomous level when it only changes how the panel looks, or when the user allowed it
+        always (tab Tools) above advisor. Never allowed for the conversation: each change is shown."""
+        if rule == RULE_ASK or self.level == ADVISOR:
+            return ASK
+        if rule == RULE_ALLOW:
+            return RUN
+        if self.level == AUTONOMOUS and _display_only(arguments):
+            return RUN
+        return ASK
+
     def grantable(self, spec) -> bool:
         """Can the user allow this tool for the rest of the conversation? Never code, nor a tool always asked."""
-        return spec.name not in CODE_TOOLS and self.rules.get(spec.name) != RULE_ASK
+        return spec.name not in CODE_TOOLS and spec.name not in SETTINGS_TOOLS and self.rules.get(spec.name) != RULE_ASK
 
     def grant(self, name: str) -> None:
         self._granted.add(name)
