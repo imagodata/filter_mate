@@ -96,6 +96,8 @@ class _Builder:
     def _combine_with_old_subset(self, old_subset, combine_operator, new_filter):
         if old_subset and combine_operator and not self._is_geometric_filter(old_subset):
             return f"({old_subset}) {combine_operator} ({new_filter})"
+        if not old_subset and combine_operator == "AND NOT":
+            return f"NOT ( {new_filter} )"
         return new_filter
 
 
@@ -160,9 +162,18 @@ def test_the_time_budget_is_refused_alike(remote):
     assert builder.last_error.startswith("Partial result: the remote time limit was reached. AND NOT")
 
 
-@pytest.mark.parametrize("old_subset", [None, "", 'intersects($geometry, geom_from_wkt(\'POINT(0 0)\'))'])
-def test_and_not_that_replaces_the_filter_keeps_the_partial_keys(remote, old_subset):
-    """No previous filter written (none, or a spatial one replaced): incomplete, not wrong (combine_subset)."""
+@pytest.mark.parametrize("old_subset", [None, ""])
+def test_and_not_without_a_filter_refuses_a_partial_result(remote, old_subset):
+    """2026-11-12: no filter yet, AND NOT writes NOT (keys): the matching features never read would stay,
+    as with (old) AND NOT (keys). The partial keys used to be listed (the opposite of AND NOT)."""
+    applied, queued, builder = _apply(remote, PARTIAL, old_subset, "AND NOT")
+    assert applied is False and queued == []
+    assert builder.last_error.endswith("AND NOT would keep the features not read; the previous filter is kept.")
+
+
+def test_and_not_that_replaces_a_spatial_filter_keeps_the_partial_keys(remote):
+    """A previous spatial filter is replaced by the keys: incomplete, not wrong."""
+    old_subset = 'intersects($geometry, geom_from_wkt(\'POINT(0 0)\'))'
     applied, queued, builder = _apply(remote, PARTIAL, old_subset, "AND NOT")
     assert applied is True
     assert queued == ['"id" IN (1)']
@@ -187,3 +198,11 @@ def test_a_complete_result_still_writes_and_not(remote):
     assert applied is True
     assert queued == ['("nature" = 2) AND NOT ("id" IN (1, 3))']
     assert remote.marked == [(False, queued[0])]
+
+
+def test_a_complete_result_without_a_filter_writes_not(remote):
+    """2026-11-12: AND NOT on a target without a filter takes the keys out of the whole layer."""
+    outcome = Outcome(keys=(1, 3), complete=True, fetched=3, reason="")
+    applied, queued, builder = _apply(remote, outcome, None, "AND NOT")
+    assert applied is True
+    assert queued == ['NOT ( "id" IN (1, 3) )']

@@ -97,6 +97,9 @@ class TestSubsets:
 
     @pytest.mark.parametrize("previous,operator,expected", [
         ("", "AND", "x"),
+        ("", "OR", "x"),
+        ("", None, "x"),
+        ("", "AND NOT", "NOT (x)"),   # 2026-11-12: taken out of the whole layer (it kept only x)
         ("a = 1", None, "x"),
         ("a = 1", "AND", "(a = 1) AND (x)"),
         ("a = 1", "OR", "(a = 1) OR (x)"),

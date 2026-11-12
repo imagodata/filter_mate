@@ -302,6 +302,13 @@ def test_target_operator_is_the_tasks(operator):
     assert orchestrator.task_parameters['_current_combine_operator'] == operator
 
 
+@pytest.mark.parametrize("operator", ["AND", "OR", "AND NOT", None])
+def test_a_target_without_filter_gets_the_operator(operator):
+    """2026-11-12: (None, operator), so that AND NOT writes NOT (new) on a target without a filter."""
+    orchestrator = _orchestrator_with_operator(operator)
+    assert orchestrator._determine_subset_strategy(_layer('')) == (None, operator)
+
+
 @pytest.mark.parametrize("subset", ['"fid" IN (1, 2)', 'ST_Intersects("geom", X)'])
 def test_previous_spatial_filter_is_still_replaced_whatever_the_operator(subset):
     orchestrator = _orchestrator_with_operator("OR")
@@ -327,6 +334,14 @@ def pg_adapter(monkeypatch):
     adapter._new_backend = MagicMock()
     adapter._legacy_backend = MagicMock()
     return adapter, applied
+
+
+def test_postgresql_adapter_without_filter_writes_not_under_and_not(pg_adapter):
+    """2026-11-12: AND NOT on a target without a filter takes the new selection out of the whole layer."""
+    adapter, applied = pg_adapter
+    assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', None, 'AND NOT') is True
+    assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', None, 'AND') is True
+    assert applied == ['NOT ( EXISTS (x) )', 'EXISTS (x)']
 
 
 @pytest.mark.parametrize("operator, expected", [

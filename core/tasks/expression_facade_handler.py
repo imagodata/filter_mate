@@ -209,6 +209,14 @@ class ExpressionFacadeHandler:
             str: Combined expression.
         """
         executor = self.task._get_attribute_executor()
+        if not getattr(executor, 'old_subset', None):
+            # 2026-11-12: no filter yet: NOT (new) under AND NOT, the new
+            # expression otherwise (the executor returns it whatever the operator).
+            try:
+                from ...filtermate_core.filter.expression_combiner import combine_without_old_subset
+            except ImportError:  # imported from the repository root (tests)
+                from filtermate_core.filter.expression_combiner import combine_without_old_subset
+            return combine_without_old_subset(expression, getattr(executor, 'combine_operator', None))
         # FIX 2026-01-18: only takes the expression parameter
         return executor.combine_with_old_subset(expression)
 

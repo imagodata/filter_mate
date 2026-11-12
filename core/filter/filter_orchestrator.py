@@ -486,6 +486,7 @@ class FilterOrchestrator:
         - REPLACE: If subset contains style/display expressions (CASE, coalesce)
         - COMBINE: If subset is simple attribute filter (preserve user's filter)
         - SPECIAL: If FID-only filter from previous step, keep for cache but don't combine in SQL
+        - NO SUBSET: ``(None, operator)``; the backends write ``NOT (new)`` under AND NOT
 
         Args:
             layer: Layer with potential existing subset
@@ -504,7 +505,9 @@ class FilterOrchestrator:
         self.task_parameters['_current_combine_operator'] = combine_operator
 
         if not old_subset:
-            return None, None
+            # 2026-11-12: the operator goes with no subset too: AND NOT on a
+            # layer without a filter writes NOT (new) (combine_without_old_subset).
+            return None, combine_operator
 
         old_subset_upper = old_subset.upper()
 

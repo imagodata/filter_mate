@@ -175,10 +175,12 @@ class SubsetStringBuilder:
         Returns:
             CombineResult with combined expression and optimization info
         """
-        # No combination needed
+        from ...filter.expression_combiner import combine_without_old_subset
+
+        # No combination needed (2026-11-12: NOT (new) under AND NOT without old subset)
         if not old_subset or not combine_operator:
             return CombineResult(
-                expression=new_expression,
+                expression=combine_without_old_subset(new_expression, combine_operator),
                 success=True
             )
 
@@ -188,7 +190,7 @@ class SubsetStringBuilder:
             sanitized_old = self._sanitize_fn(old_subset)
             if not sanitized_old:
                 return CombineResult(
-                    expression=new_expression,
+                    expression=combine_without_old_subset(new_expression, combine_operator),
                     success=True
                 )
 
