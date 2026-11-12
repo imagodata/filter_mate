@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from ...core.domain.layer_kind import LayerKind
-from .feature_edits import COMMAND_PREFIX, IN_BUFFER, _editable_layer, update_features
+from .feature_edits import IN_BUFFER, _abandon, _editable_layer, _start_editing, update_features
 from .operations import busy_reason, layer_kind, resolve_layer
 
 FIELD_TYPES = ("integer", "integer64", "decimal", "text", "date", "datetime", "boolean")
@@ -51,9 +51,10 @@ def add_field(layer: str, name: str, field_type: str = "text", length: int = 0, 
     field = QgsField(text, _type(field_type))
     if length and field_type == "text":
         field.setLength(int(length))
-    found.beginEditCommand(COMMAND_PREFIX + f"add field {text}"[:120])
+    # 2026-11-12: in editing mode only now, and out of it again when the field is refused
+    opened = _start_editing(found, f"add field {text}")
     if not found.addAttribute(field):
-        found.destroyEditCommand()
+        _abandon(found, opened)
         raise ValueError(f"the field {text!r} could not be added to '{found.name()}'")
     found.endEditCommand()
     answer: Dict[str, Any] = {'layer_name': found.name(), 'field': text, 'type': field_type, 'computed': 0,

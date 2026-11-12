@@ -100,10 +100,16 @@ class FakeCheckpoint:
 
 
 class FakeBridge:
+    made = []
+
     def __init__(self, host, parent):
         self.listening, self.busy, self.error = False, False, ""
         self.close_error = None
-        self.closed = 0
+        self.closed = self.forgotten = 0
+        FakeBridge.made.append(self)
+
+    def forget_change(self):
+        self.forgotten += 1
 
     def sync(self):
         pass
@@ -249,6 +255,19 @@ def test_settings_wait_for_the_end_of_the_turn(ctrl_module, controller, monkeypa
     assert dialogs == [] and controller._engine is engine and engine.busy
 
 
+def test_settings_wait_for_the_conversation_being_made(ctrl_module, controller, monkeypatch):
+    dialogs = []
+    monkeypatch.setattr(ctrl_module, "AgentSettingsDialog", lambda *args, **kwargs: dialogs.append(args))
+
+    def build():  # the connectors are listed: the event loop runs, an old error card is clicked
+        assert controller.open_settings() is False
+        return None
+
+    monkeypatch.setattr(controller, "_build_engine", build)
+    controller._on_send("go")
+    assert dialogs == []
+
+
 def test_a_conversation_left_while_its_tool_runs_ends_before_another_starts(ctrl_module, controller):
     seen = {}
 
@@ -309,6 +328,74 @@ def test_another_project_stops_a_recipe_quietly(ctrl_module, controller, monkeyp
     assert controller._checkpoint.committed == 0
     controller.panel.add_note.assert_not_called()  # its end is not written in the thread of the next project
     assert not controller.chat_busy()
+
+
+def test_another_project_ends_what_the_chat_waits_for(ctrl_module, controller):
+    """2026-11-12: the tool left behind went on waiting (Processing has no time limit) in the closed project."""
+    bounded_http, stopped = ctrl_module._test_bounded_http, []
+
+    def tool(arguments):
+        forget = bounded_http.on_abort(lambda: stopped.append("chat"))
+        FakeQgsProject.project.cleared.emit()
+        forget()
+        return {"ok": True}
+
+    engine, transport = _engine(ctrl_module, controller, controller._chat_owned({"write": tool})["write"])
+    controller._on_send("go")
+    transport.starts[0](_tool_turn(ctrl_module))
+    assert stopped == ["chat"]
+
+
+def test_another_project_forgets_the_change_of_another_application(ctrl_module, controller):
+    FakeQgsProject.project.cleared.emit()
+    assert controller._mcp.forgotten == 1  # its undo point is not recorded either
+
+
+def test_a_change_of_another_application_during_another_project_is_not_recorded(ctrl_module, monkeypatch):
+    """2026-11-12: committed after the project changed, every layer of the new project was "added" by the change."""
+    _module(monkeypatch, ".adapters.agent.native_mcp")
+    _module(monkeypatch, ".adapters.public_api.map_images", handlers=lambda: {})
+    bridge_module = _load(monkeypatch, "ui.controllers.real_agent_mcp_bridge", "ui/controllers/agent_mcp_bridge.py")
+    catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
+    executor = sys.modules[f"{_PKG}.core.agent.tool_executor"]
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    made = []
+    monkeypatch.setattr(bridge_module, "TurnCheckpoint", lambda: made.append(FakeCheckpoint()) or made[-1])
+    host = types.SimpleNamespace(describe_call=str, label_of=lambda call, client: client, history_changed=lambda: None)
+    bridge = bridge_module.AgentMcpBridge(host, None)
+    write = catalog.ToolSpec("write", "Change something here.", {"type": "object", "properties": {}})
+
+    def tool(arguments):
+        bridge.forget_change()  # what the chat does when the project is cleared during the change
+        return {"ok": True}
+
+    bridge._executor = executor.ToolExecutor([write], {"write": tool})
+    bridge._change(messages.ToolCallPart("c1", "write", {}), "client")
+    assert made[0].discarded == 1 and made[0].committed == 0
+    bridge.forget_change()  # between two changes: nothing to forget
+    bridge._executor = executor.ToolExecutor([write], {"write": lambda arguments: {"ok": True}})
+    bridge._change(messages.ToolCallPart("c2", "write", {}), "client")
+    assert made[1].committed == 1
+
+
+def test_an_abandoned_recipe_lets_the_lines_of_other_applications_through(ctrl_module, controller, monkeypatch):
+    catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
+    write = catalog.ToolSpec("write", "Change something here.", {"type": "object", "properties": {}})
+    project, flushed = FakeQgsProject.project, []
+    monkeypatch.setattr(controller, "_log_action", lambda call, result, label, keep=True: flushed.append(label))
+    monkeypatch.setattr(controller, "label_of", lambda call, client: client)
+
+    def tool(arguments):
+        project.cleared.emit()
+        project.readProject.emit()
+        controller.journal(types.SimpleNamespace(name="apply_filter"), "result", "client")  # queued: the chat works
+        return {"ok": True}
+
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: ([write], {"write": tool}, []))
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "write", "arguments": {"n": 1}, "label": "one"}]}]
+    controller.run_recipe("r1")
+    assert controller._journal_later == [] and flushed == ["client"]
 
 
 def test_closing_the_dock_stops_a_recipe(ctrl_module, controller, monkeypatch):
@@ -417,6 +504,19 @@ def test_a_controller_whose_page_failed_does_not_follow_the_project(ctrl_module,
         ctrl_module.AgentChatController(add_page, MagicMock(), dock, ask_user=lambda title, text: True)
     project = FakeQgsProject.project
     assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
+
+
+def test_a_controller_failing_at_its_end_leaves_no_server_and_does_not_follow_the_project(ctrl_module, dock,
+                                                                                           monkeypatch):
+    def broken(self):
+        raise RuntimeError("no settings")
+
+    monkeypatch.setattr(ctrl_module.AgentChatController, "_refresh_ready", broken)
+    with pytest.raises(RuntimeError):
+        ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock, ask_user=lambda title, text: True)
+    project = FakeQgsProject.project
+    assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
+    assert FakeBridge.made[-1].closed == 1
 
 
 def test_shutdown_goes_on_when_a_step_fails(ctrl_module, controller):

@@ -94,23 +94,24 @@ class TestAccessorRoutesThroughDispatcher:
     def test_apply_filter_dispatches_via_main_thread_helper(self):
         accessor, public_api = self._make_accessor()
 
+        from filtermate_api.qgis_accessor import _unless_busy
         with patch(
             "filtermate_api.qgis_accessor.run_on_main_thread",
             wraps=run_on_main_thread,
-        ) as spy:
+        ) as spy, patch("filtermate_api.qgis_accessor._unless_busy", wraps=_unless_busy) as guard:
             ok = accessor.apply_filter("Layer", "expr", "test")
 
         assert ok is True
         # Helper was called exactly once for apply_filter.
         assert spy.call_count == 1
-        # The dispatched callable is the busy guard wrapping the public_api
-        # method (NOT the result of calling it): both run on the main thread.
-        from filtermate_api.qgis_accessor import _unless_busy
-        first_call_args = spy.call_args_list[0]
-        assert first_call_args.args[0] is _unless_busy
-        assert first_call_args.args[1] is public_api.apply_filter
+        # One callable is dispatched (NOT the result of calling anything): the
+        # protected layers check, the busy guard and the public_api method all
+        # run inside it, on the main thread.
+        assert len(spy.call_args.args) == 1 and not spy.call_args.kwargs
+        assert guard.call_count == 1
+        assert guard.call_args.args == (public_api.apply_filter,)
         # Original kwargs preserved.
-        assert first_call_args.kwargs == {
+        assert guard.call_args.kwargs == {
             "layer_name": "Layer",
             "filter_expr": "expr",
             "source_plugin": "test",

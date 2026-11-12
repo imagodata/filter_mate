@@ -19,6 +19,7 @@ from ...adapters.public_api.map_images import handlers as image_handlers
 from ...core.agent.json_schema import validate
 from ...core.agent.mcp_server import EXTERNAL_MARK, HttpResponse, McpProtocol, RequestHead
 from ...core.agent.messages import ToolCallPart, ToolResultPart
+from ...core.agent.permissions import ASK, RULE_ALLOW, TURNED_OFF, PermissionPolicy
 from ...core.agent.tool_catalog import MCP_ONLY, ToolSpec
 from ...core.agent.tool_executor import ToolExecutor
 
@@ -90,6 +91,14 @@ class AgentMcpBridge:
         except Exception:
             logger.exception("MCP call could not be shown")
 
+    @staticmethod
+    def _policy() -> PermissionPolicy:
+        """The standard level (the level of autonomy is the chat's) under the rules of the Tools tab, read at each
+        call: always ask asks, never refuses. Always allow does not take a confirmation away from another
+        application."""
+        rules = {name: rule for name, rule in load_settings().rules.items() if rule != RULE_ALLOW}
+        return PermissionPolicy(rules=rules)
+
     def _confirmed(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """None when the user agrees and the client still waits; otherwise what to answer."""
         key = (client, call.name)
@@ -115,7 +124,13 @@ class AgentMcpBridge:
             refused = ToolResultPart(call.call_id, protected, is_error=True)
             self._journal(call, refused, client)
             return refused
-        if self._executor.needs_confirmation(call):
+        policy = self._policy()
+        verdict = self._executor.verdict(call, policy)
+        if verdict == TURNED_OFF:
+            refused = self._executor.refused(call, policy)
+            self._journal(call, refused, client)
+            return refused
+        if verdict == ASK:
             refusal = self._confirmed(call, client)
             if refusal is not None:
                 self._journal(call, refusal, client)
@@ -124,12 +139,24 @@ class AgentMcpBridge:
         self._journal(call, result, client)
         return result
 
+    _change_checkpoint = None  # the undo point of the change being made, None between two
+
+    def forget_change(self) -> None:
+        """The project closes during a change: its undo point is not recorded.
+
+        Committed, it would compare the closed project with the next one (every layer of the new project added) and
+        an Undo would remove them all.
+        """
+        if self._change_checkpoint is not None:
+            self._change_checkpoint.discard()
+
     def _change(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """One change of another application is one step of the history of the panel."""
         checkpoint = TurnCheckpoint()
         checkpoint.describe = self._host.describe_call
         checkpoint.label = EXTERNAL_MARK + self._host.label_of(call, client)
         self.busy = True
+        self._change_checkpoint = checkpoint
         try:
             try:
                 checkpoint.begin(call)
@@ -139,6 +166,7 @@ class AgentMcpBridge:
             return self._executor.execute(call)
         finally:
             self.busy = False
+            self._change_checkpoint = None
             try:
                 checkpoint.commit()
                 self._host.history_changed()

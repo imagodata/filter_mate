@@ -276,8 +276,8 @@ class BatchExporter:
             if progress_callback:
                 progress_callback(int((idx / total_layers) * 100))
 
-            # Get layer
-            layer = self.layer_exporter.get_layer_by_name(layer_name)
+            # Get layer (2026-11-12: by its layer_id, see find_export_layer)
+            layer = self.layer_exporter.get_export_layer(layer_item)
             if not layer:
                 logger.warning(f"Skipping layer '{layer_name}' (not found)")
                 skipped_layers.append(layer_name)
@@ -293,7 +293,7 @@ class BatchExporter:
             # Export layer
             logger.info(f"Exporting layer '{layer_name}' to {output_path}")
             result = self.layer_exporter.export_single_layer(
-                layer_name, output_path, projection, datatype, style_format, save_styles
+                layer_item, output_path, projection, datatype, style_format, save_styles
             )
 
             if result.success:
@@ -392,8 +392,8 @@ class BatchExporter:
             if progress_callback:
                 progress_callback(int((idx / total_layers) * 100))
 
-            # Get layer
-            layer = self.layer_exporter.get_layer_by_name(layer_name)
+            # Get layer (2026-11-12: by its layer_id, see find_export_layer)
+            layer = self.layer_exporter.get_export_layer(layer_item)
             if not layer:
                 logger.warning(f"Skipping layer '{layer_name}' (not found)")
                 skipped_layers.append(layer_name)
@@ -414,7 +414,7 @@ class BatchExporter:
                 logger.info(f"Exporting layer '{layer_name}' to temp: {temp_output}")
 
                 result = self.layer_exporter.export_single_layer(
-                    layer_name, temp_output, projection, datatype, style_format, save_styles
+                    layer_item, temp_output, projection, datatype, style_format, save_styles
                 )
 
                 if not result.success:

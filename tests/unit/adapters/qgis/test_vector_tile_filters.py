@@ -30,6 +30,17 @@ def test_empty_filter_keeps_original_rule():
     assert load().rule_expression('"kind" = 1', '') == '"kind" = 1'
 
 
+@pytest.mark.parametrize('previous, operator, expected', [
+    ('', 'AND NOT', 'NOT (intersects($geometry, x)\n)'),   # 2026-11-12: it applied the selection
+    ('', 'AND', 'intersects($geometry, x)'),
+    ('', None, 'intersects($geometry, x)'),
+    ('"kind" = 1', 'AND NOT', '("kind" = 1\n) AND NOT (intersects($geometry, x)\n)'),
+    ('"kind" = 1', None, 'intersects($geometry, x)'),
+])
+def test_tile_filter_combination(previous, operator, expected):
+    assert load().combined_tile_filter(previous, 'intersects($geometry, x)', operator) == expected
+
+
 def test_vertex_budget_refuses_instead_of_changing_geometry():
     class Shape:
         def constGet(self): return self
