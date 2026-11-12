@@ -157,6 +157,14 @@ ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPac
   parenthèses gardées devant une fonction, noms avec `'` refusés. Autres corrections : moins unaire seulement sur un
   littéral (QGIS : `-NULL` d'un champ entier = 0, vérifié), réels SQLite écrits `(CAST(m AS REAL) / 2^k)` (SQLite
   3.45 lit ~1 littéral décimal sur 4 000 à 1 ulp près).
+- **AND NOT depuis #365** : sans ancien filtre, `ExpressionFacadeHandler.combine_with_old_subset` écrit `NOT ( new )`
+  (`combine_without_old_subset`) → aucun hybride dès que l'opérateur contient NOT, ancien filtre ou non. En OGR SQL,
+  une traduction niée qui contient AND / OR / NOT (`NativeTranslation.composite`, la tolérance d'un réel comprise)
+  retombe sur l'ancienne conversion (`subset_for_layer(..., negated=True)`) : même moteur, même erreur, mais plus
+  présentée comme prouvée. Le contrôle QGIS combine comme la tâche (195 PASS / 0 FAIL).
+- **PR** : #354 (traduction), #373 (hybride + durcissement + AND NOT). Le contrôle `check_native_translation.py`
+  copie le plugin depuis le dossier parent de `tests/` : le lancer depuis le worktree du lot (le checkout principal
+  peut avoir été basculé sur une autre branche par une autre session).
 
 ## [2026-10-27] S0 : `filtermate_core/`, le cœur sans hôte (étape 1 du portage RustGIS / GeoLibre)
 Décision : extraire la sémantique de filtrage dans un paquet `filtermate_core/` sans QGIS / Qt / GDAL, vendu dans le
