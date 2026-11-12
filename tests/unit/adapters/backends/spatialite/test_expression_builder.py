@@ -84,7 +84,10 @@ _spec.loader.exec_module(_mod)
 
 SpatialiteExpressionBuilder = _mod.SpatialiteExpressionBuilder
 USE_OGR_FALLBACK = _mod.USE_OGR_FALLBACK
-_core = importlib.import_module("filtermate_core.sql.spatialite.expression_builder")
+# The core module the builder really imported: ``filtermate_core`` from the repository root, or
+# ``filter_mate.filtermate_core`` when the checkout itself is named ``filter_mate`` (CI), where the
+# relative import succeeds. Patching the other copy would leave the builder unpatched.
+_core = sys.modules[_mod.SpatialiteSqlBuilder.__module__]
 
 
 # ===========================================================================
