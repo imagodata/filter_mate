@@ -1093,6 +1093,26 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>Mga Recipe</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Ibigay ang lahat ng tool sa lokal na modelo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Ang mga tool lang na nagsasala, para sa mabagal na computer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Kapag naka-check, ang lokal na modelo ay makakakuha lang ng mga tool na nagbabasa at nagsasala ng proyekto: halos kalahati ang babasahin sa bawat kahilingan. Sa sukat gamit ang qwen3.5:4b, ang lahat ng tool ay sumagot nang kasinghusay o mas mahusay.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Kapag naka-off, ang lokal na modelo ay makakakuha ng mga tool na nagbabasa at nagsasala ng proyekto: kasya ang mga ito sa GPU na 8 GB. Ang lahat ng tool ay nangangailangan ng halos dobleng memorya.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>I-save ang huling kahilingan bilang recipe…</translation>
@@ -10302,6 +10322,19 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>I-reset lahat ng halaga sa default?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Hindi masuri ang pinili sa '{0}': walang na-filter.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Walang natitirang feature sa pinili sa '{0}': walang na-filter.</translation>
     </message>
 </context>
 <context>

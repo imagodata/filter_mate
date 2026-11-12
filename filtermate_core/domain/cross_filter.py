@@ -151,6 +151,33 @@ def combine_subset(previous: Optional[str], new: str, operator: Optional[str]) -
     return f"({previous}) {op} ({new})"
 
 
+def selection_subset(previous: Optional[str], new: str, operator: Optional[str]) -> str:
+    """The subset of the selection the targets of a source are filtered by.
+
+    2026-11-12: ``operator`` combines the new selection with the source's own
+    subset only (:func:`combine_subset`); the targets are related to the
+    selection itself. AND and AND NOT read it through the previous subset (the
+    dock selects among the features it shows), OR and None (replace) on the
+    whole layer, as the vector engine does. The combined subset served instead:
+    under AND NOT, every point but the selection.
+
+    Args:
+        previous: Subset string of the source before this filter (may be empty).
+        new: The selection expression (may be empty: the source is not changed).
+        operator: ``"AND"``, ``"AND NOT"``, ``"OR"`` or None (replace).
+
+    Returns:
+        The subset string of the selection; ``previous`` without a new expression.
+    """
+    previous = (previous or "").strip()
+    new = (new or "").strip()
+    if not new:
+        return previous
+    if (operator or "").strip().upper() in ("AND", "AND NOT"):
+        return combine_subset(previous, new, "AND")
+    return new
+
+
 def quote_identifier(name: str) -> str:
     """Double-quote an SQL identifier."""
     return '"' + str(name).replace('"', '""') + '"'

@@ -104,7 +104,10 @@ def _layer(**numeric_by_name):
 @pytest.mark.parametrize("expression, layer_fields, expected", [
     ('"pop" > 100', {}, '"pop"::numeric > 100'),
     ('"pop" = 100', {}, '"pop"::numeric = 100'),                      # type unknown: as before
-    ('"pop" = 100', {'pop': True}, '"pop"::numeric = 100'),
+    ('"pop" = 100', {'pop': True}, '"pop" = 100'),                    # numeric column: no cast (2026-11-12)
+    ('"ratio" >= 2', {'ratio': True}, '"ratio" >= 2'),                # a double is not rounded to 15 digits
+    ('"t"."pop" > 100', {'pop': True}, '"t"."pop"::numeric > 100'),   # qualified: maybe another table's column
+    ('"pop" > 1 AND "code" > 2', {'pop': True, 'code': False}, '"pop" > 1 AND "code"::numeric > 2'),
     ('"insee_dep" = 75', {'insee_dep': False}, '"insee_dep" = 75'),   # text column: no cast for =
     ('"insee_dep" > 75', {'insee_dep': False}, '"insee_dep"::numeric > 75'),
     ("\"nom\" = '\"x\" = 1'", {}, "\"nom\" = '\"x\" = 1'"),           # inside a value

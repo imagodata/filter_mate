@@ -611,7 +611,7 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
         pixels = max_pixels or _option('raster_source_max_pixels', None)
         return source_jobs.RasterSourceJob(layer, raster_selection, pixels, filter_source=filter_source)
     # Point cloud: the criteria become the source subset, its footprint is the source geometry.
-    from ...core.domain.cross_filter import combine_subset
+    from ...core.domain.cross_filter import combine_subset, selection_subset
     from ..qgis.coverage_layers.snapshots import take_snapshot
     before = take_snapshot(layer, LayerKind.POINT_CLOUD)
     expression = point_cloud_criteria if isinstance(point_cloud_criteria, str) else (
@@ -625,7 +625,9 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
             raise ValueError(f"the point cloud expression was rejected: {subset}")
     try:
         resolution = float(footprint_resolution or _option('point_cloud_footprint_resolution', 2.0))
-        job = source_jobs.PointCloudSourceJob(layer, resolution, before=before)
+        # 2026-11-12: the targets follow the criteria, not the subset of the source (NOT (criteria) under AND NOT)
+        job = source_jobs.PointCloudSourceJob(layer, resolution, before=before,
+                                              selection=selection_subset(before.subset, expression, source_operator))
     except Exception:
         _restore_point_cloud_source(layer, before)
         raise

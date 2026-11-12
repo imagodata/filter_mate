@@ -1245,6 +1245,26 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Recettes</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Proposer tous les outils au modèle local</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Seulement les outils qui filtrent, pour un ordinateur lent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Cochée, le modèle local ne reçoit que les outils qui lisent et filtrent le projet : environ deux fois moins à lire à chaque demande. Mesuré avec qwen3.5:4b, tous les outils répondaient aussi bien, ou mieux.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Décochée, un modèle local reçoit les outils qui lisent et filtrent le projet : ils tiennent sur un GPU de 8 Go. Tous les outils demandent environ deux fois plus de mémoire.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Garder la dernière demande comme recette…</translation>
@@ -10426,6 +10446,19 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Réinitialiser toutes les valeurs par défaut ?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>La sélection de « {0} » ne peut pas être évaluée : rien n'a été filtré.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>La sélection de « {0} » ne garde aucune entité : rien n'a été filtré.</translation>
     </message>
 </context>
 <context>

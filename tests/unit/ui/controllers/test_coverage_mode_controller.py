@@ -3004,3 +3004,63 @@ class TestLegendTreeFollowsTheDock:
         controller._sync_legend_tree(FakeLayer("r1", "raster"))
         view.setCurrentLayer.assert_not_called()
         dock.manageSignal.assert_not_called()
+
+
+@pytest.mark.unit
+class TestPointCloudSourceFollowsTheSelection:
+    """2026-11-12: the targets of a point cloud source are related to the criteria, not to its new subset.
+
+    The footprint was read through the subset the source operator had just set:
+    under AND NOT, every point but the criteria ("AND NOT class 6" then parcels in
+    AND kept every parcel touched by a non-building point).
+    """
+
+    @pytest.fixture
+    def jobs(self, monkeypatch, adapters):
+        module = types.ModuleType(f"{adapters.package.__name__}.source_jobs")
+        module.created = []
+
+        def job(layer, resolution, before=None, zone=None, selection=None):
+            module.created.append(dict(layer=layer.id(), subset=layer.subsetString(), selection=selection))
+            return types.SimpleNamespace(layer_id=layer.id(), layer_name=layer.id(), before=before)
+
+        module.PointCloudSourceJob = job
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        return module
+
+    def _run(self, ctrl_module, monkeypatch, layer, operator, criteria="Classification = 6"):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layer, _kind(ctrl_module, "POINT_CLOUD")
+        controller._pc_panel = MagicMock()
+        controller._pc_panel.hag_settings.return_value = None
+        controller._pc_panel.apply_to_tiles.return_value = False
+        started = []
+        for name, value in (("_point_cloud_expression", lambda: criteria),
+                            ("_filtering_settings", lambda: dict(targets=["v1"], source_operator=operator)),
+                            ("_target_specs", lambda ids, exclude_id="": ids),
+                            ("_build_request", lambda *a: "request"), ("_stop_preview", lambda layer: None),
+                            ("_zone_geometry", lambda *a: None),
+                            ("_start_task", lambda request, job, done_message="": started.append(job))):
+            monkeypatch.setattr(controller, name, value)
+        controller._run_filter(layer)
+        assert len(started) == 1
+        return started[0]
+
+    @pytest.mark.parametrize("previous, operator, subset, selection", [
+        ("", "AND NOT", "NOT (\nClassification = 6\n)", "Classification = 6"),
+        ("Z > 5", "AND NOT", "(Z > 5) AND NOT (Classification = 6)", "(Z > 5) AND (Classification = 6)"),
+        ("Z > 5", "OR", "(Z > 5) OR (Classification = 6)", "Classification = 6"),
+        ("Z > 5", "AND", "(Z > 5) AND (Classification = 6)", "(Z > 5) AND (Classification = 6)"),
+        ("Z > 5", None, "Classification = 6", "Classification = 6"),
+    ])
+    def test_the_footprint_is_read_on_the_selection(self, ctrl_module, adapters, jobs, monkeypatch,
+                                                    previous, operator, subset, selection):
+        layer = FakeLayer("p1", "pc", subset=previous)
+        self._run(ctrl_module, monkeypatch, layer, operator)
+        assert layer.subsetString() == subset                  # the source itself: the operator applies
+        assert jobs.created == [dict(layer="p1", subset=subset, selection=selection)]
+
+    def test_without_criteria_the_current_subset_is_the_selection(self, ctrl_module, adapters, jobs, monkeypatch):
+        layer = FakeLayer("p1", "pc", subset="Classification = 2")
+        self._run(ctrl_module, monkeypatch, layer, "AND NOT", criteria="")
+        assert jobs.created[0]["selection"] == "Classification = 2"

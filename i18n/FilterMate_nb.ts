@@ -1093,6 +1093,26 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <translation>Oppskrifter</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Offer every tool to the local model</source>
+        <translation>Gi den lokale modellen alle verktøy</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Bare verktøyene som filtrerer, for en treg datamaskin</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Avkrysset får den lokale modellen bare verktøyene som leser og filtrerer prosjektet: omtrent halvparten å lese ved hver forespørsel. Målt med qwen3.5:4b svarte alle verktøy like godt eller bedre.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Off, a local model gets the tools that read and filter the project: they fit a GPU of 8 GB. Every tool needs about twice the memory.</source>
+        <translation>Når den er av, får en lokal modell verktøyene som leser og filtrerer prosjektet: de passer i en GPU på 8 GB. Alle verktøy krever omtrent dobbelt så mye minne.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="663"/>
         <source>Save the last request as a recipe…</source>
         <translation>Lagre den siste forespørselen som oppskrift…</translation>
@@ -10302,6 +10322,19 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Tilbakestill alle verdier til standardverdier?</translation>
+    </message>
+</context>
+<context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Utvalget i '{0}' kan ikke evalueres: ingenting ble filtrert.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Utvalget i '{0}' beholder ingen objekter: ingenting ble filtrert.</translation>
     </message>
 </context>
 <context>

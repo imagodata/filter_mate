@@ -29,8 +29,9 @@ MAX_EXPRESSION_LENGTH = 65536
 
 # Dialects whose writing was compared with QGIS itself on real layers
 # (tests/qgis_headless/check_native_translation.py): only those replace the
-# former conversion. PostgreSQL joins them once the check has run on PostGIS.
-APPLIED_DIALECTS = (SQLITE, OGR_SQL)
+# former conversion. PostgreSQL since 2026-11-12, checked on PostGIS in a UTF-8
+# and in a C database (QGIS 4.2.3 and 3.44.15).
+APPLIED_DIALECTS = (SQLITE, OGR_SQL, POSTGRESQL)
 
 # A hybrid subset evaluates every feature of the layer in QGIS (Python loop, no
 # cancellation): beyond this count, or when the count is unknown, the former

@@ -10,7 +10,8 @@ The next full pass puts every location right. Run lrelease afterwards, in the qg
 
 ``messages.json``: ``[{"context", "after", "source", "file", "line", "translations": {"fr": ...}}]``,
 ``after`` the source of the message it follows, ``translations`` keyed by the suffix of the file
-(``fr`` for FilterMate_fr.ts). Every .ts must have a translation, and a message already there is left alone.
+(``fr`` for FilterMate_fr.ts). A context absent from the .ts is created, in the order of the names, when
+``after`` is null; its next message names the first one in ``after``. Every .ts must have a translation, and a message already there is left alone.
 """
 import glob
 import json
@@ -32,6 +33,8 @@ def add(path: str, message: dict, translation: str) -> bool:
     with open(path, encoding="utf-8") as stream:
         text = stream.read()
     context = re.search(r"<context>\n    <name>" + re.escape(message["context"]) + r"</name>\n(.*?)</context>", text, re.S)
+    if context is None and message.get("after") is None:
+        return _add_context(path, text, message, translation)
     if context is None:
         raise ValueError(f"{path}: no context {message['context']}")
     body = context.group(1)
@@ -41,14 +44,34 @@ def add(path: str, message: dict, translation: str) -> bool:
                        + r"</source>.*?    </message>\n", body, re.S)
     if anchor is None:
         raise ValueError(f"{path}: no message {message['after']!r} in {message['context']}")
-    entry = ("    <message>\n"
-             f"        <location filename=\"../{message['file']}\" line=\"{message['line']}\"/>\n"
-             f"        <source>{_xml(message['source'])}</source>\n"
-             f"        <translation>{_xml(translation)}</translation>\n"
-             "    </message>\n")
+    entry = _entry(message, translation)
     at = context.start(1) + anchor.end()
     with open(path, "w", encoding="utf-8", newline="") as stream:
         stream.write(text[:at] + entry + text[at:])
+    return True
+
+
+def _entry(message: dict, translation: str) -> str:
+    """One <message> as pylupdate5 writes it."""
+    return ("    <message>\n"
+            f"        <location filename=\"../{message['file']}\" line=\"{message['line']}\"/>\n"
+            f"        <source>{_xml(message['source'])}</source>\n"
+            f"        <translation>{_xml(translation)}</translation>\n"
+            "    </message>\n")
+
+
+def _add_context(path: str, text: str, message: dict, translation: str) -> bool:
+    """Create the context of ``message`` before the first context whose name sorts after it, as pylupdate5 orders them."""
+    block = f"<context>\n    <name>{_xml(message['context'])}</name>\n" + _entry(message, translation) + "</context>\n"
+    at = None
+    for found in re.finditer(r"<context>\n    <name>(.*?)</name>\n", text):
+        if found.group(1) > message["context"]:
+            at = found.start()
+            break
+    if at is None:
+        at = text.rindex("</TS>")
+    with open(path, "w", encoding="utf-8", newline="") as stream:
+        stream.write(text[:at] + block + text[at:])
     return True
 
 

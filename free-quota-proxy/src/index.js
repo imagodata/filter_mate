@@ -29,8 +29,24 @@ export class QuotaLedger extends DurableObject {
     return this.ledger.reserve(user, ip, amount);
   }
 
-  settle(id, amount) {
-    return this.ledger.settle(id, amount);
+  /** Also tells the parts of the budget newly spent, the cost of requests swept since included. */
+  async settle(id, amount) {
+    await this.ledger.settle(id, amount);
+    const due = await this.ledger.alertsDue();
+    if (due.length) await tellBudget(this.env, due, this.ledger.limits.budget);
+  }
+}
+
+/** A line in the Worker logs, and a post to `ALERT_WEBHOOK` when that secret is set (Slack reads `text`, Discord `content`). */
+async function tellBudget(env, parts, budget) {
+  const part = Math.max(...parts);
+  const text = `FilterMate free quota: ${Math.round(part * 100)} % of the ${budget / 1e6} $ of this month is spent.`;
+  console.warn(JSON.stringify({ alert: "budget", part }));
+  if (!env.ALERT_WEBHOOK) return;
+  try {
+    await fetch(env.ALERT_WEBHOOK, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, content: text }) });
+  } catch {
+    console.warn("the budget alert could not be posted"); // never the address: it holds the webhook secret
   }
 }
 

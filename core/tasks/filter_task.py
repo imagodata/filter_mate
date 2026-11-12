@@ -1548,7 +1548,13 @@ class FilterEngineTask(QgsTask):
         return self._expr_facade.qgis_expression_to_spatialite(expression)
 
     def prepare_postgresql_source_geom(self) -> str:
-        """Prepare PostgreSQL source geometry. Delegates to SourceGeometryPreparer."""
+        """Prepare PostgreSQL source geometry. Delegates to SourceGeometryPreparer.
+
+        Raises:
+            SourceSelectionError: The selection keeps no feature or cannot be read
+                (2026-11-12, ExpressionBuilder.check_source_selection: before any target).
+        """
+        self._get_expression_builder().check_source_selection()
         source_fc = getattr(self, '_cached_source_feature_count', None)
         result = self._source_geom_preparer.prepare_postgresql_source_geom(
             source_table=self.param_source_table, source_schema=self.param_source_schema,

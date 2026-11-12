@@ -802,7 +802,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
         SpatialiteSourceResult with WKT and metadata
 
     Raises:
-        SourceSelectionError: The source filter expression keeps no feature or
+        SourceSelectionError: The source selection keeps no feature or
             cannot be read (adapters/backends/source_refusal.py).
     """
     source_layer = context.source_layer
