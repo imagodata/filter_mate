@@ -1,6 +1,34 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
+Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression
+(`filtermate_core/filter/native_dialect.py`, pur ; adaptateur `adapters/qgis/native_filter_translation.py`), et
+seulement là où la source rend la réponse de QGIS. FULL → ce SQL remplace l'ancienne réécriture par regex ; sinon
+ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPackage, SpatiaLite) et OGR SQL
+(Shapefile, GeoJSON, FlatGeobuf, MapInfo) ; PostgreSQL écrit mais pas appliqué (`APPLIED_DIALECTS`) tant que
+`tests/qgis_headless/check_native_translation.py` n'a pas tourné sur un vrai PostGIS.
+- **Preuve** : ce contrôle évalue l'expression dans QGIS entité par entité et compare au subset traduit. Sans Docker,
+  il tourne dans le QGIS Windows : `powershell.exe -Command "& 'C:\Program Files\QGIS 3.44.6\bin\python-qgis.bat'
+  '\\wsl.localhost\Ubuntu\home\simon\projects\filter_mate\tests\qgis_headless\check_native_translation.py'"`.
+- **Sémantique QGIS à respecter** (vérifiée en vrai QGIS 3.44.6) : `=` / `<>` / IN numériques passent en double avec
+  `qgsDoubleNear` (4 DBL_EPSILON) → égalité d'un réel écrite avec cette tolérance, IN sur réels refusé ; `/` réel et
+  NULL sur 0 ; LIKE sensible à la casse et `%` traverse un saut de ligne ; ILIKE fait correspondre `k` au signe Kelvin
+  et `s` au s long (regex Unicode) ; `length()` compte en UTF-16 (refusé).
+- **Pièges des sources** : SQLite → LIKE/ILIKE écrits en GLOB (classes par lettre pour ILIKE), égalité de textes en
+  `COLLATE BINARY` (une colonne peut être NOCASE / RTRIM), `COALESCE(x)` seul = erreur. OGR SQL → `TRUE AND NULL`
+  vaut FALSE (jamais de NOT au-dessus d'un AND, y compris celui de la tolérance), BETWEEN lit la 3e opérande avec le
+  type des deux premières (bornes littérales du type de la valeur), textes comparés sans la casse (refusés), division
+  seulement par un littéral non nul, réels sans exposant. Le sanitizer lit `\'` comme échappement QGIS et `--` dans un
+  identifiant comme commentaire → backslash et ces noms refusés.
+- **Replis qui relisent l'expression en QGIS** (`EXPRESSION_FALLBACK` OGR / Spatialite) : la tâche garde
+  `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
+  COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
+- **Reste** : mode hybride (PARTIAL : partie native + liste d'ids évaluée sur le préfiltre), PostgreSQL, fonctions
+  géométriques / `@variables` (constantes à replier), bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route'
+  par l'ancien chemin. Les 5 échecs de la suite complète (expression_builder PG / Spatialite, coverage_raster_target)
+  existent sur `main` ; les lancer dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre.
+
 ## [2026-10-27] S0 : `filtermate_core/`, le cœur sans hôte (étape 1 du portage RustGIS / GeoLibre)
 Décision : extraire la sémantique de filtrage dans un paquet `filtermate_core/` sans QGIS / Qt / GDAL, vendu dans le
 plugin et importable seul (`import filtermate_core` avec la racine du dépôt sur `sys.path`). Première PR = déplacement

@@ -104,6 +104,10 @@ class AttributeFilterExecutor:
         self.combine_operator = combine_operator
         self.task_bridge = task_bridge
         self.geometry_field = geometry_field
+        # Native SQL written by process_qgis_expression -> the QGIS expression it
+        # came from: the source-geometry fallbacks evaluate an expression in QGIS,
+        # which cannot read GLOB, CAST or COLLATE.
+        self.native_origins = {}
 
         # Get layer field names
         self.field_names = [field.name() for field in layer.fields()]
@@ -273,8 +277,14 @@ class AttributeFilterExecutor:
         expression = " " + expression
         is_field_expression = QgsExpression().isFieldEqualityExpression(expression)
 
-        # Convert to provider-specific SQL
-        if self.provider_type == PROVIDER_POSTGRES:
+        # Convert to provider-specific SQL. The whole predicate written from its
+        # syntax tree for the layer's own source when every part is proven
+        # (native_dialect); otherwise the former text conversion.
+        native = self._native_subset(expression)
+        if native is not None:
+            self.native_origins[native] = expression.strip()
+            expression = native
+        elif self.provider_type == PROVIDER_POSTGRES:
             expression = self._convert_to_postgis(expression)
         elif self.provider_type == PROVIDER_SPATIALITE:
             expression = self._convert_to_spatialite(expression)
@@ -451,6 +461,19 @@ class AttributeFilterExecutor:
         except Exception:  # nosec B110 - no readable URI: the former default below
             pass
         return 'geometry'
+
+    def _native_subset(self, expression: str) -> Optional[str]:
+        """Native SQL of the whole expression for this layer's source, None when not proven."""
+        try:
+            from ....adapters.qgis.native_filter_translation import native_subset
+            native = native_subset(self.layer, expression)
+        except Exception as e:  # catch-all: the former conversion stays the fallback
+            logger.debug(f"Native translation not available: {e}")
+            return None
+        if not isinstance(native, str) or not native:
+            return None
+        logger.info(f"Native translation: {native[:200]}")
+        return native
 
     def _convert_to_postgis(self, expression: str) -> str:
         """
