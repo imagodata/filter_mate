@@ -812,6 +812,17 @@ Bạn có đồng ý không?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Bước {} đã không chạy: bạn đã tắt công cụ của bước này cho tác nhân ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Tác tử muốn thực hiện {} hành động sau:
+{}
+
+Bạn có đồng ý với tất cả không? Không thì không hành động nào được chạy.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

@@ -812,6 +812,17 @@ Do you agree?</source>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트에 대해 해당 도구를 꺼 두었습니다 ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>에이전트가 다음 {}개 작업을 하려고 합니다:
+{}
+
+모두 동의하시나요? 아니요를 누르면 하나도 실행되지 않습니다.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

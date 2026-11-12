@@ -812,6 +812,17 @@ Sumasang-ayon ka ba?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Hindi pinatakbo ang hakbang {}: pinatay mo ang tool nito para sa ahente ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Gustong gawin ng agent ang {} na aksyong ito:
+{}
+
+Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

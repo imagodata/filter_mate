@@ -817,6 +817,17 @@ Do you agree?</source>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>L'étape {} n'a pas été exécutée : vous avez coupé son outil pour l'agent ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>L'agent veut faire ces {} actions :
+{}
+
+Êtes-vous d'accord pour toutes ? Non n'en exécute aucune.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

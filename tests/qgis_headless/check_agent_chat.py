@@ -73,6 +73,20 @@ def tool_turn(name, arguments, call_id="toolu_1"):
         {"type": "message_stop"})
 
 
+def tools_turn(*calls):
+    """One turn calling several tools: ``(name, arguments)`` each."""
+    events = [{"type": "message_start", "message": {"usage": {"input_tokens": 5, "output_tokens": 0}}}]
+    for index, (name, arguments) in enumerate(calls):
+        events += [{"type": "content_block_start", "index": index,
+                    "content_block": {"type": "tool_use", "id": f"toolu_m{index}", "name": name, "input": {}}},
+                   {"type": "content_block_delta", "index": index,
+                    "delta": {"type": "input_json_delta", "partial_json": json.dumps(arguments)}},
+                   {"type": "content_block_stop", "index": index}]
+    events += [{"type": "message_delta", "delta": {"stop_reason": "tool_use"}, "usage": {"output_tokens": 3}},
+               {"type": "message_stop"}]
+    return sse(*events)
+
+
 class Provider:
     """Answers each POST with the next scripted response: (status, headers, body) or "hang"."""
 
@@ -1102,6 +1116,7 @@ def check_chat(provider, layer, authcfg, work):
     check_widgets(chat, provider, settings, ask, layer)
     check_protected(chat, provider, settings, ask, layer)
     check_tool_rules(chat, provider, settings, ask, layer)
+    check_asked_together(chat, provider, settings, ask, layer)
     check_recipes(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
@@ -1168,6 +1183,32 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
     panel.clear_thread()
+
+
+def check_asked_together(chat, provider, settings, ask, layer):
+    """Several actions of one turn the user is asked about: one question, all or none."""
+    layer.setSubsetString("")
+    settings(autonomy="careful")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    turn = tools_turn(("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}),
+                      ("set_layer_style", {"layer": "communes", "mode": "single", "color": "#ff0000"}))
+    provider.reset((200, {}, turn), (200, {}, text_turn("ok")))
+    ask("filtre et colore les communes")
+    check("together: one question for the two changes of the turn", len(asked) == 1 and "2 actions" in asked[0] and
+          "communes" in asked[0], asked)
+    check("together: yes runs both", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    layer.setSubsetString("")
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    provider.reset((200, {}, turn), (200, {}, text_turn("ok")))
+    ask("filtre et colore les communes")
+    results = provider.requests[1]["body"]["messages"][-1]["content"]
+    check("together: no runs none of them", len(asked) == 1 and layer.subsetString() == "" and
+          all(part.get("is_error") and "declined" in part["content"] for part in results), results)
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
 
 
 def check_tool_rules(chat, provider, settings, ask, layer):
@@ -1453,6 +1494,21 @@ def check_recipes(chat, provider, settings, ask, layer):
     chat._refresh_recipes()
     check("recipes: a failed step stops the recipe", chat.run_recipe("r9") is False and layer.subsetString() == "",
           layer.subsetString())
+
+    write_recipes(read_recipes() + [{"id": "r10", "name": "Deux pas", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": big, "label": "filtre"},
+        {"tool": "set_layer_style", "arguments": {"layer": "communes", "mode": "single", "color": "#00ff00"},
+         "label": "style"}]}])
+    chat._refresh_recipes()
+    settings(autonomy="careful")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    ran = chat.run_recipe("r10")
+    check("recipes: careful asks one question for the steps of the recipe", ran is not False and len(asked) == 1 and
+          "2 actions" in asked[0] and layer.subsetString() == '"pop" > 1000', (ran, asked, layer.subsetString()))
+    chat._ask_user = previous
+    settings()
+    layer.setSubsetString("")
 
     write_recipes([])
     chat._refresh_recipes()

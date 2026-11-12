@@ -812,6 +812,17 @@ Do you agree?</source>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>步骤 {} 未运行：你已为智能体关闭了它的工具（{}）。</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>代理要执行以下 {} 项操作：
+{}
+
+是否全部同意？选“否”则一项都不执行。</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

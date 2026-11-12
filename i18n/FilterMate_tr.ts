@@ -812,6 +812,17 @@ Onaylıyor musunuz?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>{}. adım çalıştırılmadı: aracısını ajan için kapattınız ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Ajan şu {} işlemi yapmak istiyor:
+{}
+
+Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

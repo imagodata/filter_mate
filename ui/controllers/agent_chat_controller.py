@@ -30,7 +30,7 @@ from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
 from ...core.agent.permissions import (
-    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, PROTECTED, REFUSE, RUN, STANDARD, TURNED_OFF, PermissionPolicy, level_note,
+    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, CODE_TOOLS, PROTECTED, REFUSE, RUN, STANDARD, TURNED_OFF, PermissionPolicy, level_note,
     risk_of,
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
@@ -652,6 +652,17 @@ class AgentChatController(QObject):
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
         done, stop = 0, ""
+        # The steps the user would be asked about, asked together when there are several: one yes for the recipe.
+        together = {}
+        asked = []
+        for number, step in enumerate(recipe["steps"], 1):
+            call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
+            verdict = executor.verdict(call, policy) if call.name in available else RUN
+            if (verdict == ASK or (level == ADVISOR and verdict == REFUSE)) and call.name not in CODE_TOOLS:
+                asked.append(call)
+        if len(asked) > 1:
+            yes = self.confirm_many(asked, title)
+            together = {call.call_id: yes for call in asked}
         try:
             for number, step in enumerate(recipe["steps"], 1):
                 call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
@@ -673,7 +684,9 @@ class AgentChatController(QObject):
                     break
                 if level == ADVISOR and verdict == REFUSE:
                     verdict = ASK
-                if verdict != RUN and (verdict == REFUSE or not self._confirm(call, title)):
+                answered = together.get(call.call_id)
+                if verdict != RUN and (verdict == REFUSE or not (
+                        answered if answered is not None else self._confirm(call, title))):
                     stop = _tr("Step {} was not run: {}.").format(number, step["label"])
                     break
                 try:
@@ -1236,6 +1249,18 @@ class AgentChatController(QObject):
             return ""
         total = data.get("total_count")
         return f"{data['feature_count']:,} / {total:,}" if isinstance(total, int) and total >= 0 else f"{data['feature_count']:,}"
+
+    def confirm_many(self, calls, title: str = "") -> bool:
+        """One question for several actions of a turn (or of a recipe): all of them, or none."""
+        lines = []
+        for number, call in enumerate(calls[:MAX_LISTED], 1):
+            detail = one_line(self._run_detail(call), 160)
+            lines.append(f"{number}. {one_line(self._describe(call), 160)}" + (f" — {detail}" if detail else ""))
+        if len(calls) > MAX_LISTED:
+            lines.append(f"(+{len(calls) - MAX_LISTED})")
+        text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
+                   "them.").format(len(calls), "\n".join(lines))
+        return bool(self._ask_user(title or _tr("FilterMate agent"), text))
 
     def confirm(self, call: ToolCallPart) -> bool:
         """A call of the chat the level of autonomy does not let run alone; the user may allow the tool for the

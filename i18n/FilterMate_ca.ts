@@ -812,6 +812,17 @@ Hi esteu d'acord?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>El pas {} no s'ha executat: heu desactivat la seva eina per a l'agent ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>L'agent vol fer aquestes {} accions:
+{}
+
+Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
