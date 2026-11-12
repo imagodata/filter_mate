@@ -12,7 +12,8 @@ Deployed at https://filtermate-free-quota.filtermate-free-quota-proxy.workers.de
 | Whole service, per month | 200 $ | `MONTHLY_BUDGET_USD` |
 | One access token, per month | 0.50 $ | `USER_MONTHLY_USD` |
 | One IP address, per month | 2 $ | `IP_MONTHLY_USD` |
-| New tokens per address, per day | 3, and 200 for everyone | `src/ledger.js` |
+| New tokens per address, per day | 3, and 50 for everyone | `src/ledger.js` |
+| Budget alerts | 50 %, 80 % and 95 % of the month, once each | `src/ledger.js`, `ALERT_WEBHOOK` |
 | Requests per token | 2 at once, 30 per minute, 300 per day | `src/ledger.js` |
 | Requests per address | 60 per minute, before any accounting | `wrangler.toml` |
 | Answer length | 8192 tokens | `src/rules.js` |
@@ -20,7 +21,12 @@ Deployed at https://filtermate-free-quota.filtermate-free-quota-proxy.workers.de
 | Model | Claude Haiku 5.5 | `MODEL` |
 
 An IPv6 address counts for its whole /64. The limit per address is what really bounds one person: a token alone is easy to replace.
-Addresses in large numbers, residential proxies for instance, get past it, up to 200 new tokens a day. The monthly budget still holds.
+Addresses in large numbers, residential proxies for instance, get past it, up to 50 new tokens a day: 25 $ a day at most, so an
+attack needs 8 days to spend the month. The monthly budget still holds, for everyone: watch the alerts.
+
+When a part of the budget is spent, the Worker logs `{"alert":"budget","part":0.8}` once for the month. To receive it, set a
+Slack or Discord incoming webhook: `npx wrangler secret put ALERT_WEBHOOK`. Set a spend limit on the Anthropic workspace of the key
+as well: the counters are an estimate.
 
 The budget is held before each request at the worst the request can cost, and replaced by the real cost when the stream says it.
 A stream cut short pays its prompt and what can have been written. A request that never reports pays its worst case, after 15 minutes.
