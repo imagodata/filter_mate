@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from core.agent.messages import ToolCallPart
-from core.agent.tool_catalog import CHAT_ONLY, chat_tools, load_catalog
+from core.agent.tool_catalog import CHAT_ONLY, SETTINGS_TOOLS, SKILL_TOOLS, chat_tools, load_catalog
 from core.agent.tool_executor import ToolExecutor
 from filtermate_api.accessor import (
     CrossFilterResult, FavoritesUnavailable, FieldValues, FilteredLayer, FilterPreview, FilterRejected,
@@ -81,8 +81,10 @@ def run(accessor, root, tool_name, **arguments):
 
 class TestHandlers:
     def test_one_handler_per_chat_tool(self, tmp_path):
-        # The tools of the chat alone (its own history) get their handler from the chat controller.
-        assert set(build_handlers(Accessor(), tmp_path)) == {tool.name for tool in chat_tools()} - {tool.name for tool in CHAT_ONLY}
+        # The tools of the chat alone (its own history) and those of the settings of FilterMate (they need the plugin)
+        # get their handler from the chat controller.
+        controller = {tool.name for tool in CHAT_ONLY + SETTINGS_TOOLS + SKILL_TOOLS}
+        assert set(build_handlers(Accessor(), tmp_path)) == {tool.name for tool in chat_tools()} - controller
 
     def test_reads(self, api):
         accessor, root = api

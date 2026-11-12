@@ -412,6 +412,71 @@ Eseguirlo?</translation>
         <translation>impostazioni di FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
+        <source>Show in the configuration: {}</source>
+        <translation>Mostra nella configurazione: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="440"/>
+        <source>Open Agent settings: {}</source>
+        <translation>Apri le impostazioni dell'agente: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
+        <source>This setting is not shown in the configuration tree.</source>
+        <translation>Questa impostazione non è visibile nell'albero di configurazione.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1505"/>
+        <source>Profile of settings saved: {}</source>
+        <translation>Profilo di impostazioni salvato: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Profile of settings applied: {}</source>
+        <translation>Profilo di impostazioni applicato: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1719"/>
+        <source>The agent wants to change these settings of FilterMate</source>
+        <translation>L'agente vuole modificare queste impostazioni di FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
+        <source>They stay for every project; undoing the turn puts them back.</source>
+        <translation>Valgono per tutti i progetti; annullare il turno le ripristina.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Apply</source>
+        <translation>Applica</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Applied at your request.</source>
+        <translation>Applicato su sua richiesta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Not applied.</source>
+        <translation>Non applicato.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Attendi la fine della richiesta, poi fai di nuovo clic su Applica.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Queste impostazioni sono cambiate da quando l'agente le ha proposte: chiedigliele di nuovo.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Modifica di {} (non salvata)</translation>
@@ -896,6 +961,11 @@ Sei d'accordo?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Il passaggio {} non è stato eseguito: hai disattivato il suo strumento per l'agente ({}).</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Il passo {step} non è stato eseguito: lavora sul layer {layer} che il passo {maker} aveva creato la prima volta, e questa esecuzione non l'ha ricreato.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>

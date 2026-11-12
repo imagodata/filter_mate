@@ -412,6 +412,71 @@ Köra den?</translation>
         <translation>inställningar för FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
+        <source>Show in the configuration: {}</source>
+        <translation>Visa i konfigurationen: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="440"/>
+        <source>Open Agent settings: {}</source>
+        <translation>Öppna agentinställningar: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
+        <source>This setting is not shown in the configuration tree.</source>
+        <translation>Den här inställningen visas inte i konfigurationsträdet.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1505"/>
+        <source>Profile of settings saved: {}</source>
+        <translation>Inställningsprofil sparad: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Profile of settings applied: {}</source>
+        <translation>Inställningsprofil tillämpad: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1719"/>
+        <source>The agent wants to change these settings of FilterMate</source>
+        <translation>Agenten vill ändra dessa inställningar i FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
+        <source>They stay for every project; undoing the turn puts them back.</source>
+        <translation>De gäller för alla projekt; om rundan ångras återställs de.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Apply</source>
+        <translation>Verkställ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Applied at your request.</source>
+        <translation>Tillämpat på din begäran.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Not applied.</source>
+        <translation>Inte tillämpat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Vänta tills begäran är klar och klicka sedan på Verkställ igen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Dessa inställningar har ändrats sedan agenten föreslog dem: fråga den igen.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Redigering av {} (inte sparad)</translation>
@@ -896,6 +961,11 @@ Godkänner du?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Steg {} kördes inte: du har stängt av dess verktyg för agenten ({}).</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Steg {step} kördes inte: det arbetar på lagret {layer} som steg {maker} skapade första gången, och den här körningen skapade det inte igen.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>

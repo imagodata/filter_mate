@@ -412,6 +412,71 @@ Run it?</source>
         <translation>FilterMate 的设置</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
+        <source>Show in the configuration: {}</source>
+        <translation>在配置中显示：{}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="440"/>
+        <source>Open Agent settings: {}</source>
+        <translation>打开智能体设置：{}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
+        <source>This setting is not shown in the configuration tree.</source>
+        <translation>此设置未显示在配置树中。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1505"/>
+        <source>Profile of settings saved: {}</source>
+        <translation>已保存设置配置文件：{}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Profile of settings applied: {}</source>
+        <translation>已应用设置配置文件：{}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1719"/>
+        <source>The agent wants to change these settings of FilterMate</source>
+        <translation>智能体想要更改 FilterMate 的以下设置</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
+        <source>They stay for every project; undoing the turn puts them back.</source>
+        <translation>这些设置对所有项目生效；撤销本轮操作会将其恢复原样。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Apply</source>
+        <translation>应用</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Applied at your request.</source>
+        <translation>已按您的请求应用。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Not applied.</source>
+        <translation>未应用。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>请等待请求结束，然后再次点击“应用”。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>自智能体提出这些设置以来，它们已被更改：请重新向智能体请求。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} 的编辑（未保存）</translation>
@@ -896,6 +961,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>步骤 {} 未运行：你已为智能体关闭了它的工具（{}）。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>第 {step} 步未执行：它作用于第 {maker} 步第一次创建的图层 {layer}，而本次运行没有再次创建它。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>

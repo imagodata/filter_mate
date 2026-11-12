@@ -316,7 +316,8 @@ def run_executor(layer, provider_type, text, old=None, operator=None):
     """process_qgis_expression, combination with the old subset and safe_set_subset_string, as the task runs them."""
     from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
     layer.setSubsetString(old or '')
-    executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key='fid',
+    key = 'id' if provider_type == 'postgresql' else 'fid'  # the PostGIS tables' primary key
+    executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key=key,
                                        old_subset=old, combine_operator=operator)
     processed, _ = executor.process_qgis_expression(text)
     if processed and not old:
@@ -334,8 +335,8 @@ def run_executor(layer, provider_type, text, old=None, operator=None):
 def hybrid_path(label, layer, provider_type):
     """The plugin's entry on expressions left to QGIS: the hybrid subset keeps what QGIS keeps.
 
-    Hybrid subsets are written for SQLite sources only: on a Shapefile these
-    cases take the former conversion (OLD, printed, not asserted).
+    Hybrid subsets are written for SQLite and PostgreSQL sources: on a
+    Shapefile these cases take the former conversion (OLD, printed, not asserted).
     """
     for text in HYBRID_CASES:
         layer.setSubsetString('')

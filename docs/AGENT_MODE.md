@@ -315,9 +315,23 @@ nothing is sent, nothing is paid, and it works with no provider set up. `core/ag
   action: the next request tells the model what changed, as for a filter set by hand.
 - What a step reads is read again at each run: a cross filter from the selection filters from the selection of the
   moment, and a layer is found by its name. A step that needs a tool the settings now leave out (attribute values not
-  shared, a source unticked) stops the recipe and says so. Known limit: a step that used a layer an earlier step made
-  (the output of `run_algorithm`, `segment_objects`, `add_layer`), by its id, still names the layer of the first run;
-  by its name, it finds the first layer of that name.
+  shared, a source unticked) stops the recipe and says so.
+- A layer made by a step (the output of `run_algorithm`, `segment_objects`, `add_layer`…) is a new layer at each run,
+  with a new id. Each step keeps the layers it made (`made`: their ids and names, the layers new in the project after
+  the call). At a run, the layers the step makes again are paired with those by name; when exactly one is left on each
+  side (the one output of an algorithm, named in another language), those two. With more left nothing tells which is
+  which, and they stay unpaired rather than send a later step (a deletion maybe) to the wrong layer. The later steps
+  then name the new layers: an id of the first run wherever it is; a name where the arguments name layers (`layer`,
+  `layers`, `source_layer`, `target_layers`, `join_layer`, `raster`… and the parameters of `run_algorithm` that take
+  layers), the last layer made under that name and still there, or renamed by `rename_layer` in the recipe. A later
+  step that names, by id or name, a layer this run did not make again stops the recipe and says which: the layer of
+  the first run may still be there under that name. A step on a made layer is asked alone, once that layer is there,
+  not in the one question of the recipe. A name protected in the file stays protected, even paired with a layer made
+  here. `made` counts in the size of a recipe and in what the approval of a live recipe holds for (`remap`,
+  `pair_made`, `stale_reference` in `core/agent/recipes.py`). A recipe kept before this has no `made` and runs as it
+  did. Limits: a layer added by something else during a step (the user, another plugin, while Processing runs) counts
+  as made by it; a layer made by code or a connector, which are not kept, is not followed; an id inside a longer text
+  (an expression, `aggregate('id', …)`) is not replaced.
 - The recipes go with each request as data: the name and the tools of each one, never their arguments nor the words
   of the file, so the model can name them or forget one (`remove_recipe`). Keeping or forgetting a recipe through the
   agent is undone with the turn (`("recipes", "", before, after)` in `adapters/agent/turn_effects.py`), unless the
@@ -484,10 +498,10 @@ The catalog is JSON because that server needs pydantic and the MCP SDK, which QG
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's
 history, which is not what the agent did.
 
-Counts (2026-11-12): 47 tools in the catalog; the chat offers 58 at most (the catalog without those three, plus the 5
-tools of the plugin's own settings and skills, plus 9 of its own: `undo_agent_step`, the notes, `run_pyqgis`,
-`view_map`, the widgets and the recipes, some only under their setting); the MCP server of the plugin serves 51 (the
-chat's tools without its own, plus `map_image` and `contact_sheet`).
+Counts (2026-11-12): 47 tools in the catalog; the chat offers 61 at most (the catalog without those three, plus the 7
+tools of the plugin's own settings, profiles and skills, plus 10 of its own: `undo_agent_step`, the notes,
+`run_pyqgis`, `view_map`, the widgets, the recipes and `show_settings_link`, some only under their setting); the MCP
+server of the plugin serves 53 (the chat's tools without its own, plus `map_image` and `contact_sheet`).
 
 ### Settings of FilterMate and skills (2026-11-12)
 
@@ -509,6 +523,21 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   question. Always allow (tab Tools) works above Advisor; Yes for this conversation is not offered: each change is shown.
   A call that would change nothing, or that the tool refuses, is not asked. A recipe never keeps a change of the
   settings.
+- In the chat, a change of the settings that the level asks is proposed in the thread: a card lists every setting
+  before and after (and what a profile leaves out), with Apply and Cancel, and the tool answers `proposed` without
+  changing anything. Apply applies exactly what the card shows, as a step of the history of its own (Undo takes it
+  back), and is refused when one of those settings changed since; the next request tells the model what the user
+  chose. Another application (MCP) and the question for several actions of a turn keep their dialog; the plan shown
+  there is frozen, and a profile changed on disk since is refused.
+- Undo: the value "after" is what the agent applied (a value the user set meanwhile stays theirs); back to before a
+  step of the turn restores the settings changed from it.
+- `show_settings_link` (chat only, read-only) puts a button in the thread that opens a tab of the settings of the
+  agent or selects a setting in the configuration tree: the agent shows what it may not change.
+- Profiles (`core/agent/settings_profile.py`): `export_settings_profile` writes the settings changed from their
+  default, never those the agent may not change, to `profiles/` of the export folder (asked like a file; an existing
+  profile is replaced only with `replace`); `apply_settings_profile` applies one by its name from that folder only
+  (never a path the model gives: a share or a probe of the disk), 40 changes at most, each shown, and lists what it
+  left out.
 - `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
 - Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
   and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt

@@ -412,6 +412,71 @@ Run it?</source>
         <translation>การตั้งค่าของ FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
+        <source>Show in the configuration: {}</source>
+        <translation>แสดงในการกำหนดค่า: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="440"/>
+        <source>Open Agent settings: {}</source>
+        <translation>เปิดการตั้งค่าเอเจนต์: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
+        <source>This setting is not shown in the configuration tree.</source>
+        <translation>การตั้งค่านี้ไม่แสดงในแผนผังการกำหนดค่า</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1505"/>
+        <source>Profile of settings saved: {}</source>
+        <translation>บันทึกโปรไฟล์การตั้งค่าแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Profile of settings applied: {}</source>
+        <translation>ใช้โปรไฟล์การตั้งค่าแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1719"/>
+        <source>The agent wants to change these settings of FilterMate</source>
+        <translation>เอเจนต์ต้องการเปลี่ยนการตั้งค่าเหล่านี้ของ FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
+        <source>They stay for every project; undoing the turn puts them back.</source>
+        <translation>การตั้งค่าเหล่านี้มีผลกับทุกโครงการ การเลิกทำรอบนี้จะคืนค่าเดิม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Apply</source>
+        <translation>นำไปใช้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Cancel</source>
+        <translation>ยกเลิก</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Applied at your request.</source>
+        <translation>นำไปใช้ตามคำขอของคุณแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Not applied.</source>
+        <translation>ไม่ได้นำไปใช้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>โปรดรอให้คำขอเสร็จสิ้น แล้วคลิก นำไปใช้ อีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>การตั้งค่าเหล่านี้เปลี่ยนไปตั้งแต่เอเจนต์เสนอ: โปรดขอให้เอเจนต์เสนออีกครั้ง</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>การแก้ไข {} (ยังไม่บันทึก)</translation>
@@ -896,6 +961,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>ขั้นตอนที่ {} ไม่ได้ทำงาน: คุณปิดเครื่องมือของขั้นตอนนี้สำหรับเอเจนต์ ({})</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>ไม่ได้เรียกใช้ขั้นตอน {step}: ขั้นตอนนี้ทำงานกับชั้นข้อมูล {layer} ที่ขั้นตอน {maker} สร้างไว้ในครั้งแรก และการเรียกใช้ครั้งนี้ไม่ได้สร้างขึ้นใหม่</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>

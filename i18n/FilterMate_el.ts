@@ -412,6 +412,71 @@ Run it?</source>
         <translation>ρυθμίσεις του FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
+        <source>Show in the configuration: {}</source>
+        <translation>Εμφάνιση στη διαμόρφωση: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="440"/>
+        <source>Open Agent settings: {}</source>
+        <translation>Άνοιγμα ρυθμίσεων πράκτορα: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
+        <source>This setting is not shown in the configuration tree.</source>
+        <translation>Αυτή η ρύθμιση δεν εμφανίζεται στο δέντρο διαμόρφωσης.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1505"/>
+        <source>Profile of settings saved: {}</source>
+        <translation>Το προφίλ ρυθμίσεων αποθηκεύτηκε: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Profile of settings applied: {}</source>
+        <translation>Το προφίλ ρυθμίσεων εφαρμόστηκε: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1719"/>
+        <source>The agent wants to change these settings of FilterMate</source>
+        <translation>Ο πράκτορας θέλει να αλλάξει αυτές τις ρυθμίσεις του FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
+        <source>They stay for every project; undoing the turn puts them back.</source>
+        <translation>Ισχύουν για όλα τα έργα· η αναίρεση του γύρου τις επαναφέρει.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Apply</source>
+        <translation>Εφαρμογή</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Cancel</source>
+        <translation>Ακύρωση</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Applied at your request.</source>
+        <translation>Εφαρμόστηκε κατόπιν αιτήματός σας.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Not applied.</source>
+        <translation>Δεν εφαρμόστηκε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>Περιμένετε να ολοκληρωθεί το αίτημα και, στη συνέχεια, κάντε ξανά κλικ στην Εφαρμογή.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>Αυτές οι ρυθμίσεις άλλαξαν από τότε που τις πρότεινε ο πράκτορας: ζητήστε του τις ξανά.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Επεξεργασία του {} (μη αποθηκευμένη)</translation>
@@ -896,6 +961,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>Το βήμα {} δεν εκτελέστηκε: απενεργοποιήσατε το εργαλείο του για τον πράκτορα ({}).</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Το βήμα {step} δεν εκτελέστηκε: δουλεύει στο επίπεδο {layer} που δημιούργησε το βήμα {maker} την πρώτη φορά, και αυτή η εκτέλεση δεν το δημιούργησε ξανά.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>

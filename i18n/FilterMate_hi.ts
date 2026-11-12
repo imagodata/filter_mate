@@ -412,6 +412,71 @@ Run it?</source>
         <translation>FilterMate की सेटिंग्स</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="433"/>
+        <source>Show in the configuration: {}</source>
+        <translation>कॉन्फ़िगरेशन में दिखाएँ: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="440"/>
+        <source>Open Agent settings: {}</source>
+        <translation>एजेंट सेटिंग्स खोलें: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="451"/>
+        <source>This setting is not shown in the configuration tree.</source>
+        <translation>यह सेटिंग कॉन्फ़िगरेशन ट्री में नहीं दिखाई जाती।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1505"/>
+        <source>Profile of settings saved: {}</source>
+        <translation>सेटिंग्स प्रोफ़ाइल सहेजी गई: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1506"/>
+        <source>Profile of settings applied: {}</source>
+        <translation>सेटिंग्स प्रोफ़ाइल लागू की गई: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1719"/>
+        <source>The agent wants to change these settings of FilterMate</source>
+        <translation>एजेंट FilterMate की ये सेटिंग्स बदलना चाहता है</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
+        <source>They stay for every project; undoing the turn puts them back.</source>
+        <translation>ये सभी प्रोजेक्ट पर लागू रहती हैं; इस बारी को पूर्ववत करने पर ये पहले जैसी हो जाती हैं।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Apply</source>
+        <translation>लागू करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1721"/>
+        <source>Cancel</source>
+        <translation>रद्द करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Applied at your request.</source>
+        <translation>आपके अनुरोध पर लागू किया गया।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1722"/>
+        <source>Not applied.</source>
+        <translation>लागू नहीं किया गया।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1744"/>
+        <source>Wait for the end of the request, then click Apply again.</source>
+        <translation>अनुरोध पूरा होने तक प्रतीक्षा करें, फिर लागू करें पर दोबारा क्लिक करें।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1748"/>
+        <source>These settings changed since the agent proposed them: ask it again.</source>
+        <translation>एजेंट द्वारा प्रस्तावित किए जाने के बाद ये सेटिंग्स बदल गई हैं: उससे फिर से पूछें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} का संपादन (सहेजा नहीं गया)</translation>
@@ -896,6 +961,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>चरण {} नहीं चला: आपने एजेंट के लिए उसका टूल बंद कर दिया है ({})।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>चरण {step} नहीं चलाया गया: यह परत {layer} पर काम करता है जिसे चरण {maker} ने पहली बार बनाया था, और इस बार वह फिर से नहीं बनी।</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>

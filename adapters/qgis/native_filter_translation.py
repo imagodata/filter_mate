@@ -155,7 +155,7 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=F
 
     Returns:
         The native SQL of the whole expression, else (``evaluate``, SQLite
-        sources) a hybrid subset that keeps the same features, else None
+        and PostgreSQL sources) a hybrid subset that keeps the same features, else None
         (former conversion). Never a subset the subset sanitizer would
         rewrite (safe_set_subset_string runs it on every subset).
     """
@@ -226,8 +226,9 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
     """
     from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
     from .source_capability_probe import feature_count_or_none
-    if native_dialect_for_layer(layer) != SQLITE:
-        raise Unsupported('Hybrid subsets are written for SQLite sources only')
+    dialect = native_dialect_for_layer(layer)
+    if dialect not in (SQLITE, POSTGRESQL):  # OGR SQL: no index on a list, ~5,000 values at most
+        raise Unsupported('Hybrid subsets are written for SQLite and PostgreSQL sources only')
     if not result.predicate:
         raise Unsupported('The expression is not a condition')
     if layer.isEditable():
@@ -284,7 +285,7 @@ def _hybrid_subset(layer, expression, result, native_sql, key_name):
             passing.append(value)
         elif failing is not None and in_native:
             failing.append(value)
-    subset = hybrid_sql(native_sql, passing, failing, key, numeric)
+    subset = hybrid_sql(native_sql, passing, failing, key, numeric, dialect)
     logger.info('Hybrid subset for %s: %d kept, %s excluded by QGIS from the native part (%s)', layer.name(),
                 len(passing), 'no native part' if failing is None else len(failing), result.reason)
     return subset

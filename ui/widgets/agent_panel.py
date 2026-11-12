@@ -839,6 +839,19 @@ class AgentPanel(QFrame):
     def begin_step(self) -> None:
         self.thread.begin_step()
 
+    def add_settings_card(self, texts: dict, lines, reason: str):
+        """A change of the settings of FilterMate asked in the thread, with Apply and Cancel (agent_thread)."""
+        self._show_conversation()
+        card = self.thread.add_settings_card(texts, lines, reason)
+        self._in_answer = False
+        return card
+
+    def add_link(self, label: str, on_click) -> None:
+        """A button the agent puts in the thread: the user goes to a setting when they want."""
+        self._show_conversation()
+        self.thread.add_link(label, on_click)
+        self._in_answer = False
+
     def add_note(self, text: str) -> None:
         """A remark of the panel itself, muted."""
         self._show_conversation()
@@ -986,12 +999,18 @@ class AgentSettingsDialog(QDialog):
         general_layout.addWidget(consent_box)
         general_layout.addStretch(1)
         self.tabs = QTabWidget(self)
+        # Pages by key, for a link of the agent (show_settings_link) that opens one of them.
+        self._tab_pages = {"provider": general}
         self.tabs.addTab(general, _tr("Provider"))
-        self.tabs.addTab(self._build_sources(values), _tr("Sources"))
-        self.tabs.addTab(self._build_autonomy(values), _tr("Autonomy"))
+        self._tab_pages["sources"] = self._build_sources(values)
+        self.tabs.addTab(self._tab_pages["sources"], _tr("Sources"))
+        self._tab_pages["autonomy"] = self._build_autonomy(values)
+        self.tabs.addTab(self._tab_pages["autonomy"], _tr("Autonomy"))
         if self._tools:
-            self.tabs.addTab(self._build_tools(values), _tr("Tools"))
-        self.tabs.addTab(self._build_applications(values), _tr("Other applications"))
+            self._tab_pages["tools"] = self._build_tools(values)
+            self.tabs.addTab(self._tab_pages["tools"], _tr("Tools"))
+        self._tab_pages["other_applications"] = self._build_applications(values)
+        self.tabs.addTab(self._tab_pages["other_applications"], _tr("Other applications"))
         if mcp_error:
             self.mcp_result.setText(_tr("The MCP server could not start: {}").format(mcp_error))
         layout = QVBoxLayout(self)
@@ -1098,10 +1117,13 @@ class AgentSettingsDialog(QDialog):
         self._rule_boxes = {}
         kinds = {0: _tr("reads"), 1: _tr("view"), 2: _tr("project"), 3: _tr("edit buffer"), 4: _tr("irreversible"),
                  5: _tr("outside")}
+        # change_settings: asked like an irreversible change, but undone with the turn (words of the undo, translated)
+        settings_kind = QCoreApplication.translate("AgentChat", "settings of FilterMate")
         choices = [("", _tr("As the level says")), ("ask", _tr("Always ask")), ("allow", _tr("Always allow")),
                    ("never", _tr("Never"))]
         for name, title, risk in sorted(self._tools, key=lambda row: (row[2], row[1].lower())):
-            item = QTreeWidgetItem(self.tool_rules, [title, kinds.get(risk, ""), ""])
+            kind = settings_kind if name in ("change_settings", "apply_settings_profile") else kinds.get(risk, "")
+            item = QTreeWidgetItem(self.tool_rules, [title, kind, ""])
             item.setToolTip(0, name)
             box = QComboBox(self.tool_rules)
             for value, label in choices:
@@ -1125,6 +1147,16 @@ class AgentSettingsDialog(QDialog):
         return [self.protected_layers.item(row).data(Qt.ItemDataRole.UserRole)
                 for row in range(self.protected_layers.count())
                 if self.protected_layers.item(row).checkState() == Qt.CheckState.Checked]
+
+    def select_tab(self, key: str) -> None:
+        """Open the tab ``key`` (provider, sources, autonomy, tools, other_applications); an unknown one is ignored."""
+        page = self._tab_pages.get(key)
+        if page is not None:
+            self.tabs.setCurrentWidget(page)
+
+    def tab_title(self, key: str) -> str:
+        page = self._tab_pages.get(key)
+        return self.tabs.tabText(self.tabs.indexOf(page)) if page is not None else ""
 
     def chosen_autonomy(self) -> str:
         button = self.autonomy.checkedButton()

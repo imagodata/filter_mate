@@ -1588,11 +1588,106 @@ def check_recipes(chat, provider, settings, ask, layer):
     settings()
     layer.setSubsetString("")
 
+    check_recipe_made_layers(chat, provider, ask, layer)
     check_live_recipes(chat, panel, layer)
     write_recipes([])
     chat._refresh_recipes()
     layer.setSubsetString("")
     panel.clear_thread()
+
+
+def check_recipe_made_layers(chat, provider, ask, layer):
+    """A step made a layer and a later step worked on it: run again, the later step works on the layer made now."""
+    from qgis.core import QgsProject
+    from filter_mate.adapters.agent.recipes_store import read_recipes, write_recipes
+
+    project = QgsProject.instance()
+    panel = chat.panel
+    previous = chat._ask_user
+    chat._ask_user = lambda title, text: True
+    big = '"pop" > 1000'
+    before = set(project.mapLayers())
+    provider.reset((200, {}, tool_turn("run_algorithm", {"algorithm_id": "native:buffer",
+                                                         "parameters": {"INPUT": "communes", "DISTANCE": 10},
+                                                         "names": {"OUTPUT": "Tampon recette"}})),
+                   (200, {}, tool_turn("apply_filter", {"layer_name": "Tampon recette", "expression": big}, "toolu_2")),
+                   (200, {}, text_turn("ok")))
+    ask("un tampon des communes, puis ses grandes communes")
+    first = [made for layer_id, made in project.mapLayers().items() if layer_id not in before]
+    check("made layers: the request made a layer and filtered it", len(first) == 1 and first[0].subsetString() == big,
+          [(made.name(), made.subsetString()) for made in first])
+    if len(first) != 1:
+        chat._ask_user = previous
+        return
+    first = first[0]
+    first_id = first.id()
+    steps, _request = chat._steps_to_keep()
+    check("made layers: the step keeps the layer it made, the filter none",
+          [step.get("made") for step in steps] == [[{"id": first.id(), "name": "Tampon recette"}], None], steps)
+    # The model may name the layer it made by its id as well as by its name.
+    by_id = [steps[0], dict(steps[1], arguments=dict(steps[1]["arguments"], layer_name=first.id()))]
+    write_recipes(read_recipes() + [{"id": "r11", "name": "Par nom", "request": "", "steps": steps},
+                                    {"id": "r12", "name": "Par identifiant", "request": "", "steps": by_id}])
+    chat._refresh_recipes()
+    first.setSubsetString("")
+    for recipe_id in ("r11", "r12"):
+        known = set(project.mapLayers())
+        ran = chat.run_recipe(recipe_id)
+        made = [layer for layer_id, layer in project.mapLayers().items() if layer_id not in known]
+        check(f"made layers: run again, the filter goes to the layer made now ({recipe_id})",
+              ran and len(made) == 1 and made[0].subsetString() == big and first.subsetString() == "",
+              (ran, [(layer.name(), layer.subsetString()) for layer in made], first.subsetString()))
+        chat._on_undo()
+        check(f"made layers: undo takes the layer of the run back ({recipe_id})", set(project.mapLayers()) == known,
+              set(project.mapLayers()) - known)
+
+    # The layer made, renamed in the request, then filtered by its new name: the layer of the first time has that
+    # name too (it was renamed the first time), and the filter must go to the one made now.
+    write_recipes(read_recipes() + [{"id": "r14", "name": "Renommée", "request": "", "steps": [
+        steps[0], {"tool": "rename_layer", "arguments": {"layer": first_id, "name": "Zone recette"}, "label": "nom"},
+        {"tool": "apply_filter", "arguments": {"layer_name": "Zone recette", "expression": big}, "label": "filtre"}]}])
+    chat._refresh_recipes()
+    first.setName("Zone recette")
+    known = set(project.mapLayers())
+    ran = chat.run_recipe("r14")
+    made = [layer for layer_id, layer in project.mapLayers().items() if layer_id not in known]
+    check("made layers: a layer made then renamed is filtered by its new name, not the one of the first time",
+          ran and len(made) == 1 and made[0].name() == "Zone recette" and made[0].subsetString() == big
+          and first.subsetString() == "", (ran, [(layer.name(), layer.subsetString()) for layer in made],
+                                           first.subsetString()))
+    chat._on_undo()
+    first.setName("Tampon recette")
+
+    # A step that made "communes" the first time and makes nothing now: a later step on "communes" by name would
+    # quietly filter the layer already there.
+    write_recipes(read_recipes() + [{"id": "r15", "name": "Nom non refait", "request": "", "steps": [
+        {"tool": "set_layers_visibility", "arguments": {"layers": ["communes"], "visible": True}, "label": "visible",
+         "made": [{"id": "communes_0123", "name": "communes"}]},
+        {"tool": "apply_filter", "arguments": {"layer_name": "communes", "expression": big}, "label": "filtre"}]}])
+    chat._refresh_recipes()
+    ran = chat.run_recipe("r15")
+    said = panel.thread.toPlainText()[-400:]
+    check("made layers: a layer made the first time, named by a later step, stops the recipe when not made again",
+          ran is False and layer.subsetString() == "" and "did not make" in said, (ran, layer.subsetString(), said))
+    chat._on_undo()  # its first step
+
+    write_recipes(read_recipes() + [{"id": "r13", "name": "Sans sa couche", "request": "", "steps": [
+        {"tool": "set_layers_visibility", "arguments": {"layers": ["communes"], "visible": True}, "label": "visible",
+         "made": [{"id": "Disparue_0123", "name": "Disparue"}]},
+        {"tool": "clear_filters", "arguments": {"layers": ["Disparue_0123"]}, "label": "Disparue"}]}])
+    chat._refresh_recipes()
+    ran = chat.run_recipe("r13")
+    said = panel.thread.toPlainText()[-400:]
+    check("made layers: a step on a layer this run did not make stops the recipe, and says which",
+          ran is False and "Disparue" in said and "did not make" in said, (ran, said))
+    chat._on_undo()  # its first step
+    chat._on_undo()  # the request that made the layer
+    check("made layers: undoing the request takes its layer back", first_id not in project.mapLayers(),
+          [layer.name() for layer in project.mapLayers().values()])
+    write_recipes([recipe for recipe in read_recipes() if recipe["id"] not in ("r11", "r12", "r13", "r14", "r15")])
+    chat._refresh_recipes()
+    chat._ask_user = previous
+    layer.setSubsetString("")
 
 
 def check_live_recipes(chat, panel, layer):
