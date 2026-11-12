@@ -1103,6 +1103,16 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>Ang mga tool lang na nagsasala, para sa mabagal na computer</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Walang inilistang modelo ang Ollama sa {}: i-type ang pangalan ng isa.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Mga modelong naka-install sa Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Kapag naka-check, ang lokal na modelo ay makakakuha lang ng mga tool na nagbabasa at nagsasala ng proyekto: halos kalahati ang babasahin sa bawat kahilingan. Sa sukat gamit ang qwen3.5:4b, ang lahat ng tool ay sumagot nang kasinghusay o mas mahusay.</translation>

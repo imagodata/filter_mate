@@ -1103,6 +1103,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>เฉพาะเครื่องมือกรอง สำหรับคอมพิวเตอร์ที่ช้า</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama ไม่ได้แสดงโมเดลใดที่ {} : พิมพ์ชื่อโมเดล</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>โมเดลที่ติดตั้งใน Ollama ({})</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>เมื่อเลือก โมเดลในเครื่องจะได้เฉพาะเครื่องมือที่อ่านและกรองโครงการ ทำให้ต้องอ่านน้อยลงราวครึ่งหนึ่งในแต่ละคำขอ จากการวัดด้วย qwen3.5:4b เครื่องมือทั้งหมดตอบได้ดีเท่ากันหรือดีกว่า</translation>

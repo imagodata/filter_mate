@@ -1103,6 +1103,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Μόνο τα εργαλεία φιλτραρίσματος, για αργό υπολογιστή</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Το Ollama δεν εμφάνισε κανένα μοντέλο στο {}: πληκτρολογήστε το όνομα ενός.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Μοντέλα εγκατεστημένα στο Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Όταν είναι επιλεγμένο, το τοπικό μοντέλο παίρνει μόνο τα εργαλεία που διαβάζουν και φιλτράρουν το έργο: περίπου το μισό κείμενο σε κάθε αίτημα. Με μέτρηση στο qwen3.5:4b, όλα τα εργαλεία απάντησαν εξίσου καλά ή καλύτερα.</translation>

@@ -1103,6 +1103,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>低速なコンピューター向けに、フィルタ用ツールのみ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama は {} でモデルを返しませんでした。モデル名を入力してください。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Ollama にインストール済みのモデル ({})。</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>オンにすると、ローカルモデルにはプロジェクトの読み取りとフィルタのツールだけを渡し、リクエストごとに読む量がほぼ半分になります。qwen3.5:4b での計測では、すべてのツールでも同等以上の回答でした。</translation>

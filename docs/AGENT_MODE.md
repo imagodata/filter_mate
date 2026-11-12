@@ -74,6 +74,8 @@ weigh about 71,000 characters, near 18,000 tokens, before the conversation: thro
 tools nor the request. `core/agent/providers/ollama_chat.py` asks for `num_ctx` 32,768, or 65,536 for a longer
 request (two sizes only: each new size makes Ollama load the model again), and reads the lines of JSON Ollama streams.
 An address saved with `/v1` still works, and a consent given for it still counts.
+The settings list the models Ollama has installed (`GET /api/tags`, `installed_models`; 2 s at most, read while the
+dialog stays usable), embedding models left out; a name already typed is kept.
 
 What a local model can run, measured on 2026-11-11 (Ollama 0.30.10, RTX 5070 Laptop GPU of 8 GB, WSL 2):
 

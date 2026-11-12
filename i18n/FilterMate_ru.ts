@@ -1103,6 +1103,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Только инструменты фильтрации, для медленного компьютера</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama не показала ни одной модели по адресу {}: введите имя модели.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Модели, установленные в Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Если отмечено, локальная модель получает только инструменты чтения и фильтрации проекта: примерно вдвое меньше текста в каждом запросе. По замерам с qwen3.5:4b со всеми инструментами ответы были не хуже.</translation>

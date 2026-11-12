@@ -1103,6 +1103,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>ለዝግተኛ ኮምፒውተር፣ የሚያጣሩ መሣሪያዎችን ብቻ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama በ{} ምንም ሞዴል አልዘረዘረም፦ የአንዱን ስም ይጻፉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>በOllama የተጫኑ ሞዴሎች ({})።</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>ሲመረጥ፣ የአካባቢው ሞዴል ፕሮጀክቱን የሚያነቡና የሚያጣሩ መሣሪያዎችን ብቻ ያገኛል፤ በእያንዳንዱ ጥያቄ የሚነበበው በግማሽ ያህል ይቀንሳል። በqwen3.5:4b ሲለካ፣ ሁሉም መሣሪያዎች እኩል ወይም የተሻለ መልስ ሰጥተዋል።</translation>

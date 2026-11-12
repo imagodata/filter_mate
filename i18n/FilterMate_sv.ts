@@ -1103,6 +1103,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Bara verktygen som filtrerar, för en långsam dator</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama listade inga modeller på {}: skriv namnet på en.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Modeller installerade i Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Markerat får den lokala modellen bara verktygen som läser och filtrerar projektet: ungefär hälften så mycket att läsa vid varje begäran. Mätt med qwen3.5:4b svarade alla verktyg lika bra eller bättre.</translation>

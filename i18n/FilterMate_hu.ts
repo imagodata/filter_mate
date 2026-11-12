@@ -1103,6 +1103,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Csak a szűrő eszközök, lassú számítógéphez</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Az Ollama nem listázott modellt itt: {}. Írja be egy modell nevét.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Az Ollamában telepített modellek ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Bejelölve a helyi modell csak a projektet olvasó és szűrő eszközöket kapja: kérésenként nagyjából fele annyit kell olvasnia. A qwen3.5:4b-vel mérve minden eszközzel ugyanolyan jól vagy jobban válaszolt.</translation>

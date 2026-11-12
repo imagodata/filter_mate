@@ -924,6 +924,7 @@ def check_chat(provider, layer, authcfg, work):
     dialog.base_url.clear()
     dialog.preset.setCurrentIndex(dialog.preset.findData("ollama"))
     check("settings: a local model has no key field", not dialog.key.isVisible())
+    check_ollama_models(AgentSettingsDialog, AgentSettings, target_of)
     check("settings: a local model may get the filtering tools only, off by default",
           dialog.local_filtering_only.isVisible() and not dialog.local_filtering_only.isChecked())
     dialog.preset.setCurrentIndex(dialog.preset.findData("mistral"))
@@ -1414,6 +1415,47 @@ def check_widgets(chat, provider, settings, ask, layer):
     layer.setSubsetString("")
     check("widgets: gone, the strip hides", strip.isHidden())
     panel.clear_thread()
+
+
+def check_ollama_models(dialog_class, settings_class, target_of):
+    """The settings list the models Ollama has installed (GET /api/tags), without waiting for it."""
+    class Tags(BaseHTTPRequestHandler):
+        def do_GET(self):  # noqa: N802 - http.server name
+            body = json.dumps({"models": [
+                {"name": "qwen3.5:4b", "details": {"family": "qwen35"}},
+                {"name": "nomic-embed-text:latest", "details": {"family": "nomic-bert"}},
+                {"name": "qwen3:8b"}]}).encode()
+            self.send_response(200 if self.path == "/api/tags" else 404)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *_args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Tags)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    address = f"http://127.0.0.1:{server.server_port}"
+    try:
+        dialog = dialog_class(settings_class(preset="ollama", model="", base_url=address + "/v1"), target_of)
+        listed = lambda: [dialog.model.itemText(i) for i in range(dialog.model.count())]  # noqa: E731
+        wait(lambda: len(listed()) == 2, 5)
+        check("ollama: the models installed are listed, embeddings left out, the first chosen",
+              listed() == ["qwen3.5:4b", "qwen3:8b"] and dialog.model.currentText() == "qwen3.5:4b", listed())
+        dialog.close()
+        dialog = dialog_class(settings_class(preset="ollama", model="mon-modele", base_url=address), target_of)
+        wait(lambda: len(listed()) == 2, 5)
+        check("ollama: a model already typed stays", dialog.model.currentText() == "mon-modele" and len(listed()) == 2,
+              (dialog.model.currentText(), listed()))
+        dialog.close()
+        dialog = dialog_class(settings_class(preset="ollama", model="", base_url="http://127.0.0.1:9"), target_of)
+        wait(lambda: "did not list" in dialog.model.toolTip(), 5)
+        check("ollama: no server, the field says so and takes a name", "did not list" in dialog.model.toolTip()
+              and not listed(), dialog.model.toolTip())
+        dialog.close()
+    finally:
+        server.shutdown()
 
 
 def check_recipes(chat, provider, settings, ask, layer):

@@ -1103,6 +1103,16 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <translation>Hanya alat yang menapis, untuk komputer perlahan</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
+        <source>Ollama did not list any model at {}: type the name of one.</source>
+        <translation>Ollama tidak menyenaraikan sebarang model di {}: taip nama salah satunya.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1402"/>
+        <source>Models installed in Ollama ({}).</source>
+        <translation>Model yang dipasang dalam Ollama ({}).</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
         <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
         <translation>Jika ditanda, model setempat hanya mendapat alat yang membaca dan menapis projek: kira-kira separuh bacaan pada setiap permintaan. Diukur dengan qwen3.5:4b, semua alat menjawab sama baik atau lebih baik.</translation>
