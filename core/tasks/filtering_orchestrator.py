@@ -311,9 +311,11 @@ class FilteringOrchestrator:
                     distant_result = manage_distant_layers_callback()
                 except SourceSelectionError as refusal:
                     # 2026-11-12: the source filter keeps no feature (or cannot be
-                    # read): the targets are left as they are, and the user is told.
-                    logger.warning(f"Distant layers not filtered: {refusal}")
+                    # read): nothing is filtered, and the user is told. The task
+                    # drops the source subset it queued (source_refused).
+                    logger.warning(f"Nothing filtered: {refusal}")
                     result['message'] = str(refusal)
+                    result['source_refused'] = True
                     return result
 
                 if is_canceled_callback():

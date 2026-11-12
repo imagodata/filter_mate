@@ -85,6 +85,11 @@ class SpatialiteSourceContext:
     # New subset string
     param_source_new_subset: Optional[str] = None
 
+    # 2026-11-12: the new selection (``expression``) applies to the whole layer
+    # (the source filter replaces the old subset, or OR), not to the old subset
+    # (AND, AND NOT): read without the old subset when it must be read again.
+    selection_reads_whole_layer: bool = False
+
     # Buffer value (None = no buffer, float = buffer distance in meters)
     param_buffer_value: Optional[float] = None
 
@@ -489,6 +494,32 @@ def _source_filter_expression(context: SpatialiteSourceContext) -> str:
     return ''
 
 
+def _unfiltered_copy(layer):
+    """A second layer on the data source of ``layer`` without its subset; None when it cannot be opened.
+
+    Same way as OGRExpressionBuilder._unfiltered_target (the subset removed from the URI).
+    """
+    try:
+        from qgis.core import QgsProviderRegistry, QgsVectorLayer
+        provider = layer.providerType()
+        if provider == 'memory':
+            return None
+        registry = QgsProviderRegistry.instance()
+        parts = dict(registry.decodeUri(provider, layer.source()))
+        for key in ('subset', 'sql', 'filter'):
+            parts.pop(key, None)
+        uri = registry.encodeUri(provider, parts) if parts else layer.source()
+        clone = QgsVectorLayer(uri, f"{layer.name()} (unfiltered)", provider)
+        if clone.isValid() and clone.subsetString():
+            clone.setSubsetString('')
+        if clone.isValid() and not clone.subsetString():
+            return clone
+    except Exception as exc:  # nosec B110 - read through the layer instead
+        logger.debug(f"[Spatialite] Unfiltered reading of {layer.name()} unavailable: {exc}")
+    logger.warning(f"[Spatialite] {layer.name()} cannot be read without its current filter")
+    return None
+
+
 def _features_matching(layer, expression: str) -> List:
     """The source features ``expression`` keeps, read in QGIS.
 
@@ -813,8 +844,13 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
         if filter_to_use:
             from ..source_refusal import SourceSelectionError, source_selection_refusal
             if mode != SourceMode.FALLBACK:  # FALLBACK has just read it
+                scope = source_layer
+                if context.selection_reads_whole_layer and source_layer.subsetString():
+                    # 2026-11-12: replaced (or OR): an old subset keeping nothing
+                    # says nothing of the new selection
+                    scope = _unfiltered_copy(source_layer) or source_layer
                 try:
-                    features = _features_matching(source_layer, filter_to_use)
+                    features = _features_matching(scope, filter_to_use)
                 except SourceSelectionError:
                     # The layer read by its mode showed nothing already; the
                     # expression may be the SQL of its provider, not QGIS.
