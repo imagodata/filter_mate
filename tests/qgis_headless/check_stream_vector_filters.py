@@ -13,9 +13,21 @@ from qgis.core import Qgis, QgsApplication, QgsNetworkAccessManager, QgsNetworkR
 from qgis.PyQt.QtCore import QEventLoop, QTimer  # noqa: E402
 from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkRequest  # noqa: E402
 
+
+def _link_dir(target, source):
+    """``target`` made a link to the folder ``source``: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        target.symlink_to(source, target_is_directory=True)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)], check=True, capture_output=True)
+
+
 root = Path(__file__).resolve().parents[2]
 temporary = Path(tempfile.mkdtemp(prefix='fm-stream-a-'))
-(temporary / 'filter_mate').symlink_to(root, target_is_directory=True)
+_link_dir(temporary / 'filter_mate', root)
 os.environ['FILTERMATE_LOG_DIR'] = str(temporary / 'logs')
 sys.path.insert(0, str(temporary))
 app = QgsApplication([], False)

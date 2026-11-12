@@ -18,13 +18,25 @@ from qgis.core import (  # noqa: E402
 )
 from qgis.PyQt.QtCore import QUrlQuery  # noqa: E402
 
+
+def _link_dir(target, source):
+    """``target`` made a link to the folder ``source``: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        target.symlink_to(source, target_is_directory=True)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)], check=True, capture_output=True)
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--service', choices=('wfs', 'oapif', 'arcgis'), required=True)
 parser.add_argument('--verify', action='store_true')
 args = parser.parse_args()
 if args.verify:
     temporary = Path(tempfile.mkdtemp(prefix='fm-verify-stream-a-'))
-    (temporary / 'filter_mate').symlink_to(Path(__file__).resolve().parents[2], target_is_directory=True)
+    _link_dir(temporary / 'filter_mate', Path(__file__).resolve().parents[2])
     os.environ['FILTERMATE_LOG_DIR'] = str(temporary / 'logs')
     sys.path.insert(0, str(temporary))
     from filter_mate.infrastructure.database.sql_utils import safe_set_subset_string

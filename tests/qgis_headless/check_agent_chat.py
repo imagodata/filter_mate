@@ -30,6 +30,18 @@ from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
 from qgis.PyQt.QtWidgets import QFrame, QLabel, QPushButton, QToolBox, QWidget  # noqa: E402
 
+
+def _link(source, target):
+    """A link to the plugin folder: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        os.symlink(source, target)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", target, source], check=True, capture_output=True)
+
+
 RESULTS = []
 SECRET = "sk-test-do-not-log-0123456789"
 
@@ -564,7 +576,7 @@ def check_chat(provider, layer, authcfg, work):
     check("undo is reported", "communes" in panel.status.text(), panel.status.text())
 
     try:  # an algorithm of Processing through the chat, its layer undone with the turn
-        sys.path.append("/usr/share/qgis/python/plugins")
+        sys.path.append(os.path.join(QgsApplication.pkgDataPath(), "python", "plugins"))
         from processing.core.Processing import Processing
         Processing.initialize()
         processing_ready = True
@@ -2276,7 +2288,7 @@ if __name__ == "__main__":
     app = QgsApplication([], True)
     app.initQgis()
     package_root = tempfile.mkdtemp()
-    os.symlink(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
+    _link(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
     sys.path.insert(0, package_root)
     sys.dont_write_bytecode = True
     try:

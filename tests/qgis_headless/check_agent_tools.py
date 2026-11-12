@@ -25,6 +25,18 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QDate, QVariant
 
+
+def _link(source, target):
+    """A link to the plugin folder: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        os.symlink(source, target)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", target, source], check=True, capture_output=True)
+
+
 try:
     from osgeo import gdal
 except ImportError:
@@ -747,7 +759,7 @@ def check_layer_tree(project):
 def check_processing(project, gpkg):
     """find / describe / run_algorithm on real layers: what may run, how its layers come, Stop."""
     try:
-        sys.path.append("/usr/share/qgis/python/plugins")
+        sys.path.append(os.path.join(QgsApplication.pkgDataPath(), "python", "plugins"))
         from processing.core.Processing import Processing
         Processing.initialize()
     except ImportError:
@@ -1373,7 +1385,7 @@ if __name__ == "__main__":
     app = QgsApplication([], False)
     app.initQgis()
     package_root = tempfile.mkdtemp()
-    os.symlink(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
+    _link(os.environ.get("FM_REPO", "/src"), os.path.join(package_root, "filter_mate"))
     sys.path.insert(0, package_root)
     sys.dont_write_bytecode = True
     print(f"QGIS {__import__('qgis.core').core.Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}")

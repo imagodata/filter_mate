@@ -777,7 +777,7 @@ def subset_literals():
         name, _, detail = rest.strip().partition(': ')
         check(f"literals: {name}", status == 'PASS', detail)
     check('literals: scenario script ran to the end', run.returncode in (0, 1) and lines,
-          f"exit={run.returncode} {run.stderr.strip()[-300:]}")
+          f"exit={run.returncode} {run.stderr.strip()[-1500:]}")
 
 
 # --- remote sources, stable keys, key literals (2026-10-17) ----------------------
@@ -831,8 +831,9 @@ def _communes_layers():
         features.append(feature)
     memory.dataProvider().addFeatures(features)
     layers = {'memory': memory}
+    folder = tempfile.mkdtemp(prefix='communes_', dir=info['work'])
     for driver, extension in (('ESRI Shapefile', 'shp'), ('GeoJSON', 'geojson'), ('GPKG', 'gpkg')):
-        path = os.path.join(info['work'], f'communes.{extension}')
+        path = os.path.join(folder, f'communes.{extension}')
         options = QgsVectorFileWriter.SaveVectorOptions()
         options.driverName = driver
         options.fileEncoding = 'UTF-8'
