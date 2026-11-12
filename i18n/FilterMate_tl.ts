@@ -10275,6 +10275,19 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
     </message>
 </context>
 <context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Hindi masuri ang pinili sa '{0}': walang na-filter.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Walang natitirang feature sa pinili sa '{0}': walang na-filter.</translation>
+    </message>
+</context>
+<context>
     <name>SqlUtils</name>
     <message>
         <location filename="../infrastructure/database/sql_utils.py" line="243"/>

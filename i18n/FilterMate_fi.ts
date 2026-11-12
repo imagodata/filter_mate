@@ -10275,6 +10275,19 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
     </message>
 </context>
 <context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Kohteen '{0}' valintaa ei voi arvioida: mitään ei suodatettu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Kohteen '{0}' valinta ei säilytä yhtään kohdetta: mitään ei suodatettu.</translation>
+    </message>
+</context>
+<context>
     <name>SqlUtils</name>
     <message>
         <location filename="../infrastructure/database/sql_utils.py" line="243"/>

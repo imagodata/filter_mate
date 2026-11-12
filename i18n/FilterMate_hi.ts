@@ -10275,6 +10275,19 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
     </message>
 </context>
 <context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>'{0}' का चयन मूल्यांकित नहीं किया जा सकता: कुछ भी फ़िल्टर नहीं किया गया।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>'{0}' का चयन कोई फ़ीचर नहीं रखता: कुछ भी फ़िल्टर नहीं किया गया।</translation>
+    </message>
+</context>
+<context>
     <name>SqlUtils</name>
     <message>
         <location filename="../infrastructure/database/sql_utils.py" line="243"/>

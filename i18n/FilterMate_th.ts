@@ -10275,6 +10275,19 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
     </message>
 </context>
 <context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>ไม่สามารถประเมินการเลือกของ '{0}' ได้: ไม่มีการกรองสิ่งใด</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>การเลือกของ '{0}' ไม่เหลือฟีเจอร์ใดเลย: ไม่มีการกรองสิ่งใด</translation>
+    </message>
+</context>
+<context>
     <name>SqlUtils</name>
     <message>
         <location filename="../infrastructure/database/sql_utils.py" line="243"/>

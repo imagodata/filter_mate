@@ -10275,6 +10275,19 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
     </message>
 </context>
 <context>
+    <name>SourceSelection</name>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="44"/>
+        <source>The selection of '{0}' cannot be evaluated: nothing was filtered.</source>
+        <translation>Pilihan '{0}' tidak dapat dinilai: tiada apa-apa yang ditapis.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/source_refusal.py" line="48"/>
+        <source>The selection of '{0}' keeps no feature: nothing was filtered.</source>
+        <translation>Pilihan '{0}' tidak mengekalkan sebarang fitur: tiada apa-apa yang ditapis.</translation>
+    </message>
+</context>
+<context>
     <name>SqlUtils</name>
     <message>
         <location filename="../infrastructure/database/sql_utils.py" line="243"/>
