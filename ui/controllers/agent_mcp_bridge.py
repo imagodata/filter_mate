@@ -19,6 +19,7 @@ from ...adapters.public_api.map_images import handlers as image_handlers
 from ...core.agent.json_schema import validate
 from ...core.agent.mcp_server import EXTERNAL_MARK, HttpResponse, McpProtocol, RequestHead
 from ...core.agent.messages import ToolCallPart, ToolResultPart
+from ...core.agent.permissions import ASK, RULE_ALLOW, TURNED_OFF, PermissionPolicy
 from ...core.agent.tool_catalog import MCP_ONLY, ToolSpec
 from ...core.agent.tool_executor import ToolExecutor
 
@@ -90,6 +91,14 @@ class AgentMcpBridge:
         except Exception:
             logger.exception("MCP call could not be shown")
 
+    @staticmethod
+    def _policy() -> PermissionPolicy:
+        """The standard level (the level of autonomy is the chat's) under the rules of the Tools tab, read at each
+        call: always ask asks, never refuses. Always allow does not take a confirmation away from another
+        application."""
+        rules = {name: rule for name, rule in load_settings().rules.items() if rule != RULE_ALLOW}
+        return PermissionPolicy(rules=rules)
+
     def _confirmed(self, call: ToolCallPart, client: str) -> ToolResultPart:
         """None when the user agrees and the client still waits; otherwise what to answer."""
         key = (client, call.name)
@@ -115,7 +124,13 @@ class AgentMcpBridge:
             refused = ToolResultPart(call.call_id, protected, is_error=True)
             self._journal(call, refused, client)
             return refused
-        if self._executor.needs_confirmation(call):
+        policy = self._policy()
+        verdict = self._executor.verdict(call, policy)
+        if verdict == TURNED_OFF:
+            refused = self._executor.refused(call, policy)
+            self._journal(call, refused, client)
+            return refused
+        if verdict == ASK:
             refusal = self._confirmed(call, client)
             if refusal is not None:
                 self._journal(call, refusal, client)

@@ -40,6 +40,17 @@ class FilterRejected(ValueError):
     """An existing layer refused an attribute filter without applying it."""
 
 
+class LayerProtected(Exception):
+    """The call would change a layer the user protected from the agent: nothing done (HTTP 403).
+
+    Neither a ValueError nor a FilterRejected: the routes answer those 400 themselves.
+    """
+
+
+# Header of that 403, which tells it apart from a 403 of the access rules (the MCP server built on the REST API).
+PROTECTED_HEADER = "X-FilterMate-Refusal"
+
+
 @dataclass(frozen=True)
 class LayerSummary:
     """Lightweight projection of a QGIS layer for API consumers.
@@ -785,7 +796,9 @@ class InMemoryAccessor:
         return [self._with_active(layer) for layer in self.layers]
 
     def _find(self, reference: str) -> Optional[LayerSummary]:
-        return next((layer for layer in self.layers if reference in (layer.layer_id, layer.name)), None)
+        """By id, then by name (the first of that name), as the plugin resolves a layer."""
+        return (next((layer for layer in self.layers if layer.layer_id == reference), None)
+                or next((layer for layer in self.layers if layer.name == reference), None))
 
     def describe_layer(self, layer: str) -> Optional[LayerDetails]:
         found = self._find(layer)
@@ -1043,8 +1056,10 @@ class InMemoryAccessor:
         return summary
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
-        if not any(layer.name == layer_name for layer in self.layers):
+        found = self._find(layer_name)  # an id or a name
+        if found is None:
             return False
+        layer_name = found.name
         # Capture the previous state for undo BEFORE we overwrite it.
         previous = self._active.get(layer_name, "")
         self._undo_stack.append(

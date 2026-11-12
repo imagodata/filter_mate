@@ -9,6 +9,7 @@ SOURCES = \
     ../adapters/layer_refresh_manager.py \
     ../adapters/task_builder.py \
     ../adapters/undo_redo_handler.py \
+    ../adapters/backends/source_refusal.py \
     ../adapters/backends/ogr/expression_builder.py \
     ../adapters/backends/ogr/filter_executor.py \
     ../adapters/public_api/operations.py \

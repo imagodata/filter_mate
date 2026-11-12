@@ -387,9 +387,13 @@ def _epsg_wkt(authid):
 class FakeCrs:
     """QgsCoordinateReferenceSystem: equal when the authid is (a compound one has a horizontal part)."""
 
-    def __init__(self, authid='', valid=True, geographic=False, horizontal=None, wkt=''):
+    def __init__(self, authid='', valid=True, geographic=False, horizontal=None, wkt='', units='metres'):
         self._authid, self._valid, self._geographic = authid, valid, geographic
         self._horizontal, self._wkt = horizontal, wkt or (_epsg_wkt(authid) if valid else '')
+        self._units = units
+
+    def mapUnits(self):
+        return self._units
 
     def isValid(self):
         return self._valid

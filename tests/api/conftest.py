@@ -22,6 +22,27 @@ from filtermate_api.config import APIConfig  # noqa: E402
 from filtermate_api.server import create_app  # noqa: E402
 
 
+class _NothingProtected:
+    """A project where the user protected no layer from the agent."""
+
+    def name_of(self, reference):
+        return None
+
+    def names(self):
+        return []
+
+    def favorite_layers(self, favorite_id):
+        return []
+
+
+@pytest.fixture(autouse=True)
+def _no_protected_layers(monkeypatch):
+    """The stand-in projects of these tests protect no layer: QGISFilterMateAccessor checks every change against the
+    protected layers of the open project, which the mocks cannot answer (test_protected_layers_rest.py checks it)."""
+    from filtermate_api import qgis_accessor
+    monkeypatch.setattr(qgis_accessor, "_project_protection", _NothingProtected)
+
+
 @pytest.fixture
 def sample_layers() -> list[LayerSummary]:
     return [

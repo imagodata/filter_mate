@@ -90,7 +90,7 @@ class ToolExecutor:
         return self._tools.get(name)
 
     def needs_confirmation(self, call: ToolCallPart) -> bool:
-        """At the usual level (``standard``): what another application or the bench is asked to confirm."""
+        """At the usual level (``standard``), without the rules of the Tools tab: what the bench is asked to confirm."""
         return self.verdict(call, PermissionPolicy()) == ASK
 
     def verdict(self, call: ToolCallPart, policy: PermissionPolicy) -> str:

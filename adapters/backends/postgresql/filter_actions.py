@@ -687,7 +687,8 @@ def execute_filter_action_postgresql_materialized(
 
     # Generate session-unique view name for multi-client isolation
     # FIX v4.2.0: For custom buffer expressions, use source_table + '_buffer_expr' as base name
-    # This must match the name generated in filter_executor.prepare_postgresql_source_geom()
+    # (2026-11-12: prepare_postgresql_source_geom no longer names such a view; custom is
+    # never True in the task, see manage_layer_subset_strings)
     if custom and param_buffer_expression:
         base_name = sanitize_sql_identifier(source_table + '_buffer_expr')
         session_name = get_session_name_fn(base_name)
