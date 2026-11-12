@@ -229,6 +229,17 @@ class TestMcpBridgeFollowsTheToolsTab:
         result = server._run(tools["remove_layers"], {"layers": ["a"]}, "Claude")
         assert result.is_error and server._host.asked == ["remove_layers"] and ran == []
 
+    def test_no_question_while_the_chat_works_or_a_dialog_is_open_even_for_a_read(self, bridge, monkeypatch):
+        server, tools, ran = bridge({"list_layers": "ask"}, answer=True)
+        server._host.chat_busy = lambda: True
+        assert server._run(tools["list_layers"], {}, "Claude").content == mcp_bridge.CHAT_IS_WORKING
+        server._host.chat_busy = lambda: False
+        monkeypatch.setattr(mcp_bridge, "QApplication", SimpleNamespace(activeModalWidget=lambda: object()))
+        assert server._run(tools["list_layers"], {}, "Claude").content == mcp_bridge.DIALOG_OPEN
+        assert server._host.asked == [] and ran == []
+        server._host.chat_busy = lambda: True  # a read nobody is asked about still runs
+        assert not server._run(tools["describe_layer"], {"layer": "a"}, "Claude").is_error
+
     def test_without_rules_the_standard_level_stays(self, bridge):
         server, tools, ran = bridge({}, answer=True)
         assert not server._run(tools["list_layers"], {}, "Claude").is_error
