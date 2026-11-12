@@ -402,6 +402,73 @@ class TestWindowMapping:
         assert w.to_map(column, row) == pytest.approx((123.0, 150.0))
 
 
+class TestWindowPlanningCost:
+    """2026-11-12: the windows of the Processing algorithm were planned in a time quadratic in the points (20 000: 148 s)."""
+
+    RASTER = (0.0, 0.0, 100000.0, 100000.0)
+
+    @staticmethod
+    def quadratic(points, raster, cell, size, margin_pixels=128):
+        """The planning before the grid index, the reference of the windows and of their order."""
+        margin = margin_pixels * cell
+        windows = []
+        for index, (x, y) in enumerate(points):
+            for window, members in windows:
+                if (window.x_min + margin <= x <= window.x_min + window.side - margin
+                        and window.y_max - window.side + margin <= y <= window.y_max - margin):
+                    members.append(index)
+                    break
+            else:
+                window = segmentation.window_at(x, y, raster, cell, size)
+                same = [m for other, m in windows if (other.x_min, other.y_max) == (window.x_min, window.y_max)]
+                if same:
+                    same[0].append(index)
+                else:
+                    windows.append((window, [index]))
+        return [(w.x_min, w.y_max, members) for w, members in windows]
+
+    @staticmethod
+    def plan(points, raster, cell, size, margin_pixels=128):
+        return [(w.x_min, w.y_max, members) for w, members in
+                segmentation.assign_windows(points, raster, cell, size, margin_pixels)]
+
+    @pytest.mark.parametrize('margin', [0, 128, 500])
+    def test_the_same_windows_as_before(self, margin):
+        import random
+        rng = random.Random(7)
+        points = [(rng.uniform(0, 100000.0), rng.uniform(0, 100000.0)) for _ in range(400)]
+        for _ in range(20):  # clusters, and points along the edge of the raster
+            cx, cy = rng.uniform(0, 100000.0), rng.uniform(0, 100000.0)
+            points += [(min(max(cx + rng.gauss(0, 150.0), 0.0), 100000.0), min(max(cy + rng.gauss(0, 150.0), 0.0), 100000.0))
+                       for _ in range(30)]
+        points += [(99990.0 - rng.uniform(0, 300.0), rng.uniform(0, 100000.0)) for _ in range(100)]
+        points += [(float(x * 64), float(y * 64)) for x in range(12) for y in range(12)]  # on the lines of the grid
+        assert self.plan(points, self.RASTER, 0.25, 1024, margin) == self.quadratic(points, self.RASTER, 0.25, 1024, margin)
+
+    def test_scattered_points_are_planned_quickly(self):
+        import random
+        import time
+        rng = random.Random(11)
+        points = [(rng.uniform(0, 100000.0), rng.uniform(0, 100000.0)) for _ in range(20000)]
+        begin = time.perf_counter()
+        windows = segmentation.assign_windows(points, self.RASTER, 0.25, 1024)
+        assert time.perf_counter() - begin < 15.0  # 148 s before, under 1 s after
+        assert sorted(index for _w, members in windows for index in members) == list(range(20000))
+
+    def test_a_cancel_stops_the_planning(self):
+        asked = []
+
+        def canceled():
+            asked.append(True)
+            return len(asked) > 3
+
+        points = [(1000.0 * i, 1000.0 * i) for i in range(1, 50)]
+        windows = segmentation.assign_windows(points, self.RASTER, 0.25, 1024, is_canceled=canceled)
+        assert sum(len(members) for _w, members in windows) == 3
+        prompts = [segmentation.Prompt(x, y) for x, y in points]
+        assert segmentation.plan_prompts(prompts, self.RASTER, 0.25, 1024, is_canceled=lambda: True) == []
+
+
 class TestWindowsAtTheEdge:
     """A window kept inside the raster near its edge must serve every point there, not be encoded once per point."""
 

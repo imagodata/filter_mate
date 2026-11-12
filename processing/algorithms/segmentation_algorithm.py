@@ -128,7 +128,10 @@ class SegmentFromFeaturesAlgorithm(FilterMateAlgorithm):
             raise QgsProcessingException(self.tr("No point or polygon of the guide layer lies on the raster"))
 
         size = int(model.input_size)
-        windows = segmentation.plan_prompts(prompts, raster['bounds'], raster['native'], size, point_view)
+        windows = segmentation.plan_prompts(prompts, raster['bounds'], raster['native'], size, point_view,
+                                            is_canceled=feedback.isCanceled)
+        if feedback.isCanceled():
+            return {self.OUTPUT: sink_id}
         feedback.pushInfo(self.tr("{0} feature(s) on the raster, {1} window(s) to prepare").format(len(prompts), len(windows)))
         layer = _private_raster(raster)
         if layer is None:

@@ -17,7 +17,7 @@ import math
 import os
 import sys
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 from qgis.core import QgsMapRendererSequentialJob, QgsMapSettings, QgsRasterLayer, QgsRectangle, QgsTask
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QSize, QThread, QTimer
@@ -279,27 +279,53 @@ def window_at(x: float, y: float, raster: Tuple[float, float, float, float], cel
 
 
 def assign_windows(points: List[Tuple[float, float]], raster: Tuple[float, float, float, float], cell: float, size: int,
-                   margin_pixels: int = 128) -> List[Tuple[SegmentationWindow, List[int]]]:
+                   margin_pixels: int = 128, is_canceled: Optional[Callable[[], bool]] = None
+                   ) -> List[Tuple[SegmentationWindow, List[int]]]:
     """Group points into as few windows as greedily found: each point lies ``margin_pixels`` inside its window.
+
+    A point joins the first window opened that holds it. The windows (all of one side) are indexed by
+    their top left corner on a grid of that side: a point is compared with the few whose corner is near,
+    not with every window opened before it (20 000 scattered points: 148 s, then 0.8 s; see
+    ``scripts/sam_window_planning_bench.py``).
+
+    Args:
+        is_canceled: Polled at each point; once True, the windows planned so far are returned.
 
     Returns:
         ``(window, indexes of its points)``, in the order the windows were opened.
     """
     margin = margin_pixels * cell
+    side = float(cell) * size
     windows: List[Tuple[SegmentationWindow, List[int]]] = []
+    corners: dict = {}  # (x_min, y_max) of a window -> its position in windows
+    grid: dict = {}  # cell of the grid holding the corner of windows -> their positions, in opening order
     for index, (x, y) in enumerate(points):
-        for window, members in windows:
-            if (window.x_min + margin <= x <= window.x_min + window.side - margin
-                    and window.y_max - window.side + margin <= y <= window.y_max - margin):
-                members.append(index)
-                break
-        else:
-            window = window_at(x, y, raster, cell, size)
-            same = [members for other, members in windows if (other.x_min, other.y_max) == (window.x_min, window.y_max)]
-            if same:  # a window kept in the raster near its edge: the point is as far inside as it can be
-                same[0].append(index)
-            else:
-                windows.append((window, [index]))
+        if is_canceled is not None and is_canceled():
+            break
+        # The windows holding (x, y) have x_min in [x - side + margin, x - margin] and y_max in [y + margin,
+        # y + side - margin]: their corner lies in these cells of the grid, one more each way for the rounding.
+        first = None
+        for column in range(math.floor((x - side + margin) / side) - 1, math.floor((x - margin) / side) + 2):
+            for row in range(math.floor((y + margin) / side) - 1, math.floor((y + side - margin) / side) + 2):
+                for position in grid.get((column, row), ()):
+                    if first is not None and position >= first:
+                        break
+                    window = windows[position][0]
+                    if (window.x_min + margin <= x <= window.x_min + window.side - margin
+                            and window.y_max - window.side + margin <= y <= window.y_max - margin):
+                        first = position
+                        break
+        if first is not None:
+            windows[first][1].append(index)
+            continue
+        window = window_at(x, y, raster, cell, size)
+        corner = (window.x_min, window.y_max)
+        if corner in corners:  # a window kept in the raster near its edge: the point is as far inside as it can be
+            windows[corners[corner]][1].append(index)
+            continue
+        corners[corner] = len(windows)
+        grid.setdefault((math.floor(window.x_min / side), math.floor(window.y_max / side)), []).append(len(windows))
+        windows.append((window, [index]))
     return windows
 
 
@@ -429,7 +455,8 @@ SERVICE_FINEST_SHARE = 1.0 / 8.0
 
 
 def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float], native_cell: float, size: int,
-                 point_view: float = PROMPT_POINT_VIEW_METRES) -> List[Tuple[SegmentationWindow, List[int]]]:
+                 point_view: float = PROMPT_POINT_VIEW_METRES, is_canceled: Optional[Callable[[], bool]] = None
+                 ) -> List[Tuple[SegmentationWindow, List[int]]]:
     """Windows to encode for ``prompts``, each with the indexes of the prompts it holds.
 
     A prompt needs a cell where its box fills at most :data:`PROMPT_BOX_FILL` of the window (a point:
@@ -440,6 +467,7 @@ def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float
         native_cell: Pixel size of the raster; 0 for a service: the finest cell a prompt needs is then
             used, no finer than :data:`SERVICE_FINEST_SHARE` of a point's view.
         point_view: Ground seen around a point prompt, in raster units.
+        is_canceled: Polled while the windows are planned; once True, what is planned so far is returned.
     """
     if not prompts:
         return []
@@ -466,7 +494,7 @@ def plan_prompts(prompts: List[Prompt], raster: Tuple[float, float, float, float
         margin = int(min(size // 2 - 1, math.ceil(half_box) + 32))
         centres = [((prompts[i].box[0] + prompts[i].box[2]) / 2.0, (prompts[i].box[1] + prompts[i].box[3]) / 2.0)
                    if prompts[i].box else (prompts[i].x, prompts[i].y) for i in members]
-        for window, inner in assign_windows(centres, raster, cell, size, margin_pixels=margin):
+        for window, inner in assign_windows(centres, raster, cell, size, margin_pixels=margin, is_canceled=is_canceled):
             planned.append((window, [members[i] for i in inner]))
     return planned
 
