@@ -12,7 +12,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
-from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected
+from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected, LayerProtected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
 from .filter_combine import combined
 from .layer_listing import select_layers, short_filter
@@ -84,7 +84,7 @@ def _guarded(handler: Handler) -> Handler:
             return handler(arguments)
         except QGISBusy as exc:
             raise ToolFailure(f"QGIS is busy, nothing was changed: {exc}. Wait and try again.") from None
-        except (FilterRejected, FavoritesUnavailable) as exc:
+        except (FilterRejected, FavoritesUnavailable, LayerProtected) as exc:
             raise ToolFailure(str(exc)) from None
     return run
 

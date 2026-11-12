@@ -40,6 +40,17 @@ class FilterRejected(ValueError):
     """An existing layer refused an attribute filter without applying it."""
 
 
+class LayerProtected(Exception):
+    """The call would change a layer the user protected from the agent: nothing done (HTTP 403).
+
+    Neither a ValueError nor a FilterRejected: the routes answer those 400 themselves.
+    """
+
+
+# Header of that 403, which tells it apart from a 403 of the access rules (the MCP server built on the REST API).
+PROTECTED_HEADER = "X-FilterMate-Refusal"
+
+
 @dataclass(frozen=True)
 class LayerSummary:
     """Lightweight projection of a QGIS layer for API consumers.

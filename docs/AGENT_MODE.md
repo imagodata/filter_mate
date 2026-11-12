@@ -223,7 +223,11 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - **Protected layers** (`adapters/agent/protected_layers.py`, kept in the project by their ids, ticked in the Autonomy
   tab): a call that would change one (`permissions.CHANGED_LAYERS`: its filter, style, labels, features, fields, join,
   name, or the layer itself) gets the verdict `PROTECTED`, refused at every level, never turned into a question nor
-  allowed for a conversation; in a recipe it stops the replay; the native MCP server answers it the same way. Reading
+  allowed for a conversation; in a recipe it stops the replay; the native MCP server answers it the same way, and
+  `QGISFilterMateAccessor` checks every change again on the main thread, so the REST API and the MCP server built on
+  it (`python -m filtermate_api.mcp`) answer 403 (`X-FilterMate-Refusal: protected-layer`), an undo or redo of the
+  dock history that would set the filter of a protected layer included. Protected layers that cannot be read refuse
+  a change (`PROTECTION_UNREADABLE`), never let it through. Reading
   one, using it as the source of a cross filter or the table of a join, zooming, selecting or showing it stays
   allowed. Their names go with each request. A favorite is checked on the layers applying it would change (its
   layer, its remote layers, its clips: `operations.favorite_layers`, found as `apply_favorite` finds them). Not
