@@ -656,7 +656,7 @@
        }
       ],
       "default": null,
-      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
+      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter, or from the whole layer when it has none). Omit to replace the previous filter."
      },
      "selected_only": {
       "default": true,
@@ -943,7 +943,7 @@
        }
       ],
       "default": null,
-      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
+      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter, or from the whole layer when it has none). Omit to replace the previous filter."
      }
     },
     "required": [
@@ -1070,7 +1070,7 @@
        }
       ],
       "default": null,
-      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter. AND NOT needs an existing filter on each layer."
+      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter, or from the whole layer when it has none). Omit to replace the previous filter."
      }
     },
     "required": [
