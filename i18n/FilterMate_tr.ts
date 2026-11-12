@@ -898,6 +898,11 @@ Onaylıyor musunuz?</translation>
         <translation>{}. adım çalıştırılmadı: aracısını ajan için kapattınız ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>{step}. adım çalıştırılmadı: ilk seferde {maker}. adımın oluşturduğu {layer} katmanı üzerinde çalışıyor ve bu çalıştırma onu yeniden oluşturmadı.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

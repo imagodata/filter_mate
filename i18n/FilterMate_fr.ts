@@ -903,6 +903,11 @@ Do you agree?</source>
         <translation>L'étape {} n'a pas été exécutée : vous avez coupé son outil pour l'agent ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>L'étape {step} n'a pas été exécutée : elle porte sur la couche {layer} que l'étape {maker} avait créée la première fois, et cette exécution ne l'a pas recréée.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

@@ -6,8 +6,9 @@ import pytest
 
 from core.agent.permissions import AGENT_OWN, PermissionPolicy, RUN
 from core.agent.recipes import (
-    HEADER, LIVE_TOOLS, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, fingerprint, followed_sources, kept,
-    live_problem, parse, plain, recipes_block, saved, steps_of, summary, with_live, without,
+    HEADER, LIVE_TOOLS, MAX_MADE, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, fingerprint,
+    followed_sources, kept, live_problem, made_layers, pair_made, parse, plain, recipes_block, remap, saved,
+    stale_reference, steps_of, summary, with_live, without,
 )
 from core.agent.system_prompt import SYSTEM_PROMPT
 from core.agent.tool_catalog import CHAT_ONLY, REMOVE_RECIPE, SAVE_RECIPE, ToolSpec, chat_tools
@@ -210,3 +211,110 @@ class TestLive:
         first = saved([], "A", "q", [_cross()])[0]
         assert fingerprint(first) == fingerprint(dict(first, name="B", request="other", live=True))
         assert fingerprint(first) != fingerprint(saved([], "A", "q", [_cross("autre")])[0])
+
+
+class TestMadeLayers:
+    """A step that made a layer, and the later steps that work on it: the ids of the first time are gone at a run."""
+
+    BUFFER = {"algorithm": "native:buffer", "parameters": {"INPUT": "routes", "DISTANCE": 50,
+                                                           "OUTPUT": "TEMPORARY_OUTPUT"}}
+
+    def test_a_step_keeps_the_layers_it_made(self):
+        made = [{"id": "Tampon_1a", "name": "Tampon"}]
+        calls = [
+            ("run_algorithm", self.BUFFER, False, "Buffer", made),
+            ("apply_filter", {"layer_name": "Tampon_1a", "expression": "a = 1"}, False, "Filter", []),
+            _call("set_layer_style"),  # a call recorded without layers made
+        ]
+        steps = steps_of(calls, _tools())
+        assert steps[0]["made"] == made
+        assert "made" not in steps[1] and "made" not in steps[2]
+
+    def test_made_layers_survive_the_project_file_and_bad_entries_are_left_out(self):
+        step = {"tool": "run_algorithm", "arguments": self.BUFFER, "label": "Buffer",
+                "made": [{"id": "Tampon_1a", "name": "Tampon"}, {"id": "", "name": "x"}, {"id": 3, "name": "y"},
+                         "z", {"id": "Tampon_1a", "name": "again"}, {"id": "b" * 2000, "name": "long"}]}
+        recipes = parse(dumps(saved([], "Buffer", "", [step])))
+        assert recipes[0]["steps"][0]["made"] == [{"id": "Tampon_1a", "name": "Tampon"}]
+        many = dict(step, made=[{"id": f"l{number}", "name": "n"} for number in range(MAX_MADE + 5)])
+        assert len(parse(dumps(saved([], "Many", "", [many])))[0]["steps"][0]["made"]) == MAX_MADE
+        assert "made" not in parse(dumps(saved([], "None", "", [dict(step, made="no")])))[0]["steps"][0]
+
+    def test_made_layers_are_those_new_after_the_step(self):
+        after = {"a": "routes", "Tampon_2b": "Tampon", "Diss_3c": "Dissolved"}
+        assert made_layers(["a"], after) == [{"id": "Tampon_2b", "name": "Tampon"},
+                                             {"id": "Diss_3c", "name": "Dissolved"}]
+        assert made_layers(["a", "Tampon_2b", "Diss_3c"], after) == []
+
+    def test_pairs_by_name_then_the_one_left(self):
+        made = [{"id": "old_a", "name": "Tampon"}, {"id": "old_b", "name": "Buffer"}]
+        new = [{"id": "new_x", "name": "Tampon (fr)"}, {"id": "new_a", "name": "Tampon"}]
+        # The one output whose name changed (another language of QGIS) is paired with the one layer left.
+        assert pair_made(made, new) == {"old_a": "new_a", "old_b": "new_x"}
+        assert pair_made(made, []) == {}
+
+    def test_layers_left_without_their_name_are_not_paired_by_chance(self):
+        # Two outputs named in another language, one of them empty this time: which is which is not known, and a
+        # deletion on "Matching" must not reach the layer of the other output.
+        made = [{"id": "m_1", "name": "Matching features (Extract)"}, {"id": "n_1", "name": "Non-matching (Extract)"}]
+        assert pair_made(made, [{"id": "n_2", "name": "Entités non correspondantes (Extraire)"}]) == {}
+        assert pair_made(made, [{"id": "a", "name": "A"}, {"id": "b", "name": "B"}]) == {}
+
+    def test_later_steps_name_the_layers_made_now(self):
+        ids, names = {"Tampon_1a": "Tampon_2b"}, {"Tampon": "Tampon_2b"}
+        assert remap("apply_filter", {"layer_name": "Tampon_1a", "expression": "name = 'Tampon'"}, ids, names) == \
+            {"layer_name": "Tampon_2b", "expression": "name = 'Tampon'"}
+        # By name only where layers are named: at the second run two layers are called Tampon.
+        assert remap("set_layers_visibility", {"layers": ["Tampon", "routes"], "visible": True}, ids, names) == \
+            {"layers": ["Tampon_2b", "routes"], "visible": True}
+        assert remap("rename_layer", {"layer": "Tampon", "name": "Tampon"}, ids, names) == \
+            {"layer": "Tampon_2b", "name": "Tampon"}
+        # The Processing parameters name layers under the names of the algorithm, objects included.
+        assert remap("run_algorithm", {"algorithm": "native:dissolve",
+                                       "parameters": {"INPUT": "Tampon", "OVERLAY": {"layer": "Tampon_1a"}}},
+                     ids, names) == {"algorithm": "native:dissolve",
+                                     "parameters": {"INPUT": "Tampon_2b", "OVERLAY": {"layer": "Tampon_2b"}}}
+        # Another tool's parameters are not layers.
+        assert remap("add_field", {"layer": "routes", "name": "Tampon"}, ids, names)["name"] == "Tampon"
+
+    def test_only_the_layer_parameters_of_an_algorithm_take_a_made_layer_by_name(self):
+        ids, names = {"Tampon_1a": "Tampon_2b"}, {"Tampon": "Tampon_2b"}
+        arguments = {"algorithm_id": "native:fieldcalculator",
+                     "parameters": {"INPUT": "Tampon", "FIELD_NAME": "Tampon", "FORMULA": "Tampon_1a"}}
+        assert remap("run_algorithm", arguments, ids, names, layer_params={"INPUT"})["parameters"] == \
+            {"INPUT": "Tampon_2b", "FIELD_NAME": "Tampon", "FORMULA": "Tampon_2b"}
+        assert remap("run_algorithm", arguments, ids, names, layer_params=set())["parameters"]["INPUT"] == "Tampon"
+
+    def test_remap_never_changes_the_stored_arguments(self):
+        arguments = {"layers": ["Tampon_1a"]}
+        remap("clear_filters", arguments, {"Tampon_1a": "new"}, {})
+        assert arguments == {"layers": ["Tampon_1a"]}
+        assert remap("clear_filters", arguments, {}, {}) == arguments
+
+    def test_a_layer_not_made_again_is_found(self):
+        made = {"Tampon_1a": (1, "Tampon")}
+        assert stale_reference("clear_filters", {"layers": ["routes", "Tampon_1a"]}, made) == "Tampon_1a"
+        assert stale_reference("run_algorithm", {"parameters": {"INPUT": {"layer": "Tampon_1a"}}},
+                               ["Tampon_1a"]) == "Tampon_1a"
+        assert stale_reference("clear_filters", {"layers": ["routes"]}, ["Tampon_1a"]) is None
+        assert stale_reference("clear_filters", {"layers": ["Tampon_1a"]}, []) is None
+
+    def test_a_layer_not_made_again_is_found_by_its_name_where_layers_are_named(self):
+        # The layer of the first time may still be there under that name: the step would quietly work on it.
+        assert stale_reference("apply_filter", {"layer_name": "Tampon", "expression": "a"}, [], ["Tampon"]) == "Tampon"
+        assert stale_reference("add_field", {"layer": "routes", "name": "Tampon"}, [], ["Tampon"]) is None
+        processing = {"parameters": {"INPUT": "routes", "FIELD_NAME": "Tampon"}}
+        assert stale_reference("run_algorithm", processing, [], ["Tampon"], layer_params={"INPUT"}) is None
+        assert stale_reference("run_algorithm", processing, [], ["Tampon"]) == "Tampon"
+
+    def test_the_layers_made_are_part_of_what_an_approval_holds_for(self):
+        step = {"tool": "run_algorithm", "arguments": self.BUFFER, "label": "Buffer"}
+        before = fingerprint({"steps": [step]})
+        assert fingerprint({"steps": [dict(step, made=[])]}) == before  # a recipe kept before keeps its approval
+        assert fingerprint({"steps": [dict(step, made=[{"id": "x", "name": "y"}])]}) != before
+
+    def test_the_layers_made_count_in_the_size_of_a_recipe(self):
+        made = [{"id": f"{number:04d}" + "i" * 900, "name": "n" * 900} for number in range(MAX_MADE)]
+        steps = [{"tool": "run_algorithm", "arguments": self.BUFFER, "label": "b", "made": made}] * 2
+        with pytest.raises(RecipeError):
+            saved([], "Big", "", steps)
