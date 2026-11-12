@@ -98,3 +98,67 @@ class TestCombineKeepsBalancedOldSubset:
 def test_none_operator_replaces_old_subset():
     # REPLACE mode: the combine option is off, the old subset is dropped.
     assert combine_with_old_subset(NEW_EXPRESSION, RTREE_OLD_SUBSET, None, 'spatialite') == NEW_EXPRESSION
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-12: has_or_outside_subqueries (a target subset combined under OR)
+# ---------------------------------------------------------------------------
+
+_EXISTS_A = 'EXISTS (SELECT 1 FROM "s"."a" AS __source WHERE ST_Intersects("t"."geom", __source."geom"))'
+_EXISTS_B = 'EXISTS (SELECT 1 FROM "s"."b" AS __source WHERE "x" = 1 OR "y" = 2)'
+
+
+@pytest.mark.parametrize("expression, expected", [
+    (f"({_EXISTS_A}) OR ({_EXISTS_B})", True),
+    (f"(({_EXISTS_A}) OR ({_EXISTS_B})) AND ({_EXISTS_A})", True),        # at any depth
+    (f"(\"nature\" = 'x') OR ({_EXISTS_A})", True),
+    (f"({_EXISTS_A}) AND ({_EXISTS_B})", False),                          # the OR is inside the subquery
+    (f"(\"t\".\"geom\" && (SELECT ST_Extent(g) FROM s WHERE a OR b)) AND {_EXISTS_A}", False),
+    (f"NOT ({_EXISTS_A})", False),
+    ("\"nature\" = 'x OR y'", False),                                    # a literal
+    ("\"OR\" = 1", False),                                                # a quoted name
+    ("\"color\" = 1", False),
+    ("", False),
+    (None, False),
+])
+def test_has_or_outside_subqueries(expression, expected):
+    from core.filter.expression_combiner import has_or_outside_subqueries
+    assert has_or_outside_subqueries(expression) is expected
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-12 (review): is_exists_conjunction, combine_target_subset
+# ---------------------------------------------------------------------------
+
+_PREFILTER = '("t"."geom" && (SELECT ST_Extent(g) FROM "s"."a" AS __source WHERE "id" IN (1, 2)))'
+
+
+@pytest.mark.parametrize("expression, expected", [
+    (_EXISTS_A, True),
+    (f"({_EXISTS_A}) AND ({_EXISTS_B})", True),
+    (f"{_PREFILTER} AND {_EXISTS_A}", True),                    # the envelope prefilter repeats the EXISTS
+    (f"NOT ({_EXISTS_A})", True),
+    (f"(\"pk\" IN (1, 2)) AND ({_EXISTS_A})", False),           # a key list beside it
+    (f"(\"nature\" = 'x') AND ({_EXISTS_A})", False),
+    (f"({_EXISTS_A}) OR ({_EXISTS_B})", False),
+    ('"pk" IN (1, 2)', False),
+    ("", False),
+])
+def test_is_exists_conjunction(expression, expected):
+    from core.filter.expression_combiner import is_exists_conjunction
+    assert is_exists_conjunction(expression) is expected
+
+
+@pytest.mark.parametrize("old, operator, new, expected", [
+    ('"a" = 1', "AND", '"a" = 1', '"a" = 1'),
+    ('("a" = 1) AND ("b" = 2)', "AND", '"b" = 2', '("a" = 1) AND ("b" = 2)'),
+    ('(("a" = 1) OR ("b" = 2)) OR ("c" = 3)', "OR", '( "b" = 2 )', '(("a" = 1) OR ("b" = 2)) OR ("c" = 3)'),
+    ('("a" = 1) OR ("b" = 2)', "AND", '"b" = 2', '(("a" = 1) OR ("b" = 2)) AND ("b" = 2)'),
+    ('("a" = 1) AND NOT ("b" = 2)', "AND", '"b" = 2', '(("a" = 1) AND NOT ("b" = 2)) AND ("b" = 2)'),
+    ('"a" = 1', "AND NOT", '"a" = 1', '("a" = 1) AND NOT ("a" = 1)'),
+    ("\"n\" = 'x AND y'", "AND", "\"n\" = 'x", "(\"n\" = 'x AND y') AND (\"n\" = 'x)"),    # literals stay whole
+    ('"a" = 1', "OR", '"a" = 2', '("a" = 1) OR ("a" = 2)'),
+])
+def test_combine_target_subset_adds_no_duplicate(old, operator, new, expected):
+    from core.filter.expression_combiner import combine_target_subset
+    assert combine_target_subset(old, operator, new) == expected

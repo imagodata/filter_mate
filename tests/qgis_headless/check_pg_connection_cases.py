@@ -16,7 +16,14 @@ FilterMate on PostGIS: three cases of the 2026-11-12 PostgreSQL fixes (QGIS GUI 
   compared with QGIS's own answer, then a geometric filter from the source filtered that way.
 - ``or_buffer``: a first filter with a buffer expression from a selection holding OR and BETWEEN,
   then a second one on another selection with the OR operator, to the same target and to a new one
-  (#368: the distant layers followed the previous subset of the source, its OR written as AND).
+  (#368: the distant layers followed the previous subset of the source, its OR written as AND). The
+  target filtered twice holds the union of both (2026-11-12: its geometric subset is combined, no
+  longer replaced).
+- ``and_buffer`` (2026-11-12): a first filter with a buffer expression to two targets, then a second
+  selection that only partly overlaps the first, with AND to one target and OR to the other: the
+  intersection and the union of both geometric filters (they replaced each other: three different
+  counts here), then AND NOT (still the whole layer minus the new selection). The buffer tables the
+  combined subsets read are still there, the layers readable.
 
 The source is made of 12 m squares (no target point ever lies on an edge), the targets of points on
 grids; each expected count is a SQL count, the buffers with 5 segments per quarter circle.
@@ -35,6 +42,7 @@ GNOME keyring prompt that QGIS waits for, and the script never runs.
 import faulthandler
 import logging
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -66,6 +74,8 @@ project = QgsProject.instance()
 SRC, TGT_A, TGT_B = 'fm_cs_src', 'fm_cs_tgt_a', 'fm_cs_tgt_b'
 FIRST_SELECTION = '"id" <= 50 OR "id" BETWEEN 201 AND 250'
 SECOND_SELECTION = '"id" BETWEEN 221 AND 250'
+OVERLAP_SELECTION = '"id" BETWEEN 231 AND 300'   # partly inside FIRST_SELECTION
+THIRD_SELECTION = '"id" BETWEEN 241 AND 260'
 PLAIN_SELECTION = '"id" <= 100'
 BUFFER_EXPRESSION = '"radius"'
 
@@ -158,6 +168,21 @@ def expected(target, selection, buffered):
                f"(SELECT 1 FROM b WHERE ST_Intersects(t.geom, b.g))")[0][0]
 
 
+def kept(selection, buffered=True):
+    """SQL condition on a target point ``t``: it intersects a selected square, or its buffer by its radius."""
+    shape = "ST_Buffer(s.geom, s.radius, 'quad_segs=5')" if buffered else 's.geom'
+    return f"EXISTS (SELECT 1 FROM public.{SRC} s WHERE ({selection}) AND ST_Intersects(t.geom, {shape}))"
+
+
+def count_where(target, condition):
+    return sql(f"SELECT count(*) FROM public.{target} t WHERE {condition}")[0][0]
+
+
+def expected_combined(target, first, second, operator):
+    """Target points kept by (first buffered filter) <operator> (second buffered filter)."""
+    return count_where(target, f"({kept(first)}) {operator} ({kept(second)})")
+
+
 def app():
     return qgis.utils.plugins[PACKAGE].app
 
@@ -242,17 +267,22 @@ def set_buffer_expression(active):
     d.filtering_buffer_property_changed()
 
 
-def set_combine_operator(operator):
+def set_combine_operator(operator, source_operator=None):
     d = dock()
     d.pushButton_checkable_filtering_current_layer_combine_operator.setChecked(operator is not None)
     if operator is not None:
-        index = {'AND': 0, 'AND NOT': 1, 'OR': 2}[operator]
-        d.comboBox_filtering_source_layer_combine_operator.setCurrentIndex(index)
-        d.comboBox_filtering_other_layers_combine_operator.setCurrentIndex(index)
+        indexes = {'AND': 0, 'AND NOT': 1, 'OR': 2}
+        d.comboBox_filtering_source_layer_combine_operator.setCurrentIndex(indexes[source_operator or operator])
+        d.comboBox_filtering_other_layers_combine_operator.setCurrentIndex(indexes[operator])
 
 
-def configure(selection, targets, buffered, operator=None):
-    """Selection, targets, Intersect, buffer and operator; returns a readiness test."""
+def configure(selection, targets, buffered, operator=None, source_operator=None):
+    """Selection, targets, Intersect, buffer and operators; returns a readiness test.
+
+    ``source_operator`` (the source layer's, ``operator`` by default): OR reads the new selection on
+    the whole source layer, so the targets follow it alone (AND would read it through the previous
+    subset of the source).
+    """
     d = dock()
 
     def apply():
@@ -264,7 +294,7 @@ def configure(selection, targets, buffered, operator=None):
         if targets:
             d.comboBox_filtering_geometric_predicates.setCheckedItems(['Intersect'])
         set_buffer_expression(buffered)
-        set_combine_operator(operator)
+        set_combine_operator(operator, source_operator)
 
     QTimer.singleShot(1500, apply)
     since = time.time()
@@ -430,13 +460,13 @@ def s_second_filter():
 
 def s_second_check():
     # The new target follows the second selection only, not the previous subset of the source (#368).
-    # The target filtered twice: a geometric subset is replaced whatever the operator, by design
-    # (FilterOrchestrator._determine_subset_strategy: only AND NOT is kept): OR would keep the first result.
+    # The target filtered twice holds the union of both geometric filters (2026-11-12, user decision:
+    # FilterOrchestrator._determine_subset_strategy combines them under OR and AND).
     second = expected(TGT_B, SECOND_SELECTION, buffered=True)
     previous = expected(TGT_B, f"({FIRST_SELECTION})", buffered=True)
-    check_count('second filter, OR: its geometric subset replaced', TGT_A,
-                expected(TGT_A, SECOND_SELECTION, buffered=True))
-    print(f"   (OR applied to the previous geometric subset would keep {STATE['first']})", flush=True)
+    check_count('second filter, OR: the union with its previous geometric subset', TGT_A,
+                expected_combined(TGT_A, FIRST_SELECTION, SECOND_SELECTION, 'OR'))
+    print(f"   (the second filter alone would keep {expected(TGT_A, SECOND_SELECTION, buffered=True)})", flush=True)
     check_count('second filter, OR (new target)', TGT_B, second)
     print(f"   (a new target that followed the previous subset of the source would hold {previous})", flush=True)
     print(f"   subset({SRC}) = {layer(SRC).subsetString()[:300]!r}", flush=True)
@@ -517,6 +547,100 @@ def s_native_geometric_check():
           f"count={total} expected={len(ids)} unreadable={problems}")
 
 
+# and_buffer: a second geometric filter combined with the first one, AND to one target, OR to the other
+
+def s_and_first_configure():
+    return configure(FIRST_SELECTION, (TGT_A, TGT_B), buffered=True)
+
+
+def s_and_first_check():
+    for name in (TGT_A, TGT_B):
+        check_count('first filter', name, expected(name, f"({FIRST_SELECTION})", buffered=True))
+
+
+def s_and_second_configure():
+    # The custom selection picks among the features the source shows: its subset (the first selection)
+    # is cleared, so that the whole second selection is the source of the targets.
+    layer(SRC).setSubsetString('')
+    return configure(OVERLAP_SELECTION, (TGT_A,), buffered=True, operator='AND', source_operator='OR')
+
+
+def s_and_second_check():
+    both = expected_combined(TGT_A, FIRST_SELECTION, OVERLAP_SELECTION, 'AND')
+    either = expected_combined(TGT_A, FIRST_SELECTION, OVERLAP_SELECTION, 'OR')
+    alone = expected(TGT_A, OVERLAP_SELECTION, buffered=True)
+    check('the fixture tells AND, OR and replace apart', len({both, either, alone}) == 3,
+          f"AND={both} OR={either} replace={alone}")
+    filtering = app().PROJECT_LAYERS[layer(SRC).id()]["filtering"]
+    print(f"   subset({SRC}) = {layer(SRC).subsetString()[:300]!r} operators="
+          f"{filtering.get('source_layer_combine_operator')!r}/{filtering.get('other_layers_combine_operator')!r}",
+          flush=True)
+    for table in sorted(set(re.findall(r'(fm_temp_buf_\w+)', layer(TGT_A).subsetString()))):
+        print(f"   {table}: {sql(f'SELECT count(*) FROM public.{table}')[0][0]} buffers", flush=True)
+    check_count('second filter, AND: the intersection with the previous geometric subset', TGT_A, both)
+    check(f"second filter, AND: {TGT_A} combines two EXISTS", layer(TGT_A).subsetString().count('EXISTS') >= 2,
+          layer(TGT_A).subsetString()[:160])
+
+
+def s_or_third_configure():
+    return configure(OVERLAP_SELECTION, (TGT_B,), buffered=True, operator='OR', source_operator='OR')
+
+
+def s_or_third_check():
+    either = expected_combined(TGT_B, FIRST_SELECTION, OVERLAP_SELECTION, 'OR')
+    print(f"   (replace: {expected(TGT_B, OVERLAP_SELECTION, buffered=True)}, "
+          f"AND: {expected_combined(TGT_B, FIRST_SELECTION, OVERLAP_SELECTION, 'AND')})", flush=True)
+    check_count('third filter, OR: the union with the previous geometric subset', TGT_B, either)
+
+
+def s_and_not_configure():
+    return configure(THIRD_SELECTION, (TGT_A,), buffered=True, operator='AND NOT', source_operator='OR')
+
+
+def s_and_not_check():
+    # Unchanged: AND NOT after a geometric filter writes NOT (new), the whole layer minus the new selection
+    check_count('fourth filter, AND NOT: the whole layer minus the new selection', TGT_A,
+                STATE['total'][TGT_A] - expected(TGT_A, THIRD_SELECTION, buffered=True))
+
+
+def s_plain_and_configure():
+    layer(SRC).setSubsetString('')  # the whole selection visible (see s_and_second_configure)
+    return configure(PLAIN_SELECTION, (TGT_A,), buffered=False, operator='AND', source_operator='OR')
+
+
+def s_plain_and_check():
+    # No buffer: the EXISTS on the source table (envelope prefilter, __source), combined under AND
+    # with the NOT (EXISTS ...) the AND NOT step left
+    print(f"   (replace: {expected(TGT_A, PLAIN_SELECTION, buffered=False)})", flush=True)
+    check_count('fifth filter without buffer, AND: the intersection with NOT (previous)', TGT_A,
+                count_where(TGT_A, f"NOT ({kept(THIRD_SELECTION)}) AND ({kept(PLAIN_SELECTION, False)})"))
+
+
+def s_plain_or_configure():
+    return configure(PLAIN_SELECTION, (TGT_B,), buffered=False, operator='OR', source_operator='OR')
+
+
+def s_plain_or_check():
+    print(f"   (replace: {expected(TGT_B, PLAIN_SELECTION, buffered=False)})", flush=True)
+    check_count('sixth filter without buffer, OR: the union with the two previous ones', TGT_B,
+                count_where(TGT_B, f"({kept(FIRST_SELECTION)}) OR ({kept(OVERLAP_SELECTION)}) "
+                                   f"OR ({kept(PLAIN_SELECTION, False)})"))
+
+
+def s_temp_objects_check():
+    # The buffer tables a combined subset reads are not dropped by the next filter
+    names = set()
+    for name in (TGT_A, TGT_B):
+        names |= set(re.findall(r'"?(fm_temp_buf_\w+)"?', layer(name).subsetString()))
+    missing = [table for table in sorted(names)
+               if sql(f"SELECT to_regclass('public.{table}') IS NULL")[0][0]]
+    check('the buffer tables the subsets read exist', names and not missing,
+          f"read={sorted(names)} missing={missing}")
+    for name in (TGT_A, TGT_B):
+        total, problems = count(name)
+        check(f"{name} readable", total is not None and not problems, f"count={total} unreadable={problems}")
+
+
 def s_finish():
     check('no Python error, no FilterMate critical message, no failed task', not STATE['errors'],
           '; '.join(STATE['errors'][:3]))
@@ -534,6 +658,12 @@ CASES = {
     + [s_native_geometric_configure, s_plain_filter, s_native_geometric_check],
     'or_buffer': [s_first_configure, s_first_filter, s_first_check, s_second_configure, s_second_filter,
                   s_second_check],
+    'and_buffer': [s_and_first_configure, s_first_filter, s_and_first_check,
+                   s_and_second_configure, s_second_filter, s_and_second_check, s_temp_objects_check,
+                   s_or_third_configure, s_second_filter, s_or_third_check, s_temp_objects_check,
+                   s_and_not_configure, s_second_filter, s_and_not_check, s_temp_objects_check,
+                   s_plain_and_configure, s_second_filter, s_plain_and_check,
+                   s_plain_or_configure, s_second_filter, s_plain_or_check, s_temp_objects_check],
 }
 if CASE not in CASES:
     print(f"FAIL   unknown FM_PG_CASE {CASE!r}: {', '.join(CASES)}", flush=True)

@@ -532,7 +532,7 @@ class ExpressionBuilder:
         self.task_parameters.get('param_source_schema')
 
         # Import filter chaining utilities
-        from .expression_combiner import detect_filter_chain_scenario
+        from .expression_combiner import detect_filter_chain_scenario, extract_exists_clauses, is_exists_conjunction
 
         # Detect the filter chaining scenario
         scenario, context = detect_filter_chain_scenario(
@@ -550,6 +550,15 @@ class ExpressionBuilder:
         # It is read like any selection below (its features, or PATH 3A); those
         # features are within the old subset, so the old EXISTS holds for them.
         chains_the_source_subset = self.task_parameters.get('source_selection_after_task') is None
+        # 2026-11-12: a target subset now combines its geometric filters, under OR
+        # ( EXISTS a ) OR ( EXISTS b ), or with a key list ( "pk" IN (...) ) AND
+        # ( EXISTS a ): the chain below keeps the EXISTS clauses only, joined by AND
+        # (the intersection, the key list lost). Unless the subset is nothing but
+        # EXISTS joined by AND, the source is read by its features (PATH 3A).
+        # Known limit (pre-existing): _with_negations puts a NOT that covers a
+        # conjunction of EXISTS, NOT ( EXISTS a AND EXISTS b ), in front of each one.
+        if chains_the_source_subset and source_subset and not is_exists_conjunction(source_subset):
+            chains_the_source_subset = False
         if scenario in ('spatial_chain', 'spatial_chain_with_custom') and chains_the_source_subset:
             # FILTER CHAINING MODE: Extract EXISTS from source_subset for combination
             logger.debug("🔗 FILTER CHAIN MODE: Extracting EXISTS clauses for chaining")
@@ -652,7 +661,15 @@ class ExpressionBuilder:
                     MAX_INLINE_FEATURES = 1000
                     MAX_EXPRESSION_LENGTH = 10000
 
-                if filtered_count > MAX_INLINE_FEATURES:
+                # 2026-11-12 (review): the WHERE reuse below reads what follows the
+                # first WHERE of the subset, a whole subset only when it is ONE EXISTS
+                # on __source. Anything else (several EXISTS, a key list or an OR
+                # beside it, an envelope prefilter, the __buffer alias of a buffer
+                # table, undefined outside its EXISTS) lost parts or wrote invalid
+                # SQL. Its features are read instead (exact; a long key list goes to
+                # a source selection MV, see _generate_fid_filter).
+                reusable_where = self._is_single_source_exists(source_subset, extract_exists_clauses)
+                if filtered_count > MAX_INLINE_FEATURES and reusable_where:
                     # OPTIMIZATION: Use original source_subset as-is for distant layers
                     # Instead of extracting all FIDs, we can create a subquery or temp table
                     logger.debug(f"   ⚡ OPTIMIZATION: {filtered_count} features > {MAX_INLINE_FEATURES} threshold")
@@ -813,6 +830,17 @@ class ExpressionBuilder:
                     logger.debug(f"   → Source has subset but not usable: '{source_subset[:100]}...'")
 
         return source_filter
+
+    @staticmethod
+    def _is_single_source_exists(subset: Optional[str], extract_exists_clauses) -> bool:
+        """Whether ``subset`` is one ``EXISTS (... AS __source ...)`` block and nothing else (2026-11-12)."""
+        if not subset or '__buffer' in subset.lower():
+            return False
+        clauses = extract_exists_clauses(subset)
+        if len(clauses) != 1 or str(clauses[0].get('alias', '')).lower() != '__source':
+            return False
+        from .expression_combiner import normalize_expression
+        return normalize_expression(subset) == normalize_expression(clauses[0]['sql'])
 
     def _parse_complex_where_clause(self, where_clause: str) -> dict:
         """

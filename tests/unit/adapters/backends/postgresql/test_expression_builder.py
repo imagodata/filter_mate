@@ -580,10 +580,17 @@ class TestApplyFilterQueueRouting:
 
     @pytest.mark.parametrize("operator, expected", [
         ("AND NOT", 'NOT (\nEXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b))\n)'),
-        ("AND", 'EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b))'),
+        # 2026-11-12 (user decision): combined under AND / OR, no longer replaced
+        ("AND", '(NOT (EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, c)))) AND '
+                '(EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b)))'),
+        ("OR", '(NOT (EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, c)))) OR '
+               '(EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b)))'),
     ])
     def test_and_not_after_a_replaced_spatial_filter_still_excludes(self, mock_pg_layer, operator, expected):
-        """2026-11-12 (review): the replaced spatial filter left the new selection itself under AND NOT."""
+        """2026-11-12 (review): the replaced spatial filter left the new selection itself under AND NOT.
+
+        2026-11-12 (user decision): only AND NOT replaces a previous spatial filter (by NOT (new));
+        AND and OR combine with it, the intersection and the union."""
         callback = MagicMock()
         builder = PostgreSQLExpressionBuilder(task_params={"_subset_queue_callback": callback})
         old = 'NOT (EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, c)))'

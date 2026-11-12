@@ -93,8 +93,20 @@ class _Builder:
     def _is_geometric_filter(self, subset):
         return "intersects(" in (subset or "").lower()
 
+    def _keeps_old_subset(self, old_subset, combine_operator):
+        # 2026-11-12: a spatial filter is combined under AND / OR, replaced under AND NOT only
+        if not old_subset or not combine_operator:
+            return False
+        return not (combine_operator == "AND NOT" and self._is_geometric_filter(old_subset))
+
+    def _listed_keys(self, layer, old_subset, combine_operator, key_count, through_old=False, complement=False):
+        return key_count
+
+    def _final_subset(self, layer, old_subset, combine_operator, key_filter, through_old, complement):
+        return self._combine_with_old_subset(old_subset, combine_operator, key_filter)
+
     def _combine_with_old_subset(self, old_subset, combine_operator, new_filter):
-        if old_subset and combine_operator and not self._is_geometric_filter(old_subset):
+        if self._keeps_old_subset(old_subset, combine_operator):
             return f"({old_subset}) {combine_operator} ({new_filter})"
         if combine_operator == "AND NOT":  # no filter, or a spatial one replaced (the builder's rule)
             return f"NOT (\n{new_filter}\n)"
