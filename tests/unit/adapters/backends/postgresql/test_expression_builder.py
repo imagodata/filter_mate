@@ -1257,9 +1257,14 @@ class TestSourceTargetSrid:
     def test_dynamic_buffer_of_a_geographic_source_is_in_metres(self, monkeypatch):
         b = TestDynamicBufferTable._builder()
         b.task_params["infos"] = {"layer_crs_authid": "EPSG:4326"}
-        constants = importlib.import_module("filtermate_core.constants")
+        # The core package the builder really imported (``filtermate_core``, or
+        # ``filter_mate.filtermate_core`` when the checkout is named ``filter_mate``, as in CI).
+        core_module = next(c.__module__ for c in type(b).__mro__
+                           if c.__module__.endswith("filtermate_core.sql.postgresql.expression_builder"))
+        core = core_module[:-len("sql.postgresql.expression_builder")]
+        constants = importlib.import_module(core + "constants")
         monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
-        executor = importlib.import_module("filtermate_core.sql.postgresql.qgis_expression")
+        executor = importlib.import_module(core + "sql.postgresql.qgis_expression")
         monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
         cursor = _RecordingCursor()
         utils = sys.modules["filter_mate.infrastructure.utils"]
