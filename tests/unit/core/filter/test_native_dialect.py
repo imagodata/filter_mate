@@ -250,9 +250,19 @@ def test_postgresql_real_arithmetic_runs_in_double_precision():
 
 
 def test_postgresql_like_functions_and_case():
-    assert full(binary('NOT ILIKE', col('nom'), lit('r%')), POSTGRESQL) == '"nom" NOT ILIKE \'r%\''
+    assert full(binary('NOT LIKE', col('nom'), lit('R%')), POSTGRESQL) == '"nom" NOT LIKE \'R%\''
+    # ILIKE follows the locale of the database: 'ſ' is not 's' there, 'İ' is 'i' in UTF-8 (not in QGIS)
+    assert full(binary('NOT ILIKE', col('nom'), lit('r%')), POSTGRESQL) == '"nom" NOT SIMILAR TO \'[rR]%\''
+    assert full(binary('ILIKE', col('nom'), lit('Ks_1.%')), POSTGRESQL) == (
+        '"nom" SIMILAR TO \'[kKK][sSſ]_1.%\'')
+    assert 'not ASCII' in refused(binary('ILIKE', col('nom'), lit('é%')), POSTGRESQL)
+    assert 'metacharacters' in refused(binary('ILIKE', col('nom'), lit('a|b')), POSTGRESQL)
     # parentheses kept before a function: the sanitizer reads "COALESCE(...) GLOB" as a display expression
-    assert full(binary('=', function('upper', col('nom')), lit('ROUTE')), POSTGRESQL) == '(upper("nom") = \'ROUTE\')'
+    assert full(binary('>', function('floor', col('ratio')), lit(2)), POSTGRESQL) == (
+        '(floor(CAST("ratio" AS double precision)) > 2)')
+    # lower() / upper() follow the locale of the database ('É' left as it is in a C database)
+    assert refused(binary('=', function('upper', col('nom')), lit('ROUTE')), POSTGRESQL)
+    assert refused(binary('=', function('lower', col('nom')), lit('été')), POSTGRESQL)
     node = binary('=', function('if', binary('>', col('pop'), lit(5)), lit('a'), col('nom')), lit('a'))
     assert full(node, POSTGRESQL) == '(CASE WHEN ("pop" > 5) THEN \'a\' ELSE "nom" END) = \'a\''
     assert refused(binary('=', function('upper', col('nom')), lit('X')), SQLITE)

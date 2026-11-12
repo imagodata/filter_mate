@@ -15,7 +15,9 @@ QGIS adapter), and only where the source gives the answer QGIS gives:
 - text ordering (``<``, ``>``) follows a collation: never written;
 - PostgreSQL: ``/`` is a float division in QGIS and NULL on a zero divisor
   (PostgreSQL truncates integers and raises), an arithmetic on reals is run in
-  double precision as QGIS runs it (``numeric`` is exact);
+  double precision as QGIS runs it (``numeric`` is exact); ``ILIKE`` folds
+  case by the locale of the database, so it is written ``SIMILAR TO`` with a
+  class per letter (as for SQLite below), for ASCII patterns only;
 - SQLite: a column may declare a collation (NOCASE, RTRIM), so the equality
   of texts is written ``COLLATE BINARY``; ``LIKE`` ignores the case of ASCII
   letters and follows a pragma, so LIKE and ILIKE are both written with
@@ -273,12 +275,11 @@ class _Writer:
             # a double in QGIS (no overflow on the smallest integer)
             real = 'double precision' if self.dialect == POSTGRESQL else 'REAL'
             return '{}(CAST({} AS {}))'.format(name, text, real), REAL
-        if name in ('lower', 'upper') and count == 1 and types[0] == TEXT and self.dialect == POSTGRESQL:
-            # SQLite folds ASCII letters only
-            return '{}({})'.format(name, text), TEXT
         if name in ('floor', 'ceil') and count == 1 and types[0] in _NUMERIC and self.dialect == POSTGRESQL:
             return '{}(CAST({} AS double precision))'.format(name, text), REAL
         # length(): QGIS counts UTF-16 code units, the sources count characters.
+        # lower() / upper(): Unicode in QGIS, ASCII letters only in SQLite, the locale of the database in
+        # PostgreSQL (a C database leaves 'É' as it is, a UTF-8 one folds 'İ' to 'i').
         raise Unsupported('Function not translated: {}'.format(name))
 
     # -- predicates -------------------------------------------------------------
@@ -404,8 +405,20 @@ class _Writer:
         negated = node.value.startswith('NOT ')
         insensitive = node.value.endswith('ILIKE')
         if self.dialect == POSTGRESQL:
-            right, _ = self._literal(pattern)  # refuses a backslash: no escape to translate
-            return '({} {} {})'.format(left, node.value, right)
+            if not insensitive:
+                right, _ = self._literal(pattern)  # refuses a backslash: no escape to translate
+                return '({} {} {})'.format(left, node.value, right)
+            # ILIKE folds case by the locale of the database ('ſ' is not 's', 'İ' is 'i' in UTF-8):
+            # QGIS's own case-insensitive match is written as SIMILAR TO with a class per letter.
+            if not pattern.isascii() or '\\' in pattern:
+                raise Unsupported('An ILIKE pattern that is not ASCII or holds an escape')
+            if any(char in pattern for char in '|*+?{}()[]'):
+                raise Unsupported('An ILIKE pattern holding SIMILAR TO metacharacters')
+            similar = ''.join(
+                '[' + char.lower() + char.upper() + _OTHER_CASES.get(char.lower(), '') + ']'
+                if char.isalpha() else char for char in pattern)
+            right, _ = self._literal(similar)
+            return '({} {}SIMILAR TO {})'.format(left, 'NOT ' if negated else '', right)
         if self.dialect == SQLITE:
             if not pattern.isascii() or '\\' in pattern:
                 raise Unsupported('A LIKE pattern that is not ASCII or holds an escape')

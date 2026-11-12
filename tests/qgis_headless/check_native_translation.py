@@ -117,8 +117,8 @@ CASES = [
     ('if("pop" > 5, \'grand\', \'petit\') = \'petit\'', DB),
     ('CASE WHEN "pop" > 5 THEN 1 WHEN "pop" > 2 THEN 2 END = 2', DB),
     ('CASE WHEN "nom" LIKE \'R%\' THEN "pop" ELSE "id" END > 6', DB),
-    ('upper("nom") = \'ROUTE\'', ('postgresql',)),
-    ('lower("nom") = \'été\'', ('postgresql',)),
+    ('upper("nom") = \'ROUTE\'', ()),             # the locale of the database: left to QGIS
+    ('lower("nom") = \'été\'', ()),
     ('floor("ratio") = 2', ('postgresql',)),
     ('ceil("ratio") = 2', ('postgresql',)),
     ('coalesce("nom", \'\') LIKE \'R%\'', DB),         # the sanitizer took COALESCE(...) GLOB for a display
@@ -200,7 +200,7 @@ def postgres_layers(dsn):
     connection = QgsProviderRegistry.instance().providerMetadata('postgres').createConnection(dsn, {})
     layers = []
     for table, pop_type, ratio_type in (('fm_native_a', 'integer', 'double precision'),
-                                        ('fm_native_b', 'bigint', 'numeric(12,6)')):
+                                        ('fm_native_b', 'bigint', 'numeric(24,9)')):
         values = ', '.join('({}, {})'.format(
             ', '.join(sql_literal(value) for value in row),
             f'ST_SetSRID(ST_MakePoint({700000 + 10 * index}, 6600000), 2154)') for index, row in enumerate(ROWS))
