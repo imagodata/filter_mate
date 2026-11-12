@@ -718,6 +718,31 @@ Do you agree?</source>
         <translation>Спряно преди стъпка {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Жива рецепта: {} (източникът ѝ е запазен)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Жива рецепта: {} се изпълнява отново, когато промените в {} бъдат запазени.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} вече не се изпълнява сама.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Жива рецепта: {} ще се изпълнява сама само на стандартното или автономното ниво на агента.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Източник на жива рецепта беше запазен, докато FilterMate беше зает: изпълнете рецептата отново от Още &gt; Рецепти.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Запази като рецепта</translation>
@@ -1056,6 +1081,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Изпълни без модела</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Изпълни отново при запазване на източника</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Невъзможно: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Целите следват източника: всеки път, когато промените в изходен слой на тази рецепта бъдат запазени, рецептата се изпълнява отново сама, като един ход, който можете да отмените.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · жива</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

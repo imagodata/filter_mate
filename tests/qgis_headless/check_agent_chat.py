@@ -1534,10 +1534,85 @@ def check_recipes(chat, provider, settings, ask, layer):
     settings()
     layer.setSubsetString("")
 
+    check_live_recipes(chat, panel, layer)
     write_recipes([])
     chat._refresh_recipes()
     layer.setSubsetString("")
     panel.clear_thread()
+
+
+def check_live_recipes(chat, panel, layer):
+    """A live recipe: its cross filter runs again by itself when the edits of its source are saved."""
+    from qgis.core import QgsFeature, QgsGeometry, QgsProject, QgsRectangle, QgsVectorLayer
+    from filter_mate.adapters.agent.recipes_store import read_recipes, write_recipes
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+
+    zones = QgsVectorLayer("Polygon?crs=EPSG:2154&field=nom:string", "zones", "memory")
+    zone = QgsFeature(zones.fields())
+    zone.setGeometry(QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650010.5, 6860001.0)))  # 10 communes
+    zone.setAttributes(["centre"])
+    zones.dataProvider().addFeatures([zone])
+    QgsProject.instance().addMapLayer(zones)
+    layer.setSubsetString("")
+    cross = {"source_layer": "zones", "target_layers": ["communes"], "predicates": ["Intersect"], "selected_only": False}
+    write_recipes([{"id": "r1", "name": "Communes des zones", "request": "", "steps": [
+        {"tool": "cross_filter", "arguments": cross, "label": "cross"}]},
+        {"id": "r2", "name": "Export", "request": "", "steps": [
+            {"tool": "export_layers", "arguments": {"layers": ["communes"]}, "label": "export"}]}])
+    chat._refresh_recipes()
+    check("live: offered for a recipe with a cross filter, not for an export", panel.recipe_live["r1"].isEnabled()
+          and not panel.recipe_live["r2"].isEnabled() and not panel.recipe_live["r1"].isChecked())
+    panel.recipe_live["r1"].setChecked(True)
+    check("live: turned on from the menu, kept in the project, its source followed",
+          read_recipes()[0].get("live") is True and zones.id() in chat.followed_layer_ids(), chat.followed_layer_ids())
+    check("live: nothing runs before a save", layer.subsetString() == "", layer.subsetString())
+
+    zones.startEditing()
+    zones.changeGeometry(next(zones.getFeatures()).id(),
+                         QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650020.5, 6860001.0)))  # 20 communes
+    zones.commitChanges()
+    ran = wait(lambda: layer.subsetString() != "" and layer.featureCount() == 20, 15)
+    check("live: the save of the source filters the target again, by itself", ran,
+          (layer.subsetString()[:120], layer.featureCount()))
+    applied = [turn for turn in TurnCheckpoint.turns() if turn.get("applied")]
+    check("live: one turn of the history, named", applied and applied[-1]["request"].startswith("Live recipe"),
+          applied[-1:] if applied else None)
+
+    zones.startEditing()
+    zones.changeGeometry(next(zones.getFeatures()).id(),
+                         QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650005.5, 6860001.0)))  # 5 communes
+    zones.commitChanges()
+    check("live: and again at the next save", wait(lambda: layer.featureCount() == 5, 15), layer.featureCount())
+
+    panel.recipe_live["r1"].setChecked(False)
+    check("live: turned off, the source is no longer followed", not chat.followed_layer_ids()
+          and "live" not in read_recipes()[0], chat.followed_layer_ids())
+    zones.startEditing()
+    zones.changeGeometry(next(zones.getFeatures()).id(),
+                         QgsGeometry.fromRect(QgsRectangle(650000.0, 6859999.0, 650030.5, 6860001.0)))
+    zones.commitChanges()
+    wait(lambda: False, 2)
+    check("live: off, a save changes nothing", layer.featureCount() == 5, layer.featureCount())
+
+    # A project made by someone else may say a recipe is live: it runs by itself only once the user ticked it here.
+    write_recipes([{"id": "r1", "name": "Communes des zones", "request": "", "live": True, "steps": [
+        {"tool": "cross_filter", "arguments": cross, "label": "cross"}]}])
+    chat._refresh_recipes()
+    check("live: a live flag from the project file alone follows nothing, and shows unticked",
+          not chat.followed_layer_ids() and not panel.recipe_live["r1"].isChecked(), chat.followed_layer_ids())
+    panel.recipe_live["r1"].setChecked(True)
+    check("live: ticked here, followed", zones.id() in chat.followed_layer_ids())
+    from dataclasses import replace
+    from filter_mate.adapters.agent.settings import load_settings, save_settings
+    save_settings(replace(load_settings(), autonomy="advisor"))
+    chat._refresh_recipes()
+    check("live: nothing runs alone at the advisor level", not chat.followed_layer_ids())
+    save_settings(replace(load_settings(), autonomy="standard"))
+    chat._refresh_recipes()
+    QgsProject.instance().removeMapLayer(zones.id())
+    check("live: a source removed from the project is no longer followed", not chat.followed_layer_ids(),
+          chat.followed_layer_ids())
+    layer.setSubsetString("")
 
 
 def check_steps(chat, provider, settings, ask, layer):

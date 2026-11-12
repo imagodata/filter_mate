@@ -718,6 +718,31 @@ Do you agree?</source>
         <translation>已在第 {} 步之前停止。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>实时配方：{}（其来源已保存）</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>实时配方：{} 会在 {} 的编辑保存时再次运行。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} 不再自动运行。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>实时配方：{} 仅在代理的标准或自主级别下才会自动运行。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>FilterMate 忙碌时，实时配方的来源被保存了：请从 更多 &gt; 配方 中再次运行该配方。</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>保存为配方</translation>
@@ -1056,6 +1081,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>不使用模型运行</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>来源保存时再次运行</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>无法执行：{}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>目标跟随来源：每当此配方的来源图层的编辑被保存，配方就会自动再次运行，作为可撤销的一轮。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · 实时</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

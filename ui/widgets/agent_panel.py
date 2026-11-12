@@ -225,6 +225,7 @@ class AgentPanel(QFrame):
     recipe_save_requested = pyqtSignal()
     recipe_run_requested = pyqtSignal(str)
     recipe_remove_requested = pyqtSignal(str)
+    recipe_live_toggled = pyqtSignal(str, bool)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -665,7 +666,7 @@ class AgentPanel(QFrame):
         menu = self.recipes_menu
         for submenu in getattr(self, "_recipe_menus", ()):  # clear() leaves the submenus alive: they would pile up
             submenu.deleteLater()
-        self._recipe_menus, self.recipe_actions, self.recipe_lines = [], {}, {}
+        self._recipe_menus, self.recipe_actions, self.recipe_lines, self.recipe_live = [], {}, {}, {}
         menu.clear()
         self.save_recipe_action = menu.addAction(_tr("Save the last request as a recipe…"))
         self.save_recipe_action.setEnabled(self._can_save_recipe)
@@ -677,7 +678,10 @@ class AgentPanel(QFrame):
         menu.addSeparator()
         for recipe in self._recipes:
             # "&" would make a shortcut of the next letter; the name comes from the project file.
-            entry = menu.addMenu(_tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"])).replace("&", "&&"))
+            title = _tr("{} ({} steps)").format(recipe["name"], len(recipe["steps"]))
+            if recipe.get("live"):
+                title = _tr("{} · live").format(title)
+            entry = menu.addMenu(title.replace("&", "&&"))
             self._recipe_menus.append(entry)
             for number, step in enumerate(recipe["steps"][:MAX_RECIPE_STEPS_SHOWN], 1):
                 line = entry.addAction(f"{number}. {step['label']}".replace("&", "&&"))
@@ -689,6 +693,17 @@ class AgentPanel(QFrame):
             entry.addSeparator()
             run = entry.addAction(_tr("Run without the model"))
             run.triggered.connect(lambda _checked=False, recipe_id=recipe["id"]: self.recipe_run_requested.emit(recipe_id))
+            live = entry.addAction(_tr("Run again when its source is saved"))
+            live.setCheckable(True)
+            live.setChecked(bool(recipe.get("live")))
+            problem = recipe.get("live_problem", "")
+            live.setEnabled(not problem or bool(recipe.get("live")))
+            live.setToolTip(_tr("Not possible: {}").format(problem) if problem else _tr(
+                "The targets follow the source: each time the edits of a source layer of this recipe are saved, the "
+                "recipe runs again by itself, as one turn you can undo."))
+            live.toggled.connect(lambda on, recipe_id=recipe["id"]: self.recipe_live_toggled.emit(recipe_id, on))
+            self.recipe_live[recipe["id"]] = live
+            entry.setToolTipsVisible(True)
             remove = entry.addAction(_tr("Remove"))
             remove.triggered.connect(
                 lambda _checked=False, recipe_id=recipe["id"]: self.recipe_remove_requested.emit(recipe_id))

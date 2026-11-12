@@ -1,20 +1,20 @@
 # Project Memory
 _Auto-maintained by project agent_
 
-## [2026-11-12] CHECKPOINT — tests PostGIS de bout en bout à faire (correctifs PG #355 / #357 / #358 / #363 / #368)
-Référence : `main` à `e646f291`. Ces correctifs sont vérifiés par la suite unitaire (8228 passés, seul échec connu
-`test_coverage_raster_target::test_canceled_selection_is_not_read`, antérieur) et des revues Opus, **jamais en QGIS
-sur PostGIS** : le 12/11, Docker Desktop n'a jamais démarré, pas de PostgreSQL local, `sudo` sous mot de passe.
-Cause du signalement client (« Task failed: Tâche échouée », source PG « Zones MRO » → 8 couches, Intersect) non
-confirmée : demander son `<plugin>/logs/filtermate.log` (« Callback execution failed: … »).
-À lancer avant de publier une version, dès qu'un PostGIS est disponible :
-1. `tests/qgis_headless/check_pg_buffer_expression.py` avec `FM_PG_SRC_COUNT=8000` puis `12000` (commande docker en
-   tête du fichier) : la cible doit compter autant d'entités que le comptage SQL (buffer `quad_segs=5`). Jamais
-   exécuté : corriger d'abord ce qui casse dans le scénario lui-même.
-2. `tests/qgis_headless/run_postgis_check.py` (vues matérialisées, connexions, tâches annulées).
-3. À écrire : couche via `service=` (pg_service.conf + `PGSERVICEFILE`) puis filtre géométrique multi-couches (#357) ;
-   couche dont psycopg2 ne peut pas se connecter (mot de passe non enregistré) : couches distantes filtrées, erreur
-   claire sinon (#355) ; deuxième filtre avec buffer par expression et opérateur OR sur une autre sélection (#368).
+## [2026-11-12] Correctifs PG #355 / #357 / #358 / #363 / #368 vérifiés en QGIS sur PostGIS (Docker)
+Contrôles de bout en bout passés le 12/11 au soir, mêmes résultats en QGIS 4.2.3 et 3.44.15 (PostGIS 3.4 `postgis/postgis:16-3.4`, réseau
+`fm_pg_net`, conteneur `fm_pg`) : `check_pg_buffer_expression.py` 5/5 à 8 000 et 12 000 entités (3 497 = SQL),
+`run_postgis_check.py` 23/23, nouveau `check_pg_connection_cases.py` (`FM_PG_CASE`) : `service` 6/6 (connexion
+psycopg2 `service=fm_svc`), `no_psycopg2` 10/10 (psycopg2.connect refusé : Intersect, unfilter, buffer expression),
+`or_buffer` 7/7 (nouvelle cible = nouvelle sélection, pas l'ancien subset de la source).
+- **Lancer** : `docker run --init ...` obligatoire pour les contrôles GUI (`xvfb-run` en PID 1 attend Xvfb sans fin,
+  QGIS ne démarre jamais, journal vide) ; avec `qgis/qgis:ltr` (3.44) ajouter `-e DBUS_SESSION_BUS_ADDRESS=disabled:`
+  (sinon invite du trousseau GNOME, QGIS attend). Commandes en tête de chaque script.
+- **Limite constatée, voulue par le code** : un 2e filtre géométrique avec OR sur une cible déjà filtrée
+  géométriquement **remplace** son subset (`FilterOrchestrator._determine_subset_strategy`, seul AND NOT gardé,
+  « Cannot nest geometric filters ») : 522 au lieu de 1 705. Décision produit à prendre pour OR.
+- Signalement client (« Task failed », source « Zones MRO » → 8 couches) : cause toujours non confirmée, son
+  `filtermate.log` n'est pas reçu.
 
 ## [2026-11-12] Cibles raster / nuage d'une source vecteur : options dédiées ; fond web grisé dans la liste
 Décision utilisateur : `CROSS_FILTER.vector_source_raster_targets` / `vector_source_point_cloud_targets` (on par
@@ -113,8 +113,11 @@ Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l
 (`filtermate_core/filter/native_dialect.py`, pur ; adaptateur `adapters/qgis/native_filter_translation.py`), et
 seulement là où la source rend la réponse de QGIS. FULL → ce SQL remplace l'ancienne réécriture par regex ; sinon
 ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPackage, SpatiaLite) et OGR SQL
-(Shapefile, GeoJSON, FlatGeobuf, MapInfo) ; PostgreSQL écrit mais pas appliqué (`APPLIED_DIALECTS`) tant que
-`tests/qgis_headless/check_native_translation.py` n'a pas tourné sur un vrai PostGIS.
+(Shapefile, GeoJSON, FlatGeobuf, MapInfo) ; PostgreSQL écrit mais pas appliqué (`APPLIED_DIALECTS`) : le
+contrôle `check_native_translation.py` a tourné sur PostGIS le 12/11 (0 échec, QGIS 4.2.3 et 3.44.15, base UTF-8
+et base en locale C) après deux corrections : ILIKE écrit `SIMILAR TO` avec une classe par lettre (`ſ`, `İ` : ILIKE
+suit la locale de la base) et `lower()` / `upper()` plus traduits en PostgreSQL (casse de la locale). Activation à
+décider.
 - **Preuve** : ce contrôle évalue l'expression dans QGIS entité par entité et compare au subset traduit. Sans Docker,
   il tourne dans le QGIS Windows : `powershell.exe -Command "& 'C:\Program Files\QGIS 3.44.6\bin\python-qgis.bat'
   '\\wsl.localhost\Ubuntu\home\simon\projects\filter_mate\tests\qgis_headless\check_native_translation.py'"`.
@@ -131,7 +134,7 @@ ancien chemin inchangé (dont le repli liste d'ids). Appliqué à SQLite (GeoPac
 - **Replis qui relisent l'expression en QGIS** (`EXPRESSION_FALLBACK` OGR / Spatialite) : la tâche garde
   `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
   COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
-- **Reste** : PostgreSQL, fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
+- **Reste** : activer PostgreSQL, fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
   `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin. Les 5 échecs de
   la suite complète (expression_builder PG / Spatialite, coverage_raster_target) existent sur `main` ; les lancer
   dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :

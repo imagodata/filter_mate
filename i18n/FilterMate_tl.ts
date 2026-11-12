@@ -718,6 +718,31 @@ Sumasang-ayon ka ba?</translation>
         <translation>Itinigil bago ang hakbang {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Live na recipe: {} (na-save ang source nito)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Live na recipe: Tatakbo ulit ang {} kapag na-save ang mga pag-edit ng {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>Hindi na tumatakbo nang kusa ang {}.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Live na recipe: tatakbo nang kusa ang {} sa standard o autonomous na antas lamang ng agent.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Na-save ang source ng isang live na recipe habang abala ang FilterMate: patakbuhin ulit ang recipe mula sa Higit pa &gt; Mga recipe.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>I-save bilang recipe</translation>
@@ -1056,6 +1081,26 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Patakbuhin nang walang model</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Patakbuhin ulit kapag na-save ang source nito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Hindi posible: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Sinusundan ng mga target ang source: tuwing na-save ang mga pag-edit ng isang source layer ng recipe na ito, kusang tatakbo ulit ang recipe, bilang isang turn na maaari mong i-undo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · live</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

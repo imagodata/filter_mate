@@ -718,6 +718,31 @@ Do you agree?</source>
         <translation>ከደረጃ {} በፊት ቆሟል።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>ቀጥተኛ ሬሲፒ፦ {} (ምንጩ ተቀምጧል)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>ቀጥተኛ ሬሲፒ፦ {} እንደገና ይሰራል፣ የ{} አርትዖቶች ሲቀመጡ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} ከዚህ በኋላ በራሱ አይሰራም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>ሕያው የምግብ አሰራር፦ {} በራሱ የሚሠራው በወኪሉ መደበኛ ወይም ራስ-ገዝ ደረጃ ብቻ ነው።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>የቀጥተኛ ሬሲፒ ምንጭ FilterMate ሥራ ላይ ሳለ ተቀምጧል፦ ሬሲፒውን ከተጨማሪ &gt; ሬሲፒዎች እንደገና ያሂዱ።</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>እንደ ሬሲፒ አስቀምጥ</translation>
@@ -1056,6 +1081,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>ያለ ሞዴል አሂድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>ምንጩ ሲቀመጥ እንደገና አሂድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>አይቻልም፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>ዒላማዎቹ ምንጩን ይከተላሉ፦ የዚህ ሬሲፒ ምንጭ ንብርብር አርትዖቶች በተቀመጡ ቁጥር ሬሲፒው በራሱ እንደገና ይሰራል፣ መቀልበስ በሚችሉት አንድ ዙር።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · ቀጥታ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

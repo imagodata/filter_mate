@@ -157,9 +157,11 @@ def _place(project: QgsProject, layer_id: str) -> Place:
 
 
 def _group(project: QgsProject, path: Sequence[str]) -> Any:
+    """The group at ``path`` from the root (direct children only, as the path was read), else the root."""
+    from ..public_api.layer_tree import child_group
     group = project.layerTreeRoot()
     for name in path:
-        child = group.findGroup(name)
+        child = child_group(group, name)
         if child is None:
             return project.layerTreeRoot()
         group = child

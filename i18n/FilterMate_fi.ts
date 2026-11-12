@@ -718,6 +718,31 @@ Hyväksytkö?</translation>
         <translation>Pysäytetty ennen vaihetta {}.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Elävä resepti: {} (sen lähde tallennettiin)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Elävä resepti: {} ajetaan uudelleen, kun kohteen {} muokkaukset tallennetaan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} ei enää ajeta itsestään.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Elävä resepti: {} käynnistyy itsestään vain agentin vakio- tai itsenäisellä tasolla.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Elävän reseptin lähde tallennettiin FilterMaten ollessa kiireinen: aja resepti uudelleen kohdasta Lisää &gt; Reseptit.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Tallenna reseptiksi</translation>
@@ -1056,6 +1081,26 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Aja ilman mallia</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Aja uudelleen, kun sen lähde tallennetaan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Ei mahdollista: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>Kohteet seuraavat lähdettä: aina kun tämän reseptin lähdetason muokkaukset tallennetaan, resepti ajetaan uudelleen itsestään yhtenä vuorona, jonka voit kumota.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · elävä</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>

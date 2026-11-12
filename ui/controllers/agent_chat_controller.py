@@ -19,7 +19,7 @@ from ...adapters.agent.settings import (
 )
 from ...adapters.agent import free_quota, transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
-from ...adapters.agent.recipes_store import read_recipes, write_recipes
+from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, abort_active, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
@@ -36,8 +36,9 @@ from ...core.agent.permissions import (
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
 from ...core.agent.recipes import (
-    MAX_NAME as RECIPE_MAX_NAME, RecipeError, find as find_recipe, plain as recipe_plain, recipes_block,
-    saved as recipe_saved, steps_of as recipe_steps, summary as recipe_summary, without as recipe_without,
+    MAX_NAME as RECIPE_MAX_NAME, RecipeError, find as find_recipe, followed_sources, live_problem,
+    plain as recipe_plain, recipes_block, saved as recipe_saved, steps_of as recipe_steps, summary as recipe_summary,
+    with_live, without as recipe_without,
 )
 from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
@@ -69,6 +70,9 @@ from ..widgets.agent_panel import (
 from ..widgets.agent_widgets_strip import number_text
 
 logger = logging.getLogger("FilterMate.agent")
+
+LIVE_DELAY_MS = 800  # a burst of saves (several layers, or the edits of a script) runs a live recipe once
+LIVE_MAX_TRIES = 375  # while FilterMate or the chat works, or a target is edited: about five minutes, then the user is told
 
 # What reads attribute values: not offered when the user chose not to share them.
 VALUES_TOOLS = ("field_values", "layer_statistics", "sample_features", "identify_at")
@@ -121,6 +125,15 @@ class AgentChatController(QObject):
         self._last_steps, self._last_steps_request = [], ""
         self._replaying = False
         self._replay_stop = False
+        # Live recipes: the source layers followed (layer id -> (layer, slot)), the ones saved since the last run, and
+        # a timer that lets a burst of saves end, and waits while something else works.
+        self._live_sources = {}
+        self._live_pending = set()
+        self._live_tries = 0
+        self._live_timer = QTimer(self)
+        self._live_timer.setSingleShot(True)
+        self._live_timer.setInterval(LIVE_DELAY_MS)
+        self._live_timer.timeout.connect(self._run_live)
         self._ask_user = ask_user or (lambda title, text: ask_plain(parent_widget, title, text))
         if ask_choice is None:  # a yes / no given alone answers the questions with three answers too
             ask_choice = ((lambda title, text: ANSWER_ONCE if self._ask_user(title, text) else ANSWER_NO) if ask_user
@@ -170,6 +183,7 @@ class AgentChatController(QObject):
         self.panel.recipe_save_requested.connect(self._on_save_recipe)
         self.panel.recipe_run_requested.connect(self.run_recipe)
         self.panel.recipe_remove_requested.connect(self._on_remove_recipe)
+        self.panel.recipe_live_toggled.connect(self._on_live_toggled)
         self._restore_transcript()
         self._refresh_history()
         self._mcp = AgentMcpBridge(self, self)
@@ -189,6 +203,8 @@ class AgentChatController(QObject):
         QgsProject.instance().cleared.connect(self._on_project_cleared)
         QgsProject.instance().readProject.connect(self._on_project_read)
         QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
+        QgsProject.instance().layersAdded.connect(self._on_layers_changed)
+        QgsProject.instance().layersRemoved.connect(self._on_layers_changed)
 
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
@@ -231,9 +247,13 @@ class AgentChatController(QObject):
         for layer in self._stat_layers.values():
             self._follow(layer, False)
         self._stat_layers = {}
+        self._follow_sources([])
+        self._live_timer.stop()
 
     def _disconnect_project(self) -> None:
-        for signal, handler in ((QgsProject.instance().cleared, self._on_project_cleared),
+        for signal, handler in ((QgsProject.instance().layersAdded, self._on_layers_changed),
+                                (QgsProject.instance().layersRemoved, self._on_layers_changed),
+                                (QgsProject.instance().cleared, self._on_project_cleared),
                                 (QgsProject.instance().readProject, self._on_project_read),
                                 (QgsProject.instance().fileNameChanged, self._on_file_name_changed)):
             try:
@@ -375,6 +395,9 @@ class AgentChatController(QObject):
             self._abandoned = True
         self._last_request = ""
         self._request_calls, self._last_steps, self._last_steps_request = [], [], ""
+        self._live_timer.stop()  # a save asked for on closing must not run a recipe on the next project
+        self._live_pending.clear()
+        self._follow_sources([])
         if self._engine is not None:
             self._engine.cancel()
         self._journal_later = []  # what other applications did in the closed project, kept for its thread
@@ -617,7 +640,161 @@ class AgentChatController(QObject):
         shown = [dict(recipe, steps=[dict(step, label=self.describe_call(
             ToolCallPart("", step["tool"], dict(step["arguments"])))) for step in recipe["steps"]])
             for recipe in recipes]
+        for recipe in shown:  # ticked: live in the project and approved here; else a project only asks for it
+            recipe["live_problem"] = live_problem(recipe)
+            recipe["live"] = self._armed(recipe) or (bool(recipe.get("live")) and self._approved(recipe))
         self.panel.set_recipes(shown, bool(self._last_steps))
+        self._follow_sources([recipe for recipe in recipes if self._armed(recipe)])
+
+    # --- live recipes -------------------------------------------------------------
+
+    @staticmethod
+    def _source_layer(reference: str):
+        """The layer a step names, by id first, then by name when one layer only has it."""
+        project = QgsProject.instance()
+        layer = project.mapLayer(reference)
+        if layer is None:
+            named = project.mapLayersByName(reference)
+            layer = named[0] if len(named) == 1 else None
+        return layer
+
+    def _armed(self, recipe) -> bool:
+        """A live recipe runs by itself only once the user ticked it here, for these steps, at the usual level or more:
+        a project made by someone else may say it is live, it is not enough; advisor and careful run nothing alone."""
+        if not recipe.get("live") or load_settings().autonomy not in (STANDARD, AUTONOMOUS):
+            return False
+        try:
+            return live_approved(transcript_store.project_key(), recipe)
+        except Exception:
+            return False
+
+    @staticmethod
+    def _approved(recipe) -> bool:
+        try:
+            return live_approved(transcript_store.project_key(), recipe)
+        except Exception:
+            return False
+
+    def _armed_recipes(self):
+        try:
+            return [recipe for recipe in read_recipes() if self._armed(recipe)]
+        except Exception:  # the project is closing
+            return []
+
+    def _follow_sources(self, live_recipes) -> None:
+        """Follow the saves of the source layers of the live recipes, and no other."""
+        wanted = {}
+        for recipe in live_recipes:
+            for reference in followed_sources(recipe):
+                layer = self._source_layer(reference)
+                if layer is not None and hasattr(layer, "afterCommitChanges"):
+                    wanted[layer.id()] = layer
+        for layer_id in list(self._live_sources):
+            layer, slot = self._live_sources[layer_id]
+            if wanted.get(layer_id) is layer:
+                continue  # the same layer object, still followed
+            del self._live_sources[layer_id]
+            try:
+                layer.afterCommitChanges.disconnect(slot)
+            except (RuntimeError, TypeError):  # deleted meanwhile, or never connected
+                pass
+        for layer_id, layer in wanted.items():
+            if layer_id not in self._live_sources:
+                slot = (lambda followed=layer_id: self._on_source_saved(followed))
+                try:
+                    layer.afterCommitChanges.connect(slot)
+                except (RuntimeError, TypeError):
+                    continue
+                self._live_sources[layer_id] = (layer, slot)
+
+    def _on_layers_changed(self, *_args) -> None:
+        """A layer came or went: a source of a live recipe may be one of them."""
+        self._follow_sources(self._armed_recipes())
+
+    def followed_layer_ids(self):
+        return set(self._live_sources)
+
+    def _on_source_saved(self, layer_id: str) -> None:
+        """The edits of a followed source were saved: its live recipes run again once the saves stop."""
+        self._live_pending.add(layer_id)
+        self._live_tries = 0
+        self._live_timer.start()
+
+    def _editing(self, recipe) -> str:
+        """A layer a recipe filters that is being edited: its filter cannot change until the edits end."""
+        for step in recipe["steps"]:
+            arguments = step["arguments"]
+            names = [arguments.get(key) for key in ("layer", "layer_name")]  # a cross filter only reads its source
+            for key in ("target_layers", "layers"):
+                names.extend(arguments.get(key) if isinstance(arguments.get(key), list) else ())
+            for name in names:
+                layer = self._source_layer(name) if isinstance(name, str) and name else None
+                editable = getattr(layer, "isEditable", None)
+                if callable(editable) and editable():
+                    return layer.name()
+        return ""
+
+    def _live_busy(self) -> str:
+        if self.chat_busy() or self._mcp.busy:
+            return "chat"
+        try:
+            from ...adapters.public_api.operations import busy_reason
+            return busy_reason()
+        except Exception:
+            return ""
+
+    def _run_live(self) -> None:
+        """Run again the live recipes whose source was saved; while something else works, later (a few minutes)."""
+        if not self._live_pending:
+            return
+        due = [recipe for recipe in self._armed_recipes() if {layer.id() for layer in (
+            self._source_layer(reference) for reference in followed_sources(recipe)) if layer} & self._live_pending]
+        if not due:
+            self._live_pending.clear()
+            return
+        for recipe in due:
+            if self._live_busy() or self._editing(recipe):
+                self._live_tries += 1
+                if self._live_tries <= LIVE_MAX_TRIES:
+                    self._live_timer.start()
+                else:
+                    self._live_pending.clear()
+                    self.panel.add_note(_tr("A source of a live recipe was saved while FilterMate was busy: run the "
+                                            "recipe again from More > Recipes."))
+                return
+            for reference in followed_sources(recipe):
+                layer = self._source_layer(reference)
+                if layer is not None:
+                    self._live_pending.discard(layer.id())
+            self.run_recipe(recipe["id"], live=True)
+        self._live_pending.clear()
+
+    def _on_live_toggled(self, recipe_id: str, on: bool) -> None:
+        """The user turned a recipe live, or no longer: kept in the project, approved on this computer."""
+        try:
+            recipes = with_live(read_recipes(), recipe_id, on)
+        except RecipeError as exc:
+            self._say(str(exc), error=True)
+            self._refresh_recipes()
+            return
+        write_recipes(recipes)
+        recipe = find_recipe(recipes, recipe_id)
+        if recipe is not None:
+            approve_live(transcript_store.project_key(), recipe, on)
+        self._refresh_recipes()
+        if recipe is not None:
+            if on and load_settings().autonomy not in (STANDARD, AUTONOMOUS):
+                note = _tr("Live recipe: {} will run by itself at the standard or autonomous level of the agent only.")
+                note = note.format(recipe["name"])
+            elif on:
+                note = _tr("Live recipe: {} runs again when the edits of {} are saved.").format(
+                    recipe["name"], ", ".join(followed_sources(recipe)))
+            else:
+                note = _tr("{} no longer runs by itself.").format(recipe["name"])
+            self.panel.show_thread()
+            self.panel.add_note(note)
+            self._record("note", note)
+            self._save_transcript()
 
     @staticmethod
     def _name_dialog(parent, title: str, text: str, default: str) -> str:
@@ -665,7 +842,7 @@ class AgentChatController(QObject):
             pass
         self._refresh_recipes()
 
-    def run_recipe(self, recipe_id: str) -> bool:
+    def run_recipe(self, recipe_id: str, live: bool = False) -> bool:
         """Run the steps of a recipe again, in order, without any model: one turn of the history, undone as one.
 
         A recipe may come with a project made by someone else, so a run asks what the chat would ask at the level of
@@ -673,6 +850,10 @@ class AgentChatController(QObject):
         what reaches outside are always asked, even at autonomous; at advisor every step is asked (the user asked for
         the run). A yes is for this step only, never for the rest of the conversation. The first step declined or
         failed stops the recipe, and Stop stops it between two steps. True when every step ran.
+
+        ``live``: run by itself because a followed source was saved. Only a live recipe runs so (its steps are the
+        undoable ones of ``LIVE_TOOLS``), at the usual level whatever the chosen one, and asks nothing: a step that
+        would ask stops it.
         """
         if self.chat_busy() or self._mcp.busy:
             return False
@@ -681,7 +862,7 @@ class AgentChatController(QObject):
             self._say(busy, error=True)
             return False
         recipe = find_recipe(read_recipes(), recipe_id)
-        if recipe is None:
+        if recipe is None or (live and not self._armed(recipe)):
             self._refresh_recipes()
             return False
         values = load_settings()
@@ -691,14 +872,21 @@ class AgentChatController(QObject):
         self._policy.set_level(values.autonomy)
         level = self._policy.level
         # Nothing allowed beforehand counts; the protected layers and the exceptions of the Tools tab do.
+        if live:
+            level = STANDARD
         policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection,
                                   rules=values.rules)
-        title = _tr("Recipe: {}").format(recipe["name"])
+        title = (_tr("Live recipe: {} (its source was saved)") if live else _tr("Recipe: {}")).format(recipe["name"])
         self._replaying, self._replay_stop = True, False
         self._checkpoint.label = title
-        self.panel.show_thread()
-        self.panel.add_user(title)
-        self._record("user", title)
+        if not live:  # a live run must not pull the user away from the history or the settings
+            self.panel.show_thread()
+        if live:
+            self.panel.add_note(title)
+            self._record("note", title)
+        else:
+            self.panel.add_user(title)
+            self._record("user", title)
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
         self._show_undo_state()
@@ -711,7 +899,7 @@ class AgentChatController(QObject):
             verdict = executor.verdict(call, policy) if call.name in available else RUN
             if (verdict == ASK or (level == ADVISOR and verdict == REFUSE)) and call.name not in CODE_TOOLS:
                 asked.append(call)
-        if len(asked) > 1:
+        if len(asked) > 1 and not live:
             yes = self.confirm_many(asked, title)
             together = {call.call_id: yes for call in asked}
         try:
@@ -741,7 +929,8 @@ class AgentChatController(QObject):
                 if level == ADVISOR and verdict == REFUSE:
                     verdict = ASK
                 answered = together.get(call.call_id)
-                if verdict != RUN and (verdict == REFUSE or not (
+                # A live run asks nothing: a step that would ask stops it.
+                if verdict != RUN and (live or verdict == REFUSE or not (
                         answered if answered is not None else self._confirm(call, title))):
                     stop = _tr("Step {} was not run: {}.").format(number, step["label"])
                     break

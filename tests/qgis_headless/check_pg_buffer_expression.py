@@ -11,7 +11,7 @@ counted in SQL with the 5 segments per quarter circle FilterMate's buffers use.
 
     docker network create fm_pg_net
     docker run -d --name fm_pg --network fm_pg_net -e POSTGRES_PASSWORD=fm postgis/postgis:16-3.4
-    docker run --rm --network fm_pg_net -v "$PWD:/src:ro" -e FM_PG_SRC_COUNT=12000 \\
+    docker run --init --rm --network fm_pg_net -v "$PWD:/src:ro" -e FM_PG_SRC_COUNT=12000 \\
         -e FM_PG="host=fm_pg port=5432 dbname=postgres user=postgres password=fm" qgis/qgis:stable \\
         xvfb-run -a qgis --nologo --noversioncheck --profiles-path /tmp/p \\
         --code /src/tests/qgis_headless/check_pg_buffer_expression.py

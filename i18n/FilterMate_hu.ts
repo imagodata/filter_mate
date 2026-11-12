@@ -718,6 +718,31 @@ Egyetért?</translation>
         <translation>Leállítva a(z) {}. lépés előtt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="640"/>
+        <source>Live recipe: {} (its source was saved)</source>
+        <translation>Élő recept: {} (a forrása el lett mentve)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="600"/>
+        <source>Live recipe: {} runs again when the edits of {} are saved.</source>
+        <translation>Élő recept: {} újra lefut, amikor a(z) {} szerkesztései mentésre kerülnek.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="602"/>
+        <source>{} no longer runs by itself.</source>
+        <translation>{} már nem fut le magától.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
+        <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
+        <translation>Élő recept: {} csak az ügynök normál vagy önálló szintjén fut le magától.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
+        <source>A source of a live recipe was saved while FilterMate was busy: run the recipe again from More &gt; Recipes.</source>
+        <translation>Egy élő recept forrása mentésre került, miközben a FilterMate foglalt volt: futtassa újra a receptet a Több &gt; Receptek menüből.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="560"/>
         <source>Save as a recipe</source>
         <translation>Mentés receptként</translation>
@@ -1056,6 +1081,26 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="676"/>
         <source>Run without the model</source>
         <translation>Futtatás modell nélkül</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="695"/>
+        <source>Run again when its source is saved</source>
+        <translation>Futtatás újra a forrás mentésekor</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>Not possible: {}</source>
+        <translation>Nem lehetséges: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="700"/>
+        <source>The targets follow the source: each time the edits of a source layer of this recipe are saved, the recipe runs again by itself, as one turn you can undo.</source>
+        <translation>A célok követik a forrást: valahányszor e recept egy forrásrétegének szerkesztései mentésre kerülnek, a recept magától újra lefut, egyetlen visszavonható lépésként.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="680"/>
+        <source>{} · live</source>
+        <translation>{} · élő</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="903"/>
