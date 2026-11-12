@@ -250,3 +250,82 @@ class TestOriginalSource:
     def test_unknown_the_band_qgis_gave_the_original(self, controller, alphas):
         layer, base = FakeRaster('ortho', '/cache/ortho.clip.vrt', alpha=5), FakeRaster('ortho', '/data/rgba.tif', alpha=4)
         assert self.source_of(controller, layer, base)[3] == 4
+
+
+def _real_segmentation():
+    """The adapter itself (pure parts: windows, well_inside), loaded by the coverage fakes."""
+    if "fm_coverage_fakes" not in sys.modules:
+        spec = importlib.util.spec_from_file_location("fm_coverage_fakes", _ROOT / "tests/unit/adapters/qgis/coverage_fakes.py")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["fm_coverage_fakes"] = module
+        spec.loader.exec_module(module)
+    fakes = sys.modules["fm_coverage_fakes"]
+    fakes.load("adapters.qgis.python_dependencies")
+    return fakes, fakes.load("segmentation")
+
+
+class Point:
+    def __init__(self, x, y):
+        self._x, self._y = float(x), float(y)
+
+    def x(self):
+        return self._x
+
+    def y(self):
+        return self._y
+
+
+class TestReuseOfTheEncodedWindow:
+    """2026-11-12: a click 2 pixels inside the encoded window reused it, and the object around the click was cut at its
+    edge; the similar objects ask 32 pixels (well_inside). A box running past it was cut by set_box."""
+
+    @pytest.fixture
+    def flow(self, ctrl_module, controller, monkeypatch):
+        fakes, real = _real_segmentation()
+        model = types.SimpleNamespace(input_size=1024, predict=lambda *args: (None, 0.0))
+        monkeypatch.setattr(ctrl_module._segmentation_stub, 'find_provider', lambda: model, raising=False)
+        monkeypatch.setattr(ctrl_module._segmentation_stub, 'well_inside', real.well_inside, raising=False)
+        extent = fakes.FakeRectangle(0.0, 0.0, 10000.0, 10000.0)
+        extent.contains = lambda point: True
+        layer = types.SimpleNamespace(id=lambda: 'ortho', extent=lambda: extent)
+        controller._host._active_layer = layer
+        encoded = real.SegmentationWindow(1000.0, 2024.0, 1.0, 1024)  # x 1000..2024, y 1000..2024
+        controller._session = real.SegmentationSession(model, encoded, 'embedding')
+        controller._session_layer = 'ortho'
+        controller._window_source = lambda _layer: ('/data/ortho.tif', 'gdal', 1.0, None)
+        controller._plan = lambda _layer, center, native, _model: real.window_at(center.x(), center.y(),
+                                                                                  (0.0, 0.0, 10000.0, 10000.0), 1.0, 1024)
+        done = []
+        controller._encode = lambda *args: done.append('encoded')
+        controller._predict = lambda session: done.append('reused')
+        return controller, done, fakes
+
+    def test_a_click_well_inside_reuses_it(self, flow):
+        controller, done, _fakes = flow
+        assert controller._prompt('point', Point(1500.0, 1500.0), True, False) and done == ['reused']
+
+    def test_a_click_near_its_edge_encodes_a_window_around_it(self, flow):
+        controller, done, _fakes = flow
+        assert controller._prompt('point', Point(2022.0, 1500.0), True, False) and done == ['encoded']
+
+    def test_a_box_running_past_it_encodes_another(self, flow):
+        controller, done, fakes = flow
+        controller._prompt('box', fakes.FakeRectangle(1900.0, 1400.0, 2100.0, 1600.0), True, False)
+        controller._prompt('box', fakes.FakeRectangle(1400.0, 1400.0, 1600.0, 1600.0), True, False)
+        assert done == ['encoded', 'reused']
+
+
+class TestVisibleExtent:
+    def test_a_map_past_the_domain_of_the_crs_gives_the_layer_extent(self, controller):
+        """2026-11-12: QgsCsException raised out of the callback of the encoding (a virtual method of C++)."""
+        settings = types.SimpleNamespace(visibleExtent=lambda: 'the world')
+        controller._host._iface = lambda: types.SimpleNamespace(mapCanvas=lambda: types.SimpleNamespace(mapSettings=lambda: settings))
+        controller._host._active_layer = types.SimpleNamespace(extent=lambda: 'the raster')
+
+        def fail(_extent):
+            raise Exception('forward transform of the world failed')  # QgsCsException is no RuntimeError
+
+        controller._transform = lambda: types.SimpleNamespace(transformBoundingBox=fail)
+        assert controller._visible_extent() == 'the raster'
+        controller._transform = lambda: types.SimpleNamespace(transformBoundingBox=lambda extent: f'{extent} reprojected')
+        assert controller._visible_extent() == 'the world reprojected'

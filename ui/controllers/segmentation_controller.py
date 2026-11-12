@@ -242,7 +242,7 @@ class SegmentationController:
             return False
         self._current, self._extending = None, False
         self._stop_search()  # its objects would join the new object's group
-        if session is not None and session.window.cell == window.cell and session.window.contains(center.x(), center.y()):
+        if session is not None and session.window.cell == window.cell and self._serves(session.window, window, kind, value, layer):
             session.clear()
             if not self._apply(session, kind, value, positive):
                 self._status(self.tr("This box is too small"))
@@ -252,6 +252,24 @@ class SegmentationController:
         self._pending = [(kind, value, positive, False)]
         self._encode(layer, window, model, source, provider_key, alpha)
         return True
+
+    @staticmethod
+    def _serves(encoded: Any, planned: Any, kind: str, value: Any, layer: Any) -> bool:
+        """Whether the window already encoded serves a new prompt, rather than ``planned`` around it.
+
+        A click must lie well inside it (``segmentation.well_inside``, as the candidates of the similar
+        objects): at a few pixels from its edge, the object around it was cut. A box must lie in it whole,
+        or ``set_box`` cuts it. The edges of the raster are no edges of an object; the same window serves.
+        """
+        from ...adapters.qgis.coverage_layers.segmentation import well_inside
+        if (encoded.x_min, encoded.y_max) == (planned.x_min, planned.y_max):
+            return True
+        extent = layer.extent()
+        raster = (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum())
+        if kind == 'point':
+            return well_inside(encoded, value.x(), value.y(), raster)
+        return (well_inside(encoded, value.xMinimum(), value.yMinimum(), raster, 0)
+                and well_inside(encoded, value.xMaximum(), value.yMaximum(), raster, 0))
 
     @staticmethod
     def _apply(session: Any, kind: str, value: Any, positive: bool) -> bool:
@@ -329,9 +347,18 @@ class SegmentationController:
         return alpha
 
     def _visible_extent(self) -> Any:
-        """The visible map, in the CRS of the layer."""
+        """The visible map, in the CRS of the layer; the extent of the layer when the map shows more than that CRS covers.
+
+        A map zoomed out on the world cannot be reprojected in the CRS of a local raster (QgsCsException,
+        no RuntimeError): it raised in the callback of the encoding (a virtual method of C++) and after an
+        object was added (whose click was then said unusable). The whole raster is then in view.
+        """
         settings = self._host._iface().mapCanvas().mapSettings()
-        return self._transform().transformBoundingBox(settings.visibleExtent())
+        try:
+            return self._transform().transformBoundingBox(settings.visibleExtent())
+        except Exception as exc:  # QgsCsException is no RuntimeError
+            logger.debug(f"[FM5] visible map not in the CRS of the layer, its extent used: {exc}")
+            return self._host._active_layer.extent()
 
     def _plan(self, layer: Any, center: Any, native: float, model: Any) -> Any:
         from ...adapters.qgis.coverage_layers.segmentation import plan_window
