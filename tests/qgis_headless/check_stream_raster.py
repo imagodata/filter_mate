@@ -43,6 +43,18 @@ from qgis.core import (  # noqa: E402
     QgsRasterLayer, QgsRectangle, QgsTask,
 )
 
+
+def _link_dir(target, source):
+    """``target`` made a link to the folder ``source``: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        target.symlink_to(source, target_is_directory=True)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)], check=True, capture_output=True)
+
+
 REPO = Path(os.environ.get('FM_REPO', Path(__file__).resolve().parents[2]))
 BASELINE = os.environ.get('FM_STREAM_BASELINE') == '1'
 MAIN_THREAD = threading.get_ident()
@@ -525,7 +537,7 @@ def main():
         plugins = folder / 'plugins'
         plugins.mkdir()
         # Read-only package alias: avoid copying unrelated local datasets.
-        (plugins / 'filter_mate').symlink_to(REPO, target_is_directory=True)
+        _link_dir(plugins / 'filter_mate', REPO)
         sys.path.insert(0, str(plugins))
         from filter_mate.adapters.qgis.coverage_layers import raster_adapter as adapter
         from filter_mate.core.domain.raster_filter_criteria import (

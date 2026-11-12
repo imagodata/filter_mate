@@ -93,12 +93,25 @@ ONLY = set(filter(None, os.environ.get('FM_E2E_ONLY', '').split(',')))
 API_TIMEOUT = float(os.environ.get('FM_E2E_API_TIMEOUT', '45'))
 
 import faulthandler  # noqa: E402
+
+
+def _link_dir(target, source):
+    """``target`` made a link to the folder ``source``: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        target.symlink_to(source, target_is_directory=True)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)], check=True, capture_output=True)
+
+
 # A hang (a stuck worker, a deadlocked nested loop) leaves its Python stacks in the log instead of nothing.
 faulthandler.dump_traceback_later(int(os.environ.get('FM_E2E_HANG_SECONDS', '1500')), repeat=True)
 app = QgsApplication([], False)
 app.initQgis()
 (WORK / 'plugins').mkdir()
-(WORK / 'plugins' / 'filter_mate').symlink_to(ROOT, target_is_directory=True)
+_link_dir(WORK / 'plugins' / 'filter_mate', ROOT)
 sys.path.insert(0, str(WORK / 'plugins'))
 
 from filter_mate.adapters.public_api import operations as ops  # noqa: E402

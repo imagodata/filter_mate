@@ -30,6 +30,17 @@ from qgis.PyQt.QtCore import QCoreApplication, QTimer
 from check_stream_raster import RangeServer, make_cog
 
 
+def _link_dir(target, source):
+    """``target`` made a link to the folder ``source``: a symlink, or a junction on Windows (no privilege needed)."""
+    try:
+        target.symlink_to(source, target_is_directory=True)
+    except OSError:
+        if os.name != "nt":
+            raise
+        import subprocess
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(target), str(source)], check=True, capture_output=True)
+
+
 def main():
     global app
     app = QgsApplication([], False)
@@ -41,7 +52,7 @@ def main():
         os.environ['FILTERMATE_LOG_DIR'] = str(folder / 'logs')
         plugins = folder / 'plugins'
         plugins.mkdir()
-        (plugins / 'filter_mate').symlink_to(root, target_is_directory=True)
+        _link_dir(plugins / 'filter_mate', root)
         sys.path.insert(0, str(plugins))
         sys.path.append(os.path.join(QgsApplication.pkgDataPath(), 'python', 'plugins'))
         from filter_mate.adapters.public_api import operations
