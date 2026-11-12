@@ -460,6 +460,8 @@ def test_empty_selection_follows_the_combination_rules(qgis, operator, expected)
     ('ST_Intersects("geom", ST_GeomFromText(\'POINT(0 0)\', 2154))', "AND"),
     ('"fid" IN (4, 5)', None),
     (None, None),
+    (None, "AND"),
+    (None, "AND NOT"),   # 2026-11-12: NOT (NEW) on both paths
 ])
 def test_same_combination_on_the_sql_and_the_ogr_paths(qgis, old_subset, operator):
     """The SpatiaLite / GeoPackage SQL path and the OGR path combine identically."""
@@ -467,6 +469,8 @@ def test_same_combination_on_the_sql_and_the_ogr_paths(qgis, old_subset, operato
     ogr_final = ogr._combine_with_old_subset(old_subset, operator, "NEW")
     sql_final = _spatialite_final(old_subset, operator, "NEW")
     assert ogr_final == sql_final
+    if old_subset is None and operator == "AND NOT":
+        assert ogr_final == "NOT ( NEW )"
 
 
 def _spatialite_final(old_subset, operator, expression):
@@ -489,7 +493,7 @@ def _spatialite_final(old_subset, operator, expression):
         log_info=lambda msg: None,
     )
     scope = {"self": sql, "old_subset": old_subset, "combine_operator": operator, "expression": expression}
-    exec(body, {}, scope)  # nosec B102 - test reads the production rule
+    exec(body, {"combine_without_old_subset": ogr_builder.combine_without_old_subset}, scope)  # nosec B102 - test reads the production rule
     return scope["final_expression"]
 
 

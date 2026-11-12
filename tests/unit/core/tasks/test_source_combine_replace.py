@@ -58,3 +58,26 @@ def test_filter_task_wires_source_operator_getter():
 
     assert "combine_operator=self._get_source_combine_operator()" in body
     assert "combine_operator=self.param_source_layer_combine_operator or 'AND'" not in body
+
+
+@pytest.mark.parametrize("operator, expected", [
+    ("AND NOT", 'NOT ( "class" = \'major\' )'),   # 2026-11-12: it kept only what it was asked to remove
+    ("AND", '"class" = \'major\''),
+    ("OR", '"class" = \'major\''),
+    (None, '"class" = \'major\''),
+])
+def test_source_without_filter_and_not_takes_the_selection_out_of_the_layer(facade_cls, operator, expected):
+    task = MagicMock()
+    task._get_attribute_executor.return_value = MagicMock(old_subset='', combine_operator=operator)
+
+    assert facade_cls(task).combine_with_old_subset('"class" = \'major\'') == expected
+    task._get_attribute_executor.return_value.combine_with_old_subset.assert_not_called()
+
+
+def test_source_with_a_filter_is_combined_by_the_executor(facade_cls):
+    task = MagicMock()
+    executor = MagicMock(old_subset='"a" = 1', combine_operator="AND NOT")
+    executor.combine_with_old_subset.return_value = '( "a" = 1 ) AND NOT ( "b" = 2 )'
+    task._get_attribute_executor.return_value = executor
+
+    assert facade_cls(task).combine_with_old_subset('"b" = 2') == '( "a" = 1 ) AND NOT ( "b" = 2 )'

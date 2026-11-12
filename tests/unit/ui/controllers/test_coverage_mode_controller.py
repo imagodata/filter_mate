@@ -596,6 +596,69 @@ class TestDockClosed:
         assert canvas.mapTool() == "pan"
         assert controller._segmentation is None and controller._extras is None  # not made only to be stopped
 
+    @staticmethod
+    def _sam(controller, canvas):
+        """SegmentationController stand-in: it remembers the tool it replaced and gives it back on deactivate()."""
+        sam = types.SimpleNamespace(tool=object(), previous=None)
+        sam.on_map = lambda: canvas.mapTool() is sam.tool
+
+        def activate():
+            sam.previous = canvas.mapTool()
+            canvas.setMapTool(sam.tool)
+
+        def deactivate():
+            previous, sam.previous = sam.previous, None
+            controller._release_map_tool(sam.tool, previous)
+        sam.activate, sam.deactivate = activate, deactivate
+        controller._segmentation = sam
+        return sam
+
+    @staticmethod
+    def _zone(controller, canvas):
+        """The Zone tool of the dock extras: it remembers the tool it replaced, as _start_pc_zone_tool did."""
+        zone = types.SimpleNamespace(tool=object(), previous=None, stops=0)
+        zone.zone_tool_on = lambda: canvas.mapTool() is zone.tool
+
+        def start():
+            zone.previous = canvas.mapTool()
+            canvas.setMapTool(zone.tool)
+
+        def stop_zone_tool():
+            zone.stops += 1
+            if canvas.mapTool() is not zone.tool:
+                zone.previous = None
+                return
+            previous, zone.previous = zone.previous, None
+            if previous is not None:
+                canvas.setMapTool(previous)
+            else:
+                canvas.unsetMapTool(zone.tool)
+        zone.start, zone.stop_zone_tool = start, stop_zone_tool
+        controller._extras = zone
+        return zone
+
+    def test_a_tool_given_back_leaves_in_turn(self, ctrl_module, monkeypatch):
+        """2026-11-12: SAM on the map, then Zone: closing the dock gave the map back to SAM, dock hidden."""
+        canvas = _Canvas("pan")
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        sam, zone = self._sam(controller, canvas), self._zone(controller, canvas)
+        sam.activate()
+        zone.start()  # the Zone of the rail remembers SAM
+        controller.release_map_tools()
+        assert canvas.mapTool() == "pan"
+
+    def test_each_tool_leaves_even_when_another_fails(self, ctrl_module, monkeypatch):
+        canvas = _Canvas("pan")
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        sam, zone = self._sam(controller, canvas), self._zone(controller, canvas)
+        zone.start()
+
+        def broken():
+            raise RuntimeError("wrapped C/C++ object has been deleted")
+        sam.on_map = broken  # a segmentation tool deleted with its panel
+        controller.release_map_tools()
+        assert canvas.mapTool() == "pan"
+
 
 @pytest.mark.unit
 class TestFailuresCacheAndTeardown:

@@ -250,14 +250,19 @@ class CrossOperationHistory:
         undoing it still restores them; the operation keeps its ``op_id`` and
         is dropped only when nothing is left of it. Its ``effects`` stay but
         those on the removed layer (its selection, style, name...); a layer a
-        turn added or removed stays too, since undoing the turn that added a
-        layer is what removes it, and redoing the turn must bring it back.
+        turn removed stays too. A turn that added the layer keeps all of it:
+        undoing that turn is what removes the layer, redoing it brings the
+        layer back, and its filter keeps the derived file of the layer from
+        the cache (``history_sources`` reads the changes).
         """
         for stacks in (self._undo, self._redo):
             stacks.pop(layer_id, None)
             for key in list(stacks):
                 kept = []
                 for op in stacks[key]:
+                    if any(effect[:2] == ("added", layer_id) for effect in op.effects):
+                        kept.append(op)
+                        continue
                     changes = tuple(pair for pair in op.changes if pair[0].layer_id != layer_id)
                     effects = tuple(effect for effect in op.effects if not _effect_on_layer(effect, layer_id))
                     if len(changes) != len(op.changes) or len(effects) != len(op.effects):
