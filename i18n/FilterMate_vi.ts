@@ -898,6 +898,11 @@ Bạn có đồng ý không?</translation>
         <translation>Bước {} đã không chạy: bạn đã tắt công cụ của bước này cho tác nhân ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Bước {step} không được chạy: bước này làm việc trên lớp {layer} mà bước {maker} đã tạo lần đầu, và lần chạy này không tạo lại nó.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

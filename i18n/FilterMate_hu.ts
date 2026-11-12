@@ -898,6 +898,11 @@ Egyetért?</translation>
         <translation>A(z) {}. lépés nem futott le: kikapcsolta az eszközét az ügynök számára ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>A(z) {step}. lépés nem futott le: a(z) {layer} rétegen dolgozik, amelyet a(z) {maker}. lépés hozott létre először, és ez a futtatás nem hozta létre újra.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

@@ -898,6 +898,11 @@ Sind Sie einverstanden?</translation>
         <translation>Schritt {} wurde nicht ausgeführt: Sie haben sein Werkzeug für den Agenten ausgeschaltet ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Schritt {step} wurde nicht ausgeführt: Er arbeitet mit dem Layer {layer}, den Schritt {maker} beim ersten Mal erstellt hat, und dieser Lauf hat ihn nicht erneut erstellt.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

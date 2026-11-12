@@ -898,6 +898,11 @@ Sunteți de acord?</translation>
         <translation>Pasul {} nu a fost executat: ați dezactivat instrumentul său pentru agent ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Pasul {step} nu a fost executat: lucrează pe stratul {layer} pe care pasul {maker} l-a creat prima dată, iar această rulare nu l-a mai creat.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

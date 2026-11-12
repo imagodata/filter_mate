@@ -898,6 +898,11 @@ Do you agree?</source>
         <translation>{}단계가 실행되지 않았습니다: 에이전트에 대해 해당 도구를 꺼 두었습니다 ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>단계 {step}은(는) 실행되지 않았습니다: 처음에 단계 {maker}이(가) 만든 레이어 {layer}을(를) 다루는데, 이번 실행에서는 다시 만들어지지 않았습니다.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

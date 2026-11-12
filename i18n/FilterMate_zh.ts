@@ -898,6 +898,11 @@ Do you agree?</source>
         <translation>步骤 {} 未运行：你已为智能体关闭了它的工具（{}）。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>第 {step} 步未执行：它作用于第 {maker} 步第一次创建的图层 {layer}，而本次运行没有再次创建它。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

@@ -898,6 +898,11 @@ Do you agree?</source>
         <translation>Крок {} не виконано: ви вимкнули його інструмент для агента ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Крок {step} не виконано: він працює з шаром {layer}, який уперше створив крок {maker}, а цей запуск його знову не створив.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}

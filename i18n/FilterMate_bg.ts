@@ -898,6 +898,11 @@ Do you agree?</source>
         <translation>Стъпка {} не беше изпълнена: изключихте нейния инструмент за агента ({}).</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="943"/>
+        <source>Step {step} was not run: it works on the layer {layer} that step {maker} made the first time, and this run did not make it again.</source>
+        <translation>Стъпка {step} не беше изпълнена: тя работи върху слоя {layer}, създаден от стъпка {maker} първия път, а това изпълнение не го създаде отново.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
         <source>The agent wants to do these {} actions:
 {}
