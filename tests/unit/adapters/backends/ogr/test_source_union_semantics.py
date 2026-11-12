@@ -462,6 +462,8 @@ def test_empty_selection_follows_the_combination_rules(qgis, operator, expected)
     (None, None),
     (None, "AND"),
     (None, "AND NOT"),   # 2026-11-12: NOT (NEW) on both paths
+    ('ST_Intersects("geom", ST_GeomFromText(\'POINT(0 0)\', 2154))', "AND NOT"),   # replaced: NOT (NEW) too
+    ('"fid" IN (4, 5)', "AND NOT"),   # the keys of a previous step minus the new selection
 ])
 def test_same_combination_on_the_sql_and_the_ogr_paths(qgis, old_subset, operator):
     """The SpatiaLite / GeoPackage SQL path and the OGR path combine identically."""
@@ -469,8 +471,10 @@ def test_same_combination_on_the_sql_and_the_ogr_paths(qgis, old_subset, operato
     ogr_final = ogr._combine_with_old_subset(old_subset, operator, "NEW")
     sql_final = _spatialite_final(old_subset, operator, "NEW")
     assert ogr_final == sql_final
-    if old_subset is None and operator == "AND NOT":
-        assert ogr_final == "NOT ( NEW )"
+    if operator == "AND NOT" and (old_subset is None or old_subset.startswith("ST_")):
+        assert ogr_final == "NOT (\nNEW\n)"   # no filter, or a spatial one replaced: still excluded
+    elif operator == "AND NOT":
+        assert ogr_final == f"({old_subset}) AND NOT (NEW)"
 
 
 def _spatialite_final(old_subset, operator, expression):

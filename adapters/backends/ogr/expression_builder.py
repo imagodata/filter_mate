@@ -725,9 +725,9 @@ class OGRExpressionBuilder(GeometricFilterPort):
         """
         if old_subset and combine_operator and not self._is_geometric_filter(old_subset):
             return f"({old_subset}) {combine_operator} ({new_filter})"
-        if not old_subset:
-            return combine_without_old_subset(new_filter, combine_operator)
-        return new_filter
+        # No filter, or a spatial one replaced (2026-11-12, review: AND NOT then
+        # wrote the new selection itself): NOT (new) under AND NOT
+        return combine_without_old_subset(new_filter, combine_operator)
 
     def _unfiltered_target(self, layer, old_subset=None, combine_operator=None):
         """The target layer read WITHOUT its current subset (2026-10-17).

@@ -29,7 +29,8 @@ def combined(previous: Optional[str], new: str, operator: Optional[str]) -> Tupl
     if not new:
         return previous, ""
     if not previous:
-        return (f"NOT ({new})" if op == "AND NOT" else new), ""
+        # On its own lines: a trailing comment of ``new`` would hide the parenthesis
+        return (f"NOT (\n{new}\n)" if op == "AND NOT" else new), ""
     if op == "AND NOT":
         return f"({previous}) AND NOT ({new})", ""
     return f"({previous}) {op} ({new})", ""
