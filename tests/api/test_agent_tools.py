@@ -501,6 +501,14 @@ class TestRoutes:
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.post("/layers/style", json={"layer": "communes", "mode": "x"}).status_code == 422
         assert client.post("/layers/style", json={"layer": "nope", "mode": "single"}).status_code == 400
+        # 2026-11-12: NaN / Infinity (sent as JSON literals) and an inverted range are refused
+        for body in ('{"layer": "dem", "mode": "gray", "minimum": NaN, "maximum": 10}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 0, "maximum": Infinity}',
+                     '{"layer": "dem", "mode": "gray", "opacity": NaN}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 10, "maximum": 2}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 5, "maximum": 5}'):
+            response = client.post("/layers/style", content=body, headers={"Content-Type": "application/json"})
+            assert response.status_code == 422, body
         response = client.post("/layers/labels", json={"layer": "communes", "field": "nom", "size": 9})
         assert response.status_code == 200 and response.json()["labels"] is True
         assert client.post("/layers/labels", json={"layer": "communes", "size": 100}).status_code == 422

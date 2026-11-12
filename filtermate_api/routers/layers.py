@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
     EditResult, FeatureSample, FieldValues, FilterMateAccessor, LabelsResult, LayerDetails, LayerStatistics, LayerSummary,
@@ -107,7 +107,8 @@ def sample_features(payload: SampleRequest, request: Request) -> FeatureSample:
 
 
 class StyleRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # 2026-11-12: NaN and Infinity refused (422), as the filter routes do
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
     mode: Literal["single", "categorized", "graduated", "pseudocolor", "gray"]
@@ -121,6 +122,12 @@ class StyleRequest(BaseModel):
     band: int = Field(1, ge=1, le=1000)
     minimum: Optional[float] = None
     maximum: Optional[float] = None
+
+    @model_validator(mode="after")
+    def _check_range(self) -> "StyleRequest":
+        if self.minimum is not None and self.maximum is not None and self.minimum >= self.maximum:
+            raise ValueError("minimum must be below maximum")
+        return self
 
 
 @router.post("/style", response_model=StyleResult)
