@@ -64,6 +64,11 @@
         <translation>Tillbaka till före: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Stoppa begäran, eller vänta tills den är klar, för att öppna inställningarna.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Inget att ångra.</translation>

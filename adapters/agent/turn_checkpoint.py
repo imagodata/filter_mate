@@ -92,6 +92,18 @@ class TurnCheckpoint:
                 steps.append((label, changed))
         return tuple(steps)
 
+    def discard(self) -> None:
+        """Forget the turn under way without recording it: its project is closing.
+
+        Committed after, it would compare the closed project with the next one (its notes, widgets, tree, themes,
+        bookmarks and CRS with empty ones, the new layers as added) and an Undo would write the old project into the
+        new one.
+        """
+        self._open = False
+        self._before = {}
+        self._steps = []
+        self._effects = EffectsRecorder()
+
     def commit(self) -> Sequence[str]:
         """Record the turn when it changed something; names of the layers it changed."""
         if not self._open:

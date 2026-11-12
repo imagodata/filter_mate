@@ -491,6 +491,75 @@ class TestUndoRedoButtons:
         controller.update_undo_redo_buttons()
         app.update_undo_redo_buttons.assert_called_once()
 
+    def test_agent_open_keeps_the_steps_of_the_agent(self, ctrl_module, layers):
+        """2026-11-12: a raster picked with AGENT open greyed out Undo / Redo while the agent had steps."""
+        undo, redo, app = MagicMock(), MagicMock(), MagicMock()
+        dock = _dock(pushButton_action_undo_filter=undo, pushButton_action_redo_filter=redo,
+                     tabTools_current_index=-1, filter_mate_app=app)
+        dock.agent_has_focus.return_value = True
+        controller = ctrl_module.CoverageModeController(dock)
+        controller._active_layer = layers["r1"]
+        controller.update_undo_redo_buttons()
+        app.update_undo_redo_buttons.assert_called_once()  # the app shows the history of the agent
+        undo.setEnabled.assert_not_called()
+        redo.setEnabled.assert_not_called()
+
+
+class _Canvas:
+    def __init__(self, tool):
+        self.tool = tool
+
+    def mapTool(self):
+        return self.tool
+
+    def setMapTool(self, tool):
+        self.tool = tool
+
+    def unsetMapTool(self, tool):
+        if self.tool is tool:
+            self.tool = None
+
+
+@pytest.mark.unit
+class TestDockClosed:
+    """2026-11-12: closing the dock (it is only hidden) takes every tool of the panels off the map."""
+
+    def _controller(self, ctrl_module, monkeypatch, canvas):
+        controller = ctrl_module.CoverageModeController(_dock())
+        iface = types.SimpleNamespace(mapCanvas=lambda: canvas)
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        return controller
+
+    def test_sam_tool_leaves_the_map(self, ctrl_module, monkeypatch):
+        canvas = _Canvas("pan")
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        sam_tool = object()
+        segmentation = MagicMock()
+        segmentation.on_map.side_effect = lambda: canvas.mapTool() is sam_tool
+        segmentation.deactivate.side_effect = lambda: controller._release_map_tool(sam_tool, "pan")
+        controller._segmentation = segmentation
+        canvas.setMapTool(sam_tool)
+        controller.release_map_tools()
+        segmentation.deactivate.assert_called_once_with()
+        assert canvas.mapTool() == "pan"  # the tool it replaced has the map back
+
+    def test_class_pipette_leaves_the_map(self, ctrl_module, monkeypatch):
+        class_tool = object()
+        canvas = _Canvas(class_tool)
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        controller._class_tool, controller._previous_class_map_tool = class_tool, "identify"
+        controller.release_map_tools()
+        assert canvas.mapTool() == "identify"
+
+    def test_pixel_picker_leaves_the_map_and_nothing_else_is_made(self, ctrl_module, monkeypatch):
+        pixel_tool = object()
+        canvas = _Canvas(pixel_tool)
+        controller = self._controller(ctrl_module, monkeypatch, canvas)
+        controller._pixel_tool, controller._previous_map_tool = pixel_tool, "pan"
+        controller.release_map_tools()
+        assert canvas.mapTool() == "pan"
+        assert controller._segmentation is None and controller._extras is None  # not made only to be stopped
+
 
 @pytest.mark.unit
 class TestFailuresCacheAndTeardown:
