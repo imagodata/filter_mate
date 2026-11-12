@@ -381,6 +381,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
             slot = getattr(self, name, None)
             if slot is not None:
                 slot.cancel()
+        # The reads of the dock hold the same lease of the wait cursor (_remote_loading) and deliver to its
+        # current layer only: once it changed they would keep the cursor up for nothing (30 to 120 s on a slow
+        # service), and the provider busy.
+        dock_reads = getattr(getattr(self, '_dockwidget', None), '__dict__', {})
+        for name, slot in list(dock_reads.items()):
+            if name in ('_debounced_feature_query', '_remote_expression_query') or name.startswith('_extent_query_'):
+                slot.cancel()
 
     def _remote_loading(self, loading):
         """Expose a translated loading state in the dock."""
