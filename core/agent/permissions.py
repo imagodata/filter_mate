@@ -109,15 +109,15 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
     """The layer references a call changes; None when it changes every layer (a clear without layers)."""
     if name == "rename_layer" and arguments.get("group"):
         return []  # a group of the tree, not a layer
-    references: List[str] = []
+    references: List[str] = []  # "" too: it resolves to the first layer whose name is empty
     for key in CHANGED_LAYERS.get(name, ()):
         value = arguments.get(key)
-        if isinstance(value, str) and value:
+        if isinstance(value, str):
             references.append(value)
         elif isinstance(value, list):
-            references.extend(item for item in value if isinstance(item, str) and item)
+            references.extend(item for item in value if isinstance(item, str))
     source = arguments.get("source_layer")
-    if name == "cross_filter" and isinstance(source, str) and source and (
+    if name == "cross_filter" and isinstance(source, str) and (
             arguments.get("filter_source") or _keeps_points(arguments.get("point_cloud_criteria"))):
         references.append(source)
     if not references and name in ALL_WHEN_NONE:
@@ -213,7 +213,7 @@ class PermissionPolicy:
                 protected = list(self.protector.names())
             else:
                 protected = [found for found in (self.protector.name_of(reference) for reference in references)
-                             if found]
+                             if found is not None]  # a protected layer may have an empty name
         except Exception:  # a project closing, favorites that cannot be read: refused rather than unchecked
             return PROTECTION_UNREADABLE
         if not protected:

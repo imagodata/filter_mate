@@ -259,6 +259,20 @@ class TestProtectedLayers:
                           {"point_cloud_criteria": None}, {"point_cloud_criteria": ""}):
             assert changed_layers("cross_filter", {"source_layer": "s", "target_layers": ["a"], **arguments}) == ["a"]
 
+    def test_an_empty_reference_is_checked_as_qgis_resolves_it(self):
+        # resolve_layer("") finds the first layer whose name is empty: the check must see it too.
+        from core.agent.permissions import changed_layers
+        assert changed_layers("remove_layers", {"layers": [""]}) == [""]
+        assert changed_layers("cross_filter", {"source_layer": "", "target_layers": [""], "filter_source": True}) \
+            == ["", ""]
+        assert changed_layers("set_layer_style", {"layer": ""}) == [""]
+        assert changed_layers("clear_filters", {"layers": []}) is None
+        policy = PermissionPolicy(protector=Protector(""))  # a protected layer whose name is empty
+        for name, arguments in (("remove_layers", {"layers": [""]}), ("geometry_filter", {"target_layers": [""]}),
+                                ("cross_filter", {"source_layer": "x", "target_layers": [""]}),
+                                ("point_cloud_filter", {"layers": [""]})):
+            assert "protected ''" in policy.protection_refusal(name, arguments), name
+
     def test_a_protected_source_masked_or_filtered_by_a_cross_filter_is_refused(self):
         from core.agent.permissions import PROTECTED
         executor = ToolExecutor(chat_tools(), {})
