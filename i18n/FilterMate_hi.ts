@@ -75,12 +75,12 @@
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
         <source>applied at once</source>
-        <translation>तुरंत लागू होता है</translation>
+        <translation>तुरंत लागू</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
         <source>used from the next filter or export</source>
-        <translation>अगले फ़िल्टर या निर्यात से लागू होता है</translation>
+        <translation>अगले फ़िल्टर या निर्यात से लागू</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
@@ -95,10 +95,10 @@
 Why: {}
 
 Do you agree?</source>
-        <translation>एजेंट FilterMate की इन सेटिंग्स को बदलना चाहता है (ये सभी प्रोजेक्ट के लिए रहती हैं; टर्न को पूर्ववत करने पर ये पहले जैसी हो जाती हैं):
+        <translation>एजेंट FilterMate की इन सेटिंग्स को बदलना चाहता है (ये सभी प्रोजेक्ट पर लागू होती हैं; टर्न को पूर्ववत करने पर ये पहले जैसी हो जाती हैं):
 {}
 
-क्यों: {}
+कारण: {}
 
 क्या आप सहमत हैं?</translation>
     </message>

@@ -75,7 +75,7 @@
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
         <source>applied at once</source>
-        <translation>darhol qo'llanadi</translation>
+        <translation>darhol qo'llaniladi</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>

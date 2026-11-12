@@ -75,7 +75,7 @@
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
         <source>applied at once</source>
-        <translation>agad na ipinapatupad</translation>
+        <translation>agad na inilalapat</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1456"/>
@@ -95,10 +95,10 @@
 Why: {}
 
 Do you agree?</source>
-        <translation>Nais ng ahente na baguhin ang mga setting na ito ng FilterMate (nananatili ang mga ito sa lahat ng proyekto; ibinabalik sila ng pag-undo sa turn):
+        <translation>Nais ng ahente na baguhin ang mga setting na ito ng FilterMate (nalalapat ang mga ito sa lahat ng proyekto; maibabalik ang mga ito sa dati sa pamamagitan ng pag-undo sa turn na ito):
 {}
 
-Bakit: {}
+Dahilan: {}
 
 Sumasang-ayon po ba kayo?</translation>
     </message>

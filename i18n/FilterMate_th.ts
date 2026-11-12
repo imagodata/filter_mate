@@ -85,7 +85,7 @@
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
         <source>after restarting QGIS</source>
-        <translation>หลังรีสตาร์ท QGIS</translation>
+        <translation>หลังจากเริ่ม QGIS ใหม่</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1462"/>
@@ -95,7 +95,7 @@
 Why: {}
 
 Do you agree?</source>
-        <translation>เอเจนต์ต้องการเปลี่ยนการตั้งค่าของ FilterMate เหล่านี้ (ใช้กับทุกโปรเจกต์ การเลิกทำรอบนี้จะคืนค่าเดิม):
+        <translation>เอเจนต์ต้องการเปลี่ยนการตั้งค่าของ FilterMate เหล่านี้ (มีผลกับทุกโปรเจกต์ การเลิกทำรอบนี้จะคืนค่าเดิม):
 {}
 
 เหตุผล: {}

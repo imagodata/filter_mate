@@ -85,7 +85,7 @@
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1457"/>
         <source>after restarting QGIS</source>
-        <translation>QGISን እንደገና ከጀመሩ በኋላ</translation>
+        <translation>QGISን ዳግም ካስጀመሩ በኋላ</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1462"/>
@@ -95,7 +95,7 @@
 Why: {}
 
 Do you agree?</source>
-        <translation>ወኪሉ እነዚህን የFilterMate ቅንብሮች ለመቀየር ይፈልጋል (ለሁሉም ፕሮጀክቶች ይቆያሉ፤ ዙሩን መቀልበስ ወደነበሩበት ይመልሳቸዋል)፦
+        <translation>ወኪሉ እነዚህን የFilterMate ቅንብሮች ለመቀየር ይፈልጋል (በሁሉም ፕሮጀክቶች ላይ ተፈጻሚ ይሆናሉ፤ ዙሩን መቀልበስ ወደነበሩበት ይመልሳቸዋል)፦
 {}
 
 ምክንያት፦ {}
