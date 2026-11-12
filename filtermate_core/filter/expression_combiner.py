@@ -125,7 +125,9 @@ def combine_without_old_subset(new_expression: str, combine_operator: Optional[s
     """
     if (new_expression and new_expression.strip()
             and (combine_operator or '').strip().upper() == CombineOperator.NOT.value):
-        return f'NOT ( {_strip_where_prefix(new_expression)} )'
+        # On its own lines: a trailing ``-- comment`` of the expression would
+        # otherwise comment out the closing parenthesis.
+        return f'NOT (\n{_strip_where_prefix(new_expression)}\n)'
     return new_expression
 
 

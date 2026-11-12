@@ -833,11 +833,22 @@ class LayerExporter:
                     error_message=f"Cannot overwrite existing GPKG: {e}",
                 )
 
+        # 2026-11-12 (review): one table per layer even when two layers share a
+        # name (CreateOrOverwriteLayer replaced the first); GeoPackage table
+        # names are compared without the case.
+        table_names, used = [], set()
+        for layer in layer_objects:
+            name, index = layer.name(), 2
+            while name.lower() in used:
+                name, index = f"{layer.name()}_{index}", index + 1
+            used.add(name.lower())
+            table_names.append(name)
+
         for idx, layer in enumerate(layer_objects):
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = 'GPKG'
             options.fileEncoding = 'UTF-8'
-            options.layerName = layer.name()
+            options.layerName = table_names[idx]
             # First layer creates the file; subsequent layers append a new
             # table to the same GPKG.
             if idx == 0:
@@ -879,7 +890,7 @@ class LayerExporter:
         if save_styles:
             try:
                 from .gpkg_layer_tree_writer import write_layer_styles_to_gpkg
-                pairs = [(layer, layer.name()) for layer in layer_objects]
+                pairs = list(zip(layer_objects, table_names))
                 ok = write_layer_styles_to_gpkg(output_path, pairs)
                 if not ok:
                     logger.warning(

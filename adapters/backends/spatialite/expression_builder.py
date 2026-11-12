@@ -152,7 +152,8 @@ class SpatialiteExpressionBuilder(SpatialiteSqlBuilder):
             if old_subset and combine_operator:
                 if self._is_geometric_filter(old_subset):
                     self.log_info("Replacing geometric filter in old_subset")
-                    final_expression = expression
+                    # 2026-11-12 (review): replaced, AND NOT still excludes: NOT (new)
+                    final_expression = combine_without_old_subset(expression, combine_operator)
                 else:
                     final_expression = f"({old_subset}) {combine_operator} ({expression})"
             elif combine_operator and not old_subset:

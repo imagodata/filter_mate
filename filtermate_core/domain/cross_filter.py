@@ -140,7 +140,8 @@ def combine_subset(previous: Optional[str], new: str, operator: Optional[str]) -
         return new
     op = operator.strip().upper()
     if not previous:
-        return f"NOT ({new})" if op == "AND NOT" and new else new
+        # On its own lines: a trailing comment of ``new`` would hide the parenthesis
+        return f"NOT (\n{new}\n)" if op == "AND NOT" and new else new
     if op not in COMBINE_OPERATORS:
         return new
     if not new:

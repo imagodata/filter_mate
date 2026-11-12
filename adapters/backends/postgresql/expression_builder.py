@@ -112,7 +112,8 @@ class PostgreSQLExpressionBuilder(PostgreSQLSqlBuilder):
                 # Check if old subset contains geometric filter (should be replaced)
                 if self._is_geometric_filter(old_subset):
                     self.log_info("🔄 Replacing geometric filter in old_subset")
-                    final_expression = expression
+                    # 2026-11-12 (review): replaced, AND NOT still excludes: NOT (new)
+                    final_expression = combine_without_old_subset(expression, combine_operator)
                 else:
                     # Combine with attribute filter
                     final_expression = f"({old_subset}) {combine_operator} ({expression})"

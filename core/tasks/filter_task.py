@@ -358,6 +358,7 @@ class FilterEngineTask(QgsTask):
         self.provider_list = []
         self.expression = None
         self.source_qgis_expression = None
+        self.source_selection_expression = None
         self.is_field_expression = None
 
         self.has_feature_count_limit = True
@@ -1430,10 +1431,22 @@ class FilterEngineTask(QgsTask):
         # evaluate the source filter in QGIS (None: self.expression is readable)
         origins = getattr(self._attribute_executor, 'native_origins', None) or {}
         self.source_qgis_expression = origins.get(self.expression) if isinstance(self.expression, str) else None
+        self.source_selection_expression = result_obj.selection_expression
         if result_obj.is_field_expression:
             self.is_field_expression = result_obj.is_field_expression
 
         return result_obj.success
+
+    def _source_selection_qgis_expression(self):
+        """The QGIS expression the fallbacks of the source geometry read the source features with.
+
+        2026-11-12 (review): the new selection as written first. The source filter
+        is combined with the old subset (NOT (x) under AND NOT: every feature when
+        x keeps none, the only case these fallbacks run in), and the QGIS
+        expression of a combined native filter cannot be found again.
+        """
+        return (getattr(self, 'source_selection_expression', None)
+                or getattr(self, 'source_qgis_expression', None) or getattr(self, 'expression', None))
 
     def _initialize_source_subset_and_buffer(self):
         """Initialize source subset and buffer parameters. Delegates to InitializationHandler."""
@@ -1589,7 +1602,7 @@ class FilterEngineTask(QgsTask):
         result = self._source_geom_preparer.prepare_spatialite_source_geom(
             source_layer=self.source_layer, task_parameters=self.task_parameters,
             is_field_expression=getattr(self, 'is_field_expression', None),
-            expression=getattr(self, 'source_qgis_expression', None) or getattr(self, 'expression', None),
+            expression=self._source_selection_qgis_expression(),
             param_source_new_subset=getattr(self, 'param_source_new_subset', None),
             param_buffer_value=getattr(self, 'param_buffer_value', None),
             param_buffer_segments=getattr(self, 'param_buffer_segments', 5),
@@ -1604,6 +1617,7 @@ class FilterEngineTask(QgsTask):
             geometry_to_wkt_fn=self._geometry_to_wkt,
             get_optimization_thresholds_fn=self._get_optimization_thresholds,
             predicates=self._predicate_names(),
+            selection_reads_whole_layer=self._get_source_combine_operator() not in ('AND', 'AND NOT'),
         )
         if result['success']:
             self.spatialite_source_geom = result['wkt']
@@ -1716,7 +1730,7 @@ class FilterEngineTask(QgsTask):
         result = self._source_geom_preparer.prepare_ogr_source_geom(
             source_layer=self.source_layer, task_parameters=self.task_parameters,
             is_field_expression=getattr(self, 'is_field_expression', None),
-            expression=getattr(self, 'source_qgis_expression', None) or getattr(self, 'expression', None),
+            expression=self._source_selection_qgis_expression(),
             param_source_new_subset=getattr(self, 'param_source_new_subset', None),
             has_to_reproject_source_layer=self.has_to_reproject_source_layer,
             source_layer_crs_authid=self.source_layer_crs_authid,
@@ -2092,6 +2106,13 @@ class FilterEngineTask(QgsTask):
             self.message = result['message']
         if result.get('failed_layer_names'):
             self._failed_layer_names = result['failed_layer_names']
+        if result.get('source_refused'):
+            # 2026-11-12 (review): the source subset queued before the refusal was
+            # applied by finished() (0 feature) with no history entry: Undo did not
+            # bring the source back. A refused filter changes nothing.
+            self._pending_subset_requests = [
+                request for request in getattr(self, '_pending_subset_requests', [])
+                if request[0] is not self.source_layer]
         return result.get('success', False)
 
     def execute_unfiltering(self) -> bool:

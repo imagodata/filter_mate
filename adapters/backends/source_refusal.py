@@ -7,8 +7,9 @@ read), the SpatiaLite and OGR source preparations fell back to every feature
 of the source layer: the source showed 0 features while the targets kept all
 that touched the whole source, with a warning in the log only. PostgreSQL
 writes the source filter into its EXISTS sub-query, so a source that keeps
-nothing never matches there. The file backends now refuse the targets with
-this error, shown to the user, instead of using the whole layer.
+nothing never matches there. The file backends now refuse the filter with
+this error, shown to the user, instead of using the whole layer; nothing is
+filtered, the source keeps its previous filter too.
 """
 
 
@@ -35,9 +36,9 @@ def source_selection_refusal(layer_name: str, unreadable: bool = False) -> Sourc
     if unreadable:
         text = QCoreApplication.translate(
             'SourceSelection',
-            "The source filter of '{0}' cannot be evaluated: the target layers were not filtered.")
+            "The source filter of '{0}' cannot be evaluated: nothing was filtered.")
     else:
         text = QCoreApplication.translate(
             'SourceSelection',
-            "The source filter of '{0}' keeps no feature: the target layers were not filtered.")
+            "The source filter of '{0}' keeps no feature: nothing was filtered.")
     return SourceSelectionError(text.format(layer_name))

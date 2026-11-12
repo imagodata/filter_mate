@@ -96,8 +96,8 @@ class _Builder:
     def _combine_with_old_subset(self, old_subset, combine_operator, new_filter):
         if old_subset and combine_operator and not self._is_geometric_filter(old_subset):
             return f"({old_subset}) {combine_operator} ({new_filter})"
-        if not old_subset and combine_operator == "AND NOT":
-            return f"NOT ( {new_filter} )"
+        if combine_operator == "AND NOT":  # no filter, or a spatial one replaced (the builder's rule)
+            return f"NOT (\n{new_filter}\n)"
         return new_filter
 
 
@@ -171,14 +171,33 @@ def test_and_not_without_a_filter_refuses_a_partial_result(remote, old_subset):
     assert builder.last_error.endswith("AND NOT would keep the features not read; the previous filter is kept.")
 
 
-def test_and_not_that_replaces_a_spatial_filter_keeps_the_partial_keys(remote):
-    """A previous spatial filter is replaced by the keys: incomplete, not wrong."""
+def test_and_not_that_replaces_a_spatial_filter_refuses_a_partial_result(remote):
+    """2026-11-12 (review): a previous spatial filter is replaced, and AND NOT then writes NOT (keys): partial
+    keys would keep the features never read. It used to write the partial keys themselves (the opposite)."""
     old_subset = 'intersects($geometry, geom_from_wkt(\'POINT(0 0)\'))'
     applied, queued, builder = _apply(remote, PARTIAL, old_subset, "AND NOT")
-    assert applied is True
-    assert queued == ['"id" IN (1)']
-    assert remote.marked == [(True, '"id" IN (1)')]
-    assert "Partial result: the remote feature limit was reached." in builder.user_warnings
+    assert applied is False and queued == []
+    assert builder.last_error.endswith("AND NOT would keep the features not read; the previous filter is kept.")
+
+
+def test_and_not_on_an_ogc_api_target_without_filter_is_refused(remote, monkeypatch):
+    """2026-11-12 (review): an OGC API Features target wrote the keys themselves under AND NOT (no NOT can be
+    proved there), as an operator other than AND already was with a previous filter."""
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.source_capability_probe"], "capability_for_layer",
+                        lambda layer: SimpleNamespace(provider_key="oapif"))
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.remote_materializer"], "unfiltered_snapshot",
+                        lambda layer: layer, raising=False)
+    original = _Builder.__init__
+
+    def init(self, queued):
+        original(self, queued)
+        self.task_params["_remote_subset_validator"] = lambda layer, expression: True  # the server takes it
+
+    monkeypatch.setattr(_Builder, "__init__", init)
+    outcome = Outcome(keys=(1, 3), complete=True, fetched=3, reason="")
+    applied, queued, builder = _apply(remote, outcome, None, "AND NOT")
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("The service filter cannot be proved complete")
 
 
 @pytest.mark.parametrize("operator, expected", [
@@ -205,4 +224,4 @@ def test_a_complete_result_without_a_filter_writes_not(remote):
     outcome = Outcome(keys=(1, 3), complete=True, fetched=3, reason="")
     applied, queued, builder = _apply(remote, outcome, None, "AND NOT")
     assert applied is True
-    assert queued == ['NOT ( "id" IN (1, 3) )']
+    assert queued == ['NOT (\n"id" IN (1, 3)\n)']

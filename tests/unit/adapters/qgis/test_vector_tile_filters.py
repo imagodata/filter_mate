@@ -41,6 +41,11 @@ def test_tile_filter_combination(previous, operator, expected):
     assert load().combined_tile_filter(previous, 'intersects($geometry, x)', operator) == expected
 
 
+def test_and_not_nothing_keeps_the_previous_tile_filter():
+    """2026-11-12 (review): an empty expression became TRUE, and (previous) AND NOT (TRUE) hid everything."""
+    assert load().combined_tile_filter('"kind" = 1', '', 'AND NOT') == '"kind" = 1'
+
+
 def test_vertex_budget_refuses_instead_of_changing_geometry():
     class Shape:
         def constGet(self): return self

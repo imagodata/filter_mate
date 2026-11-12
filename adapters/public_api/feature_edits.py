@@ -215,6 +215,10 @@ def update_features(layer: str, values: Optional[Dict[str, Any]] = None, formula
     except Exception:
         _abandon(found, opened)
         raise
+    if not changed:
+        # 2026-11-12 (review): every change refused left the editing mode open
+        _abandon(found, opened)
+        raise ValueError(f"no feature of '{found.name()}' could be changed")
     found.endEditCommand()
     return _answer(found, changed=changed)
 
