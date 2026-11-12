@@ -38,8 +38,14 @@ def _tr(text):
     return result if isinstance(result, str) else text
 
 
-def _tree(node, depth=0, budget=None):
-    """Copy the supported AST shapes; unknown nodes retain their source text."""
+def _tree(node, depth=0, budget=None, extended=False, cache=None):
+    """Copy the supported AST shapes; unknown nodes retain their source text.
+
+    ``extended`` (native SQL of a database / file source) also copies
+    arithmetic, concatenation, BETWEEN, CASE and function calls; the server
+    dialects never see those shapes. ``cache`` is shared by the nodes of one
+    tree (the list of QGIS functions is read once).
+    """
     from qgis.core import (
         QgsExpressionNodeBinaryOperator as Binary,
         QgsExpressionNodeColumnRef as Column,
@@ -54,8 +60,11 @@ def _tree(node, depth=0, budget=None):
         raise Unsupported('Expression complexity limit exceeded')
     text = node.dump()
 
+    if cache is None:
+        cache = {}
+
     def child(value):
-        return _tree(value, depth + 1, budget)
+        return _tree(value, depth + 1, budget, extended, cache)
 
     def enum(owner, scope, name):
         scoped = getattr(owner, scope, None)
@@ -79,7 +88,47 @@ def _tree(node, depth=0, budget=None):
         if node.op() == enum(Unary, 'UnaryOperator', 'uoMinus'):
             operand = child(node.operand())
             if operand.kind == 'literal' and isinstance(operand.value, (int, float)):
+                if extended and isinstance(operand.value, bool):
+                    return Node('unsupported', text, text=text)  # -TRUE is an error in QGIS
                 return Node('literal', -operand.value, text=text)
+            if extended:
+                return Node('unary', '-', (operand,), text)
+    if extended:
+        return _extended_tree(node, child, enum, text, cache)
+    return Node('unsupported', text, text=text)
+
+
+def _extended_tree(node, child, enum, text, cache):
+    """Arithmetic, concatenation, BETWEEN, CASE and function calls (native SQL only)."""
+    import qgis.core as core
+    Binary, Function, Condition = (core.QgsExpressionNodeBinaryOperator, core.QgsExpressionNodeFunction,
+                                   core.QgsExpressionNodeCondition)
+    if isinstance(node, Binary):
+        for name, operator in (('boPlus', '+'), ('boMinus', '-'), ('boMul', '*'), ('boDiv', '/'),
+                               ('boConcat', '||')):
+            if node.op() == enum(Binary, 'BinaryOperator', name):
+                return Node('binary', operator, (child(node.opLeft()), child(node.opRight())), text)
+    between = getattr(core, 'QgsExpressionNodeBetweenOperator', None)  # QGIS >= 3.26
+    if between is not None and isinstance(node, between):
+        return Node('between', bool(node.negate()),
+                    (child(node.node()), child(node.lowerBound()), child(node.higherBound())), text)
+    if isinstance(node, Condition):
+        parts = []
+        for condition in node.conditions():
+            parts += [child(condition.whenExp()), child(condition.thenExp())]
+        otherwise = node.elseExp()
+        if otherwise is not None:
+            parts.append(child(otherwise))
+        return Node('condition', otherwise is not None, tuple(parts), text)
+    if isinstance(node, Function):
+        if 'functions' not in cache:
+            cache['functions'] = core.QgsExpression.Functions()
+        functions = cache['functions']
+        index = node.fnIndex()
+        if 0 <= index < len(functions):
+            arguments = node.args()
+            return Node('function', functions[index].name(),
+                        tuple(child(item) for item in (arguments.list() if arguments is not None else ())), text)
     return Node('unsupported', text, text=text)
 
 

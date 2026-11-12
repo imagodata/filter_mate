@@ -357,6 +357,7 @@ class FilterEngineTask(QgsTask):
         self.layers = {}
         self.provider_list = []
         self.expression = None
+        self.source_qgis_expression = None
         self.is_field_expression = None
 
         self.has_feature_count_limit = True
@@ -1411,6 +1412,10 @@ class FilterEngineTask(QgsTask):
 
         # Apply results to task instance
         self.expression = result_obj.expression
+        # The QGIS expression of a native SQL subset, for the fallbacks that
+        # evaluate the source filter in QGIS (None: self.expression is readable)
+        origins = getattr(self._attribute_executor, 'native_origins', None) or {}
+        self.source_qgis_expression = origins.get(self.expression) if isinstance(self.expression, str) else None
         if result_obj.is_field_expression:
             self.is_field_expression = result_obj.is_field_expression
 
@@ -1572,7 +1577,7 @@ class FilterEngineTask(QgsTask):
         result = self._source_geom_preparer.prepare_spatialite_source_geom(
             source_layer=self.source_layer, task_parameters=self.task_parameters,
             is_field_expression=getattr(self, 'is_field_expression', None),
-            expression=getattr(self, 'expression', None),
+            expression=getattr(self, 'source_qgis_expression', None) or getattr(self, 'expression', None),
             param_source_new_subset=getattr(self, 'param_source_new_subset', None),
             param_buffer_value=getattr(self, 'param_buffer_value', None),
             param_buffer_segments=getattr(self, 'param_buffer_segments', 5),
@@ -1699,7 +1704,7 @@ class FilterEngineTask(QgsTask):
         result = self._source_geom_preparer.prepare_ogr_source_geom(
             source_layer=self.source_layer, task_parameters=self.task_parameters,
             is_field_expression=getattr(self, 'is_field_expression', None),
-            expression=getattr(self, 'expression', None),
+            expression=getattr(self, 'source_qgis_expression', None) or getattr(self, 'expression', None),
             param_source_new_subset=getattr(self, 'param_source_new_subset', None),
             has_to_reproject_source_layer=self.has_to_reproject_source_layer,
             source_layer_crs_authid=self.source_layer_crs_authid,
