@@ -1592,6 +1592,8 @@ class AgentChatController(QObject):
         for number, call in enumerate(calls[:MAX_LISTED], 1):
             detail = one_line(self._run_detail(call), 160)
             lines.append(f"{number}. {one_line(self._describe(call), 160)}" + (f" — {detail}" if detail else ""))
+            if call.name == "change_settings":  # each setting before and after, as when it is asked alone
+                lines.extend(f"    {line}" for line in self._settings_lines(call)[0][:MAX_LISTED])
         if len(calls) > MAX_LISTED:
             lines.append(f"(+{len(calls) - MAX_LISTED})")
         text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
@@ -1669,19 +1671,22 @@ class AgentChatController(QObject):
             return False
 
     @staticmethod
-    def _settings_text(call: ToolCallPart) -> str:
-        """Each setting before and after, as the user reads them before saying yes."""
+    def _settings_lines(call: ToolCallPart):
+        """Each setting the call changes, before and after, one line each; the problem when the call is refused."""
         try:
             rows = plugin_settings.planned(call.arguments)
         except Exception as exc:  # the tool will answer the model why; the user sees what was asked
-            rows, problem = [], str(exc)
-        else:
-            problem = ""
+            return [], str(exc)
         effects = {"now": _tr("applied at once"), "next use": _tr("used from the next filter or export"),
                    "after restarting QGIS": _tr("after restarting QGIS")}
-        lines = [f"{one_line(row['where'], 120)}: {json.dumps(row['before'], ensure_ascii=False)} → "
-                 f"{json.dumps(row['after'], ensure_ascii=False)} ({effects.get(row['effect'], row['effect'])})"
-                 for row in rows if row["before"] != row["after"]]
+        return [f"{one_line(row['where'], 120)}: {json.dumps(row['before'], ensure_ascii=False)} → "
+                f"{json.dumps(row['after'], ensure_ascii=False)} ({effects.get(row['effect'], row['effect'])})"
+                for row in rows if row["before"] != row["after"]], ""
+
+    @classmethod
+    def _settings_text(cls, call: ToolCallPart) -> str:
+        """Each setting before and after, as the user reads them before saying yes."""
+        lines, problem = cls._settings_lines(call)
         listed = "\n".join(lines[:MAX_LISTED]) or one_line(problem, 300)
         return _tr("The agent wants to change these settings of FilterMate (they stay for every project; undoing "
                    "the turn puts them back):\n{}\n\nWhy: {}\n\nDo you agree?").format(
