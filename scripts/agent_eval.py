@@ -642,7 +642,8 @@ def fits(case: Dict[str, Any], names) -> bool:
     return any(all(step["tool"] in names for step in steps) for steps in (case.get("expect") or [[]]))
 
 
-def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False) -> Dict[str, Any]:
+def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
+             prompt: str = "") -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict. ``filtering``: the tools a local model gets by default."""
     project = SimulatedProject(case.get("setup"))
     # Off by default (the expert mode: a case says "expert": true to turn it on), or nothing to draw in a simulated
@@ -652,7 +653,8 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False)
                   and (not filtering or tool.name in FILTERING_TOOLS))
     offered = {tool.name for tool in tools}
     tools = tuple(skill_tool(offered) if tool.name == "load_skill" else tool for tool in tools)
-    session = AgentSession(provider, tools, SYSTEM_PROMPT + (FILTERING_NOTE if filtering else ""), AgentLimits())
+    session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else ""),
+                           AgentLimits())
     project.offered = offered
     executor = ToolExecutor(tools, project.handlers())
     # As the chat sends it: the state of the project after the request.
@@ -695,6 +697,8 @@ def expected_script(case: Dict[str, Any]) -> List[Dict[str, Any]]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--live", action="store_true", help="call the provider (costs money)")
+    parser.add_argument("--prompt", choices=("current", "legacy"), default="current",
+                        help="legacy: the system prompt of 5.1.0, every domain in it (the A/B of the skills)")
     parser.add_argument("--provider", choices=sorted(PRESETS), default="anthropic")
     parser.add_argument("--model", help="model name; required with --live")
     parser.add_argument("--base-url", help="instead of the provider's usual address")
@@ -712,12 +716,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         api_key=os.environ.get(KEY_VARIABLE, "") if args.live else ""))
     results = []
     filtering = args.tools == "filtering"
+    legacy_prompt = ""
+    if args.prompt == "legacy":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from agent_eval_prompts import LEGACY_SYSTEM_PROMPT  # noqa: E402
+        legacy_prompt = LEGACY_SYSTEM_PROMPT
     for case in load_cases(args.case):
         if filtering and not fits(case, FILTERING_TOOLS):
             continue
         transport = UrllibTransport() if args.live else ScriptedTransport(expected_script(case))
         started = time.monotonic()
-        result = run_case(case, provider, transport, filtering)
+        result = run_case(case, provider, transport, filtering, prompt=legacy_prompt)
         result["seconds"] = round(time.monotonic() - started, 1)
         results.append(result)
         status = "PASS" if result["passed"] else "FAIL"
