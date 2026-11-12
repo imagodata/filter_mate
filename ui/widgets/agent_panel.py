@@ -20,7 +20,7 @@ from qgis.PyQt.QtWidgets import (
     QTabWidget, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel
+from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
@@ -443,7 +443,8 @@ class AgentPanel(QFrame):
             state = "" if not layers else (_tr("applied") if turn.get("applied") else _tr("undone"))
             item = QListWidgetItem()
             item.setData(_TURN_ROLE, turn.get("request") or "")
-            item.setToolTip(f"{when}  {request}\n{layers or _tr('no change')}" + (f" · {state}" if state else ""))
+            item.setToolTip(plain_tooltip(f"{when}  {request}\n{layers or _tr('no change')}"
+                                          + (f" · {state}" if state else "")))
             self._history_row(item, when, request, layers or _tr("no change"), state, bool(turn.get("applied")),
                               palette, dark)
             if position == last_applied:  # the steps of the last request can be undone one by one
@@ -451,7 +452,7 @@ class AgentPanel(QFrame):
                     step = QListWidgetItem()
                     step.setData(_TURN_ROLE, "")
                     step.setData(_STEP_ROLE, number)
-                    step.setToolTip(label)
+                    step.setToolTip(plain_tooltip(label))
                     self._history_row(step, "", f"{number + 1}. {label}", "", "", True, palette, dark, step=True)
         self.history_list.scrollToBottom()
         self.history_count.setText(_tr("this project · {} turn(s)").format(len(turns)))
@@ -848,8 +849,13 @@ class AgentPanel(QFrame):
 class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
-    def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="") -> None:
+    def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="",
+                 project_layers=(), tools=()) -> None:
         super().__init__(parent)
+        # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
+        self._tools = list(tools)
+        # (layer id, name, protected) of the open project, for the protected layers of the Autonomy tab.
+        self._project_layers = list(project_layers)
         self.setProperty(OWN_STYLE_PROPERTY, True)  # styled as the mockup draws it: the dock must not reset it
         self.setWindowTitle(_tr("FilterMate agent"))
         self._tester = tester
@@ -964,6 +970,8 @@ class AgentSettingsDialog(QDialog):
         self.tabs.addTab(general, _tr("Provider"))
         self.tabs.addTab(self._build_sources(values), _tr("Sources"))
         self.tabs.addTab(self._build_autonomy(values), _tr("Autonomy"))
+        if self._tools:
+            self.tabs.addTab(self._build_tools(values), _tr("Tools"))
         self.tabs.addTab(self._build_applications(values), _tr("Other applications"))
         if mcp_error:
             self.mcp_result.setText(_tr("The MCP server could not start: {}").format(mcp_error))
@@ -1029,8 +1037,75 @@ class AgentSettingsDialog(QDialog):
         layout.addSpacing(10)
         layout.addWidget(self.expert_python)
         layout.addWidget(self._expert_note)
+        layout.addSpacing(10)
+        protected_title = QLabel(_tr("LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)"), page)
+        protected_title.setObjectName("label_agent_settings_heading")
+        self.protected_layers = QListWidget(page)
+        self.protected_layers.setObjectName("listWidget_agent_protected_layers")
+        self.protected_layers.setMaximumHeight(140)
+        for layer_id, name, protected in self._project_layers:
+            item = QListWidgetItem(name, self.protected_layers)
+            item.setData(Qt.ItemDataRole.UserRole, layer_id)
+            item.setToolTip(plain_tooltip(layer_id))
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked if protected else Qt.CheckState.Unchecked)
+        protected_note = QLabel(_tr("The agent reads them and uses them as a source, but never changes them: no "
+                                    "filter, style, edit, field, join, new name or removal, whatever the level, in a "
+                                    "recipe too, and for other applications. Kept in the project."), page)
+        protected_note.setObjectName("label_agent_settings_sub")
+        protected_note.setWordWrap(True)
+        for widget in (protected_title, self.protected_layers, protected_note):
+            widget.setVisible(bool(self._project_layers))
+            layout.addWidget(widget)
         layout.addStretch(1)
         return page
+
+    def _build_tools(self, values) -> QWidget:
+        """Exceptions by tool: always ask, always allow or never, instead of what the level says."""
+        page = QWidget(self)
+        layout = QVBoxLayout(page)
+        hint = QLabel(_tr("By default each tool follows the level of the Autonomy tab. An exception holds for that "
+                          "tool alone: Never also hides it from the agent and refuses it in recipes and to other "
+                          "applications; Always allow does not go past the Advisor level, and Python code is still "
+                          "read and confirmed at every run."), page)
+        hint.setObjectName("label_agent_settings_note")
+        hint.setWordWrap(True)
+        rules = getattr(values, "rules", {}) or {}
+        self.tool_rules = QTreeWidget(page)
+        self.tool_rules.setObjectName("treeWidget_agent_tool_rules")
+        self.tool_rules.setColumnCount(3)
+        self.tool_rules.setHeaderLabels([_tr("Tool"), _tr("Kind"), _tr("Rule")])
+        self.tool_rules.setRootIsDecorated(False)
+        self._rule_boxes = {}
+        kinds = {0: _tr("reads"), 1: _tr("view"), 2: _tr("project"), 3: _tr("edit buffer"), 4: _tr("irreversible"),
+                 5: _tr("outside")}
+        choices = [("", _tr("As the level says")), ("ask", _tr("Always ask")), ("allow", _tr("Always allow")),
+                   ("never", _tr("Never"))]
+        for name, title, risk in sorted(self._tools, key=lambda row: (row[2], row[1].lower())):
+            item = QTreeWidgetItem(self.tool_rules, [title, kinds.get(risk, ""), ""])
+            item.setToolTip(0, name)
+            box = QComboBox(self.tool_rules)
+            for value, label in choices:
+                if value == "allow" and name == "run_pyqgis":
+                    continue  # code is confirmed at every run
+                box.addItem(label, value)
+            box.setCurrentIndex(max(box.findData(rules.get(name, "")), 0))
+            self.tool_rules.setItemWidget(item, 2, box)
+            self._rule_boxes[name] = box
+        self.tool_rules.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        layout.addWidget(hint)
+        layout.addWidget(self.tool_rules, 1)
+        return page
+
+    def chosen_tool_rules(self) -> dict:
+        """The exceptions chosen, without the tools left as the level says."""
+        return {name: box.currentData() for name, box in getattr(self, "_rule_boxes", {}).items() if box.currentData()}
+
+    def chosen_protected(self):
+        """The ids of the layers ticked as protected."""
+        return [self.protected_layers.item(row).data(Qt.ItemDataRole.UserRole)
+                for row in range(self.protected_layers.count())
+                if self.protected_layers.item(row).checkState() == Qt.CheckState.Checked]
 
     def chosen_autonomy(self) -> str:
         button = self.autonomy.checkedButton()
@@ -1177,7 +1252,7 @@ class AgentSettingsDialog(QDialog):
         item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
         item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         item.setData(0, _TURN_ROLE, source.id)
-        item.setToolTip(0, f"{source.note}\n{source.address}".strip())
+        item.setToolTip(0, plain_tooltip(f"{source.note}\n{source.address}".strip()))
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()

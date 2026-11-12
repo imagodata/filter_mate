@@ -64,6 +64,11 @@
         <translation>Zpět před: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Chcete-li otevřít nastavení, zastavte požadavek nebo počkejte na jeho dokončení.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Není co vrátit.</translation>
@@ -802,6 +807,32 @@ Souhlasíte?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Záložka: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Krok {} nebyl proveden: změnil by vrstvu, kterou jste chránili před agentem ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Krok {} nebyl proveden: vrstvy, které jste před agentem chránili, nelze přečíst ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>Krok {} nebyl proveden: vypnuli jste jeho nástroj pro agenta ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agent chce provést tyto akce ({}):
+{}
+
+Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -990,6 +1021,16 @@ Souhlasíte?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Offer every tool to the local model</source>
         <translation>Nabídnout místnímu modelu všechny nástroje</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Jen nástroje, které filtrují, pro pomalý počítač</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Zaškrtnuto: místní model dostane jen nástroje, které čtou a filtrují projekt, takže při každém požadavku čte zhruba polovinu. Měřeno s qwen3.5:4b odpovídaly všechny nástroje stejně dobře nebo lépe.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
@@ -1380,6 +1421,91 @@ Souhlasíte?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ano, pro tuto konverzaci</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>VRSTVY CHRÁNĚNÉ PŘED AGENTEM (TENTO PROJEKT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agent je čte a používá jako zdroj, ale nikdy je nemění: žádný filtr, styl, úprava, pole, spojení, nový název ani odebrání, na jakékoli úrovni, ani v receptu, ani pro jiné aplikace. Uloženo v projektu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Vždy povolit</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Vždy se zeptat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Podle úrovně</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Ve výchozím nastavení se každý nástroj řídí úrovní z karty Autonomie. Výjimka platí jen pro daný nástroj: Nikdy ho navíc skryje před agentem a odmítne v receptech i pro jiné aplikace; Vždy povolit nepřekročí úroveň Poradce a kód Pythonu se při každém spuštění stále čte a potvrzuje.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Druh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Nikdy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Pravidlo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Nástroj</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Nástroje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>vyrovnávací paměť úprav</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>nevratné</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>vnější</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>čte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>zobrazení</translation>
     </message>
 </context>
 <context>
@@ -8138,6 +8264,16 @@ Rastr se kreslí tak, jak je na mapě, se svým stylem. SAM se instaluje jednou 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kliknutím na čtverec vpravo otestujete tuto vrstvu podle jejích centroidů</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nelze filtrovat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webová podkladová mapa (WMS / WMTS / XYZ, ArcGIS MapServer): pouze barvy, nelze ji filtrovat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

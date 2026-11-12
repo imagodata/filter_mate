@@ -49,7 +49,9 @@ class TestRiskClasses:
 
     def test_a_connector_that_changes_something_is_outside(self):
         assert risk_of(spec("mcp_x_send", open_world=True)) == OUTSIDE
-        assert risk_of(spec("mcp_x_read", open_world=True, read_only=True)) == READ
+        # A read of the plugin itself over the network (open data searches); a connector is never read only
+        # (test_mcp_and_sources.py).
+        assert risk_of(spec("search_x", open_world=True, read_only=True)) == READ
 
     def test_code_is_outside_whatever_its_flags(self):
         assert risk_of(spec("run_pyqgis")) == OUTSIDE
@@ -215,3 +217,299 @@ class TestEngineUnderALevel:
     def test_declined_answer_is_unchanged(self):
         _, _, session = run_calls(PermissionPolicy(STANDARD), "export", accept=False)
         assert session.messages[-1].parts[0].content == DECLINED
+
+
+class Protector:
+    """Layers protected by id or name, as the adapter of the project answers."""
+
+    def __init__(self, *names):
+        self._names = list(names)
+
+    def name_of(self, reference):
+        reference = reference[:-3] if reference.endswith("_id") else reference
+        return reference if reference in self._names else None
+
+    def names(self):
+        return list(self._names)
+
+
+class TestProtectedLayers:
+    def test_the_layers_a_call_changes(self):
+        from core.agent.permissions import changed_layers
+        assert changed_layers("apply_filter", {"layer_name": "communes"}) == ["communes"]
+        assert changed_layers("cross_filter", {"source_layer": "routes", "target_layers": ["a", "b"]}) == ["a", "b"]
+        assert changed_layers("join_layers", {"layer": "a", "join_layer": "b"}) == ["a"]
+        assert changed_layers("zoom_to", {"layer": "a"}) == []
+        assert changed_layers("rename_layer", {"layer": "Fond", "group": True}) == []
+        assert changed_layers("clear_filters", {}) is None and changed_layers("clear_filters", {"layers": []}) is None
+
+    def test_a_cross_filter_changes_its_source_when_it_masks_it_or_filters_its_points(self):
+        from core.agent.permissions import changed_layers
+        # filter_source masks a raster source; point cloud criteria stay in the subset of the source after the run.
+        assert changed_layers("cross_filter", {"source_layer": "mnt", "target_layers": ["a"], "filter_source": True}) \
+            == ["a", "mnt"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": [],
+                                               "point_cloud_criteria": {"classes": [6]}}) == ["lidar"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": ["a"],
+                                               "point_cloud_criteria": {"z_min": 0}}) == ["a", "lidar"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": ["a"],
+                                               "point_cloud_criteria": "Classification = 6"}) == ["a", "lidar"]
+        # Criteria that keep nothing in particular, or no mask: the source is only read.
+        for arguments in ({"filter_source": False}, {"point_cloud_criteria": {"classes": [], "expression": " "}},
+                          {"point_cloud_criteria": None}, {"point_cloud_criteria": ""}):
+            assert changed_layers("cross_filter", {"source_layer": "s", "target_layers": ["a"], **arguments}) == ["a"]
+
+    def test_an_empty_reference_is_checked_as_qgis_resolves_it(self):
+        # resolve_layer("") finds the first layer whose name is empty: the check must see it too.
+        from core.agent.permissions import changed_layers
+        assert changed_layers("remove_layers", {"layers": [""]}) == [""]
+        assert changed_layers("cross_filter", {"source_layer": "", "target_layers": [""], "filter_source": True}) \
+            == ["", ""]
+        assert changed_layers("set_layer_style", {"layer": ""}) == [""]
+        assert changed_layers("clear_filters", {"layers": []}) is None
+        policy = PermissionPolicy(protector=Protector(""))  # a protected layer whose name is empty
+        for name, arguments in (("remove_layers", {"layers": [""]}), ("geometry_filter", {"target_layers": [""]}),
+                                ("cross_filter", {"source_layer": "x", "target_layers": [""]}),
+                                ("point_cloud_filter", {"layers": [""]})):
+            assert "protected ''" in policy.protection_refusal(name, arguments), name
+
+    def test_a_protected_source_masked_or_filtered_by_a_cross_filter_is_refused(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre"))
+        for extra in ({"filter_source": True}, {"point_cloud_criteria": {"classes": [6]}}):
+            call = ToolCallPart("c", "cross_filter", {"source_layer": "cadastre", "target_layers": ["routes"],
+                                                      "predicates": ["Intersect"], **extra})
+            assert executor.verdict(call, policy) == PROTECTED, extra
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_a_change_of_a_protected_layer_is_refused_at_every_level(self, level):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(level, granted=("apply_filter",), protector=Protector("cadastre"))
+        call = ToolCallPart("c", "apply_filter", {"layer_name": "cadastre_id", "expression": '"a" = 1'})
+        assert executor.verdict(call, policy) == PROTECTED
+        refusal = ToolExecutor.refused(call, policy).content
+        assert "'cadastre'" in refusal and "protected" in refusal
+
+    def test_reading_using_as_source_and_showing_stay_allowed(self):
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(STANDARD, protector=Protector("cadastre"))
+        for name, arguments in (
+                ("cross_filter", {"source_layer": "cadastre", "target_layers": ["routes"], "predicates": ["Intersect"]}),
+                ("zoom_to", {"layer": "cadastre"}), ("set_layers_visibility", {"layers": ["cadastre"], "visible": False}),
+                ("join_layers", {"layer": "routes", "join_layer": "cadastre", "target_field": "a", "join_field": "a"})):
+            call = ToolCallPart("c", name, arguments)
+            assert executor.verdict(call, policy) == RUN, name
+
+    def test_a_clear_is_refused_on_a_protected_layer_and_on_every_layer(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        call = ToolCallPart("c", "clear_filters", {"layers": ["routes", "cadastre"]})
+        assert executor.verdict(call, PermissionPolicy(protector=Protector("cadastre"))) == PROTECTED
+        assert executor.verdict(call, PermissionPolicy(protector=Protector())) == RUN
+        # The chat asks for layers; another caller (REST) may clear them all: every protected layer counts then.
+        assert "'cadastre'" in PermissionPolicy(protector=Protector("cadastre")).protection_refusal("clear_filters", {})
+
+    def test_without_protector_nothing_changes_and_the_advisor_text_stays(self):
+        call = ToolCallPart("c", "apply_filter", {"layer_name": "a", "expression": "1"})
+        assert ToolExecutor.refused(call, PermissionPolicy(ADVISOR)).content == ADVISOR_REFUSAL
+        assert ToolExecutor.refused(call).content == ADVISOR_REFUSAL
+
+    def test_the_engine_answers_the_protection(self):
+        tools = [spec("read", read_only=True), ToolSpec("apply_filter", "A tool.", EMPTY)]
+        session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+        seen = []
+        handlers = {"read": lambda a: seen.append("read") or {}, "apply_filter": lambda a: seen.append("f") or {}}
+        transport, listener = Transport(), Listener(True)
+        engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(),
+                            policy=PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre")))
+        engine.send("go")
+        transport.emit(turn(STOP_TOOL_USE, ToolCallPart("c1", "apply_filter", {"layer_name": "cadastre"})))
+        assert seen == [] and not [entry for entry in listener.log if entry[0] == "confirm"]
+        assert "'cadastre'" in session.messages[-1].parts[0].content
+
+
+class TestProtectedFavorites:
+    def test_a_favorite_on_a_protected_layer_is_refused(self):
+        from core.agent.permissions import PROTECTED
+
+        class WithFavorites(Protector):
+            def favorite_layers(self, favorite_id):
+                return {"fav-1": ["cadastre_id"], "fav-2": ["routes_id"]}.get(favorite_id, [])
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithFavorites("cadastre"))
+        assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}), policy) == PROTECTED
+        assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-2"}), policy) == RUN
+        assert "'cadastre'" in ToolExecutor.refused(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}),
+                                                    policy).content
+
+    def test_protected_layers_that_cannot_be_read_refuse_a_change_never_a_read(self):
+        from core.agent.permissions import PROTECTED, PROTECTION_UNREADABLE
+
+        class Unreadable:
+            def name_of(self, reference):
+                raise RuntimeError("the project is closing")
+
+            names = favorite_layers = name_of
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Unreadable())
+        for name, arguments in (("apply_filter", {"layer_name": "a", "expression": "1"}),
+                                ("clear_filters", {"layers": ["a"]}), ("remove_layers", {"layers": ["a"]}),
+                                ("apply_favorite", {"favorite_id": "f"})):
+            call = ToolCallPart("c", name, arguments)
+            assert executor.verdict(call, policy) == PROTECTED, name
+            assert ToolExecutor.refused(call, policy).content == PROTECTION_UNREADABLE
+        assert policy.protection_refusal("clear_filters", {}) == PROTECTION_UNREADABLE  # every layer (REST)
+        for name, arguments in (("list_layers", {}), ("zoom_to", {"layer": "a"}),
+                                ("cross_filter", {"source_layer": "a", "target_layers": [], "predicates": ["Intersect"]})):
+            assert policy.protection_refusal(name, arguments) == "", name
+
+    def test_a_map_theme_that_would_restyle_a_protected_layer_is_refused(self):
+        from core.agent.permissions import PROTECTED, changes_layers
+        read = []
+
+        class WithThemes(Protector):
+            def theme_layers(self, name):
+                read.append(name)
+                return {"Cadastre": ["cadastre_id"], "Routes": ["routes_id"]}.get(name, [])
+
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithThemes("cadastre"))
+        apply = ToolCallPart("c", "map_theme", {"action": "apply", "name": "Cadastre"})
+        assert executor.verdict(apply, policy) == PROTECTED
+        assert "'cadastre'" in ToolExecutor.refused(apply, policy).content
+        assert executor.verdict(ToolCallPart("c", "map_theme", {"action": "apply", "name": "Routes"}), policy) == RUN
+        read.clear()
+        for action in ("save", "remove", "list"):  # they change no layer: the theme is not even read
+            assert not changes_layers("map_theme", {"action": action, "name": "Cadastre"})
+            assert executor.verdict(ToolCallPart("c", "map_theme", {"action": action, "name": "Cadastre"}), policy) == RUN
+        assert read == []
+
+    def test_removing_a_layer_a_protected_layer_joins_is_refused(self):
+        # QGIS takes a removed layer out of the joins of the layers that join it.
+        class WithJoins(Protector):
+            def layers_joining(self, references):
+                return ["cadastre_id"] if "owners" in references else []
+
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithJoins("cadastre"))
+        assert "'cadastre'" in policy.protection_refusal("remove_layers", {"layers": ["owners"]})
+        assert policy.protection_refusal("remove_layers", {"layers": ["routes"]}) == ""
+        # Editing the joined layer writes nothing in the layer that joins it (upsert and cascade go the other way).
+        assert policy.protection_refusal("update_features", {"layer": "owners", "values": {"a": 1}}) == ""
+
+    def test_a_protector_without_favorites_lets_them_run(self):
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(protector=Protector("cadastre"))
+        assert executor.verdict(ToolCallPart("c", "apply_favorite", {"favorite_id": "fav-1"}), policy) == RUN
+
+
+class TestToolRules:
+    def names(self):
+        return {tool.name: tool for tool in chat_tools()}
+
+    def test_never_turns_a_tool_off_at_every_level(self):
+        from core.agent.permissions import TURNED_OFF
+        for level in LEVELS:
+            policy = PermissionPolicy(level, rules={"zoom_to": "never"})
+            assert policy.verdict(self.names()["zoom_to"]) == TURNED_OFF, level
+        executor = ToolExecutor(chat_tools(), {})
+        call = ToolCallPart("c", "zoom_to", {})
+        refusal = ToolExecutor.refused(call, PermissionPolicy(rules={"zoom_to": "never"})).content
+        assert "turned the tool 'zoom_to' off" in refusal
+        assert executor.verdict(call, PermissionPolicy(rules={"zoom_to": "never"})) == TURNED_OFF
+
+    def test_ask_asks_at_every_call_and_cannot_be_allowed_for_a_conversation(self):
+        policy = PermissionPolicy(AUTONOMOUS, granted=("apply_filter",), rules={"apply_filter": "ask"})
+        filter_tool = self.names()["apply_filter"]
+        assert policy.verdict(filter_tool) == ASK and not policy.grantable(filter_tool)
+        assert PermissionPolicy(rules={"list_layers": "ask"}).verdict(self.names()["list_layers"]) == ASK
+        assert PermissionPolicy(ADVISOR, rules={"apply_filter": "ask"}).verdict(filter_tool) == REFUSE
+        assert PermissionPolicy(ADVISOR, rules={"list_layers": "ask"}).verdict(self.names()["list_layers"]) == ASK
+
+    def test_allow_runs_without_asking_but_not_over_advisor_nor_for_code(self):
+        export = self.names()["export_layers"]
+        assert PermissionPolicy(STANDARD).verdict(export) == ASK
+        assert PermissionPolicy(STANDARD, rules={"export_layers": "allow"}).verdict(export) == RUN
+        assert PermissionPolicy(ADVISOR, rules={"export_layers": "allow"}).verdict(export) == REFUSE
+        code = spec("run_pyqgis", destructive=True)
+        assert PermissionPolicy(AUTONOMOUS, rules={"run_pyqgis": "allow"}).verdict(code) == ASK
+
+    def test_rules_that_cannot_be_read_are_left_out(self):
+        from core.agent.permissions import clean_rules
+        assert clean_rules({"a": "never", "b": "maybe", "undo_agent_step": "never", "run_pyqgis": "allow",
+                            "c": "ask"}) == {"a": "never", "c": "ask"}
+        assert clean_rules("nope") == {} and clean_rules(None) == {}
+
+    def test_the_agent_own_tools_ignore_rules(self):
+        policy = PermissionPolicy(rules={"add_project_note": "never"})
+        assert policy.verdict(next(tool for tool in CHAT_ONLY if tool.name == "add_project_note")) == RUN
+
+    def test_protection_comes_before_a_rule_that_allows(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre"), rules={"apply_filter": "allow"})
+        call = ToolCallPart("c", "apply_filter", {"layer_name": "cadastre", "expression": "1"})
+        assert executor.verdict(call, policy) == PROTECTED
+
+
+def test_a_tool_turned_off_and_left_out_is_still_answered_why():
+    from core.agent.permissions import TURNED_OFF
+    executor = ToolExecutor([spec("read", read_only=True)], {"read": lambda a: {}})
+    call = ToolCallPart("c", "apply_filter", {"layer_name": "a", "expression": "1"})
+    policy = PermissionPolicy(rules={"apply_filter": "never"})
+    assert executor.verdict(call, policy) == TURNED_OFF
+    assert "turned the tool 'apply_filter' off" in ToolExecutor.refused(call, policy).content
+    assert executor.verdict(call, PermissionPolicy()) == RUN  # unknown, and answered as unknown
+
+
+class ManyListener(Listener):
+    def __init__(self, accept=True):
+        super().__init__(accept)
+        self.many = []
+
+    def confirm_many(self, calls):
+        self.many.append([c.name for c in calls])
+        return self.accept
+
+
+def run_with(listener, policy, *calls):
+    tools = [spec("read", read_only=True), spec("write"), spec("other"), spec("run_pyqgis", destructive=True)]
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+    seen = []
+    handlers = {tool.name: (lambda name: lambda a: seen.append(name) or {})(tool.name) for tool in tools}
+    transport = Transport()
+    engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(), policy=policy)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, *calls))
+    return seen, session
+
+
+class TestOneQuestionForATurn:
+    def test_several_calls_asked_together(self):
+        listener = ManyListener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "read", {}),
+                           ToolCallPart("c2", "write", {}), ToolCallPart("c3", "other", {}))
+        assert listener.many == [["write", "other"]] and seen == ["read", "write", "other"]
+        assert not [entry for entry in listener.log if entry[0] == "confirm"]
+
+    def test_declined_together_runs_none_of_them(self):
+        listener = ManyListener(False)
+        seen, session = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
+                                 ToolCallPart("c2", "other", {}))
+        assert seen == [] and [part.content for part in session.messages[-1].parts] == [DECLINED, DECLINED]
+
+    def test_a_single_call_is_asked_alone_and_code_keeps_its_own_dialog(self):
+        listener = ManyListener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
+                           ToolCallPart("c2", "run_pyqgis", {}))
+        assert listener.many == [] and [entry for entry in listener.log if entry[0] == "confirm"] == [
+            ("confirm", "write"), ("confirm", "run_pyqgis")]
+
+    def test_a_listener_without_it_is_asked_call_by_call(self):
+        listener = Listener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
+                           ToolCallPart("c2", "other", {}))
+        assert [entry for entry in listener.log if entry[0] == "confirm"] == [("confirm", "write"), ("confirm", "other")]

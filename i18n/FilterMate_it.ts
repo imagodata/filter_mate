@@ -64,6 +64,11 @@
         <translation>Torna a prima di: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Interrompi la richiesta, o attendi che finisca, per aprire le impostazioni.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Niente da annullare.</translation>
@@ -802,6 +807,32 @@ Sei d'accordo?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Segnalibro: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>Il passo {} non è stato eseguito: modificherebbe un layer che hai protetto dall'agente ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>Il passo {} non è stato eseguito: non è stato possibile leggere i layer protetti dall'agente ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>Il passaggio {} non è stato eseguito: hai disattivato il suo strumento per l'agente ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>L'agente vuole eseguire queste {} azioni:
+{}
+
+Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -990,6 +1021,16 @@ Sei d'accordo?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Offer every tool to the local model</source>
         <translation>Offri tutti gli strumenti al modello locale</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Solo gli strumenti che filtrano, per un computer lento</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Selezionato, il modello locale riceve solo gli strumenti che leggono e filtrano il progetto: circa la metà da leggere a ogni richiesta. Misurato con qwen3.5:4b, tutti gli strumenti hanno risposto altrettanto bene o meglio.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
@@ -1380,6 +1421,91 @@ Sei d'accordo?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Sì, per questa conversazione</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>LAYER PROTETTI DALL'AGENTE (QUESTO PROGETTO)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>L'agente li legge e li usa come sorgente, ma non li modifica mai: nessun filtro, stile, modifica, campo, join, nuovo nome o rimozione, a qualsiasi livello, anche in una ricetta e per le altre applicazioni. Salvato nel progetto.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Consenti sempre</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Chiedi sempre</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Come dice il livello</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Per impostazione predefinita ogni strumento segue il livello della scheda Autonomia. Un'eccezione vale solo per quello strumento: Mai lo nasconde anche all'agente e lo rifiuta nelle ricette e verso altre applicazioni; Consenti sempre non supera il livello Consulente, e il codice Python viene comunque letto e confermato a ogni esecuzione.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Tipo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Mai</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Regola</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Strumento</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Strumenti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>buffer di modifica</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>irreversibile</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>esterno</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>progetto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>legge</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>vista</translation>
     </message>
 </context>
 <context>
@@ -8156,6 +8282,16 @@ Il raster viene disegnato come nella mappa, con il suo stile. SAM si installa un
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Clicca sul quadrato a destra per testare questo layer tramite i suoi centroidi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>non filtrabile</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Mappa di base web (WMS / WMTS / XYZ, ArcGIS MapServer): solo colori, non può essere filtrata</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

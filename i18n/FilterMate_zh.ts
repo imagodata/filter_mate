@@ -64,6 +64,11 @@
         <translation>返回到之前：{}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>请停止请求或等待其结束后再打开设置。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>没有可撤销的操作。</translation>
@@ -802,6 +807,32 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>书签：{} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>步骤 {} 未执行：它会更改您已对代理设为保护的图层（{}）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>步骤 {} 未执行：无法读取您保护的、不允许代理修改的图层 ({})。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>步骤 {} 未运行：你已为智能体关闭了它的工具（{}）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>代理要执行以下 {} 项操作：
+{}
+
+是否全部同意？选“否”则一项都不执行。</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -990,6 +1021,16 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Offer every tool to the local model</source>
         <translation>向本地模型提供所有工具</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>仅筛选工具，适用于较慢的电脑</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>勾选后，本地模型只获得读取和筛选项目的工具：每次请求要读的内容约减半。用 qwen3.5:4b 实测，使用全部工具时回答同样好或更好。</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
@@ -1380,6 +1421,91 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>是，本次对话</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>受保护、代理不可更改的图层（本项目）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>代理会读取这些图层并将其用作来源，但绝不会更改它们：无论哪个级别，在配方中以及对其他应用程序，都不会进行筛选、样式、编辑、字段、连接、重命名或移除。保存在项目中。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>始终允许</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>始终询问</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>按级别</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>默认情况下，每个工具遵循“自主性”选项卡的级别。例外仅对该工具有效：“从不”还会对智能体隐藏该工具，并在配方中以及对其他应用程序拒绝它；“始终允许”不会超出“顾问”级别，Python 代码仍会在每次运行时被读取并确认。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>类型</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>从不</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>规则</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>工具</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>工具</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>编辑缓冲区</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>不可逆</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>外部</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>读取</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>视图</translation>
     </message>
 </context>
 <context>
@@ -8156,6 +8282,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>点击右侧方块，以质心测试此图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>不可过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Web 底图（WMS / WMTS / XYZ、ArcGIS MapServer）：仅有颜色，无法过滤</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

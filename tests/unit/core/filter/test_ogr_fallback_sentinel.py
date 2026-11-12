@@ -251,6 +251,20 @@ def test_key_list_subsets_of_previous_spatial_steps(subset, pk, key_list):
     assert orchestrator_module.FilterOrchestrator._is_key_list_subset(_layer(subset, pk), subset) is key_list
 
 
+def test_hybrid_attribute_subsets_are_not_taken_for_spatial_key_lists():
+    """A hybrid attribute filter (native_dialect.hybrid_sql) stays an attribute filter, 2026-11-12.
+
+    Read as the key list of a previous spatial step, it would be replaced by
+    the next spatial filter instead of being combined with it.
+    """
+    from filtermate_core.filter.native_dialect import hybrid_sql
+    for subset in (hybrid_sql('', [2, 5], None, '"fid"', True),
+                   hybrid_sql('"fid" IN (1, 2, 3)', [1, 2], [3], '"fid"', True),
+                   hybrid_sql('', ['a1'], None, '"code"', False)):
+        for pk in ('fid', 'code'):
+            assert orchestrator_module.FilterOrchestrator._is_key_list_subset(_layer(subset, pk), subset) is False
+
+
 @pytest.mark.parametrize("subset, expected", [
     ('"cleabs" IN (\'TRON1\')', ('"cleabs" IN (\'TRON1\')', None)),      # replaced, not combined
     ('"nature" = \'Route\'', ('"nature" = \'Route\'', "AND")),            # attribute: combined
@@ -302,6 +316,61 @@ def test_target_operator_is_the_tasks(operator):
     assert orchestrator.task_parameters['_current_combine_operator'] == operator
 
 
+@pytest.mark.parametrize("subset", [
+    "coalesce(\"nom\",'')='route'",                   # the native SQLite translation writes COALESCE("nom", '')
+    "COALESCE(\"nom\", '') = 'route' AND \"a\" > 1",
+    "CASE WHEN \"a\" > 1 THEN true ELSE false END",
+    "(\"a\" = 1 AND TRUE)",
+])
+def test_a_filter_that_looks_like_a_style_is_combined(subset):
+    """2026-11-12: the style patterns matched these real filters, which were replaced without a word."""
+    orchestrator = _orchestrator_with_operator("AND")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (subset, "AND")
+
+
+@pytest.mark.parametrize("subset", ["coalesce(\"nom\", '')", "COALESCE(\"nom\", 'sans nom')"])
+def test_a_display_expression_is_still_replaced(subset):
+    orchestrator = _orchestrator_with_operator("AND")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (None, None)
+
+
+@pytest.mark.parametrize("subset", [
+    "\"actif\"",                                   # a boolean column
+    "starts_with(\"nom\", 'Rue')",
+    "regexp_match(\"nom\", '^A')",
+    "instr(\"nom\", 'x')",
+    "array_contains(\"tags\", 'route')",
+    "coalesce(\"actif\", false)",
+])
+def test_a_boolean_function_or_column_is_combined(subset):
+    """2026-11-12 (review): any call or column without a comparison was taken for a style and replaced in silence;
+    only what the old patterns named AND returns no boolean (coalesce(field, 'text')) is a style now."""
+    orchestrator = _orchestrator_with_operator("AND")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == (subset, "AND")
+
+
+@pytest.mark.parametrize("operator", ["AND", "OR", "AND NOT", None])
+def test_a_target_without_filter_gets_the_operator(operator):
+    """2026-11-12: (None, operator), so that AND NOT writes NOT (new) on a target without a filter."""
+    orchestrator = _orchestrator_with_operator(operator)
+    assert orchestrator._determine_subset_strategy(_layer('')) == (None, operator)
+
+
+@pytest.mark.parametrize("subset, expected", [
+    ('NOT ( "fid" IN (1, 2) )', ('NOT ( "fid" IN (1, 2) )', "AND NOT")),   # keys: combined, old minus new
+    ('"fid" IN (1, 2)', ('"fid" IN (1, 2)', "AND NOT")),
+    ('NOT ($id IN (1, 2))', ('NOT ($id IN (1, 2))', "AND NOT")),
+    ('ST_Intersects("geom", X)', (None, "AND NOT")),                    # spatial: replaced, then NOT (new)
+    ('NOT ( EXISTS (SELECT 1 FROM "s" AS __source WHERE ST_Intersects(a, b)) )', (None, "AND NOT")),
+    ("coalesce(\"nom\", '')", (None, "AND NOT")),                        # style: replaced, then NOT (new)
+])
+def test_and_not_after_a_previous_spatial_step_still_excludes(subset, expected):
+    """2026-11-12 (review): the replaced filters went with no operator, and the builders wrote the new selection
+    itself: a second AND NOT kept what it was asked to remove."""
+    orchestrator = _orchestrator_with_operator("AND NOT")
+    assert orchestrator._determine_subset_strategy(_layer(subset)) == expected
+
+
 @pytest.mark.parametrize("subset", ['"fid" IN (1, 2)', 'ST_Intersects("geom", X)'])
 def test_previous_spatial_filter_is_still_replaced_whatever_the_operator(subset):
     orchestrator = _orchestrator_with_operator("OR")
@@ -327,6 +396,14 @@ def pg_adapter(monkeypatch):
     adapter._new_backend = MagicMock()
     adapter._legacy_backend = MagicMock()
     return adapter, applied
+
+
+def test_postgresql_adapter_without_filter_writes_not_under_and_not(pg_adapter):
+    """2026-11-12: AND NOT on a target without a filter takes the new selection out of the whole layer."""
+    adapter, applied = pg_adapter
+    assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', None, 'AND NOT') is True
+    assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', None, 'AND') is True
+    assert applied == ['NOT (\nEXISTS (x)\n)', 'EXISTS (x)']
 
 
 @pytest.mark.parametrize("operator, expected", [

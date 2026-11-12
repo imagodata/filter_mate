@@ -64,6 +64,11 @@
         <translation>Vissza ez elé: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>A beállítások megnyitásához állítsa le a kérést, vagy várja meg a végét.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Nincs mit visszavonni.</translation>
@@ -802,6 +807,32 @@ Egyetért?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Könyvjelző: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>A(z) {}. lépés nem futott le: egy olyan réteget módosítana, amelyet az ügynök elől védett ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>A(z) {}. lépés nem futott le: az ügynök elől védett rétegek nem olvashatók ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>A(z) {}. lépés nem futott le: kikapcsolta az eszközét az ügynök számára ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Az ügynök ezt a(z) {} műveletet szeretné végrehajtani:
+{}
+
+Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -990,6 +1021,16 @@ Egyetért?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Offer every tool to the local model</source>
         <translation>Minden eszköz a helyi modellnek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Csak a szűrő eszközök, lassú számítógéphez</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Bejelölve a helyi modell csak a projektet olvasó és szűrő eszközöket kapja: kérésenként nagyjából fele annyit kell olvasnia. A qwen3.5:4b-vel mérve minden eszközzel ugyanolyan jól vagy jobban válaszolt.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
@@ -1380,6 +1421,91 @@ Egyetért?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Igen, ehhez a beszélgetéshez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>AZ ÜGYNÖK ELŐL VÉDETT RÉTEGEK (EZ A PROJEKT)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Az ügynök olvassa és forrásként használja őket, de soha nem módosítja: sem szűrő, sem stílus, sem szerkesztés, sem mező, sem összekapcsolás, sem új név, sem eltávolítás, bármely szinten, receptben és más alkalmazások számára sem. A projektben tárolva.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Mindig engedélyez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Mindig kérdez</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>A szint szerint</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Alapértelmezés szerint minden eszköz az Autonómia lap szintjét követi. A kivétel csak az adott eszközre vonatkozik: a Soha az ügynök elől is elrejti, és elutasítja a receptekben és más alkalmazások felé; a Mindig engedélyez nem lépi túl a Tanácsadó szintet, a Python-kód pedig minden futtatáskor továbbra is elolvasásra és megerősítésre kerül.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Fajta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Soha</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Szabály</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Eszköz</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Eszközök</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>szerkesztési puffer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>visszafordíthatatlan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>külső</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>projekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>olvas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>nézet</translation>
     </message>
 </context>
 <context>
@@ -8156,6 +8282,16 @@ A raszter úgy kerül megrajzolásra, mint a térképen, a saját stílusával. 
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kattintson a jobb oldali négyzetre, hogy ezt a réteget súlypontjai alapján tesztelje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>nem szűrhető</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Webes alaptérkép (WMS / WMTS / XYZ, ArcGIS MapServer): csak színek, nem szűrhető</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

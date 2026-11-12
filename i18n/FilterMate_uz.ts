@@ -64,6 +64,11 @@
         <translation>Oldingi holatga qaytish: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>Sozlamalarni ochish uchun so‘rovni to‘xtating yoki uning tugashini kuting.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>Bekor qilinadigan narsa yo'q.</translation>
@@ -802,6 +807,32 @@ Rozimisiz?</translation>
         <source>Bookmark: {} {}</source>
         <translation>Xatcho‘p: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>{}-qadam bajarilmadi: u agentdan himoya qilgan qatlamingizni o‘zgartirgan bo‘lardi ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>{}-qadam bajarilmadi: agentdan himoyalangan qatlamlarni o‘qib bo‘lmadi ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>{}-qadam bajarilmadi: uning vositasini agent uchun o'chirib qo'ygansiz ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Agent quyidagi {} amalni bajarmoqchi:
+{}
+
+Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -990,6 +1021,16 @@ Rozimisiz?</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Offer every tool to the local model</source>
         <translation>Mahalliy modelga barcha vositalarni berish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>Sekin kompyuter uchun faqat filtrlovchi vositalar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>Belgilansa, mahalliy model faqat loyihani o'qiydigan va filtrlaydigan vositalarni oladi: har bir so'rovda o'qiladigan matn taxminan yarmiga kamayadi. qwen3.5:4b bilan o'lchanganda barcha vositalar bilan javoblar shunday yoki yaxshiroq bo'ldi.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
@@ -1380,6 +1421,91 @@ Rozimisiz?</translation>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>Ha, shu suhbat uchun</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>AGENTDAN HIMOYALANGAN QATLAMLAR (USHBU LOYIHA)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>Agent ularni o‘qiydi va manba sifatida ishlatadi, lekin hech qachon o‘zgartirmaydi: filtr, uslub, tahrir, maydon, birlashtirish, yangi nom yoki o‘chirish yo‘q, har qanday darajada, retseptda ham, boshqa ilovalar uchun ham. Loyihada saqlanadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>Doim ruxsat berish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>Doim so'rash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>Daraja bo'yicha</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>Odatda har bir vosita Avtonomlik yorlig'idagi darajaga amal qiladi. Istisno faqat shu vositaga tegishli: Hech qachon uni agentdan ham yashiradi, retseptlarda va boshqa ilovalar uchun rad etadi; Doim ruxsat berish Maslahatchi darajasidan oshmaydi, Python kodi esa har bir ishga tushirishda baribir o'qiladi va tasdiqlanadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>Turi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>Hech qachon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>Qoida</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>Vosita</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>Vositalar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>tahrir buferi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>qaytarib bo'lmaydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>tashqi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>loyiha</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>o'qiydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>ko'rinish</translation>
     </message>
 </context>
 <context>
@@ -8156,6 +8282,16 @@ Raster xaritadagidek, o'z uslubi bilan chiziladi. SAM FilterMate panelining TANL
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Bu qatlamni markaziy nuqtalari bo‘yicha sinash uchun o‘ngdagi kvadratni bosing</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>filtrlab bo'lmaydi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>Veb asos xarita (WMS / WMTS / XYZ, ArcGIS MapServer): faqat ranglar, uni filtrlab bo'lmaydi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

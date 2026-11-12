@@ -30,6 +30,22 @@ def rule_expression(original, expression):
     return f'({original}\n) AND ({expression}\n)' if original else expression
 
 
+def combined_tile_filter(previous, expression, operator=None):
+    """The display filter of a vector tile layer: ``expression`` combined with ``previous`` by ``operator``.
+
+    2026-11-12: without a previous filter AND NOT takes the expression out of
+    the whole layer (``NOT (expression)``); it applied the expression.
+    """
+    op = (operator or '').strip().upper()
+    if previous and op == 'AND NOT' and not expression:
+        return previous  # 2026-11-12: nothing taken out (AND NOT (TRUE) hid everything)
+    if previous and op in ('AND', 'OR', 'AND NOT'):
+        return f'({previous}\n) {op} ({expression or "TRUE"}\n)'
+    if op == 'AND NOT' and expression:
+        return f'NOT ({expression}\n)'
+    return expression
+
+
 def bounded_wkt(geometry):
     """Refuse oversized geometry rather than silently changing a spatial filter."""
     if geometry.constGet().nCoordinates() > MAX_VERTICES:
@@ -249,11 +265,7 @@ def apply_filter(layer, expression, operator=None):
         raise ValueError(tr('Invalid vector tile filter expression'))
     reg = registry()
     before = take_snapshot(layer, LayerKind.VECTOR_TILE)
-    op = (operator or '').strip().upper()
-    if before.tile_filter and op in ('AND', 'OR', 'AND NOT'):
-        combined = f'({before.tile_filter}\n) {op} ({expression or "TRUE"}\n)'
-    else:
-        combined = expression
+    combined = combined_tile_filter(before.tile_filter, expression, operator)
     if len(combined.encode('utf-8')) > MAX_FILTER_BYTES:
         raise ValueError(tr('The vector tile filter exceeds the expression budget (1 MB)'))
     # Work on detached original styles; reapplying never stacks over the old

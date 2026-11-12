@@ -578,6 +578,19 @@ class TestApplyFilterQueueRouting:
         assert result is False
         callback.assert_not_called()
 
+    @pytest.mark.parametrize("operator, expected", [
+        ("AND NOT", 'NOT (\nEXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b))\n)'),
+        ("AND", 'EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b))'),
+    ])
+    def test_and_not_after_a_replaced_spatial_filter_still_excludes(self, mock_pg_layer, operator, expected):
+        """2026-11-12 (review): the replaced spatial filter left the new selection itself under AND NOT."""
+        callback = MagicMock()
+        builder = PostgreSQLExpressionBuilder(task_params={"_subset_queue_callback": callback})
+        old = 'NOT (EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, c)))'
+        new = 'EXISTS (SELECT 1 FROM s AS __source WHERE ST_Intersects(a, b))'
+        assert builder.apply_filter(mock_pg_layer, new, old, operator) is True
+        assert callback.call_args.args[1] == expected
+
 
 # ===========================================================================
 # PERF 2026-09-12: index-aware predicate with the centroid optimisation

@@ -309,10 +309,33 @@ class TestHandlers:
         assert run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")[0] is False
         assert accessor._active == {"communes": "a = 1"}
 
-    def test_a_layer_id_is_applied_by_its_name(self, api):
+    def test_a_layer_id_is_applied_by_its_id_and_answered_by_its_name(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "apply_filter", layer_name="L1", expression="a = 1")
         assert not error and answer["layer_name"] == "communes" and accessor._active == {"communes": "a = 1"}
+
+    def test_among_layers_of_the_same_name_the_one_named_by_its_id_is_tried_filtered_and_counted(self, tmp_path):
+        # The protection checks the layer of the id: applying by the name would filter the first of the name.
+        class Twins(Accessor):
+            def __init__(self):
+                super().__init__()
+                self.layers = [LayerSummary("L1", "communes", "ogr", feature_count=9),
+                               LayerSummary("L2", "communes", "ogr", feature_count=4)]
+                self.applied, self.tried = [], []
+
+            def preview_filter(self, layer_name, expression):
+                self.tried.append(layer_name)
+                return super().preview_filter(layer_name, expression)
+
+            def apply_filter(self, layer_name, expression, source):
+                self.applied.append(layer_name)
+                return super().apply_filter(layer_name, expression, source)
+
+        accessor = Twins()
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="L2", expression="a = 1")
+        assert not error and answer["layer_name"] == "communes" and answer["total_count"] == 4
+        assert accessor.applied == ["L2"] and accessor.tried == ["L2"]
+        assert [seen["layer"] for name, seen in accessor.calls if name == "describe"] == ["L2", "L2"]
 
     def test_busy_after_the_change_does_not_look_like_a_failure(self, tmp_path):
         class Busy(Accessor):
@@ -501,6 +524,14 @@ class TestRoutes:
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.post("/layers/style", json={"layer": "communes", "mode": "x"}).status_code == 422
         assert client.post("/layers/style", json={"layer": "nope", "mode": "single"}).status_code == 400
+        # 2026-11-12: NaN / Infinity (sent as JSON literals) and an inverted range are refused
+        for body in ('{"layer": "dem", "mode": "gray", "minimum": NaN, "maximum": 10}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 0, "maximum": Infinity}',
+                     '{"layer": "dem", "mode": "gray", "opacity": NaN}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 10, "maximum": 2}',
+                     '{"layer": "dem", "mode": "gray", "minimum": 5, "maximum": 5}'):
+            response = client.post("/layers/style", content=body, headers={"Content-Type": "application/json"})
+            assert response.status_code == 422, body
         response = client.post("/layers/labels", json={"layer": "communes", "field": "nom", "size": 9})
         assert response.status_code == 200 and response.json()["labels"] is True
         assert client.post("/layers/labels", json={"layer": "communes", "size": 100}).status_code == 422
@@ -667,6 +698,36 @@ class TestCombinedFilters:
         assert combined("", "c = 3", "OR") == ("c = 3", "")
         with pytest.raises(ValueError):
             combined("a = 1", "c = 3", "XOR")
+
+    def test_and_not_without_a_filter_removes_the_condition_from_the_layer(self):
+        """2026-11-12: it applied the condition, the opposite of what AND NOT asks."""
+        from filtermate_api.filter_combine import combined
+        assert combined("", "\"class\" = 'major'", "AND NOT") == ("NOT (\n\"class\" = 'major'\n)", "")
+        assert combined(None, "c = 3", "and not") == ("NOT (\nc = 3\n)", "")
+        # 2026-11-12 (review): a trailing comment no longer swallows the closing parenthesis
+        assert combined("", "c = 3 -- the note", "AND NOT") == ("NOT (\nc = 3 -- the note\n)", "")
+        assert combined("", "c = 3", "AND") == ("c = 3", "")
+
+    def test_an_empty_condition_keeps_the_filter(self):
+        """2026-11-12: it gave "(a = 1) AND ()"."""
+        from filtermate_api.filter_combine import combined
+        assert combined("a = 1", "  ", "AND") == ("a = 1", "")
+        assert combined("a = 1", "", "AND NOT") == ("a = 1", "")
+        assert combined("", "", "AND NOT") == ("", "")
+
+    def test_the_chat_excludes_from_an_unfiltered_layer(self, tmp_path):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset=""))
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="communes",
+                            expression="\"class\" = 'major'", operator="AND NOT")
+        assert not error and answer["expression"] == "NOT (\n\"class\" = 'major'\n)"
+        assert accessor._active["communes"] == answer["expression"]
+
+    def test_rest_and_not_on_an_unfiltered_layer_excludes(self, make_client):
+        accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset=""))
+        response = make_client(accessor).post("/filters/apply", json={
+            "layer_name": "communes", "expression": "\"class\" = 'major'", "operator": "AND NOT"})
+        assert response.status_code == 200, response.text
+        assert response.json()["expression"] == "NOT (\n\"class\" = 'major'\n)"
 
     def test_the_chat_narrows_a_filtered_layer(self, tmp_path):
         accessor = Accessor(describe=LayerDetails("L1", "communes", "vector", provider_type="postgres", subset='"pop" > 10'))

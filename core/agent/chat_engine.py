@@ -8,14 +8,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Protocol, Sequence, Tuple
+from typing import Any, Callable, Dict, Optional, Protocol, Sequence, Tuple
 
 from .messages import (
     ERROR_STREAM, ProviderError, StreamEvent, StreamFailure, TextDelta, ToolCallPart, ToolResultPart, TurnComplete,
 )
 from .providers.base import HttpRequest
 from .session import STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
-from .permissions import ASK, REFUSE, PermissionPolicy
+from .permissions import ASK, CODE_TOOLS, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
@@ -68,6 +68,8 @@ class ChatListener(Protocol):
 
     def confirm(self, call: ToolCallPart) -> bool:
         """Does the user accept this call?"""
+
+    # Optional: ``confirm_many(calls) -> bool``, one question for several calls of a turn, all or none.
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         """The request is over."""
@@ -173,10 +175,11 @@ class ChatEngine:
         self._running_tools = True
         answers = []
         try:
+            answered = self._confirm_together(calls)
             for call in calls:
                 if self._cancelled:
                     break
-                answers.append(self._run_one(call))
+                answers.append(self._run_one(call, answered.get(call.call_id)))
         finally:
             self._running_tools = False
         if self._cancelled:
@@ -186,11 +189,29 @@ class ChatEngine:
         self._session.add_tool_results(answers)
         self._defer(lambda: self._request_model(generation))
 
-    def _run_one(self, call: ToolCallPart) -> ToolResultPart:
+    def _confirm_together(self, calls: Sequence[ToolCallPart]) -> Dict[str, bool]:
+        """One question for the calls of a turn the user is asked about, when there are several: ``{call id: yes}``.
+
+        Code is left out: each run is read in a dialog of its own. A listener without ``confirm_many`` is asked
+        call by call, as before.
+        """
+        asked = [call for call in calls if self._executor.verdict(call, self._policy) == ASK
+                 and call.name not in CODE_TOOLS]
+        confirm_many = getattr(self._listener, "confirm_many", None)
+        if len(asked) < 2 or confirm_many is None:
+            return {}
+        try:
+            yes = bool(confirm_many(list(asked)))
+        except Exception:
+            logger.exception("Agent confirmation failed")
+            yes = False
+        return {call.call_id: yes for call in asked}
+
+    def _run_one(self, call: ToolCallPart, answered: Optional[bool] = None) -> ToolResultPart:
         verdict = self._executor.verdict(call, self._policy)
-        if verdict == REFUSE:
-            return self._executor.refused(call)
-        if verdict == ASK and not self._confirmed(call):
+        if verdict in (REFUSE, PROTECTED, TURNED_OFF):
+            return self._executor.refused(call, self._policy)
+        if verdict == ASK and not (answered if answered is not None else self._confirmed(call)):
             return self._executor.declined(call)
         spec = self._executor.spec(call.name)
         if spec is not None and not spec.read_only and not spec.manages_history:

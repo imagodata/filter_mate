@@ -3,6 +3,7 @@
 import importlib.util
 import pathlib
 import sys
+import types
 
 import pytest
 
@@ -571,6 +572,26 @@ class TestFootprint:
         job = source_jobs.PointCloudSourceJob(FakeCloudLayer(crs=crs), 2.0)
         job.compute(_request(), lambda: False)
         assert asked == [pytest.approx(expected)]
+
+    @pytest.mark.parametrize("units, expected", [('feet', 2.0 * 3.28084), ('usfeet', 2.0 * 3.2808333), ('metres', 2.0),
+                                                 ('unknown', 2.0)])
+    def test_resolution_in_the_unit_of_a_projected_crs(self, monkeypatch, units, expected):
+        """2026-11-12: a cloud in a State Plane CRS in feet was read in cells of 2 feet for 2 m."""
+        factors = {'feet': 3.28084, 'usfeet': 3.2808333, 'metres': 1.0}
+
+        def factor(source, target):
+            assert source == 'metres'
+            if target not in factors:
+                raise TypeError(target)
+            return factors[target]
+
+        core = sys.modules['qgis.core']
+        monkeypatch.setattr(core, 'Qgis', types.SimpleNamespace(DistanceUnit=types.SimpleNamespace(Meters='metres')),
+                            raising=False)
+        monkeypatch.setattr(core, 'QgsUnitTypes', types.SimpleNamespace(fromUnitToUnitFactor=factor), raising=False)
+        assert footprint.layer_resolution(2.0, fk.FakeCrs('EPSG:2227', units=units)) == pytest.approx(expected)
+        assert footprint.layer_resolution(2.0, fk.FakeCrs('EPSG:4326', geographic=True, units='degrees')) == \
+            pytest.approx(2.0 / 111320.0)
 
     def test_read_in_tiles_of_a_bounded_size(self, engine, grids, monkeypatch):
         monkeypatch.setattr(footprint, 'POINTS_PER_CALL', 50)

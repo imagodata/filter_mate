@@ -213,7 +213,7 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 | project | filters, style, Processing, layouts, CRS, SAM layers, any other change | with the turn |
 | edit buffer | `update_features`, `add_features`, `add_field` | with the turn, until the user saves |
 | irreversible | `destructive` tools: `delete_features`, `export_layers`, `export_layout`, `remove_layers` | not always |
-| outside | `open_world` changes (`add_layer`, `add_service_layer`, connectors) and `run_pyqgis` | no |
+| outside | `open_world` changes (`add_layer`, `add_service_layer`), every tool of a connector (its `readOnlyHint` is not trusted) and `run_pyqgis` | no |
 
 | Level | Runs alone | Asked | Refused |
 |---|---|---|---|
@@ -230,7 +230,36 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - The level is read at each call (`ChatEngine(policy=...)`), and sent with each request, after the project summary,
   when it is not `standard` (the system prompt stays constant for the cache).
 - An invalid call is never asked nor refused: it runs to answer its mistake.
-- The MCP servers keep the `standard` rules (`ToolExecutor.needs_confirmation`): the level is the chat's.
+- The MCP servers keep the `standard` level: the level is the chat's. The native one follows the *Always ask* and
+  *Never* rules of the Tools tab too (`AgentMcpBridge._policy`); *Always allow* does not take its confirmations away.
+- **One question for a turn** (`ChatEngine._confirm_together`, `confirm_many` of the listener): when the model calls
+  several tools in one turn and two or more of them would be asked, the user gets one question listing them, all or
+  none; a recipe does the same for its steps. Code (`run_pyqgis`) keeps its own dialog, one run at a time; a listener
+  without `confirm_many` (the bench) is asked call by call. The verdicts are the same as call by call: refused calls
+  stay refused, the others run alone.
+- **Exceptions by tool** (Tools tab, `AgentSettings.tool_rules`): *As the level says* (default), *Always ask* (at
+  every call; never allowed for a conversation), *Always allow* (not past `advisor`, never for `run_pyqgis`) or
+  *Never*: the tool is left out of the tools offered to the model and answered `TURNED_OFF` if it is called anyway,
+  in a recipe, or by another application through the native MCP server. The notes and `undo_agent_step` have no
+  exception. A protected layer is refused before any exception.
+- **Protected layers** (`adapters/agent/protected_layers.py`, kept in the project by their ids, ticked in the Autonomy
+  tab): a call that would change one (`permissions.CHANGED_LAYERS`: its filter, style, labels, features, fields, join,
+  name, or the layer itself) gets the verdict `PROTECTED`, refused at every level, never turned into a question nor
+  allowed for a conversation; in a recipe it stops the replay; the native MCP server answers it the same way, and
+  `QGISFilterMateAccessor` checks every change again on the main thread, so the REST API and the MCP server built on
+  it (`python -m filtermate_api.mcp`) answer 403 (`X-FilterMate-Refusal: protected-layer`), an undo or redo of the
+  dock history that would set the filter of a protected layer included. Protected layers that cannot be read refuse
+  a change (`PROTECTION_UNREADABLE`), never let it through. Reading
+  one, using it as the source of a cross filter or the table of a join, zooming, selecting or showing it stays
+  allowed. Their names go with each request. A favorite is checked on the layers applying it would change (its
+  layer, its remote layers, its clips: `operations.favorite_layers`, found as `apply_favorite` finds them); a map
+  theme applied on the layers whose current style or legend items it would change (`layer_tree.theme_changed_layers`,
+  compared with what QGIS records from the map now; a layer of the theme hidden now counts); removing a layer counts
+  as a change of the layers that join it (`permissions.JOINED_CHANGES`: QGIS removes the join). Editing a joined layer
+  does not (an editable join and a cascaded delete write from the layer that holds the join into the joined one);
+  relations (kept by the project, not by a layer) and virtual layers (their query stays, they can no longer read a
+  layer removed) are not counted. Not
+  covered: `run_pyqgis` (code, asked at every run).
 - The question of a change the level shows first (a filter at `careful`) says what the tool does and its arguments; a
   tool added later without a text of its own gets the same, instead of the text of an export.
 
@@ -399,7 +428,7 @@ address, else its content type), its size, and whether the server gives parts of
 Rules: in the chat, only what is ticked can be used (REST and MCP callers hold the API key and are not limited by the
 ticks); a connector alone does not let `add_layer` read the web; a WFS layer must be listed by the service, which must keep
 its operations on its own host, and its URI is built by the plugin; every connector call stays in the thread; a connector
-tool not declared read-only asks the user first; a call is sent once, again only when the server lost the session; a server
+tool is a call outside even when the server declares it read-only (asked at every level, refused at advisor); a call is sent once, again only when the server lost the session; a server
 that does not answer is left out of the conversation and said so.
 
 Anything fetched from these servers goes through `adapters/agent/bounded_http.py`: redirects are not followed, total time and
@@ -462,11 +491,17 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
 - what may run is a list of what is accepted: the providers `native` and `qgis` (GDAL, GRASS, SAGA, PDAL, scripts
   and models start other programs or run code nobody here has read), and an algorithm that makes at least one layer
   or only answers values (statistics). Selection, style, projection, index, truncation, import into a database,
-  upload and download make no layer: that alone leaves them out. Executors of SQL or Python, and the network
-  requests that make a layer, are refused by name. A parameter that needs a file, a folder, a database connection,
-  a layout or a map theme refuses the algorithm; an optional one stays unset;
+  upload and download make no layer: that alone leaves them out. Executors of SQL or Python, the network
+  requests that make a layer and the geocoder that sends addresses to Nominatim are refused by name. The types of
+  parameters are a list of what is accepted too (`GIVEN_TYPES`): layers, extent, point, CRS, expression, option, the
+  rows of an interpolation, and plain values (numbers, texts, fields, flags, tables, colours, dates, ranges, WKT,
+  bands, dataset groups). Any other type (a file, a folder, a database connection, a layout, a map theme, a PROJ
+  operation, which names a grid by path or URL, or a type of a later QGIS) refuses the algorithm when it is required
+  and stays unset when it is optional; `describe_algorithm` lists it in `left_out`;
 - inputs are layers of the project, never a path, a URI or a URL (QGIS would open them); an extent, a point or a CRS
-  is numbers, an authid or a project layer. Expressions go through a list a little wider than the one of
+  is numbers, an authid or a project layer. The rows of an IDW or TIN interpolation (`idw_interpolation_data`,
+  `source::~::value source::~::field index::~::source type` joined by `::|::`, whose source QGIS opens from its text)
+  are written again, each source the id of a vector layer of the project and the rest integers. Expressions go through a list a little wider than the one of
   `select_features` (math, text, geometry functions that only compute; nothing that reads another layer, a file or
   the environment, and no `eval`). Raster calculator expressions have their own parser and are not checked;
 - each layer an algorithm makes is written to a temporary file (GeoPackage, GeoTIFF) and added to the project: the

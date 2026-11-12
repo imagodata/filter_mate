@@ -618,8 +618,7 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
         point_cloud_criteria.to_subset_string() if point_cloud_criteria is not None else "")
     expression = (expression or "").strip()
     if expression:
-        if source_operator == "AND NOT" and not before.subset:
-            raise ValueError("AND NOT needs an existing filter on the point cloud source")
+        # 2026-11-12: AND NOT on an unfiltered cloud keeps every point but the criteria (combine_subset)
         subset = combine_subset(before.subset, expression, source_operator)
         if not layer.setSubsetString(subset):
             layer.setSubsetString(before.subset)
@@ -777,10 +776,7 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
             report.skipped[name] = "not a point cloud layer"
             continue
         before = take_snapshot(layer, LayerKind.POINT_CLOUD)
-        if operator == "AND NOT" and not before.subset:
-            # combine_subset would keep only the excluded points of an unfiltered cloud.
-            report.failed[name] = "AND NOT needs an existing filter on the layer"
-            continue
+        # 2026-11-12: AND NOT on an unfiltered cloud keeps every point but the criteria (combine_subset)
         subset = combine_subset(before.subset, expression, operator)
         if not layer.setSubsetString(subset):
             layer.setSubsetString(before.subset)
@@ -1098,25 +1094,11 @@ def _favorite_layer(project, signature: Optional[str], layer_id: Optional[str], 
     return None
 
 
-@_exclusive()
-def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -> OperationReport:
-    """Apply a favorite: its subset strings, then its raster / point cloud clips.
-
-    Same behaviour as the dock's favorites menu (subsets pushed directly,
-    layers resolved by signature, then id, then name). Works headless from
-    the favorites saved in the project file when the plugin is not loaded.
-    ``feedback``: canceled before the clips, progress after the subsets.
-    """
+def _favorite_entries(favorite, project):
+    """``([(label, expression, layer or None), ...], coverage)`` of a favorite: the layers its subsets go to,
+    resolved by signature, then id, then name, and its raster / point cloud clips."""
     from ...core.domain.layer_signature import LayerSignature
-    from ...infrastructure.database.sql_utils import safe_set_subset_string
     from ..qgis.coverage_layers import favorites_bridge
-    project = _project(project)
-    report = OperationReport()
-    service = service or find_favorites_service()
-    favorite = find_favorite(name_or_id, service, project)
-    if favorite is None:
-        report.error = f"favorite not found: {name_or_id}"
-        return report
     by_signature = {}
     for layer in project.mapLayers().values():
         try:
@@ -1136,6 +1118,52 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
         name = payload.get('display_name') or (key if isinstance(key, str) and '::' not in key else None)
         entries.append((name or str(key), payload.get('expression', '') or '',
                         _favorite_layer(project, signature, payload.get('layer_id'), name, by_signature)))
+    return entries, coverage
+
+
+def favorite_layers(name_or_id: str, service=None, project=None) -> List[Any]:
+    """The layers applying a favorite would change, found as ``apply_favorite`` finds them; [] when it is not found.
+
+    Read only: the agent checks them against the layers the user protected before the favorite runs.
+    """
+    from ..qgis.coverage_layers import favorites_bridge
+    project = _project(project)
+    service = service or find_favorites_service()
+    favorite = find_favorite(name_or_id, service, project)
+    if favorite is None:
+        return []
+    entries, coverage = _favorite_entries(favorite, project)
+    layers = [layer for _label, _expression, layer in entries if layer is not None]
+    for entry in coverage:
+        try:
+            layer = favorites_bridge._resolve(project, entry, layer_kind)
+        except Exception as exc:  # a stored source that no longer opens: it changes nothing
+            logger.debug(f"[FM5] favorite clip layer not resolved: {exc}")
+            layer = None
+        if layer is not None:
+            layers.append(layer)
+    return layers
+
+
+@_exclusive()
+def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -> OperationReport:
+    """Apply a favorite: its subset strings, then its raster / point cloud clips.
+
+    Same behaviour as the dock's favorites menu (subsets pushed directly,
+    layers resolved by signature, then id, then name). Works headless from
+    the favorites saved in the project file when the plugin is not loaded.
+    ``feedback``: canceled before the clips, progress after the subsets.
+    """
+    from ...infrastructure.database.sql_utils import safe_set_subset_string
+    from ..qgis.coverage_layers import favorites_bridge
+    project = _project(project)
+    report = OperationReport()
+    service = service or find_favorites_service()
+    favorite = find_favorite(name_or_id, service, project)
+    if favorite is None:
+        report.error = f"favorite not found: {name_or_id}"
+        return report
+    entries, coverage = _favorite_entries(favorite, project)
     for label, expression, layer in entries:
         if layer is None:
             report.skipped[label] = "layer not found in this project"

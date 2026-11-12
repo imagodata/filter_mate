@@ -64,6 +64,11 @@
         <translation>इससे पहले की स्थिति पर लौटें: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>सेटिंग्स खोलने के लिए अनुरोध रोकें या उसके समाप्त होने की प्रतीक्षा करें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>पूर्ववत करने के लिए कुछ नहीं।</translation>
@@ -802,6 +807,32 @@ Do you agree?</source>
         <source>Bookmark: {} {}</source>
         <translation>बुकमार्क: {} {}</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
+        <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
+        <translation>चरण {} नहीं चलाया गया: यह उस परत को बदल देता जिसे आपने एजेंट से सुरक्षित किया है ({})।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
+        <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
+        <translation>चरण {} नहीं चलाया गया: एजेंट से सुरक्षित की गई परतें पढ़ी नहीं जा सकीं ({})।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
+        <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
+        <translation>चरण {} नहीं चला: आपने एजेंट के लिए उसका टूल बंद कर दिया है ({})।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>एजेंट ये {} क्रियाएँ करना चाहता है:
+{}
+
+क्या आप सभी से सहमत हैं? नहीं चुनने पर कोई नहीं चलेगी।</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>
@@ -990,6 +1021,16 @@ Do you agree?</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Offer every tool to the local model</source>
         <translation>स्थानीय मॉडल को सभी टूल दें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="888"/>
+        <source>Only the tools that filter, for a slow computer</source>
+        <translation>धीमे कंप्यूटर के लिए, केवल फ़िल्टर करने वाले टूल</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="891"/>
+        <source>Ticked, the local model gets only the tools that read and filter the project: about half as much to read at each request. Measured with qwen3.5:4b, every tool answered as well, or better.</source>
+        <translation>चुने जाने पर स्थानीय मॉडल को केवल प्रोजेक्ट पढ़ने और फ़िल्टर करने वाले टूल मिलते हैं: हर अनुरोध पर लगभग आधा पढ़ना। qwen3.5:4b से मापने पर सभी टूल ने उतना ही अच्छा या बेहतर उत्तर दिया।</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="891"/>
@@ -1380,6 +1421,91 @@ Do you agree?</source>
         <location filename="../ui/widgets/agent_panel.py" line="128"/>
         <source>Yes for this conversation</source>
         <translation>हाँ, इस बातचीत के लिए</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1029"/>
+        <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
+        <translation>एजेंट से सुरक्षित परतें (यह प्रोजेक्ट)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1040"/>
+        <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
+        <translation>एजेंट इन्हें पढ़ता है और स्रोत के रूप में उपयोग करता है, पर कभी बदलता नहीं: कोई फ़िल्टर, शैली, संपादन, फ़ील्ड, जॉइन, नया नाम या हटाना नहीं, किसी भी स्तर पर, किसी रेसिपी में भी और अन्य एप्लिकेशन के लिए भी। प्रोजेक्ट में सहेजा जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always allow</source>
+        <translation>हमेशा अनुमति दें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>Always ask</source>
+        <translation>हमेशा पूछें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1074"/>
+        <source>As the level says</source>
+        <translation>स्तर के अनुसार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1059"/>
+        <source>By default each tool follows the level of the Autonomy tab. An exception holds for that tool alone: Never also hides it from the agent and refuses it in recipes and to other applications; Always allow does not go past the Advisor level, and Python code is still read and confirmed at every run.</source>
+        <translation>डिफ़ॉल्ट रूप से हर टूल स्वायत्तता टैब के स्तर का पालन करता है। अपवाद केवल उसी टूल पर लागू होता है: कभी नहीं उसे एजेंट से छिपा भी देता है और रेसिपी में तथा अन्य एप्लिकेशन के लिए अस्वीकार करता है; हमेशा अनुमति दें सलाहकार स्तर से आगे नहीं जाता, और Python कोड हर बार चलाने पर पढ़ा और पुष्ट किया जाता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Kind</source>
+        <translation>प्रकार</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1075"/>
+        <source>Never</source>
+        <translation>कभी नहीं</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Rule</source>
+        <translation>नियम</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1069"/>
+        <source>Tool</source>
+        <translation>टूल</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="966"/>
+        <source>Tools</source>
+        <translation>टूल</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>edit buffer</source>
+        <translation>संपादन बफ़र</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>irreversible</source>
+        <translation>अपरिवर्तनीय</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1073"/>
+        <source>outside</source>
+        <translation>बाहरी</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>project</source>
+        <translation>प्रोजेक्ट</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>reads</source>
+        <translation>पढ़ता है</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1072"/>
+        <source>view</source>
+        <translation>दृश्य</translation>
     </message>
 </context>
 <context>
@@ -8156,6 +8282,16 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <location filename="../ui/widgets/custom_widgets.py" line="533"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>इस परत को उसके केंद्रकों से जाँचने के लिए दाईं ओर के वर्ग पर क्लिक करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="557"/>
+        <source>not filterable</source>
+        <translation>फ़िल्टर नहीं किया जा सकता</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="558"/>
+        <source>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): colours only, it cannot be filtered</source>
+        <translation>वेब आधार मानचित्र (WMS / WMTS / XYZ, ArcGIS MapServer): केवल रंग, इसे फ़िल्टर नहीं किया जा सकता</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>

@@ -14,7 +14,7 @@ from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtCore import QCoreApplication
 
 from ...core.agent.mcp_server import DEFAULT_PORT
-from ...core.agent.permissions import DEFAULT_LEVEL, level_or_default
+from ...core.agent.permissions import DEFAULT_LEVEL, clean_rules, level_or_default
 from ...core.agent.providers import FREE_PRESET, FREE_QUOTA_URL, PRESETS
 from ...core.agent.providers.ollama_chat import native_base
 from ...core.agent.providers.base import ProviderConfig
@@ -88,6 +88,15 @@ class AgentSettings:
     autonomy: str = DEFAULT_LEVEL
     # Only the filtering tools for a model of Ollama (core.agent.tool_catalog.FILTERING_TOOLS), for a slow computer.
     local_filtering_only: bool = False
+    # Exceptions of the Tools tab, as JSON {tool: "ask" | "allow" | "never"}: they override the level for that tool.
+    tool_rules: str = "{}"
+
+    @property
+    def rules(self) -> dict:
+        try:
+            return clean_rules(json.loads(self.tool_rules or "{}"))
+        except (ValueError, RecursionError):
+            return {}
 
     @property
     def needs_key(self) -> bool:
@@ -150,7 +159,8 @@ def load_settings() -> AgentSettings:
         mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""),
         expert_python=settings.value(_PREFIX + "expert_python", False, type=bool),
         local_filtering_only=settings.value(_PREFIX + "local_filtering_only", False, type=bool),
-        autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")))
+        autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")),
+        tool_rules=str(settings.value(_PREFIX + "tool_rules", "{}") or "{}"))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -171,6 +181,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "mcp_port", values.mcp_port)
     settings.setValue(_PREFIX + "mcp_token", values.mcp_token)
     settings.setValue(_PREFIX + "autonomy", level_or_default(values.autonomy))
+    settings.setValue(_PREFIX + "tool_rules", json.dumps(values.rules, sort_keys=True))
 
 
 def _auth_manager():

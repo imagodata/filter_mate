@@ -220,8 +220,13 @@ def create_layout(name: str, title: str = '', page: str = 'A4', orientation: str
 def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 150) -> Dict[str, Any]:
     """Write a layout of the project into ``folder`` (resolved by the caller under the export root).
 
+    2026-11-12: ``folder`` is created when missing, as ``export_layers`` does (the export failed on a new
+    sub-folder), and an existing file is never overwritten: ``<name>_2.pdf``, ``<name>_3.pdf``... instead,
+    for every page a PNG export writes (``<name>_2.png`` is its second page).
+
     Raises:
-        ValueError: An unknown layout or format, a resolution out of range, a failed export.
+        ValueError: An unknown layout or format, a resolution out of range, a folder that cannot be made, a
+            failed export.
     """
     from qgis.core import QgsLayoutExporter
     layout = _layout(name)
@@ -229,8 +234,27 @@ def export_layout(name: str, folder: str, file_format: str = 'pdf', dpi: int = 1
         raise ValueError('format is pdf or png')
     if not 72 <= int(dpi) <= MAX_DPI:
         raise ValueError(f"dpi goes from 72 to {MAX_DPI}")
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except OSError as exc:
+        raise ValueError(f"the export folder could not be created ({exc.strerror or exc})") from None
     safe = ''.join(char if char.isalnum() or char in '-_ ' else '_' for char in layout.name()).strip() or 'layout'
-    path = os.path.join(folder, f"{safe}.{file_format}")
+    pages = 1
+    if file_format == 'png':
+        try:
+            pages = max(1, int(layout.pageCollection().pageCount()))
+        except Exception:  # nosec B110 - one page assumed
+            pages = 1
+
+    def written(stem):
+        """The files the exporter writes for ``stem``: one PNG per page, ``<stem>_2.png`` from the second."""
+        return [os.path.join(folder, f"{stem}.{file_format}")] + [
+            os.path.join(folder, f"{stem}_{page}.{file_format}") for page in range(2, pages + 1)]
+
+    stem, index = safe, 2
+    while any(os.path.exists(candidate) for candidate in written(stem)):
+        stem, index = f"{safe}_{index}", index + 1
+    path = written(stem)[0]
     exporter = QgsLayoutExporter(layout)
     if file_format == 'pdf':
         settings = QgsLayoutExporter.PdfExportSettings()

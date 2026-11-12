@@ -588,6 +588,62 @@ class TestPointCloudObjectDetector:
         assert calls == [("detector", True), ("detector", False)]  # the picker left the map
 
 
+class TestZoneToolHandOver:
+    """2026-11-12: a tool of the panels that takes over another one inherits the tool that one replaced, so no tool
+    of the plugin is ever given back (closing the dock gave SAM the map, or left no tool at all)."""
+
+    class Canvas:
+        def __init__(self, tool):
+            self.tool = tool
+
+        def mapTool(self):
+            return self.tool
+
+        def setMapTool(self, tool):
+            self.tool = tool
+
+        def unsetMapTool(self, tool):
+            if self.tool is tool:
+                self.tool = None
+
+    def _env(self, dock_extras, on_map):
+        canvas = self.Canvas(on_map)
+        controller = dock_extras.controller
+        controller._iface = lambda: types.SimpleNamespace(mapCanvas=lambda: canvas)
+        controller._pixel_tool = controller._class_tool = None
+        controller._previous_map_tool = controller._previous_class_map_tool = None
+        controller._segmentation = None
+        zone = types.SimpleNamespace(set_shape=lambda shape: None, set_color=lambda color: None)
+        dock_extras.dock._pc_zone_tool = zone
+        return canvas, controller, zone
+
+    def test_zone_over_sam_takes_the_tool_sam_replaced(self, dock_extras):
+        sam_tool = object()
+        canvas, controller, zone = self._env(dock_extras, sam_tool)
+        controller._segmentation = types.SimpleNamespace(tool=sam_tool, _previous_tool="pan")
+        dock_extras.dock._start_pc_zone_tool()
+        assert canvas.mapTool() is zone
+        assert dock_extras.dock._pc_zone_previous_tool == "pan" and controller._segmentation._previous_tool is None
+        dock_extras.dock._stop_pc_zone_tool()
+        assert canvas.mapTool() == "pan"  # never SAM back on the map
+
+    def test_class_pipette_over_zone_takes_the_tool_zone_replaced(self, dock_extras):
+        class_tool = object()
+        canvas, controller, zone = self._env(dock_extras, class_tool)
+        dock_extras.dock._pc_zone_previous_tool = "pan"
+        controller._class_tool, controller._previous_class_map_tool = class_tool, zone  # CLASSES after Zone
+        dock_extras.dock._on_pc_zone_tool_deactivated()
+        assert controller._previous_class_map_tool == "pan"
+
+    def test_sam_over_zone_takes_the_tool_zone_replaced(self, dock_extras):
+        sam_tool = object()
+        canvas, controller, zone = self._env(dock_extras, sam_tool)
+        dock_extras.dock._pc_zone_previous_tool = "pan"
+        controller._segmentation = types.SimpleNamespace(tool=sam_tool, _previous_tool=zone)
+        dock_extras.dock._on_pc_zone_tool_deactivated()
+        assert controller._segmentation._previous_tool == "pan"
+
+
 class TestClassPipette:
     def _pipette(self, env):
         calls = []

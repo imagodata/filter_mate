@@ -73,6 +73,20 @@ def tool_turn(name, arguments, call_id="toolu_1"):
         {"type": "message_stop"})
 
 
+def tools_turn(*calls):
+    """One turn calling several tools: ``(name, arguments)`` each."""
+    events = [{"type": "message_start", "message": {"usage": {"input_tokens": 5, "output_tokens": 0}}}]
+    for index, (name, arguments) in enumerate(calls):
+        events += [{"type": "content_block_start", "index": index,
+                    "content_block": {"type": "tool_use", "id": f"toolu_m{index}", "name": name, "input": {}}},
+                   {"type": "content_block_delta", "index": index,
+                    "delta": {"type": "input_json_delta", "partial_json": json.dumps(arguments)}},
+                   {"type": "content_block_stop", "index": index}]
+    events += [{"type": "message_delta", "delta": {"stop_reason": "tool_use"}, "usage": {"output_tokens": 3}},
+               {"type": "message_stop"}]
+    return sse(*events)
+
+
 class Provider:
     """Answers each POST with the next scripted response: (status, headers, body) or "hang"."""
 
@@ -474,6 +488,9 @@ def check_chat(provider, layer, authcfg, work):
         return wait(lambda: not panel._working, seconds)
 
     chat.open_settings = lambda: False
+    # The settings a request asks for when it cannot be sent go to the dialog directly (not refused as open_settings is,
+    # 2026-11-12): a modal dialog, which would hold the bench, never answered.
+    chat._settings_dialog = lambda: False
     settings()
     chat._refresh_ready()
     wait(lambda: False, 0.05)
@@ -1121,6 +1138,9 @@ def check_chat(provider, layer, authcfg, work):
     check_steps(chat, provider, settings, ask, layer)
     check_autonomy(chat, provider, settings, ask, answers, layer)
     check_widgets(chat, provider, settings, ask, layer)
+    check_protected(chat, provider, settings, ask, layer)
+    check_tool_rules(chat, provider, settings, ask, layer)
+    check_asked_together(chat, provider, settings, ask, layer)
     check_recipes(chat, provider, settings, ask, layer)
     check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
@@ -1187,6 +1207,113 @@ def check_autonomy(chat, provider, settings, ask, answers, layer):
     settings()
     check("standard: nothing shown next to the model", "Standard" not in shown() and "test-model" in shown(), shown())
     panel.clear_thread()
+
+
+def check_asked_together(chat, provider, settings, ask, layer):
+    """Several actions of one turn the user is asked about: one question, all or none."""
+    layer.setSubsetString("")
+    settings(autonomy="careful")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    turn = tools_turn(("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}),
+                      ("set_layer_style", {"layer": "communes", "mode": "single", "color": "#ff0000"}))
+    provider.reset((200, {}, turn), (200, {}, text_turn("ok")))
+    ask("filtre et colore les communes")
+    check("together: one question for the two changes of the turn", len(asked) == 1 and "2 actions" in asked[0] and
+          "communes" in asked[0], asked)
+    check("together: yes runs both", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    layer.setSubsetString("")
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    provider.reset((200, {}, turn), (200, {}, text_turn("ok")))
+    ask("filtre et colore les communes")
+    results = provider.requests[1]["body"]["messages"][-1]["content"]
+    check("together: no runs none of them", len(asked) == 1 and layer.subsetString() == "" and
+          all(part.get("is_error") and "declined" in part["content"] for part in results), results)
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
+
+
+def check_tool_rules(chat, provider, settings, ask, layer):
+    """Exceptions of the Tools tab: never hides and refuses a tool, always ask asks at every call."""
+    from filter_mate.adapters.agent.settings import load_settings, target_of
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
+
+    dialog = AgentSettingsDialog(load_settings(), target_of, tools=[("zoom_to", "Zoom", 1), ("run_pyqgis", "Python", 5)])
+    check("rules: a Tools tab", any(dialog.tabs.tabText(i) == "Tools" for i in range(dialog.tabs.count())))
+    check("rules: code can never be always allowed", dialog._rule_boxes["run_pyqgis"].findData("allow") < 0)
+    dialog._rule_boxes["zoom_to"].setCurrentIndex(dialog._rule_boxes["zoom_to"].findData("never"))
+    check("rules: the choice is read back", dialog.chosen_tool_rules() == {"zoom_to": "never"}, dialog.chosen_tool_rules())
+    dialog.close()
+
+    filter_call = {"layer_name": "communes", "expression": '"pop" > 1000'}
+    layer.setSubsetString("")
+    settings(autonomy="autonomous", tool_rules='{"apply_filter": "never"}')
+    provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("Outil coupé.")))
+    ask("filtre les communes")
+    names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("rules: never hides the tool from the model", "apply_filter" not in names and "zoom_to" in names, names)
+    check("rules: never refuses it even when autonomous", result.get("is_error") is True and
+          "turned the tool 'apply_filter' off" in result["content"] and layer.subsetString() == "", result)
+    check("rules: other applications are refused too", "off" in chat.protection_refusal(ToolCallPart("m", "apply_filter",
+                                                                                                    filter_call)))
+    settings(tool_rules='{"apply_filter": "ask"}')
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    for _round in range(2):
+        provider.reset((200, {}, tool_turn("apply_filter", filter_call)), (200, {}, text_turn("ok")))
+        ask("filtre les communes")
+    check("rules: always ask asks at every call", len(asked) == 2 and layer.subsetString() == '"pop" > 1000',
+          (len(asked), layer.subsetString()))
+    layer.setSubsetString("")
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
+
+
+def check_protected(chat, provider, settings, ask, layer):
+    """A layer the user protected: refused to the chat at every level, named to the model, and to other applications."""
+    from filter_mate.adapters.agent.protected_layers import read_ids, write_ids
+    from filter_mate.adapters.agent.settings import load_settings, target_of
+    from filter_mate.core.agent.messages import ToolCallPart
+    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
+
+    dialog = AgentSettingsDialog(load_settings(), target_of, project_layers=[(layer.id(), "communes", False)])
+    dialog.protected_layers.item(0).setCheckState(Qt.CheckState.Checked)
+    check("protected: ticked in the Autonomy tab", dialog.chosen_protected() == [layer.id()], dialog.chosen_protected())
+    dialog.close()
+    write_ids([layer.id()])
+    check("protected: kept in the project", read_ids() == [layer.id()])
+    settings(autonomy="autonomous")
+    layer.setSubsetString("")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'})),
+                   (200, {}, text_turn("Elle est protégée.")))
+    ask("filtre les communes")
+    result = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("protected: a filter is refused even when autonomous, nobody asked", result.get("is_error") is True and
+          "'communes'" in result["content"] and "protected" in result["content"] and not asked and
+          layer.subsetString() == "", (result, asked, layer.subsetString()))
+    sent = json.dumps(provider.requests[0]["body"]["messages"][-1], ensure_ascii=False)
+    check("protected: the model is told which layers", "protected from the agent" in sent and "communes" in sent,
+          sent[-300:])
+    call = ToolCallPart("m1", "set_layer_style", {"layer": layer.id(), "mode": "single"})
+    check("protected: other applications are refused too", "'communes'" in chat.protection_refusal(call))
+    check("protected: a zoom stays allowed", chat.protection_refusal(ToolCallPart("m2", "zoom_to", {"layer": "communes"}))
+          == "")
+    write_ids([])
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'})),
+                   (200, {}, text_turn("ok")))
+    ask("filtre les communes")
+    check("protected: once let go, the filter applies", layer.subsetString() == '"pop" > 1000', layer.subsetString())
+    layer.setSubsetString("")
+    chat._ask_user = lambda title, text: False
+    settings()
+    chat.panel.clear_thread()
 
 
 def check_widgets(chat, provider, settings, ask, layer):
@@ -1391,6 +1518,21 @@ def check_recipes(chat, provider, settings, ask, layer):
     chat._refresh_recipes()
     check("recipes: a failed step stops the recipe", chat.run_recipe("r9") is False and layer.subsetString() == "",
           layer.subsetString())
+
+    write_recipes(read_recipes() + [{"id": "r10", "name": "Deux pas", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": big, "label": "filtre"},
+        {"tool": "set_layer_style", "arguments": {"layer": "communes", "mode": "single", "color": "#00ff00"},
+         "label": "style"}]}])
+    chat._refresh_recipes()
+    settings(autonomy="careful")
+    asked = []
+    chat._ask_user = lambda title, text: asked.append(text) or True
+    ran = chat.run_recipe("r10")
+    check("recipes: careful asks one question for the steps of the recipe", ran is not False and len(asked) == 1 and
+          "2 actions" in asked[0] and layer.subsetString() == '"pop" > 1000', (ran, asked, layer.subsetString()))
+    chat._ask_user = previous
+    settings()
+    layer.setSubsetString("")
 
     write_recipes([])
     chat._refresh_recipes()
