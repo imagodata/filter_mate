@@ -52,6 +52,28 @@ def _record(layer, style=None, checked=None):
                            usingLegendItems=checked is not None, checkedLegendItems=set(checked or ()))
 
 
+class TestJoins:
+    def test_the_layers_that_join_a_layer_by_its_id_or_any_layer_of_its_name(self, monkeypatch):
+        def vector(layer_id, name, joined=()):
+            joins = [SimpleNamespace(joinLayerId=lambda target=target: target) for target in joined]
+            return SimpleNamespace(id=lambda: layer_id, name=lambda: name, vectorJoins=lambda: joins)
+        owners, owners_bis = vector("owners_1", "owners"), vector("owners_2", "owners")
+        cadastre, routes = vector("cadastre_id", "cadastre", ["owners_2"]), vector("routes_id", "routes", ["x"])
+        mnt = SimpleNamespace(id=lambda: "mnt_id", name=lambda: "mnt")  # a raster: no joins
+        layers = {item.id(): item for item in (owners, owners_bis, cadastre, routes, mnt)}
+        project = SimpleNamespace(
+            readEntry=lambda scope, key, default: ('["cadastre_id"]', True), mapLayer=layers.get,
+            mapLayersByName=lambda name: [item for item in layers.values() if item.name() == name],
+            mapLayers=lambda: layers)
+        monkeypatch.setattr(protected_layers, "QgsProject", SimpleNamespace(instance=lambda: project))
+        protection = protected_layers.ProjectProtection()
+        assert protection.layers_joining(["owners"]) == ["cadastre_id"]
+        assert protection.layers_joining(["owners_2"]) == ["cadastre_id"]
+        assert protection.layers_joining(["owners_1", "mnt"]) == []
+        assert "'cadastre'" in PermissionPolicy(protector=protection).protection_refusal(
+            "remove_layers", {"layers": ["owners_2"]})
+
+
 class TestMapThemes:
     @pytest.fixture
     def themes(self, monkeypatch):

@@ -388,6 +388,18 @@ class TestProtectedFavorites:
             assert executor.verdict(ToolCallPart("c", "map_theme", {"action": action, "name": "Cadastre"}), policy) == RUN
         assert read == []
 
+    def test_removing_a_layer_a_protected_layer_joins_is_refused(self):
+        # QGIS takes a removed layer out of the joins of the layers that join it.
+        class WithJoins(Protector):
+            def layers_joining(self, references):
+                return ["cadastre_id"] if "owners" in references else []
+
+        policy = PermissionPolicy(AUTONOMOUS, protector=WithJoins("cadastre"))
+        assert "'cadastre'" in policy.protection_refusal("remove_layers", {"layers": ["owners"]})
+        assert policy.protection_refusal("remove_layers", {"layers": ["routes"]}) == ""
+        # Editing the joined layer writes nothing in the layer that joins it (upsert and cascade go the other way).
+        assert policy.protection_refusal("update_features", {"layer": "owners", "values": {"a": 1}}) == ""
+
     def test_a_protector_without_favorites_lets_them_run(self):
         executor = ToolExecutor(chat_tools(), {})
         policy = PermissionPolicy(protector=Protector("cadastre"))

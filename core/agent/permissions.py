@@ -55,6 +55,10 @@ CHANGED_LAYERS = {
 }
 # Without any layer named, these act on every layer.
 ALL_WHEN_NONE = frozenset({"clear_filters"})
+# QGIS takes a removed layer out of the joins of the layers that join it: those change too. Editing a joined layer
+# writes nothing in the layers that join it (an editable join writes from the layer that holds it into the joined one,
+# and a cascaded delete goes the same way): they only show its new values, as from a source.
+JOINED_CHANGES = frozenset({"remove_layers"})
 
 # The highest class that runs without asking, at each level.
 _RUNS_ALONE = {ADVISOR: READ, CAREFUL: VIEW, STANDARD: BUFFER, AUTONOMOUS: LOCAL}
@@ -106,6 +110,9 @@ class Protection(Protocol):
 
     def theme_layers(self, name: str) -> Sequence[str]:
         """The ids of the layers applying the map theme ``name`` would restyle (current style, legend items)."""
+
+    def layers_joining(self, references: Sequence[str]) -> Sequence[str]:
+        """The ids of the layers that join one of ``references`` (a vector join)."""
 
 
 def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
@@ -226,12 +233,16 @@ class PermissionPolicy:
 
     def _references(self, name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
         """The layers the call changes, read in the project where the call does not name them: those of a favorite,
-        of a map theme. None: every layer."""
+        of a map theme, those that join a layer removed. None: every layer."""
         if name in ("apply_favorite", "map_theme"):
             method, key = ("favorite_layers", "favorite_id") if name == "apply_favorite" else ("theme_layers", "name")
             resolve = getattr(self.protector, method, None)
             return list(resolve(str(arguments.get(key, "")))) if resolve is not None else []
-        return changed_layers(name, arguments)
+        references = changed_layers(name, arguments)
+        joining = getattr(self.protector, "layers_joining", None)
+        if references and name in JOINED_CHANGES and joining is not None:
+            references = references + list(joining(references))
+        return references
 
     def verdict(self, spec) -> str:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec``."""

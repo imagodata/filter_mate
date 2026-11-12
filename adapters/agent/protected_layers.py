@@ -48,6 +48,12 @@ def write_ids(ids: Sequence[str], project=None) -> None:
         project.removeEntry(SCOPE, KEY)
 
 
+def _candidates(project, reference: str) -> List:
+    """What a reference may designate: the layer of an id, or every layer of a name."""
+    layer = project.mapLayer(reference)
+    return [layer] if layer is not None else project.mapLayersByName(reference)
+
+
 class ProjectProtection:
     """The protected layers of the open project, read at each call: the user may change them at any time.
 
@@ -59,9 +65,7 @@ class ProjectProtection:
         ids = set(read_ids(project, strict=True))
         if not ids:
             return None
-        layer = project.mapLayer(reference)
-        candidates = [layer] if layer is not None else project.mapLayersByName(reference)
-        for candidate in candidates:
+        for candidate in _candidates(project, reference):
             if candidate.id() in ids:
                 return candidate.name()
         return None
@@ -88,3 +92,12 @@ class ProjectProtection:
             return []  # nothing protected: the theme is not even read
         from ..public_api.layer_tree import theme_changed_layers
         return theme_changed_layers(name)
+
+    def layers_joining(self, references: Sequence[str]) -> List[str]:
+        """The ids of the vector layers that join one of ``references``: removing it takes it out of their joins."""
+        project = QgsProject.instance()
+        if not read_ids(project, strict=True):
+            return []
+        targets = {layer.id() for reference in references for layer in _candidates(project, reference)}
+        return [layer.id() for layer in project.mapLayers().values() if hasattr(layer, "vectorJoins")
+                and any(join.joinLayerId() in targets for join in layer.vectorJoins())]
