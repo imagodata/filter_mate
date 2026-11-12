@@ -89,7 +89,8 @@ def _do_merge(
 
     # 4. Write output
     tree = ET.ElementTree(kml_root)
-    ET.indent(tree, space="  ")
+    if hasattr(ET, "indent"):  # Python 3.9; QGIS 3.22 on Ubuntu 20.04 runs Python 3.8
+        ET.indent(tree, space="  ")
     tree.write(output_path, encoding="utf-8", xml_declaration=True)
 
     logger.info(
