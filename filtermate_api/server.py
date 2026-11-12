@@ -26,7 +26,7 @@ from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from . import __version__
-from .accessor import FilterMateAccessor, FilterRejected, InMemoryAccessor
+from .accessor import PROTECTED_HEADER, FilterMateAccessor, FilterRejected, InMemoryAccessor, LayerProtected
 from .auth import APIKeyMiddleware
 from .config import _LOOPBACK_HOSTS, APIConfig
 from .main_thread import QGISBusy
@@ -394,6 +394,12 @@ def create_app(
     @app.exception_handler(FilterRejected)
     async def _filter_rejected(request: Request, exc: FilterRejected) -> JSONResponse:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': str(exc)})
+
+    # A layer the user protected from the agent: the same refusal as the chat and the MCP server of the plugin.
+    @app.exception_handler(LayerProtected)
+    async def _layer_protected(request: Request, exc: LayerProtected) -> JSONResponse:
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": str(exc)},
+                            headers={PROTECTED_HEADER: "protected-layer"})
 
     @app.exception_handler(QGISBusy)
     async def _qgis_busy(request: Request, exc: QGISBusy) -> JSONResponse:

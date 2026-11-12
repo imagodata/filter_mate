@@ -12,7 +12,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
-from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected
+from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected, LayerProtected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
 from .filter_combine import combined
 from .layer_listing import select_layers, short_filter
@@ -84,7 +84,7 @@ def _guarded(handler: Handler) -> Handler:
             return handler(arguments)
         except QGISBusy as exc:
             raise ToolFailure(f"QGIS is busy, nothing was changed: {exc}. Wait and try again.") from None
-        except (FilterRejected, FavoritesUnavailable) as exc:
+        except (FilterRejected, FavoritesUnavailable, LayerProtected) as exc:
             raise ToolFailure(str(exc)) from None
     return run
 
@@ -166,12 +166,14 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         except QGISBusy:
             return {}
 
-    def _resolved_name(reference: str, expression: str, operator: Optional[str]) -> Tuple[str, Optional[int], str, str]:
-        """Name ``apply_filter`` needs for an id or a name, once the expression passed a trial where one is needed.
+    def _resolved_layer(reference: str, expression: str,
+                        operator: Optional[str]) -> Tuple[str, str, Optional[int], str, str]:
+        """The layer an id or a name designates, once the expression passed a trial where one is needed.
 
-        With it, the features of the layer when it had no filter yet (``None`` otherwise): the total to compare
-        with; the expression to apply (the new condition combined with the current filter when ``operator`` says
-        so), and the filter it replaces.
+        ``(target, name, total, applied, replaced)``: the id ``apply_filter`` applies to (the layer the protection
+        checked: a name may be shared by several layers), the name the answer shows, the features of the layer when
+        it had no filter yet (``None`` otherwise): the total to compare with; the expression to apply (the new
+        condition combined with the current filter when ``operator`` says so), and the filter it replaces.
         """
         try:
             details = accessor.describe_layer(reference)
@@ -183,27 +185,27 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         if details is None:
-            return reference, None, applied, replaced
+            return reference, reference, None, applied, replaced
         if details.provider_type in _SILENT_SQL_PROVIDERS:
             try:
-                preview = accessor.preview_filter(details.name, applied)
+                preview = accessor.preview_filter(details.layer_id, applied)
             except FilterRejected:
                 preview = None
             if preview is not None and not preview.valid:
                 raise ToolFailure(f"Nothing was applied, the expression is invalid: {preview.error}")
         total = details.feature_count if not details.subset and details.feature_count >= 0 else None
-        return details.name, total, applied, replaced
+        return details.layer_id, details.name, total, applied, replaced
 
     def apply_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         expression = _checked_expression(args["expression"])
-        name, total, applied, replaced = _resolved_name(args["layer_name"], expression, args.get("operator"))
-        if not accessor.apply_filter(name, applied, SOURCE):
+        target, name, total, applied, replaced = _resolved_layer(args["layer_name"], expression, args.get("operator"))
+        if not accessor.apply_filter(target, applied, SOURCE):
             raise ToolFailure("Layer not found.")
         answer = {"success": True, "layer_name": name, "expression": applied, "active_filters": _active_after_change()}
         if replaced and replaced != applied:
             answer["replaced_filter"] = replaced  # the model sees a filter it may have meant to keep
         try:
-            details = accessor.describe_layer(name)
+            details = accessor.describe_layer(target)
         except (QGISBusy, FilterRejected):
             details = None
         if details is not None and details.feature_count >= 0:

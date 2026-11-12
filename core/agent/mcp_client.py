@@ -160,10 +160,12 @@ def tools_from_listing(server_id: str, server_title: str, result: Dict[str, Any]
         if cost > budget:
             continue
         budget -= cost
+        # Never read only, whatever readOnlyHint says: the hint is the server's own claim, and the arguments of a
+        # call may carry data of the project out. A connector stays a call outside, confirmed as the level says.
         found[name] = RemoteTool(ToolSpec(
             name=name, description=f"[External connector {server_title}] {description}", input_schema=bounded,
-            title=_safe_name(remote)[:80], read_only=hints.get("readOnlyHint") is True,
-            destructive=hints.get("destructiveHint") is True, open_world=True), server_id, remote)
+            title=_safe_name(remote)[:80], destructive=hints.get("destructiveHint") is True, open_world=True),
+            server_id, remote)
     return tuple(found.values())
 
 

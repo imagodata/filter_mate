@@ -309,10 +309,33 @@ class TestHandlers:
         assert run(accessor, tmp_path, "apply_filter", layer_name="communes", expression="a = 1")[0] is False
         assert accessor._active == {"communes": "a = 1"}
 
-    def test_a_layer_id_is_applied_by_its_name(self, api):
+    def test_a_layer_id_is_applied_by_its_id_and_answered_by_its_name(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "apply_filter", layer_name="L1", expression="a = 1")
         assert not error and answer["layer_name"] == "communes" and accessor._active == {"communes": "a = 1"}
+
+    def test_among_layers_of_the_same_name_the_one_named_by_its_id_is_tried_filtered_and_counted(self, tmp_path):
+        # The protection checks the layer of the id: applying by the name would filter the first of the name.
+        class Twins(Accessor):
+            def __init__(self):
+                super().__init__()
+                self.layers = [LayerSummary("L1", "communes", "ogr", feature_count=9),
+                               LayerSummary("L2", "communes", "ogr", feature_count=4)]
+                self.applied, self.tried = [], []
+
+            def preview_filter(self, layer_name, expression):
+                self.tried.append(layer_name)
+                return super().preview_filter(layer_name, expression)
+
+            def apply_filter(self, layer_name, expression, source):
+                self.applied.append(layer_name)
+                return super().apply_filter(layer_name, expression, source)
+
+        accessor = Twins()
+        error, answer = run(accessor, tmp_path, "apply_filter", layer_name="L2", expression="a = 1")
+        assert not error and answer["layer_name"] == "communes" and answer["total_count"] == 4
+        assert accessor.applied == ["L2"] and accessor.tried == ["L2"]
+        assert [seen["layer"] for name, seen in accessor.calls if name == "describe"] == ["L2", "L2"]
 
     def test_busy_after_the_change_does_not_look_like_a_failure(self, tmp_path):
         class Busy(Accessor):

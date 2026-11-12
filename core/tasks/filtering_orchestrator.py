@@ -509,11 +509,9 @@ class FilteringOrchestrator:
         source_layer: QgsVectorLayer,
         layers: Dict[str, List],
         task_parameters: Dict[str, Any],
-        param_buffer_expression: Optional[str],
         param_source_provider_type: str,
         provider_list: List[str],
         initialize_source_subset_and_buffer_callback: Callable,
-        ensure_buffer_expression_mv_exists_callback: Callable,
         try_create_filter_chain_mv_callback: Callable,
         prepare_geometries_by_provider_callback: Callable,
         filter_all_layers_with_progress_callback: Callable,
@@ -531,11 +529,9 @@ class FilteringOrchestrator:
             source_layer: The source QgsVectorLayer.
             layers: Dict of layers organized by provider type.
             task_parameters: Full task parameters dict.
-            param_buffer_expression: Buffer expression or None.
             param_source_provider_type: Provider type of source layer.
             provider_list: List of provider types for geometry preparation.
             initialize_source_subset_and_buffer_callback: Callable to init buffer params.
-            ensure_buffer_expression_mv_exists_callback: Callable to create buffer MV.
             try_create_filter_chain_mv_callback: Callable to create filter chain MV.
             prepare_geometries_by_provider_callback: Callable(provider_list) to prepare geometries.
             filter_all_layers_with_progress_callback: Callable to run the actual filtering.
@@ -545,7 +541,8 @@ class FilteringOrchestrator:
             True if all distant layers were filtered successfully.
 
         Note:
-            - Supports buffer expressions with MV optimization for large datasets
+            - A buffer expression is applied inline by the PostgreSQL filter whatever
+              the size of the source (2026-11-12, see prepare_postgresql_source_geom)
             - Creates filter chain MV when multiple spatial filters are chained
             - Handles provider-specific geometry preparation (PostgreSQL, Spatialite, OGR)
         """
@@ -563,33 +560,10 @@ class FilteringOrchestrator:
         initialize_source_subset_and_buffer_callback()
 
         # Calculate source_feature_count ONCE and store it for consistent threshold decisions
-        # This ensures _ensure_buffer_expression_mv_exists() and prepare_postgresql_source_geom()
-        # use the same value (featureCount can vary if subsetString changes between calls)
+        # (featureCount can vary if subsetString changes between calls)
         cached_feature_count = source_layer.featureCount() if source_layer else None
         cached_source_feature_count_setter(cached_feature_count)
         logger.info(f"  Cached source_feature_count: {cached_feature_count}")
-
-        # Re-read param_buffer_expression from task after initialization
-        # (it may have been set by initialize_source_subset_and_buffer_callback)
-        # The caller should pass the updated value, but we use the one from task_parameters
-        # as a safety measure
-        current_buffer_expression = task_parameters.get('filtering', {}).get('buffer_expression', param_buffer_expression)
-        if current_buffer_expression is None:
-            current_buffer_expression = param_buffer_expression
-
-        # Ensure buffer expression MV exists BEFORE prepare_geometries
-        # CRITICAL - Only call MV creation if feature count exceeds threshold
-        from ...adapters.backends.postgresql.filter_executor import BUFFER_EXPR_MV_THRESHOLD
-        if (current_buffer_expression and
-            param_source_provider_type == PROVIDER_POSTGRES and
-            cached_feature_count is not None and
-                cached_feature_count > BUFFER_EXPR_MV_THRESHOLD):
-            logger.info(f"  Feature count ({cached_feature_count}) > threshold ({BUFFER_EXPR_MV_THRESHOLD})")
-            logger.info("  -> Calling _ensure_buffer_expression_mv_exists()...")
-            ensure_buffer_expression_mv_exists_callback()
-        elif current_buffer_expression and param_source_provider_type == PROVIDER_POSTGRES:
-            logger.info(f"  SKIP MV creation: {cached_feature_count} features <= {BUFFER_EXPR_MV_THRESHOLD} threshold")
-            logger.info("  -> Buffer expression will be applied INLINE by prepare_postgresql_source_geom()")
 
         # Try to create optimized filter chain MV for PostgreSQL
         # When multiple spatial filters are chained (zone_pop AND demand_points etc.),

@@ -59,13 +59,18 @@ class SegmentationController:
 
     @staticmethod
     def _stop(task: Any) -> None:
-        """Cancel a task QGIS says runs; any other is left to finish, its callback ignored (the generation moved on).
+        """Cancel a task QGIS says runs; any other gives up as it starts (``task.stopped``), its callback ignored.
 
         QGIS 3.22 deletes a queued task canceled while the thread pool already holds its runnable:
         the run that follows reads a deleted object and QGIS crashes (2026-11-10, the Escape of a click
-        whose area was not prepared yet). A status that cannot be read counts as not running.
+        whose area was not prepared yet; later that day a task deleted for want of a Python reference was
+        found behind that Escape, see ``_running``, and this rule stayed). A queued task is therefore not
+        canceled but flagged: its run() reads the flag first and between its windows, instead of drawing
+        a search nobody waits for (some 20 s of CPU). A status that cannot be read counts as not running.
         """
         try:
+            if hasattr(task, 'stopped'):
+                task.stopped = True
             if not hasattr(task, 'status'):
                 task.cancel()  # not a QgsTask (a stand-in): nothing queued to protect
                 return
@@ -105,8 +110,10 @@ class SegmentationController:
         self._status(self.tr("Click an object, or draw a box around it"))
 
     def _on_tool_left(self) -> None:
-        """The tool left the map (another QGIS tool too): its markers went, the prompts go with them."""
+        """The tool left the map (another QGIS tool too, a reset of the panel): its markers went, the prompts and
+        the proposals go with them (Keep all would add objects whose clicked object may be gone)."""
         self.cancel()
+        self._set_proposals([])
         self._host._show_picker_state(False)
 
     def deactivate(self) -> None:
@@ -126,9 +133,17 @@ class SegmentationController:
         self._session, self._session_layer = None, ''
         self._groups, self._current = [], None
         self._set_proposals([])
+        # Out of the scene of the map: hidden, the outlines and the markers of the tool stayed there, two more
+        # outlines at each reload of the plugin and the markers of a tool at each change of layer.
+        for name in ('_outline', '_proposal_outline'):
+            outline = getattr(self, name)
+            setattr(self, name, None)
+            if outline is not None:
+                outline.remove()
         tool, self.tool = self.tool, None
         if tool is not None:
             try:
+                tool.remove_items()
                 tool.deleteLater()
             except RuntimeError:
                 pass  # already deleted (QGIS closing)
@@ -137,10 +152,11 @@ class SegmentationController:
         """Forget the prompts, the window being encoded and the search running; the objects stay."""
         self._generation += 1
         self._pending = []
-        self._task = None  # the encoding is short: left to finish, its result ignored (never canceled, see _stop)
-        search, self._search = self._search, None
-        if search is not None:
-            self._stop(search)
+        for name in ('_task', '_search'):  # their callbacks return at once (the generation moved on)
+            task = getattr(self, name)
+            setattr(self, name, None)
+            if task is not None:
+                self._stop(task)
         if self._hover_timer is not None:
             self._hover_timer.stop()
         if self._session is not None:
@@ -233,7 +249,7 @@ class SegmentationController:
         if model is None:
             self._status(self._missing_model_text())
             return False
-        source, provider_key, native = self._window_source(layer)
+        source, provider_key, native, alpha = self._window_source(layer)
         try:
             window = self._plan(layer, center, native, model)
         except ValueError as exc:
@@ -242,7 +258,7 @@ class SegmentationController:
             return False
         self._current, self._extending = None, False
         self._stop_search()  # its objects would join the new object's group
-        if session is not None and session.window.cell == window.cell and session.window.contains(center.x(), center.y()):
+        if session is not None and session.window.cell == window.cell and self._serves(session.window, window, kind, value, layer):
             session.clear()
             if not self._apply(session, kind, value, positive):
                 self._status(self.tr("This box is too small"))
@@ -250,8 +266,26 @@ class SegmentationController:
             self._predict(session)
             return True
         self._pending = [(kind, value, positive, False)]
-        self._encode(layer, window, model, source, provider_key)
+        self._encode(layer, window, model, source, provider_key, alpha)
         return True
+
+    @staticmethod
+    def _serves(encoded: Any, planned: Any, kind: str, value: Any, layer: Any) -> bool:
+        """Whether the window already encoded serves a new prompt, rather than ``planned`` around it.
+
+        A click must lie well inside it (``segmentation.well_inside``, as the candidates of the similar
+        objects): at a few pixels from its edge, the object around it was cut. A box must lie in it whole,
+        or ``set_box`` cuts it. The edges of the raster are no edges of an object; the same window serves.
+        """
+        from ...adapters.qgis.coverage_layers.segmentation import well_inside
+        if (encoded.x_min, encoded.y_max) == (planned.x_min, planned.y_max):
+            return True
+        extent = layer.extent()
+        raster = (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum())
+        if kind == 'point':
+            return well_inside(encoded, value.x(), value.y(), raster)
+        return (well_inside(encoded, value.xMinimum(), value.yMinimum(), raster, 0)
+                and well_inside(encoded, value.xMaximum(), value.yMaximum(), raster, 0))
 
     @staticmethod
     def _apply(session: Any, kind: str, value: Any, positive: bool) -> bool:
@@ -295,24 +329,52 @@ class SegmentationController:
 
     # === Encoding the window ===
 
-    def _window_source(self, layer: Any) -> Tuple[str, str, float]:
-        """``(source, provider, native cell)`` to draw: a service is rendered itself, it has no pixels of its own.
+    def _window_source(self, layer: Any) -> Tuple[str, str, float, Optional[int]]:
+        """``(source, provider, native cell, alpha band)`` to draw: a service is rendered itself, it has no pixels of its own.
 
         Its local sample only covers what was visible when it was taken, and its size says nothing of
-        the coverage; a raster filtered by FilterMate is read from its original source.
+        the coverage; a raster filtered by FilterMate is read from its original source, with the alpha
+        band of that source (:meth:`_original_alpha_band`; None: the renderer keeps its own).
         """
         from ...adapters.qgis.coverage_layers.raster_materialization import raster_reads_remotely
         if raster_reads_remotely(layer.providerType(), layer.source()) or not self._host._raster_capability(layer).has_raw_values:
-            return layer.source(), layer.providerType(), 0.0
+            return layer.source(), layer.providerType(), 0.0, None
         base = self._host._base_raster(layer)
         extent = base.extent()
         native = max(extent.width() / base.width(), extent.height() / base.height()) if base.width() > 0 and base.height() > 0 else 0.0
-        return base.source(), base.providerType(), native
+        return base.source(), base.providerType(), native, self._original_alpha_band(layer, base)
+
+    @staticmethod
+    def _original_alpha_band(layer: Any, base: Any) -> Optional[int]:
+        """The alpha band the renderer of ``layer`` reads on its original source ``base``; None when ``base`` is the layer.
+
+        A raster filtered by FilterMate shows a derived source with an alpha band of FilterMate's (the
+        VRT of an integer raster without NoData), which its renderer reads (``snapshots._sync_alpha_band``).
+        The original source has no such band: that block is invalid and the window was drawn black. The
+        band of the original source is the one the layer had there, else the one QGIS chose for it.
+        """
+        if base is layer:
+            return None
+        from ...adapters.qgis.coverage_layers.snapshots import registry
+        alpha = registry().original_alpha_band(layer.id())
+        if alpha is None:  # not known (a project of an older version)
+            renderer = base.renderer()
+            alpha = renderer.alphaBand() if renderer is not None and hasattr(renderer, 'alphaBand') else -1
+        return alpha
 
     def _visible_extent(self) -> Any:
-        """The visible map, in the CRS of the layer."""
+        """The visible map, in the CRS of the layer; the extent of the layer when the map shows more than that CRS covers.
+
+        A map zoomed out on the world cannot be reprojected in the CRS of a local raster (QgsCsException,
+        no RuntimeError): it raised in the callback of the encoding (a virtual method of C++) and after an
+        object was added (whose click was then said unusable). The whole raster is then in view.
+        """
         settings = self._host._iface().mapCanvas().mapSettings()
-        return self._transform().transformBoundingBox(settings.visibleExtent())
+        try:
+            return self._transform().transformBoundingBox(settings.visibleExtent())
+        except Exception as exc:  # QgsCsException is no RuntimeError
+            logger.debug(f"[FM5] visible map not in the CRS of the layer, its extent used: {exc}")
+            return self._host._active_layer.extent()
 
     def _plan(self, layer: Any, center: Any, native: float, model: Any) -> Any:
         from ...adapters.qgis.coverage_layers.segmentation import plan_window
@@ -321,15 +383,15 @@ class SegmentationController:
         return plan_window(center.x(), center.y(), (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()),
                            native, min(visible.width(), visible.height()), int(model.input_size))
 
-    def _encode(self, layer: Any, window: Any, model: Any, source: str, provider_key: str) -> None:
-        from qgis.core import QgsApplication, QgsProject
-        from ...adapters.qgis.coverage_layers.segmentation import SegmentationEmbedTask
+    def _encode(self, layer: Any, window: Any, model: Any, source: str, provider_key: str,
+                alpha: Optional[int] = None) -> None:
+        from qgis.core import QgsApplication
+        from ...adapters.qgis.coverage_layers.segmentation import SegmentationEmbedTask, raster_look
         self._generation += 1
         self._hide_outline()
-        renderer = layer.renderer().clone() if layer.renderer() is not None else None
-        task = SegmentationEmbedTask(source, provider_key, renderer, layer.crs(), window, model,
+        task = SegmentationEmbedTask(source, provider_key, None, layer.crs(), window, model,
                                      self._embedded(self._generation, layer.id(), window, model),
-                                     QgsProject.instance().transformContext())
+                                     look=raster_look(layer, alpha))
         self._task = task
         self._running.append(task)
         self._status(self.tr("Preparing the segmentation of this area…"))
@@ -376,12 +438,12 @@ class SegmentationController:
         return model_state()
 
     def _missing_model_text(self) -> str:
-        from ...adapters.qgis.coverage_layers.sam_model import install_command
+        from ...adapters.qgis.python_dependencies import manual_command
         state = self.model_state()
         if state.installing_runtime:
             return self.tr("onnxruntime is being installed, click again in a moment")
         if not state.runtime and state.runtime_failed:
-            return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(install_command())
+            return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(manual_command())
         if not state.runtime:
             return self.tr("Install onnxruntime first, with the button below")
         if self.downloading():
@@ -516,9 +578,9 @@ class SegmentationController:
     def _search_similar(self, reference: Any) -> None:
         """Propose to SAM the colour patches near the clicked object, then the places whose features look like it,
         and keep the objects like it (a task)."""
-        from qgis.core import QgsApplication, QgsProject
+        from qgis.core import QgsApplication
         from ...adapters.qgis.coverage_layers.segmentation import (
-            SimilarObjectsTask, feature_candidate_points, find_provider, pooled_features,
+            SimilarObjectsTask, feature_candidate_points, find_provider, pooled_features, raster_look,
         )
         layer, session, panel = self._host._active_layer, self._session, self._host._raster_panel
         model = find_provider()
@@ -543,17 +605,16 @@ class SegmentationController:
             self._status(self.tr("No patch of this colour nearby to compare with the object"))
             return
         self._stop_search()  # one search at a time (several clicks may have been queued)
-        source, provider_key, _native = self._window_source(layer)
+        source, provider_key, _native, alpha = self._window_source(layer)
         extent = layer.extent()
-        renderer = layer.renderer().clone() if layer.renderer() is not None else None
         self._generation += 1
-        task = SimilarObjectsTask(source, provider_key, renderer, layer.crs(), model,
+        task = SimilarObjectsTask(source, provider_key, None, layer.crs(), model,
                                   (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()),
                                   session.window.cell, points, reference.asWkt(), panel.similar_ratio(),
                                   panel.similar_shape(), self._searched(self._generation, layer.id(), reference.asWkt()),
-                                  QgsProject.instance().transformContext(), existing=list(panel._segments),
-                                  reference_features=reference_features,
-                                  click_window=session.window, click_embedding=session.embedding)
+                                  existing=list(panel._segments), reference_features=reference_features,
+                                  click_window=session.window, click_embedding=session.embedding,
+                                  look=raster_look(layer, alpha))
         self._search = task
         self._running.append(task)
         task.progressChanged.connect(lambda progress: self._on_search_progress(task, progress))

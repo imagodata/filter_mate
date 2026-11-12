@@ -2374,6 +2374,18 @@ class CoverageModeController(BaseController):
         previous, self._previous_map_tool = self._previous_map_tool, None
         self._release_map_tool(self._pixel_tool, previous)
 
+    def release_map_tools(self) -> None:
+        """The dock was closed (only hidden): each tool of the panels gives the map back to the tool it replaced.
+
+        Left on, SAM's tool would still encode on a click, draw its outline under the mouse and catch Esc / Enter /
+        G, and the pickers would write into a panel nobody sees.
+        """
+        self._deactivate_pixel_tool()
+        self._stop_segmentation()
+        self._deactivate_class_tool()
+        if self._extras is not None:  # never made only to be stopped
+            self._extras_call('stop_zone_tool')
+
     def _drop_map_tools(self) -> None:
         """Delete the pixel and class pickers (made again on demand); their destructor takes them off the
         canvas and out of the tool QGIS gives back after Pan / Zoom."""
@@ -3659,10 +3671,12 @@ class CoverageModeController(BaseController):
         return layer_id is not None and self.service.can_redo(layer_id)
 
     def update_undo_redo_buttons(self) -> None:
-        if self._active_layer is None:
+        dw = self.dockwidget
+        agent_focus = getattr(dw, 'agent_has_focus', None)
+        # AGENT open: the buttons walk the steps of the agent, which the app shows (filter_mate_app.py).
+        if self._active_layer is None or (callable(agent_focus) and agent_focus() is True):
             self._call(self._app(), 'update_undo_redo_buttons')
             return
-        dw = self.dockwidget
         # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
         on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
         self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', on_filtering and self.can_undo())

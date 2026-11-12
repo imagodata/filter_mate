@@ -1517,11 +1517,9 @@ class FilterEngineTask(QgsTask):
             source_layer=self.source_layer,
             layers=self.layers,
             task_parameters=self.task_parameters,
-            param_buffer_expression=self.param_buffer_expression,
             param_source_provider_type=self.param_source_provider_type,
             provider_list=self.provider_list,
             initialize_source_subset_and_buffer_callback=self._initialize_source_subset_and_buffer,
-            ensure_buffer_expression_mv_exists_callback=self._ensure_buffer_expression_mv_exists,
             try_create_filter_chain_mv_callback=self._try_create_filter_chain_mv,
             prepare_geometries_by_provider_callback=self._prepare_geometries_by_provider,
             filter_all_layers_with_progress_callback=self._filter_all_layers_with_progress,
@@ -1786,10 +1784,6 @@ class FilterEngineTask(QgsTask):
     def _create_source_mv_if_needed(self, source_mv_info):
         """Create source materialized view with pre-computed buffer. Delegates to MaterializedViewHandler."""
         return self._mv_handler.create_source_mv_if_needed(source_mv_info)
-
-    def _ensure_buffer_expression_mv_exists(self):
-        """Ensure buffer expression MVs exist. Delegates to MaterializedViewHandler."""
-        return self._mv_handler.ensure_buffer_expression_mv_exists()
 
     def _try_create_filter_chain_mv(self):
         """Try to create filter chain MV optimization. Delegates to MaterializedViewHandler."""

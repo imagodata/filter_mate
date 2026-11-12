@@ -20,6 +20,25 @@ Patterns à retenir :
 - Écartés par les options : absents (pas grisés), l'option sert à alléger la liste. Fonds web grisés seulement là
   où les rasters de valeurs sont listés. Masque des fonds web hors source : PR séparée, à venir.
 
+## [2026-11-12] Audit segmentation / nuages (lot S, branche `claude/audit-segmentation`)
+- **Fenêtres SAM** : plus de `QgsRasterLayer` dans les tâches ni l'algorithme. `raster_look(layer, alpha)` clone sur
+  le thread principal le moteur de rendu + les filtres du pipe (luminosité, teinte, rééchantillonnage) ;
+  `open_drawing` ouvre la source en provider seul dans le worker (pas de statistiques : un WCS n'est plus relu en
+  entier à chaque fenêtre) et `render_drawing` lit le bloc de la fenêtre dans les coordonnées de la couche (un SCR
+  corrigé par l'utilisateur ne fait que nommer ces coordonnées). `render_window` reste pour l'API publique. Une
+  couche filtrée par FilterMate est dessinée depuis sa source d'origine avec la bande alpha d'origine (le VRT dérivé
+  d'un raster entier sans NoData a une bande alpha en plus). `QgsRasterBlockFeedback.errors()` et
+  `Distribution.files` : ce dernier omet les fichiers manquants sous Python 3.12, lire RECORD soi-même.
+- **Tâches en file** : la règle « ne pas annuler une QgsTask en file (3.22) » est gardée (non réfutée, même si le
+  plantage d'origine venait d'une référence Python perdue) ; `_stop` pose `task.stopped`, lu par `run()`.
+- **onnxruntime** : `--target` ignore le numpy de QGIS → `numpy==<version de QGIS>` épinglé ; installation coupée
+  détectée par RECORD (`python_dependencies.is_intact`), `--upgrade` dès que le dossier n'est pas vide ; commande à
+  la main avec le même `--target`.
+- **Nuages** : relecture d'une classe à 1 m bornée à `FINE_POINTS_LIMIT` = 200 000 points (l'estimation ×4 depuis
+  2 m est fausse pour la végétation : 13 047 points à 2 m, 9,6 s à 1 m) ; la passer en tâche demande un
+  rafraîchissement différé dans `coverage_mode_controller`. Résolutions converties par l'unité du SCR (pieds).
+- Non vérifié dans QGIS réel : rendu par pipe (local, WMS/XYZ, WCS), bande alpha, nuage en pieds.
+
 ## [2026-11-12] Source PostgreSQL sans connexion psycopg2 → « Tâche échouée », couches distantes jamais filtrées
 Signalement (journal client, Zones MRO → 8 couches, Intersect) : source filtrée, puis « Task failed » sans détail,
 aucun « Distant layers to filter » dans le journal QGIS. Cause : QGIS lit la couche avec SA connexion ; la connexion
@@ -35,10 +54,14 @@ Patterns à retenir :
   `<plugin>/logs/filtermate.log` (« Callback execution failed: … »), pas dans le journal QGIS.
 - Indice de lecture d'un journal client : l'absence des `QgsMessageLog` « Distant layers to filter (N) » / « Filtering
   N distant layers » situe l'échec entre le filtre source et la phase distante.
-Restes notés par la revue Opus (hors lot) : `service=` ignoré par `get_datasource_connexion_from_layer` (peut même
-ouvrir une base locale par défaut) ; MV de buffer par expression jamais créée (`param_buffer_expression` lu avant
-l'init, clé `buffer_expression` absente de `task_parameters['filtering']`) alors que `prepare_postgresql_source_geom`
-référence `…_buffer_expr_dump` au-delà de 10 000 entités ; DROP du reset non protégé (base en lecture seule).
+Suites : `service=` → #357 (`pg_connect.connect_kwargs_from_uri` = `QgsDataSourceUri::connectionInfo()` : avec
+un service ni host ni port, valeurs vides écartées car libpq ne remplit depuis le service que les mots-clés absents ;
+`connection_identity` pour toute clé de cache par base). Transaction laissée par `ensure_table_stats` → PR suivante.
+DROP du reset en lecture seule : non-problème (`execute_commands` attrape et fait rollback).
+**Reste ouvert** : buffer par expression sur source PG > 10 000 entités, cassé à 3 étages (MV jamais créée :
+`param_buffer_expression` lu avant l'init et clé `buffer_expression` absente ; si créée, elle prendrait l'ANCIEN
+subset car le nouveau est seulement en file ; la MV `_dump` = ST_Union sans clé alors que le builder y applique
+`__source."pk" IN …`). À reproduire sur PostGIS (Docker) avant de toucher : piste = toujours le mode inline.
 
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression

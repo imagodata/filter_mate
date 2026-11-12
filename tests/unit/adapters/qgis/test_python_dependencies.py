@@ -95,7 +95,84 @@ class TestCommand:
     def test_into_the_folder_without_compiling(self):
         command = deps.pip_command('/q/python', '/profile/py312', ['onnxruntime'])
         assert command[:6] == ['/q/python', '-m', 'pip', 'install', '--target', '/profile/py312']
-        assert '--only-binary=:all:' in command and command[-1] == 'onnxruntime'
+        assert '--only-binary=:all:' in command and command[-1] == 'onnxruntime' and '--upgrade' not in command
+
+    def test_replacing_and_pinned(self):
+        command = deps.pip_command('/q/python', '/profile/py312', ['onnxruntime'], True, ['numpy==1.26.4'])
+        assert '--upgrade' in command and command[-2:] == ['numpy==1.26.4', 'onnxruntime']
+
+    @pytest.mark.parametrize('version, expected', [('1.26.4', ['numpy==1.26.4']), ('1.26.4+mkl', ['numpy==1.26.4']),
+                                                   ('2.3.0.dev0+git2025', []), ('2.1.3', ['numpy==2.1.3'])])
+    def test_the_numpy_of_qgis_is_kept(self, monkeypatch, version, expected):
+        """2026-11-12: --target resolved numpy afresh, an onnxruntime for numpy 2 beside the numpy 1 QGIS imports."""
+        monkeypatch.setitem(sys.modules, 'numpy', types.SimpleNamespace(__version__=version))
+        assert deps.numpy_requirement() == expected
+
+    def test_the_command_by_hand_goes_to_the_same_folder(self, monkeypatch):
+        """2026-11-12: it had no --target: it installed into the Python of QGIS (PEP 668, administrator, its numpy)."""
+        sam_model = fk.load("sam_model")
+        monkeypatch.setattr(sam_model, 'python_executable', lambda: '/q/python')
+        monkeypatch.setattr(deps, 'target_directory', lambda: '/home/jo/QGIS profile/filtermate/python/py312')
+        monkeypatch.setattr(deps, 'numpy_requirement', lambda: ['numpy==1.26.4'])
+        assert deps.manual_command() == ('/q/python -m pip install --upgrade --target '
+                                         '"/home/jo/QGIS profile/filtermate/python/py312" numpy==1.26.4 onnxruntime')
+
+
+class TestIntact:
+    """2026-11-12: an install cut short was found by find_spec, taken as installed and never repaired."""
+
+    PACKAGE = 'fm_probe_cut'
+
+    @pytest.fixture
+    def folder(self, tmp_path, monkeypatch):
+        folder = tmp_path / 'py312'
+        package = folder / self.PACKAGE
+        (package / 'capi').mkdir(parents=True)
+        for name in ('__init__.py', 'capi/__init__.py', 'capi/native.so'):
+            (package / name).write_text('', encoding='utf-8')
+        info = folder / f'{self.PACKAGE}-1.0.dist-info'
+        info.mkdir()
+        (info / 'METADATA').write_text(f'Metadata-Version: 2.1\nName: {self.PACKAGE}\nVersion: 1.0\n', encoding='utf-8')
+        records = [f'{self.PACKAGE}/__init__.py,,', f'{self.PACKAGE}/capi/__init__.py,,', f'{self.PACKAGE}/capi/native.so,,',
+                   f'{self.PACKAGE}/__pycache__/__init__.cpython-312.pyc,,', '../../bin/fm_probe_tool,,',
+                   f'{self.PACKAGE}-1.0.dist-info/METADATA,,', f'{self.PACKAGE}-1.0.dist-info/RECORD,,']
+        (info / 'RECORD').write_text('\n'.join(records) + '\n', encoding='utf-8')
+        monkeypatch.setattr(sys, 'path', list(sys.path) + [str(folder)])
+        monkeypatch.setattr(deps, 'target_directory', lambda: str(folder))
+        monkeypatch.setattr(deps, '_intact', {})
+        importlib.invalidate_caches()
+        return folder
+
+    def test_complete(self, folder):
+        assert deps.is_intact(self.PACKAGE) and deps.missing_packages([self.PACKAGE]) == []
+
+    def test_a_file_of_its_own_missing(self, folder):
+        (folder / self.PACKAGE / 'capi' / 'native.so').unlink()
+        assert not deps.is_intact(self.PACKAGE) and deps.missing_packages([self.PACKAGE]) == [self.PACKAGE]
+
+    def test_its_folder_without_its_record(self, folder):
+        import shutil
+        shutil.rmtree(folder / f'{self.PACKAGE}-1.0.dist-info')
+        assert not deps.is_intact(self.PACKAGE)
+
+    def test_judged_once_until_the_next_install(self, folder):
+        assert deps.is_intact(self.PACKAGE)
+        (folder / self.PACKAGE / 'capi' / 'native.so').unlink()
+        assert deps.is_intact(self.PACKAGE)
+        _task_for('pass').finished(True)
+        assert not deps.is_intact(self.PACKAGE)
+
+    def test_elsewhere_or_missing_it_is_not_judged(self, folder, monkeypatch, tmp_path):
+        monkeypatch.setattr(deps, 'target_directory', lambda: str(tmp_path / 'another'))
+        (folder / self.PACKAGE / 'capi' / 'native.so').unlink()
+        assert deps.is_intact(self.PACKAGE) and deps.is_intact('fm_no_such_package')
+
+    def test_an_unknown_profile_is_not_judged(self, folder, monkeypatch):
+        def fail():
+            raise TypeError('no profile')
+
+        monkeypatch.setattr(deps, 'target_directory', fail)
+        assert deps.is_intact(self.PACKAGE)
 
 
 def _task_for(code, callback=None, proxy=None):
@@ -180,6 +257,16 @@ class TestInstallMissing:
         deps.install_missing()
         deps.install_missing()
         assert len(launch) == 1 and deps.installing() and launch[0].command[-1] == 'onnxruntime'
+        assert '--upgrade' not in launch[0].command  # an empty folder
+        import numpy
+        assert f"numpy=={numpy.__version__.split('+')[0]}" in launch[0].command
+
+    def test_a_package_cut_short_is_installed_again_over_it(self, launch, monkeypatch, tmp_path):
+        monkeypatch.setattr(deps, 'is_available', lambda name: True)
+        monkeypatch.setattr(deps, '_files_present', lambda name: False)
+        (tmp_path / 'py312' / 'onnxruntime').mkdir(parents=True)
+        deps.install_missing()
+        assert len(launch) == 1 and '--upgrade' in launch[0].command and launch[0].command[-1] == 'onnxruntime'
 
     def test_a_failure_is_remembered_and_a_retry_clears_it(self, launch, monkeypatch):
         monkeypatch.setattr(deps, 'is_available', lambda name: False)

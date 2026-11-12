@@ -64,6 +64,11 @@
         <translation>다음 이전으로 되돌리기: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="387"/>
+        <source>Stop the request, or wait for its end, to open the settings.</source>
+        <translation>설정을 열려면 요청을 중지하거나 끝날 때까지 기다리세요.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="228"/>
         <source>Nothing to undo.</source>
         <translation>실행 취소할 항목이 없습니다.</translation>

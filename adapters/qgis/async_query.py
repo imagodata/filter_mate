@@ -48,6 +48,8 @@ class SnapshotQueryTask(QgsTask):
         self.deliver = deliver
         # Called once, last, from finished(): the read lets go of its UI state there (see submit_query).
         self.on_settled = None
+        # Called once each after on_settled (see when_settled); None once the read has settled.
+        self._followers = []
         self.result = None
         self.error = None
         self.setDependentLayers([layer])
@@ -86,6 +88,21 @@ class SnapshotQueryTask(QgsTask):
         finally:
             iterator.close()
 
+    def when_settled(self, callback):
+        """Call ``callback()`` once, from finished(), after the read let go of its UI state.
+
+        For code that waits for a read (a Filter or an Identify clicked while
+        the selection loads), instead of a function connected to taskCompleted
+        / taskTerminated (see submit_query). Called whether the read completed,
+        failed, was cancelled (running or still queued: QgsTask.cancel() then
+        calls finished() before it returns) or replaced; at once if the read
+        has already settled. Dropped once called.
+        """
+        if self._followers is None:
+            callback()
+        else:
+            self._followers.append(callback)
+
     def cancel(self):
         self.feedback.cancel()
         super().cancel()
@@ -118,6 +135,12 @@ class SnapshotQueryTask(QgsTask):
                     on_settled()
                 except Exception as exc:  # a Python error must not escape a C++ virtual
                     logger.warning("Snapshot settlement failed (%s)", type(exc).__name__)
+            followers, self._followers = self._followers, None
+            for follower in followers or ():
+                try:
+                    follower()
+                except Exception as exc:  # a Python error must not escape a C++ virtual
+                    logger.warning("Snapshot follower failed (%s)", type(exc).__name__)
 
 
 def collect_extent(task, request):
@@ -272,7 +295,12 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
     task.on_settled = settled
     if loading is not None and not keep_loading:
         loading(True)
-    QgsApplication.taskManager().addTask(task)
+    try:
+        QgsApplication.taskManager().addTask(task)
+    except Exception:
+        # Never added, so finished() never comes: settle the read here, or the slot keeps the task and its lease.
+        task.finished(False)
+        raise
     return task
 
 
