@@ -75,7 +75,7 @@ LayerName = Annotated[str, Field(max_length=_MAX_NAME)]
 
 
 class ApplyFilterRequest(BaseModel):
-    layer_name: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Target QGIS layer name")
+    layer_name: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Target vector layer: id or name (the id first)")
     expression: str = Field(
         ..., min_length=1, max_length=_MAX_EXPRESSION, description="QGIS filter expression to apply"
     )
