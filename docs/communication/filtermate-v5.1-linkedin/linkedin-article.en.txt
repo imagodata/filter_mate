@@ -1,0 +1,60 @@
+FilterMate 5.1: ask QGIS in one sentence, check every step, undo in one click
+
+FilterMate is a free, open source QGIS plugin that carries a selection from one layer to the others: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops. Vector, raster and point cloud layers can each be the source or a target.
+
+Version 5.1 adds a new section to the panel, AGENT. It is experimental. You type a request, and FilterMate does it in your project, one step at a time, where you can see it.
+
+1. Ask in one sentence
+
+"Buildings above 1200 m in the selected commune." "Keep the parcels within 50 m of the river, then export them as a GeoPackage." "A slider on the height of the buildings."
+
+The agent first reads the project: the layers, their fields, statistics, samples of features, what lies at a point. It does not guess field names. Then it filters, selects, zooms, shows or hides layers, runs QGIS Processing algorithms, styles and labels a layer, groups and renames layers, makes a print layout, adds open data and exports.
+
+It can also leave controls under the conversation: a range on a numeric field, ticked values, a count or a mean that follows the filters, a small bar chart. They are saved with the project, and FilterMate writes their filters itself, not the model.
+
+2. Check every step
+
+Each filter says how many features it keeps. A filter written by the model is one plain WHERE clause, checked before it runs. Edits go into the edit buffer of QGIS: nothing is saved until you save it.
+
+You decide how far it goes alone. Four levels of autonomy:
+• Advisor: reads and explains the steps, changes nothing.
+• Careful: asks before every change, filters included.
+• Standard, the default: asks before what cannot be undone (exports, layers added or removed, deletions).
+• Autonomous: also exports and removes without asking, and still asks before the network, connectors and code.
+
+You can set a rule for each tool (always ask, always allow, never), and tick layers the agent must never change. It still reads them and can use them as a source.
+
+3. Undo in one click
+
+Each request is one turn. Undo and Redo walk the turns: filters, styles, layers added or removed, groups, fields, joins. In the History page, "Undo back to here" returns to any step. If you changed a layer yourself after a request, undoing that request leaves your change as you made it, and says so.
+
+Your model, no account
+
+Choose Claude, Mistral, OpenAI, any OpenAI-compatible server, or a local model through Ollama. Your key stays in the QGIS authentication database. To try it without a key, a few free requests a month go through a relay of FilterMate to Claude Haiku 5.5.
+
+To be precise about data: the agent reads field values and samples of features, and those go to the provider you chose. With a local Ollama model, nothing leaves your computer. Nothing is sent before you choose a model and agree.
+
+Recipes: run it again without the model
+
+Once a request has done what you wanted, keep it as a recipe in the project. "Run without the model" replays its steps with no request to any provider: nothing sent, nothing paid. A recipe can also run again by itself each time the edits of its source layer are saved: edit the zones, save, and the buildings in the zones are filtered again.
+
+Objects drawn by SAM
+
+In the raster pipette, a click or a box and the SAM 2.1 model draws the object, locally on the CPU (62 MB model, no graphics card). The object filters the other layers, or becomes a polygon layer. A Processing algorithm draws one object per point or footprint of a layer: on 40 BD TOPO buildings over a 25 cm orthophoto, the median overlap with the reference outlines was 0.81. Also experimental.
+
+For people who automate
+
+A built-in MCP server, off by default, lets Claude Code or another MCP client on your computer drive FilterMate through the same tools and the same rules. Note for scripts: the REST API and the stdio MCP server now accept only plain WHERE clauses in their filters.
+
+And the filtering itself
+
+PostgreSQL, SpatiaLite, GeoPackage and file layers keep closer to what QGIS itself keeps: a geometric filter now combines with the previous one under OR and AND, an expression PostgreSQL cannot run is evaluated by QGIS, and a text filter on a Shapefile keeps its case.
+
+FilterMate 5.1 runs in QGIS 3.22 to 4.x, Qt5 and Qt6, in 34 languages. The new texts were machine translated: corrections from native speakers are welcome.
+
+Install it from the QGIS plugin manager (search "FilterMate"), or read more:
+https://imagodata.github.io/filter_mate/#agent
+
+What would you ask it first? And would your organisation want one shared key for its team? Tell me in the comments.
+
+#QGIS #GIS #OpenSource #Geospatial #LiDAR
