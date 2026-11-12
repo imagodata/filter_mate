@@ -323,7 +323,7 @@ def prepare_geometries_by_provider(
             - 'spatialite_fallback_mode': bool flag
 
     Raises:
-        SourceSelectionError: The source filter keeps no feature or cannot be
+        SourceSelectionError: The source selection keeps no feature or cannot be
             read. 2026-11-12: let through the SpatiaLite → OGR fallback, whose
             failure ends in the source layer used whole below.
     """

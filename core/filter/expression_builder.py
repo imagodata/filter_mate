@@ -341,7 +341,13 @@ class ExpressionBuilder:
         # the previous one, a buffer expression (which prefers the source subset to the
         # selected features) filtered the distant layers by the previous selection.
         # Without a record (all features / field-based modes) the subset does not change.
-        source_subset = self.task_parameters.get('source_subset_after_task')
+        # 2026-11-12: the selection of this filter first. The new subset is the
+        # selection combined with the old one by the source operator, NOT (x) under
+        # AND NOT, (old) OR (x) under OR: the targets are filtered by the selection
+        # (ExpressionFacadeHandler._source_selection), as on SpatiaLite / OGR.
+        source_subset = self.task_parameters.get('source_selection_after_task')
+        if source_subset is None:
+            source_subset = self.task_parameters.get('source_subset_after_task')
         if source_subset is None:
             source_subset = self.source_layer.subsetString() if self.source_layer else None
         logger.debug("=" * 80)
@@ -687,16 +693,14 @@ class ExpressionBuilder:
                                 else:
                                     logger.warning("   ⚠️ Advanced optimization failed - falling back to FID extraction")
                                     # Fallback to FID extraction
-                                    from qgis.core import QgsFeatureRequest
-                                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                                    filtered_features = list(self.source_layer.getFeatures(request))
+                                    filtered_features = self._features_of_the_selection()
 
                                     if filtered_features:
                                         source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
                                         logger.debug(f"   ✅ Fallback FID filter: {len(source_filter) if source_filter else 0} chars")
                                     else:
                                         logger.warning("   ⚠️ No features extracted")
-                                        source_filter = None
+                                        source_filter = self._empty_selection_filter()
                             else:
                                 logger.warning("   ⚠️ No reusable components found - falling back to FID extraction")
                                 logger.debug(f"   → WHERE length: {len(where_clause)} chars")
@@ -717,9 +721,7 @@ class ExpressionBuilder:
                                                     f"'{where_clause[exists_pos.start():exists_pos.start() + 50]}...'")
 
                                 # FALLBACK: Extract FIDs instead
-                                from qgis.core import QgsFeatureRequest
-                                request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                                filtered_features = list(self.source_layer.getFeatures(request))
+                                filtered_features = self._features_of_the_selection()
 
                                 if filtered_features:
                                     source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
@@ -729,7 +731,7 @@ class ExpressionBuilder:
                                         logger.warning(f"   → Features count: {len(filtered_features)}, consider using MV")
                                 else:
                                     logger.warning("   ⚠️ No features extracted")
-                                    source_filter = None
+                                    source_filter = self._empty_selection_filter()
                         else:
                             # Safe to reuse WHERE clause - no __source alias
                             # Remove trailing parentheses that belong to EXISTS, not to the WHERE condition
@@ -766,9 +768,7 @@ class ExpressionBuilder:
                         logger.warning(f"   → This may generate large expression for {filtered_count} features")
 
                         # Extract FIDs from filtered features
-                        from qgis.core import QgsFeatureRequest
-                        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                        filtered_features = list(self.source_layer.getFeatures(request))
+                        filtered_features = self._features_of_the_selection()
 
                         if filtered_features:
                             source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
@@ -777,21 +777,19 @@ class ExpressionBuilder:
                                 logger.warning("   → Consider using materialized view optimization")
                         else:
                             logger.warning("   ⚠️ No features extracted from filtered layer")
-                            source_filter = None
+                            source_filter = self._empty_selection_filter()
                 else:
                     # Small dataset: Extract FIDs directly
                     logger.debug(f"   → Extracting FIDs from {filtered_count} filtered features")
 
-                    from qgis.core import QgsFeatureRequest
-                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-                    filtered_features = list(self.source_layer.getFeatures(request))
+                    filtered_features = self._features_of_the_selection()
 
                     if filtered_features:
                         source_filter = self._generate_fid_filter(filtered_features, backend_name=backend_name)
                         logger.debug(f"   ✅ Generated FID filter: {len(source_filter)} chars")
                     else:
                         logger.warning("   ⚠️ No features extracted from filtered layer")
-                        source_filter = None
+                        source_filter = self._empty_selection_filter()
             else:
                 # NO FILTER: Will match all source features (this is NORMAL when source layer already filtered)
                 logger.debug("🎯 PostgreSQL EXISTS: PATH 3B - No source_filter (will use all source features)")
@@ -1113,6 +1111,38 @@ class ExpressionBuilder:
         logger.debug(f"Generated field value filter: {field_ref} IN ({len(formatted_values)} values)")
 
         return filter_sql
+
+    def _selection_qgis_expression(self) -> str:
+        """The QGIS expression of this filter's selection, '' when it recorded none (PATH 3A)."""
+        if self.task_parameters.get('source_selection_after_task') is None:
+            return ''
+        return (self.task_parameters.get('task', {}).get('expression') or '').strip()
+
+    def _features_of_the_selection(self) -> List[Any]:
+        """The source features of the selection, read through the source layer (PATH 3A).
+
+        2026-11-12: the layer keeps its previous subset until finished(), so its
+        features were those of the PREVIOUS filter whatever the new selection.
+        When this filter recorded its selection (old subset AND the new
+        expression, see ExpressionFacadeHandler._source_selection), its QGIS
+        expression is read through that subset too.
+        """
+        from qgis.core import QgsFeatureRequest
+        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        expression = self._selection_qgis_expression()
+        if expression:
+            request.setFilterExpression(expression)
+        return list(self.source_layer.getFeatures(request))
+
+    def _empty_selection_filter(self) -> Optional[str]:
+        """The source filter when the selection read keeps no feature (PATH 3A).
+
+        2026-11-12: None means every source feature, so a selection keeping none
+        filtered the targets by the whole source. The selection of this filter
+        then matches no source feature, as PATH 2 does with an empty selection.
+        Without a recorded selection the former None stays.
+        """
+        return 'FALSE' if self._selection_qgis_expression() else None
 
     def _generate_fid_filter(self, task_features: List[Any], backend_name: str = 'postgresql') -> Optional[str]:
         """

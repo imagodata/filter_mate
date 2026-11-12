@@ -1130,16 +1130,27 @@ class TestPointCloudAndNotWithoutFilter:
         assert report.failed == {} and report.done == {"pc": "dalle"}
         assert cloud.subset == expected
 
-    def test_point_cloud_source(self, snapshots, monkeypatch):
-        cloud = self._Cloud("")
+    @pytest.mark.parametrize("previous, operator, subset, selection", [
+        ("", "AND NOT", "NOT (\nClassification = 6\n)", "Classification = 6"),
+        ("Z > 5", "AND NOT", "(Z > 5) AND NOT (Classification = 6)", "(Z > 5) AND (Classification = 6)"),
+        ("Z > 5", "OR", "(Z > 5) OR (Classification = 6)", "Classification = 6"),
+        ("Z > 5", "AND", "(Z > 5) AND (Classification = 6)", "(Z > 5) AND (Classification = 6)"),
+        ("Z > 5", None, "Classification = 6", "Classification = 6"),
+    ])
+    def test_point_cloud_source(self, snapshots, monkeypatch, previous, operator, subset, selection):
+        # 2026-11-12: the footprint sent to the targets is read on the criteria (the selection),
+        # not on the subset the source operator sets (NOT (criteria) under AND NOT)
+        cloud = self._Cloud(previous)
         jobs = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.source_jobs")
-        jobs.PointCloudSourceJob = lambda layer, resolution, before=None: types.SimpleNamespace(details={})
+        jobs.PointCloudSourceJob = lambda layer, resolution, before=None, selection=None: types.SimpleNamespace(
+            details={}, selection=selection)
         monkeypatch.setitem(sys.modules, jobs.__name__, jobs)
         monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.coverage_layers"], "source_jobs", jobs,
                             raising=False)
         job = operations._source_job(cloud, operations.LayerKind.POINT_CLOUD, operations.OperationReport(),
                                      selected_only=True, raster_selection=None,
-                                     point_cloud_criteria="Classification = 6", source_operator="AND NOT",
+                                     point_cloud_criteria="Classification = 6", source_operator=operator,
                                      filter_source=True, footprint_resolution=2.0, max_pixels=None)
-        assert cloud.subset == "NOT (\nClassification = 6\n)"
-        assert job.details["subset"] == "NOT (\nClassification = 6\n)"
+        assert cloud.subset == subset
+        assert job.details["subset"] == subset
+        assert job.selection == selection
