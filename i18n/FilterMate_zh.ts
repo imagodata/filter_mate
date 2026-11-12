@@ -325,7 +325,7 @@ Do you agree?</source>
 What for: {}
 
 Run it?</source>
-        <translation>代理想要以您的权限在 QGIS 中运行这段 Python 代码：它可以读取和更改 QGIS 和您的账户能做的一切，撤销本轮操作无法将其恢复。
+        <translation>智能体想要以您的权限在 QGIS 中运行这段 Python 代码：它可以读取和更改 QGIS 和您的账户能做的一切，撤销本轮操作无法将其恢复。
 
 用途：{}
 
@@ -384,7 +384,7 @@ Run it?</source>
     <message>
         <location filename="../../adapters/agent/turn_effects.py" line="114"/>
         <source>recipes of the agent</source>
-        <translation>代理的配方</translation>
+        <translation>智能体的配方</translation>
     </message>
     <message>
         <location filename="../../adapters/agent/turn_effects.py" line="101"/>
@@ -508,7 +508,7 @@ Run it?</source>
 {}
 
 They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
-        <translation>代理想要删除此图层的要素：
+        <translation>智能体想要删除此图层的要素：
 {}
 {}
 
@@ -527,7 +527,7 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="815"/>
         <source>The agent wants to export the layout {} as a {} file into the export folder ({}). A file of the same name there is replaced. Do you agree?</source>
-        <translation>代理想要将布局 {} 作为 {} 文件导出到导出文件夹（{}）。那里的同名文件将被替换。您同意吗？</translation>
+        <translation>智能体想要将布局 {} 作为 {} 文件导出到导出文件夹（{}）。那里的同名文件将被替换。您同意吗？</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
@@ -777,7 +777,7 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="763"/>
         <source>The request took too many steps: the agent stopped.</source>
-        <translation>请求所需步骤过多：代理已停止。</translation>
+        <translation>请求所需步骤过多：智能体已停止。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="767"/>
@@ -850,7 +850,7 @@ Do you agree?</source>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="700"/>
         <source>Live recipe: {} will run by itself at the standard or autonomous level of the agent only.</source>
-        <translation>实时配方：{} 仅在代理的标准或自主级别下才会自动运行。</translation>
+        <translation>实时配方：{} 仅在智能体的标准或自主级别下才会自动运行。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="585"/>
@@ -880,7 +880,7 @@ Do you agree?</source>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="620"/>
         <source>Step {} needs a tool the settings of the agent leave out: {}.</source>
-        <translation>步骤 {} 需要一个被代理设置排除的工具：{}。</translation>
+        <translation>步骤 {} 需要一个被智能体设置排除的工具：{}。</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="625"/>
@@ -950,12 +950,12 @@ Do you agree?</source>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="660"/>
         <source>Step {} was not run: it would change a layer you protected from the agent ({}).</source>
-        <translation>步骤 {} 未执行：它会更改您已对代理设为保护的图层（{}）。</translation>
+        <translation>步骤 {} 未执行：它会更改您已对智能体设为保护的图层（{}）。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="704"/>
         <source>Step {} was not run: the layers you protected from the agent could not be read ({}).</source>
-        <translation>步骤 {} 未执行：无法读取您保护的、不允许代理修改的图层 ({})。</translation>
+        <translation>步骤 {} 未执行：无法读取您保护的、不允许智能体修改的图层 ({})。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="671"/>
@@ -973,7 +973,7 @@ Do you agree?</source>
 {}
 
 Do you agree to all of them? No runs none of them.</source>
-        <translation>代理要执行以下 {} 项操作：
+        <translation>智能体要执行以下 {} 项操作：
 {}
 
 是否全部同意？选“否”则一项都不执行。</translation>
@@ -1040,7 +1040,7 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="778"/>
         <source>Expert: let the agent run Python code in QGIS</source>
-        <translation>专家：允许代理在 QGIS 中运行 Python 代码</translation>
+        <translation>专家：允许智能体在 QGIS 中运行 Python 代码</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="781"/>
@@ -1460,7 +1460,7 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="554"/>
         <source>Describe it in your own words. The agent reads the project, tries the filter, then applies it. Each turn can be undone.</source>
-        <translation>用您自己的话描述。代理会读取项目、试用筛选，然后应用它。每一轮都可以撤销。</translation>
+        <translation>用您自己的话描述。智能体会读取项目、试用筛选，然后应用它。每一轮都可以撤销。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="56"/>
@@ -1485,7 +1485,7 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="558"/>
         <source>The agent reads the layers of your project, writes the filters and applies them. Each turn can be undone.</source>
-        <translation>代理读取您项目的图层，编写筛选并应用它们。每一轮都可以撤销。</translation>
+        <translation>智能体读取您项目的图层，编写筛选并应用它们。每一轮都可以撤销。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="733"/>
@@ -1500,7 +1500,7 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="739"/>
         <source>Without it, the agent does not read the values of your fields. Those already written in your filters and favorites are still sent.</source>
-        <translation>不勾选时，代理不会读取您字段中的值。已写在筛选和收藏中的值仍会发送。</translation>
+        <translation>不勾选时，智能体不会读取您字段中的值。已写在筛选和收藏中的值仍会发送。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="590"/>
@@ -1510,7 +1510,7 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="745"/>
         <source>Your request, the names of your layers and fields, your filter expressions and the results of the tools of the agent, to this provider and under its terms. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>您的请求、图层和字段的名称、筛选表达式以及代理工具的结果，发送给此提供方并遵守其条款。对话按项目保存在本计算机上，直到您开始新的对话。</translation>
+        <translation>您的请求、图层和字段的名称、筛选表达式以及智能体工具的结果，发送给此提供方并遵守其条款。对话按项目保存在本计算机上，直到您开始新的对话。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="349"/>
@@ -1600,12 +1600,12 @@ Do you agree to all of them? No runs none of them.</source>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1029"/>
         <source>LAYERS PROTECTED FROM THE AGENT (THIS PROJECT)</source>
-        <translation>受保护、代理不可更改的图层（本项目）</translation>
+        <translation>受保护、智能体不可更改的图层（本项目）</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1040"/>
         <source>The agent reads them and uses them as a source, but never changes them: no filter, style, edit, field, join, new name or removal, whatever the level, in a recipe too, and for other applications. Kept in the project.</source>
-        <translation>代理会读取这些图层并将其用作来源，但绝不会更改它们：无论哪个级别，在配方中以及对其他应用程序，都不会进行筛选、样式、编辑、字段、连接、重命名或移除。保存在项目中。</translation>
+        <translation>智能体会读取这些图层并将其用作来源，但绝不会更改它们：无论哪个级别，在配方中以及对其他应用程序，都不会进行筛选、样式、编辑、字段、连接、重命名或移除。保存在项目中。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1074"/>
