@@ -35,6 +35,7 @@ _REASONS = {200: "OK", 202: "Accepted", 204: "No Content", 400: "Bad Request", 4
             413: "Content Too Large", 415: "Unsupported Media Type", 431: "Request Header Fields Too Large",
             500: "Internal Server Error", 501: "Not Implemented", 503: "Service Unavailable"}
 _PARSE_ERROR, _INVALID_REQUEST, _METHOD_NOT_FOUND, _INVALID_PARAMS = -32700, -32600, -32601, -32602
+_RESOURCE_NOT_FOUND = -32002
 
 
 class HttpReject(Exception):
@@ -201,12 +202,36 @@ def _success(request_id: Any, result: Any, headers: Tuple[Tuple[str, str], ...] 
 RunTool = Callable[[ToolSpec, Dict[str, Any], str], ToolResultPart]
 
 
+@dataclass(frozen=True)
+class McpPrompt:
+    """A prompt the client offers its user (MCP prompts): instructions for a task, without arguments."""
+
+    name: str
+    title: str
+    description: str
+    text: str
+
+
+@dataclass(frozen=True)
+class McpResource:
+    """A text the client may read (MCP resources), produced when it is read."""
+
+    uri: str
+    name: str
+    title: str
+    description: str
+    mime_type: str
+    read: Callable[[], str]
+
+
 class McpProtocol:
     """Answers one request at a time. Tools run on the caller's thread."""
 
     def __init__(self, list_tools: Callable[[], Sequence[ToolSpec]], run_tool: RunTool, instructions: str = "",
-                 version: str = "1") -> None:
+                 version: str = "1", prompts: Sequence[McpPrompt] = (), resources: Sequence[McpResource] = ()) -> None:
         self._list_tools = list_tools
+        self._prompts = {prompt.name: prompt for prompt in prompts}
+        self._resources = {resource.uri: resource for resource in resources}
         self._run_tool = run_tool
         self._instructions = instructions
         self._version = version
@@ -265,6 +290,28 @@ class McpProtocol:
             return _success(request_id, {"tools": [_tool_listing(tool) for tool in self._list_tools()]})
         if method == "tools/call":
             return self._call(request_id, params, self._sessions.get(session or "", UNKNOWN_CLIENT))
+        if method == "prompts/list" and self._prompts:
+            return _success(request_id, {"prompts": [
+                {"name": item.name, "title": item.title, "description": item.description, "arguments": []}
+                for item in self._prompts.values()]})
+        if method == "prompts/get" and self._prompts:
+            name = params.get("name")
+            prompt = self._prompts.get(name) if isinstance(name, str) else None
+            if prompt is None:
+                return _failure(request_id, _INVALID_PARAMS, "Unknown prompt.")
+            return _success(request_id, {"description": prompt.description, "messages": [
+                {"role": "user", "content": {"type": "text", "text": prompt.text}}]})
+        if method == "resources/list" and self._resources:
+            return _success(request_id, {"resources": [
+                {"uri": item.uri, "name": item.name, "title": item.title, "description": item.description,
+                 "mimeType": item.mime_type} for item in self._resources.values()]})
+        if method == "resources/read" and self._resources:
+            uri = params.get("uri")
+            resource = self._resources.get(uri) if isinstance(uri, str) else None
+            if resource is None:
+                return _failure(request_id, _RESOURCE_NOT_FOUND, "Resource not found.")
+            return _success(request_id, {"contents": [
+                {"uri": resource.uri, "mimeType": resource.mime_type, "text": resource.read()}]})
         return _failure(request_id, _METHOD_NOT_FOUND, "Method not found.")
 
     def _initialize(self, request_id: Any, params: Dict[str, Any]) -> HttpResponse:
@@ -275,10 +322,18 @@ class McpProtocol:
             self._sessions.popitem(last=False)
         return _success(request_id, {
             "protocolVersion": wanted if wanted in SUPPORTED_VERSIONS else SUPPORTED_VERSIONS[0],
-            "capabilities": {"tools": {"listChanged": False}},
+            "capabilities": self._capabilities(),
             "serverInfo": {"name": "filtermate", "title": "FilterMate", "version": self._version},
             "instructions": self._instructions,
         }, (("Mcp-Session-Id", session),))
+
+    def _capabilities(self) -> Dict[str, Any]:
+        capabilities: Dict[str, Any] = {"tools": {"listChanged": False}}
+        if self._prompts:
+            capabilities["prompts"] = {"listChanged": False}
+        if self._resources:
+            capabilities["resources"] = {"listChanged": False, "subscribe": False}
+        return capabilities
 
     def _call(self, request_id: Any, params: Dict[str, Any], client: str) -> HttpResponse:
         name, arguments = params.get("name"), params.get("arguments")

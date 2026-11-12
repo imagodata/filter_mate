@@ -1,5 +1,9 @@
 # FilterMate — Configuration Reference
 
+> Every setting with its default, choices and bounds, generated from `config/config.default.json`:
+> [SETTINGS_REFERENCE.md](SETTINGS_REFERENCE.md). This page is older and incomplete (no AGENT, RASTER, POINT_CLOUD
+> or CROSS_FILTER section).
+
 > Everything that can be configured in FilterMate, from user-facing settings to performance tuning.
 > Configuration lives in `config/config.json` and is editable via the Configuration Tree View in the UI.
 

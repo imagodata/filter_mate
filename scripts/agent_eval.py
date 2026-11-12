@@ -39,8 +39,12 @@ from agent.sql_guard import filter_problem  # noqa: E402
 NOTHING_KEPT = ("No feature kept. Check the direction of the predicate (the target is tested against the source), "
                 "the buffer, and that the source holds the features meant (its selection, its filter).")
 from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_exchange  # noqa: E402
+from agent.settings_reference import (  # noqa: E402
+    describe as describe_settings, get as get_setting, plan as plan_settings, read_settings, set_leaf)
+from agent.performance import summary as performance_summary  # noqa: E402
+from agent.skills import load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, chat_tools, load_catalog  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -100,6 +104,25 @@ class SimulatedProject:
         self.filters: Dict[str, str] = dict(setup.get("filters", {}))
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
+        self.settings: Dict[str, Any] = {}  # the configuration of FilterMate: its defaults, then what was changed
+
+    def _get_setting(self, args):
+        try:
+            return get_setting(read_settings(self.settings), args["path"])
+        except LookupError as exc:
+            raise ToolFailure(str(exc)) from None
+
+    def _change_settings(self, args):
+        """The settings of FilterMate changed in the simulated configuration: the reads after see them."""
+        try:
+            rows = plan_settings(read_settings(self.settings), args["changes"])
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        for row in rows:
+            set_leaf(self.settings, row["path"], row["after"])
+        return {"changed": [{key: row[key] for key in ("path", "before", "after", "effect")}
+                            for row in rows if row["before"] != row["after"]],
+                "unchanged": [row["path"] for row in rows if row["before"] == row["after"]]}
 
     def _add_field(self, args: Dict[str, Any]) -> Dict[str, Any]:
         """A field added to the simulated layer, so that the reads after it see it (filled when a formula is given)."""
@@ -466,6 +489,17 @@ class SimulatedProject:
                                            "extent_from": "view", "scale": 25000},
             "export_layout": lambda args: {"name": args["name"], "format": args.get("format", "pdf"),
                                            "path": f"{args['name']}.{args.get('format', 'pdf')}", "bytes": 120000},
+            "describe_settings": lambda args: describe_settings(
+                read_settings(self.settings), query=args.get("query", ""), section=args.get("section", ""),
+                changed_only=bool(args.get("changed_only")), limit=args.get("limit", 25)),
+            "get_setting": self._get_setting,
+            "change_settings": self._change_settings,
+            "load_skill": lambda args: load_skill(args["name"]),
+            # A slow PostgreSQL filter, as FilterMate logs it.
+            "diagnose_performance": lambda _args: performance_summary([
+                "2026-11-11 10:43:00 - FilterMate.Perf - INFO - ⏱ cascade_filter: 61250 ms (2 layer(s) in the worker)",
+                "2026-11-11 10:43:00 - FilterMate.Perf - INFO - ⏱ layer_filter: 60100 ms (communes)",
+                "2026-11-11 10:43:01 - filter_mate.backends - WARNING - PostgreSQL query timed out after 60 s"]),
             "add_project_note": lambda args: {"notes": [f"1. {args['text']}"]},
             "remove_project_note": lambda args: {"notes": []},
             "undo_agent_step": lambda _args: {"undone": "Garde les communes de plus de 10 000 habitants",
@@ -613,7 +647,7 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False)
                               [{"name": name, "selected_count": 1} for name in project.selected],
                               handlers["map_context"]({}))
     exchange = run_exchange(session, case["prompt"], transport, executor, confirm=lambda call: True, context=context)
-    write_tools = [tool.name for tool in load_catalog() + CHAT_ONLY if not tool.read_only]
+    write_tools = [tool.name for tool in load_catalog() + SETTINGS_TOOLS + CHAT_ONLY if not tool.read_only]
     reason = exchange.error.message if exchange.error else score_case(case, exchange.calls, project.by_ref, write_tools)
     if not reason and exchange.decision is not None and exchange.decision.status not in ("done", STATUS_RUN_TOOLS):
         reason = f"stopped: {exchange.decision.reason}"

@@ -20,6 +20,8 @@ from ...adapters.agent.settings import (
 from ...adapters.agent import free_quota, transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
+from ...adapters.agent import plugin_settings
+from ...adapters.agent.plugin_settings import settings_handlers
 from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, abort_active, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
@@ -153,6 +155,9 @@ class AgentChatController(QObject):
         # is not shown, and the engine is let go when it ends (_drop_engine).
         self._abandoned = False
         self._checkpoint = TurnCheckpoint()
+        manager = getattr(parent_widget, '_config_model_manager', None)
+        self._settings_applier = manager.apply_settings if manager is not None else None
+        plugin_settings.set_applier(self._settings_applier)
         self._checkpoint.describe = self.describe_call
         self._last_request = ""
         self._tools = {tool.name: tool for tool in chat_tools()}
@@ -236,7 +241,8 @@ class AgentChatController(QObject):
 
         Each step runs even when one before failed.
         """
-        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project):
+        for step in (self.stop, abort_active, self._mcp.close, self._unfollow_layers, self._disconnect_project,
+                     lambda: plugin_settings.clear_applier(self._settings_applier)):
             try:
                 step()
             except Exception:
@@ -515,6 +521,7 @@ class AgentChatController(QObject):
                                   allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
+        handlers.update(settings_handlers())
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool
@@ -1463,6 +1470,11 @@ class AgentChatController(QObject):
             "contact_sheet": lambda: _tr("Contact sheet of {} sent").format(args.get("layer", "")),
             "add_service_layer": lambda: _tr("Layer added: {}").format(args.get("name") or args.get("typename", "")),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
+            "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
+            "get_setting": lambda: _tr("Reading the setting {}").format(args.get("path", "")),
+            "change_settings": lambda: _tr("Settings of FilterMate: {}").format(", ".join(
+                str(change.get("path", "")).rsplit(".", 1)[-1] for change in (args.get("changes") or [])
+                if isinstance(change, dict))),
         }.get(call.name, lambda: call.name.replace("_", " "))()
 
     def on_tool_start(self, call: ToolCallPart) -> None:
@@ -1590,6 +1602,8 @@ class AgentChatController(QObject):
         for number, call in enumerate(calls[:MAX_LISTED], 1):
             detail = one_line(self._run_detail(call), 160)
             lines.append(f"{number}. {one_line(self._describe(call), 160)}" + (f" — {detail}" if detail else ""))
+            if call.name == "change_settings":  # each setting before and after, as when it is asked alone
+                lines.extend(f"    {line}" for line in self._settings_lines(call)[0][:MAX_LISTED])
         if len(calls) > MAX_LISTED:
             lines.append(f"(+{len(calls) - MAX_LISTED})")
         text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
@@ -1610,6 +1624,8 @@ class AgentChatController(QObject):
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
+        if call.name == "change_settings" and not self._settings_would_change(call):
+            return True  # nothing to show: every value is already set, or the tool refuses the call and says why
         if call.name == RUN_PYTHON:
             text = _tr("The agent wants to run this Python code in QGIS, with your rights: it can read and change "
                        "anything QGIS and your account can, and undoing the turn does not take it back.\n\nWhat for: "
@@ -1646,6 +1662,8 @@ class AgentChatController(QObject):
         elif call.name == "remove_layers":
             text = _tr("The agent wants to remove these layers from the project (their files stay, their styles and "
                        "filters here are lost):\n{}\n\nDo you agree?").format(layers)
+        elif call.name == "change_settings":
+            text = self._settings_text(call)
         elif call.name == "export_layers":
             text = _tr("The agent wants to export these layers to files:\n{}\n\nDo you agree?").format(layers)
         else:  # a change the level of autonomy shows first, or a tool added since these texts were written
@@ -1654,6 +1672,35 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to do this:\n{}\n{}\n\nDo you agree?").format(
                 one_line(self._describe(call), 200), detail)
         return text
+
+    @staticmethod
+    def _settings_would_change(call: ToolCallPart) -> bool:
+        try:
+            return any(row["before"] != row["after"] for row in plugin_settings.planned(call.arguments))
+        except Exception:
+            return False
+
+    @staticmethod
+    def _settings_lines(call: ToolCallPart):
+        """Each setting the call changes, before and after, one line each; the problem when the call is refused."""
+        try:
+            rows = plugin_settings.planned(call.arguments)
+        except Exception as exc:  # the tool will answer the model why; the user sees what was asked
+            return [], str(exc)
+        effects = {"now": _tr("applied at once"), "next use": _tr("used from the next filter or export"),
+                   "after restarting QGIS": _tr("after restarting QGIS")}
+        return [f"{one_line(row['where'], 120)}: {json.dumps(row['before'], ensure_ascii=False)} → "
+                f"{json.dumps(row['after'], ensure_ascii=False)} ({effects.get(row['effect'], row['effect'])})"
+                for row in rows if row["before"] != row["after"]], ""
+
+    @classmethod
+    def _settings_text(cls, call: ToolCallPart) -> str:
+        """Each setting before and after, as the user reads them before saying yes."""
+        lines, problem = cls._settings_lines(call)
+        listed = "\n".join(lines[:MAX_LISTED]) or one_line(problem, 300)
+        return _tr("The agent wants to change these settings of FilterMate (they stay for every project; undoing "
+                   "the turn puts them back):\n{}\n\nWhy: {}\n\nDo you agree?").format(
+            listed, one_line(str(call.arguments.get("reason", "")), 300))
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go

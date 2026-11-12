@@ -36,6 +36,8 @@ MAX_RECIPE_CHARS = 50_000
 NOT_KEPT = frozenset({
     "undo_agent_step", "run_pyqgis", "add_project_note", "remove_project_note", "view_map", "create_widget",
     "remove_widget", "save_recipe", "remove_recipe",
+    # The settings of FilterMate belong to this machine, not to a project: a recipe from another .qgz never sets them.
+    "change_settings",
 })
 CONNECTOR_PREFIX = "mcp_"
 
