@@ -3668,10 +3668,12 @@ class CoverageModeController(BaseController):
         return layer_id is not None and self.service.can_redo(layer_id)
 
     def update_undo_redo_buttons(self) -> None:
-        if self._active_layer is None:
+        dw = self.dockwidget
+        agent_focus = getattr(dw, 'agent_has_focus', None)
+        # AGENT open: the buttons walk the steps of the agent, which the app shows (filter_mate_app.py).
+        if self._active_layer is None or (callable(agent_focus) and agent_focus() is True):
             self._call(self._app(), 'update_undo_redo_buttons')
             return
-        dw = self.dockwidget
         # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
         on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
         self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', on_filtering and self.can_undo())

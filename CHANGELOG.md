@@ -21,6 +21,7 @@ All notable changes to FilterMate will be documented in this file.
 
 - **Removing a layer no longer erases a turn of AGENT that did something else.** A turn that filtered the removed layer and also styled another one, kept a note or added a widget was dropped from the history with the filter; it now stays, and Undo still takes back the rest. What the turn did to the removed layer itself goes with it.
 - **Closing the dock takes SAM off the map.** Only the pixel picker left the map with the dock: SAM's tool stayed, so a click on the map still encoded an image, its outline followed the mouse and Esc, Enter and G were caught by a panel nobody saw. SAM, the class pipette of point clouds and the Zone tool now leave with it, and the map tool you had before comes back.
+- **Undo and Redo keep the steps of AGENT when a raster or a point cloud is picked.** With AGENT open, choosing a raster or a point cloud, or the end of its filter, greyed out Undo and Redo of the action bar while the agent had steps to undo.
 
 ### Point clouds
 

@@ -491,6 +491,19 @@ class TestUndoRedoButtons:
         controller.update_undo_redo_buttons()
         app.update_undo_redo_buttons.assert_called_once()
 
+    def test_agent_open_keeps_the_steps_of_the_agent(self, ctrl_module, layers):
+        """2026-11-12: a raster picked with AGENT open greyed out Undo / Redo while the agent had steps."""
+        undo, redo, app = MagicMock(), MagicMock(), MagicMock()
+        dock = _dock(pushButton_action_undo_filter=undo, pushButton_action_redo_filter=redo,
+                     tabTools_current_index=-1, filter_mate_app=app)
+        dock.agent_has_focus.return_value = True
+        controller = ctrl_module.CoverageModeController(dock)
+        controller._active_layer = layers["r1"]
+        controller.update_undo_redo_buttons()
+        app.update_undo_redo_buttons.assert_called_once()  # the app shows the history of the agent
+        undo.setEnabled.assert_not_called()
+        redo.setEnabled.assert_not_called()
+
 
 class _Canvas:
     def __init__(self, tool):
