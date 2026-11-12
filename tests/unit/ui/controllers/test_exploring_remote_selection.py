@@ -114,7 +114,7 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
     async_query.receivers = []
 
     def watcher(callback):  # the QObject receiver of a binding, without Qt
-        receiver = SimpleNamespace(changed=callback, deleteLater=MagicMock())
+        receiver = SimpleNamespace(changed=callback, deleteLater=MagicMock(), setParent=MagicMock())
         async_query.receivers.append(receiver)
         return receiver
 
@@ -232,6 +232,13 @@ def _setup(monkeypatch, mode='custom_selection', custom='', checked=(), picker_f
     return SimpleNamespace(controller=controller, dock=dock, layer=layer, warning=warning, canvas=canvas,
                            submit=fakes.async_query.submit_query, async_query=fakes.async_query,
                            whole=namespace['WHOLE_LAYER'], timer=namespace['QTimer'])
+
+
+def _slot(task):
+    """A QuerySlot reading with ``task``: its generation changes when the read is replaced or cancelled."""
+    slot = SimpleNamespace(task=task, cancel=MagicMock(), generation=1)
+    slot.accepts = lambda generation: slot.generation == generation
+    return slot
 
 
 def _submitted_request(env):
@@ -448,7 +455,7 @@ def test_identify_waits_for_a_pending_read_without_a_false_warning(monkeypatch):
     original = env.submit.side_effect
 
     def submit(owner, attribute, *args):
-        setattr(owner, attribute, SimpleNamespace(task=task, cancel=MagicMock()))
+        setattr(owner, attribute, _slot(task))
     env.submit.side_effect = submit
     assert env.controller.identify_remote_selection() is True
     env.submit.side_effect = original
@@ -474,7 +481,7 @@ def test_identify_of_a_read_that_ends_without_its_result_flashes_nothing(monkeyp
     task.when_settled = task.followers.append
 
     def submit(owner, attribute, *args):
-        setattr(owner, attribute, SimpleNamespace(task=task, cancel=MagicMock()))
+        setattr(owner, attribute, _slot(task))
     env.submit.side_effect = submit
     assert env.controller.identify_remote_selection() is True
     follower, = task.followers
@@ -483,6 +490,28 @@ def test_identify_of_a_read_that_ends_without_its_result_flashes_nothing(monkeyp
     env.timer.singleShot.call_args.args[1]()
     env.canvas.flashGeometries.assert_not_called()
     assert not env.warning.called
+
+
+def test_identify_never_flashes_from_a_read_replaced_meanwhile(monkeypatch):
+    """Identify on S while its read hangs on a slow service, S -> S2 -> S: the new read of S delivers, then the
+    first read ends at last (its provider timeout): no late flash."""
+    env = _setup(monkeypatch, custom='"id" > 0')
+    first = SimpleNamespace(followers=[])
+    first.when_settled = first.followers.append
+
+    def submit(owner, attribute, *args):
+        setattr(owner, attribute, _slot(first))
+    env.submit.side_effect = submit
+    assert env.controller.identify_remote_selection() is True
+    follower, = first.followers
+    slot = env.controller._selection_query
+    slot.generation += 2  # replaced by the read of S2, then by a new read of S
+    slot.task = None
+    env.submit.call_args.args[5](_submitted_request(env))  # the new read of S delivers
+    follower()  # the first read ends, cancelled
+    for call in env.timer.singleShot.call_args_list:
+        call.args[1]()
+    env.canvas.flashGeometries.assert_not_called()
 
 
 def test_a_layer_switch_never_touches_the_signals_of_the_layer_it_watched(monkeypatch):
@@ -496,6 +525,7 @@ def test_a_layer_switch_never_touches_the_signals_of_the_layer_it_watched(monkey
     env.controller._remote_selection_result = ('signature', [], '')
     receiver.changed()  # an edit or a reload of the layer
     assert env.controller._remote_selection_result is None
+    receiver.setParent.assert_called_once_with(env.controller)  # it goes with the controller, at the latest
     env.controller._cancel_remote_reads()
     receiver.deleteLater.assert_called_once_with()
     for name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):

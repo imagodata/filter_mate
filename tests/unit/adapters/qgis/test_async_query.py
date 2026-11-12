@@ -335,6 +335,27 @@ def test_a_follower_of_a_read_already_settled_is_called_at_once(module):
     follower.assert_called_once_with()
 
 
+def test_a_read_the_task_manager_never_took_settles_at_once(module):
+    """addTask raised: finished() would never come, the slot would keep the task and its loading lease."""
+    import sys
+    owner, layer = _owner_layer()
+    loading = MagicMock()
+    add = sys.modules['qgis.core'].QgsApplication.taskManager.return_value.addTask
+    add.side_effect = RuntimeError('wrapped C/C++ object of type QgsTaskManager has been deleted')
+    with pytest.raises(RuntimeError):
+        module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    task = add.call_args.args[0]
+    assert owner.query.task is None and owner.query.loading is None
+    assert [call.args for call in loading.call_args_list] == [(True,), (False,)]
+    module.WATCHERS[0].deleteLater.assert_called_once()
+    follower = MagicMock()
+    task.when_settled(follower)
+    follower.assert_called_once_with()
+    add.side_effect = None
+    module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    assert loading.call_args.args == (True,)  # the next read takes the lease again
+
+
 def test_a_settled_read_holds_its_followers_no_longer(module):
     import gc
     import weakref
