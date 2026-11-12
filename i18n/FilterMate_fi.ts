@@ -477,6 +477,26 @@ Ajetaanko?</translation>
         <translation>Nämä asetukset ovat muuttuneet sen jälkeen, kun agentti ehdotti niitä: pyydä sitä uudelleen.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>QGIS-profiilistasi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>tämän projektin kansiosta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agentti haluaa noudattaa taitoa ”{}” ({}). Se on peräisin {}, ei FilterMatesta: lue se ensin. Se ei anna agentille mitään oikeuksia: jokaisesta muutoksesta kysytään edelleen asetustesi mukaisesti. Annetaanko agentin käyttää sitä? Tätä ei kysytä uudelleen ennen kuin se muuttuu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Taito agentille</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Tason {} muokkaus (tallentamatta)</translation>

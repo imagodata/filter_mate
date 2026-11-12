@@ -477,6 +477,26 @@ Run it?</source>
         <translation>Αυτές οι ρυθμίσεις άλλαξαν από τότε που τις πρότεινε ο πράκτορας: ζητήστε του τις ξανά.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>το προφίλ σας στο QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>τον φάκελο αυτού του έργου</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Ο πράκτορας θέλει να ακολουθήσει τη δεξιότητα «{}» ({}). Προέρχεται από {}, όχι από το FilterMate: διαβάστε την πρώτα. Δεν δίνει κανένα δικαίωμα στον πράκτορα: κάθε αλλαγή εξακολουθεί να ζητείται όπως ορίζουν οι ρυθμίσεις σας. Να επιτραπεί στον πράκτορα να τη χρησιμοποιήσει; Δεν θα ερωτηθείτε ξανά μέχρι να αλλάξει.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Μια δεξιότητα για τον πράκτορα</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Επεξεργασία του {} (μη αποθηκευμένη)</translation>

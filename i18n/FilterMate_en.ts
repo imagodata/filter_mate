@@ -406,6 +406,26 @@ Run it?</translation>
         <translation>These settings changed since the agent proposed them: ask it again.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>your QGIS profile</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>the folder of this project</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>A skill for the agent</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Edit of {} (not saved)</translation>

@@ -477,6 +477,26 @@ Run it?</source>
         <translation>自智能体提出这些设置以来，它们已被更改：请重新向智能体请求。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>您的 QGIS 配置文件</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>此项目的文件夹</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>智能体想要遵循技能“{}”（{}）。它来自{}，而非 FilterMate：请先阅读。它不会赋予智能体任何权限：每项更改仍会按您的设置进行询问。是否允许智能体使用它？在其内容更改之前不会再次询问。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>供智能体使用的技能</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} 的编辑（未保存）</translation>

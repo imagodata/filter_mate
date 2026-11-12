@@ -477,6 +477,26 @@ Pentru ce: {}
         <translation>Aceste setări s-au schimbat de când agentul le-a propus: cereți-i din nou.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>profilul dvs. QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>dosarul acestui proiect</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agentul vrea să urmeze abilitatea „{}” ({}). Provine din {}, nu din FilterMate: citiți-o mai întâi. Nu îi dă agentului niciun drept: fiecare modificare este în continuare cerută așa cum indică setările dvs. Permiteți agentului să o folosească? Nu veți mai fi întrebat până când nu se schimbă.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>O abilitate pentru agent</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Editarea {} (nesalvată)</translation>

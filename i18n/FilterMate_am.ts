@@ -477,6 +477,26 @@ Run it?</source>
         <translation>ወኪሉ ካቀረባቸው በኋላ እነዚህ ቅንብሮች ተለውጠዋል፦ እንደገና ይጠይቁት።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>የQGIS መገለጫዎ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>የዚህ ፕሮጀክት አቃፊ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>ወኪሉ &quot;{}&quot; ({}) የተባለውን ክህሎት መከተል ይፈልጋል። ምንጩ {} ነው እንጂ FilterMate አይደለም፦ አስቀድመው ያንብቡት። ለወኪሉ ምንም መብት አይሰጥም፦ እያንዳንዱ ለውጥ አሁንም ቅንብሮችዎ በሚሉት መሰረት ይጠየቃል። ወኪሉ እንዲጠቀምበት ይፈቅዳሉ? እስኪቀየር ድረስ ዳግም አይጠየቅም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>ለወኪሉ የሚሆን ክህሎት</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>የ{} ማስተካከያ (አልተቀመጠም)</translation>

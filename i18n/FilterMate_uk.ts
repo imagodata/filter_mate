@@ -477,6 +477,26 @@ Run it?</source>
         <translation>Ці налаштування змінилися відтоді, як агент їх запропонував: попросіть його знову.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>вашого профілю QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>теки цього проєкту</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Агент хоче скористатися навичкою «{}» ({}). Вона походить із {}, а не з FilterMate: спершу прочитайте її. Вона не дає агентові жодних прав: кожна зміна й надалі запитується так, як визначають ваші налаштування. Дозволити агентові використовувати її? Запит не з’явиться знову, доки навичка не зміниться.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Навичка для агента</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Редагування шару {} (не збережено)</translation>

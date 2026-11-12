@@ -477,6 +477,26 @@ Spustit?</translation>
         <translation>Tato nastavení se změnila od chvíle, kdy je agent navrhl: požádejte ho znovu.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>vašeho profilu QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>složky tohoto projektu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agent chce použít dovednost „{}“ ({}). Pochází z {}, nikoli z FilterMate: nejprve si ji přečtěte. Nedává agentovi žádná práva: každá změna se stále vyžaduje ke schválení podle vašeho nastavení. Povolit agentovi ji používat? Dokud se nezmění, nebudete znovu dotázáni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Dovednost pro agenta</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Úprava vrstvy {} (neuloženo)</translation>

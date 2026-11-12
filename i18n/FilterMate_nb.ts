@@ -477,6 +477,26 @@ Kjøre den?</translation>
         <translation>Disse innstillingene er endret siden agenten foreslo dem: spør den på nytt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>QGIS-profilen din</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>mappen til dette prosjektet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agenten vil følge ferdigheten «{}» ({}). Den kommer fra {}, ikke fra FilterMate: les den først. Den gir ikke agenten noen rettigheter: det spørres fortsatt om hver endring slik innstillingene dine sier. Vil du la agenten bruke den? Det spørres ikke igjen før den endres.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>En ferdighet for agenten</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Redigering av {} (ikke lagret)</translation>
