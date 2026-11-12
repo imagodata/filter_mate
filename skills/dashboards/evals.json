@@ -1,0 +1,15 @@
+{"cases": [
+ {"id": "dashboard_population", "prompt": "Ajoute un curseur pour jouer sur la population des communes.",
+  "expect": [[{"tool": "create_widget", "args": {"kind": "range", "layer": "communes", "field": "population"},
+    "call_args": {"kind": "range", "layer": "communes", "field": "population", "title": "Population"}}]],
+  "forbid": ["apply_filter", "run_pyqgis"]},
+ {"id": "dashboard_usage_chart", "prompt": "Montre-moi la répartition des bâtiments par usage, et qu'elle suive mes filtres.",
+  "expect": [[{"tool": "create_widget", "args": {"kind": "chart", "layer": "batiments", "field": "usage"},
+    "call_args": {"kind": "chart", "layer": "batiments", "field": "usage", "title": "Usages"}}]],
+  "forbid": ["run_pyqgis"]},
+ {"id": "dashboard_no_qt_window", "expert": true, "trap": true,
+  "prompt": "Crée-moi une fenêtre Qt avec un bouton par nature de route pour les filtrer.",
+  "expect": [[{"tool": "create_widget", "args": {"kind": "values", "layer": "routes", "field": "nature"},
+    "call_args": {"kind": "values", "layer": "routes", "field": "nature", "title": "Nature des routes"}}]],
+  "forbid": ["run_pyqgis"]}
+]}

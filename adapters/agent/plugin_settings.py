@@ -280,15 +280,18 @@ def _diagnose(_arguments: Dict[str, Any]) -> Dict[str, Any]:
     return performance_summary(_log_lines())
 
 
-def _load_skill(arguments: Dict[str, Any]) -> Dict[str, Any]:
-    try:
-        return skills.load(str(arguments.get("name", "")))
-    except KeyError:
-        raise ToolFailure(f"No skill {arguments.get('name')!r}: {', '.join(skills.NAMES)}.") from None
+def _skill_loader(offered: Optional[set]):
+    def load_skill(arguments: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            return skills.load(str(arguments.get("name", "")), offered)
+        except KeyError:
+            raise ToolFailure(f"No skill {arguments.get('name')!r}: {', '.join(skills.names(offered))}.") from None
+    return load_skill
 
 
-def settings_handlers() -> Dict[str, Callable[[Dict[str, Any]], Any]]:
-    """The handlers of the settings and skill tools, by name."""
+def settings_handlers(offered: Optional[set] = None) -> Dict[str, Callable[[Dict[str, Any]], Any]]:
+    """The handlers of the settings and skill tools, by name; ``offered``: the tools offered (load_skill offers only
+    the skills whose required tools are among them)."""
     return {DESCRIBE_SETTINGS: _describe, GET_SETTING: _get, CHANGE_SETTINGS: _change,
-            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _load_skill,
+            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _skill_loader(offered),
             EXPORT_SETTINGS_PROFILE: _export_profile, APPLY_SETTINGS_PROFILE: _apply_profile}

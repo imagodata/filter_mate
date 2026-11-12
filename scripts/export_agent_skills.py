@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate ``skills/filtermate-<name>/SKILL.md`` from the skills of the agent (``core/agent/skills.py``).
+"""Regenerate ``skills/export/filtermate-<name>/SKILL.md`` from the skills of the agent (``skills/<name>/``).
 
 These Agent Skills are for an application connected to the MCP server of FilterMate (Claude Code, Claude Desktop...):
 the same instructions the chat loads with load_skill. ``--check`` fails when a file is out of date (for the tests).
@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT = ROOT / "skills"
+OUTPUT = ROOT / "skills" / "export"
 
 
 def _module():
@@ -26,7 +26,7 @@ def _module():
 def main(argv) -> int:
     skills = _module()
     stale = []
-    for skill in skills.SKILLS.values():
+    for skill in skills.for_audience("mcp"):
         path = OUTPUT / f"filtermate-{skill.name}" / "SKILL.md"
         text = skills.agent_skill_file(skill)
         if "--check" in argv:

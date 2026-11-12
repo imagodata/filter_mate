@@ -4,6 +4,11 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **Two new skills: PyQGIS and dashboards.** With the expert mode on, the agent can load the instructions to write Python for QGIS 3.22 to 4.x (tools first, Qt5 and Qt6 enums, nothing protected, nothing saved unasked, QGIS kept responsive); the skill is offered only in the expert mode. Asked for a dashboard, it builds sliders, ticked values, numbers and charts with the widgets of the panel, never a window of its own.
+- **Skills follow a standard.** Each skill of the agent is now a folder of the plugin, `skills/<name>/`, with its instructions (`SKILL.md`, the format of Agent Skills with the fields of FilterMate) and its test cases; the standard is `skills/README.md`, and the tests refuse a skill that names a tool or a setting that does not exist, tells the model to get around a question, or comes without a trap case.
+
 ## [5.1.0] - 2026-11-13
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

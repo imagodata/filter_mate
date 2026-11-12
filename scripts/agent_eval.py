@@ -44,7 +44,7 @@ from agent.settings_reference import (  # noqa: E402
 from agent.performance import summary as performance_summary  # noqa: E402
 from agent.skills import load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog, skill_tool  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -105,6 +105,7 @@ class SimulatedProject:
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
         self.settings: Dict[str, Any] = {}  # the configuration of FilterMate: its defaults, then what was changed
+        self.offered: set = set()  # the tools of the case (load_skill offers the skills they allow)
 
     def _get_setting(self, args):
         try:
@@ -494,7 +495,11 @@ class SimulatedProject:
                 changed_only=bool(args.get("changed_only")), limit=args.get("limit", 25)),
             "get_setting": self._get_setting,
             "change_settings": self._change_settings,
-            "load_skill": lambda args: load_skill(args["name"]),
+            "load_skill": lambda args: load_skill(args["name"], self.offered),
+            "run_pyqgis": lambda args: {"ok": True, "printed": "", "result": None},
+            "create_widget": lambda args: {"widget": {"id": "w1", "kind": args["kind"], "layer": args["layer"],
+                                                      "field": args.get("field", "")}, "widgets": []},
+            "remove_widget": lambda args: {"widgets": []},
             "export_settings_profile": lambda args: {"path": f"profiles/{args['name']}.json", "name": args["name"],
                                                      "settings": 0},
             "apply_settings_profile": lambda args: {"changed": [], "unchanged": [], "profile": args.get("name", "")},
@@ -640,10 +645,15 @@ def fits(case: Dict[str, Any], names) -> bool:
 def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False) -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict. ``filtering``: the tools a local model gets by default."""
     project = SimulatedProject(case.get("setup"))
-    # Off by default (the expert mode), or nothing to draw in a simulated project (view_map).
-    tools = tuple(tool for tool in chat_tools() if tool.name not in ("run_pyqgis", "view_map")
+    # Off by default (the expert mode: a case says "expert": true to turn it on), or nothing to draw in a simulated
+    # project (view_map).
+    left_out = ("view_map",) if case.get("expert") else ("run_pyqgis", "view_map")
+    tools = tuple(tool for tool in chat_tools() if tool.name not in left_out
                   and (not filtering or tool.name in FILTERING_TOOLS))
+    offered = {tool.name for tool in tools}
+    tools = tuple(skill_tool(offered) if tool.name == "load_skill" else tool for tool in tools)
     session = AgentSession(provider, tools, SYSTEM_PROMPT + (FILTERING_NOTE if filtering else ""), AgentLimits())
+    project.offered = offered
     executor = ToolExecutor(tools, project.handlers())
     # As the chat sends it: the state of the project after the request.
     handlers = project.handlers()
@@ -664,9 +674,16 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False)
             "cache_write_tokens": session.usage.cache_write_tokens}
 
 
+SKILLS_PATH = Path(__file__).resolve().parent.parent / "skills"
+
+
 def load_cases(only: Optional[Sequence[str]] = None) -> List[Dict[str, Any]]:
+    """The shared cases, then those of each skill (skills/<name>/evals.json)."""
     with open(CASES_PATH, encoding="utf-8") as stream:
         cases = json.load(stream)["cases"]
+    for evals in sorted(SKILLS_PATH.glob("*/evals.json")):
+        with open(evals, encoding="utf-8") as stream:
+            cases += json.load(stream)["cases"]
     return [case for case in cases if not only or case["id"] in only]
 
 
