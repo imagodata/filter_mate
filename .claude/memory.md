@@ -84,10 +84,14 @@ Suites : `service=` → #357 (`pg_connect.connect_kwargs_from_uri` = `QgsDataSou
 un service ni host ni port, valeurs vides écartées car libpq ne remplit depuis le service que les mots-clés absents ;
 `connection_identity` pour toute clé de cache par base). Transaction laissée par `ensure_table_stats` → PR suivante.
 DROP du reset en lecture seule : non-problème (`execute_commands` attrape et fait rollback).
-**Reste ouvert** : buffer par expression sur source PG > 10 000 entités, cassé à 3 étages (MV jamais créée :
-`param_buffer_expression` lu avant l'init et clé `buffer_expression` absente ; si créée, elle prendrait l'ANCIEN
-subset car le nouveau est seulement en file ; la MV `_dump` = ST_Union sans clé alors que le builder y applique
-`__source."pk" IN …`). À reproduire sur PostGIS (Docker) avant de toucher : piste = toujours le mode inline.
+Buffer par expression : #363 (toujours inline ; la MV `_dump` n'était jamais créée et n'avait pas les colonnes que
+le builder EXISTS lit sur `__source`) et #368 (la sélection source de CE filtre : pendant la phase distante, le subset
+de la source est encore l'ANCIEN, il n'est posé que dans `finished()` ; `task_parameters['source_subset_after_task']`
+= subset mis en file ; branche « BUFFER MODE » supprimée, elle découpait le subset sur AND/OR et recollait en AND).
+Piège général à retenir : toute lecture de `source_layer.subsetString()` / `featureCount()` pendant la phase distante
+voit l'état d'avant la tâche. Restes connus : chaînage spatial (`spatial_chain`) qui ne garde que les EXISTS (la
+nouvelle sélection est perdue, table de buffers sur toute la source) ; PATH 3A ; scénario headless
+`tests/qgis_headless/check_pg_buffer_expression.py` jamais exécuté (pas de PostGIS : Docker indisponible).
 
 ## [2026-11-12] Filtre attributaire : expression QGIS → SQL natif de la source, depuis l'arbre
 Décision : le subset d'une couche base / fichier est écrit depuis l'arbre de l'expression
