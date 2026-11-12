@@ -68,9 +68,9 @@ def ctrl_module(monkeypatch):
     segmentation.model_directory = lambda: "/profile/filtermate/models/sam"
     segmentation.ModelDownloadTask = FakeDownloadTask
     monkeypatch.setitem(sys.modules, segmentation.__name__, segmentation)
-    sam_model = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.sam_model")
-    sam_model.install_command = lambda: "python -m pip install onnxruntime"
-    monkeypatch.setitem(sys.modules, sam_model.__name__, sam_model)
+    dependencies = types.ModuleType(f"{_PKG}.adapters.qgis.python_dependencies")
+    dependencies.manual_command = lambda: "python -m pip install --upgrade --target /profile/py312 onnxruntime"
+    monkeypatch.setitem(sys.modules, dependencies.__name__, dependencies)
     added = []
     core = sys.modules["qgis.core"]
     monkeypatch.setattr(core, "QgsApplication", types.SimpleNamespace(
@@ -95,7 +95,7 @@ def controller(ctrl_module):
 class TestMissingModel:
     def test_after_a_failed_install_the_command_is_told(self, ctrl_module, controller):
         ctrl_module._segmentation_stub.state = ModelState(False, False, False, True)
-        assert "pip install onnxruntime" in controller._missing_model_text()
+        assert "pip install --upgrade --target /profile/py312 onnxruntime" in controller._missing_model_text()
 
     def test_before_any_install_the_button_is_told(self, ctrl_module, controller):
         ctrl_module._segmentation_stub.state = ModelState(False, False)

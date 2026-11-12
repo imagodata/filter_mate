@@ -25,6 +25,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Objects drawn by SAM (experimental)
 
+- **The install of onnxruntime keeps the numpy of QGIS, and repairs an install cut short.** pip installs into a folder of the profile (`--target`), where it ignores what the Python of QGIS has: it chose numpy afresh, so an onnxruntime built for another numpy than the one QGIS loads could be installed and fail to load. numpy is now pinned to the version QGIS has. An install cut short (QGIS closed meanwhile) left a package that was found, taken as installed and never repaired: its files are now compared with those pip recorded, the panel offers the install again, and pip replaces what the folder holds. The command shown to run by hand when the install fails had no `--target`: it installed into the Python of QGIS itself (refused under Linux, administrator only under Windows, numpy of QGIS replaced); it now names the same folder.
 - **Processing plans its windows in a fraction of a second.** *Draw objects on a raster with SAM from points or polygons* compared each feature with every window planned before it: 20 000 scattered features took 148 s before the first window, with no way to cancel. The windows are now found on a grid (0.8 s, the same windows), and Cancel stops the planning.
 
 ### Filtering

@@ -231,6 +231,14 @@ class TestFindProvider:
         monkeypatch.setattr(sam_model, 'SamOnnxProvider', fail)
         assert segmentation.find_provider() is None
 
+    def test_a_runtime_cut_short_is_offered_again(self, monkeypatch):
+        """2026-11-12: an install of onnxruntime cut short was found, taken as installed and never repaired."""
+        self.ready(monkeypatch)
+        dependencies = fk.load("adapters.qgis.python_dependencies")
+        monkeypatch.setattr(dependencies, 'is_intact', lambda package: package != 'onnxruntime')
+        assert segmentation.model_state() == segmentation.ModelState(False, True)
+        assert segmentation.find_provider() is None
+
     def test_an_unknown_profile_is_not_installed(self, monkeypatch):
         sam_model = fk.load("sam_model")
         monkeypatch.setattr(sam_model, 'runtime_available', lambda: True)

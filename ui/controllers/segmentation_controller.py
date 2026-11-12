@@ -376,12 +376,12 @@ class SegmentationController:
         return model_state()
 
     def _missing_model_text(self) -> str:
-        from ...adapters.qgis.coverage_layers.sam_model import install_command
+        from ...adapters.qgis.python_dependencies import manual_command
         state = self.model_state()
         if state.installing_runtime:
             return self.tr("onnxruntime is being installed, click again in a moment")
         if not state.runtime and state.runtime_failed:
-            return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(install_command())
+            return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(manual_command())
         if not state.runtime:
             return self.tr("Install onnxruntime first, with the button below")
         if self.downloading():

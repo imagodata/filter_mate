@@ -83,7 +83,8 @@ def model_state() -> ModelState:
         logger.debug(f"[FM5] segmentation model folder unknown: {exc}")
         installed = False
     from .. import python_dependencies
-    runtime = sam_model.runtime_available()
+    # An install cut short: found, but its files are not all there; the panel offers to install it again.
+    runtime = sam_model.runtime_available() and python_dependencies.is_intact(sam_model.RUNTIME_MODULE)
     return ModelState(runtime, installed, not runtime and python_dependencies.installing(), not runtime and python_dependencies.install_failed())
 
 
