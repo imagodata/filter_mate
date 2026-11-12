@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from dataclasses import asdict
 from typing import Optional, Tuple
 
@@ -747,6 +748,7 @@ class AgentChatController(QObject):
                 pass
 
     def _refresh_stats(self) -> None:
+        started = time.monotonic()
         try:
             widgets = agent_widgets.read_widgets()
         except Exception:
@@ -757,6 +759,9 @@ class AgentChatController(QObject):
                 self.panel.widgets_strip.set_value(widget["id"], number_text(value))
             elif widget["kind"] == CHART:
                 self.panel.widgets_strip.set_bars(widget["id"], agent_widgets.chart_bars(widget))
+        # Read on this thread, up to MAX_STAT_FEATURES features a widget: the next refresh waits three times as long as
+        # this one took (10 s at most), so a big layer being edited is not read again 300 ms after each change.
+        self._stat_timer.setInterval(min(10_000, max(300, int((time.monotonic() - started) * 3000))))
 
     def _on_widget_changed(self, widget) -> None:
         """The user moved a bound or ticked a value: kept in the project, and its layer filtered."""

@@ -15,7 +15,7 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 
-from ...core.agent.widgets import CATEGORIES, CHART, RANGE, VALUES
+from ...core.agent.widgets import CATEGORIES, CHART, RANGE, VALUES, decimals
 from ..styles.mockup_design import plugin_is_dark, tokens
 
 APPLY_DELAY_MS = 400  # a value typed or ticked is applied once the user pauses
@@ -34,6 +34,12 @@ def default_title(widget: Dict[str, Any]) -> str:
     aggregate = {"count": _tr("Count"), "sum": _tr("Sum"), "mean": _tr("Mean"), "min": _tr("Minimum"),
                  "max": _tr("Maximum")}[widget["aggregate"]]
     return f"{aggregate} · {widget['field']}" if widget["field"] else aggregate
+
+
+def _shape(widget: Dict[str, Any]) -> tuple:
+    """What a card is drawn from, but its state (bounds, ticked values)."""
+    return (widget["id"], widget["kind"], widget["title"], widget["field"], widget["layer_id"],
+            tuple(map(str, widget.get("values", ()))), widget.get("minimum"), widget.get("maximum"))
 
 
 def value_text(value: Any) -> str:
@@ -198,13 +204,23 @@ class WidgetCard(QFrame):
 
     def _spin(self) -> QDoubleSpinBox:
         widget = self.widget
+        places = decimals(widget)
         box = QDoubleSpinBox(self)
-        box.setDecimals(0 if widget.get("integer") else 2)
-        box.setRange(widget["minimum"], widget["maximum"])
-        box.setSingleStep(max((widget["maximum"] - widget["minimum"]) / 100.0, 1.0 if widget.get("integer") else 0.01))
+        box.setDecimals(places)
+        box.setRange(widget["minimum"], widget["maximum"])  # rounded to the decimals: see _bound
+        box.setSingleStep(max((widget["maximum"] - widget["minimum"]) / 100.0, 10.0 ** -places))
         box.setKeyboardTracking(False)
         box.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         return box
+
+    def _bound(self, box: QDoubleSpinBox) -> float:
+        """The value of ``box``; at either end, the end of the field itself: the box shows it rounded, and 0.125
+        written 0.13 would leave out the feature of the minimum."""
+        if box.value() <= box.minimum():
+            return self.widget["minimum"]
+        if box.value() >= box.maximum():
+            return self.widget["maximum"]
+        return box.value()
 
     def _build_range(self) -> QHBoxLayout:
         row = QHBoxLayout()
@@ -257,13 +273,17 @@ class WidgetCard(QFrame):
         self._on_values()
 
     def _on_range(self, _value: float = 0.0) -> None:
-        low, high = self.low.value(), self.high.value()
-        if low > high:  # the bound moved past the other one drags it along
-            other = self.high if self.sender() is self.low else self.low
+        # Only the bound moved is written: the other one keeps its value, which its box shows rounded.
+        moved, other = (self.high, self.low) if self.sender() is self.high else (self.low, self.high)
+        key, other_key = ("high", "low") if moved is self.high else ("low", "high")
+        self.widget[key] = self._bound(moved)
+        if self.widget["low"] > self.widget["high"]:  # the bound moved past the other one drags it along
             other.blockSignals(True)
-            other.setValue(low if other is self.high else high)
+            other.setValue(moved.value())
             other.blockSignals(False)
-        self.widget.update(low=self.low.value(), high=self.high.value())
+            self.widget[other_key] = self.widget[key]
+        elif other.value() in (other.minimum(), other.maximum()):  # at an end, the end (an older version rounded it)
+            self.widget[other_key] = self._bound(other)
         self._timer.start()
 
     def _on_values(self, _item=None) -> None:
@@ -274,11 +294,13 @@ class WidgetCard(QFrame):
     def _emit(self) -> None:
         self.changed.emit(dict(self.widget))
 
-    def flush(self) -> None:
-        """Apply now what waits for the pause (tests, and a widget about to go)."""
-        if self._timer.isActive():
-            self._timer.stop()
-            self._emit()
+    def flush(self) -> bool:
+        """Apply now what waits for the pause (tests, and a widget about to go); True when something was."""
+        if not self._timer.isActive():
+            return False
+        self._timer.stop()
+        self._emit()
+        return True
 
     def set_value(self, text: str) -> None:
         if self.value is not None:
@@ -319,20 +341,32 @@ class WidgetsStrip(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._area)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        # The height of new cards is known once they are shown, on the next turn of the event loop (see _fit). A
+        # timer of the strip, not QTimer.singleShot: it never fires for a strip deleted meanwhile.
+        self._fit_timer = QTimer(self)
+        self._fit_timer.setSingleShot(True)
+        self._fit_timer.setInterval(0)
+        self._fit_timer.timeout.connect(self._fit)
         self.hide()
 
     def set_widgets(self, widgets: Sequence[Dict[str, Any]]) -> None:
         """Draw ``widgets``; a card the user is moving is not drawn again when only its state changed."""
-        shape = tuple((widget["id"], widget["kind"], widget["title"], widget["field"], widget["layer_id"],
-                       tuple(map(str, widget.get("values", ()))), widget.get("minimum"), widget.get("maximum"))
-                      for widget in widgets)
+        shape = tuple(_shape(widget) for widget in widgets)
         states = {widget["id"]: widget for widget in widgets}
         if shape == self._shape and all(card.widget == states.get(key) for key, card in self.cards.items()):
             return
+        # What was typed or ticked in the last moments is applied before its card goes, and drawn again as it is
+        # now: ``widgets`` was read before.
+        flushed = {key: card.widget for key, card in self.cards.items() if card.flush()}
         for card in self.cards.values():
+            self._column.removeWidget(card)  # deleteLater alone leaves it in the column, measured, until it goes
+            card.hide()
             card.deleteLater()
         self.cards = {}
         for widget in widgets:
+            state = flushed.get(widget["id"])
+            if state is not None and _shape(state) == _shape(widget):
+                widget = dict(widget, **{key: state[key] for key in ("low", "high", "chosen") if key in state})
             card = WidgetCard(widget, self._inner)
             card.changed.connect(self.changed)
             card.remove_requested.connect(self.remove_requested)
@@ -340,12 +374,18 @@ class WidgetsStrip(QFrame):
             self.cards[widget["id"]] = card
         self._shape = shape
         self.setVisible(bool(widgets))
-        self._fit()
+        self._fit_timer.start()
         self.refresh_look()
 
     def _fit(self) -> None:
+        """As high as the cards, up to STRIP_MAX_HEIGHT, then they scroll.
+
+        Run once the cards are laid out: a card just added is shown on the next turn of the event loop, and a hidden
+        one counts for nothing. The height is fixed both ways: the scroll area keeps the size hint it had first.
+        """
         self._inner.adjustSize()
-        self._area.setMinimumHeight(min(self._inner.sizeHint().height(), STRIP_MAX_HEIGHT))
+        self._area.setFixedHeight(min(self._inner.sizeHint().height(), STRIP_MAX_HEIGHT))
+        self.updateGeometry()
 
     def set_value(self, widget_id: str, text: str) -> None:
         card = self.cards.get(widget_id)
@@ -356,7 +396,7 @@ class WidgetsStrip(QFrame):
         card = self.cards.get(widget_id)
         if card is not None:
             card.set_bars(bars)
-            self._fit()
+            self._fit_timer.start()
 
     def set_error(self, widget_id: str, text: str) -> None:
         card = self.cards.get(widget_id)

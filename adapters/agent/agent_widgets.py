@@ -173,8 +173,12 @@ def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
     count = layer.featureCount()
     if not isinstance(count, int) or count > MAX_STAT_FEATURES:
         return None
-    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry).setSubsetOfAttributes([index])
+    # A count the provider does not know (-1, or -2 before counting) is read up to the limit, and refused beyond.
+    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry).setSubsetOfAttributes([index]) \
+        .setLimit(MAX_STAT_FEATURES + 1)
     values = [_plain(feature.attribute(index)) for feature in layer.getFeatures(request)]
+    if len(values) > MAX_STAT_FEATURES:
+        return None
     if widget["mode"] == CATEGORIES:
         counts: Dict[Any, int] = {}
         for value in values:

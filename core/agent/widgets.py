@@ -32,6 +32,7 @@ AGGREGATES = ("count", "sum", "mean", "min", "max")
 MAX_WIDGETS = 12
 MAX_VALUES = 50
 MAX_TITLE = 60
+MAX_DECIMALS = 15  # what a float holds
 NOTHING = "1 = 0"  # every value unticked: the layer shows nothing, as the user asked
 
 Quote = Callable[[Any], str]
@@ -44,7 +45,11 @@ class WidgetError(ValueError):
 def _number(value: Any) -> Optional[float]:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    return float(value) if math.isfinite(value) else None
+    try:
+        number = float(value)
+    except OverflowError:  # an int beyond the largest float
+        return None
+    return number if math.isfinite(number) else None
 
 
 def _scalar(value: Any) -> bool:
@@ -173,6 +178,17 @@ def make(widgets: Sequence[Dict[str, Any]], kind: str, layer_id: str, layer_name
     return cleaned
 
 
+def decimals(widget: Dict[str, Any]) -> int:
+    """The decimals a range widget shows its bounds with: none for whole numbers, else at least 2 and enough for a
+    hundredth of its span (a field between 0.001 and 0.005 is not rounded to 0)."""
+    if widget.get("integer"):
+        return 0
+    span = widget["maximum"] - widget["minimum"]
+    if not 0 < span < math.inf:
+        return 2
+    return min(MAX_DECIMALS, max(2, math.ceil(2 - math.log10(span) - 1e-9)))  # 1e-9: 2.0000000001 is 2
+
+
 def _format_number(value: float, integer: bool) -> str:
     return str(int(round(value))) if integer else repr(float(value))
 
@@ -256,12 +272,17 @@ def histogram_bars(values: Iterable[Any], bins: int = HISTOGRAM_BINS) -> List[Di
     low, high = min(numbers), max(numbers)
     if low == high:
         return [{"low": low, "high": high, "count": len(numbers)}]
-    width = (high - low) / bins
+    # Each number by its place between low and high, never by a width: a tenth of the span may be below the smallest
+    # float (0 to 5e-324), and the span beyond the largest one (-1.7e308 to 1.7e308): then in halves, which fit.
+    halves = math.isinf(high - low)
+    span = high / 2 - low / 2 if halves else high - low
     counts = [0] * bins
     for number in numbers:
-        counts[min(int((number - low) / width), bins - 1)] += 1
-    return [{"low": low + index * width, "high": low + (index + 1) * width, "count": count}
-            for index, count in enumerate(counts)]
+        place = (number / 2 - low / 2 if halves else number - low) / span
+        counts[min(int(place * bins), bins - 1)] += 1
+    # An edge is a weighted mean of low and high: it never goes beyond them.
+    edges = [low * (1 - index / bins) + high * (index / bins) for index in range(bins + 1)]
+    return [{"low": edges[index], "high": edges[index + 1], "count": count} for index, count in enumerate(counts)]
 
 
 def without(widgets: Sequence[Dict[str, Any]], widget_id: str) -> List[Dict[str, Any]]:
