@@ -626,6 +626,35 @@ def check_fields_joins(project):
     project.removeMapLayer(table.id())
 
 
+def check_tree_same_names(project):
+    """Groups of the same name at two depths: a path names the group at its own level, never one deeper."""
+    from filter_mate.adapters.public_api import layer_tree
+    from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
+    from filter_mate.core.agent.messages import ToolCallPart
+    root = project.layerTreeRoot()
+    nested = root.insertGroup(0, "A").addGroup("Roads")  # first in the tree: findGroup("Roads") finds it
+    top = root.addGroup("Roads")
+    routes = project.mapLayersByName("routes")[0]
+    start = layer_tree.group_path(root.findLayer(routes.id()))
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("c1", "group_layers", {"layers": ["routes"], "group": "Roads"}))
+    answer = layer_tree.group_layers(["routes"], "Roads")
+    node = root.findLayer(routes.id())
+    check("same names: the group at the top is used, none made", answer["groups_made"] == [] and
+          node.parent() is top and not nested.children(), (answer, layer_tree.group_path(node)))
+    check("same names: the deeper one is reached by its path", layer_tree.group_layers(["routes"], "A/Roads")["moved"]
+          and root.findLayer(routes.id()).parent() is nested)
+    layer_tree.group_layers(["routes"], "Roads")
+    effects = recorder.finish()
+    apply_effects(effects, undo=True)
+    check("same names: undo puts the layer back, both groups kept", layer_tree.group_path(
+        root.findLayer(routes.id())) == start and root.findGroup("A") is not None and
+        layer_tree.child_group(root, "Roads") is not None, layer_tree.group_path(root.findLayer(routes.id())))
+    for group in (root.findGroup("A"), layer_tree.child_group(root, "Roads")):
+        if group is not None:
+            group.parent().removeChildNode(group)
+
+
 def check_layer_tree(project):
     """group_layers, rename_layer and map_theme on the real layer tree, and what an undo of the turn brings back."""
     from filter_mate.adapters.public_api import layer_tree
@@ -806,6 +835,7 @@ def main(introspection):
     check_edits(project, work)
     check_layouts(project, work)
     check_project_crs(project)
+    check_tree_same_names(project)
     check_layer_tree(project)
     check_fields_joins(project)
     check_tree_more(project)

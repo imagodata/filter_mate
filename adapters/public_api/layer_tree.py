@@ -38,6 +38,19 @@ def group_path(node) -> str:
     return "/".join(reversed(names))
 
 
+def child_group(group, name: str):
+    """The first group named ``name`` directly in ``group``, or None.
+
+    Not ``findGroup``: it searches the whole tree below and returns the first group of that name at any depth, so a
+    group ``Roads`` inside another group would hide the ``Roads`` at the top, and a second one would be made.
+    """
+    from qgis.core import QgsLayerTree
+    for child in group.children():
+        if QgsLayerTree.isGroup(child) and child.name() == name:
+            return child
+    return None
+
+
 def ensure_group(path: Sequence[str]) -> Tuple[Any, List[str]]:
     """The group at ``path``, made where missing; and the paths of the groups made."""
     group = _root()
@@ -45,8 +58,8 @@ def ensure_group(path: Sequence[str]) -> Tuple[Any, List[str]]:
     walked: List[str] = []
     for name in path:
         walked.append(name)
-        child = group.findGroup(name)
-        if child is None or child.parent() is not group:
+        child = child_group(group, name)
+        if child is None:
             child = group.addGroup(name)
             made.append("/".join(walked))
         group = child
@@ -142,8 +155,8 @@ def _find_group(path: Sequence[str]):
     """The group at ``path``, or None; never made."""
     group = _root()
     for name in path:
-        child = group.findGroup(name)
-        if child is None or child.parent() is not group:
+        child = child_group(group, name)
+        if child is None:
             return None
         group = child
     return group if path else None
