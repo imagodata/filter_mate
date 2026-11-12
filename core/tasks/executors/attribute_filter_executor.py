@@ -468,7 +468,8 @@ class AttributeFilterExecutor:
         try:
             from ....adapters.qgis.native_filter_translation import subset_for_layer
             native = subset_for_layer(self.layer, expression, key_name=self.primary_key,
-                                      evaluate=self._keys_may_be_evaluated())
+                                      evaluate=self._keys_may_be_evaluated(),
+                                      negated='NOT' in (self.combine_operator or '').upper())
         except Exception as e:  # catch-all: the former conversion stays the fallback
             logger.debug(f"Native translation not available: {e}")
             return None
@@ -482,13 +483,15 @@ class AttributeFilterExecutor:
 
         A list of keys keeps the same features as the expression but is never
         NULL: under the NOT of an 'AND NOT' combination the rows where the
-        expression is NULL would come back. And the features are read through
-        the layer's current subset: right when the new subset is ANDed with
-        that same subset, wrong when it replaces it or is ORed with it.
+        expression is NULL would come back. That NOT is written with an old
+        subset and, since 2026-11-12, without one too (``NOT (new)``,
+        ExpressionFacadeHandler.combine_with_old_subset). And the features are
+        read through the layer's current subset: right when the new subset is
+        ANDed with that same subset, wrong when it replaces it or is ORed with it.
         """
         operator = (self.combine_operator or '').upper()
         old = (self.old_subset or '').strip()
-        if old and 'NOT' in operator:
+        if 'NOT' in operator:
             return False
         try:
             current = (self.layer.subsetString() or '').strip()

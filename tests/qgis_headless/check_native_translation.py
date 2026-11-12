@@ -302,6 +302,8 @@ HYBRID_CASES = [
 ]
 # (old subset, combine operator, expression): hybrid with AND only, the former path otherwise
 COMBINED_CASES = [
+    (None, 'AND NOT', 'regexp_match("nom", \'o\') > 0'),     # NOT ( new ): never a list of keys
+    (None, 'AND NOT', '"pop" > 5 AND "ratio" < 2'),
     ('"pop" > 2', 'AND', 'regexp_match("nom", \'o\') > 0'),
     ('"pop" > 2', 'AND', '"nom" = \'route\' OR "nom" = \'Route\''),
     ('"pop" > 2', 'OR', 'regexp_match("nom", \'o\') > 0'),
@@ -317,7 +319,12 @@ def run_executor(layer, provider_type, text, old=None, operator=None):
     executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key='fid',
                                        old_subset=old, combine_operator=operator)
     processed, _ = executor.process_qgis_expression(text)
-    combined = executor.combine_with_old_subset(processed) if processed else None
+    if processed and not old:
+        # as ExpressionFacadeHandler.combine_with_old_subset: NOT ( new ) under AND NOT
+        from filter_mate.filtermate_core.filter.expression_combiner import combine_without_old_subset
+        combined = combine_without_old_subset(processed, operator)
+    else:
+        combined = executor.combine_with_old_subset(processed) if processed else None
     accepted = bool(combined) and executor.apply_filter(combined)
     got = keys(layer) if accepted else None
     layer.setSubsetString('')
@@ -339,10 +346,12 @@ def hybrid_path(label, layer, provider_type):
     for old, operator, text in COMBINED_CASES:
         layer.setSubsetString('')
         joined = {'AND': '({}) AND ({})', 'OR': '({}) OR ({})', 'AND NOT': '({}) AND NOT ({})'}.get(operator, '{1}')
+        if not old:
+            joined = 'NOT ({1})' if operator == 'AND NOT' else '{1}'
         expected = reference(layer, joined.format(old, text))
         written, subset, got = run_executor(layer, provider_type, text, old, operator)
         status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
-        if operator != 'AND' and written:
+        if operator != 'AND' and written and ' IN (' in (subset or ''):
             status = 'FAIL'  # a list of keys read through the old subset, or negated: never written
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.160} expected={expected} got={got}")

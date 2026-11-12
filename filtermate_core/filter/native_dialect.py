@@ -96,6 +96,9 @@ class NativeTranslation:
         predicate: Whether the expression is a condition (comparison,
             AND / OR / NOT, IN, BETWEEN, LIKE, IS): its value is TRUE,
             FALSE or NULL, never a number or a text read as a boolean.
+        composite: Whether ``sql`` holds AND, OR or NOT (the user's, or the
+            tolerance of a real's equality). OGR SQL gives FALSE to TRUE AND
+            NULL: such a subset must not be negated there.
     """
 
     status: TranslationStatus
@@ -105,6 +108,7 @@ class NativeTranslation:
     native_expression: str = ''
     native_columns: frozenset = frozenset()
     predicate: bool = False
+    composite: bool = False
 
 
 def _class(kind: str) -> str:
@@ -118,6 +122,7 @@ class _Writer:
         self.dialect = dialect
         self.types = types
         self.ands = 0  # AND written so far, user's or ours (OGR SQL: no NOT over one)
+        self.connectives = 0  # AND, OR, NOT written so far
         self.columns = set()
 
     # -- values -----------------------------------------------------------------
@@ -286,6 +291,7 @@ class _Writer:
         if kind == 'binary':
             operator = node.value
             if operator in ('AND', 'OR'):
+                self.connectives += 1
                 if operator == 'AND':
                     self.ands += 1
                 return '({} {} {})'.format(self.predicate(node.children[0], depth + 1), operator,
@@ -298,6 +304,7 @@ class _Writer:
                 return self._like(node, depth)
         if kind == 'unary' and node.value == 'NOT':
             before = self.ands
+            self.connectives += 1
             operand = self.predicate(node.children[0], depth + 1)
             if self.dialect == OGR_SQL and self.ands != before:
                 raise Unsupported('OGR SQL gives FALSE to TRUE AND NULL, so a NOT over an AND would keep it')
@@ -341,6 +348,7 @@ class _Writer:
             # qgsDoubleNear on the difference, as QGIS compares
             difference, _ = self._arithmetic(Node('binary', '-', node.children, node.text), depth)
             epsilon = self._literal(_EPSILON)[0]
+            self.connectives += 1
             if operator == '=':
                 self.ands += 1
                 return '({0} > -{1} AND {0} <= {1})'.format(difference, epsilon)
@@ -491,6 +499,7 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
         return NativeTranslation(TranslationStatus.NONE, local_expression=node.text,
                                  reason='Unknown dialect: {}'.format(dialect))
     written, native, local, reasons, columns = [], [], [], [], set()
+    connectives = [0]
 
     def visit(part: Node) -> None:
         if part.kind == 'binary' and part.value == 'AND':
@@ -502,6 +511,7 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
             written.append(writer.predicate(part))
             native.append('(' + part.text + ')')
             columns.update(writer.columns)
+            connectives[0] += writer.connectives
         except Unsupported as exc:
             local.append('(' + part.text + ')')
             reasons.append(str(exc))
@@ -515,7 +525,8 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
         TranslationStatus.NONE if local else TranslationStatus.FULL)
     sql = _strip_outer_parentheses(written[0]) if len(written) == 1 else ' AND '.join(written)
     return NativeTranslation(status, sql, ' AND '.join(local), '; '.join(dict.fromkeys(reasons)),
-                             ' AND '.join(native), frozenset(columns), _is_predicate(node))
+                             ' AND '.join(native), frozenset(columns), _is_predicate(node),
+                             connectives[0] > 0 or len(written) > 1)
 
 
 # Hybrid subsets are written for SQLite only. OGR SQL (GDAL 3.13) refuses an

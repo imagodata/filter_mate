@@ -500,3 +500,15 @@ def test_hybrid_subset_keeps_what_the_expression_keeps(table):
         rows = [row[0] for row in table.execute('SELECT id FROM t WHERE {} ORDER BY id'.format(sql))]  # nosec B608
         assert rows == expected
     assert list(table.execute('SELECT id FROM t WHERE ' + hybrid_sql('', [], None, '"id"', True))) == []  # nosec B608
+
+
+def test_translation_reports_whether_it_holds_a_connective():
+    # OGR SQL: TRUE AND NULL is FALSE, so a negated AND / OR is left to the former conversion
+    assert not translate_native(binary('>', col('pop'), lit(5)), OGR_SQL, TYPES).composite
+    assert not translate_native(in_list(col('id'), [1, 2], negated=True), OGR_SQL, TYPES).composite
+    assert translate_native(binary('AND', binary('>', col('pop'), lit(5)), binary('<', col('ratio'), lit(2))),
+                            OGR_SQL, TYPES).composite
+    assert translate_native(binary('OR', binary('>', col('pop'), lit(5)), binary('<', col('ratio'), lit(2))),
+                            OGR_SQL, TYPES).composite
+    assert translate_native(negation(binary('>', col('pop'), lit(5))), OGR_SQL, TYPES).composite
+    assert translate_native(binary('=', col('ratio'), lit(0.5)), OGR_SQL, TYPES).composite  # its tolerance

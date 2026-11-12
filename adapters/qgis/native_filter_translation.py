@@ -137,7 +137,7 @@ def native_subset(layer, expression):
     return subset_for_layer(layer, expression)
 
 
-def subset_for_layer(layer, expression, key_name=None, evaluate=False):
+def subset_for_layer(layer, expression, key_name=None, evaluate=False, negated=False):
     """The subset of ``layer`` for ``expression`` in its source's own language.
 
     Args:
@@ -148,6 +148,9 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False):
             and replaced by a list of keys. Only when the subset is neither
             negated (FALSE and NULL differ under NOT) nor read through another
             filter than the one it will be combined with by AND.
+        negated: Whether the subset will be written under NOT (AND NOT). OGR
+            SQL gives FALSE to TRUE AND NULL: a translation holding AND, OR or
+            NOT is then left to the former conversion.
 
     Returns:
         The native SQL of the whole expression, else (``evaluate``, SQLite
@@ -163,6 +166,9 @@ def subset_for_layer(layer, expression, key_name=None, evaluate=False):
         logger.warning('Native translation failed, former conversion used: %s', exc)
         return None
     if result is None:
+        return None
+    if negated and result.composite and native_dialect_for_layer(layer) == OGR_SQL:
+        logger.info('Native SQL left aside: OGR SQL would negate an AND / OR (TRUE AND NULL is FALSE there)')
         return None
     native_sql = result.sql
     if native_sql and not _survives_sanitizer(layer, native_sql):
