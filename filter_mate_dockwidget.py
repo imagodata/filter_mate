@@ -7239,8 +7239,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             # Let all task delivery/cleanup slots, and a replacing submit, finish first.
             QTimer.singleShot(0, check)
 
-        task.taskCompleted.connect(settled)
-        task.taskTerminated.connect(settled)
+        # From finished() of the read, completed or terminated: never a Python function connected to
+        # taskCompleted / taskTerminated, which QGIS 4.2.2 on Windows died entering (async_query.submit_query).
+        task.when_settled(settled)
 
     def agent_has_focus(self) -> bool:
         """AGENT is open: Undo and Redo of the action bar, and Ctrl+Z / Ctrl+Y, walk the steps of the agent."""
