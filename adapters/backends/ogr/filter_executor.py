@@ -767,6 +767,10 @@ def prepare_ogr_source_geom(
 
     Returns:
         QgsVectorLayer or None: Prepared source geometry layer
+
+    Raises:
+        SourceSelectionError: The source filter expression keeps no feature or
+            cannot be read (adapters/backends/source_refusal.py).
     """
     from qgis.core import QgsMessageLog, Qgis, QgsExpressionContext
     try:
@@ -853,23 +857,31 @@ def prepare_ogr_source_geom(
         filter_to_use = mode_data
         logger.info(f"[OGR]   Expression fallback: '{filter_to_use[:80]}...'")
 
+        # 2026-11-12: an expression that keeps nothing, or cannot be read, is
+        # refused; the layer used to stay whole (every source feature filtered
+        # the targets while the source showed none).
+        from qgis.core import QgsFeatureRequest, QgsExpression
+        from ..source_refusal import source_selection_refusal
+        expr = QgsExpression(filter_to_use)
+        if expr.hasParserError():
+            logger.error(f"[OGR]   Expression parse error: {expr.parserErrorString()}")
+            raise source_selection_refusal(layer.name(), unreadable=True)
         try:
-            from qgis.core import QgsFeatureRequest, QgsExpression
-            expr = QgsExpression(filter_to_use)
-            if expr.hasParserError():
-                logger.warning(f"[OGR]   Expression parse error: {expr.parserErrorString()}")
-            else:
-                request = QgsFeatureRequest(expr)
-                filtered_features = list(layer.getFeatures(request))
-
-                if filtered_features and context.create_memory_layer_from_features:
-                    layer = context.create_memory_layer_from_features(
-                        filtered_features, layer.crs(), "source_expr_filtered"
-                    )
-                    if layer:
-                        logger.info(f"[OGR]   ✓ Filtered to {layer.featureCount()} features")
+            filtered_features = list(layer.getFeatures(QgsFeatureRequest(expr)))
         except Exception as e:
             logger.error(f"[OGR]   Expression filtering failed: {e}")
+            raise source_selection_refusal(layer.name(), unreadable=True) from e
+        if not filtered_features:
+            raise source_selection_refusal(layer.name())
+        if context.create_memory_layer_from_features:
+            layer = context.create_memory_layer_from_features(
+                filtered_features, layer.crs(), "source_expr_filtered"
+            )
+            if layer:
+                logger.info(f"[OGR]   ✓ Filtered to {layer.featureCount()} features")
+        else:
+            logger.error("[OGR]   ✗ No memory layer for the features of the expression")
+            return None
 
     elif mode == "DIRECT":
         logger.info("[OGR]   Direct mode: using source layer as-is")
