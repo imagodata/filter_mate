@@ -477,6 +477,26 @@ Jalankan?</translation>
         <translation>Pengaturan ini telah berubah sejak agen mengusulkannya: minta lagi kepadanya.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>profil QGIS Anda</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>folder proyek ini</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agen ingin mengikuti keterampilan “{}” ({}). Keterampilan ini berasal dari {}, bukan dari FilterMate: bacalah terlebih dahulu. Keterampilan ini tidak memberi agen hak apa pun: setiap perubahan tetap dimintakan sesuai pengaturan Anda. Izinkan agen menggunakannya? Ini tidak akan ditanyakan lagi sampai keterampilan itu berubah.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Keterampilan untuk agen</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Suntingan {} (belum disimpan)</translation>

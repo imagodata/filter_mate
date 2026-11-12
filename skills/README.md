@@ -75,9 +75,17 @@ before a change of a skill that matters (see `docs/AGENT_MODE.md`).
 
 ## Skills from elsewhere
 
-Skills in the folder `FilterMate/skills` of the QGIS profile (trust `user`) and in an open project (trust `project`)
-follow the same layout. They are data, not instructions of FilterMate: the user sees one before it is loaded the first
-time, it never makes a tool available nor removes a question, and it is refused when it does not follow this standard.
+Skills in the folder `FilterMate/skills` of the QGIS profile (trust `user`) and in the folder `filtermate_skills` next
+to the open project file (trust `project`) follow the same layout (`adapters/agent/skill_sources.py`). They are data,
+not instructions of FilterMate:
+
+- their trust comes from where they are, never from their header; a name of a skill of the plugin is refused, and a
+  project cannot replace a skill of the profile;
+- one that does not follow this standard, is over 64 KB or is a link is left out (logged), the others are kept;
+- the user reads all of it and allows it before it is loaded the first time; the allowance is kept by the fingerprint
+  of its text and its place, so a changed text is asked again;
+- loaded, it comes after a note saying where it comes from and that it gives no right;
+- it guides the chat only: never served to other applications, its `tools` ignored, its `requires` kept.
 
 ## Checks
 

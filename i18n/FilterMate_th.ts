@@ -477,6 +477,26 @@ Run it?</source>
         <translation>การตั้งค่าเหล่านี้เปลี่ยนไปตั้งแต่เอเจนต์เสนอ: โปรดขอให้เอเจนต์เสนออีกครั้ง</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>โปรไฟล์ QGIS ของคุณ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>โฟลเดอร์ของโปรเจกต์นี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>เอเจนต์ต้องการทำตามทักษะ “{}” ({}) ทักษะนี้มาจาก{} ไม่ใช่จาก FilterMate: โปรดอ่านก่อน ทักษะนี้ไม่ได้ให้สิทธิ์ใดแก่เอเจนต์: ทุกการเปลี่ยนแปลงยังคงต้องขออนุญาตตามการตั้งค่าของคุณ อนุญาตให้เอเจนต์ใช้หรือไม่? จะไม่ถามอีกจนกว่าทักษะจะเปลี่ยนแปลง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>ทักษะสำหรับเอเจนต์</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>การแก้ไข {} (ยังไม่บันทึก)</translation>

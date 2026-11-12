@@ -477,6 +477,26 @@ Jo zaženem?</translation>
         <translation>Te nastavitve so se spremenile, odkar jih je agent predlagal: vprašajte ga znova.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>vašega profila QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>mape tega projekta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agent želi slediti veščini »{}« ({}). Prihaja iz {}, ne iz FilterMate: najprej jo preberite. Agentu ne daje nobenih pravic: za vsako spremembo se še naprej vpraša, kot določajo vaše nastavitve. Dovolite agentu, da jo uporablja? Dokler se ne spremeni, vas ne bomo več vprašali.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Veščina za agenta</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Urejanje plasti {} (ni shranjeno)</translation>

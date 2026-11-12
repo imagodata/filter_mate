@@ -477,6 +477,26 @@ Executar?</translation>
         <translation>Estas definições mudaram desde que o agente as propôs: peça-lhe novamente.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>do seu perfil QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>da pasta deste projeto</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>O agente quer seguir a competência «{}» ({}). Provém {}, não do FilterMate: leia-a antes. Não dá nenhum direito ao agente: cada alteração continua a ser pedida conforme as suas definições. Permitir que o agente a utilize? Não voltará a ser perguntado enquanto não mudar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Uma competência para o agente</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Edição de {} (não guardada)</translation>

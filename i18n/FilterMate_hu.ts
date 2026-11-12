@@ -477,6 +477,26 @@ Futtatja?</translation>
         <translation>Ezek a beállítások megváltoztak, mióta az ügynök javasolta őket: kérje újra.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>az Ön QGIS-profilja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>ennek a projektnek a mappája</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Az ügynök a(z) „{}” ({}) készséget szeretné követni. Forrása: {}, nem a FilterMate: előbb olvassa el. Nem ad jogot az ügynöknek: minden módosításhoz továbbra is a beállításai szerint kér engedélyt. Engedélyezi, hogy az ügynök használja? Amíg nem változik, nem kérdezünk rá újra.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Készség az ügynöknek</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} szerkesztése (nincs mentve)</translation>

@@ -477,6 +477,26 @@ Run it?</source>
         <translation>에이전트가 제안한 이후 이 설정이 변경되었습니다. 다시 요청하세요.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>QGIS 프로필</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>이 프로젝트의 폴더</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>에이전트가 스킬 '{}'({})을(를) 따르려고 합니다. 이 스킬은 FilterMate가 아닌 {}에서 왔습니다. 먼저 읽어 보세요. 에이전트에게 어떤 권한도 주지 않습니다. 모든 변경은 여전히 설정에 따라 확인을 요청합니다. 에이전트가 이 스킬을 사용하도록 허용하시겠습니까? 내용이 바뀌기 전까지 다시 묻지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>에이전트용 스킬</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} 편집 (저장 안 됨)</translation>

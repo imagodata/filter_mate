@@ -477,6 +477,26 @@ Ausführen?</translation>
         <translation>Diese Einstellungen haben sich geändert, seit der Agent sie vorgeschlagen hat: Fragen Sie ihn erneut.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>Ihrem QGIS-Profil</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>dem Ordner dieses Projekts</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Der Agent möchte dem Skill „{}“ ({}) folgen. Er stammt aus {}, nicht von FilterMate: Lesen Sie ihn vorher. Er gibt dem Agenten keine Rechte: Jede Änderung wird weiterhin so erfragt, wie es Ihre Einstellungen vorsehen. Darf der Agent ihn verwenden? Es wird erst wieder gefragt, wenn er sich ändert.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Ein Skill für den Agenten</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Bearbeitung von {} (nicht gespeichert)</translation>

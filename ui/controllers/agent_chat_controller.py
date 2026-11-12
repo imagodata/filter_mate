@@ -420,6 +420,15 @@ class AgentChatController(QObject):
 
     # --- settings ---------------------------------------------------------------
 
+    def _approve_skill(self, skill) -> bool:
+        """A skill from the profile or the project folder: the user reads all of it before it guides the agent."""
+        place = {"user": _tr("your QGIS profile"), "project": _tr("the folder of this project")}.get(skill.trust, "")
+        text = _tr("The agent wants to follow the skill \"{}\" ({}). It comes from {}, not from FilterMate: read it "
+                   "before. It gives the agent no right: every change stays asked as your settings say. Let the agent "
+                   "use it? It is not asked again until it changes.").format(
+            one_line(skill.title, 100), one_line(skill.name, 40), place)
+        return bool(self._ask_code(_tr("A skill for the agent"), text, skill.body))
+
     def _settings_link_tool(self, arguments) -> dict:
         """show_settings_link: a button in the thread, to a tab of the agent settings or to a setting."""
         from ...core.agent.settings_reference import get as get_setting
@@ -553,6 +562,11 @@ class AgentChatController(QObject):
             left_out.add(IMAGERY_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
         offered = {tool.name for tool in tools}
+        try:  # the skills of the profile and of the project folder, read again (the project may have changed)
+            from ...adapters.agent.skill_sources import refresh as refresh_skills
+            refresh_skills()
+        except Exception:
+            logger.debug("Agent: skills from elsewhere not read", exc_info=True)
         # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on)
         tools = [skill_tool(offered) if tool.name == LOAD_SKILL else tool for tool in tools]
         if self.local_filtering(values):
@@ -562,7 +576,7 @@ class AgentChatController(QObject):
                                   allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
-        handlers.update(settings_handlers(offered))
+        handlers.update(settings_handlers(offered, self._approve_skill))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool

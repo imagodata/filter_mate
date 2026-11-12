@@ -477,6 +477,26 @@ Run it?</source>
         <translation>एजेंट द्वारा प्रस्तावित किए जाने के बाद ये सेटिंग्स बदल गई हैं: उससे फिर से पूछें।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>आपकी QGIS प्रोफ़ाइल</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>इस प्रोजेक्ट का फ़ोल्डर</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>एजेंट कौशल &quot;{}&quot; ({}) का पालन करना चाहता है। इसका स्रोत {} है, FilterMate नहीं: पहले इसे पढ़ें। यह एजेंट को कोई अधिकार नहीं देता: हर बदलाव के लिए अब भी आपकी सेटिंग्स के अनुसार पूछा जाएगा। क्या एजेंट को इसका उपयोग करने दें? जब तक यह नहीं बदलता, दोबारा नहीं पूछा जाएगा।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>एजेंट के लिए एक कौशल</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} का संपादन (सहेजा नहीं गया)</translation>
