@@ -241,6 +241,31 @@ class TestProtectedLayers:
         assert changed_layers("rename_layer", {"layer": "Fond", "group": True}) == []
         assert changed_layers("clear_filters", {}) is None and changed_layers("clear_filters", {"layers": []}) is None
 
+    def test_a_cross_filter_changes_its_source_when_it_masks_it_or_filters_its_points(self):
+        from core.agent.permissions import changed_layers
+        # filter_source masks a raster source; point cloud criteria stay in the subset of the source after the run.
+        assert changed_layers("cross_filter", {"source_layer": "mnt", "target_layers": ["a"], "filter_source": True}) \
+            == ["a", "mnt"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": [],
+                                               "point_cloud_criteria": {"classes": [6]}}) == ["lidar"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": ["a"],
+                                               "point_cloud_criteria": {"z_min": 0}}) == ["a", "lidar"]
+        assert changed_layers("cross_filter", {"source_layer": "lidar", "target_layers": ["a"],
+                                               "point_cloud_criteria": "Classification = 6"}) == ["a", "lidar"]
+        # Criteria that keep nothing in particular, or no mask: the source is only read.
+        for arguments in ({"filter_source": False}, {"point_cloud_criteria": {"classes": [], "expression": " "}},
+                          {"point_cloud_criteria": None}, {"point_cloud_criteria": ""}):
+            assert changed_layers("cross_filter", {"source_layer": "s", "target_layers": ["a"], **arguments}) == ["a"]
+
+    def test_a_protected_source_masked_or_filtered_by_a_cross_filter_is_refused(self):
+        from core.agent.permissions import PROTECTED
+        executor = ToolExecutor(chat_tools(), {})
+        policy = PermissionPolicy(AUTONOMOUS, protector=Protector("cadastre"))
+        for extra in ({"filter_source": True}, {"point_cloud_criteria": {"classes": [6]}}):
+            call = ToolCallPart("c", "cross_filter", {"source_layer": "cadastre", "target_layers": ["routes"],
+                                                      "predicates": ["Intersect"], **extra})
+            assert executor.verdict(call, policy) == PROTECTED, extra
+
     @pytest.mark.parametrize("level", LEVELS)
     def test_a_change_of_a_protected_layer_is_refused_at_every_level(self, level):
         from core.agent.permissions import PROTECTED

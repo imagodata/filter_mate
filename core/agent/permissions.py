@@ -44,7 +44,8 @@ RULES = (RULE_ASK, RULE_ALLOW, RULE_NEVER)
 
 # The arguments that name the layers a tool changes (its filter, style, data, name, or the layer itself). A layer only
 # read (the source of a cross filter, the table of a join, an input of Processing) or only shown (zoom, selection,
-# visibility, place in the tree) is not changed.
+# visibility, place in the tree) is not changed. The source of a cross filter is changed when the call masks it
+# (filter_source) or gives it point cloud criteria, which stay in its subset after the run (see changed_layers).
 CHANGED_LAYERS = {
     "apply_filter": ("layer_name",), "cross_filter": ("target_layers",), "geometry_filter": ("target_layers",),
     "point_cloud_filter": ("layers",), "clear_filters": ("layers",), "set_layer_style": ("layer",),
@@ -112,9 +113,23 @@ def changed_layers(name: str, arguments: Dict[str, Any]) -> Optional[List[str]]:
             references.append(value)
         elif isinstance(value, list):
             references.extend(item for item in value if isinstance(item, str) and item)
+    source = arguments.get("source_layer")
+    if name == "cross_filter" and isinstance(source, str) and source and (
+            arguments.get("filter_source") or _keeps_points(arguments.get("point_cloud_criteria"))):
+        references.append(source)
     if not references and name in ALL_WHEN_NONE:
         return None
     return references
+
+
+def _keeps_points(criteria: Any) -> bool:
+    """Point cloud criteria that keep something in particular: a cross filter makes them the subset of its source."""
+    if isinstance(criteria, dict):
+        return any(value not in (None, [], {}) and (not isinstance(value, str) or value.strip())
+                   for value in criteria.values())
+    if isinstance(criteria, str):
+        return bool(criteria.strip())
+    return bool(criteria)
 
 
 def clean_rules(rules: Any) -> Dict[str, str]:
