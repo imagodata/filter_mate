@@ -822,6 +822,17 @@ Egyetért?</translation>
         <source>Step {} was not run: you turned its tool off for the agent ({}).</source>
         <translation>A(z) {}. lépés nem futott le: kikapcsolta az eszközét az ügynök számára ({}).</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1261"/>
+        <source>The agent wants to do these {} actions:
+{}
+
+Do you agree to all of them? No runs none of them.</source>
+        <translation>Az ügynök ezt a(z) {} műveletet szeretné végrehajtani:
+{}
+
+Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
+    </message>
 </context>
 <context>
     <name>AgentPanel</name>

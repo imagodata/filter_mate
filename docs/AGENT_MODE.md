@@ -215,6 +215,11 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - An invalid call is never asked nor refused: it runs to answer its mistake.
 - The MCP servers keep the `standard` level: the level is the chat's. The native one follows the *Always ask* and
   *Never* rules of the Tools tab too (`AgentMcpBridge._policy`); *Always allow* does not take its confirmations away.
+- **One question for a turn** (`ChatEngine._confirm_together`, `confirm_many` of the listener): when the model calls
+  several tools in one turn and two or more of them would be asked, the user gets one question listing them, all or
+  none; a recipe does the same for its steps. Code (`run_pyqgis`) keeps its own dialog, one run at a time; a listener
+  without `confirm_many` (the bench) is asked call by call. The verdicts are the same as call by call: refused calls
+  stay refused, the others run alone.
 - **Exceptions by tool** (Tools tab, `AgentSettings.tool_rules`): *As the level says* (default), *Always ask* (at
   every call; never allowed for a conversation), *Always allow* (not past `advisor`, never for `run_pyqgis`) or
   *Never*: the tool is left out of the tools offered to the model and answered `TURNED_OFF` if it is called anyway,

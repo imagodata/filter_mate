@@ -463,3 +463,53 @@ def test_a_tool_turned_off_and_left_out_is_still_answered_why():
     assert executor.verdict(call, policy) == TURNED_OFF
     assert "turned the tool 'apply_filter' off" in ToolExecutor.refused(call, policy).content
     assert executor.verdict(call, PermissionPolicy()) == RUN  # unknown, and answered as unknown
+
+
+class ManyListener(Listener):
+    def __init__(self, accept=True):
+        super().__init__(accept)
+        self.many = []
+
+    def confirm_many(self, calls):
+        self.many.append([c.name for c in calls])
+        return self.accept
+
+
+def run_with(listener, policy, *calls):
+    tools = [spec("read", read_only=True), spec("write"), spec("other"), spec("run_pyqgis", destructive=True)]
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+    seen = []
+    handlers = {tool.name: (lambda name: lambda a: seen.append(name) or {})(tool.name) for tool in tools}
+    transport = Transport()
+    engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(), policy=policy)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, *calls))
+    return seen, session
+
+
+class TestOneQuestionForATurn:
+    def test_several_calls_asked_together(self):
+        listener = ManyListener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "read", {}),
+                           ToolCallPart("c2", "write", {}), ToolCallPart("c3", "other", {}))
+        assert listener.many == [["write", "other"]] and seen == ["read", "write", "other"]
+        assert not [entry for entry in listener.log if entry[0] == "confirm"]
+
+    def test_declined_together_runs_none_of_them(self):
+        listener = ManyListener(False)
+        seen, session = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
+                                 ToolCallPart("c2", "other", {}))
+        assert seen == [] and [part.content for part in session.messages[-1].parts] == [DECLINED, DECLINED]
+
+    def test_a_single_call_is_asked_alone_and_code_keeps_its_own_dialog(self):
+        listener = ManyListener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
+                           ToolCallPart("c2", "run_pyqgis", {}))
+        assert listener.many == [] and [entry for entry in listener.log if entry[0] == "confirm"] == [
+            ("confirm", "write"), ("confirm", "run_pyqgis")]
+
+    def test_a_listener_without_it_is_asked_call_by_call(self):
+        listener = Listener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
+                           ToolCallPart("c2", "other", {}))
+        assert [entry for entry in listener.log if entry[0] == "confirm"] == [("confirm", "write"), ("confirm", "other")]
