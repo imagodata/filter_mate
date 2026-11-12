@@ -61,20 +61,41 @@ _TOPLEVEL_BOOLEAN_MARKERS = (
     '=', '!=', '<>', '>', '<', '>=', '<=',
     ' IN ', ' IN(', ' NOT IN ',
     ' LIKE ', ' ILIKE ', ' SIMILAR TO ',
+    # SQLite: the native translation writes LIKE / ILIKE as GLOB (2026-11-12)
+    ' GLOB ',
     ' IS NULL', ' IS NOT NULL',
     ' AND ', ' OR ',
     ' BETWEEN ',
 )
 
 
+def _skip_quoted_identifier(expr: str, i: int) -> int:
+    """Index just past the double-quoted identifier opening at ``i`` ("" is an escaped quote)."""
+    n = len(expr)
+    i += 1
+    while i < n:
+        if expr[i] == '"':
+            if i + 1 < n and expr[i + 1] == '"':
+                i += 2
+                continue
+            return i + 1
+        i += 1
+    return n
+
+
 def _strip_toplevel_string_literals(expr: str) -> str:
-    """Replace single-quoted literals with placeholders so characters inside
-    them (notably '<', '>', '=') don't fool the top-level-operator scan."""
+    """Replace single-quoted literals and double-quoted identifiers with
+    placeholders so characters inside them (notably '<', '>', '=', a quote or
+    a parenthesis of a field name such as "nom d'usage") don't fool the scans."""
     out = []
     i = 0
     n = len(expr)
     while i < n:
         c = expr[i]
+        if c == '"':
+            i = _skip_quoted_identifier(expr, i)
+            out.append('""')
+            continue
         if c == "'":
             # skip until the closing quote (handle '' as an escape)
             i += 1
@@ -111,6 +132,10 @@ def _strip_for_op_scan(expr: str) -> str:
     n = len(expr)
     while i < n:
         c = expr[i]
+        if c == '"':
+            i = _skip_quoted_identifier(expr, i)
+            out.append('""')
+            continue
         if c == "'":
             i += 1
             while i < n:

@@ -354,3 +354,47 @@ class TestNonStandardWhitespace:
             "P1-SAN-WS regression: tab-separated AND was dropped as a "
             "display expression"
         )
+
+
+class TestNativeTranslationSubsets:
+    """2026-11-12: subsets written by the native translation (#354) must survive.
+
+    SQLite writes LIKE / ILIKE as GLOB; a quote or a parenthesis in a field
+    name made the literal scrub open a false literal. Both wiped the subset
+    to '' (``safe_set_subset_string`` then showed the whole layer, silently).
+    """
+
+    def test_coalesce_glob_is_a_filter(self):
+        expr = "COALESCE(\"nom\", '') GLOB 'R*'"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_coalesce_glob_letter_classes_is_a_filter(self):
+        expr = "COALESCE(\"nom\", '') GLOB '[rR]*'"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_not_glob_on_a_field_with_an_apostrophe(self):
+        expr = "NOT (\"nom d'usage\" GLOB 'A*')"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_not_over_a_comparison_on_a_field_with_an_apostrophe(self):
+        expr = "NOT (\"type d'occupation\" > 2)"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_parenthesis_in_a_field_name(self):
+        expr = "NOT (\"surface (m2)\" > 2)"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_escaped_quote_in_a_field_name(self):
+        expr = "NOT (\"a\"\"b\" GLOB 'x*')"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_display_expressions_are_still_cleared(self):
+        assert sanitize_subset_string("COALESCE(\"nom d'usage\", '')") == ''
+        assert sanitize_subset_string("\"nom d'usage\"") == ''
+
+    def test_chained_statement_after_not_is_still_cleared(self):
+        assert sanitize_subset_string("NOT (\"a\" = 1); DROP TABLE t; --") == ''
+
+    def test_operator_inside_an_identifier_is_not_a_filter(self):
+        # "a = b" is a column name, not a comparison: still a display expression
+        assert sanitize_subset_string("COALESCE(\"a = b\", '')") == ''
