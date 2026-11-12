@@ -139,7 +139,8 @@ couche PG est compilé côté serveur (ILIKE de PostgreSQL), la référence QGIS
   `source_qgis_expression` (l'expression d'origine d'un subset natif) pour `prepare_*_source_geom` ; GLOB, CAST et
   COLLATE ne se parsent pas dans QGIS (l'ancien `_to_spatialite` cassait déjà ce repli avec `CAST`).
 - **Reste** : fonctions géométriques / `@variables` (constantes à replier), hybride sur OGR SQL et sous
-  `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin. Les 5 échecs de
+  `AND NOT`, bug existant Shapefile `"nom" = 'route'` qui rend aussi 'Route' par l'ancien chemin (traité pour =, IN,
+  LIKE, ILIKE hors NOT : section « Textes sur OGR SQL » ci-dessous). Les 5 échecs de
   la suite complète (expression_builder PG / Spatialite, coverage_raster_target) existent sur `main` ; les lancer
   dans un dossier qui ne s'appelle pas `filter_mate` en change le nombre. Lancer `pytest tests` (racine comprise :
   `test_no_unscoped_qt_enums` refuse `QgsFeatureRequest.NoGeometry`, écrire `QgsFeatureRequest.Flag.NoGeometry`).
@@ -154,6 +155,29 @@ une collation déterministe compare les octets). Contrôle 369 PASS / 0 FAIL (4.
 l'ancienne conversion, comme en SQLite : combinaisons OR / AND NOT / remplacement (liste lue à travers l'ancien
 subset ou niée). Limite connue acceptée : la sélection EXPLORING d'une couche PG est compilée côté serveur (ILIKE
 de PostgreSQL : 286 au lieu de 572 pour 'saint') alors que le filtre suit QGIS.
+
+## [2026-11-12] Textes sur OGR SQL : LIKE sensible à la casse, aucune liste de FID (branche `claude/ogr-text-case`)
+Décision utilisateur : `"nom" = 'route'` sur Shapefile rendait aussi 'Route'. Hors de tout NOT et jamais sous AND NOT,
+quand `case_sensitive_like(layer)` (Shapefile / GeoJSON / FlatGeobuf, GDAL ≥ 3.1, `OGR_SQL_LIKE_AS_ILIKE` absent) :
+`=` à un texte sans `%` ni `_` → `LIKE 'x'` ; IN sur ≤ 10 tels textes (`OGR_LIKE_LIST_MAX`) → LIKE joints par OR ;
+LIKE sans `_` et ILIKE ASCII sans k/s tels quels, chaque suite de `%` réduite à un. Tout le reste → ancienne conversion.
+- **Listes de FID abandonnées (décision utilisateur, après revue)** : une 1re version écrivait un sur-ensemble puis
+  `AND NOT (fid IN (rejetées))` après évaluation QGIS. Rejeté : les FID se périment quand le fichier change après le
+  filtre (suppression + repack en édition, GeoJSON réécrit à l'enregistrement, attribut modifié sur place, favori qui
+  rejoue `subsetString()` tel quel) → une entité qui correspond peut être CACHÉE. Ne garder que des écritures exactes
+  par elles-mêmes, sans ids.
+- **Piège `%%`** : `swq_test_like` n'accepte un `%` final qu'une fois l'entrée consommée : `'Route' LIKE 'Route%%'`
+  et `'' LIKE '%%'` sont faux en OGR SQL (`'%%e%%'` ne garde presque rien), alors que QGIS lit chaque `%` comme `.*`.
+- **Mesuré GDAL 3.10.3 / 3.12.2** (images qgis stable / ltr) : `=` et IN sans la casse (ASCII seulement : 'été' ≠
+  'Été') ; LIKE avec la casse ; `_` et `%` = un caractère UTF-8 (saut de ligne compris) sur Shapefile / GeoJSON / FGB
+  mais `_` = un OCTET sur MapInfo (jeu de caractères brut) → MapInfo exclu, `_` refusé ; ILIKE replie é/É mais ni K
+  (Kelvin) ni ſ, ni İ / ı (QGIS non plus) → motifs ASCII sans k/s ; chaque LIKE joint par OR coûte ~0,035 s par
+  lecture sur 200 000 lignes (10 valeurs : 0,39 s, IN : 0,095 s) ; pas de court-circuit de AND ; `NULL OR TRUE` = TRUE.
+- **L'ancienne conversion n'est PAS toujours trop large** : `"nom" <> 'route'`, NOT IN, `NOT ("nom" = 'route')`
+  écartent aussi 'Route' (trop étroit), `"nom" ILIKE 'saint'` ne rend pas 'ſaint'. Non traité (hors périmètre).
+- **Piège du contrôle** : chaque `setSubsetString` d'une couche OGR garde 1–2 fichiers ouverts (QGIS 4.2.3 / 3.44.15) ;
+  à 1 024 (Docker) les couches suivantes lisent 0 entité → le contrôle relève RLIMIT_NOFILE. Contrôle 367 PASS / 0 FAIL
+  (shp, GeoJSON, FGB) dans les deux images.
 
 ## [2026-11-12] Mode hybride (SQLite seulement) et durcissement de la traduction native
 - **Hybride** : traduction PARTIAL / NONE sur GeoPackage / SpatiaLite → QGIS évalue l'expression localement entité

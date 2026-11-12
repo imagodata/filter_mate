@@ -2,9 +2,9 @@
 """
 QGIS predicates written in the native SQL of the source, compared with QGIS itself.
 
-For a GeoPackage, a Shapefile (and a PostGIS table when ``FM_PG_DSN`` is set),
-each expression is evaluated by QGIS on every feature of the unfiltered layer
-(the reference), then written by ``native_filter_translation`` and applied as
+For a GeoPackage, a Shapefile, a GeoJSON and a FlatGeobuf file (and a PostGIS
+table when ``FM_PG_DSN`` is set), each expression is evaluated by QGIS on every
+feature of the unfiltered layer (the reference), then written by ``native_filter_translation`` and applied as
 the layer's subset string: the features the source returns must be the same.
 An expression the translator leaves to QGIS is a ``SKIP`` (its reason is
 printed) unless it is listed as one that must be written.
@@ -25,6 +25,13 @@ import tempfile
 import traceback
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+try:
+    # Each setSubsetString of an OGR layer keeps one or two files open (QGIS 4.2.3 and 3.44.15,
+    # measured): past the 1,024 of a Docker container the next layers read no feature.
+    import resource
+    resource.setrlimit(resource.RLIMIT_NOFILE, (resource.getrlimit(resource.RLIMIT_NOFILE)[1],) * 2)
+except (ImportError, ValueError, OSError):  # Windows, or a hard limit that cannot be reached
+    pass
 
 from osgeo import ogr, osr  # noqa: E402
 from qgis.core import (  # noqa: E402
@@ -54,6 +61,10 @@ ROWS = [
     (12, 1, 0.2, '\u017faint', 's'),        # long s
     (13, 4, 0.7, 'Kelvin \u212a', 'k'),     # Kelvin sign
     (14, 8, 6656395.210250434, 'Grand', '14'),  # SQLite 3.45 reads this literal one ulp off
+    (15, 20, 1.0, None, 'x'),                    # no text, another operand TRUE under OR
+    (16, 11, 1.25, '', 'vide'),                  # an empty text (a Shapefile reads it NULL)
+    (17, 12, 1.75, 'İle', 'tr'),           # dotted capital I: not a case of i in QGIS
+    (18, 13, 2.25, 'ile', 'tr2'),
 ]
 
 # (expression, dialects that MUST write it entirely)
@@ -261,15 +272,16 @@ def compare(label, layer):
 def executor_path(label, layer, provider_type):
     """The plugin's own entry: AttributeFilterExecutor.process_qgis_expression then the subset.
 
-    A case its dialect writes must give QGIS's answer. Any other goes through
-    the former conversion: its answer is printed (``OLD``), right or wrong.
+    A case its dialect writes must give QGIS's answer (OGR SQL: texts with a
+    case-sensitive LIKE). Any other goes through the former conversion: its
+    answer is printed (``OLD``), right or wrong.
     """
-    from filter_mate.adapters.qgis.native_filter_translation import APPLIED_DIALECTS, native_dialect_for_layer
+    from filter_mate.adapters.qgis.native_filter_translation import native_dialect_for_layer
     from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
     dialect = native_dialect_for_layer(layer)
     for text, required in (('"pop" BETWEEN 3 AND 9', ALL), ('"pop" / 2 = 3.5', ALL),
-                           ('"nom" LIKE \'Route%\'', DB), ('"nom" LIKE \'route%\'', DB),
-                           ('"nom" = \'route\'', DB), ('"pop" > 5 AND "nom" = \'Route\'', DB)):
+                           ('"nom" LIKE \'Route%\'', ALL), ('"nom" LIKE \'route%\'', ALL),
+                           ('"nom" = \'route\'', ALL), ('"pop" > 5 AND "nom" = \'Route\'', ALL)):
         layer.setSubsetString('')
         expected = reference(layer, text)
         executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key='id')
@@ -277,8 +289,8 @@ def executor_path(label, layer, provider_type):
         accepted = bool(processed) and executor.apply_filter(processed)
         got = keys(layer) if accepted else None
         layer.setSubsetString('')
-        written = dialect in required and dialect in APPLIED_DIALECTS
-        status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
+        written = processed in executor.native_origins
+        status = ('PASS' if got == expected else 'FAIL') if written else ('FAIL' if dialect in required else 'OLD')
         report(status, f"{label} executor: {text}", f"sql={processed!r} expected={expected} got={got}")
 
 
@@ -346,16 +358,100 @@ def hybrid_path(label, layer, provider_type):
         report(status, f"{label} hybrid: {text}", f"subset={subset!r:.160} expected={expected} got={got}")
     for old, operator, text in COMBINED_CASES:
         layer.setSubsetString('')
-        joined = {'AND': '({}) AND ({})', 'OR': '({}) OR ({})', 'AND NOT': '({}) AND NOT ({})'}.get(operator, '{1}')
-        if not old:
-            joined = 'NOT ({1})' if operator == 'AND NOT' else '{1}'
-        expected = reference(layer, joined.format(old, text))
+        expected = combined_reference(layer, old, operator, text)
         written, subset, got = run_executor(layer, provider_type, text, old, operator)
         status = ('PASS' if got == expected else 'FAIL') if written else 'OLD'
         if operator != 'AND' and written and ' IN (' in (subset or ''):
             status = 'FAIL'  # a list of keys read through the old subset, or negated: never written
         report(status, f"{label} combined {operator}: {old} / {text}",
                f"subset={subset!r:.160} expected={expected} got={got}")
+
+
+def combined_reference(layer, old, operator, text):
+    """What QGIS keeps for ``text`` combined with ``old`` as the task combines them."""
+    joined = {'AND': '({}) AND ({})', 'OR': '({}) OR ({})', 'AND NOT': '({}) AND NOT ({})'}.get(operator, '{1}')
+    if not old:
+        joined = 'NOT ({1})' if operator == 'AND NOT' else '{1}'
+    return reference(layer, joined.format(old, text))
+
+
+# OGR SQL compares texts with = and IN without their case, with LIKE with it
+# (GDAL 3.1+): outside any NOT, = to a text without wildcard is written LIKE,
+# IN as LIKEs joined by OR (up to 10 values), LIKE / ILIKE as they are with
+# each run of % as one. Anything else keeps the former conversion (too wide,
+# never too narrow). (old subset, combine operator, expression, written on
+# Shapefile / GeoJSON / FlatGeobuf, text the subset must hold)
+TEN = '"nom" IN ({})'.format(', '.join("'{}'".format(v) for v in (
+    'route', 'Été', 'ROUTE du Sud', 'İle', 'v5', 'v6', 'v7', 'v8', 'v9', 'v10')))
+ELEVEN = TEN[:-1] + ", 'v11')"
+TEXT_CASES = [
+    (None, None, '"nom" = \'route\'', True, 'LIKE'),
+    (None, None, '\'Route\' = "nom"', True, 'LIKE'),
+    (None, None, '"nom" = \'Éte\'', True, 'LIKE'),
+    (None, None, '"nom" = \'\'', True, 'LIKE'),                       # GeoJSON / FGB keep '', a Shapefile reads NULL
+    (None, None, '"nom" IN (\'route\', \'Été\')', True, ' OR '),
+    (None, None, TEN, True, ' OR '),                                   # 10 values: LIKEs
+    (None, None, '"nom" LIKE \'Route%\'', True, None),
+    (None, None, '"nom" LIKE \'%oute%\'', True, None),
+    (None, None, '"nom" LIKE \'%Nord\'', True, None),
+    (None, None, '"nom" LIKE \'%\'', True, None),
+    (None, None, '"nom" ILIKE \'route%\'', True, None),
+    (None, None, '"nom" ILIKE \'%E\'', True, None),
+    (None, None, '"nom" ILIKE \'i%\'', True, None),                   # İ is not i, in QGIS as in OGR
+    # runs of %: OGR SQL drops a text that ends where a trailing %% starts
+    (None, None, '"nom" LIKE \'Route%%\'', True, "'Route%'"),
+    (None, None, '"nom" LIKE \'%%Nord\'', True, "'%Nord'"),
+    (None, None, '"nom" LIKE \'Ro%%te\'', True, "'Ro%te'"),
+    (None, None, '"nom" LIKE \'%%\'', True, "'%'"),                    # the empty text too
+    (None, None, '"nom" LIKE \'%%e%%\'', True, "'%e%'"),
+    (None, None, '"nom" ILIKE \'ROUTE%%%\'', True, "'ROUTE%'"),
+    (None, None, '"code" LIKE \'%%\'', True, "'%'"),                   # code '' (id 7)
+    # inside AND / OR, NULL texts (OGR SQL: NULL OR TRUE is TRUE)
+    (None, None, '"pop" > 5 AND "nom" = \'Route\'', True, 'LIKE'),
+    (None, None, '"nom" = \'route\' OR "pop" > 15', True, 'LIKE'),    # id 15: no text, pop 20
+    (None, None, '"nom" LIKE \'R%\' OR "pop" > 15', True, None),
+    (None, None, '"pop" > 15 OR "nom" IN (\'route\', \'Été\')', True, ' OR '),
+    (None, None, '"nom" = \'route\' OR "nom" IS NULL', True, 'LIKE'),
+    (None, None, '("nom" = \'route\' OR "ratio" > 4) AND "pop" IS NOT NULL', True, 'LIKE'),
+    (None, None, 'NOT ("pop" > 5) OR "nom" = \'Route\'', True, 'LIKE'),
+    # the former conversion: a wildcard in the text, two fields, more than 10 values, a NOT, a
+    # negation, _ in a pattern, ILIKE with k / s, AND NOT
+    (None, None, '"nom" = \'route_66\'', False, None),
+    (None, None, '"nom" = \'50%\'', False, None),
+    (None, None, '"nom" = "code"', False, None),
+    (None, None, ELEVEN, False, None),
+    (None, None, '"nom" IN (\'route\', \'r_ute\')', False, None),
+    (None, None, 'NOT ("nom" = \'route\')', False, None),
+    (None, None, '"nom" <> \'route\'', False, None),
+    (None, None, '"nom" NOT IN (\'route\', \'Été\')', False, None),
+    (None, None, '"nom" NOT LIKE \'Route%\'', False, None),
+    (None, None, '"nom" LIKE \'Route_Nord\'', False, None),
+    (None, None, '"nom" ILIKE \'saint\'', False, None),
+    (None, 'AND NOT', '"nom" = \'route\'', False, None),               # NOT ( new )
+    ('"pop" > 2', 'AND NOT', '"nom" = \'route\'', False, None),
+    # combined with an old subset
+    ('"id" < 5', 'AND', TEN, True, ' OR '),
+    ('"id" > 10', 'OR', TEN, True, ' OR '),
+    ('"id" > 10', None, TEN, True, ' OR '),
+    ('"id" > 10', 'OR', '"nom" = \'route\'', True, 'LIKE'),
+    ('"nom" LIKE \'Route\'', 'AND', '"nom" LIKE \'%%\'', True, "'%'"),
+]
+
+
+def text_path(label, layer, provider_type):
+    """OGR SQL texts written with LIKE, through the plugin's entry: QGIS's answer, or the former conversion."""
+    for old, operator, text, must_write, form in TEXT_CASES:
+        layer.setSubsetString('')
+        expected = combined_reference(layer, old, operator, text)
+        written, subset, got = run_executor(layer, provider_type, text, old, operator)
+        if not written:
+            status = 'FAIL' if must_write else 'OLD'
+        else:
+            status = 'PASS' if must_write and got == expected and (form or '') in subset else 'FAIL'
+            if '%%' in subset or 'fid' in subset.lower():
+                status = 'FAIL'
+        report(status, f"{label} text {operator}: {old} / {text}",
+               f"subset={subset!r:.200} expected={expected} got={got}")
 
 
 def main():
@@ -372,9 +468,14 @@ def main():
     write_file(shp_path, 'ESRI Shapefile', 'lieux')
     nocase_path = os.path.join(work, 'nocase.gpkg')
     write_nocase_gpkg(nocase_path)
+    geojson_path, fgb_path = os.path.join(work, 'lieux.geojson'), os.path.join(work, 'lieux.fgb')
+    write_file(geojson_path, 'GeoJSON', 'lieux')
+    write_file(fgb_path, 'FlatGeobuf', 'lieux')  # spatial index: features reordered, FIDs too
     layers = [('gpkg', QgsVectorLayer(f'{gpkg_path}|layername=lieux', 'lieux_gpkg', 'ogr'), 'spatialite'),
               ('gpkg nocase', QgsVectorLayer(f'{nocase_path}|layername=nocase', 'nocase', 'ogr'), 'spatialite'),
-              ('shp', QgsVectorLayer(shp_path, 'lieux_shp', 'ogr'), 'ogr')]
+              ('shp', QgsVectorLayer(shp_path, 'lieux_shp', 'ogr'), 'ogr'),
+              ('geojson', QgsVectorLayer(geojson_path, 'lieux_geojson', 'ogr'), 'ogr'),
+              ('fgb', QgsVectorLayer(fgb_path, 'lieux_fgb', 'ogr'), 'ogr')]
     dsn = os.environ.get('FM_PG_DSN')
     if dsn:
         layers += [(label, layer, 'postgresql') for label, layer in postgres_layers(dsn)]
@@ -384,6 +485,8 @@ def main():
             compare(label, layer)
             executor_path(label, layer, provider_type)
             hybrid_path(label, layer, provider_type)
+            if provider_type == 'ogr':
+                text_path(label, layer, provider_type)
         except Exception as exc:
             traceback.print_exc()
             report('FAIL', f"{label} raised {type(exc).__name__}: {exc}")

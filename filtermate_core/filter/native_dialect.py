@@ -30,7 +30,13 @@ QGIS adapter), and only where the source gives the answer QGIS gives:
   divisor gives a number where QGIS gives NULL); ``TRUE AND NULL`` is FALSE
   there, not NULL, so a NOT over an AND is not written; BETWEEN takes literal
   bounds of the type of its value only (the engine reads the third operand
-  with the type of the first two).
+  with the type of the first two). Where the caller knows that LIKE keeps
+  the case (``case_sensitive_like``: GDAL 3.1+ without OGR_SQL_LIKE_AS_ILIKE,
+  data read as UTF-8), outside any NOT: ``=`` to a text without wildcard is
+  written LIKE, IN on such texts as LIKEs joined by OR (up to
+  ``OGR_LIKE_LIST_MAX``), LIKE without ``_`` and ILIKE with ASCII letters
+  other than k and s as they are, each run of ``%`` as one (a trailing
+  ``%%`` drops features in OGR SQL).
 
 Everywhere: the sign of a value that is not a literal is not written (QGIS
 reads -NULL of an integer or real field as 0, the sources as NULL); SQLite
@@ -48,6 +54,7 @@ a SQLite source the caller may let QGIS evaluate the expression and list keys
 (:func:`hybrid_sql`); otherwise it keeps its former path.
 """
 import math
+import re
 import sys
 from dataclasses import dataclass
 from decimal import Decimal
@@ -120,12 +127,15 @@ def _class(kind: str) -> str:
 class _Writer:
     """Writes one AND operand; raises :class:`Unsupported` on anything unproven."""
 
-    def __init__(self, dialect: str, types: Dict[str, Optional[str]]):
+    def __init__(self, dialect: str, types: Dict[str, Optional[str]], case_sensitive_like: bool = False):
         self.dialect = dialect
         self.types = types
         self.ands = 0  # AND written so far, user's or ours (OGR SQL: no NOT over one)
         self.connectives = 0  # AND, OR, NOT written so far
         self.columns = set()
+        # OGR SQL: texts compared with LIKE, outside any NOT only
+        self.case_sensitive_like = case_sensitive_like and dialect == OGR_SQL
+        self.negations = 0  # NOT around the node being written
 
     # -- values -----------------------------------------------------------------
 
@@ -306,7 +316,9 @@ class _Writer:
         if kind == 'unary' and node.value == 'NOT':
             before = self.ands
             self.connectives += 1
+            self.negations += 1
             operand = self.predicate(node.children[0], depth + 1)
+            self.negations -= 1
             if self.dialect == OGR_SQL and self.ands != before:
                 raise Unsupported('OGR SQL gives FALSE to TRUE AND NULL, so a NOT over an AND would keep it')
             return '(NOT {})'.format(operand)
@@ -323,7 +335,12 @@ class _Writer:
         sql, _ = self.value(left, depth + 1)
         return '({} {} NULL)'.format(sql, node.value)
 
-    def _comparable(self, left_type: str, right_type: str, ordering: bool) -> None:
+    def _comparable(self, left_type: str, right_type: str, ordering: bool, as_like: bool = False) -> None:
+        """Raise unless the two values compare in the source as in QGIS.
+
+        ``as_like``: OGR SQL may compare the texts with LIKE (=, IN, not their
+        negations); the caller still checks the literal.
+        """
         if NULL in (left_type, right_type):
             raise Unsupported('Use IS NULL or IS NOT NULL for null values')
         kind = _class(left_type)
@@ -332,10 +349,21 @@ class _Writer:
         if kind == TEXT:
             if ordering:
                 raise Unsupported('Text ordering depends on the collation of the data source')
-            if self.dialect == OGR_SQL:
+            if self.dialect == OGR_SQL and not (as_like and self._texts_as_like()):
                 raise Unsupported('OGR SQL compares texts without their case')
         if kind == BOOL and ordering:
             raise Unsupported('Ordering of booleans')
+
+    def _texts_as_like(self) -> bool:
+        """OGR SQL: whether texts may be compared with a case-sensitive LIKE here (outside any NOT)."""
+        return self.case_sensitive_like and not self.negations
+
+    def _ogr_text_match(self, left: str, literal: Node) -> str:
+        """OGR SQL: ``left LIKE 'text'``, QGIS's text equality (= and IN ignore case in OGR SQL)."""
+        value = literal.value if literal.kind == 'literal' else None
+        if not isinstance(value, str) or '%' in value or '_' in value:
+            raise Unsupported('OGR SQL compares texts without their case (LIKE only for a text without % or _)')
+        return '{} LIKE {}'.format(left, self._literal(value)[0])
 
     def _binary_text(self, sql: str, type_: str) -> str:
         """SQLite: the left operand of a text equality, whatever the column's collation."""
@@ -344,7 +372,11 @@ class _Writer:
     def _comparison(self, node: Node, depth: int) -> str:
         (left, left_type), (right, right_type) = (self.value(child, depth + 1) for child in node.children)
         operator = node.value
-        self._comparable(left_type, right_type, operator not in ('=', '<>'))
+        self._comparable(left_type, right_type, operator not in ('=', '<>'), as_like=operator == '=')
+        if self.dialect == OGR_SQL and left_type == TEXT:
+            if node.children[1].kind == 'literal':
+                return '({})'.format(self._ogr_text_match(left, node.children[1]))
+            return '({})'.format(self._ogr_text_match(right, node.children[0]))
         if operator in ('=', '<>') and REAL in (left_type, right_type):
             # qgsDoubleNear on the difference, as QGIS compares
             difference, _ = self._arithmetic(Node('binary', '-', node.children, node.text), depth)
@@ -365,10 +397,17 @@ class _Writer:
             if child.kind != 'literal':
                 raise Unsupported('IN requires a list of literals')
             sql, type_ = self.value(child, depth + 1)
-            self._comparable(left_type, type_, False)
+            self._comparable(left_type, type_, False, as_like=not node.value)
             if REAL in (left_type, type_):
                 raise Unsupported('IN on real numbers: QGIS compares them with a tolerance')
             items.append(sql)
+        if self.dialect == OGR_SQL and left_type == TEXT:
+            if len(items) > OGR_LIKE_LIST_MAX:
+                raise Unsupported('IN on more than {} texts: OGR SQL compares them without their case'.format(
+                    OGR_LIKE_LIST_MAX))
+            if len(items) > 1:
+                self.connectives += 1
+            return '({})'.format(' OR '.join(self._ogr_text_match(left, child) for child in node.children[1:]))
         return '({} {}IN ({}))'.format(self._binary_text(left, left_type), 'NOT ' if node.value else '',
                                       ', '.join(items))
 
@@ -436,7 +475,17 @@ class _Writer:
                 else:
                     glob.append(char)
             return '({} {}GLOB {})'.format(left, 'NOT ' if negated else '', self._literal(''.join(glob))[0])
-        raise Unsupported('LIKE is not the same in OGR SQL')
+        if negated or not self._texts_as_like():
+            raise Unsupported('LIKE is not the same in OGR SQL')
+        # _ matches one byte, not one character, where the data is not read as UTF-8 (MapInfo,
+        # measured); ILIKE folds ASCII letters but neither to the Kelvin sign nor to the long s.
+        if '\\' in pattern or '_' in pattern:
+            raise Unsupported('An OGR SQL LIKE pattern holding _ or an escape')
+        if insensitive and (not pattern.isascii() or any(char in pattern for char in 'kKsS')):
+            raise Unsupported('An OGR SQL ILIKE pattern that is not ASCII or holds k or s')
+        # QGIS reads each % as .*; OGR SQL drops a text that ends where a trailing %% starts
+        # ('Route' LIKE 'Route%%', '' LIKE '%%'): one % per run, the same pattern in QGIS.
+        return '({} {} {})'.format(left, node.value, self._literal(re.sub('%+', '%', pattern))[0])
 
 
 def _sqlite_real(value: float) -> str:
@@ -495,7 +544,8 @@ def _strip_outer_parentheses(sql: str) -> str:
     return sql[1:-1]
 
 
-def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) -> NativeTranslation:
+def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
+                     case_sensitive_like: bool = False) -> NativeTranslation:
     """Write a QGIS predicate for a data source, splitting a top-level AND only.
 
     Args:
@@ -503,6 +553,11 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
         dialect: ``postgresql``, ``sqlite`` or ``ogr_sql``.
         types: Type of each field of the data source, by exact name: ``int``,
             ``real``, ``text``, ``bool`` or ``other`` (None reads as other).
+        case_sensitive_like: OGR SQL only: the source's LIKE keeps the case
+            and ``_`` matches one character (GDAL 3.1+ without
+            OGR_SQL_LIKE_AS_ILIKE, data read as UTF-8). Texts compared with
+            =, IN, LIKE or ILIKE outside any NOT are then written with LIKE.
+            The subset must not be negated by the caller (AND NOT).
 
     Returns:
         NativeTranslation; nothing is dropped, the untranslated operands are
@@ -520,7 +575,7 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
                 visit(child)
             return
         try:
-            writer = _Writer(dialect, types)
+            writer = _Writer(dialect, types, case_sensitive_like)
             written.append(writer.predicate(part))
             native.append('(' + part.text + ')')
             columns.update(writer.columns)
@@ -547,6 +602,12 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]]) 
 # read (no index, even on FID), compares text keys without case and names a
 # field "fid" rather than the feature id when the layer has one.
 HYBRID_MAX_KEYS = 100_000
+
+# OGR SQL: IN on texts is written as LIKEs joined by OR up to this many values,
+# left to the former conversion beyond. Measured with GDAL 3.10 on a
+# 200,000-row Shapefile: one LIKE costs what = costs, each other LIKE adds
+# about 0.035 s to every read (10 values: 0.39 s, IN: 0.095 s).
+OGR_LIKE_LIST_MAX = 10
 
 
 def key_reference(name: str) -> str:
@@ -608,4 +669,5 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
 
 
 __all__ = ['DIALECTS', 'NativeTranslation', 'OGR_SQL', 'POSTGRESQL', 'SQLITE', 'translate_native',
-           'HYBRID_MAX_KEYS', 'hybrid_sql', 'key_reference', 'INT', 'REAL', 'TEXT', 'BOOL', 'OTHER']
+           'HYBRID_MAX_KEYS', 'hybrid_sql', 'key_reference', 'INT', 'REAL', 'TEXT', 'BOOL', 'OTHER',
+           'OGR_LIKE_LIST_MAX']

@@ -8,6 +8,10 @@ All notable changes to FilterMate will be documented in this file.
 
 - **A change of the settings is proposed in the thread.** The agent's change of a setting now shows as a card in the conversation, every setting before and after, with Apply and Cancel, instead of a dialog; nothing changes until you click Apply, which you can undo like any other step. When the agent may not change a setting itself (its own settings, a name, a path), it puts a button that opens the right tab of the agent settings, or selects the setting in the configuration. Ask it to save your settings as a profile to share with your team, or to apply one copied in the profiles folder of the export folder: a profile never holds the settings of the agent, a name or a path, and applying one is shown setting by setting. Undoing a turn leaves a setting you changed meanwhile as you set it, and going back to before a step restores the settings changed from it.
 
+### Filtering
+
+- **On a Shapefile, GeoJSON or FlatGeobuf layer, a filter on a text keeps the case you wrote.** `"nom" = 'route'` also kept 'Route' and 'ROUTE': QGIS compares texts with their case, the OGR SQL engine that filters these files compares them without it in `=` and IN, but with it in LIKE. Outside a NOT, an equality to a text without `%` or `_` is now written as a LIKE, IN on up to 10 such texts as LIKEs joined by OR, and LIKE / ILIKE as they are, so the file keeps exactly what QGIS keeps. A run of `%` is written as one: OGR SQL left out 'Route' from `LIKE 'Route%%'`. `<>`, NOT IN, NOT LIKE, a text under NOT or AND NOT, a text holding `%` or `_` compared with `=`, IN on more than 10 texts, a LIKE pattern holding `_`, an ILIKE pattern holding k, s or a letter outside ASCII, MapInfo files and GDAL set with `OGR_SQL_LIKE_AS_ILIKE` keep the former behaviour.
+
 ## [5.1.0] - 2026-11-12
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.
