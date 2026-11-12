@@ -501,7 +501,7 @@ class TestFootprintCells:
         assert objects.footprint_resolution(10, coarse_truncated=True) == 2.0
 
     def _read(self, monkeypatch, points_at_2m, fine=None):
-        reads = []
+        reads, self.limits = [], []
 
         class Copy(FakeLayer):
             def setSubsetString(self, subset):
@@ -509,6 +509,7 @@ class TestFootprintCells:
 
         def footprint_geometry(layer, resolution, points_limit=0, dilate_cells=1, erode_cells=0, check=None):
             reads.append((resolution, dilate_cells, erode_cells))
+            self.limits.append(points_limit)
             points = points_at_2m if resolution == 2.0 else points_at_2m * 4
             result = footprint.FootprintResult("geometry", points, resolution)
             if resolution != 2.0 and fine:
@@ -529,6 +530,12 @@ class TestFootprintCells:
     def test_the_footprint_of_a_dense_class_read_once(self, monkeypatch):
         result, reads = self._read(monkeypatch, 182406)
         assert reads == [(2.0, 1, 1)] and result.resolution == 2.0 and result.objects == {}
+
+    def test_the_read_in_cells_of_1_m_is_bounded(self, monkeypatch):
+        """2026-11-12: the class was read again up to CLASS_POINTS_LIMIT points on the main thread (45 to 70 s)."""
+        self._read(monkeypatch, 13047)
+        assert self.limits == [objects.CLASS_POINTS_LIMIT, objects.FINE_POINTS_LIMIT]
+        assert objects.FINE_POINTS_LIMIT == 4 * objects.FINE_CLASS_POINTS < objects.CLASS_POINTS_LIMIT
 
     @pytest.mark.parametrize("fine", [{"truncated": True}, {"coarse": True, "cell_size": 1.3}])
     def test_a_fine_read_cut_or_widened_keeps_the_coarse_one(self, monkeypatch, fine):
