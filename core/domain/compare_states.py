@@ -13,7 +13,7 @@ Both become :class:`BeforeState` items: what a clone of the layer needs to be dr
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Iterable, List
 
 
@@ -25,6 +25,9 @@ class BeforeState:
     subset: str = ""
     source: str = ""
     provider: str = ""
+    # The snapshot of a cross operation (adapters/qgis/coverage_layers/snapshots.LayerSnapshot): restored the way
+    # Undo restores it (vector tile style, alpha band, NoData); None for a vector filter of the dock.
+    snapshot: Any = field(default=None, compare=False, repr=False)
 
     @property
     def other_source(self) -> bool:
@@ -54,5 +57,5 @@ def from_cross_operation(operation: Any) -> List[BeforeState]:
         source_changed = bool(before.source) and before.source != getattr(after, "source", None)
         states.append(BeforeState(
             before.layer_id, str(before.subset or ""),
-            before.source if source_changed else "", (before.provider or "") if source_changed else ""))
+            before.source if source_changed else "", (before.provider or "") if source_changed else "", before))
     return _unique(states)

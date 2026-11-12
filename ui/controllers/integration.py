@@ -211,12 +211,15 @@ class ControllerIntegration:
         if not self._is_setup:
             return
 
-        try:
-            compare = getattr(self, "_compare_controller", None)
-            if compare is not None:
+        compare = getattr(self, "_compare_controller", None)
+        self._compare_controller = None
+        if compare is not None:
+            try:
                 compare.teardown()
-                self._compare_controller = None
+            except Exception as e:  # never in the way of the rest of the teardown
+                logger.error(f"Error during compare teardown: {e}")
 
+        try:
             # Disconnect signals
             self._disconnect_signals()
 
@@ -253,12 +256,13 @@ class ControllerIntegration:
         picker, SAM, class pipette, Zone): they would keep it while their
         panel is hidden.
         """
-        controller = self._point_cloud_ui_controller
-        if controller is not None:
-            controller.release_map_tools()
+        # Compare first: it gives the map back to the tool before it, a picker of a panel the next lines release.
         compare = getattr(self, "_compare_controller", None)
         if compare is not None:  # its swipe tool would keep the map while the dock is hidden
             compare.stop()
+        controller = self._point_cloud_ui_controller
+        if controller is not None:
+            controller.release_map_tools()
 
     def _create_controllers(self) -> None:
         """Create all controller instances."""

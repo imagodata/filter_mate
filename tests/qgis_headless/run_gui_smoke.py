@@ -753,12 +753,16 @@ def s_compare_check():
     if not check('compare: a checkable button beside Redo', button is not None and button.isCheckable()
                  and button.parentWidget() is redo.parentWidget()):
         return None
+    check('compare: available as Undo is', button.isEnabled() == d.pushButton_action_undo_filter.isEnabled(),
+          f"compare={button.isEnabled()} undo={d.pushButton_action_undo_filter.isEnabled()}")
     canvas = iface.mapCanvas()
     previous = canvas.mapTool()
     button.click()
     session = d._controller_integration._compare_controller.session
     compared = session.compared_layer_ids() if session is not None else []
-    check('compare: on after a filter, the dem drawn as it was', button.isChecked() and layer('dem').id() in compared
+    source = d.current_layer
+    check('compare: on after a filter, the source and the dem drawn as they were', button.isChecked()
+          and layer('dem').id() in compared and source is not None and source.id() in compared
           and canvas.mapTool() is session.tool, f"checked={button.isChecked()} compared={compared}")
     STATE['compare_session'] = session
     STATE['compare_previous_tool'] = previous
@@ -775,6 +779,18 @@ def s_compare_off_check():
     check('compare: off, the tool there before and no clone left',
           not d.pushButton_action_compare.isChecked() and iface.mapCanvas().mapTool() is STATE.get('compare_previous_tool')
           and (session is None or not session.clones))
+    # On again, then another map tool chosen: the comparison ends and leaves that tool, the button goes up.
+    from qgis.gui import QgsMapToolPan
+    d.pushButton_action_compare.click()
+    pan = QgsMapToolPan(iface.mapCanvas())
+    iface.mapCanvas().setMapTool(pan)
+    check('compare: another map tool ends it', not d.pushButton_action_compare.isChecked()
+          and session is not None and not session.active and iface.mapCanvas().mapTool() is pan)
+    previous = STATE.get('compare_previous_tool')
+    if previous is not None:
+        iface.mapCanvas().setMapTool(previous)
+    else:
+        iface.mapCanvas().unsetMapTool(pan)
 
 
 def s_vector_check():

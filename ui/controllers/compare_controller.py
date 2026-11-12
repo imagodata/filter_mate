@@ -3,7 +3,9 @@
 
 It reads the history Undo reads, chosen the same way (``FilterMateApp.update_undo_redo_buttons``): the turns of the
 agent while AGENT is open, the history of the raster / point cloud source while one is current, the vector filters
-of the dock otherwise. ``adapters/qgis/compare_swipe.py`` draws.
+of the dock otherwise, restricted to the layers Undo restores. It is available when Undo is, and ends with any
+operation of the action bar, a change of the current layer or of project: what it shows is the state Undo would
+bring back now. ``adapters/qgis/compare_swipe.py`` draws.
 """
 from __future__ import annotations
 
@@ -11,7 +13,7 @@ import logging
 from typing import List, Optional
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QObject, QPointF, QRectF, QSize, Qt
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt
 from qgis.PyQt.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 from qgis.PyQt.QtWidgets import QPushButton
 
@@ -21,6 +23,9 @@ from ...core.domain.compare_states import BeforeState, from_cross_operation, fro
 logger = logging.getLogger("FilterMate.compare")
 
 BUTTON_NAME = "pushButton_action_compare"
+# Operations of the action bar: the state before changes with them, the comparison ends.
+ENDING_BUTTONS = ("pushButton_action_filter", "pushButton_action_undo_filter", "pushButton_action_redo_filter",
+                  "pushButton_action_unfilter")
 
 
 def _tr(text: str) -> str:
@@ -70,9 +75,24 @@ class CompareController(QObject):
         self._integration = integration
         self.session: Optional[CompareSession] = None
         self.button = self._make_button()
-        signal = getattr(dockwidget, "undoRedoStateRequested", None)
+        self._undo = getattr(dockwidget, "pushButton_action_undo_filter", None)
+        self._connections = []
+        if self.button is None:
+            return
+        if self._undo is not None:  # available when Undo is
+            self.button.setEnabled(self._undo.isEnabled())
+            self._undo.installEventFilter(self)
+        self._connect(getattr(dockwidget, "undoRedoStateRequested", None), self.refresh)
+        self._connect(getattr(dockwidget, "currentLayerChanged", None), self.stop)
+        for name in ENDING_BUTTONS:
+            button = getattr(dockwidget, name, None)
+            self._connect(button.clicked if button is not None else None, self.stop)
+        self._connect(QgsProject.instance().cleared, self.stop)
+
+    def _connect(self, signal, slot) -> None:
         if signal is not None:
-            signal.connect(self.refresh)
+            signal.connect(slot)
+            self._connections.append((signal, slot))
 
     # --- the button --------------------------------------------------------------
 
@@ -98,15 +118,27 @@ class CompareController(QObject):
         button.setToolTip(_tr("Compare: the map before the last filter left of the line, as it is on its right; "
                               "the line follows the mouse"))
         button.setAccessibleName(_tr("Compare before and after the last filter"))
-        layout.insertWidget(layout.indexOf(redo) + 1, button)
+        index = layout.indexOf(redo)
+        layout.insertWidget(index + 1, button, 0, layout.itemAt(index).alignment())
         button.toggled.connect(self._on_toggled)
         setattr(self._dock, BUTTON_NAME, button)
         return button
 
+    def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+        if watched is self._undo and event.type() == QEvent.Type.EnabledChange and self.button is not None:
+            try:
+                enabled = self._undo.isEnabled()
+                self.button.setEnabled(enabled)
+                if not enabled:
+                    self.stop()
+            except RuntimeError:  # the dock is being deleted
+                pass
+        return False
+
     # --- which history -----------------------------------------------------------
 
     def before_states(self) -> List[BeforeState]:
-        """The states before the operation Undo would undo now, from the history it reads."""
+        """The states Undo would bring back now, from the history it reads, for the layers it restores."""
         dock = self._dock
         agent_focus = getattr(dock, "agent_has_focus", None)
         if callable(agent_focus) and agent_focus():
@@ -122,19 +154,31 @@ class CompareController(QObject):
             except (AttributeError, RuntimeError):
                 operation = None
             return from_cross_operation(operation) if operation is not None else []
-        app = getattr(dock, "app", None)
+        current = getattr(dock, "current_layer", None)
+        if current is None:
+            return []
+        # The app is ``filter_mate_app`` (the initializer of the plugin), ``app`` on the former path.
+        app = getattr(dock, "filter_mate_app", None) or getattr(dock, "app", None)
         history = getattr(app, "history_manager", None) if app is not None else None
         entry = history.peek_undo() if history is not None else None
-        states = from_history_entry(entry) if entry is not None else []
-        # A vector source also filters raster and point cloud targets: their former sources are in the history of
-        # the cross filters, keyed by the source layer.
-        current = getattr(dock, "current_layer", None)
-        if coverage is not None and current is not None:
+        states = []
+        if entry is not None:
+            # Undo restores the source, and the layers to filter when their button is on (_handle_undo_redo).
+            restored = {current.id()}
+            button = getattr(dock, "pushButton_checkable_filtering_layers_to_filter", None)
+            if button is not None and button.isChecked():
+                restored.update(dock.get_layers_to_filter() or [])
+            states = [state for state in from_history_entry(entry) if state.layer_id in restored]
+        # A vector source also filters raster and point cloud targets: Undo replays that cross operation only when
+        # it is the one the last run recorded (CoverageModeController, task 'undo').
+        if coverage is not None:
             try:
+                runs = (getattr(coverage, "_linked_runs", None) or {}).get(current.id()) or []
                 operation = coverage.service.history.peek_undo(current.id())
+                linked = bool(runs) and coverage._run_is_next(runs[-1], operation)
             except (AttributeError, RuntimeError):
-                operation = None
-            if operation is not None:
+                linked = False
+            if linked:
                 known = {state.layer_id for state in states}
                 states += [state for state in from_cross_operation(operation) if state.layer_id not in known]
         return states
@@ -165,36 +209,47 @@ class CompareController(QObject):
                 states = []
             if self.session is None:
                 self.session = CompareSession(canvas, self)
-            count = self.session.start(states, QgsProject.instance().mapLayers()) if states else 0
+                self.session.ended.connect(lambda: self._set_checked(False))
+            count = self.session.start(states, QgsProject.instance().mapLayers())
         if not count:
             self._say(_tr("Nothing to compare: no filter to undo here."))
             self._set_checked(False)
         return count
 
     def refresh(self) -> None:
-        """The history Undo reads changed (a filter, an undo, AGENT opened): compare against the new state."""
+        """AGENT opened or closed, a turn of the agent done or undone: compare against what Undo reads now."""
         if self.session is not None and self.session.active:
             self.start()
 
-    def stop(self) -> None:
+    def stop(self, *_args) -> None:
         if self.session is not None:
             self.session.stop()
         self._set_checked(False)
 
     def teardown(self) -> None:
-        self.stop()
-        signal = getattr(self._dock, "undoRedoStateRequested", None)
-        if signal is not None:
+        for signal, slot in self._connections:
             try:
-                signal.disconnect(self.refresh)
+                signal.disconnect(slot)
             except (TypeError, RuntimeError):
                 pass
+        self._connections = []
+        try:
+            if self._undo is not None:
+                self._undo.removeEventFilter(self)
+        except RuntimeError:
+            pass
+        if self.session is not None:
+            self.session.close()
+        self._set_checked(False)
 
     def _set_checked(self, on: bool) -> None:
-        if self.button is not None and self.button.isChecked() != on:
-            self.button.blockSignals(True)
-            self.button.setChecked(on)
-            self.button.blockSignals(False)
+        try:
+            if self.button is not None and self.button.isChecked() != on:
+                self.button.blockSignals(True)
+                self.button.setChecked(on)
+                self.button.blockSignals(False)
+        except RuntimeError:  # the button was deleted with the dock
+            pass
 
     def _say(self, text: str) -> None:
         try:

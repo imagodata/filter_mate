@@ -10,7 +10,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Dock
 
-- **Compare before and after the last filter.** A new button beside Redo shows the map as it was before the operation Undo would undo, left of a line that follows the mouse, and the map as it is on its right; click it again to leave. It reads the same history as Undo: the turns of the agent while AGENT is open, the raster or point cloud source while one is current, the vector filters otherwise, with the rasters and point clouds a vector source filtered. The map before is drawn from copies of the layers kept out of the project, in the background, again after each pan or zoom; a derived file removed since leaves its layer out. Nothing to undo: nothing to compare, the button says so.
+- **Compare before and after the last filter.** A new button beside Redo shows the map as it was before the operation Undo would undo, left of a line that follows the mouse, and the map as it is on its right; click it again to leave. It shows what Undo would bring back now, and is available when Undo is: the turns of the agent while AGENT is open, the raster or point cloud source while one is current, otherwise the current vector layer (with the layers to filter when their button is on) and the rasters and point clouds its last filter clipped. The map before is drawn from copies of the layers kept out of the project, in the background, again after each pan or zoom; a derived file removed since, or a web feature service, leaves its layer out. Choosing another map tool, Filter, Undo, Redo, Unfilter, another current layer or another project ends the comparison.
 
 ### Filtering
 

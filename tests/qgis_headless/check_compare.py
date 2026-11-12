@@ -15,7 +15,7 @@ from qgis.core import QgsApplication, QgsProject, QgsRasterLayer, QgsRectangle, 
 APP = QgsApplication([], True)
 APP.initQgis()
 
-from qgis.gui import QgsMapCanvas, QgsMapMouseEvent, QgsMapToolPan  # noqa: E402
+from qgis.gui import QgsMapCanvas, QgsMapMouseEvent, QgsMapToolPan, QgsMapToolZoom  # noqa: E402
 from qgis.PyQt.QtCore import QEvent, QPoint, QSize, Qt  # noqa: E402
 from qgis.PyQt.QtGui import QColor, QImage, QPainter  # noqa: E402
 
@@ -40,7 +40,7 @@ _link_dir(packages / "filter_mate", ROOT)
 sys.path.insert(0, str(packages))
 
 import make_fixtures  # noqa: E402
-from filter_mate.adapters.qgis.compare_swipe import CompareSession  # noqa: E402
+from filter_mate.adapters.qgis.compare_swipe import CompareSession, SwipeItem, SwipeTool  # noqa: E402
 from filter_mate.core.domain.compare_states import BeforeState  # noqa: E402
 
 FAILURES = []
@@ -147,10 +147,37 @@ def main():
     check("a pan or a zoom renders the before image again", wait(lambda: session.renders > renders, 10),
           session.renders)
 
+    tool = session.tool
+    count = session.start([BeforeState(zones.id(), "\"name\" LIKE 'west%'")], {zones.id(): zones})
+    check("compared again while on: the same tool, the tool before kept", count == 1 and session.tool is tool
+          and canvas.mapTool() is tool)
+
     session.stop()
     check("stopped: the tool there before, no item, no clone", canvas.mapTool() is pan and session.item is None
-          and not session.clones and not any(isinstance(i, type(None)) for i in canvas.scene().items()))
+          and not session.clones and not any(isinstance(i, SwipeItem) for i in canvas.scene().items()))
     check("stopped: the project as it was", set(project.mapLayers()) == layers_before)
+
+    # Another tool chosen while comparing: the comparison ends by itself and leaves that tool.
+    ended = []
+    session.ended.connect(lambda: ended.append(True))
+    session.start([BeforeState(zones.id(), "")], {zones.id(): zones})
+    zoom = QgsMapToolZoom(canvas, False)
+    canvas.setMapTool(zoom)
+    check("another tool chosen: the comparison ends, that tool stays", ended == [True] and not session.active
+          and canvas.mapTool() is zoom and not any(isinstance(i, SwipeItem) for i in canvas.scene().items()))
+    canvas.setMapTool(pan)
+
+    # Started and stopped again and again (each refresh of the dock): no tool, no item, no render left behind.
+    for _ in range(5):
+        session.start([BeforeState(zones.id(), "")], {zones.id(): zones})
+        session.stop()
+    wait(lambda: not session._retired, 10)
+    QgsApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    QgsApplication.processEvents()
+    tools = [child for child in canvas.children() if isinstance(child, SwipeTool)]
+    check("five comparisons later: no swipe tool, item or render left", not tools and session._job is None
+          and not session._retired and not any(isinstance(i, SwipeItem) for i in canvas.scene().items()),
+          (len(tools), session._job, len(session._retired)))
 
     # A raster whose former source is gone (a derived file removed since): left out, nothing to compare.
     dem = QgsRasterLayer(fixtures["dem"], "dem", "gdal")
