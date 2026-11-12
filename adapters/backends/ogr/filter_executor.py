@@ -1252,7 +1252,9 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         keys = outcome.keys
     builder.remote_materialization_outcome = outcome
     # 2026-11-12: the keys of a previous step kept by the combination go to the server too
-    listed = len(keys) if oapif else builder._listed_keys(old_subset, combine_operator, len(keys))
+    through_old = target is layer
+    listed = len(keys) if oapif else builder._listed_keys(layer, old_subset, combine_operator, len(keys),
+                                                          through_old, complement)
     refusal = builder._key_list_refusal(layer, listed)
     if refusal:
         builder.last_error = refusal
@@ -1261,7 +1263,8 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
     key_filter = builder._build_fid_filter_with_values(layer, list(keys), builder._get_primary_key(layer)) if keys else '1 = 0'
     if complement:
         key_filter = '1 = 1' if not keys else 'NOT ({})'.format(key_filter)
-    final = key_filter if oapif else builder._combine_with_old_subset(old_subset, combine_operator, key_filter)
+    final = key_filter if oapif else builder._final_subset(layer, old_subset, combine_operator, key_filter,
+                                                           through_old, complement)
     if oapif:
         # A CQL2 capability label is not proof that this QGIS/server pair
         # pushes an IN list down. Lot A supplies the FULL-translation guard.

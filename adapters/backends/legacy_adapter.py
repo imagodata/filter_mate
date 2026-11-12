@@ -276,15 +276,17 @@ class BaseLegacyAdapter(GeometricFilterBackend):
             # FilterOrchestrator._determine_subset_strategy, which also sends a
             # previous geometric filter under AND / OR since 2026-11-12), as in the
             # SpatiaLite and OGR builders; 2026-10-17: it was combined with AND.
+            try:
+                from ...filtermate_core.filter.expression_combiner import (
+                    combine_target_subset, combine_without_old_subset)
+            except ImportError:  # imported from the repository root (tests)
+                from filtermate_core.filter.expression_combiner import combine_target_subset, combine_without_old_subset
             final_expr = expression
             if old_subset and combine_operator:
-                final_expr = f"({old_subset}) {combine_operator} ({expression})"
+                # 2026-11-12 (review): no duplicate operand when the same filter comes again
+                final_expr = combine_target_subset(old_subset, combine_operator, expression)
             elif combine_operator:
                 # 2026-11-12: no filter yet: NOT (new) under AND NOT
-                try:
-                    from ...filtermate_core.filter.expression_combiner import combine_without_old_subset
-                except ImportError:  # imported from the repository root (tests)
-                    from filtermate_core.filter.expression_combiner import combine_without_old_subset
                 final_expr = combine_without_old_subset(expression, combine_operator)
 
             # 2026-10-17: a filter task's subset is queued for the main thread, as in the

@@ -444,11 +444,50 @@ def test_previous_spatial_key_list_is_combined_under_or(qgis):
     'ST_Intersects("geom", ST_GeomFromText(\'POINT(0 0)\', 2154))',
 ])
 def test_previous_spatial_filter_is_combined_under_and(qgis, old_subset):
-    """2026-11-12 (user decision): the intersection, read through the previous filter (same keys, faster)."""
+    """2026-11-12 (user decision): the intersection, read through the previous filter (same keys, faster).
+
+    2026-11-12 (review): read through it, the new keys alone ARE the intersection: the previous key list or
+    geometric filter is not written again (it grew by the whole old list at each AND step)."""
     roads = _roads(visible={1, 3}, subset=old_subset)
     subset, _ = _apply(qgis, "ST_Crosses", roads=roads, old_subset=old_subset, operator="AND")
-    assert subset == f'({old_subset}) AND (fid IN (1))'
+    assert subset == 'fid IN (1)'
     assert roads.requests, "AND: reading through the previous filter gives the same keys"
+
+
+def test_and_through_an_attribute_filter_keeps_it(qgis):
+    roads = _roads(visible={1, 3}, subset='"nature" = \'x\'')
+    subset, _ = _apply(qgis, "ST_Crosses", roads=roads, old_subset='"nature" = \'x\'', operator="AND")
+    assert subset == '("nature" = \'x\') AND (fid IN (1))'
+
+
+def test_and_through_a_previous_disjoint_complement_keeps_the_old_subset(qgis):
+    """NOT (keys) read through the old subset needs it around: the complement of the whole layer is wider."""
+    old_subset = '"fid" IN (1, 3, 4)'
+    roads = _roads(visible={1, 3, 4}, subset=old_subset)
+    subset, _ = _apply(qgis, "ST_Disjoint", roads=roads, old_subset=old_subset, operator="AND")
+    assert subset.startswith(f'({old_subset}) AND (NOT (')
+
+
+def test_and_through_old_keys_counts_the_new_keys_only(qgis, monkeypatch):
+    """2026-11-12 (review): 3 old + 1 new keys against a bound of 3 were refused; the 1 new key is exact."""
+    monkeypatch.setattr(ogr_builder, "PLAIN_KEY_LIST_WARNING", 1)
+    monkeypatch.setattr(ogr_builder, "PLAIN_KEY_LIST_MAX", 3)
+    monkeypatch.setattr(ogr_builder.OGRExpressionBuilder, "_rescans_key_lists", staticmethod(lambda layer: True))
+    old_subset = '"fid" IN (1, 3, 4)'
+    roads = _roads(visible={1, 3, 4}, subset=old_subset)
+    subset, _ = _apply(qgis, "ST_Crosses", roads=roads, old_subset=old_subset, operator="AND")
+    assert subset == 'fid IN (1)'
+
+
+def test_the_same_selection_again_adds_no_duplicate(qgis):
+    """2026-11-12 (review): (E) OR (E), then ((E) OR (E)) OR (E)."""
+    roads = _roads(subset='fid IN (1, 2)')
+    subset, _ = _apply(qgis, "ST_Crosses", roads=roads, old_subset='fid IN (1, 2)', operator="OR")
+    assert subset == 'fid IN (1, 2)'
+    old_subset = '("fid" IN (4, 5)) OR (fid IN (1, 2))'
+    roads = _roads(subset=old_subset)
+    subset, _ = _apply(qgis, "ST_Crosses", roads=roads, old_subset=old_subset, operator="OR")
+    assert subset == old_subset
 
 
 @pytest.mark.parametrize("subset, count", [
@@ -460,24 +499,31 @@ def test_previous_spatial_filter_is_combined_under_and(qgis, old_subset):
     ('"fid" IN (SELECT value FROM json_each(\'[1,2,3]\'))', 0),   # the JSON form lists nothing in SQL
     ('ST_Intersects("geom", ST_GeomFromText(\'POINT(0 0)\', 2154))', 0),
     ('"fid" IN ()', 0),
+    ('"fid" IN (1, 2', 0),                                  # 2026-11-12 (review): unclosed, nothing listed
+    ('("fid" IN (1, 2)) OR ("fid" IN (3', 2),
     ('', 0),
 ])
 def test_listed_key_count(subset, count):
     assert ogr_builder.listed_key_count(subset) == count
 
 
-@pytest.mark.parametrize("old_subset, operator, listed", [
-    ('"fid" IN (4, 5)', "OR", 7),        # kept: its keys count
-    ('"fid" IN (4, 5)', "AND", 7),
-    ('"fid" IN (4, 5)', "AND NOT", 7),
-    ('"fid" IN (4, 5)', None, 5),         # replaced
-    ('ST_Intersects("geom", X) AND "fid" IN (1)', "AND NOT", 5),   # geometric under AND NOT: replaced
-    (None, "OR", 5),
+@pytest.mark.parametrize("old_subset, operator, through_old, listed", [
+    ('"fid" IN (4, 5)', "OR", False, 7),        # kept: its keys count
+    ('"fid" IN (4, 5)', "AND", False, 7),
+    ('"fid" IN (4, 5)', "AND", True, 5),         # read through it: the new keys alone are written
+    ('"fid" IN (4, 5)', "AND NOT", False, 7),
+    ('"fid" IN (4, 5)', None, False, 5),         # replaced
+    ('("fid" IN (4, 5)) OR ("fid" IN (6))', "OR", False, 8),
+    ('"code" IN (1, 2, 3)', "OR", False, 5),     # 2026-11-12 (review): a user filter, no key list
+    ('ST_Intersects("geom", X) AND "fid" IN (1)', "AND NOT", False, 5),   # geometric under AND NOT: replaced
+    (None, "OR", False, 5),
 ])
-def test_the_keys_of_a_kept_subset_count_in_the_bounds(old_subset, operator, listed):
+def test_the_keys_of_a_kept_subset_count_in_the_bounds(old_subset, operator, through_old, listed):
     """2026-11-12: (old keys) OR (new keys) lists both (PLAIN_KEY_LIST_MAX, web service key_list_limit)."""
     builder = ogr_builder.OGRExpressionBuilder(task_params={})
-    assert builder._listed_keys(old_subset, operator, 5) == listed
+    builder._get_primary_key = lambda layer: "fid"
+    layer = types.SimpleNamespace(subsetString=lambda: old_subset)
+    assert builder._listed_keys(layer, old_subset, operator, 5, through_old) == listed
 
 
 def test_a_combination_listing_too_many_keys_is_refused_on_a_rescanning_format(qgis, monkeypatch):
@@ -567,7 +613,8 @@ def _spatialite_final(old_subset, operator, expression):
         log_info=lambda msg: None,
     )
     scope = {"self": sql, "old_subset": old_subset, "combine_operator": operator, "expression": expression}
-    exec(body, {"combine_without_old_subset": ogr_builder.combine_without_old_subset}, scope)  # nosec B102 - test reads the production rule
+    exec(body, {"combine_without_old_subset": ogr_builder.combine_without_old_subset,  # nosec B102
+                "combine_target_subset": ogr_builder.combine_target_subset}, scope)  # nosec B102 - test reads the production rule
     return scope["final_expression"]
 
 

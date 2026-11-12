@@ -76,6 +76,10 @@ _GEOMETRIC_FILTER_RE = re.compile(
 # subset are counted (a comma or a parenthesis inside them is no separator).
 _QUOTED_RE = re.compile(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"")
 _IN_LIST_RE = re.compile(r"\bIN\s*\((?!\s*SELECT\b)", re.IGNORECASE)
+# The shape of a key list subset (same as filter_orchestrator._KEY_LIST_SUBSET_RE, any
+# parenthesis depth in front: a combined one starts with "(("): its key decides.
+_KEY_LIST_START_RE = re.compile(
+    r"""^\s*(?:NOT\s*\(\s*)?(?:\(\s*)*(["']?)(?P<name>\$?[A-Za-z_]\w*)\1\s+IN\s*\(""", re.IGNORECASE)
 
 
 def listed_key_count(subset: Optional[str]) -> int:
@@ -89,19 +93,20 @@ def listed_key_count(subset: Optional[str]) -> int:
     text = _QUOTED_RE.sub("''", subset or '')
     count = 0
     for match in _IN_LIST_RE.finditer(text):
-        depth, commas, values = 1, 0, False
+        depth, commas, values, closed = 1, 0, False, False
         for char in text[match.end():]:
             if char == '(':
                 depth += 1
             elif char == ')':
                 depth -= 1
                 if depth == 0:
+                    closed = True
                     break
             elif char == ',' and depth == 1:
                 commas += 1
             elif not char.isspace():
                 values = True
-        if values:
+        if values and closed:  # an unclosed list (malformed text) lists nothing
             count += commas + 1
     return count
 
@@ -163,11 +168,11 @@ try:
 except ImportError:
     from core.domain.stable_key import FEATURE_ID, FEATURE_ID_KEY, NONE, KeyChoice, choose_key, is_feature_id_key
 
-# 2026-11-12: the filter of a target without one (NOT (new) under AND NOT)
+# 2026-11-12: the filter of a target without one (NOT (new) under AND NOT), and with one
 try:
-    from ....filtermate_core.filter.expression_combiner import combine_without_old_subset
+    from ....filtermate_core.filter.expression_combiner import combine_target_subset, combine_without_old_subset
 except ImportError:  # imported from the repository root (tests)
-    from filtermate_core.filter.expression_combiner import combine_without_old_subset
+    from filtermate_core.filter.expression_combiner import combine_target_subset, combine_without_old_subset
 
 # Providers whose subset is a QGIS expression AND address features by ``$id`` (no fid column).
 FEATURE_ID_EXPRESSION_PROVIDERS = ('memory', 'delimitedtext')
@@ -635,7 +640,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 return False
 
             # 2026-11-12: the keys of a previous step kept by the combination count too
-            listed = self._listed_keys(old_subset, combine_operator, len(selected_ids))
+            through_old = target is layer
+            listed = self._listed_keys(layer, old_subset, combine_operator, len(selected_ids), through_old, complement)
             if listed > PLAIN_KEY_LIST_WARNING and self._rescans_key_lists(layer):
                 if listed > PLAIN_KEY_LIST_MAX:
                     kept = "keeps its previous filter" if layer.subsetString() else "is left unfiltered"
@@ -669,7 +675,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 return False
             if complement:
                 key_filter = "1 = 1" if not selected_ids else f"NOT ({key_filter})"
-            final_filter = self._combine_with_old_subset(old_subset, combine_operator, key_filter)
+            final_filter = self._final_subset(layer, old_subset, combine_operator, key_filter, through_old, complement)
 
             if source_capability(layer).requires_server_translation:
                 from ...qgis.server_filter_translation import prepare_server_subset
@@ -768,17 +774,59 @@ class OGRExpressionBuilder(GeometricFilterPort):
         ``NOT (new)`` (the new selection taken out of the whole layer).
         """
         if self._keeps_old_subset(old_subset, combine_operator):
-            return f"({old_subset}) {combine_operator} ({new_filter})"
+            return combine_target_subset(old_subset, combine_operator, new_filter)
         # No filter, no operator (replace), or a geometric one under AND NOT
         # (2026-11-12, review: AND NOT then wrote the new selection itself):
         # NOT (new) under AND NOT
         return combine_without_old_subset(new_filter, combine_operator)
 
-    def _listed_keys(self, old_subset: Optional[str], combine_operator: Optional[str], key_count: int) -> int:
-        """Keys the new subset lists: ``key_count`` new ones, plus those of the old subset it keeps (2026-11-12)."""
-        if self._keeps_old_subset(old_subset, combine_operator):
+    def _is_own_key_list(self, layer, subset: Optional[str]) -> bool:
+        """Whether ``subset`` is a key list on the key this builder lists for ``layer`` (2026-11-12, review).
+
+        A user filter such as ``"code" IN (4,000 values)`` is no key list of a
+        previous spatial step: its values are not counted in the key bounds.
+        """
+        match = _KEY_LIST_START_RE.match(subset or '')
+        if not match:
+            return False
+        keys = {'fid', FEATURE_ID_KEY.lower()}
+        try:
+            keys.add(str(self._get_primary_key(layer)).lower())
+        except Exception:  # nosec B110 - no key found: fid / $id only
+            pass
+        return match.group('name').lower() in keys
+
+    def _drops_old_subset(self, layer, old_subset, combine_operator, through_old: bool, complement: bool) -> bool:
+        """Under AND with the target read through the old subset, the new keys alone ARE the intersection.
+
+        2026-11-12 (review): ``(old) AND (keys)`` repeated the whole old key list
+        at each AND step and counted it against PLAIN_KEY_LIST_MAX /
+        key_list_limit (3,000 old + 2,500 new keys refused, although the 2,500
+        alone are exact). A previous key list or geometric filter is dropped; an
+        attribute filter is kept (it lists no key, and stays readable); a
+        Disjoint complement NOT (keys) needs the old subset around it.
+        """
+        return (
+            through_old and not complement and bool(old_subset) and layer.subsetString() == old_subset
+            and (combine_operator or '').strip().upper() == 'AND'
+            and (self._is_own_key_list(layer, old_subset) or self._is_geometric_filter(old_subset))
+        )
+
+    def _listed_keys(self, layer, old_subset: Optional[str], combine_operator: Optional[str], key_count: int,
+                     through_old: bool = False, complement: bool = False) -> int:
+        """Keys the new subset lists: ``key_count`` new ones, plus those of the old key list it keeps (2026-11-12)."""
+        if self._drops_old_subset(layer, old_subset, combine_operator, through_old, complement):
+            return key_count
+        if self._keeps_old_subset(old_subset, combine_operator) and self._is_own_key_list(layer, old_subset):
             return key_count + listed_key_count(old_subset)
         return key_count
+
+    def _final_subset(self, layer, old_subset, combine_operator, key_filter: str, through_old: bool,
+                      complement: bool) -> str:
+        """The subset written: the new keys alone (see _drops_old_subset), else _combine_with_old_subset."""
+        if self._drops_old_subset(layer, old_subset, combine_operator, through_old, complement):
+            return key_filter
+        return self._combine_with_old_subset(old_subset, combine_operator, key_filter)
 
     def _unfiltered_target(self, layer, old_subset=None, combine_operator=None):
         """The target layer read WITHOUT its current subset (2026-10-17).

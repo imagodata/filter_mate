@@ -30,9 +30,11 @@ from qgis.core import (
 from ..ports import get_backend_services
 from ..domain.exceptions import BackendError
 try:
-    from ...filtermate_core.filter.expression_sanitizer import _is_standalone_display_expression
+    from ...filtermate_core.filter.expression_sanitizer import (
+        _is_standalone_display_expression, contains_well_formed_exists)
 except ImportError:  # imported from the repository root (tests)
-    from filtermate_core.filter.expression_sanitizer import _is_standalone_display_expression
+    from filtermate_core.filter.expression_sanitizer import (
+        _is_standalone_display_expression, contains_well_formed_exists)
 from ...infrastructure.constants import (
     PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR, PROVIDER_MEMORY,
     QGIS_PROVIDER_POSTGRES,
@@ -459,23 +461,7 @@ class FilterOrchestrator:
         """
         current_subset = layer.subsetString()
 
-        if not current_subset or '__source' not in current_subset.lower():
-            return
-
-        # Check if this is a VALID EXISTS expression (well-formed)
-        # Pattern: EXISTS (SELECT ... FROM ... AS __source WHERE ...)
-        # 2026-09-13: the expression may be preceded by the source envelope
-        # prefilter ``("t"."geom" && (SELECT ... AS __source WHERE ...)) AND
-        # EXISTS (...)`` (PostgreSQL builder), so a well-formed EXISTS block
-        # anywhere in the subset is enough. Clearing such subsets queued an
-        # empty subset that was applied on the main thread AFTER the worker
-        # had set the new filter: every PostgreSQL target ended unfiltered.
-        from .expression_sanitizer import contains_well_formed_exists
-        is_valid_exists = contains_well_formed_exists(current_subset)
-
-        if is_valid_exists:
-            logger.debug(f"✓ Layer {layer.name()} has VALID EXISTS expression - keeping it")
-            logger.debug(f"  → Expression: '{current_subset[:100]}'...")
+        if not self._is_corrupted_subset(current_subset):
             return
 
         # If we reach here, it's a CORRUPTED expression with __source
@@ -486,6 +472,23 @@ class FilterOrchestrator:
         # Queue subset clear for main thread application
         self.subset_queue_callback(layer, "")
         logger.debug(f"  ✓ Queued subset clear for {layer.name()} - ready for fresh filter")
+
+    @staticmethod
+    def _is_corrupted_subset(subset: Optional[str]) -> bool:
+        """A subset holding ``__source`` without a well-formed EXISTS block (cleared by _clean_corrupted_subsets).
+
+        Check if this is a VALID EXISTS expression (well-formed)
+        Pattern: EXISTS (SELECT ... FROM ... AS __source WHERE ...)
+        2026-09-13: the expression may be preceded by the source envelope
+        prefilter ``("t"."geom" && (SELECT ... AS __source WHERE ...)) AND
+        EXISTS (...)`` (PostgreSQL builder), so a well-formed EXISTS block
+        anywhere in the subset is enough. Clearing such subsets queued an
+        empty subset that was applied on the main thread AFTER the worker
+        had set the new filter: every PostgreSQL target ended unfiltered.
+        """
+        if not subset or '__source' not in subset.lower():
+            return False
+        return not contains_well_formed_exists(subset)
 
     def _determine_subset_strategy(
         self,
@@ -515,6 +518,15 @@ class FilterOrchestrator:
         """
         old_subset = layer.subsetString() if layer.subsetString() != '' else None
         combine_operator = self._get_combine_operator()
+
+        # 2026-11-12 (review): a corrupted subset is only QUEUED for clearing
+        # (_clean_corrupted_subsets): the layer still returns it here. Holding
+        # __source, it was taken for a geometric filter and combined under AND /
+        # OR, and finished() applied "" then (corrupted) OR (new), which the
+        # provider refuses. It is never kept: the layer counts as unfiltered.
+        if self._is_corrupted_subset(old_subset):
+            logger.debug(f"  → Corrupted subset on {layer.name()} queued for clearing: not combined")
+            old_subset = None
 
         # Store combine operator in task params for cache validation
         self.task_parameters['_current_combine_operator'] = combine_operator
@@ -574,6 +586,12 @@ class FilterOrchestrator:
         # the session cleanup, and those of a canceled task when no subset in
         # place names them (FinishedHandler.handle_finished, _drop_deferred_views).
         combines = (combine_operator or '').strip().upper() in ('AND', 'OR')
+        # 2026-11-12 (review): an OGC API - Features target cannot get a verified
+        # (old) OR (keys) filter (apply_remote_spatial_filter refuses it): the
+        # previous spatial filter is replaced under OR there, as before. AND
+        # stays combined (the new keys are read through the previous filter).
+        if combines and combine_operator.strip().upper() == 'OR' and self._provider_type(layer) == 'oapif':
+            combines = False
 
         # Apply strategy
         if is_geometric_filter:
@@ -606,6 +624,15 @@ class FilterOrchestrator:
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             logger.debug("  → Reason: Preserving user's attribute filter with geometric filter")
             return old_subset, combine_operator
+
+    @staticmethod
+    def _provider_type(layer) -> str:
+        """``layer.providerType()``, '' when it cannot be read."""
+        try:
+            provider = layer.providerType()
+        except Exception:  # nosec B110 - deleted layer / mock: no provider
+            return ''
+        return provider if isinstance(provider, str) else ''
 
     @staticmethod
     def _is_key_list_subset(layer, subset: str) -> bool:

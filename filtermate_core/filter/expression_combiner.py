@@ -22,7 +22,7 @@ import re
 from enum import Enum
 from typing import Optional, List, Dict, Tuple
 
-from .sql_quotes import mask_quoted, strip_outer_parens, unmask_quoted
+from .sql_quotes import mask_quoted, matching_close, strip_outer_parens, unmask_quoted
 
 logger = logging.getLogger('FilterMate.Core.Filter.Combiner')
 
@@ -283,6 +283,23 @@ def extract_exists_clauses(expression: str) -> List[Dict[str, str]]:
 
 
 _SUBQUERY_START = re.compile(r'\(\s*SELECT\b', re.IGNORECASE)
+# The left side of the PostgreSQL envelope prefilter, ``"t"."geom" && (SELECT ...)``
+# (``~`` for Contains / Covers / Equals), on masked text: a quoted name, maybe qualified.
+_PREFILTER_LEFT = re.compile(r'(?:\x04\d+\x05\s*\.\s*)?\x04\d+\x05\s*(?:&&|~)')
+_EXISTS_CONJUNCTION_REST = re.compile(r'(?:\s|[()]|\bEXISTS\b|\bNOT\b|\bAND\b)*', re.IGNORECASE)
+
+
+def _outside_subqueries(masked: str) -> str:
+    """Masked text with the bodies of its ``(SELECT ...)`` subqueries removed (an EXISTS keeps its keyword)."""
+    kept, i = [], 0
+    for match in _SUBQUERY_START.finditer(masked):
+        if match.start() < i:
+            continue  # inside a subquery already skipped
+        kept.append(masked[i:match.start()])
+        close = matching_close(masked, match.start())
+        i = len(masked) if close < 0 else close + 1
+    kept.append(masked[i:])
+    return ' '.join(kept)
 
 
 def has_or_outside_subqueries(expression: str) -> bool:
@@ -303,23 +320,80 @@ def has_or_outside_subqueries(expression: str) -> bool:
     if not expression:
         return False
     masked, _ = mask_quoted(expression)
-    kept, i = [], 0
-    for match in _SUBQUERY_START.finditer(masked):
-        if match.start() < i:
-            continue  # inside a subquery already skipped
-        kept.append(masked[i:match.start()])
-        depth, j = 0, match.start()
-        while j < len(masked):
-            if masked[j] == '(':
-                depth += 1
-            elif masked[j] == ')':
-                depth -= 1
-                if depth == 0:
-                    break
-            j += 1
-        i = j + 1
-    kept.append(masked[i:])
-    return bool(re.search(r'\bOR\b', ' '.join(kept), re.IGNORECASE))
+    return bool(re.search(r'\bOR\b', _outside_subqueries(masked), re.IGNORECASE))
+
+
+def is_exists_conjunction(expression: str) -> bool:
+    """Whether ``expression`` is nothing but EXISTS clauses joined by AND (each maybe under NOT).
+
+    2026-11-12 (review): the filter chain keeps the EXISTS clauses of a
+    source subset only. ``("pk" IN (...)) AND (EXISTS a)`` (a key list, then
+    a geometric filter combined under AND) lost its key list. The envelope
+    prefilter of the PostgreSQL builder (``"t"."geom" && (SELECT ...)``) is
+    allowed: it only repeats a necessary condition of its EXISTS.
+
+    Args:
+        expression: SQL subset string.
+
+    Returns:
+        True when, literals masked, subqueries and prefilters removed, only
+        EXISTS / NOT / AND keywords and parentheses remain (at least one EXISTS).
+    """
+    if not expression:
+        return False
+    masked, _ = mask_quoted(expression)
+    rest = _PREFILTER_LEFT.sub(' ', _outside_subqueries(masked))
+    return bool(re.search(r'\bEXISTS\b', rest, re.IGNORECASE)) and bool(_EXISTS_CONJUNCTION_REST.fullmatch(rest))
+
+
+def _top_level_operands(masked: str, operator: str) -> List[str]:
+    """Masked operands of ``masked`` joined by ``operator`` (AND / OR) at depth 0, nested ones flattened."""
+    text = strip_outer_parens(masked)
+    pattern = re.compile(r'\bAND\b(?!\s+NOT\b)' if operator == 'AND' else r'\bOR\b', re.IGNORECASE)
+    operands, depth, start = [], 0, 0
+    for match in re.finditer(r'[()]|' + pattern.pattern, text, re.IGNORECASE):
+        token = match.group()
+        if token == '(':
+            depth += 1
+        elif token == ')':
+            depth -= 1
+        elif depth == 0:
+            operands.append(text[start:match.start()])
+            start = match.end()
+    if not operands:
+        return [text]
+    operands.append(text[start:])
+    flattened = []
+    for operand in operands:
+        flattened.extend(_top_level_operands(operand, operator))
+    return flattened
+
+
+def combine_target_subset(old_subset: str, combine_operator: str, new_expression: str) -> str:
+    """``(old) <operator> (new)``, the subset a target gets from a new geometric filter.
+
+    2026-11-12 (review): filtering again with the same selection wrote
+    ``(E) AND (E)``, then ``((E) AND (E)) AND (E)``. Under AND and OR (both
+    idempotent) the old subset is kept as it is when the new expression is
+    already one of its top-level operands joined by the same operator, or the
+    whole old subset. A new selection still adds an operand at each step: the
+    subset grows with the number of different filters combined (no cap).
+
+    Args:
+        old_subset: Subset of the target, kept.
+        combine_operator: AND, OR or AND NOT.
+        new_expression: Filter of the new selection.
+
+    Returns:
+        The combined subset string.
+    """
+    operator = (combine_operator or '').strip().upper()
+    if operator in ('AND', 'OR'):
+        masked, parts = mask_quoted(old_subset)
+        for operand in _top_level_operands(masked, operator):
+            if _same_expression(unmask_quoted(operand, parts), new_expression):
+                return old_subset
+    return f"({old_subset}) {combine_operator} ({new_expression})"
 
 
 def adapt_exists_for_nested_context(

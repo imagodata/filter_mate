@@ -542,3 +542,43 @@ def test_path_3a_reads_combined_geometric_filters_by_their_features(monkeypatch,
 
     assert builder._prepare_source_filter("PostgreSQL") == "<FIDS [4, 7]>"
     assert [request.expression for request in requests] == [None]
+
+
+# 2026-11-12 (review): a key list beside the EXISTS, the __buffer alias, the envelope prefilter
+
+KEYS = '"src"."id" IN (1, 2, 3)'
+PREFILTER = ('("src"."geom" && (SELECT ST_Extent(__source."geom") FROM "public"."zone" AS __source '
+             'WHERE "id" IN (1, 2)))')
+
+
+def test_the_chain_reads_a_key_list_beside_an_exists_by_its_features(monkeypatch, refusal):
+    layer, requests = _source_layer(kept=[2, 3], subset=f"({KEYS}) AND ({EXISTS_OLD})")
+    builder = _builder(monkeypatch, _all_features_task(), layer)
+    builder.buffer_expression = '"radius"'
+
+    assert builder._prepare_source_filter("PostgreSQL") == "<FIDS [2, 3]>"
+    assert [request.expression for request in requests] == [None]
+
+
+def test_the_chain_keeps_an_exists_behind_its_envelope_prefilter(monkeypatch, refusal):
+    layer, requests = _source_layer(kept=[], subset=f"{PREFILTER} AND {EXISTS_OLD}")
+    builder = _builder(monkeypatch, _all_features_task(), layer)
+    builder.buffer_expression = '"radius"'
+
+    assert builder._prepare_source_filter("PostgreSQL") == f"({EXISTS_OLD})"
+    assert requests == []
+
+
+@pytest.mark.parametrize("subset", [
+    f"({KEYS}) AND ({EXISTS_OTHER})",     # the key list lost, __buffer undefined outside its EXISTS
+    EXISTS_OTHER,                          # a lone buffer-table EXISTS: __buffer undefined
+    f"({KEYS}) AND ({EXISTS_OLD})",
+    f"{PREFILTER} AND {EXISTS_OLD}",       # the first WHERE is the prefilter's
+])
+def test_path_3a_reuses_no_where_clause_but_of_a_single_source_exists(monkeypatch, refusal, subset):
+    layer, requests = _source_layer(kept=[4, 7], subset=subset)
+    layer.featureCount.return_value = 50_000
+    builder = _builder(monkeypatch, _all_features_task(), layer)
+
+    assert builder._prepare_source_filter("PostgreSQL") == "<FIDS [4, 7]>"
+    assert [request.expression for request in requests] == [None]

@@ -99,8 +99,11 @@ class _Builder:
             return False
         return not (combine_operator == "AND NOT" and self._is_geometric_filter(old_subset))
 
-    def _listed_keys(self, old_subset, combine_operator, key_count):
+    def _listed_keys(self, layer, old_subset, combine_operator, key_count, through_old=False, complement=False):
         return key_count
+
+    def _final_subset(self, layer, old_subset, combine_operator, key_filter, through_old, complement):
+        return self._combine_with_old_subset(old_subset, combine_operator, key_filter)
 
     def _combine_with_old_subset(self, old_subset, combine_operator, new_filter):
         if self._keeps_old_subset(old_subset, combine_operator):

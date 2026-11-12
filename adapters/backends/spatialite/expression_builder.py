@@ -59,9 +59,9 @@ except ImportError:  # imported from the repository root (tests)
 
 # 2026-11-12: the filter of a target without one (NOT (new) under AND NOT)
 try:
-    from ....filtermate_core.filter.expression_combiner import combine_without_old_subset
+    from ....filtermate_core.filter.expression_combiner import combine_target_subset, combine_without_old_subset
 except ImportError:  # imported from the repository root (tests)
-    from filtermate_core.filter.expression_combiner import combine_without_old_subset
+    from filtermate_core.filter.expression_combiner import combine_target_subset, combine_without_old_subset
 
 # Import safe_set_subset_string from infrastructure
 try:
@@ -157,7 +157,11 @@ class SpatialiteExpressionBuilder(SpatialiteSqlBuilder):
                     self.log_info("Replacing geometric filter in old_subset (AND NOT)")
                     final_expression = combine_without_old_subset(expression, combine_operator)
                 else:
-                    final_expression = f"({old_subset}) {combine_operator} ({expression})"
+                    # 2026-11-12 (review): no duplicate operand (combine_target_subset).
+                    # Known limit: the inline budget of build_expression
+                    # (_inline_cost_seconds) is the new predicate's alone; a kept
+                    # inline predicate adds its own cost to every statement.
+                    final_expression = combine_target_subset(old_subset, combine_operator, expression)
             elif combine_operator and not old_subset:
                 # 2026-11-12: no filter yet: NOT (new) under AND NOT
                 final_expression = combine_without_old_subset(expression, combine_operator)

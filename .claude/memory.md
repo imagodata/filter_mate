@@ -1194,3 +1194,24 @@ Result: Que veux-tu faire dans cette session ?
 - `SamOnnxProvider.predict_by_area` (aires lues en basse résolution) : rappel en hausse, précision en forte baisse
   (set C neuf : 0,50 → 0,21). La recherche garde le masque le mieux noté par SAM.
 - Méthode : quand le set A n'a servi à aucun réglage et contredit B, confirmation préenregistrée sur des données neuves.
+
+## [2026-11-12] Filtres géométriques combinés sous OR / AND (branche `claude/geo-combine-or-and`)
+- Décision utilisateur : une couche cible qui porte déjà le subset d'un filtre géométrique précédent (EXISTS / `__source`,
+  table tampon `fm_temp_buf_*`, prédicat SpatiaLite inline, liste de clés OGR / SQLite) le COMBINE avec le nouveau sous
+  l'opérateur des autres couches : `(old) OR (new)` = union, `(old) AND (new)` = intersection (avant : remplacé, OR et
+  AND gardaient la nouvelle sélection seule). Sans opérateur : remplacement. AND NOT inchangé (géométrique → `NOT (new)`,
+  liste de clés → `(keys) AND NOT (new)`). Expression de style : toujours remplacée.
+- Point de décision : `FilterOrchestrator._determine_subset_strategy` ; les builders PG / SpatiaLite / OGR ne remplacent
+  plus que sous AND NOT. Objets temporaires : les tables tampon et vues ne sont pas supprimées par une tâche filtre
+  (seulement reset / unfilter, nettoyage de session, vues d'une tâche annulée que nul subset ne nomme).
+- Correctifs de revue : subset corrompu (en file pour effacement) jamais gardé ; OGC API - Features garde le remplacement
+  sous OR (combinaison non vérifiable) ; chaîne de filtres et réemploi WHERE de PATH 3A seulement pour un subset fait
+  d'EXISTS joints par AND (resp. un seul EXISTS `__source`), sinon lecture des entités ; OGR sous AND lu à travers
+  l'ancien subset → nouvelles clés seules ; bornes de clés (Shapefile, mémoire, services web) comptent l'ancienne liste
+  de clés gardée seulement (pas un filtre utilisateur `IN`) ; pas d'opérande en double (`combine_target_subset`).
+- Bancs : `check_pg_connection_cases.py` (`or_buffer` = union, cas `and_buffer`), `check_geo_combine.py` (GPKG,
+  SpatiaLite, Shapefile, comptes GDAL). Piège du banc : la sélection personnalisée ne choisit que parmi les entités
+  visibles de la source → vider le subset de la source avant une sélection qui en sort.
+- Limites connues : le subset grossit d'un opérande par filtre différent combiné (pas de plafond) ; `_with_negations`
+  met un NOT couvrant une conjonction devant chaque EXISTS ; le budget inline SpatiaLite ignore les prédicats gardés ;
+  après unfilter, le nettoyage des vues par le tracker peut supprimer une vue que lit le subset restauré (antérieur).
