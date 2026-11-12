@@ -1,6 +1,25 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-11-12] Cibles raster / nuage d'une source vecteur : options dédiées ; fond web grisé dans la liste
+Décision utilisateur : `CROSS_FILTER.vector_source_raster_targets` / `vector_source_point_cloud_targets` (on par
+défaut), en plus de `RASTER` / `POINT_CLOUD.enabled` (qui restent source ET cible). Source raster / nuage : options
+sans effet. API publique / REST / Processing / agent : non concernés (ils nomment leurs cibles).
+Patterns à retenir :
+- Une seule règle, `point_cloud_capability.is_listed_coverage_target(layer, vector_source)`, pour les deux chemins
+  de remplissage (FilteringController et le repli ComboboxPopulationManager) ; `is_unlisted_vector_source_target`
+  filtre en plus les ids au lancement dans `CoverageModeController.run_vector_source_task` ('filter' seulement ;
+  pas dans `split_coverage_targets`, partagé avec l'export).
+- Les cibles d'un lancement viennent de la liste (`get_layers_to_filter`) : une option changée la fait remplir de
+  nouveau (`PropertyController.refresh_layers_to_filter`, garde les cases cochées encore listées), depuis l'édition
+  en direct (ConfigController) et la relecture du disque (ConfigModelManager), là où RASTER.enabled est déjà suivi.
+- Ligne grisée (`QgsCheckableComboBoxLayer.add_unfilterable_item`) : aucun flag, pas d'état coché, pas de
+  `layer_id` dans ses données (seulement `unfilterable_layer_id`) → jamais lue comme cible. Toute écriture de case
+  du widget passe par `_checkable`. Piège Qt : la ligne courante n'est jamais une ligne désactivée, donc le clic
+  doit viser `indexAt(position)` (avant : cliquer la ligne grisée cochait la ligne survolée juste avant).
+- Écartés par les options : absents (pas grisés), l'option sert à alléger la liste. Fonds web grisés seulement là
+  où les rasters de valeurs sont listés. Masque des fonds web hors source : PR séparée, à venir.
+
 ## [2026-11-12] Source PostgreSQL sans connexion psycopg2 → « Tâche échouée », couches distantes jamais filtrées
 Signalement (journal client, Zones MRO → 8 couches, Intersect) : source filtrée, puis « Task failed » sans détail,
 aucun « Distant layers to filter » dans le journal QGIS. Cause : QGIS lit la couche avec SA connexion ; la connexion
