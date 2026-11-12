@@ -494,6 +494,7 @@ class SimulatedProject:
             "get_setting": self._get_setting,
             "change_settings": self._change_settings,
             "load_skill": lambda args: load_skill(args["name"]),
+            "show_settings_link": lambda args: {"shown": f"{args['target']} {args.get('path', '')}".strip()},
             # A slow PostgreSQL filter, as FilterMate logs it.
             "diagnose_performance": lambda _args: performance_summary([
                 "2026-11-11 10:43:00 - FilterMate.Perf - INFO - ⏱ cascade_filter: 61250 ms (2 layer(s) in the worker)",

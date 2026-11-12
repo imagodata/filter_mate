@@ -353,6 +353,25 @@ class AgentThread(QScrollArea):
         self._append(_Item(card, f"! {title}" + (f"\n   {detail}" if detail else ""), "error", look))
         self.end_answer()
 
+    def add_link(self, label: str, on_click: Callable[[], None]) -> None:
+        """A button of the agent that takes the user somewhere (a tab of the settings, a setting)."""
+        row = QWidget(self._content)
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        button = QPushButton(label, row)
+        button.setObjectName("pushButton_agent_link")
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.clicked.connect(on_click)
+        layout.addWidget(button)
+        layout.addStretch(1)
+
+        def look(palette: dict, _dark: bool) -> None:
+            _sheet(button, f"QPushButton#pushButton_agent_link {{ font-size: 12px; font-weight: 500; padding: 4px 12px;"
+                           f" border: 1px solid {palette['fm_accent']}; border-radius: 6px;"
+                           f" background: {palette['fm_list']}; color: {palette['fm_accent']}; }}")
+        self._append(_Item(row, f"→ {label}", "link", look))
+        self.end_answer()
+
     def set_hint(self, text: str) -> None:
         """A muted line at the foot of the thread (while the agent works: the next request can be typed)."""
         self._hint.setText(text)

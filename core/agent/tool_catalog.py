@@ -69,6 +69,9 @@ CREATE_WIDGET = "create_widget"
 REMOVE_WIDGET = "remove_widget"
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
+SHOW_SETTINGS_LINK = "show_settings_link"
+# The tabs of the settings dialog of the agent a link may open (ui/widgets/agent_panel.AgentSettingsDialog).
+SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "other_applications")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
     ToolSpec(
@@ -183,6 +186,21 @@ CHAT_ONLY = (
             "recipe_id": {"type": "string", "minLength": 1, "maxLength": 20}},
             "required": ["recipe_id"], "additionalProperties": False},
         chat_only=True),
+    ToolSpec(
+        name=SHOW_SETTINGS_LINK, title="Show the user where a setting is",
+        description=("Put a button in the thread that takes the user to a setting they change themselves: a tab of "
+                     "the settings of the agent (provider: provider, model, key; sources: open data and connectors; "
+                     "autonomy: level, protected layers, expert mode; tools: always ask, always allow or never by "
+                     "tool; other_applications: the MCP server), or a setting of FilterMate in the configuration "
+                     "tree (target setting, with its path). Use it with your answer when the user should change "
+                     "something you may not (the settings of the agent, APP.OPTIONS.AGENT, a name or a path), or "
+                     "asks where a setting is. It changes nothing; the user clicks when they want. Returns shown."),
+        input_schema={"type": "object", "properties": {
+            "target": {"type": "string", "enum": list(SETTINGS_TABS) + ["setting"]},
+            "path": {"type": "string", "maxLength": 200,
+                     "description": "For target setting: the path of the setting (from describe_settings)"}},
+            "required": ["target"], "additionalProperties": False},
+        read_only=True, chat_only=True),
 )
 
 

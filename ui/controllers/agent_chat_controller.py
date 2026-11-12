@@ -155,6 +155,7 @@ class AgentChatController(QObject):
         # is not shown, and the engine is let go when it ends (_drop_engine).
         self._abandoned = False
         self._checkpoint = TurnCheckpoint()
+        self._links = []  # what the buttons of show_settings_link do, kept alive with the thread
         manager = getattr(parent_widget, '_config_model_manager', None)
         self._settings_applier = manager.apply_settings if manager is not None else None
         plugin_settings.set_applier(self._settings_applier)
@@ -414,7 +415,37 @@ class AgentChatController(QObject):
 
     # --- settings ---------------------------------------------------------------
 
-    def open_settings(self) -> bool:
+    def _settings_link_tool(self, arguments) -> dict:
+        """show_settings_link: a button in the thread, to a tab of the agent settings or to a setting."""
+        from ...core.agent.settings_reference import get as get_setting
+        from ...core.agent.tool_catalog import SETTINGS_TABS
+        target = str(arguments.get("target", ""))
+        if target == "setting":
+            try:
+                row = get_setting(plugin_settings.settings_rows(), str(arguments.get("path") or ""))
+            except LookupError as exc:
+                raise ToolFailure(str(exc)) from None
+            label = _tr("Show in the configuration: {}").format(one_line(row["where"], 120))
+            path = row["path"]
+            self._links.append(lambda: self._reveal_setting(path))
+        elif target in SETTINGS_TABS:
+            panel_words = {"provider": "Provider", "sources": "Sources", "autonomy": "Autonomy", "tools": "Tools",
+                           "other_applications": "Other applications"}  # the titles of the tabs, already translated
+            names = {key: QCoreApplication.translate("AgentPanel", word) for key, word in panel_words.items()}
+            label = _tr("Open Agent settings: {}").format(names[target])
+            self._links.append(lambda: self.open_settings(tab=target))
+        else:
+            raise ToolFailure(f"Unknown target {target!r}.")
+        click = self._links[-1]
+        self.panel.add_link(label, click)
+        return {"shown": label}
+
+    def _reveal_setting(self, path: str) -> None:
+        manager = getattr(self._parent_widget, '_config_model_manager', None)
+        if manager is None or not manager.reveal_setting(path):
+            self._say(_tr("This setting is not shown in the configuration tree."), error=True)
+
+    def open_settings(self, tab: str = "") -> bool:
         """Ask for the settings; True when saved.
 
         Not while a request or a recipe runs, nor while its conversation is made (the link of an earlier error card
@@ -424,9 +455,9 @@ class AgentChatController(QObject):
         if self._building or self._replaying or (self._engine is not None and self._engine.busy):
             self._say(_tr("Stop the request, or wait for its end, to open the settings."), error=True)
             return False
-        return self._settings_dialog()
+        return self._settings_dialog(tab)
 
-    def _settings_dialog(self) -> bool:
+    def _settings_dialog(self, tab: str = "") -> bool:
         """The settings dialog; True when saved."""
         values = load_settings()
         protected = set(read_protected())
@@ -437,6 +468,8 @@ class AgentChatController(QObject):
                                      project_layers=project_layers,
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
                                             for tool in chat_tools() if tool.name not in AGENT_OWN])
+        if tab:
+            dialog.select_tab(tab)
         try:
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return False
@@ -528,6 +561,7 @@ class AgentChatController(QObject):
         handlers[REMOVE_WIDGET] = self._remove_widget_tool
         handlers[SAVE_RECIPE] = self._save_recipe_tool
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
+        handlers["show_settings_link"] = self._settings_link_tool
         return tools, handlers, active
 
     @staticmethod
@@ -1461,6 +1495,7 @@ class AgentChatController(QObject):
             "add_service_layer": lambda: _tr("Layer added: {}").format(args.get("name") or args.get("typename", "")),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
+            "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
             "get_setting": lambda: _tr("Reading the setting {}").format(args.get("path", "")),
             "change_settings": lambda: _tr("Settings of FilterMate: {}").format(", ".join(
                 str(change.get("path", "")).rsplit(".", 1)[-1] for change in (args.get("changes") or [])

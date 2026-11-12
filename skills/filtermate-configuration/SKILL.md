@@ -34,7 +34,7 @@ To explain a setting, only read: describe_settings and get_setting change nothin
   section) and everything in the settings dialog of the agent (provider, model, key, consent, autonomy level, tools,
   protected layers, expert mode, MCP server). change_settings refuses the first; the second is not reachable. Tell
   the user where it is: the configuration tree for APP.OPTIONS.AGENT, Agent settings (menu ⋯ of the AGENT panel)
-  for the rest. You may suggest what narrows the agent: protecting a layer (tab Autonomy), a tool set to
+  for the rest. In the chat, show_settings_link puts a button that opens that tab or shows that setting. You may suggest what narrows the agent: protecting a layer (tab Autonomy), a tool set to
   "always ask" or "never" (tab Tools), a lower level.
 - A name and local paths (APP.USER_IDENTITY, CROSS_FILTER cache_dir and pdal_path): only said set or empty; the user
   sets them in the configuration tree.
