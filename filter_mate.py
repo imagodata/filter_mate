@@ -64,6 +64,27 @@ def _clear_layer_database(db_path):
         conn.close()
 
 
+def _forget_module_aliases(package):
+    """Drop the ``sys.modules`` entries of ``package`` that name a module under another name.
+
+    The compatibility shims of the modules moved to ``filtermate_core`` register
+    the moved module under their old name (``filter_mate.core.domain.x`` is
+    ``filter_mate.filtermate_core.domain.x``). QGIS tracks what a plugin imports
+    by the ``__name__`` of each module and removes those names when the plugin
+    unloads, so these aliases were left behind: after an update or a reload in
+    the session, the old names still gave the previous code next to the fresh
+    one (two copies of each class, ``isinstance`` and ``except`` failing across
+    them). Returns the names removed.
+    """
+    import sys
+    prefix = package + '.'
+    aliases = [key for key, module in list(sys.modules.items())
+               if key.startswith(prefix) and module is not None and getattr(module, '__name__', key) != key]
+    for key in aliases:
+        sys.modules.pop(key, None)
+    return aliases
+
+
 class FilterMate:
     """QGIS Plugin Implementation."""
 
@@ -1536,6 +1557,13 @@ class FilterMate:
         # The deferred callbacks (perform_reinitialization...) test it: an unloaded plugin has no app.
         self.app = None
         self.pluginIsActive = False
+
+        # Last: QGIS removes the plugin's modules after unload() by their own names only.
+        try:
+            removed = _forget_module_aliases(__name__.split('.')[0])
+            logger.debug(f"FilterMate: {len(removed)} module alias(es) released")
+        except Exception as e:  # never fail an unload on this
+            logger.debug(f"FilterMate: module aliases not released: {e}")
 
     # --------------------------------------------------------------------------
 

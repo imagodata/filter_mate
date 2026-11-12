@@ -24,6 +24,7 @@ All notable changes to FilterMate will be documented in this file.
 ### Filtering
 
 - **A filter is no longer dropped, showing the whole layer, when it starts with a function or names a field holding a quote.** On a GeoPackage or SpatiaLite layer, `coalesce("name", '') LIKE 'R%'` (written in the native SQL of the file as a `GLOB`) and `"nom d'usage" NOT LIKE 'A%'` were taken for display expressions by the check every subset goes through, and the layer showed all its features with no message; the same happened to `NOT ("type d'occupation" > 2)` before. Operators inside a field name no longer count either.
+- **An update or a reload of FilterMate in the session runs the new code everywhere.** The modules moved to the core of FilterMate kept their former names as aliases, which QGIS does not remove when a plugin unloads: after an update from the plugin manager, part of FilterMate still ran the previous version until QGIS was restarted (the native attribute filters were never applied then). The aliases are now released on unload.
 
 ## [5.1.0] - 2026-11-10
 

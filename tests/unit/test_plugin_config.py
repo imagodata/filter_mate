@@ -218,3 +218,41 @@ class TestResetConfiguration:
         sqlite3.connect(db).close()
 
         reset_env.namespace["_clear_layer_database"](db)  # no "no such table" error
+
+
+@pytest.mark.unit
+class TestModuleAliasesReleasedOnUnload:
+    """2026-11-12: the shims of ``filtermate_core`` register the moved module under its old name; QGIS only removes
+    the names it tracked (each module's ``__name__``) when the plugin unloads, so the old names survived a reload and
+    gave the previous code next to the fresh one."""
+
+    def test_only_the_aliases_of_the_package_are_dropped(self, monkeypatch):
+        namespace = _load([], {}, module_level=("_forget_module_aliases",))
+        moved = types.ModuleType("fmpkg.filtermate_core.domain.x")
+        own = types.ModuleType("fmpkg.adapters.y")
+        elsewhere = types.ModuleType("otherpkg.real")
+        entries = {
+            "fmpkg.filtermate_core.domain.x": moved,  # the moved module, under its own name: QGIS removes it
+            "fmpkg.core.domain.x": moved,  # the alias set by the shim
+            "fmpkg.adapters.y": own,
+            "fmpkg.missing": None,  # a failed relative import marker
+            "otherpkg.alias": elsewhere,  # another package: never touched
+            "fmpkg": types.ModuleType("fmpkg"),
+        }
+        for key, module in entries.items():
+            monkeypatch.setitem(sys.modules, key, module)
+
+        removed = namespace["_forget_module_aliases"]("fmpkg")
+
+        assert removed == ["fmpkg.core.domain.x"]
+        assert "fmpkg.core.domain.x" not in sys.modules
+        for key in ("fmpkg.filtermate_core.domain.x", "fmpkg.adapters.y", "fmpkg.missing", "otherpkg.alias", "fmpkg"):
+            assert key in sys.modules
+
+    def test_unload_releases_them_last(self):
+        source = _PLUGIN.read_text(encoding="utf-8")
+        unload = next(n for n in _class_methods(["unload"]))
+        last = unload.body[-1]
+        assert isinstance(last, ast.Try) and "_forget_module_aliases" in ast.unparse(last), (
+            "unload() must release the module aliases as its last step")
+        assert "_forget_module_aliases(__name__.split('.')[0])" in source
