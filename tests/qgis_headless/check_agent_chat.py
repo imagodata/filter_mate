@@ -1016,7 +1016,8 @@ def check_chat(provider, layer, authcfg, work):
     offered = [tool["function"]["name"] for tool in (provider.requests[0]["body"].get("tools") or [])] \
         if provider.requests else []
     check("Ollama: the filtering tools only once the user asks, and the model is told so",
-          offered and "apply_filter" in offered and "run_algorithm" not in offered and len(offered) <= 22
+          offered and "apply_filter" in offered and "run_algorithm" not in offered and len(offered) <= 23
+          and "ask_user" in offered  # the questions stay, lot D: light, and a local model needs them as much
           and "every tool" in provider.requests[0]["body"]["messages"][0]["content"], offered)
     panel.input.clear()
     check("Ollama: a consent given for its /v1 address up to 5.1 still counts",
