@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+## [5.1.1] - 2026-11-13
+
+The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with your own API key or a local Ollama model. New: the agent sets FilterMate up with you, asks its questions with choices to click and follows your own skills; the dock compares the map before and after the last filter; a filter reads the variables of QGIS, of the project and of the layer.
+
 ### AGENT (experimental)
 
 - **The free quota is removed: the agent works with your own API key or a local Ollama model.** The settings of the agent guide both: a link to create a key at the provider, a Test button that says whether it answers and lists its models, and for Ollama a note on where to install it, Refresh, and Download to fetch a model from the dialog (asked first, with progress and Cancel). A profile that was on the free quota reads as no provider chosen. Guided edges, fixed after a review: Test no longer fails on OpenAI (it sent an empty list of tools), a model of another provider (a Claude name) is not carried over when you pick Ollama, a model typed without its tag (`llama3`) counts as installed, Save and Cancel wait for a Test or a download instead of leaving a dialog half-closed or saving a model Ollama does not have, the Test of Ollama asks for a few tokens and waits up to two minutes for a model to load, the models listed are the newest ones, a key of a few characters no longer garbles the messages, and the address and token of the former relay are forgotten.
