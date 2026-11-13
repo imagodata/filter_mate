@@ -17,7 +17,8 @@ QGIS adapter), and only where the source gives the answer QGIS gives:
   (PostgreSQL truncates integers and raises), an arithmetic on reals is run in
   double precision as QGIS runs it (``numeric`` is exact); ``ILIKE`` folds
   case by the locale of the database, so it is written ``SIMILAR TO`` with a
-  class per letter (as for SQLite below), for ASCII patterns only;
+  class per letter (as for SQLite below), for ASCII patterns only, the long s
+  and the Kelvin sign in the classes of a UTF-8 database only;
 - SQLite: a column may declare a collation (NOCASE, RTRIM), so the equality
   of texts is written ``COLLATE BINARY``; ``LIKE`` ignores the case of ASCII
   letters and follows a pragma, so LIKE and ILIKE are both written with
@@ -311,8 +312,10 @@ class _Writer:
     """Writes one AND operand; raises :class:`Unsupported` on anything unproven."""
 
     def __init__(self, dialect: str, types: Dict[str, Optional[str]], case_sensitive_like: bool = False,
-                 geometry: Optional[NativeGeometry] = None):
+                 geometry: Optional[NativeGeometry] = None, other_cases: Optional[bool] = True):
         self.dialect = dialect
+        # PostgreSQL ILIKE: whether the texts of the database may hold the long s and the Kelvin sign
+        self.other_cases = other_cases
         self.types = types
         self.geometry = geometry
         self.ands = 0  # AND written so far, user's or ours (OGR SQL: no NOT over one)
@@ -727,8 +730,13 @@ class _Writer:
                 raise Unsupported('An ILIKE pattern that is not ASCII or holds an escape')
             if any(char in pattern for char in '|*+?{}()[]'):
                 raise Unsupported('An ILIKE pattern holding SIMILAR TO metacharacters')
+            # The long s and the Kelvin sign exist in a UTF-8 database only: elsewhere the server refuses
+            # the pattern ("no equivalent in encoding LATIN1"), or reads its bytes one by one (SQL_ASCII).
+            if self.other_cases is None and any(char.lower() in _OTHER_CASES for char in pattern):
+                raise Unsupported('An ILIKE pattern holding k or s for a database whose encoding is not known')
+            others = _OTHER_CASES if self.other_cases else {}
             similar = ''.join(
-                '[' + char.lower() + char.upper() + _OTHER_CASES.get(char.lower(), '') + ']'
+                '[' + char.lower() + char.upper() + others.get(char.lower(), '') + ']'
                 if char.isalpha() else char for char in pattern)
             right, _ = self._literal(similar)
             return '({} {}SIMILAR TO {})'.format(left, 'NOT ' if negated else '', right)
@@ -863,7 +871,8 @@ def uses_geometry(node: Node) -> bool:
 
 def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
                      case_sensitive_like: bool = False, variables: Optional[Dict[str, object]] = None,
-                     geometry: Optional[NativeGeometry] = None) -> NativeTranslation:
+                     geometry: Optional[NativeGeometry] = None,
+                     other_cases: Optional[bool] = True) -> NativeTranslation:
     """Write a QGIS predicate for a data source, splitting a top-level AND only.
 
     Args:
@@ -882,6 +891,12 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
             follow a later change of the variable.
         geometry: The source's geometry column, for the geometric functions
             written natively; None writes none.
+        other_cases: PostgreSQL only: whether the texts of the database may
+            hold the long s and the Kelvin sign, which QGIS's ILIKE reads as
+            ``s`` and ``k``. True (a UTF-8 database) writes them in the class
+            of the letter; False (an encoding that has neither) leaves them
+            out, the server refusing a pattern it cannot encode; None (not
+            known) leaves an ILIKE on ``s`` or ``k`` untranslated.
 
     Returns:
         NativeTranslation; nothing is dropped, the untranslated operands are
@@ -899,7 +914,7 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
                 visit(child)
             return
         try:
-            writer = _Writer(dialect, types, case_sensitive_like, geometry)
+            writer = _Writer(dialect, types, case_sensitive_like, geometry, other_cases)
             original, part = part, _fold_variables(part, variables or {})
             written.append(writer.predicate(part))
             native.append('(' + part.text + ')')

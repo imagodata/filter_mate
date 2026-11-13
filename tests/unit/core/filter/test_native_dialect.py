@@ -652,3 +652,17 @@ def test_postgresql_hybrid_lists_keys_without_a_collation():
 def test_hybrid_is_not_written_for_ogr_sql():
     with pytest.raises(Unsupported):
         hybrid_sql('', [1], None, '"fid"', True, OGR_SQL)
+
+
+def test_postgresql_ilike_writes_the_long_s_and_the_kelvin_sign_for_a_utf8_database_only():
+    # 2026-11-13: on a LATIN1 database the server refused '[sSſ]' ("no equivalent in encoding LATIN1"),
+    # so every ILIKE holding s or k failed; on SQL_ASCII the class matched single bytes.
+    node = binary('ILIKE', col('nom'), lit('sk%'))
+    assert translate_native(node, POSTGRESQL, TYPES, other_cases=True).sql == '"nom" SIMILAR TO \'[sS\u017f][kK\u212a]%\''
+    assert translate_native(node, POSTGRESQL, TYPES, other_cases=False).sql == '"nom" SIMILAR TO \'[sS][kK]%\''
+    unknown = translate_native(node, POSTGRESQL, TYPES, other_cases=None)
+    assert unknown.status == TranslationStatus.NONE and 'encoding is not known' in unknown.reason
+    # a pattern with neither letter is written whatever the encoding
+    plain = binary('NOT ILIKE', col('nom'), lit('route%'))
+    assert translate_native(plain, POSTGRESQL, TYPES, other_cases=None).sql == \
+        '"nom" NOT SIMILAR TO \'[rR][oO][uU][tT][eE]%\''
