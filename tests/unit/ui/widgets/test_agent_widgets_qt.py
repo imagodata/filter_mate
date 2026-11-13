@@ -247,3 +247,57 @@ class TestThread:
         assert label.toolTip() == ('<p style="white-space: pre-wrap;">&lt;b&gt;&quot;type&quot;&lt;/b&gt; = '
                                    '&#x27;a&#x27;\n  b</p>')
         assert thread_module.plain_tooltip("") == ""
+
+
+_TEXTS = {"other": "Other", "answer": "Answer", "no_answer": "No answer", "close": "Close without answering"}
+
+
+def _questions():
+    questions_module = importlib.import_module(f"{_PKG}.core.agent.questions")
+    return questions_module.parse_questions([
+        {"question": "Which roads?", "header": "Roads",
+         "options": [{"label": "Main only (Recommended)"}, {"label": "All"}]},
+        {"question": "Which extras?", "header": "Extras", "multi_select": True,
+         "options": [{"label": "Labels"}, {"label": "Zoom"}]}])
+
+
+class TestQuestionCard:
+    def test_answer_needs_each_question_then_freezes_with_the_choices(self, thread):
+        card = thread.add_question_card(_TEXTS, _questions())
+        answered = []
+        card.answered.connect(answered.append)
+        assert not card.answer_button.isEnabled()
+        main = card._groups[0][0][0][0]
+        main.click()
+        assert not card.answer_button.isEnabled()  # the second question has no answer yet
+        labels = card._groups[1][0][0][0]
+        labels.click()
+        assert card.answer_button.isEnabled()
+        card.answer_button.click()
+        assert answered == [[(["Main only (Recommended)"], ""), (["Labels"], "")]]
+        assert card.done and not card.answer_button.isVisible()
+        assert "Roads: Main only (Recommended)" in card.result.text()
+        plain = thread.toPlainText()
+        assert "? Which roads?" in plain and "Extras: Labels" in plain
+        main.click()  # frozen: a click changes nothing, and nothing is emitted again
+        assert len(answered) == 1 and card.selections()[0] == (["Main only (Recommended)"], "")
+
+    def test_other_needs_its_text_and_gives_it_as_the_answer(self, thread):
+        card = thread.add_question_card(_TEXTS, _questions()[:1])
+        answered = []
+        card.answered.connect(answered.append)
+        _buttons, other, field = card._groups[0]
+        other.click()
+        assert field.isEnabled() and not card.answer_button.isEnabled()
+        field.setText("the forest tracks")
+        assert card.answer_button.isEnabled()
+        field.returnPressed.emit()
+        assert answered == [[([], "the forest tracks")]]
+
+    def test_closing_the_card_declines(self, thread):
+        card = thread.add_question_card(_TEXTS, _questions()[:1])
+        declined = []
+        card.declined.connect(lambda: declined.append(True))
+        card.close_button.click()
+        assert declined == [True] and card.done and card.result.text() == "No answer"
+        assert "No answer" in thread.toPlainText()

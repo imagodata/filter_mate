@@ -457,6 +457,26 @@ Run it?</source>
         <translation>ወኪሉ እነዚህን የFilterMate ቅንብሮች መቀየር ይፈልጋል</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Other</source>
+        <translation>ሌላ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Answer</source>
+        <translation>መልስ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>No answer</source>
+        <translation>መልስ የለም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="798"/>
+        <source>Close without answering</source>
+        <translation>ሳይመልስ ዝጋ</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
         <source>They stay for every project; undoing the turn puts them back.</source>
         <translation>ለሁሉም ፕሮጀክቶች ይቆያሉ፤ ዙሩን መቀልበስ ወደ ቀድሞው ይመልሳቸዋል።</translation>

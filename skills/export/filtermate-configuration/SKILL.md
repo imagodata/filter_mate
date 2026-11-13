@@ -35,9 +35,12 @@ When the user asks to set FilterMate up (the setup the panel offers once per ver
 1. Look first, before any question: list_layers and map_context say which kinds of layers and sources the project
    holds (PostgreSQL, GeoPackage, WFS, rasters, point clouds); describe_settings with changed_only says what was
    already set.
-2. Ask a few questions in one message, three or four at most, in the language of the user: what they mostly do
-   with FilterMate, their screen (small, usual, very large), the language and the look they want, whether their
-   data is large or remote. Skip what the project already answers.
+2. Ask a few questions, three or four at most, in the language of the user: what they mostly do with
+   FilterMate, their screen (small, usual, very large), the language and the look they want, whether their data
+   is large or remote. In the chat, ask them in one ask_user call, one question each with those choices named
+   (the one the project suggests first, followed by " (Recommended)"); another application asks them in one
+   message. Skip what the project already answers. Declined, propose the settings from what the project says
+   alone and say so.
 3. With the answers, make one change_settings with everything: the user sees each setting before and after.
 4. Then the agent itself, which only the user changes: the level of autonomy and the layers it never changes, the
    tools always asked. Tell the user where: Agent settings (menu ⋯ of the AGENT panel), tabs Autonomy and Tools; in

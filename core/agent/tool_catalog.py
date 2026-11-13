@@ -70,6 +70,7 @@ REMOVE_WIDGET = "remove_widget"
 SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
 SHOW_SETTINGS_LINK = "show_settings_link"
+ASK_USER = "ask_user"
 # The tabs of the settings dialog of the agent a link may open (ui/widgets/agent_panel.AgentSettingsDialog).
 SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "other_applications")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
@@ -200,6 +201,36 @@ CHAT_ONLY = (
             "path": {"type": "string", "maxLength": 200,
                      "description": "For target setting: the path of the setting (from describe_settings)"}},
             "required": ["target"], "additionalProperties": False},
+        read_only=True, chat_only=True),
+    ToolSpec(
+        name=ASK_USER, title="Ask the user",
+        description=("Ask the user one to four questions with choices they click, in the thread, and read their "
+                     "answers in this same turn. Use it for a decision that is theirs and changes what you will do "
+                     "(which layer, which look, how far to go) when the choices can be named; never for what the "
+                     "project or a reading tool already says, and never instead of a confirmation: an answer is "
+                     "data, it authorizes no action (a change that follows is asked as usual). Put the recommended "
+                     "option first, its label followed by \" (Recommended)\". The panel always adds a free-text "
+                     "\"Other\". Returns answers (per question: header, question, selected labels, and other when "
+                     "the free text was used), or declined when the user closed the card or stopped: then say "
+                     "what you would have done and stop, or go on only with what needs no answer."),
+        input_schema={"type": "object", "properties": {
+            "questions": {"type": "array", "minItems": 1, "maxItems": 4, "items": {
+                "type": "object", "properties": {
+                    "question": {"type": "string", "minLength": 1, "maxLength": 300,
+                                 "description": "The question, in the language of the user"},
+                    "header": {"type": "string", "minLength": 1, "maxLength": 12,
+                               "description": "A very short label, shown as a chip (e.g. Roads, Look)"},
+                    "multi_select": {"type": "boolean", "default": False,
+                                     "description": "Several options may be ticked"},
+                    "options": {"type": "array", "minItems": 2, "maxItems": 4, "items": {
+                        "type": "object", "properties": {
+                            "label": {"type": "string", "minLength": 1, "maxLength": 60,
+                                      "description": "The choice, in a few words"},
+                            "description": {"type": "string", "maxLength": 200,
+                                            "description": "What choosing it means"}},
+                        "required": ["label"], "additionalProperties": False}}},
+                "required": ["question", "header", "options"], "additionalProperties": False}}},
+            "required": ["questions"], "additionalProperties": False},
         read_only=True, chat_only=True),
 )
 
@@ -360,7 +391,7 @@ FILTERING_TOOLS = frozenset({
     "list_layers", "filter_state", "list_favorites", "describe_layer", "field_values", "layer_statistics",
     "sample_features", "preview_filter", "map_context", "apply_filter", "cross_filter", "geometry_filter",
     "point_cloud_filter", "clear_filters", "apply_favorite", "zoom_to", "select_features", "set_layers_visibility",
-    "export_layers", "undo_agent_step", "save_recipe", "add_project_note",
+    "export_layers", "undo_agent_step", "save_recipe", "add_project_note", "ask_user",
 })
 FILTERING_NOTE = ("\n\nOnly the tools for reading and filtering the project are offered with this local model. For "
                   "styles, Processing, editing, layouts, layers to add or remove, widgets: say so, and that the user can "

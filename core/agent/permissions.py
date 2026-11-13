@@ -69,8 +69,10 @@ VIEW_TOOLS = frozenset({"zoom_to", "select_features", "set_layers_visibility", "
 BUFFER_TOOLS = frozenset({"update_features", "add_features", "add_field"})
 # Code written by the model: outside at every level, and asked at every run (each one is new code).
 CODE_TOOLS = frozenset({"run_pyqgis"})
-# What the user asks of the agent about its own work: its history, its notes and its recipes. They run at every level.
-AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe"})
+# What the user asks of the agent about its own work: its history, its notes and its recipes. And the questions it
+# asks them (ask_user): an answer changes nothing and authorizes nothing. They run at every level.
+AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_note", "save_recipe", "remove_recipe",
+                       "ask_user"})
 # The settings of FilterMate itself (config.json, a file of this machine, kept beyond the project): always shown to
 # the user before and after, at every level, advisor included (2026-11-12, decided with the user); at the autonomous
 # level, how the panel looks changes without a question. The settings of the agent are refused by the tool itself.

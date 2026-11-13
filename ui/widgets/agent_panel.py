@@ -881,6 +881,13 @@ class AgentPanel(QFrame):
         self._in_answer = False
         return card
 
+    def add_question_card(self, texts: dict, questions):
+        """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread)."""
+        self._show_conversation()
+        card = self.thread.add_question_card(texts, questions)
+        self._in_answer = False
+        return card
+
     def add_link(self, label: str, on_click) -> None:
         """A button the agent puts in the thread: the user goes to a setting when they want."""
         self._show_conversation()

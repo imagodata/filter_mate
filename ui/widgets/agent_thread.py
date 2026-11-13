@@ -14,8 +14,11 @@ from typing import Callable, List, Optional, Sequence
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QFontMetrics
 from qgis.PyQt.QtWidgets import (
-    QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QSizePolicy, QVBoxLayout, QWidget,
+    QButtonGroup, QCheckBox, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QScrollArea,
+    QSizePolicy, QVBoxLayout, QWidget,
 )
+
+from ...core.agent.questions import MAX_OTHER
 
 BUBBLE_SHARE = 0.88  # of the width of the thread
 ANSWER_DELAY_MS = 80  # the answer being written is drawn again at most so often, whatever the number of fragments
@@ -187,6 +190,194 @@ class SettingsCard(QFrame):
         _sheet(self.cancel_button, f"QPushButton {{ font-size: 12px; padding: 4px 12px; border: 1px solid"
                                    f" {palette['fm_group_border']}; border-radius: 6px; background: {palette['fm_list']};"
                                    f" color: {palette['fm_text']}; }}")
+
+
+class QuestionCard(QFrame):
+    """The questions of ``ask_user`` in the thread: choices to click (one, or several when the question says so),
+    a free "Other" the panel always adds, and Answer once each question has one. The controller waits for
+    ``answered`` (the labels ticked and the free text, per question) or ``declined`` (the card closed); the card
+    then freezes showing what was chosen. An answer changes nothing and authorizes nothing."""
+
+    answered = pyqtSignal(object)  # [(selected labels, free text), ...], one per question
+    declined = pyqtSignal()
+
+    def __init__(self, texts: dict, questions, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.setObjectName("frame_agent_questions")
+        self._texts = texts
+        self._questions = list(questions)
+        self._done = False
+        self._groups = []  # per question: ([(button, label)], other button, other field)
+        self._chips: List[QLabel] = []
+        self._headings: List[QLabel] = []
+        self._muted: List[QLabel] = []
+        self._choices = []  # every radio / check box, for the theme
+        self._fields: List[QLineEdit] = []
+        column = QVBoxLayout(self)
+        column.setContentsMargins(10, 10, 10, 10)
+        column.setSpacing(8)
+        for question in self._questions:
+            heading = QHBoxLayout()
+            heading.setContentsMargins(0, 0, 0, 0)
+            heading.setSpacing(6)
+            chip = _plain_label(question.header, self, wrap=False)
+            chip.setObjectName("label_agent_question_chip")
+            self._chips.append(chip)
+            heading.addWidget(chip, 0, Qt.AlignmentFlag.AlignTop)
+            text = _plain_label(question.question, self)
+            self._headings.append(text)
+            heading.addWidget(text, 1)
+            column.addLayout(heading)
+            group = QButtonGroup(self)
+            group.setExclusive(not question.multi_select)
+            buttons = []
+            for option in question.options:
+                button = QCheckBox(option.label, self) if question.multi_select else QRadioButton(option.label, self)
+                button.setCursor(Qt.CursorShape.PointingHandCursor)
+                group.addButton(button)
+                self._choices.append(button)
+                buttons.append((button, option.label))
+                column.addWidget(button)
+                if option.description:
+                    note = _plain_label(option.description, self)
+                    note.setContentsMargins(18, 0, 0, 0)
+                    self._muted.append(note)
+                    column.addWidget(note)
+            other_row = QHBoxLayout()
+            other_row.setContentsMargins(0, 0, 0, 0)
+            other_row.setSpacing(6)
+            other = QCheckBox(texts["other"], self) if question.multi_select else QRadioButton(texts["other"], self)
+            other.setObjectName("checkBox_agent_question_other" if question.multi_select
+                                else "radioButton_agent_question_other")
+            other.setCursor(Qt.CursorShape.PointingHandCursor)
+            group.addButton(other)
+            self._choices.append(other)
+            other_row.addWidget(other)
+            field = QLineEdit(self)
+            field.setObjectName("lineEdit_agent_question_other")
+            field.setMaxLength(MAX_OTHER)
+            field.setEnabled(False)
+            self._fields.append(field)
+            other_row.addWidget(field, 1)
+            column.addLayout(other_row)
+            other.toggled.connect(lambda checked, box=field: self._other_toggled(box, checked))
+            field.textChanged.connect(lambda _text: self._refresh())
+            field.returnPressed.connect(self._submit)
+            for button, _label in buttons:
+                button.toggled.connect(lambda _checked: self._refresh())
+            self._groups.append((buttons, other, field))
+        row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        self.answer_button = QPushButton(texts["answer"], self)
+        self.answer_button.setObjectName("pushButton_agent_questions_answer")
+        self.answer_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.answer_button.setEnabled(False)
+        self.answer_button.clicked.connect(self._submit)
+        row.addWidget(self.answer_button)
+        self.close_button = QPushButton("✕", self)
+        self.close_button.setObjectName("pushButton_agent_questions_close")
+        self.close_button.setFlat(True)
+        self.close_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.close_button.setToolTip(plain_tooltip(texts["close"]))
+        self.close_button.clicked.connect(self._close)
+        row.addWidget(self.close_button)
+        row.addStretch(1)
+        column.addLayout(row)
+        self.result = _plain_label("", self)
+        self.result.setVisible(False)
+        column.addWidget(self.result)
+        self._summary: List[str] = []
+
+    @property
+    def done(self) -> bool:
+        return self._done
+
+    def selections(self):
+        """Per question: (the labels ticked, the free text of Other or "")."""
+        chosen = []
+        for buttons, other, field in self._groups:
+            selected = [label for button, label in buttons if button.isChecked()]
+            chosen.append((selected, field.text().strip() if other.isChecked() else ""))
+        return chosen
+
+    def summary_lines(self) -> List[str]:
+        """What the frozen card and the transcription say of the answers, once it is done."""
+        return list(self._summary)
+
+    def finish(self, with_answers: bool) -> None:
+        """Answered or not: the choices freeze as they were left, and what was chosen stays written."""
+        if self._done:
+            return
+        self._done = True
+        if with_answers:
+            self._summary = [f"{question.header}: " + ", ".join([*selected, *([other] if other else [])])
+                             for question, (selected, other) in zip(self._questions, self.selections())]
+            self.result.setText("\n".join(self._summary))
+        else:
+            self._summary = [self._texts["no_answer"]]
+            self.result.setText(self._texts["no_answer"])
+        for widget in (*self._choices, *self._fields):
+            widget.setEnabled(False)
+        for button in (self.answer_button, self.close_button):
+            button.setEnabled(False)
+            button.setVisible(False)
+        self.result.setVisible(True)
+
+    def restyle(self, palette: dict, _dark: bool) -> None:
+        _sheet(self, f"QFrame#frame_agent_questions {{ background: {palette['fm_list']}; border: 1px solid"
+                     f" {palette['fm_accent']}; border-radius: 6px; }} QFrame#frame_agent_questions QLabel {{"
+                     " background: transparent; border: none; padding: 0px; }")
+        for chip in self._chips:
+            _sheet(chip, f"background: {palette['fm_active']}; color: {palette['fm_text']}; border-radius: 4px;"
+                         " padding: 1px 6px; font-size: 11px; font-weight: 600;")
+        for heading in self._headings:
+            _sheet(heading, f"font-size: 12px; font-weight: 600; color: {palette['fm_text']};")
+        for label in self._muted:
+            _sheet(label, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        _sheet(self.result, f"font-size: 11px; color: {palette['fm_text_muted']};")
+        for choice in self._choices:
+            _sheet(choice, f"font-size: 12px; color: {palette['fm_text']}; spacing: 6px;")
+        for field in self._fields:
+            _sheet(field, f"QLineEdit {{ font-size: 12px; color: {palette['fm_text']};"
+                          f" background: {palette['fm_field']}; border: 1px solid {palette['fm_field_border']};"
+                          " border-radius: 4px; padding: 2px 6px; }")
+        _sheet(self.answer_button, f"QPushButton {{ font-size: 12px; font-weight: 600; padding: 4px 14px;"
+                                   f" border: none; border-radius: 6px; background: {palette['fm_accent']};"
+                                   " color: white; } QPushButton:disabled { background: "
+                                   f"{palette['fm_group_border']}; }}")
+        _sheet(self.close_button, f"QPushButton {{ color: {palette['fm_text_muted']}; background: none;"
+                                  " border: none; padding: 0 4px; font-size: 12px; min-height: 0; }")
+
+    def _other_toggled(self, field: QLineEdit, checked: bool) -> None:
+        field.setEnabled(checked and not self._done)
+        if checked:
+            field.setFocus()
+        self._refresh()
+
+    def _complete(self) -> bool:
+        for buttons, other, field in self._groups:
+            if other.isChecked() and not field.text().strip():
+                return False
+            if not other.isChecked() and not any(button.isChecked() for button, _label in buttons):
+                return False
+        return True
+
+    def _refresh(self) -> None:
+        if not self._done:
+            self.answer_button.setEnabled(self._complete())
+
+    def _submit(self) -> None:
+        if self._done or not self._complete():
+            return
+        chosen = self.selections()
+        self.finish(True)
+        self.answered.emit(chosen)
+
+    def _close(self) -> None:
+        if self._done:
+            return
+        self.finish(False)
+        self.declined.emit()
 
 
 class ChangeCard(QFrame):
@@ -436,6 +627,22 @@ class AgentThread(QScrollArea):
         self._append(_Item(card, plain, "settings", card.restyle))
         self.end_answer()
         return card
+
+    def add_question_card(self, texts: dict, questions) -> "QuestionCard":
+        """The questions of ask_user in the thread (QuestionCard); the caller waits for ``answered``/``declined``,
+        and the transcription keeps the questions with what was chosen."""
+        card = QuestionCard(texts, questions, self._content)
+        plain = "\n".join(f"? {question.question}" for question in questions)
+        item = _Item(card, plain, "questions", card.restyle)
+        card.answered.connect(lambda _chosen: self._close_question_item(item, card))
+        card.declined.connect(lambda: self._close_question_item(item, card))
+        self._append(item)
+        self.end_answer()
+        return card
+
+    @staticmethod
+    def _close_question_item(item: "_Item", card: "QuestionCard") -> None:
+        item.plain += "".join(f"\n   {line}" for line in card.summary_lines())
 
     def add_link(self, label: str, on_click: Callable[[], None]) -> None:
         """A button of the agent that takes the user somewhere (a tab of the settings, a setting)."""

@@ -9,7 +9,7 @@ from dataclasses import asdict, replace
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
 from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 
 from ...adapters.agent.qt_transport import QtTransport
@@ -22,7 +22,7 @@ from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
 from ...adapters.agent.plugin_settings import settings_handlers
-from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, owned_by
+from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, on_abort, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -53,8 +53,9 @@ from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
+from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
-    ADD_NOTE, CREATE_WIDGET, FILTERING_NOTE, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
+    ADD_NOTE, ASK_USER, CREATE_WIDGET, FILTERING_NOTE, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
     LOAD_SKILL, VIEW_MAP, chat_tools, filtering_only, with_skill_tool,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
@@ -734,6 +735,7 @@ class AgentChatController(QObject):
         handlers[REMOVE_WIDGET] = self._remove_widget_tool
         handlers[SAVE_RECIPE] = self._save_recipe_tool
         handlers[REMOVE_RECIPE] = self._remove_recipe_tool
+        handlers[ASK_USER] = self._ask_user_tool
         handlers["show_settings_link"] = self._settings_link_tool
         return tools, handlers, active
 
@@ -780,6 +782,51 @@ class AgentChatController(QObject):
             raise ToolFailure(str(exc)) from None
         write_notes(notes)
         return {"notes": [f"{number}. {note}" for number, note in enumerate(notes, 1)]}
+
+    def _ask_user_tool(self, arguments) -> dict:
+        """ask_user: questions with choices in the thread; the answer comes back in this same turn.
+
+        The wait spins a local event loop, so QGIS stays usable and the thread scrollable; Stop (the waits of
+        the chat, ``on_abort``) or the card taken away ends it without an answer. An answer is data: whatever
+        the model does with it goes through the permissions as usual.
+        """
+        try:
+            questions = parse_questions(arguments.get("questions"))
+        except ValueError as exc:
+            raise ToolFailure(str(exc)) from None
+        texts = {"other": _tr("Other"), "answer": _tr("Answer"), "no_answer": _tr("No answer"),
+                 "close": _tr("Close without answering")}
+        try:
+            card = self.panel.add_question_card(texts, questions)
+        except RuntimeError:  # the panel is gone: nobody to ask
+            return {"declined": True}
+        loop = QEventLoop()
+        outcome = {}
+
+        def answered(chosen) -> None:
+            outcome["payload"] = answers_payload(questions, chosen)
+            loop.quit()
+
+        def declined() -> None:
+            outcome.setdefault("payload", {"declined": True})
+            loop.quit()
+
+        def stopped() -> None:
+            try:
+                card.finish(False)
+            except RuntimeError:  # the card went with the panel
+                pass
+            declined()
+
+        card.answered.connect(answered)
+        card.declined.connect(declined)
+        card.destroyed.connect(lambda *_args: declined())  # a new conversation, the panel taken away
+        forget = on_abort(stopped)
+        try:
+            loop.exec()
+        finally:
+            forget()
+        return outcome.get("payload", {"declined": True})
 
     @staticmethod
     def _remove_note_tool(arguments) -> dict:

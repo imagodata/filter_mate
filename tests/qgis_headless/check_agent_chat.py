@@ -477,6 +477,82 @@ def check_families(chat, provider, settings, ask):
     settings()
 
 
+def check_ask_user(panel, provider, ask):
+    """ask_user (lot D): the card in the thread, clicked while the request waits; the answer comes back in the turn."""
+    from qgis.PyQt.QtCore import QTimer
+
+    from filter_mate.ui.widgets.agent_thread import QuestionCard
+
+    questions = {"questions": [
+        {"question": "Quelles routes ?", "header": "Routes",
+         "options": [{"label": "Principales (Recommended)"}, {"label": "Toutes"}]},
+        {"question": "Quels extras ?", "header": "Extras", "multi_select": True,
+         "options": [{"label": "Noms"}, {"label": "Zoom"}]}]}
+
+    def when_card(action, tries=60):
+        card = next((item.widget for item in reversed(panel.thread._items)
+                     if isinstance(item.widget, QuestionCard) and not item.widget.done), None)
+        if card is not None:
+            action(card)
+        elif tries:
+            QTimer.singleShot(100, lambda: when_card(action, tries - 1))
+        else:  # never hang the bench on a card that did not come: stop the request, the checks below fail aloud
+            panel.stop_requested.emit()
+
+    def result_of(index=1):
+        return provider.requests[index]["body"]["messages"][-1]["content"][0]["content"]
+
+    provider.reset((200, {}, tool_turn("ask_user", questions)), (200, {}, text_turn("Entendu.")))
+
+    def answer_both(card):
+        card._groups[0][0][0][0].click()
+        card._groups[1][0][0][0].click()
+        card._groups[1][0][1][0].click()
+        card.answer_button.click()
+
+    when_card(answer_both)
+    check("ask_user: a request that asks ends", ask("filtre les routes, demande-moi lesquelles"))
+    names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
+    check("ask_user: offered to the model", "ask_user" in names, names[:5])
+    given = result_of() if len(provider.requests) > 1 else ""
+    check("ask_user: the clicks come back in the same turn",
+          "Principales (Recommended)" in given and "Noms" in given and "Zoom" in given, given)
+    frozen = next(item.widget for item in reversed(panel.thread._items) if isinstance(item.widget, QuestionCard))
+    check("ask_user: the card freezes with the choices, kept in the thread",
+          frozen.done and "Routes: Principales (Recommended)" in panel.thread.toPlainText(),
+          panel.thread.toPlainText()[-300:])
+
+    provider.reset((200, {}, tool_turn("ask_user", {"questions": questions["questions"][:1]})),
+                   (200, {}, text_turn("Entendu.")))
+
+    def answer_other(card):
+        card._groups[0][1].click()
+        card._groups[0][2].setText("les pistes forestières")
+        card._groups[0][2].returnPressed.emit()
+
+    when_card(answer_other)
+    ask("et lesquelles alors ?")
+    given = result_of() if len(provider.requests) > 1 else ""
+    check("ask_user: the free text of Other comes back as other",
+          '"other": "les pistes forestières"' in given, given)
+
+    provider.reset((200, {}, tool_turn("ask_user", {"questions": questions["questions"][:1]})),
+                   (200, {}, text_turn("Comme vous voulez.")))
+    when_card(lambda card: card.close_button.click())
+    ask("demande encore")
+    given = result_of() if len(provider.requests) > 1 else ""
+    check("ask_user: closing the card declines", '"declined": true' in given, given)
+
+    provider.reset((200, {}, tool_turn("ask_user", {"questions": questions["questions"][:1]})),
+                   (200, {}, text_turn("jamais lu")))
+    when_card(lambda card: panel.send_button.click())  # Stop, while the card waits
+    ask("demande, je vais arrêter")
+    frozen = next(item.widget for item in reversed(panel.thread._items) if isinstance(item.widget, QuestionCard))
+    check("ask_user: Stop ends the wait and the request, the card says no answer",
+          len(provider.requests) == 1 and frozen.done and frozen.result.text() == "No answer",
+          (len(provider.requests), frozen.result.text()))
+
+
 def check_chat(provider, layer, authcfg, work):
     from filter_mate.adapters.agent.settings import AgentSettings, load_settings, save_settings, target_of
     from filter_mate.adapters.public_api.filter_mate_public_api import FilterMatePublicAPI
@@ -719,6 +795,8 @@ def check_chat(provider, layer, authcfg, work):
     ask("merci")
     check("and not again with the next request", '"type": "image"' not in json.dumps(provider.requests[0]["body"]))
 
+    check_ask_user(panel, provider, ask)
+
     check("no Python without the expert mode", "run_pyqgis" not in
           [tool.name for tool in chat.tools_and_handlers(load_settings())[0]])
     settings(expert_python=True)
@@ -938,7 +1016,8 @@ def check_chat(provider, layer, authcfg, work):
     offered = [tool["function"]["name"] for tool in (provider.requests[0]["body"].get("tools") or [])] \
         if provider.requests else []
     check("Ollama: the filtering tools only once the user asks, and the model is told so",
-          offered and "apply_filter" in offered and "run_algorithm" not in offered and len(offered) <= 22
+          offered and "apply_filter" in offered and "run_algorithm" not in offered and len(offered) <= 23
+          and "ask_user" in offered  # the questions stay, lot D: light, and a local model needs them as much
           and "every tool" in provider.requests[0]["body"]["messages"][0]["content"], offered)
     panel.input.clear()
     check("Ollama: a consent given for its /v1 address up to 5.1 still counts",
