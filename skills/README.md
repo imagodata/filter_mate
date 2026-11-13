@@ -80,7 +80,8 @@ to the open project file (trust `project`) follow the same layout (`adapters/age
 not instructions of FilterMate:
 
 - their trust comes from where they are, never from their header; a name of a skill of the plugin is refused, and a
-  project cannot replace a skill of the profile;
+  project cannot replace a skill of the profile; a name starting with `connector-` is refused too (the MCP connectors
+  are entries of `load_skill` under that prefix);
 - the folder of a project is the one next to its file, whatever home path the project sets;
 - one that does not follow this standard, is over 64 KB, is a link to another place (the sub-folder, its `SKILL.md`
   or the skills folder itself, told before it is followed) or holds a character that does not show on screen
