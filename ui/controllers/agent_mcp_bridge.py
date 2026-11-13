@@ -20,7 +20,7 @@ from ...core.agent.json_schema import validate
 from ...core.agent.mcp_server import EXTERNAL_MARK, HttpResponse, McpPrompt, McpProtocol, McpResource, RequestHead
 from ...core.agent.messages import ToolCallPart, ToolResultPart
 from ...core.agent.permissions import ASK, RULE_ALLOW, TURNED_OFF, PermissionPolicy
-from ...core.agent.tool_catalog import LOAD_SKILL, MCP_ONLY, ToolSpec, skill_tool
+from ...core.agent.tool_catalog import LOAD_SKILL, MCP_ONLY, ToolSpec, with_skill_tool
 from ...core.agent.tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
@@ -106,7 +106,7 @@ class AgentMcpBridge:
         names = {tool.name for tool in served}
         if LOAD_SKILL in names:
             from ...adapters.agent.plugin_settings import skill_loader
-            served = [skill_tool(names, audience="mcp") if tool.name == LOAD_SKILL else tool for tool in served]
+            served = with_skill_tool(served, names, audience="mcp")
             handlers = {**handlers, LOAD_SKILL: skill_loader(names, audience="mcp")}
         self._tools = tuple(served) + MCP_ONLY
         self._executor = ToolExecutor(self._tools, {**handlers, **image_handlers()})

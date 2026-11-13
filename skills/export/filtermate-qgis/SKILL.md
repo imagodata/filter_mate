@@ -1,6 +1,6 @@
 ---
 name: filtermate-qgis
-description: Drive QGIS through FilterMate through the MCP server of the FilterMate QGIS plugin: work in the QGIS of the user through the MCP server of FilterMate - read the project, filter layers of any kind, look at the map, export - and what the user is asked or sees. Use when the user asks for it in QGIS with FilterMate.
+description: "Drive QGIS through FilterMate through the MCP server of the FilterMate QGIS plugin: work in the QGIS of the user through the MCP server of FilterMate - read the project, filter layers of any kind, look at the map, export - and what the user is asked or sees. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/qgis/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->
