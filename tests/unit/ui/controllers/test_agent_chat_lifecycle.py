@@ -326,7 +326,7 @@ def test_another_project_stops_a_recipe_quietly(ctrl_module, controller, monkeyp
         project.cleared.emit()  # another project opened during the first step
         return {"ok": True}
 
-    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: ([write], {"write": tool}, []))
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values, for_chat=True: ([write], {"write": tool}, []))
     ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
         {"tool": "write", "arguments": {"n": 1}, "label": "one"}, {"tool": "write", "arguments": {"n": 2}, "label": "two"}]}]
     controller.panel.reset_mock()
@@ -398,7 +398,7 @@ def test_an_abandoned_recipe_lets_the_lines_of_other_applications_through(ctrl_m
         controller.journal(types.SimpleNamespace(name="apply_filter"), "result", "client")  # queued: the chat works
         return {"ok": True}
 
-    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: ([write], {"write": tool}, []))
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values, for_chat=True: ([write], {"write": tool}, []))
     ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
         {"tool": "write", "arguments": {"n": 1}, "label": "one"}]}]
     controller.run_recipe("r1")
@@ -415,7 +415,7 @@ def test_closing_the_dock_stops_a_recipe(ctrl_module, controller, monkeypatch):
         controller.stop()  # the dock closes during the first step
         return {"ok": True}
 
-    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: ([write], {"write": tool}, []))
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values, for_chat=True: ([write], {"write": tool}, []))
     ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
         {"tool": "write", "arguments": {"n": 1}, "label": "one"}, {"tool": "write", "arguments": {"n": 2}, "label": "two"}]}]
     assert controller.run_recipe("r1") is False
@@ -541,7 +541,7 @@ def _recipe_tools(monkeypatch, controller, ran, names=("add_layer", "remove_laye
     catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
     tools = [tool for tool in catalog.chat_tools() if tool.name in names]
     handlers = {tool.name: (lambda name: lambda arguments: ran.append(name) or {"ok": True})(tool.name) for tool in tools}
-    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: (tools, handlers, []))
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values, for_chat=True: (tools, handlers, []))
 
 
 def test_a_recipe_that_cannot_be_read_frees_the_panel(ctrl_module, controller, monkeypatch):
@@ -563,6 +563,19 @@ def test_a_recipe_that_cannot_be_read_frees_the_panel(ctrl_module, controller, m
     controller.panel.set_working.assert_called_with(False)
     note = controller.panel.add_note.call_args[0][0]
     assert "Step 1 was not run" in note and "recursion" not in note  # said in the thread; why is in the log
+
+
+def test_a_recipe_runs_with_every_tool_not_the_lighter_set_of_a_local_model(ctrl_module, controller, monkeypatch):
+    """No model runs a recipe: "only the tools that filter", for a small model in the chat, stopped its steps."""
+    ran, asked = [], []
+    _recipe_tools(monkeypatch, controller, ran)
+    chat_tools = controller.tools_and_handlers
+    monkeypatch.setattr(controller, "tools_and_handlers",
+                        lambda values, for_chat=True: asked.append(for_chat) or chat_tools(values, for_chat))
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "A", "expression": "1"}, "label": "one"}]}]
+    controller.run_recipe("r1")
+    assert asked == [False]
 
 
 def test_a_panel_that_fails_at_the_start_of_a_recipe_is_not_left_busy(ctrl_module, controller, monkeypatch):

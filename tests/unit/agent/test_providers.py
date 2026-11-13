@@ -9,7 +9,8 @@ from core.agent.messages import (
     StreamFailure, TextDelta, TextPart, ToolCallPart, ToolResultPart, TurnComplete,
 )
 from core.agent.providers import PRESETS, create_provider
-from core.agent.providers.base import ProviderConfig, SseDecoder, check_base_url, error_from_response
+from core.agent.providers.base import (
+    ProviderConfig, SseDecoder, check_base_url, error_from_response, without_credentials)
 from core.agent.tool_catalog import ToolSpec
 
 pytestmark = pytest.mark.unit
@@ -301,6 +302,24 @@ class TestShared:
         with pytest.raises(ValueError):
             create_provider(ProviderConfig("anthropic", "m", base_url="http://relay.example.org",
                                            extra_headers={"x-relay": SECRET}))
+
+    @pytest.mark.parametrize("url, shown", [
+        ("http://user:secret@gpu.lan:11434/api/tags", "http://gpu.lan:11434/api/tags"),
+        ("https://a@b@host/x?q=@#f", "https://host/x?q=@#f"),  # up to the last @ of the address, not of the query
+        ("http://u:secret@[::1", "http://[::1"),  # urlsplit refuses it: never shown whole for that
+        ("http://localhost:11434/api/tags", "http://localhost:11434/api/tags"),
+        ("http://user:pa/ss@gpu.lan:11434", "http://gpu.lan:11434"),  # a generated password holds "/"
+        ("http://admin:p@ss/w0rd@gpu.lan/api", "http://gpu.lan/api"),
+        ("user:secret@gpu.lan:11434", "gpu.lan:11434"),  # typed without http://
+        ("http://host/path@x", "http://x"),  # a path holding "@" is shown short: never a password
+        ("not a url", "not a url")])
+    def test_an_address_shown_to_the_user_leaves_its_credentials_out(self, url, shown):
+        assert without_credentials(url) == shown
+
+    def test_the_refusal_of_an_address_does_not_repeat_its_password(self):
+        with pytest.raises(ValueError) as refused:
+            check_base_url("ftp://user:secret@host/x", None)
+        assert "secret" not in str(refused.value) and "host/x" in str(refused.value)
 
     def test_key_never_in_repr(self):
         config = ProviderConfig("anthropic", "m", api_key=SECRET, extra_headers={"x-relay": SECRET})

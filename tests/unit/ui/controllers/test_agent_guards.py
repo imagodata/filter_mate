@@ -362,7 +362,7 @@ class TestSkillFromElsewhere:
         handlers = {tool.name: (lambda arguments: {}) for tool in tools}
         handlers["load_skill"] = settings.skill_loader(offered, lambda skill: asked.append(skill.name) or True)
         bridge = object.__new__(mcp_bridge.AgentMcpBridge)  # no server: sync alone
-        bridge._host = SimpleNamespace(tools_and_handlers=lambda values: (list(tools), handlers, []))
+        bridge._host = SimpleNamespace(tools_and_handlers=lambda values, for_chat=True: (list(tools), handlers, []))
         bridge._server = SimpleNamespace(close=lambda: None, serves=lambda port, token: True)
         monkeypatch.setattr(mcp_bridge, "load_settings",
                             lambda: SimpleNamespace(mcp_enabled=True, mcp_port=17823, mcp_token="t"))
