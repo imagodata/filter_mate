@@ -1050,6 +1050,7 @@ class AgentSettingsDialog(QDialog):
         consent_layout.addWidget(consent_note)
         self._models_reply = None  # the request listing the models of Ollama, while it runs
         self._closing = False  # done() has begun: no new request (the address loses the focus while it hides)
+        self._key_target = None  # the server the key field is for: another one starts with an empty field
         self.preset.currentIndexChanged.connect(self._on_preset)
         self.base_url.textChanged.connect(self._on_destination)
         self.base_url.editingFinished.connect(self._fetch_ollama_models)
@@ -1499,10 +1500,13 @@ class AgentSettingsDialog(QDialog):
         """What depends on the provider: its models, its address, whether it needs a key."""
         name = self.preset.currentData()
         typed = self.model.currentText()
+        listed = {self.model.itemText(index) for index in range(self.model.count())}  # the former provider's list
+        self.key.clear()  # typed for the former provider: it must not be sent to this one, nor stored for it
         self.model.clear()
         self.model.addItems(MODEL_SUGGESTIONS.get(name, ()))
         # The name of a model of another provider is not one of this one: Ollama would offer to download it.
-        self.model.setEditText("" if _belongs_to_another(typed.strip(), name) else typed)
+        other = _belongs_to_another(typed.strip(), name) or (typed in listed and typed not in MODEL_SUGGESTIONS.get(name, ()))
+        self.model.setEditText("" if other else typed)
         self.base_url.setPlaceholderText(PRESETS[name][1])
         no_key = name == "ollama"
         self.local_filtering_only.setVisible(name == "ollama")
@@ -1594,7 +1598,8 @@ class AgentSettingsDialog(QDialog):
         if asked is not None:  # Save, Cancel or Esc came meanwhile: it closes now
             self.done(asked)
             return
-        if self.preset.currentData() != preset:
+        if (self.preset.currentData(), self.base_url.text().strip(), self.key.text().strip()) != (preset, base_url, key):
+            self._show_provider_result("")  # the answer is about another provider, address or key than the fields now
             return
         # A provider may echo what it was sent in its errors.
         self._show_provider_result(without_key(str(message), key))
@@ -1833,6 +1838,9 @@ class AgentSettingsDialog(QDialog):
     def _on_destination(self, _text: str = "") -> None:
         """A key and a consent are for one server: another one starts without them."""
         target = self.chosen_target()
+        if self._key_target is not None and target != self._key_target:
+            self.key.clear()  # typed for another server: it must not be sent to this one, nor stored for it
+        self._key_target = target
         stored = bool(self._values.authcfg) and self._values.key_target == target and not self.forget_key
         self.key.setPlaceholderText(_tr("Stored: leave empty to keep it") if stored else "")
         self.forget_button.setVisible(stored and self.key.isVisibleTo(self))
