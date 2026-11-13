@@ -27,6 +27,7 @@ from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
 from ...core.agent.providers.base import check_base_url, without_credentials
+from ...core.agent.providers.model_list import KEY_PAGES
 from ...core.agent.providers.ollama_chat import installed_models, tags_url
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
@@ -49,7 +50,8 @@ _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 
 PRESET_LABELS = {"anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
-MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
+MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"),
+                     "mistral": ("mistral-small-latest", "mistral-medium-latest", "mistral-large-latest")}
 OLLAMA_TAGS_TIMEOUT_MS = 2000  # a local server answers at once; a missing one must not hold the dialog
 OLLAMA_TAGS_MAX_BYTES = 1_000_000  # the list of the installed models: a few KB
 
@@ -544,8 +546,8 @@ class AgentPanel(QFrame):
         self.welcome_text = QLabel(page)
         self.welcome_text.setObjectName("label_agent_welcome_text")
         self.welcome_text.setWordWrap(True)
-        self.welcome_note = QLabel(_tr("It needs an AI provider: the free quota of FilterMate, your own key, or a local "
-                                       "model. Nothing is sent before you agree."), page)
+        self.welcome_note = QLabel(_tr("It needs an AI provider: your own API key, or a local model with Ollama. "
+                                       "Nothing is sent before you agree."), page)
         self.welcome_note.setObjectName("label_agent_welcome_note")
         self.welcome_note.setWordWrap(True)
         self.configure_button = QPushButton(_tr("Connect a provider"), page)
@@ -890,7 +892,7 @@ class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
     def __init__(self, values, target_of, parent=None, tester=None, mcp_error="",
-                 project_layers=(), tools=()) -> None:
+                 project_layers=(), tools=(), provider_tester=None) -> None:
         super().__init__(parent)
         # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
         self._tools = list(tools)
@@ -899,6 +901,9 @@ class AgentSettingsDialog(QDialog):
         self.setProperty(OWN_STYLE_PROPERTY, True)  # styled as the mockup draws it: the dock must not reset it
         self.setWindowTitle(_tr("FilterMate agent"))
         self._tester = tester
+        # (preset, model, address, typed key) -> (it answers, what to say, the chat models it lists): the Test button.
+        self._provider_tester = provider_tester
+        self._testing = False  # a provider is being tested: the wait spins the event loop, a second click is ignored
         self._values = values
         self._target_of = target_of
         self.forget_key = False
@@ -918,6 +923,20 @@ class AgentSettingsDialog(QDialog):
         self.forget_button.setObjectName("pushButton_agent_forget_key")
         self.forget_button.setToolTip(_tr("Remove the stored key"))
         self.forget_button.clicked.connect(self._on_forget)
+        self.key_link = QLabel(self)
+        self.key_link.setObjectName("label_agent_key_link")
+        self.key_link.setTextFormat(Qt.TextFormat.RichText)  # the one address is ours (KEY_PAGES), the text is fixed
+        self.key_link.setOpenExternalLinks(True)
+        self.provider_test_button = QPushButton(_tr("Test"), self)
+        self.provider_test_button.setObjectName("pushButton_agent_provider_test")
+        self.provider_test_button.setToolTip(_tr("Send one short request to this provider, and list its models"))
+        self.provider_test_button.setEnabled(provider_tester is not None)
+        self.provider_test_button.clicked.connect(self._on_test_provider)
+        self.provider_result = QLabel(self)
+        self.provider_result.setObjectName("label_agent_settings_note")
+        self.provider_result.setTextFormat(Qt.TextFormat.PlainText)  # a provider words its errors: never read as HTML
+        self.provider_result.setWordWrap(True)
+        self.provider_result.setVisible(False)
         self.key_note = QLabel(_tr("The key is kept in the authentication database of QGIS, never in a settings file. "
                                    "It is only sent to this address."), self)
         self.key_note.setObjectName("label_agent_settings_note")
@@ -974,10 +993,25 @@ class AgentSettingsDialog(QDialog):
         key_row.setSpacing(6)
         key_row.addWidget(self.key, 1)
         key_row.addWidget(self.forget_button)
+        key_box = QVBoxLayout()
+        key_box.setContentsMargins(0, 0, 0, 0)
+        key_box.setSpacing(2)
+        key_box.addLayout(key_row)
+        key_box.addWidget(self.key_link)
+        model_row = QHBoxLayout()
+        model_row.setContentsMargins(0, 0, 0, 0)
+        model_row.setSpacing(6)
+        model_row.addWidget(self.model, 1)
+        model_row.addWidget(self.provider_test_button)
+        model_box = QVBoxLayout()
+        model_box.setContentsMargins(0, 0, 0, 0)
+        model_box.setSpacing(2)
+        model_box.addLayout(model_row)
+        model_box.addWidget(self.provider_result)
         form = QFormLayout()
         form.addRow(_tr("Provider"), self.preset)
-        form.addRow(self.model_label, self.model)
-        form.addRow(self.key_label, key_row)
+        form.addRow(self.model_label, model_box)
+        form.addRow(self.key_label, key_box)
         form.addRow(self.address_label, self.base_url)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
         buttons.button(QDialogButtonBox.StandardButton.Save).setObjectName("pushButton_agent_settings_save")
@@ -1401,6 +1435,11 @@ class AgentSettingsDialog(QDialog):
         self.key_label.setVisible(not no_key)
         self.key.setVisible(not no_key)
         self.key_note.setVisible(not no_key)
+        link = KEY_PAGES.get(name)
+        self.key_link.setVisible(link is not None)
+        if link is not None:
+            self.key_link.setText(f'<a href="{link}">{_tr("Create a key")}</a>')
+        self._show_provider_result("")  # what the test said was about the former provider
         self._on_destination()
         self._fetch_ollama_models()
 
@@ -1437,6 +1476,41 @@ class AgentSettingsDialog(QDialog):
         reply.downloadProgress.connect(
             lambda received, _total, answered=reply: answered.abort() if received > OLLAMA_TAGS_MAX_BYTES else None)
         reply.finished.connect(lambda answered=reply, address=url: self._on_ollama_models(answered, address))
+
+    def _show_provider_result(self, text: str) -> None:
+        self.provider_result.setText(text)
+        self.provider_result.setVisible(bool(text))
+
+    def _on_test_provider(self) -> None:
+        """Test: does this provider answer with this key and this model, and which chat models does it list?
+
+        The tester waits for the provider, so the event loop runs: nothing else is started, and what comes back is
+        dropped if the user chose another provider meanwhile. The key is typed here, and never shown."""
+        if self._provider_tester is None or self._testing or self._closing:
+            return
+        preset, model = self.preset.currentData(), self.model.currentText().strip()
+        base_url, key = self.base_url.text().strip(), self.key.text().strip()
+        self._testing = True
+        self.provider_test_button.setEnabled(False)
+        self._show_provider_result(_tr("Testing…"))
+        QCoreApplication.processEvents()
+        try:
+            try:
+                _answers, message, models = self._provider_tester(preset, model, base_url, key)
+            except Exception:  # a tester that fails is said, not raised from a slot
+                message, models = _tr("The test could not be made."), ()
+        finally:
+            self._testing = False
+            self.provider_test_button.setEnabled(True)
+        if self.preset.currentData() != preset:
+            return
+        # A provider may echo what it was sent in its errors.
+        self._show_provider_result(str(message).replace(key, "…") if key else str(message))
+        if models:
+            typed = self.model.currentText()
+            self.model.clear()
+            self.model.addItems(models)
+            self.model.setEditText(typed)
 
     def _forget_listed_models(self) -> None:
         """The models of a server listed before are not offered for one that lists none; the typed name stays."""

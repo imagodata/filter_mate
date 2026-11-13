@@ -1645,7 +1645,7 @@ def capture_boards(d, chat, folder):
     settings = importlib.import_module(f'{PACKAGE}.adapters.agent.settings')
     load_settings, target_of = settings.load_settings, settings.target_of
     AgentSettingsDialog = importlib.import_module(f'{PACKAGE}.ui.widgets.agent_panel').AgentSettingsDialog
-    dialog = AgentSettingsDialog(load_settings(), target_of, d, free_available=True)
+    dialog = AgentSettingsDialog(load_settings(), target_of, d)
     dialog.resize(440, 660)
     dialog.show()
     QApplication.processEvents()

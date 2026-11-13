@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
@@ -22,7 +22,7 @@ from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
 from ...adapters.agent.plugin_settings import settings_handlers
-from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, abort_active, owned_by
+from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -43,9 +43,12 @@ from ...core.agent.recipes import (
     stale_reference, steps_of as recipe_steps, summary as recipe_summary, with_live, without as recipe_without,
 )
 from ...core.agent.messages import (
-    ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
+    ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
+    TextPart, ToolCallPart, ToolResultPart,
 )
-from ...core.agent.providers import create_provider
+from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
+from ...core.agent.providers.base import HttpRequest, error_from_response
+from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
@@ -85,6 +88,11 @@ NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_ope
                      "only takes local files.")
 FIXED_IN_SETTINGS = (ERROR_AUTH, ERROR_QUOTA)
 MAX_DETAIL_CHARS = 200
+# The Test button of the provider tab: one short request, then the list of the models.
+PROVIDER_TEST_ASK = "Reply with OK."
+PROVIDER_TEST_TOKENS = 16
+PROVIDER_TEST_WAIT_MS = 30_000
+PROVIDER_TEST_MAX_BYTES = 1_000_000
 MAX_CONNECTOR_TOOLS = 60  # a provider limits the tools of a request, and each one is paid for at every turn
 MAX_LISTED = 20
 NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values, layer_statistics, sample_features "
@@ -541,7 +549,8 @@ class AgentChatController(QObject):
         project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
-                                     mcp_error=self._mcp.error, project_layers=project_layers,
+                                     provider_tester=self._test_provider, mcp_error=self._mcp.error,
+                                     project_layers=project_layers,
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
                                             for tool in chat_tools() if tool.name not in AGENT_OWN])
         if tab:
@@ -1408,6 +1417,78 @@ class AgentChatController(QObject):
             return _tr("It answers.")
         except (McpError, FilterRejected, QGISBusy) as exc:
             return str(exc)[:300]
+
+    @staticmethod
+    def _test_provider(preset: str, model: str, base_url: str, key: str) -> Tuple[bool, str, Tuple[str, ...]]:
+        """For the Provider tab: does this provider answer, and which chat models does it list?
+
+        The key is the one typed, or else the stored one when it is for the same server. One request, "Reply with OK."
+        and 16 tokens, goes through the adapter of the provider; then its list of models is read, even after a request
+        that failed on the model (the list says which ones exist), unless the key or the network is the problem. With
+        no model typed, only the list is read. Failures are worded as the chat words them, never with the key.
+
+        Returns:
+            (it answers, what to tell the user, the chat models the provider lists).
+        """
+        kind, default_address = PRESETS[preset]
+        address = base_url or default_address
+        try:
+            if kind == KIND_OLLAMA:
+                key = ""
+            elif not key:
+                stored = replace(load_settings(), preset=preset, base_url=base_url)  # the key of this very server
+                key = read_key(stored.authcfg) if stored.has_key else ""
+                if not key:
+                    return False, _tr("Enter your API key first."), ()
+            # Without a model the provider is only asked for its headers (the key's, the version's): never sent to.
+            config = replace(provider_config(AgentSettings(preset=preset, model=model or "-", base_url=base_url), key),
+                             max_tokens=PROVIDER_TEST_TOKENS)
+            provider = create_provider(config)
+            ask = Message(ROLE_USER, (TextPart(PROVIDER_TEST_ASK),))
+            chat = provider.build_request("A connection test.", [ask], [])
+        except (KeyStoreError, ValueError) as exc:
+            return False, str(exc).replace(key, "…") if key else str(exc), ()
+
+        def said(error: ProviderError) -> str:
+            text = AgentChatController._error_message(error)
+            return text.replace(key, "…") if key else text
+
+        error: Optional[ProviderError] = None
+        if model:
+            error, content = AgentChatController._call_provider(chat)
+            if error is None:
+                parser = provider.new_parser()
+                failed = [event for event in parser.feed(content) + parser.close() if isinstance(event, StreamFailure)]
+                error = failed[0].error if failed else None
+            if error is not None and error.kind in (ERROR_AUTH, ERROR_NETWORK):
+                return False, said(error), ()  # the list would say the same
+        headers = {name: value for name, value in chat.headers.items()
+                   if name.lower() not in ("content-type", "accept", "anthropic-beta")}
+        headers["accept"] = "application/json"
+        listing_error, content = AgentChatController._call_provider(
+            HttpRequest(listing_url(kind, address), headers), post=False)
+        models = models_from_listing(kind, content) if listing_error is None else ()
+        if error is not None:
+            return False, said(error), models
+        if model:
+            return True, _tr("It answers."), models
+        if listing_error is not None:
+            return False, said(listing_error), ()
+        if not models:
+            return False, _tr("The provider listed no model: type the name of one."), ()
+        return True, _tr("It answers: choose a model in the list."), models
+
+    @staticmethod
+    def _call_provider(request: HttpRequest, post: bool = True) -> Tuple[Optional[ProviderError], bytes]:
+        """One bounded call, waiting in a local event loop: (the failure worded as the chat words it, the answer)."""
+        try:
+            answer = fetch(request.url, request.body if post else None, request.headers,
+                           max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=PROVIDER_TEST_WAIT_MS)
+        except HttpFailure as exc:
+            return ProviderError(ERROR_NETWORK, str(exc)), b""
+        if answer.status >= 300:  # a redirection is not followed: the key must not go elsewhere
+            return error_from_response(answer.status, answer.content, answer.headers), b""
+        return None, answer.content
 
     def _drop_engine(self) -> None:
         """Let go of the conversation; a request still running is stopped, and let go of only once really over.
