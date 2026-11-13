@@ -873,15 +873,14 @@ processing.run("filtermate:batch_filter", {
 
     <h3>Choose a model</h3>
     <ul>
-        <li><strong>Free quota.</strong> The first time, the settings offer a few free requests a month, through a relay of FilterMate to Claude Haiku 5.5 (Anthropic), with no key to enter. The relay counts what is spent and keeps no conversation. Once the quota is used up, the panel asks for your own API key.</li>
-        <li><strong>Your own provider.</strong> Claude, Mistral, OpenAI, any OpenAI-compatible server, or a local Ollama model.</li>
+        <li><strong>Your own provider.</strong> Claude, Mistral, OpenAI, any OpenAI-compatible server, or a local Ollama model. The settings link to the page where a key is created, test it, and list the models. For Ollama, they say where to install it and download a model from the dialog.</li>
         <li><strong>The key</strong> is kept in the QGIS authentication database, which asks for its master password, never in a settings file. It is sent only to the server it was typed for, and you can remove it in the settings.</li>
         <li><strong>Consent.</strong> Nothing leaves your computer before you have chosen a model and agreed. Changing the provider or its address asks again.</li>
     </ul>
 
     <figure>
-        <img src="img/guide/agent-settings.png" alt="AGENT settings, Provider tab: the free quota chosen, what leaves this machine, the box to agree" loading="lazy" width="712" height="660">
-        <figcaption>The settings of AGENT: the provider (here the free quota), what is sent to it, and the agreement asked before anything leaves the computer. <em>Sources</em> and <em>Other applications</em> are the next tabs.</figcaption>
+        <img src="img/guide/agent-settings.png" alt="AGENT settings, Provider tab: the provider, what leaves this machine, the box to agree" loading="lazy" width="712" height="660">
+        <figcaption>The settings of AGENT: the provider, what is sent to it, and the agreement asked before anything leaves the computer. <em>Sources</em> and <em>Other applications</em> are the next tabs.</figcaption>
     </figure>
 
     <h3>What you see</h3>
@@ -939,7 +938,7 @@ processing.run("filtermate:batch_filter", {
     </ul>
     <p>
         Attribute values go to the model only if you allow them in the settings: without that, the tools that read values (<code>field_values</code>, <code>layer_statistics</code>, <code>sample_features</code>, <code>identify_at</code>) are not offered.
-        Values already written in filters and favorites are still sent, and the dialog says so. With the free quota, the request goes through the relay to Claude Haiku 5.5.
+        Values already written in filters and favorites are still sent, and the dialog says so.
     </p>
 
     <h3>MCP server built into the plugin</h3>
@@ -978,7 +977,7 @@ processing.run("filtermate:batch_filter", {
         <tr><td>The panel opens in the wrong language</td><td>Set <code>LANGUAGE</code> explicitly instead of <em>auto</em>.</td></tr>
         <tr><td>A filter from an old session is still applied</td><td>Filters live in the project file. Use <strong>Unfilter</strong>, or clear the provider filter in the layer properties.</td></tr>
         <tr><td>The AGENT section is missing</td><td>The <code>AGENT</code> option of the Configuration tab is off. Turn it on and reopen the panel.</td></tr>
-        <tr><td>AGENT asks for my own API key</td><td>The free quota is used up, yours for the month or the relay's total. Enter a key in the AGENT settings, or choose another provider such as a local Ollama model.</td></tr>
+        <tr><td>AGENT asks for my own API key</td><td>No key is entered yet. Enter one in the AGENT settings, or choose a local Ollama model.</td></tr>
         <tr><td>A local model gives a timeout</td><td>The network timeout of QGIS applies to the agent (60 s by default). A local model slow to start may need more, and the message says so.</td></tr>
         <tr><td>SAM is not installed: onnxruntime was refused or the installation failed</td><td>If you decline the question, the object targets use the colour engine, and the <em>Install SAM…</em> button of the PIPETTE group offers it again. If pip fails (no network, no pip), the reason is in the FilterMate log and the group shows the command to run by hand in a terminal, the OSGeo4W Shell on Windows.</td></tr>
         <tr><td>The SAM model does not download, or is reported damaged</td><td>The download uses the HTTP proxy set in the QGIS options and can be canceled. Each file is checked against its SHA-256 before it replaces anything. Click <em>Repair the model…</em> to replace the bad files.</td></tr>

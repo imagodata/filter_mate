@@ -2,7 +2,7 @@
 
 This page is a map of the source tree for a developer who has just cloned the repository. It describes FilterMate 5.1 (QGIS 3.22 to 4.x, Qt5 and Qt6). Paths are relative to the repository root, which is the plugin folder (`filter_mate/`).
 
-Related documents: [AUTOMATION.md](AUTOMATION.md) (Processing, Python API, REST API), [AGENT_MODE.md](AGENT_MODE.md) (AGENT section, MCP servers, free quota), [SEGMENTATION.md](SEGMENTATION.md) (objects drawn by SAM), [../filtermate_core/README.md](../filtermate_core/README.md) (host-free core), [../extensions/README.md](../extensions/README.md) (extension system), [../adapters/backends/README.md](../adapters/backends/README.md) (backends, written for 4.1), [../CONTRIBUTING.md](../CONTRIBUTING.md).
+Related documents: [AUTOMATION.md](AUTOMATION.md) (Processing, Python API, REST API), [AGENT_MODE.md](AGENT_MODE.md) (AGENT section, MCP servers), [SEGMENTATION.md](SEGMENTATION.md) (objects drawn by SAM), [../filtermate_core/README.md](../filtermate_core/README.md) (host-free core), [../extensions/README.md](../extensions/README.md) (extension system), [../adapters/backends/README.md](../adapters/backends/README.md) (backends, written for 4.1), [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Layout
 
@@ -17,7 +17,6 @@ The code follows a hexagonal layout: `core/` holds the logic and the ports (abst
 | `ui/` | Controllers, managers, widgets, dialogs, styles and layout of the dock widget. |
 | `processing/` | Processing provider, algorithms and shipped models. |
 | `filtermate_api/` | FastAPI REST server, the tools of the chat (`agent_tools.py`) and the stdio MCP server (`mcp/`). |
-| `free-quota-proxy/` | Cloudflare Worker that relays the free quota of AGENT. Not shipped in the zip. |
 | `extensions/` | Optional modules discovered at startup (QFieldCloud, favorites sharing). |
 | `config/` | Default configuration and configuration helpers. |
 | `resources/` | Fonts and QSS style sheets. |
@@ -67,7 +66,7 @@ Modules that need neither QGIS, Qt nor GDAL moved to `filtermate_core/` in 5.1; 
 - `qgis/`: QGIS adapters (layers, expressions, signals in `signals/`, `tasks/`) and `coverage_layers/` for rasters and point clouds (see below).
 - `repositories/`: layer and history storage.
 - `public_api/`: `operations.py` and `filter_mate_public_api.py`; `introspection.py` (fields, values, statistics, samples, identify, map state), `project_control.py` (zoom, selection, visibility, adding and removing layers) and `processing_tools.py` (the Processing algorithms AGENT may find, describe and run, under `core/agent/processing_policy.py`) serve the chat and the MCP servers.
-- `agent/`: `qt_transport.py` (streamed requests), `bounded_http.py` (every network read of the agent: no redirect, time and size capped), `free_quota.py`, `native_mcp.py`, `turn_checkpoint.py` and `turn_effects.py` (undo of a turn and of its steps), `transcript_store.py`.
+- `agent/`: `qt_transport.py` (streamed requests), `bounded_http.py` (every network read of the agent: no redirect, time and size capped), `native_mcp.py`, `turn_checkpoint.py` and `turn_effects.py` (undo of a turn and of its steps), `transcript_store.py`.
 - `task_builder.py` (`TaskParameterBuilder`), `filter_result_handler.py`, `undo_redo_handler.py`, `database_manager.py`, `app_bridge.py` (service locator used by the legacy app).
 
 ### `infrastructure/`

@@ -10,7 +10,7 @@ from core.agent.tool_catalog import RUN_PYTHON, chat_tools
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
-SKIPPED = {"tests", ".git", ".claude", "website", "scripts", "docs", "free-quota-proxy", "_bmad", "_bmad-output", "dist",
+SKIPPED = {"tests", ".git", ".claude", "website", "scripts", "docs", "_bmad", "_bmad-output", "dist",
            "build", "node_modules", "__pycache__", "i18n", "resources"}
 
 
