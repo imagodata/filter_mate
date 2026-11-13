@@ -91,12 +91,15 @@ class OllamaChatProvider:
             "model": config.model,
             "stream": True,
             "messages": _wire_messages(system, messages),
-            "tools": [{"type": "function", "function": {
-                "name": tool.name, "description": tool.description, "parameters": tool.input_schema}}
-                for tool in tools],
         }
+        if tools:
+            body["tools"] = [{"type": "function", "function": {
+                "name": tool.name, "description": tool.description, "parameters": tool.input_schema}}
+                for tool in tools]
         size = len(encode_json(body))
         body["options"] = {"num_ctx": context_for(size)}
+        if config.max_tokens > 0:  # Ollama's name for it: without it a model answers as long as it likes
+            body["options"]["num_predict"] = config.max_tokens
         headers = {"content-type": "application/json", "accept": "application/x-ndjson"}
         if config.api_key:  # a server behind a proxy that asks for one
             headers["authorization"] = f"Bearer {config.api_key}"

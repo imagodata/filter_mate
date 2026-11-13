@@ -22,7 +22,7 @@ from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
 from ...adapters.agent.plugin_settings import settings_handlers
-from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, owned_by
+from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, TOO_LONG, HttpFailure, abort_active, fetch, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
@@ -47,7 +47,7 @@ from ...core.agent.messages import (
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
-from ...core.agent.providers.base import HttpRequest, error_from_response
+from ...core.agent.providers.base import HttpRequest, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
@@ -93,6 +93,7 @@ PROVIDER_TEST_ASK = "Reply with OK."
 PROVIDER_TEST_TOKENS = 16
 PROVIDER_TEST_WAIT_MS = 30_000
 PROVIDER_TEST_MAX_BYTES = 1_000_000
+PROVIDER_TEST_WAITS = "provider-test"  # owner of its waits: the settings dialog ends them when it closes, Stop never does
 MAX_CONNECTOR_TOOLS = 60  # a provider limits the tools of a request, and each one is paid for at every turn
 MAX_LISTED = 20
 NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values, layer_statistics, sample_features "
@@ -613,6 +614,7 @@ class AgentChatController(QObject):
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
                                      provider_tester=self._test_provider, mcp_error=self._mcp.error,
+                                     provider_stop=lambda: abort_active(PROVIDER_TEST_WAITS),
                                      project_layers=project_layers,
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
                                             for tool in chat_tools() if tool.name not in AGENT_OWN])
@@ -1510,11 +1512,10 @@ class AgentChatController(QObject):
             ask = Message(ROLE_USER, (TextPart(PROVIDER_TEST_ASK),))
             chat = provider.build_request("A connection test.", [ask], [])
         except (KeyStoreError, ValueError) as exc:
-            return False, str(exc).replace(key, "…") if key else str(exc), ()
+            return False, without_key(str(exc), key), ()
 
         def said(error: ProviderError) -> str:
-            text = AgentChatController._error_message(error)
-            return text.replace(key, "…") if key else text
+            return without_key(AgentChatController._error_message(error), key)
 
         error: Optional[ProviderError] = None
         if model:
@@ -1523,7 +1524,11 @@ class AgentChatController(QObject):
                 parser = provider.new_parser()
                 failed = [event for event in parser.feed(content) + parser.close() if isinstance(event, StreamFailure)]
                 error = failed[0].error if failed else None
-            if error is not None and error.kind in (ERROR_AUTH, ERROR_NETWORK):
+            # A model Ollama loads for the first time may take longer than the wait to answer: its list of installed
+            # models (read at once, it loads nothing) still says what to choose. Any other network failure, or a stop,
+            # would fail the list as well.
+            slow_ollama = kind == KIND_OLLAMA and error is not None and error.message == TOO_LONG
+            if error is not None and error.kind in (ERROR_AUTH, ERROR_NETWORK) and not slow_ollama:
                 return False, said(error), ()  # the list would say the same
         headers = {name: value for name, value in chat.headers.items()
                    if name.lower() not in ("content-type", "accept", "anthropic-beta")}
@@ -1545,8 +1550,9 @@ class AgentChatController(QObject):
     def _call_provider(request: HttpRequest, post: bool = True) -> Tuple[Optional[ProviderError], bytes]:
         """One bounded call, waiting in a local event loop: (the failure worded as the chat words it, the answer)."""
         try:
-            answer = fetch(request.url, request.body if post else None, request.headers,
-                           max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=PROVIDER_TEST_WAIT_MS)
+            with owned_by(PROVIDER_TEST_WAITS):
+                answer = fetch(request.url, request.body if post else None, request.headers,
+                               max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=PROVIDER_TEST_WAIT_MS)
         except HttpFailure as exc:
             return ProviderError(ERROR_NETWORK, str(exc)), b""
         if answer.status >= 300:  # a redirection is not followed: the key must not go elsewhere

@@ -27,7 +27,7 @@ from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
-from ...core.agent.providers.base import check_base_url, without_credentials
+from ...core.agent.providers.base import check_base_url, without_credentials, without_key
 from ...core.agent.providers.model_list import KEY_PAGES
 from ...core.agent.providers.ollama_chat import (
     OLLAMA_DOWNLOAD_PAGE, RECOMMENDED_LOCAL_MODEL, PullError, installed_models, pull_body, pull_progress, pull_url,
@@ -906,7 +906,7 @@ class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
     def __init__(self, values, target_of, parent=None, tester=None, mcp_error="",
-                 project_layers=(), tools=(), provider_tester=None) -> None:
+                 project_layers=(), tools=(), provider_tester=None, provider_stop=None) -> None:
         super().__init__(parent)
         # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
         self._tools = list(tools)
@@ -917,6 +917,7 @@ class AgentSettingsDialog(QDialog):
         self._tester = tester
         # (preset, model, address, typed key) -> (it answers, what to say, the chat models it lists): the Test button.
         self._provider_tester = provider_tester
+        self._provider_stop = provider_stop  # ends the request of a test that waits: the dialog closes meanwhile
         self._testing = False  # a provider is being tested: the wait spins the event loop, a second click is ignored
         self._values = values
         self._target_of = target_of
@@ -1040,6 +1041,8 @@ class AgentSettingsDialog(QDialog):
         consent_layout.addWidget(consent_note)
         self._models_reply = None  # the request listing the models of Ollama, while it runs
         self._closing = False  # done() has begun: no new request (the address loses the focus while it hides)
+        self._shown_preset = None  # the provider whose models the field offers: its suggestions go with it
+        self._key_target = None  # the server the key field is for: another one starts with an empty field
         self.preset.currentIndexChanged.connect(self._on_preset)
         self.base_url.textChanged.connect(self._on_destination)
         self.base_url.editingFinished.connect(self._fetch_ollama_models)
@@ -1488,9 +1491,16 @@ class AgentSettingsDialog(QDialog):
         """What depends on the provider: its models, its address, whether it needs a key."""
         name = self.preset.currentData()
         typed = self.model.currentText()
+        # A model of the former provider (one it suggested or listed) is of no use to this one.
+        former = {self.model.itemText(index) for index in range(self.model.count())}
+        former.update(MODEL_SUGGESTIONS.get(self._shown_preset, ()))
+        stale = self._shown_preset is not None and self._shown_preset != name and typed in former
+        self._shown_preset = name
+        self.key.clear()  # typed for the former provider: it must not be sent to this one, nor stored for it
+        suggestions = MODEL_SUGGESTIONS.get(name, ())
         self.model.clear()
-        self.model.addItems(MODEL_SUGGESTIONS.get(name, ()))
-        self.model.setEditText(typed if name not in MODEL_SUGGESTIONS or typed else "")
+        self.model.addItems(suggestions)
+        self.model.setEditText((suggestions[0] if suggestions else "") if stale else typed)
         self.base_url.setPlaceholderText(PRESETS[name][1])
         no_key = name == "ollama"
         self.local_filtering_only.setVisible(name == "ollama")
@@ -1568,6 +1578,11 @@ class AgentSettingsDialog(QDialog):
         self.provider_test_button.setEnabled(False)
         self._show_provider_result(_tr("Testing…"))
         QCoreApplication.processEvents()
+        if self._closing:  # a click on Save or Cancel was handled just now: nothing leaves from a closed dialog
+            self._testing = False
+            self.provider_test_button.setEnabled(self._provider_tester is not None)
+            self._show_provider_result("")
+            return
         try:
             try:
                 _answers, message, models = self._provider_tester(preset, model, base_url, key)
@@ -1576,10 +1591,11 @@ class AgentSettingsDialog(QDialog):
         finally:
             self._testing = False
             self.provider_test_button.setEnabled(True)
-        if self.preset.currentData() != preset:
+        if (self.preset.currentData(), self.base_url.text().strip(), self.key.text().strip()) != (preset, base_url, key):
+            self._show_provider_result("")  # the answer is about another provider, address or key than the fields now
             return
         # A provider may echo what it was sent in its errors.
-        self._show_provider_result(str(message).replace(key, "…") if key else str(message))
+        self._show_provider_result(without_key(str(message), key))
         if models:
             typed = self.model.currentText()
             self.model.clear()
@@ -1598,6 +1614,8 @@ class AgentSettingsDialog(QDialog):
         2026-11-13: the address loses the focus while super().done() hides the dialog, and editingFinished then
         sent a new request, answered once the dialog was deleted. None is sent once done() has begun."""
         self._closing = True
+        if self._testing and self._provider_stop is not None:
+            self._provider_stop()  # the wait of the test ends: exec() would not return before, and Save would wait
         if self._models_reply is not None:
             reply, self._models_reply = self._models_reply, None
             reply.abort()
@@ -1801,6 +1819,9 @@ class AgentSettingsDialog(QDialog):
     def _on_destination(self, _text: str = "") -> None:
         """A key and a consent are for one server: another one starts without them."""
         target = self.chosen_target()
+        if self._key_target is not None and target != self._key_target:
+            self.key.clear()  # typed for another server: it must not be sent to this one, nor stored for it
+        self._key_target = target
         stored = bool(self._values.authcfg) and self._values.key_target == target and not self.forget_key
         self.key.setPlaceholderText(_tr("Stored: leave empty to keep it") if stored else "")
         self.forget_button.setVisible(stored and self.key.isVisibleTo(self))

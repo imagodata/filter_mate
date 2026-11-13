@@ -70,3 +70,42 @@ def test_ollama_listing_is_its_tags_answer():
     ("ollama", "http://localhost:11434/v1", "http://localhost:11434/api/tags")])
 def test_listing_url(kind, base, url):
     assert listing_url(kind, base) == url
+
+
+def test_the_newest_models_come_first_before_the_cap():
+    """OpenAI and Mistral do not sort their list: the cap must not cut the recent models."""
+    entries = [{"id": f"old{index}", "created": 1_000 + index} for index in range(MAX_LISTED_MODELS + 10)]
+    entries.append({"id": "newest", "created": 9_999_999})
+    models = models_from_listing("openai_compatible", json.dumps({"data": entries}).encode())
+    assert len(models) == MAX_LISTED_MODELS and models[0] == "newest"
+    assert models[1] == f"old{MAX_LISTED_MODELS + 9}"
+
+
+def test_a_model_without_a_date_follows_the_dated_ones_in_its_order():
+    data = b'{"data":[{"id":"x"},{"id":"a","created":1},{"id":"y"},{"id":"b","created":2}]}'
+    assert models_from_listing("openai_compatible", data) == ("b", "a", "x", "y")
+
+
+def test_a_list_without_dates_keeps_the_order_of_the_server():
+    data = json.dumps({"data": [{"id": name} for name in ("c", "a", "b")]}).encode()
+    assert models_from_listing("anthropic", data) == ("c", "a", "b")
+
+
+@pytest.mark.parametrize("created", ["2026-01-01", None, True, [1]])
+def test_a_date_that_is_not_a_number_is_ignored(created):
+    data = json.dumps({"data": [{"id": "a", "created": created}, {"id": "b", "created": 5}]}).encode()
+    assert models_from_listing("openai_compatible", data) == ("b", "a")
+
+
+def test_an_id_that_is_too_long_or_holds_a_control_character_is_dropped():
+    data = json.dumps({"data": [{"id": "x" * 201}, {"id": "ok" + "\x1b[31m"}, {"id": "bad\nline"}, {"id": "x" * 200},
+                                {"id": "fine"}]}).encode()
+    assert models_from_listing("openai_compatible", data) == ("x" * 200, "fine")
+
+
+def test_a_mistral_model_that_cannot_call_functions_is_dropped():
+    data = json.dumps({"data": [
+        {"id": "mistral-small-latest", "capabilities": {"completion_chat": True, "function_calling": True}},
+        {"id": "no-tools", "capabilities": {"completion_chat": True, "function_calling": False}},
+        {"id": "unsaid", "capabilities": {"completion_chat": True}}]}).encode()
+    assert models_from_listing("openai_compatible", data) == ("mistral-small-latest", "unsaid")

@@ -64,7 +64,8 @@ def network(monkeypatch):
 
     def fetch(url, body=None, headers=None, max_bytes=0, timeout_ms=0, **kwargs):
         state.requests.append(types.SimpleNamespace(url=url, body=body, headers=dict(headers or {}),
-                                                    timeout_ms=timeout_ms, max_bytes=max_bytes))
+                                                    timeout_ms=timeout_ms, max_bytes=max_bytes,
+                                                    owner=http._OWNER[0]))
         for suffix, answer in state.answers.items():
             if url.endswith(suffix):
                 if isinstance(answer, Exception):
@@ -91,7 +92,7 @@ def test_anthropic_answers_and_lists_its_models(network):
     body = json.loads(chat.body)
     assert body["max_tokens"] == 16 and body["model"] == "claude-haiku-5-5"
     assert body["messages"] == [{"role": "user", "content": [{"type": "text", "text": "Reply with OK."}]}]
-    assert body["tools"] == []
+    assert "tools" not in body  # an empty list is a 400 for OpenAI
     assert chat.timeout_ms == 30_000 and listing.timeout_ms <= 30_000
     assert chat.headers["x-api-key"] == SECRET and listing.headers["x-api-key"] == SECRET
     assert listing.body is None  # a GET
@@ -205,3 +206,57 @@ def test_a_key_never_ends_up_in_a_log_line(network, caplog):
     network.answers = {"/v1/messages": reply(b'{"error":"x"}', 401)}
     Controller._test_provider("anthropic", "m", "", SECRET)
     assert SECRET not in caplog.text
+
+
+def test_the_openai_request_of_the_test_holds_no_tools_key(network):
+    network.values = settings.AgentSettings(preset="openai")
+    network.answers = {"/v1/chat/completions": reply(OPENAI_OK), "/v1/models": reply(OPENAI_LIST)}
+    Controller._test_provider("openai", "gpt-x", "", SECRET)
+    body = json.loads(network.requests[0].body)
+    assert "tools" not in body and "tool_choice" not in body
+
+
+@pytest.mark.parametrize("key", ["e", "It", "short12"])
+def test_a_short_key_does_not_damage_the_message(network, key):
+    """The key is hidden in the words of the provider, but a key of one letter would break any message."""
+    body = json.dumps({"error": {"message": "It answers badly: the model does not exist."}}).encode()
+    network.answers = {"/v1/messages": reply(body, 400), "/v1/models?limit=100": reply(CLAUDE_LIST)}
+    _answers, message, _models = Controller._test_provider("anthropic", "m", "", key)
+    assert "It answers badly: the model does not exist." in message
+
+
+def test_a_key_of_eight_characters_is_still_hidden(network):
+    body = json.dumps({"error": {"message": "The key 12345678 is not allowed here."}}).encode()
+    network.answers = {"/v1/messages": reply(body, 400), "/v1/models?limit=100": reply(CLAUDE_LIST)}
+    _answers, message, _models = Controller._test_provider("anthropic", "m", "", "12345678")
+    assert "12345678" not in message and "is not allowed here" in message
+
+
+def test_the_waits_of_the_test_belong_to_the_test_alone(network):
+    """Stop of the chat must not end them, and closing the settings must end them (abort_active)."""
+    network.answers = {"/v1/messages": reply(CLAUDE_OK), "/v1/models?limit=100": reply(CLAUDE_LIST)}
+    Controller._test_provider("anthropic", "m", "", SECRET)
+    assert [request.owner for request in network.requests] == [controller_module.PROVIDER_TEST_WAITS] * 2
+    assert http._OWNER[0] == ""  # and only for the call
+
+
+def test_a_cold_ollama_that_takes_too_long_still_lists_its_models(network):
+    tags = json.dumps({"models": [{"name": "qwen3:4b", "details": {"family": "qwen3"}}]}).encode()
+    network.answers = {"/api/chat": http.HttpFailure(http.TOO_LONG), "/api/tags": reply(tags)}
+    answers, message, models = Controller._test_provider("ollama", "qwen3:4b", "", "")
+    assert answers is False and models == ("qwen3:4b",) and message
+    assert [request.url for request in network.requests] == ["http://localhost:11434/api/chat",
+                                                             "http://localhost:11434/api/tags"]
+
+
+@pytest.mark.parametrize("failure", [http.STOPPED, "connection refused"])
+def test_ollama_that_does_not_answer_or_was_stopped_does_not_list(network, failure):
+    network.answers = {"/api/chat": http.HttpFailure(failure)}
+    answers, _message, models = Controller._test_provider("ollama", "qwen3:4b", "", "")
+    assert (answers, models) == (False, ()) and len(network.requests) == 1
+
+
+def test_ollama_test_asks_for_a_few_tokens_only(network):
+    network.answers = {"/api/chat": reply(OLLAMA_OK), "/api/tags": reply(b'{"models":[]}')}
+    Controller._test_provider("ollama", "qwen3:4b", "", "")
+    assert json.loads(network.requests[0].body)["options"]["num_predict"] == controller_module.PROVIDER_TEST_TOKENS

@@ -62,8 +62,18 @@ class TestRequest:
         assert body["model"] == "qwen3:8b" and body["stream"] is True
         assert body["messages"] == [{"role": "system", "content": "S"}, {"role": "user", "content": "bonjour"}]
         assert body["tools"][0]["function"]["name"] == "list_layers"
-        assert body["options"] == {"num_ctx": CONTEXT_STEPS[0]}
+        assert body["options"] == {"num_ctx": CONTEXT_STEPS[0], "num_predict": ProviderConfig("x", "m").max_tokens}
         assert "authorization" not in request.headers
+
+    def test_no_tools_means_no_tools_key(self):
+        body = json.loads(ollama().build_request("S", [Message(ROLE_USER, (TextPart("bonjour"),))], []).body)
+        assert "tools" not in body
+
+    def test_max_tokens_is_the_number_of_tokens_to_predict(self):
+        """Without it the Test of the settings waits for a whole answer, and a cold model runs out of time."""
+        hello = [Message(ROLE_USER, (TextPart("bonjour"),))]
+        body = json.loads(ollama(max_tokens=16).build_request("S", hello, []).body)
+        assert body["options"] == {"num_ctx": CONTEXT_STEPS[0], "num_predict": 16}
 
     def test_every_tool_asks_for_32k_the_filtering_ones_for_16k(self):
         """The system prompt and every tool of the chat: about 73,000 characters, well past Ollama's 4096 tokens."""

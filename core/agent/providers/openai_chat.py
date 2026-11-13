@@ -62,10 +62,11 @@ class OpenAIChatProvider:
             "model": config.model,
             "stream": True,
             "messages": _wire_messages(system, messages),
-            "tools": [{"type": "function", "function": {
-                "name": tool.name, "description": tool.description, "parameters": tool.input_schema}}
-                for tool in tools],
         }
+        if tools:  # OpenAI answers 400 to an empty list ("[] is too short - 'tools'"), as Mistral and others do
+            body["tools"] = [{"type": "function", "function": {
+                "name": tool.name, "description": tool.description, "parameters": tool.input_schema}}
+                for tool in tools]
         headers = {"content-type": "application/json", "accept": "text/event-stream"}
         if config.api_key:
             headers["authorization"] = f"Bearer {config.api_key}"

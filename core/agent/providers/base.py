@@ -87,6 +87,14 @@ def without_credentials(url: str) -> str:
                             count=1)
 
 
+MIN_MASKED_KEY = 8  # a shorter "key" (one letter) would be found in any word: the message would be torn
+
+
+def without_key(text: str, key: str) -> str:
+    """``text`` with ``key`` replaced by an ellipsis, for a message a provider worded and may have sent the key in."""
+    return text.replace(key, "…") if len(key) >= MIN_MASKED_KEY else text
+
+
 def encode_json(body: Dict[str, Any]) -> bytes:
     """Compact and in insertion order: the same conversation gives the same bytes."""
     # "replace": a model can stream a lone surrogate, which must not make every later request fail.

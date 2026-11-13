@@ -69,6 +69,10 @@ CLAUDE_TURN = sse(
 
 
 class TestAnthropicRequest:
+    def test_no_tools_means_no_tools_key(self):
+        body = json.loads(claude().build_request("S", [Message(ROLE_USER, (TextPart("hi"),))], []).body)
+        assert "tools" not in body
+
     def test_body_and_headers(self):
         messages = [Message(ROLE_USER, (TextPart("bonjour"),))]
         request = claude().build_request("SYS", messages, [TOOL])
@@ -178,6 +182,11 @@ class TestAnthropicStream:
 
 
 class TestOpenAICompatible:
+    def test_no_tools_means_no_tools_key(self):
+        """OpenAI answers 400 to ``"tools": []``: the Test of the settings sends a request without tools."""
+        body = json.loads(compatible().build_request("S", [Message(ROLE_USER, (TextPart("hi"),))], []).body)
+        assert "tools" not in body and "tool_choice" not in body
+
     def test_request(self):
         messages = [
             Message(ROLE_USER, (TextPart("hello"),)),

@@ -236,6 +236,159 @@ def test_a_removed_key_is_not_tested_as_if_it_were_still_there():
     assert len(tester.calls) == 1 and dialog.provider_result.text() == "It answers."
 
 
+def test_the_key_typed_for_a_provider_does_not_follow_a_change_of_provider():
+    tester = FakeTester((True, "It answers.", ()))
+    dialog = _dialog("anthropic", tester)
+    dialog.key.setText(SECRET)
+    dialog.preset.setCurrentIndex(dialog.preset.findData("openai"))
+    assert dialog.key.text() == ""
+    dialog.provider_test_button.click()
+    assert tester.calls[0][3] == ""
+
+
+def test_the_key_typed_for_an_address_does_not_follow_a_change_of_address():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())))
+    dialog.base_url.setText("https://one.example.com/v1")
+    dialog.key.setText(SECRET)
+    dialog.base_url.setText("https://two.example.com/v1")
+    assert dialog.key.text() == ""
+
+
+def test_the_key_stays_when_the_address_is_only_written_differently():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())))
+    dialog.base_url.setText("https://one.example.com/v1")
+    dialog.key.setText(SECRET)
+    dialog.base_url.setText("https://one.example.com/v1/")  # the same server: a trailing slash is not a target
+    assert dialog.key.text() == SECRET
+
+
+def test_removing_the_stored_key_keeps_the_key_being_typed():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())), authcfg="abc123", key_target="x")
+    dialog.key.setText(SECRET)
+    dialog._on_forget()
+    assert dialog.key.text() == SECRET
+
+
+def test_the_model_of_the_former_provider_is_not_kept():
+    dialog = _dialog("anthropic", model="claude-haiku-5-5")
+    assert dialog.model.currentText() == "claude-haiku-5-5"
+    dialog.preset.setCurrentIndex(dialog.preset.findData("mistral"))
+    assert dialog.model.currentText() == "mistral-small-latest"
+    dialog.preset.setCurrentIndex(dialog.preset.findData("openai"))
+    assert dialog.model.currentText() == ""  # OpenAI suggests nothing and the model was Mistral's
+
+
+def test_a_model_the_user_typed_stays_through_a_change_of_provider():
+    dialog = _dialog("anthropic", model="my-own-model")
+    dialog.preset.setCurrentIndex(dialog.preset.findData("openai"))
+    assert dialog.model.currentText() == "my-own-model"
+
+
+def test_a_model_the_former_provider_listed_is_not_kept():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ("gpt-x", "gpt-y"))), model="gpt-x")
+    dialog.provider_test_button.click()
+    dialog.preset.setCurrentIndex(dialog.preset.findData("mistral"))
+    assert dialog.model.currentText() == "mistral-small-latest"
+
+
+def test_the_saved_model_is_what_the_dialog_opens_with():
+    for preset, model in (("anthropic", "claude-opus-5-5"), ("mistral", "my-finetune"), ("openai", "gpt-x"),
+                          ("anthropic", "")):
+        assert _dialog(preset, model=model).chosen_model() == model
+
+
+def test_a_short_key_does_not_damage_what_the_provider_said():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())))
+    dialog.key.setText("e")
+    dialog.provider_test_button.click()
+    assert dialog.provider_result.text() == "It answers."
+
+
+def test_a_key_of_eight_characters_is_hidden_in_what_the_provider_said():
+    dialog = _dialog("openai", FakeTester(lambda key: (False, f"bad key {key}", ())))
+    dialog.key.setText("12345678")
+    dialog.provider_test_button.click()
+    assert dialog.provider_result.text() == "bad key …"
+
+
+def test_models_of_another_address_are_not_offered():
+    holder = {}
+
+    def tester(preset, model, base_url, key):
+        holder["dialog"].base_url.setText("https://two.example.com/v1")
+        return True, "It answers.", ("from-the-first-server",)
+
+    dialog = holder["dialog"] = _dialog("openai", tester)
+    dialog.base_url.setText("https://one.example.com/v1")
+    dialog.provider_test_button.click()
+    assert "from-the-first-server" not in _models(dialog)
+    assert dialog.provider_result.text() == ""  # not left saying Testing…
+
+
+def test_models_of_another_key_are_not_offered():
+    holder = {}
+
+    def tester(preset, model, base_url, key):
+        holder["dialog"].key.setText("another-key-0123456789")
+        return True, "It answers.", ("from-the-first-key",)
+
+    dialog = holder["dialog"] = _dialog("openai", tester)
+    dialog.key.setText(SECRET)
+    dialog.provider_test_button.click()
+    assert "from-the-first-key" not in _models(dialog) and dialog.provider_result.text() == ""
+
+
+class _Application:
+    """QCoreApplication for the panel, with what happens during processEvents() chosen by the test."""
+
+    def __init__(self, during):
+        self.during = during
+
+    @staticmethod
+    def translate(_context, text):
+        return text
+
+    def processEvents(self):
+        self.during()
+
+
+def test_closing_during_the_first_events_sends_nothing(monkeypatch):
+    """A click on Save while the Testing… label is painted: the dialog is closed, no request leaves with the key."""
+    tester = FakeTester((True, "It answers.", ()))
+    dialog = _dialog("openai", tester)
+    dialog.key.setText(SECRET)
+    monkeypatch.setattr(panel_module, "QCoreApplication", _Application(lambda: dialog.done(0)))
+    dialog.provider_test_button.click()
+    assert tester.calls == []
+    assert dialog.provider_test_button.isEnabled() and not dialog._testing
+
+
+def test_closing_the_dialog_stops_the_test_that_is_waiting():
+    stopped = []
+    holder = {}
+
+    def tester(preset, model, base_url, key):
+        holder["dialog"].done(0)  # Save or Cancel, in the event loop the test spins
+        return False, "stopped", ()
+
+    settings = settings_module.AgentSettings(preset="openai")
+    dialog = holder["dialog"] = AgentSettingsDialog(settings, settings_module.target_of, None, provider_tester=tester,
+                                                    provider_stop=lambda: stopped.append(True))
+    dialog._fetch_ollama_models = lambda: None
+    dialog.provider_test_button.click()
+    assert stopped == [True]
+
+
+def test_closing_the_dialog_without_a_test_stops_nothing():
+    stopped = []
+    settings = settings_module.AgentSettings(preset="openai")
+    dialog = AgentSettingsDialog(settings, settings_module.target_of, None,
+                                 provider_tester=FakeTester((True, "", ())), provider_stop=lambda: stopped.append(True))
+    dialog._fetch_ollama_models = lambda: None
+    dialog.done(0)
+    assert stopped == []
+
+
 def test_the_key_link_escapes_what_a_translation_says(monkeypatch):
     real = panel_module._tr
     monkeypatch.setattr(panel_module, "_tr", lambda text: "Create <b> & key" if text == "Create a key" else real(text))
