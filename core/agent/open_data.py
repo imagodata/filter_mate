@@ -11,7 +11,7 @@ import re
 import socket
 import threading
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple, Union
 from urllib.parse import parse_qs, quote, unquote, urljoin, urlsplit
 
 KIND_DATAGOUV = "datagouv"
@@ -80,6 +80,13 @@ _WINDOWS_DRIVE = re.compile(r"^[A-Za-z]:[\\/]")
 MAX_RESULTS = 20
 MAX_TEXT = 300
 _LOOPBACK = ("localhost", "127.0.0.1", "::1")
+# A name Python, Qt and curl all ask for as it is written. Python resolves an international name in IDNA 2003, Qt 6
+# in IDNA 2008, curl as it was built, and Qt decodes a name in percent-encoding: the name checked would not be the one read.
+_PLAIN_HOST = re.compile(r"[a-z0-9._-]+")
+_NOT_PLAIN_HOST = ("this server name is not plain ASCII letters, digits and hyphens: write an international name in its "
+                   "ASCII form (xn--...)")
+_NAT64 = ipaddress.ip_network("64:ff9b::/96")  # the gateway reaches the IPv4 address of the last 32 bits
+_LOCAL_NAT64 = ipaddress.ip_network("64:ff9b:1::/48")  # a gateway of the local network, which places the IPv4 itself
 
 
 def parse_extra_domains(text: str) -> Dict[str, Tuple[str, str]]:
@@ -270,28 +277,47 @@ def _url_problem(url: str) -> str:
     try:
         address = ipaddress.ip_address(host)
     except ValueError:  # 127.1, 0x7f.0.0.1: a real name ends with letters
+        if not _PLAIN_HOST.fullmatch(host):
+            return _NOT_PLAIN_HOST
         return "" if host.rsplit(".", 1)[-1].isalpha() else "only a public address can be read"
-    return "" if address.is_global else "only a public address can be read"
+    return "" if _public(address) else "only a public address can be read"
+
+
+def _public(address: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]) -> bool:
+    """Whether ``address`` is on the internet, the IPv4 address an IPv6 one carries (mapped, NAT64, 6to4) too.
+
+    Python takes 64:ff9b::a00:1 for global: through a NAT64 gateway, it is 10.0.0.1 (audit of 13/11/2026).
+    """
+    if address.version == 6 and address.ipv4_mapped is not None:
+        address = address.ipv4_mapped
+    if address.version == 4:
+        return address.is_global
+    if address in _LOCAL_NAT64:
+        return False
+    carried = address.sixtofour or (ipaddress.IPv4Address(int(address) & 0xFFFFFFFF) if address in _NAT64 else None)
+    return address.is_global and (carried is None or carried.is_global)
 
 
 RESOLVE_TIMEOUT_S = 3.0  # a name a resolver cannot answer for in this time is not read
 
 
 def resolved_problem(url: str, resolve: Optional[Callable[..., Any]] = None,
-                     timeout: float = RESOLVE_TIMEOUT_S) -> str:
+                     timeout: float = RESOLVE_TIMEOUT_S, checked: Optional[Dict[str, str]] = None) -> str:
     """Why ``url`` cannot be read once its name is resolved; "" when every address of it is public.
 
     _url_problem judges the name only: a public name that resolves to 127.0.0.1, to the local network or to the
     metadata of a cloud (169.254.169.254) passed (audit of 12/11/2026). Called just before a request to a server
-    a model or a portal named, never for one the user chose (a connector, a WFS of the settings). The name is
-    resolved again by the request itself, so a server that answers another address meanwhile (rebinding) is not
-    stopped: this closes the plain case. The resolution runs in a thread of its own, ``timeout`` at most, so a slow
-    resolver never holds QGIS.
+    a model or a portal named, never for one the user chose (a connector, a WFS of the settings, an open data
+    platform of the list). The name is resolved again by the request itself, so a server that answers another
+    address meanwhile (rebinding) is not stopped: this closes the plain case. The resolution runs in a thread of its
+    own, ``timeout`` at most, so a slow resolver never holds QGIS long, and once per name in a tool call.
 
     Args:
         url: An address _url_problem already accepted.
         resolve: socket.getaddrinfo, or a stand-in for the tests.
         timeout: Seconds to wait for the resolver.
+        checked: What the names already resolved in this tool call answered, filled here. It lives as long as the
+            call: a longer memory would give a server more time to answer another address.
     """
     try:
         host = (urlsplit(url).hostname or "").strip("[]")
@@ -304,6 +330,15 @@ def resolved_problem(url: str, resolve: Optional[Callable[..., Any]] = None,
         return ""  # an address, not a name: _url_problem judged it
     except ValueError:
         pass
+    if checked is not None and host in checked:
+        return checked[host]
+    problem = _resolved_problem(host, resolve, timeout)
+    if checked is not None:
+        checked[host] = problem
+    return problem
+
+
+def _resolved_problem(host: str, resolve: Optional[Callable[..., Any]], timeout: float) -> str:
     found: Dict[str, Any] = {}
 
     def work() -> None:
@@ -324,9 +359,7 @@ def resolved_problem(url: str, resolve: Optional[Callable[..., Any]] = None,
             address = ipaddress.ip_address(str(info[4][0]).split("%", 1)[0])
         except (ValueError, IndexError, TypeError):
             return "only a public address can be read"
-        if address.version == 6 and address.ipv4_mapped is not None:
-            address = address.ipv4_mapped
-        if not address.is_global:
+        if not _public(address):
             return "only a public address can be read"
     return ""
 
