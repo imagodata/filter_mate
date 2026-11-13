@@ -7,10 +7,11 @@ follow the links it holds. Nothing here ever parses HTML.
 """
 from __future__ import annotations
 
+import html
 import time
 from typing import Sequence, Tuple
 
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, QTimer, pyqtSignal
+from qgis.PyQt.QtCore import QByteArray, QCoreApplication, QEvent, QSize, Qt, QTimer, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QFont, QTextOption
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
@@ -28,7 +29,10 @@ from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STAN
 from ...core.agent.providers import PRESETS
 from ...core.agent.providers.base import check_base_url, without_credentials
 from ...core.agent.providers.model_list import KEY_PAGES
-from ...core.agent.providers.ollama_chat import installed_models, tags_url
+from ...core.agent.providers.ollama_chat import (
+    OLLAMA_DOWNLOAD_PAGE, RECOMMENDED_LOCAL_MODEL, PullError, installed_models, pull_body, pull_progress, pull_url,
+    tags_url,
+)
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
     custom_to_json, make_source,
@@ -54,6 +58,9 @@ MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "cla
                      "mistral": ("mistral-small-latest", "mistral-medium-latest", "mistral-large-latest")}
 OLLAMA_TAGS_TIMEOUT_MS = 2000  # a local server answers at once; a missing one must not hold the dialog
 OLLAMA_TAGS_MAX_BYTES = 1_000_000  # the list of the installed models: a few KB
+OLLAMA_PULL_IDLE_MS = 60_000  # a download has no total timeout (several GB): only a silence of this long ends it
+OLLAMA_PULL_MAX_LINE = 1_000_000  # a line of progress is a few hundred bytes: more is not Ollama
+PULL_PERMILLE = 1000  # the progress bar of a download counts in thousandths: a size in bytes overflows its int
 
 
 MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
@@ -61,6 +68,11 @@ MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
 
 def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentPanel", text)
+
+
+def _size_text(size: int) -> str:
+    """A size in bytes as a person reads it: 3.4 GB, 820 MB."""
+    return f"{size / 1e9:.1f} GB" if size >= 1e9 else f"{size / 1e6:.0f} MB"
 
 
 def preset_label(name: str) -> str:
@@ -925,13 +937,57 @@ class AgentSettingsDialog(QDialog):
         self.forget_button.clicked.connect(self._on_forget)
         self.key_link = QLabel(self)
         self.key_link.setObjectName("label_agent_key_link")
-        self.key_link.setTextFormat(Qt.TextFormat.RichText)  # the one address is ours (KEY_PAGES), the text is fixed
+        self.key_link.setTextFormat(Qt.TextFormat.RichText)  # the one address is ours (KEY_PAGES), the text escaped
         self.key_link.setOpenExternalLinks(True)
         self.provider_test_button = QPushButton(_tr("Test"), self)
         self.provider_test_button.setObjectName("pushButton_agent_provider_test")
         self.provider_test_button.setToolTip(_tr("Send one short request to this provider, and list its models"))
         self.provider_test_button.setEnabled(provider_tester is not None)
         self.provider_test_button.clicked.connect(self._on_test_provider)
+        # Ollama: where to install it when it does not answer, and a model to download when it lacks the one wanted.
+        self.ollama_install_note = QLabel(self)
+        self.ollama_install_note.setObjectName("label_agent_ollama_install")
+        self.ollama_install_note.setTextFormat(Qt.TextFormat.RichText)  # the page is ours, the rest escaped
+        self.ollama_install_note.setOpenExternalLinks(True)
+        self.ollama_install_note.setWordWrap(True)
+        self.ollama_refresh_button = QPushButton(_tr("Refresh"), self)
+        self.ollama_refresh_button.setObjectName("pushButton_agent_ollama_refresh")
+        self.ollama_refresh_button.setToolTip(_tr("Look for Ollama and the models it has installed"))
+        self.ollama_refresh_button.clicked.connect(self._fetch_ollama_models)
+        self.ollama_install_row = QWidget(self)
+        install_layout = QHBoxLayout(self.ollama_install_row)
+        install_layout.setContentsMargins(0, 0, 0, 0)
+        install_layout.setSpacing(6)
+        install_layout.addWidget(self.ollama_install_note, 1)
+        install_layout.addWidget(self.ollama_refresh_button)
+        self.ollama_download_button = QPushButton(_tr("Download"), self)
+        self.ollama_download_button.setObjectName("pushButton_agent_ollama_download")
+        self.ollama_download_button.setToolTip(_tr("Download this model into Ollama"))
+        self.ollama_download_button.clicked.connect(self._on_download_model)
+        self.ollama_progress = QProgressBar(self)
+        self.ollama_progress.setObjectName("progressBar_agent_ollama_pull")
+        self.ollama_progress.setTextVisible(False)
+        self.ollama_cancel_button = QPushButton(_tr("Cancel"), self)
+        self.ollama_cancel_button.setObjectName("pushButton_agent_ollama_cancel")
+        self.ollama_cancel_button.clicked.connect(self._on_cancel_download)
+        self.ollama_download_row = QWidget(self)
+        download_layout = QHBoxLayout(self.ollama_download_row)
+        download_layout.setContentsMargins(0, 0, 0, 0)
+        download_layout.setSpacing(6)
+        download_layout.addWidget(self.ollama_download_button)
+        download_layout.addWidget(self.ollama_progress, 1)
+        download_layout.addWidget(self.ollama_cancel_button)
+        self._ollama_up = None  # None: not asked yet; False: no answer at the address; True: it lists its models
+        self._ollama_installed = ()  # the chat models it listed
+        self._pull_reply = None  # the download of a model, while it runs
+        self._pull_model = ""
+        self._pull_address = ""
+        self._pull_buffer = bytearray()
+        self._pull_end = None  # why it ended: "success", "failed", "cancelled", "silent" or "closing"
+        self._pull_idle = QTimer(self)
+        self._pull_idle.setSingleShot(True)
+        self._pull_idle.setInterval(OLLAMA_PULL_IDLE_MS)
+        self._pull_idle.timeout.connect(self._on_pull_idle)
         self.provider_result = QLabel(self)
         self.provider_result.setObjectName("label_agent_settings_note")
         self.provider_result.setTextFormat(Qt.TextFormat.PlainText)  # a provider words its errors: never read as HTML
@@ -987,6 +1043,8 @@ class AgentSettingsDialog(QDialog):
         self.base_url.editingFinished.connect(self._fetch_ollama_models)
         self._on_preset()
         self.model.setEditText(values.model)
+        self.model.editTextChanged.connect(self._update_ollama_widgets)
+        self._update_ollama_widgets()
 
         key_row = QHBoxLayout()
         key_row.setContentsMargins(0, 0, 0, 0)
@@ -1007,6 +1065,8 @@ class AgentSettingsDialog(QDialog):
         model_box.setContentsMargins(0, 0, 0, 0)
         model_box.setSpacing(2)
         model_box.addLayout(model_row)
+        model_box.addWidget(self.ollama_install_row)
+        model_box.addWidget(self.ollama_download_row)
         model_box.addWidget(self.provider_result)
         form = QFormLayout()
         form.addRow(_tr("Provider"), self.preset)
@@ -1438,8 +1498,11 @@ class AgentSettingsDialog(QDialog):
         link = KEY_PAGES.get(name)
         self.key_link.setVisible(link is not None)
         if link is not None:
-            self.key_link.setText(f'<a href="{link}">{_tr("Create a key")}</a>')
+            # The text is translated, so it is escaped; the address is ours (KEY_PAGES).
+            self.key_link.setText(f'<a href="{link}">{html.escape(_tr("Create a key"))}</a>')
         self._show_provider_result("")  # what the test said was about the former provider
+        self._ollama_up, self._ollama_installed = None, ()  # what was known of Ollama was about another address
+        self._update_ollama_widgets()
         self._on_destination()
         self._fetch_ollama_models()
 
@@ -1456,7 +1519,6 @@ class AgentSettingsDialog(QDialog):
             self.model.setToolTip("")
             return
         from qgis.core import QgsNetworkAccessManager
-        from qgis.PyQt.QtCore import QUrl
         from qgis.PyQt.QtNetwork import QNetworkRequest
         url = tags_url(self.base_url.text().strip() or PRESETS["ollama"][1])
         try:
@@ -1464,7 +1526,8 @@ class AgentSettingsDialog(QDialog):
         except ValueError:
             self._forget_listed_models()
             self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
-                without_credentials(url)))
+                without_credentials(self._ollama_address())))
+            self._set_ollama_state(False, (), self._ollama_address())
             return
         request = QNetworkRequest(QUrl(url))
         if hasattr(request, "setTransferTimeout"):
@@ -1475,7 +1538,12 @@ class AgentSettingsDialog(QDialog):
         # stops sending is cut at the limit, not read for a minute.
         reply.downloadProgress.connect(
             lambda received, _total, answered=reply: answered.abort() if received > OLLAMA_TAGS_MAX_BYTES else None)
-        reply.finished.connect(lambda answered=reply, address=url: self._on_ollama_models(answered, address))
+        reply.finished.connect(
+            lambda answered=reply, address=self._ollama_address(): self._on_ollama_models(answered, address))
+
+    def _ollama_address(self) -> str:
+        """The address of Ollama as typed in the dialog (its default when empty), not the URL of one of its routes."""
+        return self.base_url.text().strip().rstrip("/") or PRESETS["ollama"][1]
 
     def _show_provider_result(self, text: str) -> None:
         self.provider_result.setText(text)
@@ -1486,10 +1554,14 @@ class AgentSettingsDialog(QDialog):
 
         The tester waits for the provider, so the event loop runs: nothing else is started, and what comes back is
         dropped if the user chose another provider meanwhile. The key is typed here, and never shown."""
-        if self._provider_tester is None or self._testing or self._closing:
+        if self._provider_tester is None or self._testing or self._closing or self._pull_reply is not None:
             return
         preset, model = self.preset.currentData(), self.model.currentText().strip()
         base_url, key = self.base_url.text().strip(), self.key.text().strip()
+        if self.forget_key and not key and preset != "ollama":
+            # The stored key was removed here: the tester would still read it, and say it answers.
+            self._show_provider_result(_tr("Enter your API key first."))
+            return
         self._testing = True
         self.provider_test_button.setEnabled(False)
         self._show_provider_result(_tr("Testing…"))
@@ -1527,6 +1599,7 @@ class AgentSettingsDialog(QDialog):
         if self._models_reply is not None:
             reply, self._models_reply = self._models_reply, None
             reply.abort()
+        self._end_pull("closing")  # Ollama keeps the part it got, and resumes it at the next download
         super().done(result)
 
     def _on_ollama_models(self, reply, address: str) -> None:
@@ -1534,27 +1607,194 @@ class AgentSettingsDialog(QDialog):
             reply.deleteLater()
             return
         self._models_reply = None
-        names = []
+        names, answers = [], False
         try:
             import json
-            names = installed_models(json.loads(
-                bytes(reply.read(OLLAMA_TAGS_MAX_BYTES) or b"").decode("utf-8", "replace") or "{}"))
+            payload = json.loads(bytes(reply.read(OLLAMA_TAGS_MAX_BYTES) or b"").decode("utf-8", "replace") or "{}")
+            names = installed_models(payload)
+            answers = isinstance(payload, dict) and isinstance(payload.get("models"), list)  # Ollama says its models
         except Exception:  # whatever a server answers (read() gives None without a body): this is a slot
-            names = []
+            names, answers = [], False
         finally:
             reply.deleteLater()
         if self.preset.currentData() != "ollama":
             return
+        self._set_ollama_state(answers, names, address)
         if not names:
             self._forget_listed_models()
-            self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
-                without_credentials(address)))
+            if answers:  # Ollama is there and has no chat model: the one that fits a small GPU is proposed
+                self.model.setToolTip(_tr("Ollama has no chat model yet: download one."))
+                if not self.model.currentText().strip():
+                    self.model.setEditText(RECOMMENDED_LOCAL_MODEL)
+            else:
+                self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
+                    without_credentials(address)))
             return
         typed = self.model.currentText().strip()
         self.model.clear()
         self.model.addItems(names)
         self.model.setEditText(typed or names[0])
         self.model.setToolTip(_tr("Models installed in Ollama ({}).").format(len(names)))
+
+    def _set_ollama_state(self, answers: bool, names, address: str) -> None:
+        """What the last list said: Ollama answers or not, and which models it has. The note shows the address."""
+        self._ollama_up, self._ollama_installed = bool(answers), tuple(names)
+        text = html.escape(_tr("Ollama does not answer at {}: install it, start it, then Refresh.").format(
+            without_credentials(address)))
+        self.ollama_install_note.setText(
+            f'{text} <a href="{OLLAMA_DOWNLOAD_PAGE}">{html.escape(_tr("Get Ollama"))}</a>')
+        self._update_ollama_widgets()
+
+    def _update_ollama_widgets(self, _text: str = "") -> None:
+        """The install note and Refresh, the Download button, and the progress of a download: shown by what is known."""
+        ollama = self.preset.currentData() == "ollama"
+        pulling = self._pull_reply is not None
+        wanted = self.model.currentText().strip()
+        offer = (ollama and self._ollama_up is True and bool(wanted) and wanted not in self._ollama_installed
+                 and not pulling)
+        self.ollama_install_row.setVisible(ollama and self._ollama_up is False and not pulling)
+        self.ollama_download_button.setVisible(offer)
+        self.ollama_progress.setVisible(ollama and pulling)
+        self.ollama_cancel_button.setVisible(ollama and pulling)
+        self.ollama_download_row.setVisible(offer or (ollama and pulling))
+
+    # -- the download of a model into Ollama ---------------------------------------------------------------------
+
+    def _on_download_model(self) -> None:
+        """Download: ask first (several GB), then post to the Ollama of this dialog and follow the lines it streams."""
+        model = self.model.currentText().strip()
+        if (self._pull_reply is not None or self._testing or self._closing or self.preset.currentData() != "ollama"
+                or not model):
+            return  # a Test spins the event loop: a click let through must not start a download beside it
+        url = pull_url(self.base_url.text().strip() or PRESETS["ollama"][1])
+        try:
+            check_base_url(url, None)  # the same address as the list, http(s) only
+        except ValueError:
+            self._show_provider_result(_tr("This address is not a web address."))
+            return
+        if not ask_plain(self, _tr("Download a model"), _tr(
+                "Download {} into Ollama? A model weighs several GB: it takes a while, and the space on the disk of "
+                "the computer that runs Ollama.").format(model)):
+            return
+        from qgis.core import QgsNetworkAccessManager
+        from qgis.PyQt.QtNetwork import QNetworkRequest
+        request = QNetworkRequest(QUrl(url))
+        request.setHeader(QNetworkRequest.KnownHeaders.ContentTypeHeader, "application/json")
+        # Only to the address typed here: a redirection is not followed.
+        request.setAttribute(QNetworkRequest.Attribute.RedirectPolicyAttribute,
+                             QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
+        if hasattr(request, "setTransferTimeout"):
+            request.setTransferTimeout(OLLAMA_PULL_IDLE_MS)  # the silence limit, not a default that cuts a long download
+        self._pull_model, self._pull_address, self._pull_end = model, self._ollama_address(), None
+        self._pull_buffer = bytearray()
+        reply = QgsNetworkAccessManager.instance().post(request, QByteArray(pull_body(model)))
+        self._pull_reply = reply
+        reply.readyRead.connect(self._on_pull_data)
+        reply.finished.connect(lambda answered=reply: self._on_pull_finished(answered))
+        self._pull_idle.start()
+        self.ollama_progress.setRange(0, 0)  # busy until a size is known
+        for widget in (self.preset, self.model, self.base_url, self.provider_test_button):
+            widget.setEnabled(False)
+        self._show_provider_result(_tr("Downloading {}…").format(model))
+        self._update_ollama_widgets()
+
+    def _on_cancel_download(self) -> None:
+        self._end_pull("cancelled", _tr("Download cancelled."))
+
+    def _on_pull_idle(self) -> None:
+        self._end_pull("silent", _tr("Ollama sent nothing for {} seconds: the download was stopped.").format(
+            OLLAMA_PULL_IDLE_MS // 1000))
+
+    def _end_pull(self, why: str, message: str = "") -> None:
+        """Stop the download for ``why``; its reply finishes, and ``_on_pull_finished`` puts the dialog back."""
+        reply = self._pull_reply
+        if reply is None or self._pull_end is not None:
+            return
+        self._pull_end = why
+        self._pull_idle.stop()
+        if message:
+            self._show_provider_result(message)
+        reply.abort()
+
+    def _on_pull_data(self) -> None:
+        reply = self._pull_reply
+        if reply is None or self._pull_end is not None:
+            return
+        self._pull_idle.start()
+        self._feed_pull(bytes(reply.readAll()))
+
+    def _feed_pull(self, data: bytes, last: bool = False) -> None:
+        """Take what came of the stream: every complete line says where the download is."""
+        self._pull_buffer.extend(data)
+        *lines, rest = bytes(self._pull_buffer).split(b"\n")
+        self._pull_buffer = bytearray(rest)
+        if last and rest.strip():
+            lines.append(rest)
+            self._pull_buffer = bytearray()
+        for line in lines:
+            if self._pull_end is not None:
+                return
+            if not line.strip():
+                continue
+            try:
+                progress = pull_progress(line)
+            except PullError as exc:
+                self._end_pull("failed", _tr("Ollama could not download {}: {}").format(
+                    self._pull_model, exc.error.message))
+                return
+            if progress is not None:
+                self._show_pull_progress(*progress)
+        if len(self._pull_buffer) > OLLAMA_PULL_MAX_LINE:  # no end of line in a megabyte: not a stream of Ollama
+            self._end_pull("failed", _tr("The answer of Ollama could not be read."))
+
+    def _show_pull_progress(self, status: str, received: int, total: int) -> None:
+        if status == "success":
+            self._end_pull("success", _tr("{} is downloaded.").format(self._pull_model))
+            return
+        if total > 0:
+            self.ollama_progress.setRange(0, PULL_PERMILLE)
+            self.ollama_progress.setValue(received * PULL_PERMILLE // total)
+            detail = _tr("{} of {}").format(_size_text(received), _size_text(total))
+        else:
+            self.ollama_progress.setRange(0, 0)
+            detail = status
+        self._show_provider_result(_tr("Downloading {}: {}").format(self._pull_model, detail))
+
+    def _on_pull_finished(self, reply) -> None:
+        if reply is not self._pull_reply:  # not the current download: forgotten
+            reply.deleteLater()
+            return
+        from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
+        if self._pull_end is None:  # it ended by itself: what is left of the stream may say why
+            try:
+                self._feed_pull(bytes(reply.readAll()), last=True)
+            except Exception:  # whatever came: this is a slot
+                self._pull_end = "failed"
+                self._show_provider_result(_tr("The answer of Ollama could not be read."))
+            if self._pull_end is None:
+                self._pull_end = "failed"
+                status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
+                if reply.error() == QNetworkReply.NetworkError.NoError:
+                    self._show_provider_result(_tr("The download ended before its end."))
+                elif isinstance(status, int) and status >= 400:
+                    self._show_provider_result(_tr("Ollama refused the download of {}.").format(self._pull_model))
+                elif isinstance(status, int) and status > 0:  # answered, then the stream was cut
+                    self._show_provider_result(_tr("The connection to Ollama was lost during the download of {}.")
+                                               .format(self._pull_model))
+                else:
+                    self._show_provider_result(_tr("Ollama could not be reached at {}.").format(
+                        without_credentials(self._pull_address)))
+        self._pull_idle.stop()
+        self._pull_reply = None
+        self._pull_buffer = bytearray()
+        reply.deleteLater()
+        for widget in (self.preset, self.model, self.base_url):
+            widget.setEnabled(True)
+        self.provider_test_button.setEnabled(self._provider_tester is not None)
+        if self._pull_end == "success" and not self._closing:
+            self.model.setEditText(self._pull_model)
+            self._fetch_ollama_models()  # the list now has it
+        self._update_ollama_widgets()
 
     def _on_destination(self, _text: str = "") -> None:
         """A key and a consent are for one server: another one starts without them."""

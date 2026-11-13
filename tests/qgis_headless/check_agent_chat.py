@@ -1155,7 +1155,6 @@ def check_chat(provider, layer, authcfg, work):
     check_tool_rules(chat, provider, settings, ask, layer)
     check_asked_together(chat, provider, settings, ask, layer)
     check_recipes(chat, provider, settings, ask, layer)
-    check_free_quota(chat, provider, settings, ask)
     check_native_mcp(chat, settings, answers, layer)
     host.close()
 
@@ -1945,99 +1944,6 @@ def check_steps(chat, provider, settings, ask, layer):
     chat._on_undo()
     chat._on_undo()
     layer.setSubsetString("")
-
-
-def check_free_quota(chat, provider, settings, ask):
-    """The relay that offers free requests, with a fake of it: no model is called."""
-    from filter_mate.adapters.agent import free_quota
-    from filter_mate.adapters.agent.settings import AgentSettings, provider_config, target_of
-    from filter_mate.config import config
-    from filter_mate.core.agent.providers import FREE_MODEL, FREE_PRESET
-    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
-
-    panel = chat.panel
-    agent = config.ENV_VARS.setdefault("CONFIG_DATA", {}).setdefault("APP", {}).setdefault("OPTIONS", {}).setdefault("AGENT", {})
-    from filter_mate.adapters.agent import settings as settings_module
-    released = settings_module.FREE_QUOTA_URL
-    check("free: the release points to an https relay", released.startswith("https://"), released)
-    settings_module.FREE_QUOTA_URL = ""  # the fake relay only: these checks must never reach the real one
-
-    dialog = AgentSettingsDialog(AgentSettings(), target_of, None, free_available=False)
-    check("free: not offered without a relay", dialog.preset.findData(FREE_PRESET) == -1)
-    dialog.close()
-    try:
-        provider_config(AgentSettings(preset=FREE_PRESET, model=FREE_MODEL), "fmq1.x.y")
-        check("free: no relay, no request to the official API", False)
-    except ValueError:
-        check("free: no relay, no request to the official API", True)
-
-    agent["free_quota_url"] = {"value": provider.url + "/"}
-    dialog = AgentSettingsDialog(AgentSettings(), target_of, None, free_available=True)
-    dialog.show()
-    check("free: offered first, chosen on a first use", dialog.preset.itemData(0) == FREE_PRESET and dialog.chosen_preset() == FREE_PRESET)
-    check("free: no key, no model, no address to fill", not dialog.key.isVisible() and not dialog.model.isVisible() and not dialog.base_url.isVisible())
-    check("free: it says what it is", dialog.free_notice.isVisible())
-    check("free: its model", dialog.chosen_model() == FREE_MODEL)
-    check("free: the consent is for the relay", dialog.chosen_target() == provider.url, dialog.chosen_target())
-    dialog.preset.setCurrentIndex(dialog.preset.findData("anthropic"))
-    check("free: the other providers come back", dialog.key.isVisible() and dialog.model.isVisible() and not dialog.free_notice.isVisible())
-    dialog.close()
-
-    def use_free():
-        settings(preset=FREE_PRESET, model=FREE_MODEL, base_url="https://not-this-one.example.org", authcfg="", key_target="",
-                 consent_target=target_of(FREE_PRESET, ""))
-
-    free_quota.forget_token()
-    use_free()
-    token = "fmq1.abc.def"
-    provider.reset((200, {}, json.dumps({"token": token}).encode()), (200, {}, text_turn("free answer")))
-    ask("bonjour")
-    check("free: a token is asked for once", [item["path"] for item in provider.requests] == ["/v1/register", "/v1/messages"], [item["path"] for item in provider.requests])
-    check("free: the token goes with the request", provider.requests[1]["headers"].get("x-api-key") == token)
-    check("free: the answer shows", "free answer" in panel.thread.toPlainText())
-
-    use_free()
-    provider.reset((200, {}, text_turn("again")))
-    ask("encore")
-    check("free: the token is kept", [item["path"] for item in provider.requests] == ["/v1/messages"], [item["path"] for item in provider.requests])
-
-    use_free()
-    provider.reset((402, {}, json.dumps({"type": "error", "error": {"type": "insufficient_quota", "message": "used up"}}).encode()))
-    ask("encore")
-    check("free: used up, it says what to do", "own API key" in panel.thread.toPlainText()[-400:], panel.thread.toPlainText()[-400:])
-    check("free: the request comes back in the line", panel.input.text() == "encore", panel.input.text())
-    panel.input.clear()
-
-    use_free()
-    provider.reset((401, {}, b'{"error":{"type":"authentication_error","message":"Invalid access token."}}'))
-    ask("encore")
-    panel.input.clear()
-    provider.reset((200, {}, json.dumps({"token": "fmq1.new.one"}).encode()), (200, {}, text_turn("renewed")))
-    ask("encore")
-    check("free: an unknown token is replaced", [item["path"] for item in provider.requests] == ["/v1/register", "/v1/messages"]
-          and provider.requests[1]["headers"].get("x-api-key") == "fmq1.new.one", [item["path"] for item in provider.requests])
-
-    free_quota.forget_token()
-    use_free()
-    provider.reset((429, {}, b"{}"))
-    ask("encore")
-    check("free: refused an account, no request follows", [item["path"] for item in provider.requests] == ["/v1/register"], provider.requests)
-    panel.input.clear()
-    free_quota.forget_token()
-    use_free()
-    provider.reset((200, {}, b'{"token": "sk-not-ours"}'))
-    ask("encore")
-    check("free: a strange answer is not kept", [item["path"] for item in provider.requests] == ["/v1/register"] and not QgsSettings().value("filter_mate/agent/free_token", ""))
-    panel.input.clear()
-
-    agent["free_quota_url"] = {"value": ""}
-    provider.reset()
-    use_free()
-    ask("encore")
-    check("free: the relay removed, nothing is sent", provider.requests == [] and chat._engine is None, provider.requests)
-    panel.input.clear()
-    settings()
-    settings_module.FREE_QUOTA_URL = released
 
 
 def check_native_mcp(chat, settings, answers, layer):

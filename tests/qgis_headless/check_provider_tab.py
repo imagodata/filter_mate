@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""The Provider tab of the agent settings in a real QGIS: the key link, the Test button, the models of the provider.
+"""The Provider tab of the agent settings in a real QGIS: the key link, the Test button, the models of the provider,
+and Ollama guided (where to install it, a model downloaded from the dialog).
 
-The providers are a local server that speaks the Messages API and the OpenAI-compatible API, so no model is called
-and no key is real. The real network stack and the real bounded request of the plugin are used. Run inside a
+The providers are a local server that speaks the Messages API and the OpenAI-compatible API, and another that speaks
+Ollama's /api/tags and /api/pull, so no model is called and no key is real. The real network stack and the real
+bounded request of the plugin are used. Run inside a
 qgis/qgis image, on a writable copy of the repository:
 
     docker run --rm --network none -v "$PWD:/src:ro" -e FM_REPO=/tmp/copy qgis/qgis:ltr bash -c \\
@@ -114,11 +116,141 @@ class Provider:
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
 
+class FakeOllama:
+    """/api/tags lists ``installed``; /api/pull streams lines of JSON, as ``mode`` says, one at a time."""
+
+    def __init__(self):
+        self.installed, self.pulls, self.mode, self.gone = [], [], "ok", threading.Event()
+        self.release = threading.Event()
+        ollama = self
+
+        class Handler(BaseHTTPRequestHandler):
+            protocol_version = "HTTP/1.0"  # the stream ends with the connection
+
+            def log_message(self, *args):
+                pass
+
+            def do_GET(self):  # noqa: N802 - http.server name
+                if self.path != "/api/tags":
+                    self.send_response(404)
+                    self.end_headers()
+                    return
+                body = json.dumps({"models": [{"name": n, "details": {"families": ["qwen35"]}}
+                                              for n in ollama.installed]}).encode()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def _line(self, payload):
+                self.wfile.write(json.dumps(payload).encode() + b"\n")
+                self.wfile.flush()
+
+            def do_POST(self):  # noqa: N802
+                body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                ollama.pulls.append((self.path, body))
+                self.send_response(200)
+                self.send_header("Content-Type", "application/x-ndjson")
+                self.end_headers()
+                try:
+                    self._line({"status": "pulling manifest"})
+                    if ollama.mode == "error":
+                        return self._line({"error": "pull model manifest: file does not exist"})
+                    self._line({"status": "pulling a1b2", "total": 4_000_000, "completed": 1_000_000})
+                    if ollama.mode == "hang":  # sends no more: until the client leaves
+                        while not ollama.release.wait(0.05):
+                            self._line({"status": "pulling a1b2", "total": 4_000_000, "completed": 1_000_000})
+                        return
+                    time.sleep(0.5)  # a download takes time: the dialog shows where it is
+                    self._line({"status": "pulling a1b2", "total": 4_000_000, "completed": 4_000_000})
+                    ollama.installed.append(body["model"])
+                    self._line({"status": "success"})
+                except (BrokenPipeError, ConnectionResetError):
+                    ollama.gone.set()
+
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.url = f"http://127.0.0.1:{self.server.server_address[1]}"
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+
+def ollama_cases(AgentSettings, target_of, AgentSettingsDialog, panel_module):
+    ollama = FakeOllama()
+    panel_module.ask_plain = lambda *args: True  # the question of the download: a person answers it
+
+    def open_dialog(url, model=""):
+        dialog = AgentSettingsDialog(AgentSettings(preset="ollama", model=model, base_url=url), target_of, None)
+        dialog.show()
+        return dialog
+
+    dialog = open_dialog("http://127.0.0.1:9")  # nothing listens
+    check("ollama not answering: the note with the page of Ollama, and Refresh",
+          wait(lambda: dialog.ollama_install_row.isVisible())
+          and "https://ollama.com/download" in dialog.ollama_install_note.text()
+          and dialog.ollama_refresh_button.isVisible() and not dialog.ollama_download_button.isVisible(),
+          dialog.ollama_install_note.text())
+    dialog.base_url.setText(ollama.url)
+    dialog.ollama_refresh_button.click()
+    check("ollama started, Refresh finds it: the note goes, qwen3.5:4b is proposed with Download",
+          wait(lambda: dialog.ollama_download_button.isVisible()) and not dialog.ollama_install_row.isVisible()
+          and dialog.model.currentText() == "qwen3.5:4b", dialog.model.currentText())
+
+    dialog.ollama_download_button.click()
+    check("download: busy, then a bar with the size; Cancel shown, the rest locked",
+          wait(lambda: dialog.ollama_progress.maximum() == 1000 and dialog.ollama_progress.value() == 250)
+          and dialog.ollama_cancel_button.isVisible() and not dialog.preset.isEnabled(),
+          (dialog.ollama_progress.maximum(), dialog.ollama_progress.value(), dialog.provider_result.text()))
+    check("download: posted to the address of the dialog, with the model, in a stream",
+          ollama.pulls and ollama.pulls[0] == ("/api/pull", {"model": "qwen3.5:4b", "stream": True}), ollama.pulls)
+    check("download done: the list is read again, the model chosen, the controls back",
+          wait(lambda: dialog.preset.isEnabled() and not dialog.ollama_cancel_button.isVisible())
+          and wait(lambda: not dialog.ollama_download_row.isVisible())
+          and dialog.model.currentText() == "qwen3.5:4b" and "qwen3.5:4b" in [
+              dialog.model.itemText(i) for i in range(dialog.model.count())] and
+          dialog.provider_result.text() == "qwen3.5:4b is downloaded.", dialog.provider_result.text())
+    dialog.close()
+
+    ollama.installed.clear()
+    ollama.mode = "error"
+    dialog = open_dialog(ollama.url)
+    wait(lambda: dialog.ollama_download_button.isVisible())
+    dialog.ollama_download_button.click()
+    check("download: the error line of the stream is shown, the dialog is usable again",
+          wait(lambda: "file does not exist" in dialog.provider_result.text() and dialog.preset.isEnabled()),
+          dialog.provider_result.text())
+    dialog.close()
+
+    dialog = open_dialog(ollama.url)
+    wait(lambda: dialog.ollama_download_button.isVisible())
+    dialog.base_url.setText("http://127.0.0.1:9")  # Ollama went away after the list was read
+    dialog.ollama_download_button.click()
+    check("download: no Ollama at the address says so, and the dialog is usable again",
+          wait(lambda: "could not be reached" in dialog.provider_result.text() and dialog.preset.isEnabled()),
+          dialog.provider_result.text())
+    dialog.close()
+
+    ollama.mode = "hang"
+    dialog = open_dialog(ollama.url)
+    wait(lambda: dialog.ollama_download_button.isVisible())
+    dialog.ollama_download_button.click()
+    wait(lambda: dialog.ollama_progress.value() == 250)
+    dialog.ollama_cancel_button.click()
+    check("cancel: the connection is dropped, the dialog says so and is usable again",
+          dialog.provider_result.text() == "Download cancelled." and dialog.preset.isEnabled()
+          and wait(ollama.gone.is_set, 5), dialog.provider_result.text())
+    ollama.gone.clear()
+    dialog.ollama_download_button.click()  # again, then the dialog is closed during it
+    wait(lambda: dialog.ollama_progress.value() == 250)
+    dialog.done(0)
+    check("closing the dialog during a download drops the connection", wait(ollama.gone.is_set, 5))
+    ollama.release.set()
+
+
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
     from filter_mate.adapters.agent.settings import AgentSettings, target_of
     from filter_mate.core.agent.providers.model_list import KEY_PAGES
     from filter_mate.ui.controllers.agent_chat_controller import AgentChatController
+    from filter_mate.ui.widgets import agent_panel as panel_module
     from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
 
     provider = Provider()
@@ -189,6 +321,8 @@ def main():
     check("no server: it says the provider could not be reached",
           "could not be reached" in dialog.provider_result.text(), dialog.provider_result.text())
     dialog.close()
+
+    ollama_cases(AgentSettings, target_of, AgentSettingsDialog, panel_module)
 
 
 if __name__ == "__main__":
