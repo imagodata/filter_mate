@@ -116,6 +116,9 @@ class TestHostHooks:
                 buffer_expression='"homecount" * 2', source_filter='EXISTS (SELECT 1)', layer_name='ducts')
         assert builder._is_complex_query
         assert any("Complex query on 'ducts'" in r.getMessage() for r in caplog.records)
+        # 2026-11-13: no timeout reaches the filter, which runs through the connection of the QGIS provider
+        assert not any("timeout is set" in r.getMessage() for r in caplog.records)
+        assert not hasattr(builder, "_set_query_timeout")
 
     @pytest.mark.parametrize('authid, srid', [
         ('EPSG:2154', 2154), ('epsg:3857', 3857), (' EPSG:27572 ', 27572),
