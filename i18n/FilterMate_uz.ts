@@ -497,6 +497,61 @@ Ishga tushirilsinmi?</translation>
         <translation>Agent uchun ko'nikma</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>FilterMate'ni agent yordamida sozlaysizmi?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Bir nechta savol, so'ng sozlamalar oldin va keyin ko'rsatiladi: siz qo'llamaguningizcha hech narsa o'zgarmaydi. Keyinroq: menyu Vektor &gt; FilterMate &gt; FilterMate'ni agent yordamida sozlash.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Boshlash</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Hozir emas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Sozlash boshlandi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Hozir emas: menyu uni xohlagan vaqtingizda ishga tushiradi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Ko'rinish: til, mavzu, panel o'lchami</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Ma'lumotlaringiz: PostgreSQL, rasterlar, nuqtalar bulutlari, kutish muddatlari</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Agent: mustaqil ravishda nima qila oladi, qaysi qatlamlarni hech qachon o'zgartirmaydi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>So'rov tugashini kuting, so'ng sozlashni qayta boshlang.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>FilterMate'ni kompyuterim va ma'lumotlarim uchun sozlashga yordam ber: bu loyihada nima borligini ko'r, menga bir nechta savol ber, so'ng sozlamalarni taklif qil.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} tahriri (saqlanmagan)</translation>
@@ -1051,6 +1106,11 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Agent sozlamalari</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMate'ni agent yordamida sozlash…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3832,6 +3892,21 @@ Birinchi sevimlingizni saqlash uchun ★ ko'rsatkichini bosing va 'Joriy filtrni
         <translation>Sozlamalar va ma'lumotlar bazasini tiklash</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMate'ni agent yordamida sozlash</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Agent bir nechta savol beradi va FilterMate sozlamalarini taklif qiladi</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>AGENT bo'limi o'chirilgan: konfiguratsiyada APP.OPTIONS.AGENT.enabled parametrini yoqing, so'ng QGIS'ni qayta ishga tushiring.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Standart sozlamalarni tiklash va SQLite ma'lumotlar bazasini o'chirish</translation>
@@ -4400,6 +4475,21 @@ What would you like to do?</translation>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>Zip the export</source>
         <translation>Eksportni zip qilish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Solishtirish: oxirgi filtrdan oldingi xarita chiziqning chap tomonida, hozirgisi o'ngda; chiziq sichqonchaga ergashadi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Oxirgi filtrdan oldin va keyin solishtirish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Solishtiradigan narsa yo'q: bu yerda bekor qilinadigan filtr yo'q.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

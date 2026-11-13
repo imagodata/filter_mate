@@ -497,6 +497,61 @@ Run it?</source>
         <translation>ለወኪሉ የሚሆን ክህሎት</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>FilterMate በወኪሉ ይዋቀር?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>ጥቂት ጥያቄዎች፣ ከዚያ ቅንብሮቹ በፊትና በኋላ ይታያሉ፦ እስኪተገብሩ ድረስ ምንም አይለወጥም። በኋላ፦ ምናሌ ቬክተር &gt; FilterMate &gt; FilterMateን በወኪሉ አዋቅር።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>ጀምር</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>አሁን አይደለም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>ማዋቀሩ ተጀምሯል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>አሁን አይደለም፦ በፈለጉ ጊዜ ምናሌው ያስጀምረዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>ገጽታ፦ ቋንቋ፣ ጭብጥ፣ የፓነሉ መጠን</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>የእርስዎ ውሂብ፦ PostgreSQL፣ ራስተሮች፣ የነጥብ ደመናዎች፣ የጊዜ ገደቦች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>ወኪሉ፦ ብቻውን ማድረግ የሚችለው፣ በፍጹም የማይለውጣቸው ንብርብሮች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>ጥያቄው እስኪያልቅ ይጠብቁ፣ ከዚያ ማዋቀሩን እንደገና ያስጀምሩ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>FilterMateን ለኮምፒውተሬና ለውሂቤ እንዳዋቅር እርዳኝ፦ ይህ ፕሮጀክት ምን እንደያዘ ተመልከት፣ ጥቂት ጥያቄዎችን ጠይቀኝ፣ ከዚያ ቅንብሮቹን አቅርብ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>የ{} ማስተካከያ (አልተቀመጠም)</translation>
@@ -1051,6 +1106,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>የወኪል ቅንብሮች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMateን በወኪሉ አዋቅር…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3832,6 +3892,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>ውቅረትና ዳታቤዝ ዳግም አስጀምር</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMateን በወኪሉ አዋቅር</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>ወኪሉ ጥቂት ጥያቄዎችን ይጠይቃል የFilterMate ቅንብሮችንም ያቀርባል</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>የAGENT ክፍል ጠፍቷል፦ በውቅረቱ ውስጥ APP.OPTIONS.AGENT.enabled የሚለውን ያብሩ፣ ከዚያ QGISን እንደገና ያስጀምሩ።</translation>
+    </message>
+    <message>
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>ነባሪ ውቅረትን ዳግም አስጀምርና SQLite ዳታቤዝን ሰርዝ</translation>
@@ -4400,6 +4475,21 @@ What would you like to do?</translation>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>Zip the export</source>
         <translation>መላኪያውን ዚፕ አድርግ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>ማነጻጸር፦ ከመጨረሻው ማጣሪያ በፊት ያለው ካርታ ከመስመሩ በግራ፣ የአሁኑ በቀኝ፤ መስመሩ አይጡን ይከተላል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>ከመጨረሻው ማጣሪያ በፊትና በኋላ አነጻጽር</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>የሚነጻጸር የለም፦ እዚህ የሚቀለበስ ማጣሪያ የለም።</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

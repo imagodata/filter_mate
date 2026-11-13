@@ -183,6 +183,7 @@ class AgentChatController(QObject):
         self.panel.resend_requested.connect(self._on_resend)
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.settings_requested.connect(self.open_settings)
+        self.panel.setup_requested.connect(self.start_setup)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
         self._stat_timer = QTimer(self)
@@ -428,6 +429,66 @@ class AgentChatController(QObject):
                    "use it? It is not asked again until it changes.").format(
             one_line(skill.title, 100), one_line(skill.name, 40), place)
         return bool(self._ask_code(_tr("A skill for the agent"), text, skill.body))
+
+    SETUP_OFFERED_KEY = "FilterMate/agent/setup_offered_version"
+
+    @staticmethod
+    def setup_offer_due(offered: str, version: str) -> bool:
+        """The setup is offered once for each version installed: not again for the version it was offered for."""
+        return bool(version) and offered != version
+
+    def plugin_version(self) -> str:
+        """The version of metadata.txt of the plugin, "" when it cannot be read."""
+        import configparser
+        import os
+        folder = getattr(self._plugin, "plugin_dir", "") or os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__))))
+        parser = configparser.ConfigParser(interpolation=None)
+        try:
+            parser.read(os.path.join(folder, "metadata.txt"), encoding="utf-8")
+            return parser.get("general", "version", fallback="").strip()
+        except (configparser.Error, OSError):
+            return ""
+
+    def offer_setup_once(self, version: str = "") -> bool:
+        """The first time this version opens: a card in the thread offers to set FilterMate up with the agent.
+
+        Kept as offered at once, whatever the answer: never offered again for this version (the menu entries start
+        it at any time). True when offered."""
+        from qgis.core import QgsSettings
+        version = version or self.plugin_version()
+        settings = QgsSettings()
+        if not self.setup_offer_due(str(settings.value(self.SETUP_OFFERED_KEY, "") or ""), version):
+            return False
+        settings.setValue(self.SETUP_OFFERED_KEY, version)
+        texts = {"heading": _tr("Set FilterMate up with the agent?"),
+                 "note": _tr("A few questions, then the settings shown before and after: nothing changes until you "
+                             "apply. Later: menu Vector > FilterMate > Set up FilterMate with the agent."),
+                 "apply": _tr("Start"), "cancel": _tr("Not now"),
+                 "accepted": _tr("Setup started."), "declined": _tr("Not now: the menu starts it when you want.")}
+        lines = [_tr("Look: language, theme, size of the panel"),
+                 _tr("Your data: PostgreSQL, rasters, point clouds, timeouts"),
+                 _tr("The agent: what it may do alone, which layers it never changes")]
+        card = self.panel.add_settings_card(texts, lines, "")
+        card.apply_requested.connect(lambda: (card.finish(True), self.start_setup()))
+        card.cancel_requested.connect(lambda: card.finish(False))
+        self._settings_cards.append(card)
+        return True
+
+    def start_setup(self) -> None:
+        """Set FilterMate up with the agent: the AGENT section opened, and a request that starts the setup. The
+        settings of the agent are asked first when it has none (the usual way of a first request)."""
+        if self.chat_busy():
+            self._say(_tr("Wait for the end of the request, then start the setup again."), error=True)
+            return
+        sections = getattr(self._parent_widget, "_fm_sections", None)
+        if sections is not None and hasattr(sections, "open_top"):
+            try:
+                sections.open_top("agent")
+            except Exception:
+                logger.debug("Agent: section not opened for the setup", exc_info=True)
+        self._on_send(_tr("Help me set FilterMate up for my computer and my data: look at what this project holds, "
+                          "ask me a few questions, then propose the settings."))
 
     def _settings_link_tool(self, arguments) -> dict:
         """show_settings_link: a button in the thread, to a tab of the agent settings or to a setting."""

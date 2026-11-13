@@ -497,6 +497,61 @@ Futtatja?</translation>
         <translation>Készség az ügynöknek</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Beállítja a FilterMate-et az ügynökkel?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Néhány kérdés, majd a beállítások előtte és utána: semmi sem változik, amíg nem alkalmazza őket. Később: Vektor menü &gt; FilterMate &gt; FilterMate beállítása az ügynökkel.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Indítás</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Most nem</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>A beállítás elindult.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Most nem: a menüből akkor indíthatja, amikor szeretné.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Megjelenés: nyelv, téma, a panel mérete</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Az Ön adatai: PostgreSQL, raszterek, pontfelhők, időkorlátok</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Az ügynök: mit tehet egyedül, mely rétegeket nem módosítja soha</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Várja meg a kérés végét, majd indítsa újra a beállítást.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Segíts beállítani a FilterMate-et a gépemhez és az adataimhoz: nézd meg, mit tartalmaz ez a projekt, tegyél fel néhány kérdést, aztán javasold a beállításokat.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} szerkesztése (nincs mentve)</translation>
@@ -1051,6 +1106,11 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Az ügynök beállításai</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMate beállítása az ügynökkel…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3832,6 +3892,21 @@ Kattintson a ★ jelzőre és válassza a 'Jelenlegi szűrő hozzáadása a kedv
         <translation>Konfiguráció és adatbázis visszaállítása</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMate beállítása az ügynökkel</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Az ügynök feltesz néhány kérdést, és javaslatot tesz a FilterMate beállításaira</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Az AGENT szakasz ki van kapcsolva: kapcsolja be az APP.OPTIONS.AGENT.enabled beállítást a konfigurációban, majd indítsa újra a QGIS-t.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Alapértelmezett konfiguráció visszaállítása és SQLite adatbázis törlése</translation>
@@ -4400,6 +4475,21 @@ What would you like to do?</translation>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>Zip the export</source>
         <translation>Export tömörítése zip-be</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Összehasonlítás: a térkép az utolsó szűrő előtt a vonaltól balra, a mostani jobbra; a vonal követi az egeret</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Összehasonlítás az utolsó szűrő előtt és után</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Nincs mit összehasonlítani: itt nincs visszavonható szűrő.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

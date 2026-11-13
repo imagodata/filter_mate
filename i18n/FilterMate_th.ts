@@ -497,6 +497,61 @@ Run it?</source>
         <translation>ทักษะสำหรับเอเจนต์</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>ตั้งค่า FilterMate ด้วยเอเจนต์หรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>มีคำถามไม่กี่ข้อ แล้วจะแสดงการตั้งค่าก่อนและหลัง: จะไม่มีอะไรเปลี่ยนจนกว่าคุณจะนำไปใช้ ภายหลัง: เมนู เวกเตอร์ &gt; FilterMate &gt; ตั้งค่า FilterMate ด้วยเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>เริ่ม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>ไว้ทีหลัง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>เริ่มการตั้งค่าแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>ไว้ทีหลัง: เมนูจะเริ่มการตั้งค่าเมื่อคุณต้องการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>รูปลักษณ์: ภาษา ธีม ขนาดของแผง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>ข้อมูลของคุณ: PostgreSQL, ราสเตอร์, พอยต์คลาวด์, การหมดเวลา</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>เอเจนต์: สิ่งที่ทำได้เอง และเลเยอร์ที่จะไม่เปลี่ยนเลย</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>รอให้คำขอเสร็จสิ้น แล้วเริ่มการตั้งค่าอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>ช่วยฉันตั้งค่า FilterMate สำหรับคอมพิวเตอร์และข้อมูลของฉันหน่อย: ดูว่าโปรเจกต์นี้มีอะไรบ้าง ถามฉันสักสองสามข้อ แล้วเสนอการตั้งค่า</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>การแก้ไข {} (ยังไม่บันทึก)</translation>
@@ -1051,6 +1106,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>การตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>ตั้งค่า FilterMate ด้วยเอเจนต์…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3832,6 +3892,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>รีเซ็ตการกำหนดค่าและฐานข้อมูล</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>ตั้งค่า FilterMate ด้วยเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>เอเจนต์จะถามคำถามสองสามข้อและเสนอการตั้งค่าของ FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>ส่วน AGENT ปิดอยู่: เปิด APP.OPTIONS.AGENT.enabled ในการกำหนดค่า แล้วรีสตาร์ต QGIS</translation>
+    </message>
+    <message>
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>รีเซ็ตการกำหนดค่าเริ่มต้นและลบฐานข้อมูล SQLite</translation>
@@ -4400,6 +4475,21 @@ What would you like to do?</translation>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>Zip the export</source>
         <translation>บีบอัดการส่งออกเป็น ZIP</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>เปรียบเทียบ: แผนที่ก่อนตัวกรองล่าสุดอยู่ทางซ้ายของเส้น แผนที่ปัจจุบันอยู่ทางขวา เส้นจะเลื่อนตามเมาส์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>เปรียบเทียบก่อนและหลังตัวกรองล่าสุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>ไม่มีอะไรให้เปรียบเทียบ: ไม่มีตัวกรองให้ยกเลิกที่นี่</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

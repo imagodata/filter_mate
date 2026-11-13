@@ -497,6 +497,61 @@ Ausführen?</translation>
         <translation>Ein Skill für den Agenten</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>FilterMate mit dem Agenten einrichten?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Ein paar Fragen, dann die Einstellungen vorher und nachher: Nichts ändert sich, bis Sie anwenden. Später: Menü Vektor &gt; FilterMate &gt; FilterMate mit dem Agenten einrichten.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Starten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Nicht jetzt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Einrichtung gestartet.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Nicht jetzt: Das Menü startet sie, wann Sie möchten.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Darstellung: Sprache, Thema, Größe des Bedienfelds</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Ihre Daten: PostgreSQL, Raster, Punktwolken, Zeitlimits</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Der Agent: was er allein tun darf, welche Layer er nie ändert</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Warten Sie das Ende der Anfrage ab und starten Sie die Einrichtung dann erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Hilf mir, FilterMate für meinen Rechner und meine Daten einzurichten: Schau dir an, was dieses Projekt enthält, stell mir ein paar Fragen und schlag dann die Einstellungen vor.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Bearbeitung von {} (nicht gespeichert)</translation>
@@ -1051,6 +1106,11 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Agent-Einstellungen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMate mit dem Agenten einrichten…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3832,6 +3892,21 @@ Klicken Sie auf die ★-Anzeige und wählen Sie 'Aktuellen Filter zu Favoriten h
         <translation>Konfiguration und Datenbank zurücksetzen</translation>
     </message>
     <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMate mit dem Agenten einrichten</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Der Agent stellt ein paar Fragen und schlägt die Einstellungen von FilterMate vor</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Der Bereich AGENT ist ausgeschaltet: Schalten Sie APP.OPTIONS.AGENT.enabled in der Konfiguration ein und starten Sie QGIS dann neu.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Standardkonfiguration zurücksetzen und SQLite-Datenbank löschen</translation>
@@ -4400,6 +4475,21 @@ What would you like to do?</translation>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>Zip the export</source>
         <translation>Export als ZIP packen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Vergleichen: die Karte vor dem letzten Filter links der Linie, die aktuelle rechts; die Linie folgt der Maus</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Vor und nach dem letzten Filter vergleichen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Nichts zu vergleichen: hier gibt es keinen Filter zum Rückgängigmachen.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

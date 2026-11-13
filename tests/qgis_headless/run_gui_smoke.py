@@ -672,6 +672,24 @@ def s_agent_skill_from_profile_check():
     return waits(0.2)
 
 
+def s_agent_setup_offer_check():
+    """The setup with the agent: offered once per version (a card of the thread), an entry of both menus."""
+    import qgis.utils
+    chat = agent_chat()
+    before = len(chat._settings_cards)
+    first = chat.offer_setup_once('smoke-9.9.9')
+    second = chat.offer_setup_once('smoke-9.9.9')
+    cards = len(chat._settings_cards)
+    shown = cards >= 1 and 'Set FilterMate up with the agent?' in chat.panel.thread.toPlainText()
+    plugin = qgis.utils.plugins[PACKAGE]
+    entries = [action.text() for action in plugin.actions]
+    check('setup with the agent: offered once per version, in the QGIS menu and the panel menu',
+          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and 'Set up FilterMate with the agent' in entries
+          and chat.panel.setup_action is not None, f"first={first} second={second} entries={entries}")
+    chat.new_conversation()  # the checks of the AGENT section that follow expect its welcome
+    return waits(0.2)
+
+
 def s_qt6_enums_check():
     """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
     from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
@@ -769,6 +787,55 @@ def s_vector_filter():
         ctrl._smoke_traced = True
     run_task('filter')
     return lambda: layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_compare_check():
+    """Compare (action bar): the map before the last filter left of a line, its tool on the canvas, gone when off."""
+    from qgis.utils import iface
+    d = dock()
+    button = getattr(d, 'pushButton_action_compare', None)
+    redo = d.pushButton_action_redo_filter
+    if not check('compare: a checkable button beside Redo', button is not None and button.isCheckable()
+                 and button.parentWidget() is redo.parentWidget()):
+        return None
+    check('compare: available as Undo is', button.isEnabled() == d.pushButton_action_undo_filter.isEnabled(),
+          f"compare={button.isEnabled()} undo={d.pushButton_action_undo_filter.isEnabled()}")
+    canvas = iface.mapCanvas()
+    previous = canvas.mapTool()
+    button.click()
+    session = d._controller_integration._compare_controller.session
+    compared = session.compared_layer_ids() if session is not None else []
+    source = d.current_layer
+    check('compare: on after a filter, the source and the dem drawn as they were', button.isChecked()
+          and layer('dem').id() in compared and source is not None and source.id() in compared
+          and canvas.mapTool() is session.tool, f"checked={button.isChecked()} compared={compared}")
+    STATE['compare_session'] = session
+    STATE['compare_previous_tool'] = previous
+    return lambda: session is None or session.renders >= 1
+
+
+def s_compare_off_check():
+    from qgis.utils import iface
+    d = dock()
+    session = STATE.get('compare_session')
+    check('compare: the before image was rendered', session is not None and session.renders >= 1,
+          session.renders if session is not None else None)
+    d.pushButton_action_compare.click()
+    check('compare: off, the tool there before and no clone left',
+          not d.pushButton_action_compare.isChecked() and iface.mapCanvas().mapTool() is STATE.get('compare_previous_tool')
+          and (session is None or not session.clones))
+    # On again, then another map tool chosen: the comparison ends and leaves that tool, the button goes up.
+    from qgis.gui import QgsMapToolPan
+    d.pushButton_action_compare.click()
+    pan = QgsMapToolPan(iface.mapCanvas())
+    iface.mapCanvas().setMapTool(pan)
+    check('compare: another map tool ends it', not d.pushButton_action_compare.isChecked()
+          and session is not None and not session.active and iface.mapCanvas().mapTool() is pan)
+    previous = STATE.get('compare_previous_tool')
+    if previous is not None:
+        iface.mapCanvas().setMapTool(previous)
+    else:
+        iface.mapCanvas().unsetMapTool(pan)
 
 
 def s_vector_check():
@@ -1810,9 +1877,11 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
          s_agent_skill_from_profile_check,
+         s_agent_setup_offer_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
-         s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
+         s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_vector_check,
+         s_vector_undo_check,
          s_user_pick_after_undo_check,
          s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,

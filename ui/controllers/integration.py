@@ -211,6 +211,14 @@ class ControllerIntegration:
         if not self._is_setup:
             return
 
+        compare = getattr(self, "_compare_controller", None)
+        self._compare_controller = None
+        if compare is not None:
+            try:
+                compare.teardown()
+            except Exception as e:  # never in the way of the rest of the teardown
+                logger.error(f"Error during compare teardown: {e}")
+
         try:
             # Disconnect signals
             self._disconnect_signals()
@@ -248,6 +256,10 @@ class ControllerIntegration:
         picker, SAM, class pipette, Zone): they would keep it while their
         panel is hidden.
         """
+        # Compare first: it gives the map back to the tool before it, a picker of a panel the next lines release.
+        compare = getattr(self, "_compare_controller", None)
+        if compare is not None:  # its swipe tool would keep the map while the dock is hidden
+            compare.stop()
         controller = self._point_cloud_ui_controller
         if controller is not None:
             controller.release_map_tools()
@@ -317,6 +329,15 @@ class ControllerIntegration:
             filter_service=self._filter_service,
             signal_manager=self._signal_manager
         )
+
+        # Compare: a button of the action bar, the map before the last filter left of a line. Never in the way of the
+        # dock: a failure leaves it without the button.
+        try:
+            from .compare_controller import CompareController
+            self._compare_controller = CompareController(self._dockwidget, self)
+        except Exception:
+            logger.warning("Compare mode not set up", exc_info=True)
+            self._compare_controller = None
 
         logger.debug("All controllers created")
 
