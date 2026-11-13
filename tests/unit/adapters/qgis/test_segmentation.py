@@ -629,10 +629,14 @@ class TestFeatureCandidates:
 
 
 class FakeInterface:
-    """A raster interface of a pipe (renderer, filter): clone() records the copies, setAlphaBand the band."""
+    """A raster interface of a pipe (renderer, filter): clone() records the copies, setAlphaBand the band, setInput the input."""
 
     def __init__(self, name, alpha=-1):
-        self.name, self.alpha, self.copies = name, alpha, []
+        self.name, self.alpha, self.copies, self.input = name, alpha, [], None
+
+    def setInput(self, interface):
+        self.input = interface
+        return True
 
     def clone(self):
         copy = FakeInterface(self.name, self.alpha)
@@ -721,11 +725,18 @@ class TestDrawingWithoutALayer:
     def test_a_bare_provider_drawn_with_the_look_of_the_layer(self, registry):
         opened, _pipes = registry
         look = segmentation.raster_look(self.layer())
-        pipe = segmentation.open_drawing('https://example.org/wcs?coverage=dem', 'wcs', look)
+        drawing = segmentation.open_drawing('https://example.org/wcs?coverage=dem', 'wcs', look)
         assert opened == [('wcs', 'https://example.org/wcs?coverage=dem', 'options')]
-        assert [getattr(interface, 'name', 'provider') for interface in pipe.interfaces] == \
-            ['provider', 'renderer', 'brightness', 'hue', 'resampler']
-        assert all(interface is not look[interface.name] for interface in pipe.interfaces[1:])  # copies: the pipe owns them
+        pipe = drawing.pipe
+        assert [interface.name for interface in pipe.interfaces] == ['renderer', 'brightness', 'hue', 'resampler']
+        assert all(interface is not look[interface.name] for interface in pipe.interfaces)  # copies: the pipe owns them
+        assert drawing.last() is pipe.interfaces[-1]
+
+    def test_the_provider_is_read_but_not_given_to_the_pipe(self, registry):
+        """2026-11-13: a provider owned by the pipe died in the worker before its wrapper (PyQt5 heap, QGIS 3.44)."""
+        drawing = segmentation.open_drawing('ortho.tif', 'gdal', segmentation.raster_look(self.layer()))
+        assert drawing.pipe.interfaces[0].input is drawing.provider
+        assert drawing.provider not in drawing.pipe.interfaces
 
     def test_nothing_to_draw(self, registry):
         assert segmentation.open_drawing('bad.tif', 'gdal', segmentation.raster_look(self.layer())) is None

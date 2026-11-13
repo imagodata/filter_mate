@@ -846,14 +846,34 @@ def raster_look(layer: Any, alpha_band: Optional[int] = None) -> dict:
     return look
 
 
+class _Drawing:
+    """The interfaces that draw a provider, and the provider they read (:func:`open_drawing`)."""
+
+    def __init__(self, pipe: Any, provider: Any) -> None:
+        self.pipe, self.provider = pipe, provider  # released in this order: the renderer never reads a provider gone
+
+    def last(self) -> Any:
+        return self.pipe.last()
+
+
 def open_drawing(source: str, provider_key: str, look: dict) -> Any:
-    """A pipe drawing ``source`` as ``look`` says (:func:`raster_look`); None when the source cannot be read. Worker.
+    """What draws ``source`` as ``look`` says (:func:`raster_look`); None when the source cannot be read. Worker.
 
     A bare provider, not a QgsRasterLayer: a layer computes the statistics of its default renderer
     when it opens, one more read of the whole coverage (a WCS: a GetCoverage of all of it for each
     window; see ``target_appliers._ProviderLayer.open``). The windows are read in the coordinates of
     the layer as they are: a CRS the user set in QGIS on a file whose own is wrong or missing only
     names them, there is no reprojection to get wrong.
+
+    The provider stays owned by Python, read by the renderer but out of the pipe. PyQt5 keeps the
+    QObjects made by C++ that Python wraps in a set, which the main thread edits without the GIL
+    when one of them is destroyed. Owned by the pipe, the provider was destroyed in the worker
+    before its wrapper, and both threads took it out of that set at once: a corrupted heap, a crash
+    later on the main thread (one run in four of check_segmentation in QGIS 3.44). Owned by Python,
+    its wrapper goes first, in the worker, and the main thread finds nothing left to remove.
+
+    Returns:
+        An object whose ``last()`` is the end of the pipe, as :func:`render_drawing` reads it.
     """
     from qgis.core import QgsDataProvider, QgsProviderRegistry, QgsRasterPipe
     if look.get('renderer') is None:
@@ -862,12 +882,13 @@ def open_drawing(source: str, provider_key: str, look: dict) -> Any:
     if provider is None or not provider.isValid():
         return None
     pipe = QgsRasterPipe()
-    if not pipe.set(provider):
-        return None
-    for key in ('renderer', 'brightness', 'hue', 'resampler'):
+    renderer = look['renderer'].clone()
+    if not renderer.setInput(provider) or not pipe.set(renderer):
+        raise RuntimeError('the renderer of the layer does not fit its source')
+    for key in ('brightness', 'hue', 'resampler'):
         if look.get(key) is not None and not pipe.set(look[key].clone()):
             raise RuntimeError(f'the {key} of the layer does not fit its source')
-    return pipe
+    return _Drawing(pipe, provider)
 
 
 def render_drawing(pipe: Any, window: SegmentationWindow, is_canceled: Any) -> QImage:
