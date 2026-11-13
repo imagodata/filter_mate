@@ -59,6 +59,9 @@ DENIED = frozenset({
     "native:batchnominatimgeocoder",  # sends the addresses of a layer to the Nominatim server of OpenStreetMap
     "native:openurl",  # hands a URL or a file to the system (it makes no layer, refused by name all the same)
     "native:zonalstatistics",  # "in place": it adds fields to the source of its input
+    # A layer of the sources of the layers given: the paths of this machine, the hosts and users of its databases,
+    # which the model would then read (audit of 12/11/2026)
+    "native:exportlayersinformation",
 })
 
 Parameter = Tuple[str, str, bool]  # name, type, optional

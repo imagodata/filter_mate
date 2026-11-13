@@ -86,6 +86,13 @@ def test_what_sends_data_out_is_refused_by_name():
         assert refusal(algorithm, "native", BUFFER)
 
 
+def test_the_sources_of_the_layers_are_not_made_a_layer_the_model_reads():
+    """native:exportlayersinformation makes a layer (so the rule alone let it run) of the source of each layer."""
+    parameters = [("LAYERS", "multilayer", False), ("OUTPUT", "sink", False)]
+    assert refusal("native:exportlayersinformation", "native", parameters) != ""
+    assert refusal("native:buffer", "native", BUFFER) == ""
+
+
 def test_deprecated():
     assert "deprecated" in refusal("native:old", "native", BUFFER, deprecated=True)
 
