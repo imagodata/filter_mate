@@ -248,6 +248,73 @@ def test_a_removed_key_is_not_tested_as_if_it_were_still_there():
     assert len(tester.calls) == 1 and dialog.provider_result.text() == "It answers."
 
 
+def test_the_key_typed_for_a_provider_does_not_follow_a_change_of_provider():
+    tester = FakeTester((True, "It answers.", ()))
+    dialog = _dialog("anthropic", tester)
+    dialog.key.setText(SECRET)
+    dialog.preset.setCurrentIndex(dialog.preset.findData("openai"))
+    assert dialog.key.text() == ""
+    dialog.provider_test_button.click()
+    assert tester.calls[0][3] == ""
+
+
+def test_the_key_typed_for_an_address_does_not_follow_a_change_of_address():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())))
+    dialog.base_url.setText("https://one.example.com/v1")
+    dialog.key.setText(SECRET)
+    dialog.base_url.setText("https://two.example.com/v1")
+    assert dialog.key.text() == ""
+
+
+def test_the_key_stays_when_the_address_is_only_written_differently():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())))
+    dialog.base_url.setText("https://one.example.com/v1")
+    dialog.key.setText(SECRET)
+    dialog.base_url.setText("https://one.example.com/v1/")  # the same server: a trailing slash is not a target
+    assert dialog.key.text() == SECRET
+
+
+def test_removing_the_stored_key_keeps_the_key_being_typed():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ())), authcfg="abc123", key_target="x")
+    dialog.key.setText(SECRET)
+    dialog._on_forget()
+    assert dialog.key.text() == SECRET
+
+
+def test_a_model_the_former_provider_listed_is_not_kept():
+    dialog = _dialog("openai", FakeTester((True, "It answers.", ("gpt-x", "gpt-y"))), model="gpt-x")
+    dialog.provider_test_button.click()
+    dialog.preset.setCurrentIndex(dialog.preset.findData("mistral"))
+    assert dialog.model.currentText() == ""
+
+
+def test_models_of_another_address_are_not_offered():
+    holder = {}
+
+    def tester(preset, model, base_url, key):
+        holder["dialog"].base_url.setText("https://two.example.com/v1")
+        return True, "It answers.", ("from-the-first-server",)
+
+    dialog = holder["dialog"] = _dialog("openai", tester)
+    dialog.base_url.setText("https://one.example.com/v1")
+    dialog.provider_test_button.click()
+    assert "from-the-first-server" not in _models(dialog)
+    assert dialog.provider_result.text() == ""  # not left saying Testing…
+
+
+def test_models_of_another_key_are_not_offered():
+    holder = {}
+
+    def tester(preset, model, base_url, key):
+        holder["dialog"].key.setText("another-key-0123456789")
+        return True, "It answers.", ("from-the-first-key",)
+
+    dialog = holder["dialog"] = _dialog("openai", tester)
+    dialog.key.setText(SECRET)
+    dialog.provider_test_button.click()
+    assert "from-the-first-key" not in _models(dialog) and dialog.provider_result.text() == ""
+
+
 def test_the_key_link_escapes_what_a_translation_says(monkeypatch):
     real = panel_module._tr
     monkeypatch.setattr(panel_module, "_tr", lambda text: "Create <b> & key" if text == "Create a key" else real(text))

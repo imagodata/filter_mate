@@ -7,6 +7,7 @@ embedding, speech and image models too; Ollama answers its own ``/api/tags`` (se
 from __future__ import annotations
 
 import json
+import unicodedata
 from typing import Dict, Optional, Tuple
 
 from .ollama_chat import MAX_LISTED_MODELS, installed_models, tags_url
@@ -23,12 +24,19 @@ KEY_PAGES: Dict[str, str] = {
 _NOT_CHAT = ("embed", "tts", "whisper", "dall-e", "moderation", "image", "audio", "transcribe", "realtime", "search",
              "sora", "babbage", "davinci")
 ANTHROPIC_PAGE_SIZE = 100  # its list gives 20 models unless asked for more
+MAX_ID_LENGTH = 200  # a longer id is not the name of a model
 
 
 def _created(entry) -> Optional[int]:
     """The ``created`` timestamp of an entry of the list, when it has one."""
     value = entry.get("created") if isinstance(entry, dict) else None
     return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _is_model_id(name: object) -> bool:
+    """A name a model can have: some text, of a sane length, with no control character (it ends in a combo box)."""
+    return (isinstance(name, str) and bool(name.strip()) and len(name) <= MAX_ID_LENGTH
+            and not any(unicodedata.category(char) == "Cc" for char in name))
 
 
 def listing_url(kind: str, base_url: str) -> str:
@@ -63,10 +71,11 @@ def models_from_listing(kind: str, data: bytes) -> Tuple[str, ...]:
     names = []
     for entry in entries:
         name = entry.get("id") if isinstance(entry, dict) else None
-        if not isinstance(name, str) or not name.strip() or name in names:
+        if not _is_model_id(name) or name in names:
             continue
-        capabilities = entry.get("capabilities")  # Mistral says which models complete a chat
-        if isinstance(capabilities, dict) and capabilities.get("completion_chat") is False:
+        capabilities = entry.get("capabilities")  # Mistral says which models complete a chat, and call functions
+        if isinstance(capabilities, dict) and (capabilities.get("completion_chat") is False
+                                               or capabilities.get("function_calling") is False):
             continue
         if any(word in name.lower() for word in _NOT_CHAT):
             continue

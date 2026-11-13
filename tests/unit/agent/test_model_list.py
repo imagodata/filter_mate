@@ -91,3 +91,17 @@ def test_ollama_listing_is_its_tags_answer():
     ("ollama", "http://localhost:11434/v1", "http://localhost:11434/api/tags")])
 def test_listing_url(kind, base, url):
     assert listing_url(kind, base) == url
+
+
+def test_an_id_that_is_too_long_or_holds_a_control_character_is_dropped():
+    data = json.dumps({"data": [{"id": "x" * 201}, {"id": "ok" + "\x1b[31m"}, {"id": "bad\nline"}, {"id": "x" * 200},
+                                {"id": "fine"}]}).encode()
+    assert models_from_listing("openai_compatible", data) == ("x" * 200, "fine")
+
+
+def test_a_mistral_model_that_cannot_call_functions_is_dropped():
+    data = json.dumps({"data": [
+        {"id": "mistral-small-latest", "capabilities": {"completion_chat": True, "function_calling": True}},
+        {"id": "no-tools", "capabilities": {"completion_chat": True, "function_calling": False}},
+        {"id": "unsaid", "capabilities": {"completion_chat": True}}]}).encode()
+    assert models_from_listing("openai_compatible", data) == ("mistral-small-latest", "unsaid")
