@@ -236,6 +236,21 @@ Do you agree?</source>
         <translation>ምላሽ ይሰጣል።</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
+        <source>Enter your API key first.</source>
+        <translation>መጀመሪያ API ቁልፍዎን ያስገቡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1479"/>
+        <source>It answers: choose a model in the list.</source>
+        <translation>ምላሽ ይሰጣል፦ ከዝርዝሩ ሞዴል ይምረጡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1478"/>
+        <source>The provider listed no model: type the name of one.</source>
+        <translation>አቅራቢው ምንም ሞዴል አልዘረዘረም፦ የአንዱን ስም ይጻፉ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
@@ -1414,6 +1429,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>ሞክር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1441"/>
+        <source>Create a key</source>
+        <translation>ቁልፍ ፍጠር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="549"/>
+        <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
+        <translation>የAI አቅራቢ ያስፈልገዋል፦ የራስዎ API ቁልፍ፣ ወይም ከOllama ጋር አካባቢያዊ ሞዴል። ከስምምነትዎ በፊት ምንም አይላክም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="932"/>
+        <source>Send one short request to this provider, and list its models</source>
+        <translation>ለዚህ አቅራቢ አንድ አጭር ጥያቄ ላክ፣ እና ሞዴሎቹን ዘርዝር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>The test could not be made.</source>
+        <translation>ሙከራው ሊደረግ አልቻለም።</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1021"/>
