@@ -1546,6 +1546,11 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Ollama {} ni yuklab olishni rad etdi.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>{} ni yuklab olish muvaffaqiyatsiz tugadi.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>{} manzilidagi Ollama'ga ulanib bo'lmadi.</translation>

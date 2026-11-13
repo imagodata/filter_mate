@@ -1546,6 +1546,11 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <translation>Ollama afviste download af {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Download af {} mislykkedes.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollama kunne ikke nås på {}.</translation>

@@ -29,7 +29,7 @@ class ProviderConfig:
     api_key: str = field(default="", repr=False)
     max_tokens: int = 16000
     effort: Optional[str] = None
-    # A relay's own token, for instance.
+    # Extra headers a server asks for besides the key (a proxy's own token, for instance).
     extra_headers: Mapping[str, str] = field(default_factory=dict, repr=False)
 
 
@@ -85,6 +85,14 @@ def without_credentials(url: str) -> str:
     """``url`` as shown to the user (a tooltip, a message): a ``user:password@`` typed in the address is left out."""
     return _CREDENTIALS.sub(lambda match: (match.group(1) or "") + "//" if "//" in match.group(0) else "", url,
                             count=1)
+
+
+MIN_SCRUBBED_KEY = 8  # a shorter key is no secret worth garbling a message for ("e" would eat every letter e)
+
+
+def without_key(text: str, key: str) -> str:
+    """``text`` with the API key ``key`` replaced by an ellipsis, when the key is long enough to be one."""
+    return text.replace(key, "…") if len(key) >= MIN_SCRUBBED_KEY else text
 
 
 def encode_json(body: Dict[str, Any]) -> bytes:

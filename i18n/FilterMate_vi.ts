@@ -1546,6 +1546,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Ollama đã từ chối việc tải {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Tải {} không thành công.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Không thể kết nối tới Ollama tại {}.</translation>
