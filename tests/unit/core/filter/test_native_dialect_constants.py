@@ -189,6 +189,13 @@ def test_other_texts_compared_with_a_number_are_not_written(text):
     assert refused(binary('>', col('pop'), lit(text)), POSTGRESQL)
 
 
+def test_a_text_of_thousands_of_digits_is_not_written_and_raises_nothing():
+    """Python 3.11 and later refuse to read an integer of more than 4,300 digits: the ValueError left the
+    translation, and with it every other part of the predicate (2026-11-13)."""
+    assert refused(binary('>', col('pop'), lit('9' * 5000)), POSTGRESQL)
+    assert refused(binary('>', col('pop'), lit('-' + '9' * 5000)), SQLITE)
+
+
 def test_texts_read_as_numbers_give_the_answer_of_qgis_in_sqlite():
     connection = sqlite3.connect(':memory:')
     connection.execute('CREATE TABLE t (id INTEGER PRIMARY KEY, pop INTEGER, ratio REAL)')

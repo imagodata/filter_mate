@@ -125,6 +125,11 @@ _OTHER_CASES = {'k': 'K', 's': 'ſ'}
 
 # A text QGIS reads as a number (QString::toDouble, C locale), written in the
 # plainest form only: ASCII digits, no space, no leading or trailing point.
+# The first QGIS whose geometric functions were compared with the sources (3.44 and 4.x were measured). Before
+# 3.34 the rectangle of an empty geometry is 0,0,0,0: the bounds of an empty line, polygon or collection are 0
+# in QGIS, where the source answers NULL, and ``x_min($geometry) < 100`` would keep in QGIS a feature the source
+# leaves out.
+GEOMETRY_MIN_QGIS = 33400
 _INTEGER_TEXT = re.compile(r'[+-]?[0-9]+')
 _NUMBER_TEXT = re.compile(r'[+-]?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?')
 
@@ -255,7 +260,12 @@ def _number_from_text(node: Node, other_type: str) -> Node:
     if other_type not in _NUMERIC or node.kind != 'literal' or not isinstance(node.value, str):
         return node
     if _INTEGER_TEXT.fullmatch(node.value):
-        return Node('literal', int(node.value), (), node.text)
+        try:
+            return Node('literal', int(node.value), (), node.text)
+        except ValueError:
+            # Python 3.11 and later read no integer of more than 4,300 digits: left as the text it is, which is
+            # not written against a number (the error left the translation, with every other part of the predicate)
+            return node
     if _NUMBER_TEXT.fullmatch(node.value):
         value = float(node.value)
         if value == 0 and any(digit in '123456789' for digit in re.split('[eE]', node.value)[0]):

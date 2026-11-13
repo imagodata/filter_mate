@@ -11,15 +11,17 @@ import logging
 try:
     from ...core.filter.server_dialect import TranslationStatus, Unsupported
     from ...filtermate_core.filter.native_dialect import (
-        BOOL, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT, NativeGeometry,
-        NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native, uses_geometry,
+        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
+        NativeGeometry, NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native,
+        uses_geometry,
     )
     from ...filtermate_core.filter.pk_formatter import is_null_value
 except ImportError:  # plugin root on sys.path in pure unit tests
     from core.filter.server_dialect import TranslationStatus, Unsupported
     from filtermate_core.filter.native_dialect import (
-        BOOL, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT, NativeGeometry,
-        NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native, uses_geometry,
+        BOOL, GEOMETRY_MIN_QGIS, GEOPACKAGE, INT, OGR_SQL, OTHER, POSTGIS, POSTGRESQL, REAL, SQLITE, TEXT,
+        NativeGeometry, NativeTranslation, hybrid_sql, key_reference, referenced_variables, translate_native,
+        uses_geometry,
     )
     from filtermate_core.filter.pk_formatter import is_null_value
 
@@ -200,10 +202,13 @@ def native_geometry(layer):
     PostGIS (PostgreSQL provider) and GeoPackage files read by GDAL, whose
     functions were compared with QGIS; not SpatiaLite (another blob, not
     compared) nor GDAL's SpatiaLite functions on a GeoPackage (only where GDAL
-    is built with SpatiaLite).
+    is built with SpatiaLite). None before QGIS 3.34, where the bounds of an
+    empty geometry are 0 and not what the source answers (``GEOMETRY_MIN_QGIS``).
     """
-    from qgis.core import QgsDataSourceUri, QgsWkbTypes
+    from qgis.core import Qgis, QgsDataSourceUri, QgsWkbTypes
     try:
+        if Qgis.QGIS_VERSION_INT < GEOMETRY_MIN_QGIS:
+            return None
         dialect = native_dialect_for_layer(layer)
         provider = layer.dataProvider()
         if dialect == POSTGRESQL:
