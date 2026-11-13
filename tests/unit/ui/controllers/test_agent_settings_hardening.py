@@ -123,6 +123,15 @@ class TestProfiles:
         with pytest.raises(ToolFailure, match="export folder is a link"):
             plugin_settings._apply_profile({"name": "team"})
 
+    def test_a_profile_too_long_is_said_so_with_a_byte_order_mark_too(self, profiles):
+        """The mark took three bytes of the text read, cut in the middle of the JSON: "not JSON"."""
+        profiles.mkdir()
+        too_long = b'{"name": "' + b"x" * plugin_settings.settings_profile.MAX_BYTES + b'"}'
+        for mark in (b"", b"\xef\xbb\xbf"):
+            (profiles / "team.json").write_bytes(mark + too_long)
+            with pytest.raises(ValueError, match="KB at most"):
+                plugin_settings.planned_profile({"name": "team"})
+
     def test_a_profile_saved_with_a_byte_order_mark_is_read(self, profiles):
         """Notepad saves UTF-8 with a mark at the start."""
         import json

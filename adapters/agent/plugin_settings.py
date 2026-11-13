@@ -148,6 +148,7 @@ def planned(arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 PROFILES_FOLDER = "profiles"
+_BOM = b"\xef\xbb\xbf"
 
 
 def _profiles_folder():
@@ -180,8 +181,10 @@ def planned_profile(arguments: Dict[str, Any]):
         with os.fdopen(os.open(str(path), flags), "rb") as stream:
             if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
                 raise ValueError(f"no profile {path.name}")
-            data = stream.read(settings_profile.MAX_BYTES + 1)
-        text = data.decode("utf-8-sig")  # Notepad saves UTF-8 with a mark at the start
+            data = stream.read(settings_profile.MAX_BYTES + len(_BOM) + 1)
+        # Notepad saves UTF-8 with a mark at the start: not counted, so that a profile too long is said so (the
+        # mark took three bytes of the text read, cut in the middle of the JSON: "not JSON")
+        text = data[len(_BOM):].decode("utf-8") if data.startswith(_BOM) else data.decode("utf-8")
     except FileNotFoundError:
         raise ValueError(f"no profile {path.name}") from None
     except (OSError, UnicodeDecodeError) as exc:

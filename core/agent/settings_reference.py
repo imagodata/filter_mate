@@ -294,8 +294,8 @@ def checked_value(setting: Setting, value: Any) -> Any:
         else:
             try:
                 number = float(value)
-            except OverflowError:  # a whole number of hundreds of digits (a profile, a model): out of range
-                raise ValueError(f"{setting.path} is {maximum} at most") from None
+            except OverflowError:  # a whole number of hundreds of digits (a profile, a model): out of range,
+                number = math.inf if value > 0 else -math.inf  # said by the bound it passes, below
         if setting.minimum is not None and number < setting.minimum:
             raise ValueError(f"{setting.path} is {setting.minimum} at least")
         if number > maximum:

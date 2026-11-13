@@ -1437,6 +1437,7 @@ class AgentSettingsDialog(QDialog):
         try:
             check_base_url(url, None)  # http(s) only: a file:// address typed here was read as it was
         except ValueError:
+            self._forget_listed_models()
             self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
                 without_credentials(url)))
             return
@@ -1450,6 +1451,12 @@ class AgentSettingsDialog(QDialog):
         reply.downloadProgress.connect(
             lambda received, _total, answered=reply: answered.abort() if received > OLLAMA_TAGS_MAX_BYTES else None)
         reply.finished.connect(lambda answered=reply, address=url: self._on_ollama_models(answered, address))
+
+    def _forget_listed_models(self) -> None:
+        """The models of a server listed before are not offered for one that lists none; the typed name stays."""
+        typed = self.model.currentText()
+        self.model.clear()
+        self.model.setEditText(typed)
 
     def done(self, result) -> None:  # noqa: D401 - Qt name
         """Closed: a list of models still on its way must not reach a dialog that is gone.
@@ -1479,6 +1486,7 @@ class AgentSettingsDialog(QDialog):
         if self.preset.currentData() != "ollama":
             return
         if not names:
+            self._forget_listed_models()
             self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
                 without_credentials(address)))
             return

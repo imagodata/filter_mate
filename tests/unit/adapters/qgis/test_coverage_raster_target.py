@@ -5,6 +5,7 @@ import json
 import pathlib
 import struct
 import sys
+import types
 
 import pytest
 
@@ -386,4 +387,6 @@ class TestSourceClipVrt:
     def test_canceled_selection_is_not_read(self, engine):
         job = source_jobs.RasterSourceJob.__new__(source_jobs.RasterSourceJob)
         job._provider, job.message = object(), ''
+        # a selection of values, not of validated polygons (segments, read first since the segmentation of 5.0.3)
+        job.selection = types.SimpleNamespace(segments=())
         assert job._raw_geometry(lambda: True).isEmpty() and job.message == 'canceled'
