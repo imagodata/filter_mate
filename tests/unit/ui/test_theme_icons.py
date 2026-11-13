@@ -22,9 +22,17 @@ def styles(monkeypatch):
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     for name, module in [('QtCore', QtCore), ('QtGui', QtGui), ('QtWidgets', QtWidgets)]:
         monkeypatch.setitem(sys.modules, 'qgis.PyQt.' + name, module)
-    package = types.ModuleType('_real_qt_theme_styles')
+    # ui/ as a package of its own, styles/ and layout/ below it: icon_manager imports ..layout.mockup_layout
+    # (the headers of FilterMate 5), which a package of styles/ alone put beyond the top level (2026-10-14)
+    ui = types.ModuleType('_real_qt_theme_ui')
+    ui.__path__ = [str(ROOT / 'ui')]
+    monkeypatch.setitem(sys.modules, ui.__name__, ui)
+    package = types.ModuleType(ui.__name__ + '.styles')
     package.__path__ = [str(ROOT / 'ui/styles')]
     monkeypatch.setitem(sys.modules, package.__name__, package)
+    for name in [key for key in sys.modules if key.startswith(ui.__name__ + '.')]:
+        if name != package.__name__:
+            monkeypatch.delitem(sys.modules, name)  # a module of another test, bound to other Qt modules
     loaded = {}
     for name in ('icon_manager', 'button_styler', 'style_loader'):
         spec = importlib.util.spec_from_file_location(package.__name__ + '.' + name,
@@ -115,8 +123,12 @@ def test_setup_recolors_icons_loaded_before_theme_and_refreshes_auxiliary_icons(
     dock._theme_manager = types.SimpleNamespace(
         current_theme='dark', add_theme_changed_callback=callbacks.append)
     dock.toolBox_tabTools = QtWidgets.QToolBox(dock)
-    for label in ('Filtering', 'Exporting', 'Configuration'):
-        dock.toolBox_tabTools.addItem(QtWidgets.QWidget(), label)
+    # the sections are found by their page (FILTERING, EXPORTING, CONFIGURATION, as the dock names them), not by
+    # their place: AGENT came among them
+    for name, label in (('FILTERING', 'Filtering'), ('EXPORTING', 'Exporting'), ('CONFIGURATION', 'Configuration')):
+        page = QtWidgets.QWidget()
+        setattr(dock, name, page)
+        dock.toolBox_tabTools.addItem(page, label)
     dock.checkBox_filtering_use_centroids_source_layer = QtWidgets.QCheckBox(dock)
     button = QtWidgets.QPushButton(dock)
     manager = modules.icon_manager.IconManager(dock)

@@ -244,6 +244,8 @@ def test_a_huge_whole_number_for_a_decimal_setting_is_out_of_range(default):
     assert isinstance(resolution.default, float)
     with pytest.raises(ValueError, match="at most"):
         checked_value(resolution, 10 ** 400)
+    with pytest.raises(ValueError, match="at least|not negative"):  # said by the bound it passes
+        checked_value(resolution, -10 ** 400)
 
 
 @pytest.mark.parametrize("path, maximum", [
