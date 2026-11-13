@@ -149,6 +149,24 @@ assert target.subsetString() and target.featureCount() == 2
 results.append({'finding': 'F6', 'native': True, 'prepared_in_explicit_project': True,
                 'explicit_target_filtered': True})
 
+# 2026-11-13: a web map service is an image drawn on request, never exported (an XYZ layer at its maximal zoom is
+# the whole world at full resolution). Nothing is read from the network here: the layer is refused before.
+tiles = QgsRasterLayer('type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png&zmax=19&zmin=0', 'osm', 'wms')
+assert tiles.isValid(), 'the XYZ layer is not valid'
+project.addMapLayer(tiles)
+web = folder / 'web'
+exported = ops.export_layers([tiles], str(web), raster_format='GTiff', project=project)
+assert not exported.done and not exported.failed and any('osm' in key for key in exported.skipped), exported
+try:
+    exporters.RasterExportJob(tiles, str(web / 'osm.tif'))
+    job_refused = False
+except ValueError as exc:
+    job_refused = 'web map service' in str(exc)
+assert job_refused and not list(web.glob('*.tif')), list(web.glob('*'))
+results.append({'finding': 'web basemaps', 'native': True, 'xyz_skipped_by_export_layers': True,
+                'xyz_refused_by_the_export_job': True})
+project.removeMapLayer(tiles.id())
+
 service_mod.release_coverage_layers()
 other_project.clear()
 project.clear()

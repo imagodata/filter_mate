@@ -872,7 +872,9 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         feedback: Optional ``QgsFeedback`` (progress, cancellation).
     """
     from qgis.core import QgsFeedback, QgsRasterBlockFeedback
-    from ..qgis.coverage_layers.exporters import POINT_CLOUD_FORMATS, export_point_cloud, export_raster, output_path
+    from ..qgis.coverage_layers.exporters import (
+        POINT_CLOUD_FORMATS, RENDERED_NOT_EXPORTED, export_point_cloud, export_raster, output_path)
+    from ..qgis.point_cloud_capability import is_non_analysis_raster
     project = _project(project)
     report = OperationReport()
     if vector_format not in VECTOR_EXPORT_FORMATS:
@@ -915,6 +917,9 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                     ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
                 finally:
                     release()
+            elif kind is LayerKind.RASTER and is_non_analysis_raster(layer):
+                report.skipped[label] = RENDERED_NOT_EXPORTED
+                continue
             elif kind is LayerKind.RASTER:
                 path = _output_file(_unique_path(output_path(folder, name, '.tif'), used), sources)
                 block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
