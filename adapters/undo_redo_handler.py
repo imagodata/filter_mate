@@ -91,6 +91,21 @@ def _history_count(layer) -> int:
     return -1 if count is None else count
 
 
+def _entry_in_scope(entry, layer_id: str, layers_to_filter: List[str]) -> bool:
+    """True when Undo / Redo from layer ``layer_id`` may take ``entry`` (None: no entry).
+
+    The stack is shared by every layer. With layers to filter, the step restores every
+    layer of the entry: each must be the current layer or a layer to filter, else that
+    layer would keep its filter and lose its step. Without, the entry must involve the
+    current layer.
+    """
+    if entry is None:
+        return False
+    if layers_to_filter:
+        return set(entry.layer_ids) <= set(layers_to_filter) | {layer_id}
+    return layer_id in entry.layer_ids
+
+
 def _panel_layer_id(dockwidget) -> Optional[str]:
     """Id of the dock's current layer (None: no layer, or a deleted one)."""
     try:
@@ -153,7 +168,8 @@ class UndoRedoHandler:
 
         Args:
             current_layer: Currently selected layer
-            layers_to_filter: List of remote layer IDs to filter
+            layers_to_filter: Layer IDs Undo / Redo also restore (the layers to filter
+                when their button is on), empty for the current layer only
             undo_button: QPushButton for undo action
             redo_button: QPushButton for redo action
         """
@@ -172,17 +188,10 @@ class UndoRedoHandler:
             redo_button.setEnabled(False)
             return
 
-        has_remote_layers = bool(layers_to_filter)
-
-        if has_remote_layers:
-            # Global history mode - use global undo/redo availability
-            can_undo = self._history_manager.can_undo
-            can_redo = self._history_manager.can_redo
-        else:
-            # Source layer only mode - check if any history entries affect this layer
-            layer_history = self._history_manager.get_history_for_layer(current_layer.id())
-            can_undo = len(layer_history) > 0 and self._history_manager.can_undo
-            can_redo = self._history_manager.can_redo
+        # A click takes the last entry of the shared stack only when it is in the scope of
+        # the current layer (handle_undo, handle_redo): the buttons say the same
+        can_undo = _entry_in_scope(self._history_manager.peek_undo(), current_layer.id(), layers_to_filter)
+        can_redo = _entry_in_scope(self._history_manager.peek_redo(), current_layer.id(), layers_to_filter)
 
         undo_button.setEnabled(can_undo)
         redo_button.setEnabled(can_redo)
@@ -284,11 +293,12 @@ class UndoRedoHandler:
         v4.1.3: Redo now respects the history entry type rather than current checkbox state.
         - If history entry is multi-layer (layer_count > 1): perform global redo
         - If history entry is single-layer: perform layer-only redo
+        The entry must be in the scope of the source layer, as for undo (_entry_in_scope).
 
         Args:
             source_layer: The source layer for the redo operation
-            layers_to_filter: List of remote layer IDs (used for context, not decision)
-            use_global: Whether checkbox is checked (used for context, not decision)
+            layers_to_filter: List of remote layer IDs (the scope of the entry, not the redo type)
+            use_global: Whether checkbox is checked (the scope of the entry, not the redo type)
             dockwidget: Optional dockwidget for combobox protection
 
         Returns:
@@ -318,6 +328,11 @@ class UndoRedoHandler:
         pending_entry = self._history_manager.peek_redo()
         if not pending_entry:
             logger.info("No redo history available")
+            return False
+        # The stack is shared by every layer: a redo from this layer never applies the
+        # entry of a layer outside its scope (another layer filtered alone)
+        if not _entry_in_scope(pending_entry, source_layer.id(), layers_to_filter if use_global else []):
+            logger.info(f"Next redo entry is outside the scope of layer {source_layer.name()}, nothing to redo")
             return False
 
         # Determine redo type from the history entry itself
@@ -427,23 +442,21 @@ class UndoRedoHandler:
         logger.info(f"Undo entry: {history_entry.entry_id}")
         logger.info(f"  - layer_ids: {history_entry.layer_ids}")
 
-        # Build set of allowed layer IDs (source + selected layers_to_filter)
-        allowed_layer_ids = set(layers_to_filter)
-        allowed_layer_ids.add(source_layer.id())
+        # The stack is shared by every layer: an entry with a layer outside the selection (another
+        # layer filtered alone, the source of a filter that had this one as target) stays whole.
+        # Undone without that layer, it would leave it filtered and drop its undo step.
+        if not _entry_in_scope(history_entry, source_layer.id(), layers_to_filter):
+            logger.info("Last history entry involves layers outside the selection, nothing to undo")
+            return False
 
         # Get project instance
         project = QgsProject.instance()
 
-        # Restore previous filters ONLY for allowed layers
+        # Restore previous filters of every layer of the entry
         restored_layers = []
-        skipped_layers = []
         source_ok, failed = True, False
 
         for layer_id, previous_filter in history_entry.previous_filters:
-            if layer_id not in allowed_layer_ids:
-                skipped_layers.append(layer_id)
-                continue
-
             layer = project.mapLayer(layer_id)
 
             if layer:
@@ -467,7 +480,7 @@ class UndoRedoHandler:
 
         if source_ok:
             self._history_manager.undo()
-        logger.info(f"Filtered undo completed - restored {len(restored_layers)} layers, skipped {len(skipped_layers)}")
+        logger.info(f"Filtered undo completed - restored {len(restored_layers)} layers")
         return source_ok and not failed
 
     def _perform_global_redo(
@@ -576,8 +589,9 @@ class UndoRedoHandler:
         """Perform redo of a single-layer entry on its own layer.
 
         v4.1.3: Simplified - caller has already verified entry exists via peek.
-        The stack is shared by every layer: the entry's layer need not be the
-        current one (source_layer), which must not get its expression.
+        The stack is shared by every layer: the entry's layer is the current one
+        (source_layer) or one of its layers to filter (handle_redo checked its
+        scope), and the current layer must not get another layer's expression.
         """
         logger.info("Performing single layer redo")
 
