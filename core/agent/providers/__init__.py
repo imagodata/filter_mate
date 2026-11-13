@@ -10,10 +10,6 @@ from .openai_chat import OpenAIChatProvider
 KIND_ANTHROPIC = "anthropic"
 KIND_OPENAI_COMPATIBLE = "openai_compatible"
 KIND_OLLAMA = "ollama"
-FREE_PRESET = "free"
-FREE_MODEL = "claude-haiku-5-5"  # the relay decides; this is what the panel shows
-# Set here and not in config.default.json: that file is copied once per profile and would never follow a change.
-FREE_QUOTA_URL = "https://filtermate-free-quota.filtermate-free-quota-proxy.workers.dev"  # see free-quota-proxy/README.md
 
 # Where each known service lives. The model is always the user's choice.
 PRESETS = {
@@ -22,8 +18,6 @@ PRESETS = {
     "openai": (KIND_OPENAI_COMPATIBLE, "https://api.openai.com/v1"),
     # Ollama's own API: its OpenAI-compatible one cannot ask for more than 4096 tokens of context (ollama_chat.py).
     "ollama": (KIND_OLLAMA, "http://localhost:11434"),
-    # Its address: see adapters.agent.settings.free_quota_url.
-    FREE_PRESET: (KIND_ANTHROPIC, ""),
 }
 
 

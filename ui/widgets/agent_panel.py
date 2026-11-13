@@ -25,7 +25,7 @@ from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
-from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
+from ...core.agent.providers import PRESETS
 from ...core.agent.providers.base import check_base_url, without_credentials
 from ...core.agent.providers.ollama_chat import installed_models, tags_url
 from ...core.agent.sources import (
@@ -47,7 +47,7 @@ _WELCOME_PAGE, _THREAD_PAGE, _HISTORY_PAGE = 0, 1, 2
 _TURN_ROLE = Qt.ItemDataRole.UserRole
 _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
 
-PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
+PRESET_LABELS = {"anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
 OLLAMA_TAGS_TIMEOUT_MS = 2000  # a local server answers at once; a missing one must not hold the dialog
@@ -63,7 +63,7 @@ def _tr(text: str) -> str:
 
 def preset_label(name: str) -> str:
     """The name of a provider preset as the settings show it, in the language of QGIS."""
-    translated = {FREE_PRESET: _tr("FilterMate (free quota)"), "ollama": _tr("Ollama (local)")}
+    translated = {"ollama": _tr("Ollama (local)")}
     return translated.get(name) or PRESET_LABELS.get(name, name)
 
 
@@ -889,7 +889,7 @@ class AgentPanel(QFrame):
 class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
-    def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="",
+    def __init__(self, values, target_of, parent=None, tester=None, mcp_error="",
                  project_layers=(), tools=()) -> None:
         super().__init__(parent)
         # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
@@ -903,23 +903,14 @@ class AgentSettingsDialog(QDialog):
         self._target_of = target_of
         self.forget_key = False
         self.preset = QComboBox(self)
-        for name in sorted(PRESETS, key=lambda item: item != FREE_PRESET):  # the free quota first, when there is one
-            if name != FREE_PRESET or free_available:
-                self.preset.addItem(preset_label(name), name)
-        # A first use starts on what needs no key; a free quota that went away falls back on the first provider.
-        first_use = free_available and not values.model
-        self.preset.setCurrentIndex(max(self.preset.findData(FREE_PRESET if first_use else values.preset), 0))
+        for name in PRESETS:
+            self.preset.addItem(preset_label(name), name)
+        self.preset.setCurrentIndex(max(self.preset.findData(values.preset), 0))
         self.model_label = QLabel(_tr("Model"), self)
         self.model = QComboBox(self)
         self.model.setEditable(True)
         self.base_url = QLineEdit(values.base_url, self)
         self.address_label = QLabel(_tr("Address"), self)
-        self.free_notice = QLabel(_tr(
-            "A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of "
-            "Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider "
-            "and enter your own API key."), self)
-        self.free_notice.setWordWrap(True)
-        self.free_notice.setObjectName("label_agent_settings_note")
         self.key_label = QLabel(_tr("API key"), self)
         self.key = QLineEdit(self)
         self.key.setEchoMode(QLineEdit.EchoMode.Password)
@@ -1009,7 +1000,6 @@ class AgentSettingsDialog(QDialog):
             "Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that "
             "task. Other applications always get every tool."))
         general_layout.addWidget(self.tool_families)
-        general_layout.addWidget(self.free_notice)
         general_layout.addWidget(line)
         general_layout.addWidget(leaving)
         general_layout.addWidget(notice)
@@ -1406,15 +1396,11 @@ class AgentSettingsDialog(QDialog):
         self.model.addItems(MODEL_SUGGESTIONS.get(name, ()))
         self.model.setEditText(typed if name not in MODEL_SUGGESTIONS or typed else "")
         self.base_url.setPlaceholderText(PRESETS[name][1])
-        free = name == FREE_PRESET
-        no_key = free or name == "ollama"
+        no_key = name == "ollama"
         self.local_filtering_only.setVisible(name == "ollama")
         self.key_label.setVisible(not no_key)
         self.key.setVisible(not no_key)
         self.key_note.setVisible(not no_key)
-        for widget in (self.model_label, self.model, self.address_label, self.base_url):
-            widget.setVisible(not free)
-        self.free_notice.setVisible(free)
         self._on_destination()
         self._fetch_ollama_models()
 
@@ -1520,4 +1506,4 @@ class AgentSettingsDialog(QDialog):
         return self.preset.currentData()
 
     def chosen_model(self) -> str:
-        return FREE_MODEL if self.preset.currentData() == FREE_PRESET else self.model.currentText().strip()
+        return self.model.currentText().strip()

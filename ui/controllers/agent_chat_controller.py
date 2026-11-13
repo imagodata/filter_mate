@@ -15,9 +15,9 @@ from qgis.PyQt.QtWidgets import QDialog, QInputDialog, QLineEdit
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
-    free_quota_url, target_of,
+    target_of,
 )
-from ...adapters.agent import free_quota, transcript_store
+from ...adapters.agent import transcript_store
 from ...adapters.agent.project_notes_store import read_notes, write_notes
 from ...adapters.agent.recipes_store import approve_live, live_approved, read_recipes, write_recipes
 from ...adapters.agent import plugin_settings
@@ -45,7 +45,7 @@ from ...core.agent.recipes import (
 from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
-from ...core.agent.providers import FREE_PRESET, create_provider
+from ...core.agent.providers import create_provider
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
@@ -98,7 +98,7 @@ def _tr(text: str) -> str:
 
 def destination_text(preset: str, model: str) -> str:
     """Where the requests go, short, as the mockup heads the section: ``Claude · haiku-5-5``."""
-    short = {FREE_PRESET: _tr("Free quota"), "anthropic": "Claude"}.get(preset) or preset_label(preset)
+    short = {"anthropic": "Claude"}.get(preset) or preset_label(preset)
     name = model[len("claude-"):] if model.startswith("claude-") else model
     return f"{short} · {name}" if name else short
 
@@ -541,8 +541,7 @@ class AgentChatController(QObject):
         project_layers = sorted(((layer.id(), layer.name(), layer.id() in protected)
                                  for layer in QgsProject.instance().mapLayers().values()), key=lambda row: row[1].lower())
         dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
-                                     free_available=bool(free_quota_url()), mcp_error=self._mcp.error,
-                                     project_layers=project_layers,
+                                     mcp_error=self._mcp.error, project_layers=project_layers,
                                      tools=[(tool.name, tool.title or tool.name, risk_of(tool))
                                             for tool in chat_tools() if tool.name not in AGENT_OWN])
         if tab:
@@ -553,7 +552,7 @@ class AgentChatController(QObject):
             authcfg = values.authcfg
             key_target = values.key_target
             # A key left in a field the chosen provider hides must not replace the stored one.
-            key = dialog.key.text().strip() if dialog.chosen_preset() not in (FREE_PRESET, "ollama") else ""
+            key = dialog.key.text().strip() if dialog.chosen_preset() != "ollama" else ""
             target = dialog.chosen_target()
             try:
                 if key:
@@ -620,10 +619,8 @@ class AgentChatController(QObject):
             left_out.update(VALUES_TOOLS)
         if not values.expert_python:
             left_out.add(RUN_PYTHON)
-        if not values.send_values or values.preset == FREE_PRESET:
-            # An image of the map shows its labels and symbols: a value as much as a field. The relay of the free
-            # quota takes no image (free-quota-proxy/README.md): with a key of the user only.
-            left_out.add(VIEW_MAP)
+        if not values.send_values:
+            left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
         if not kinds - {KIND_MCP, KIND_STAC} and not configured_names:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WFS not in kinds:
@@ -1304,13 +1301,11 @@ class AgentChatController(QObject):
         try:
             # Only the key typed for this server, and none for a local one.
             key = read_key(values.authcfg) if values.needs_key and values.has_key else ""
-            if values.preset == FREE_PRESET and free_quota_url():
-                key = free_quota.token_for(free_quota_url())
             if values.needs_key and not key:
                 self._say(_tr("Enter your API key in the agent settings."), offer_settings=True)
                 return None
             provider = create_provider(provider_config(values, key))
-        except (KeyStoreError, free_quota.FreeQuotaError, ValueError) as exc:
+        except (KeyStoreError, ValueError) as exc:
             self._say(str(exc), error=True, offer_settings=True)
             return None
         tools, handlers, active = self.tools_and_handlers(values)
@@ -1457,7 +1452,7 @@ class AgentChatController(QObject):
         if self._engine is None:
             self._building = True
             try:
-                with owned_by(CHAT_WAITS):  # the connectors listed, the token of the free quota
+                with owned_by(CHAT_WAITS):  # the connectors listed
                     self._engine = self._build_engine()
             finally:
                 self._building = False
@@ -2067,14 +2062,7 @@ class AgentChatController(QObject):
         self._remember_project()
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             self._give_back_request()
-            free = load_settings().preset == FREE_PRESET
-            if free and outcome.error.status == 401:  # the relay no longer knows this token: ask for another
-                free_quota.forget_token()
-                self._engine = None
-                self._say(_tr("Access to the free quota was renewed: send your request again."))
-                return
-            message = (_tr("The free quota is used up for this month. Enter your own API key in the agent settings.")
-                       if free and outcome.error.kind == ERROR_QUOTA else self._error_message(outcome.error))
+            message = self._error_message(outcome.error)
             fix = outcome.error.kind in FIXED_IN_SETTINGS
             self._say("")
             self.panel.show_error(message, _tr("The request is back in the line below: fix the settings, then send it "
