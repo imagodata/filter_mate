@@ -1,6 +1,6 @@
 ---
 name: filtermate-configuration
-description: Configure FilterMate through the MCP server of the FilterMate QGIS plugin: set FilterMate up for the user (look, language, messages, raster and point cloud options, timeouts, caches, profiles) and find why filters are slow. Use when the user asks for it in QGIS with FilterMate.
+description: "Configure FilterMate through the MCP server of the FilterMate QGIS plugin: set FilterMate up for the user (look, language, messages, raster and point cloud options, timeouts, caches, profiles) and find why filters are slow. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/configuration/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->
@@ -39,8 +39,9 @@ When the user asks to set FilterMate up (the setup the panel offers once per ver
    with FilterMate, their screen (small, usual, very large), the language and the look they want, whether their
    data is large or remote. Skip what the project already answers.
 3. With the answers, make one change_settings with everything: the user sees each setting before and after.
-4. Then the agent itself, which only the user changes: the level of autonomy and the layers it never changes
-   (show_settings_link with autonomy), the tools always asked (show_settings_link with tools).
+4. Then the agent itself, which only the user changes: the level of autonomy and the layers it never changes, the
+   tools always asked. Tell the user where: Agent settings (menu ⋯ of the AGENT panel), tabs Autonomy and Tools; in
+   the chat, show_settings_link with autonomy, then with tools, puts a button for each.
 5. Say how to share this setup with a team (export_settings_profile) and that the setup can be started again from
    the menu.
 

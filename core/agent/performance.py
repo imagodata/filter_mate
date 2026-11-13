@@ -23,6 +23,9 @@ MAX_DETAIL = 160
 # An operation is a short name (layer_change, pg_layer_connect): a longer one is not a timing of FilterMate but text
 # someone else wrote into the log, which this summary would hand to the model (2026-11-13).
 MAX_OPERATION = 60
+# The name of a layer between quotes (target vector 'communes', height above ground for 'communes') is counted apart,
+# as long as a detail at most: a long name made the operation longer than 60 and its timings were lost (2026-11-13).
+_QUOTED = re.compile(r"'[^']*'")
 
 
 def _timing(message: str) -> Optional[Dict[str, Any]]:
@@ -44,7 +47,8 @@ def _timing(message: str) -> Optional[Dict[str, Any]]:
         value = float(duration["value"]) * (1 if duration["unit"] == "ms" else 1000)
         detail = (rest[:duration.start()] + rest[duration.end():]).strip(" ,")
     operation, detail = operation.strip(), detail.strip()
-    if not operation or len(operation) > MAX_OPERATION:
+    words = _QUOTED.sub("''", operation)
+    if not operation or len(words) > MAX_OPERATION or len(operation) - len(words) > MAX_DETAIL:
         return None
     if detail.startswith("(") and detail.endswith(")"):
         detail = detail[1:-1]  # one pair: "(batiment (GPKG))" keeps its own
