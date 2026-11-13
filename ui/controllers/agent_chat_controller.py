@@ -55,7 +55,7 @@ from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.tool_catalog import (
     ADD_NOTE, CREATE_WIDGET, FILTERING_NOTE, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
-    LOAD_SKILL, VIEW_MAP, chat_tools, filtering_only, skill_tool,
+    LOAD_SKILL, VIEW_MAP, chat_tools, filtering_only, with_skill_tool,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -706,15 +706,17 @@ class AgentChatController(QObject):
             left_out.add(IMAGERY_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
         offered = {tool.name for tool in tools}
-        skill_approved = None
+        skill_approved = skill_declined = None
         try:  # the skills of the profile and of the project folder, read again (the project may have changed)
-            from ...adapters.agent.skill_sources import approved as skill_approved, refresh as refresh_skills
+            from ...adapters.agent.skill_sources import (
+                approved as skill_approved, declined as skill_declined, refresh as refresh_skills)
             refresh_skills()
         except Exception:
             logger.debug("Agent: skills from elsewhere not read", exc_info=True)
         # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on); of a skill from elsewhere
-        # the user has not allowed, its name only
-        tools = [skill_tool(offered, skill_approved) if tool.name == LOAD_SKILL else tool for tool in tools]
+        # the user has not allowed, its name only (and that they declined it, once they did); no load_skill without
+        # a skill to list
+        tools = with_skill_tool(tools, offered, skill_approved, declined=skill_declined)
         if for_chat and self.local_filtering(values):
             tools = list(filtering_only(tools))
         # A connector alone does not open the web to add_layer: only a data source the user ticked does.
@@ -1347,8 +1349,8 @@ class AgentChatController(QObject):
         if not values.tool_families:
             return tools, handlers, set()
         from ...core.agent import skills as skill_registry
-        from ...core.agent.families import hidden_tools, unlocked
-        hidden = hidden_tools(tools, skill_registry.SKILLS.values())
+        from ...core.agent.families import bringing, unlocked
+        hidden = bringing(tools, skill_registry.SKILLS.values())  # each with the skills that bring it, for the executor
         if not hidden or LOAD_SKILL not in {tool.name for tool in tools}:
             return tools, handlers, set()
         later = {tool.name: tool for tool in tools if tool.name in hidden}

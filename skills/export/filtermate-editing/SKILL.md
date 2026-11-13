@@ -1,6 +1,6 @@
 ---
 name: filtermate-editing
-description: Edit the data of a layer through the MCP server of the FilterMate QGIS plugin: change, delete or add features of a vector layer, in its edit buffer, when the user asks to change the data itself. Use when the user asks for it in QGIS with FilterMate.
+description: "Edit the data of a layer through the MCP server of the FilterMate QGIS plugin: change, delete or add features of a vector layer, in its edit buffer, when the user asks to change the data itself. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/editing/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

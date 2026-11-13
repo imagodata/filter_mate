@@ -58,6 +58,30 @@ def test_every_skill_follows_the_standard(name):
             assert _NEGATION.search(sentence), sentence
 
 
+# A sentence that names a tool some audience does not have says so: "when it is offered", "in the chat"; or it
+# forbids it ("never run_pyqgis").
+_CONDITIONAL = re.compile(r"when it is offered|\bin the chat\b", re.I)
+# Sentences across the lines they wrap on: parted at their end, at a blank line, before an item of a list or a title.
+_SENTENCE_END = re.compile(r"(?<=[.!?;])\s+|\n\s*\n|\n(?=\s*(?:[-#]|\d+\.)\s)")
+
+
+@pytest.mark.parametrize("name", sorted(SKILLS))
+def test_every_tool_a_skill_cites_is_there_for_each_of_its_audiences(name):
+    """2026-11-13: the export of configuration for another application told it to call show_settings_link, a tool of
+    the chat alone: the tools of the chat and of MCP together were allowed to a skill of both."""
+    skill = SKILLS[name]
+    served = {"chat": CHAT_TOOLS, "mcp": MCP_TOOLS}
+    for sentence in _SENTENCE_END.split(skill.body):
+        sentence = " ".join(sentence.split())
+        if _CONDITIONAL.search(sentence):
+            continue
+        for word in set(re.findall(r"\b([a-z]+(?:_[a-z]+)+)\b", sentence)) & (CHAT_TOOLS | MCP_TOOLS):
+            if re.search(rf"\bnever (?:use |call )?{word}\b", sentence, re.I):
+                continue
+            for audience in skill.audience:
+                assert word in served[audience], (audience, word, sentence)
+
+
 @pytest.mark.parametrize("name", sorted(name for name, skill in SKILLS.items() if "chat" in skill.audience))
 def test_every_skill_of_the_chat_has_its_cases_one_of_them_a_trap(name):
     cases = json.loads((ROOT / "skills" / name / "evals.json").read_text(encoding="utf-8"))["cases"]

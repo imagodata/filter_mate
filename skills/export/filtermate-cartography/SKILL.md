@@ -1,6 +1,6 @@
 ---
 name: filtermate-cartography
-description: Make the map look right through the MCP server of the FilterMate QGIS plugin: styles and labels, print layouts and their export, the CRS of the map, the layer tree, map themes and spatial bookmarks. Use when the user asks for it in QGIS with FilterMate.
+description: "Make the map look right through the MCP server of the FilterMate QGIS plugin: styles and labels, print layouts and their export, the CRS of the map, the layer tree, map themes and spatial bookmarks. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/cartography/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

@@ -1,6 +1,6 @@
 ---
 name: filtermate-raster-objects
-description: Objects on a raster and SAM through the MCP server of the FilterMate QGIS plugin: filter with the objects the user drew on a raster in the dock, draw objects with SAM from guide features, find objects that look like an example. Use when the user asks for it in QGIS with FilterMate.
+description: "Objects on a raster and SAM through the MCP server of the FilterMate QGIS plugin: filter with the objects the user drew on a raster in the dock, draw objects with SAM from guide features, find objects that look like an example. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/raster-objects/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->

@@ -42,10 +42,10 @@ from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_excha
 from agent.settings_reference import (  # noqa: E402
     describe as describe_settings, get as get_setting, plan as plan_settings, read_settings, set_leaf)
 from agent.performance import summary as performance_summary  # noqa: E402
-from agent.families import hidden_tools, unlocked  # noqa: E402
+from agent.families import bringing, unlocked  # noqa: E402
 from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog, skill_tool  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog, with_skill_tool  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -653,12 +653,13 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
     tools = tuple(tool for tool in chat_tools() if tool.name not in left_out
                   and (not filtering or tool.name in FILTERING_TOOLS))
     offered = {tool.name for tool in tools}
-    tools = tuple(skill_tool(offered) if tool.name == "load_skill" else tool for tool in tools)
+    tools = tuple(with_skill_tool(tools, offered))
     hidden: Dict[str, Any] = {}
+    held: Dict[str, Any] = {}
     if families:  # the tools of a task offered once its skill is loaded (core/agent/families.py)
-        names = hidden_tools(tools, SKILLS.values())
-        hidden = {tool.name: tool for tool in tools if tool.name in names}
-        tools = tuple(tool for tool in tools if tool.name not in names)
+        held = bringing(tools, SKILLS.values())
+        hidden = {tool.name: tool for tool in tools if tool.name in held}
+        tools = tuple(tool for tool in tools if tool.name not in held)
     session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else ""),
                            AgentLimits())
     project.offered = offered
@@ -678,7 +679,7 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
             return answer
         handlers_of_case["load_skill"] = load_and_offer
     executor = ToolExecutor(tools, handlers_of_case)
-    executor.hold(hidden)
+    executor.hold(held)
     # As the chat sends it: the state of the project after the request.
     handlers = project.handlers()
     context = project_summary(handlers["list_layers"]({})["layers"],
