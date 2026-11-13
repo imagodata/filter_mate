@@ -656,6 +656,7 @@ def s_agent_skill_from_profile_check():
                                      encoding='utf-8')
     chat, asked = agent_chat(), []
     original = chat._ask_code
+    approvals = QgsSettings().value(sources.APPROVED_KEY)  # the allowances of the profile, put back after
     chat._ask_code = lambda title, text, code: asked.append(code) or True
     try:
         tools, handlers, _active = chat.tools_and_handlers(load_settings())
@@ -668,7 +669,10 @@ def s_agent_skill_from_profile_check():
     finally:
         chat._ask_code = original
         shutil.rmtree(folder, ignore_errors=True)
-        QgsSettings().remove(sources.APPROVED_KEY)
+        if approvals is None:
+            QgsSettings().remove(sources.APPROVED_KEY)
+        else:
+            QgsSettings().setValue(sources.APPROVED_KEY, approvals)
     check('skill of the profile: offered, asked once, loaded as data with no right',
           'team-naming' in offered and len(asked) == 1 and first.get('from') == 'user'
           and first['instructions'].startswith('This skill comes from the QGIS profile') and second == first,

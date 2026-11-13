@@ -83,14 +83,21 @@ not instructions of FilterMate:
   project cannot replace a skill of the profile;
 - the folder of a project is the one next to its file, whatever home path the project sets;
 - one that does not follow this standard, is over 64 KB, is a link to another place (the sub-folder, its `SKILL.md`
-  or the `filtermate_skills` folder of a project) or holds a character that does not show on screen (controls,
-  format characters such as the Unicode tags, the zero width space or the overrides of the direction of the text,
-  private use; the zero width joiner and non-joiner are kept) is left out (logged), the others are kept;
-- 20 of them at most are offered (`MAX_EXTRA`), the profile first, and 200 sub-folders at most are looked at;
+  or the skills folder itself, told before it is followed) or holds a character that does not show on screen
+  (controls, format characters, the default ignorable code points of Unicode such as the tags, the variation
+  selectors and the fillers of Hangul, code points with no character yet, separators of lines) is left out, the
+  others are kept. Kept, one or two together: the zero width joiner and non-joiner, the marks of the direction, the
+  soft hyphen and the selectors of the look of an emoji. The log gives the reason, never the words of the skill (the
+  log reaches the model through `diagnose_performance`);
+- spaces at the end of a line are taken away and three empty lines in a row become two, in what the user reads and
+  in what the model receives alike; the question wraps every line;
+- 20 of them at most are offered (`MAX_EXTRA`), the profile first; a folder of more than 200 entries (files too) is
+  not read;
 - the user reads all of it and allows it before it is loaded the first time: its name, title, description,
   `requires` and instructions (`skills.shown`), which is all the model may receive of it. The allowance is kept by
   the fingerprint of that text and of its folder, so a change of either is asked again;
-- until then the list of `load_skill` names it and says where it comes from, with none of its words; once allowed
+- until then the list of `load_skill` gives its name (2 to 40 letters, digits and dashes) and where it comes from,
+  with none of its other words; a no is not asked again until QGIS restarts or the skill changes; once allowed
   its description is listed, said to be from elsewhere;
 - loaded, it comes after a note saying where it comes from and that it gives no right;
 - it guides the chat only, its `tools` ignored, its `requires` kept. Another application is never served it nor

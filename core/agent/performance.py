@@ -20,11 +20,16 @@ _TIMEOUT = re.compile(r"timed out|time out|canceling statement|timeout expired|s
 _SECRET = re.compile(r"\b(host|hostaddr|service|dbname|user|password|port|sslmode)=('[^']*'|\S+)", re.I)
 MAX_SLOWEST = 8
 MAX_DETAIL = 160
+# An operation is a short name (layer_change, pg_layer_connect): a longer one is not a timing of FilterMate but text
+# someone else wrote into the log, which this summary would hand to the model (2026-11-13).
+MAX_OPERATION = 60
 
 
 def _timing(message: str) -> Optional[Dict[str, Any]]:
     """``⏱ operation: 12 ms (detail)``, ``⏱ operation: connection 12 ms, ...`` or ``⏱ [FM5] operation in 1.2s ...``."""
-    mark = _MARK.search(message)
+    # At the start of the message, as FilterMate logs its timings (logger.info(f"⏱ ...")): a mark in the middle of
+    # another message is text someone else wrote, the name of a layer or a skill left out (2026-11-13)
+    mark = _MARK.match(message)
     if not mark:
         return None
     text = message[mark.end():]
@@ -38,11 +43,13 @@ def _timing(message: str) -> Optional[Dict[str, Any]]:
             return None
         value = float(duration["value"]) * (1 if duration["unit"] == "ms" else 1000)
         detail = (rest[:duration.start()] + rest[duration.end():]).strip(" ,")
-    detail = detail.strip()
+    operation, detail = operation.strip(), detail.strip()
+    if not operation or len(operation) > MAX_OPERATION:
+        return None
     if detail.startswith("(") and detail.endswith(")"):
         detail = detail[1:-1]  # one pair: "(batiment (GPKG))" keeps its own
     detail = _SECRET.sub(lambda found: f"{found[1]}=…", detail)
-    return {"operation": operation.strip(), "ms": round(value), "detail": detail[:MAX_DETAIL]}
+    return {"operation": operation, "ms": round(value), "detail": detail[:MAX_DETAIL]}
 
 
 def summary(lines: Iterable[str], max_entries: int = 200) -> Dict[str, Any]:

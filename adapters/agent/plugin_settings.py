@@ -327,15 +327,19 @@ def skill_loader(offered: Optional[set], approve: Optional[SkillApprover] = None
         name = str(arguments.get("name", ""))
         skill = skills.all_skills().get(name)
         try:
-            if skill is None or audience not in skill.audience:
+            # What the skill needs is checked before the user is asked: a yes kept for a skill then refused
+            # ("No skill") asked for nothing (2026-11-13).
+            if skill is None or audience not in skill.audience \
+                    or (offered is not None and not set(skill.requires) <= offered):
                 raise KeyError(name)
             if skill.trust != "builtin":
-                from .skill_sources import approved, remember
+                from .skill_sources import approved, decline, declined, remember
                 if not approved(skill):
-                    if approve is None or not approve(skill):
+                    if declined(skill) or approve is None or not approve(skill):
+                        if approve is not None:
+                            decline(skill)  # not asked again until QGIS restarts or its text changes
                         raise ToolFailure(f"The user did not allow the skill {name!r} (it comes from {skill.trust}, "
-                                          f"not from FilterMate). Go on without it; do not ask for it again in this "
-                                          f"request.")
+                                          f"not from FilterMate). Go on without it; do not ask for it again.")
                     remember(skill)
             # The skill the user was asked about, not one read again by name while the question was open.
             return skills.answer(skill, offered, audience)

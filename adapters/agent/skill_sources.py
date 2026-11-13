@@ -43,15 +43,20 @@ def user_folder() -> Optional[Path]:
 def project_folder() -> Optional[Path]:
     """``filtermate_skills`` next to the open project file; None for a project never saved or kept in a database.
 
-    The folder of the file itself, not ``homePath()``: a project can set its home path to any place (the share of
-    another computer too), which was then read at each request, on the main thread (2026-11-13).
+    The folder of the file itself, not a home path the project sets: it can be any place (the share of another
+    computer too), which was then read at each request, on the main thread (2026-11-13). A project kept in a
+    GeoPackage has no file path of its own: without a home path set, its home path is the folder of the GeoPackage.
     """
     try:
         from qgis.core import QgsProject
-        path = QgsProject.instance().absoluteFilePath()
+        project = QgsProject.instance()
+        path = project.absoluteFilePath()
+        if path:
+            return Path(path).parent / PROJECT_FOLDER
+        home = "" if project.presetHomePath() else project.homePath()
     except Exception:
         return None
-    return Path(path).parent / PROJECT_FOLDER if path else None
+    return Path(home) / PROJECT_FOLDER if home else None
 
 
 def refresh() -> List[str]:
@@ -62,18 +67,18 @@ def refresh() -> List[str]:
         if folder is None:
             continue
         try:
-            if trust == "project" and folder.is_dir() and (folder.is_symlink()
-                                                           or folder.resolve().parent != folder.parent.resolve()):
-                errors.append(f"{folder.name}: a link, the skills of a project are in its own folder")
+            # A link is told before it is followed: one to a share would be reached at each request (2026-11-13).
+            if folder.is_symlink() or skills._is_junction(str(folder)):
+                errors.append(f"{folder.name}: a link, the skills are in a folder of their own")
                 continue
-            for name, skill in skills.read_folder(folder, trust=trust, errors=errors,
-                                                  limit=skills.MAX_EXTRA).items():
+            for name, skill in skills.read_folder(folder, trust=trust, errors=errors, limit=skills.MAX_EXTRA,
+                                                  reserved=skills.RESERVED).items():
                 if name in found:  # the profile first: a project cannot replace a skill the user keeps
                     errors.append(f"{name}: a skill of the profile has that name")
                     continue
                 found[name] = skill
-        except OSError as exc:
-            errors.append(f"{folder}: {exc}")
+        except Exception as exc:  # whatever happens, the skills of a folder read before are not kept by mistake
+            errors.append(f"{folder.name}: not read ({type(exc).__name__})")
     errors += skills.set_extra(found)
     for error in errors:
         logger.info("Agent skill left out: %s", error)
@@ -91,6 +96,19 @@ def _approved() -> List[str]:
 
 def approved(skill: "skills.Skill") -> bool:
     return skill.trust == "builtin" or skills.fingerprint(skill) in _approved()
+
+
+# Skills the user said no to, until QGIS restarts or the text changes: a model must not ask again at each request
+# until the user, tired of it, says yes (2026-11-13).
+_declined: set = set()
+
+
+def declined(skill: "skills.Skill") -> bool:
+    return skills.fingerprint(skill) in _declined
+
+
+def decline(skill: "skills.Skill") -> None:
+    _declined.add(skills.fingerprint(skill))
 
 
 def remember(skill: "skills.Skill") -> None:
