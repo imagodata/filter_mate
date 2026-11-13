@@ -144,6 +144,20 @@ class TestHistoryEntryAccessors:
         assert entry.get_metadata_value("k2") == 42
         assert entry.get_metadata_value("missing") is None
 
+    def test_expression_for_the_source_and_each_target(self):
+        # ``expression`` is the source's: a target's subset is in remote_layers.
+        entry = _make_entry(
+            expression="src = 1",
+            layer_ids=("src", "r1"),
+            metadata={"remote_layers": {"r1": {"expression": "EXISTS r1", "feature_count": 2}}},
+        )
+        assert entry.expression_for("src") == "src = 1"
+        assert entry.expression_for("r1") == "EXISTS r1"
+
+    def test_expression_for_a_layer_without_one_is_none(self):
+        assert _make_entry(layer_ids=("a", "b")).expression_for("b") is None
+        assert _make_entry(layer_ids=("a",)).expression_for("missing") is None
+
     def test_str_includes_id_and_description(self):
         entry = _make_entry(description="my-op")
         s = str(entry)
@@ -646,6 +660,22 @@ class TestLayerHistoryWrapper:
         assert latest.expression == "second"
         assert latest.get_previous_filter("L1") == "first"
 
+    def test_push_state_of_a_former_target_keeps_its_own_previous_expression(self):
+        # The last entry of r1 is a filter from src: Undo gave r1 the source's expression
+        # ('"zone_mro"."id" IN (...)' on Zones POP, rejected by PostgreSQL).
+        h = HistoryService()
+        h.push_global_state(
+            source_layer_id="src",
+            source_expression="src = 1",
+            source_feature_count=1,
+            remote_layers={"r1": ("EXISTS r1", 2)},
+            previous_expressions={"src": "", "r1": ""},
+        )
+
+        h.get_or_create_history("r1").push_state(expression="(c = 1) AND (EXISTS r1)", feature_count=1)
+
+        assert h.peek_undo().previous_filters == (("r1", "EXISTS r1"),)
+
     def test_push_state_records_per_layer_state(self):
         h = HistoryService()
         wrapper = h.get_or_create_history("L1")
@@ -742,25 +772,18 @@ class TestRemoveHistory:
         assert entry.expression == "b = 1"
         assert entry.get_metadata_value("source_feature_count") == 2
         assert dict(entry.previous_filters) == {"B": "b0", "C": "c0"}
-        # B stays in remote_layers: UndoRedoHandler._perform_global_redo gives the current
-        # layer the entry expression and looks every other layer up there.
+        # B stays in remote_layers, with the same expression.
         remote = entry.get_metadata_value("remote_layers")
         assert {lid: info["expression"] for lid, info in remote.items()} == {"B": "b = 1", "C": "c = 1"}
 
     def test_global_redo_after_the_source_left(self):
-        """The expressions a global redo applies (UndoRedoHandler._perform_global_redo rule)."""
+        """The expressions a global redo applies (UndoRedoHandler._perform_global_redo: expression_for)."""
         h = HistoryService()
         _global_state(h)
         h.remove_history("A")
         entry = h.peek_undo()
 
-        def redo(current):
-            remote = entry.get_metadata_value("remote_layers") or {}
-            return {lid: entry.expression if lid == current else remote.get(lid, {}).get("expression", "")
-                    for lid in entry.layer_ids}
-
-        assert redo("B") == {"B": "b = 1", "C": "c = 1"}
-        assert redo("X") == {"B": "b = 1", "C": "c = 1"}  # a layer outside the entry
+        assert {lid: entry.expression_for(lid) for lid in entry.layer_ids} == {"B": "b = 1", "C": "c = 1"}
 
     def test_a_removed_source_without_per_layer_expressions_keeps_the_expression(self):
         h = HistoryService()

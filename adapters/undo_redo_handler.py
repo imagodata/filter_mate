@@ -486,11 +486,6 @@ class UndoRedoHandler:
             logger.info("No global redo history available")
             return False
 
-        # Extract the expressions to restore for each layer
-        # For redo, we need to apply the NEW expressions stored in metadata
-        # (the expression that was applied when this history entry was created)
-        remote_layers_info = history_entry.get_metadata_value('remote_layers') or {}
-
         # v4.1.4: Get project instance once
         project = QgsProject.instance()
 
@@ -502,14 +497,10 @@ class UndoRedoHandler:
             layer = project.mapLayer(layer_id)
 
             if layer:
-                # Determine the expression to apply:
-                # - For source layer: use history_entry.expression
-                # - For remote layers: use the expression from metadata
-                if layer_id == source_layer.id():
-                    expression = history_entry.expression
-                else:
-                    layer_info = remote_layers_info.get(layer_id, {})
-                    expression = layer_info.get('expression', '') if isinstance(layer_info, dict) else ''
+                # The expression this entry applied to the layer: history_entry.expression
+                # for the entry's source (layer_ids[0]), whatever the current layer is,
+                # and the metadata for its targets
+                expression = history_entry.expression_for(layer_id) or ''
 
                 if not _restore_history_subset(layer, expression):
                     failed = True
@@ -549,6 +540,11 @@ class UndoRedoHandler:
         previous_state = self._history_manager.peek_undo()
         if not previous_state:
             return False
+        # The stack is shared by every layer: the last entry may be another layer's,
+        # whose undo would clear this layer's filter and leave its own layers as they are
+        if source_layer.id() not in previous_state.layer_ids:
+            logger.info(f"Last history entry does not involve layer {source_layer.name()}, nothing to undo")
+            return False
 
         # Find the previous filter for this specific layer
         previous_expression = ""
@@ -577,11 +573,13 @@ class UndoRedoHandler:
         source_layer: 'QgsVectorLayer',
         project_layers: Dict
     ) -> bool:
-        """Perform redo for source layer only.
+        """Perform redo of a single-layer entry on its own layer.
 
         v4.1.3: Simplified - caller has already verified entry exists via peek.
+        The stack is shared by every layer: the entry's layer need not be the
+        current one (source_layer), which must not get its expression.
         """
-        logger.info("Performing source layer redo only")
+        logger.info("Performing single layer redo")
 
         # Pop the entry (caller already verified it exists)
         next_state = self._history_manager.peek_redo()
@@ -589,21 +587,27 @@ class UndoRedoHandler:
             return False
 
         # For redo, we apply the expression that was recorded (the NEW expression)
-        # For single-layer entry, this is simply next_state.expression
+        # For single-layer entry, this is simply next_state.expression, of layer_ids[0]
+        layer_id = next_state.layer_ids[0]
+        layer = source_layer if layer_id == source_layer.id() else QgsProject.instance().mapLayer(layer_id)
+        if not layer:
+            logger.warning(f"Layer {layer_id} not found in QgsProject for redo")
+            return False
         expression = next_state.expression
 
-        if not _restore_history_subset(source_layer, expression):
+        if not _restore_history_subset(layer, expression):
             return False
         self._history_manager.redo()
-        project_layers[source_layer.id()]["infos"]["is_already_subset"] = bool(expression)
-        logger.info(f"Redo source layer to: {next_state.description}")
+        if layer_id in project_layers:
+            project_layers[layer_id]["infos"]["is_already_subset"] = bool(expression)
+        logger.info(f"Redo layer {layer.name()} to: {next_state.description}")
 
         # Refresh
         from ..core.domain.source_capability import classify_layer
-        if classify_layer(source_layer).requires_server_translation:
-            self._refresh_affected_layers(source_layer, [])
+        if classify_layer(layer).requires_server_translation:
+            self._refresh_affected_layers(layer, [])
         else:
-            self._refresh_layers(source_layer)
+            self._refresh_layers(layer)
         return True
 
     def _restore_remote_layers(
@@ -854,40 +858,17 @@ class UndoRedoHandler:
         previous_expressions = {}
         project = self._get_project()
 
-        # For source layer: check if we have history
-        source_history = self._history_manager.get_history_for_layer(source_layer_id)
-        if source_history:
-            # Last entry's expression is what's currently applied to source
-            previous_expressions[source_layer_id] = source_history[-1].expression
-        else:
-            # No history - get current state from layer
-            layer = project.mapLayer(source_layer_id) if project else None
-            previous_expressions[source_layer_id] = layer.subsetString() if layer else ""
-
-        # For remote layers: check metadata of last entry or get from layer
-        for layer_id in remote_layer_ids:
+        # The source and each remote layer alike: the new source may have been a target
+        # of the last entry, a remote layer its source
+        for layer_id in [source_layer_id] + list(remote_layer_ids):
             layer_history = self._history_manager.get_history_for_layer(layer_id)
-            if layer_history:
-                last_entry = layer_history[-1]
-                # Check if this layer's expression is in metadata (for global entries)
-                remote_layers_meta = last_entry.get_metadata_value('remote_layers') or {}
-                if layer_id in remote_layers_meta:
-                    layer_info = remote_layers_meta[layer_id]
-                    if isinstance(layer_info, dict):
-                        previous_expressions[layer_id] = layer_info.get('expression', '')
-                    else:
-                        previous_expressions[layer_id] = ''
-                elif layer_id == source_layer_id:
-                    # It's the source of that entry
-                    previous_expressions[layer_id] = last_entry.expression
-                else:
-                    # Fallback: get from layer
-                    layer = project.mapLayer(layer_id) if project else None
-                    previous_expressions[layer_id] = layer.subsetString() if layer else ""
-            else:
+            # What the last entry applied to this layer is what's currently applied to it
+            expression = layer_history[-1].expression_for(layer_id) if layer_history else None
+            if expression is None:
                 # No history - get current state from layer
                 layer = project.mapLayer(layer_id) if project else None
-                previous_expressions[layer_id] = layer.subsetString() if layer else ""
+                expression = layer.subsetString() if layer else ""
+            previous_expressions[layer_id] = expression
 
         logger.debug(f"Collected previous expressions for {len(previous_expressions)} layers")
         return previous_expressions
