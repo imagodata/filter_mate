@@ -321,7 +321,40 @@ class TestSkillFromElsewhere:
         kept = []
         monkeypatch.setattr(sources, "_approved", lambda: list(kept))
         monkeypatch.setattr(sources, "remember", lambda skill: kept.append(sources.skills.fingerprint(skill)))
+        monkeypatch.setattr(sources, "_declined", set())
         return settings, kept
+
+    def test_a_no_is_not_asked_again_until_the_text_changes(self, loader, project_skill):
+        """2026-11-13 (review): a model asked again at each request, until the user, tired of it, said yes."""
+        settings, kept = loader
+        project_skill()
+        asked = []
+        load = settings.skill_loader(set(), lambda skill: asked.append(skill.body) and False)
+        for _ in range(3):
+            with pytest.raises(Exception, match="did not allow"):
+                load({"name": "naming"})
+        assert len(asked) == 1 and kept == []
+        project_skill(body="Theme first, then the year.")
+        with pytest.raises(Exception, match="did not allow"):
+            load({"name": "naming"})
+        assert len(asked) == 2
+
+    def test_what_a_skill_needs_is_checked_before_the_user_is_asked(self, loader, tmp_path):
+        """A yes kept for a skill then refused ("No skill") asked for nothing (2026-11-13, review)."""
+        settings, kept = loader
+        skills = sys.modules[f"{_PKG}.core.agent.skills"]
+        folder = tmp_path / "filtermate_skills" / "naming"
+        folder.mkdir(parents=True)
+        (folder / "SKILL.md").write_text("---\nname: naming\ntitle: t\ndescription: d\nmetadata:\n  requires: "
+                                         "run_pyqgis\n---\n\nTheme first.\n", encoding="utf-8")
+        skills.set_extra(skills.read_folder(tmp_path / "filtermate_skills", trust="project", errors=[]))
+        try:
+            asked = []
+            with pytest.raises(Exception, match="No skill"):
+                settings.skill_loader(set(), lambda skill: asked.append(skill.name) or True)({"name": "naming"})
+            assert asked == [] and kept == []
+        finally:
+            skills.set_extra({})
 
     def test_declined_nothing_is_loaded_nor_kept(self, loader, project_skill):
         settings, kept = loader
@@ -379,11 +412,16 @@ class TestSkillFromElsewhere:
 
     def test_the_skills_of_a_project_are_next_to_its_file_not_in_its_home_path(self, monkeypatch, tmp_path):
         sources = importlib.import_module(f"{_PKG}.adapters.agent.skill_sources")
-        project = SimpleNamespace(absoluteFilePath=lambda: str(tmp_path / "town.qgz"), homePath=lambda: "//host/share")
+        project = SimpleNamespace(absoluteFilePath=lambda: str(tmp_path / "town.qgz"), homePath=lambda: "//host/share",
+                                  presetHomePath=lambda: "//host/share")
         monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", SimpleNamespace(instance=lambda: project),
                             raising=False)
         assert sources.project_folder() == tmp_path / "filtermate_skills"
-        project.absoluteFilePath = lambda: ""  # never saved, or kept in a database
+        project.absoluteFilePath = lambda: ""  # kept in a GeoPackage: no file path of its own
+        assert sources.project_folder() is None  # a home path the project set is never read
+        project.presetHomePath, project.homePath = (lambda: ""), (lambda: str(tmp_path / "data"))
+        assert sources.project_folder() == tmp_path / "data" / "filtermate_skills"  # the folder of the GeoPackage
+        project.homePath = lambda: ""  # never saved
         assert sources.project_folder() is None
 
     def test_a_project_folder_that_is_a_link_is_not_read(self, monkeypatch, tmp_path, project_skill):

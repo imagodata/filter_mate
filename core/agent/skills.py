@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import re
+import stat
 import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -60,6 +62,15 @@ class Skill:
     folder: Optional[Path] = field(default=None, compare=False)
 
 
+def safe_name(text: str) -> str:
+    """``text`` (a folder, a key of a header) as a message may name it: letters, digits, ``_.-``, 40 at most.
+
+    2026-11-13: a message of a skill left out quoted its words, logged at each request; diagnose_performance reads
+    the log to the model, so a skill the user never read reached it all the same."""
+    shown = re.sub(r"[^A-Za-z0-9_.-]", "?", text[:40])
+    return shown + ("…" if len(text) > 40 else "")
+
+
 def _list(value: str) -> Tuple[str, ...]:
     return tuple(item.strip() for item in value.split(",") if item.strip())
 
@@ -91,13 +102,13 @@ def parse(text: str, folder: Optional[Path] = None, trust: Optional[str] = None)
                     raise SkillError("metadata holds indented lines")
                 continue
             if key not in TOP_KEYS:
-                raise SkillError(f"unknown header key {key!r}")
+                raise SkillError(f"unknown header key {safe_name(key)!r}")
             if key in top:  # the last one won: a second name or title read by no one
                 raise SkillError(f"the header has {key!r} twice")
             top[key] = value
         elif in_meta:
             if key not in META_KEYS:
-                raise SkillError(f"unknown metadata key {key!r}")
+                raise SkillError(f"unknown metadata key {safe_name(key)!r}")
             if key in meta:
                 raise SkillError(f"metadata has {key!r} twice")
             meta[key] = value
@@ -108,7 +119,7 @@ def parse(text: str, folder: Optional[Path] = None, trust: Optional[str] = None)
             raise SkillError(f"the header has no {key}")
     name = top["name"]
     if not NAME.fullmatch(name):
-        raise SkillError(f"name {name!r}: 2 to 40 lower case letters, digits or dashes, starting with a letter")
+        raise SkillError("the name is 2 to 40 lower case letters, digits or dashes, starting with a letter")
     if len(top["title"]) > MAX_TITLE:
         # 2026-11-13: a title had no limit. The question showed its first 100 characters while the model received
         # all of it, before the instructions: 56 KB of title filled the answer of load_skill, which was then cut
@@ -142,82 +153,187 @@ def parse(text: str, folder: Optional[Path] = None, trust: Optional[str] = None)
 
 
 MAX_FILE = 64 * 1024  # a SKILL.md of a skill from elsewhere is read up to this size
-# Skills from elsewhere offered at once, and sub-folders looked at to find them: each skill adds a line to every
-# request (10,000 folders made a description of load_skill of 3 MB), each folder is a read on a disk that may be far.
+# Skills from elsewhere offered at once, and entries of a folder looked at to find them: each skill adds a line to
+# every request (10,000 folders made a description of load_skill of 3 MB), each entry is a read on a disk that may be
+# far. Every entry counts, files too: 60,000 files and folders "_x" were looked at, each with its own read (2026-11-13).
 MAX_EXTRA = 20
-MAX_SCANNED = 200
+MAX_ENTRIES = 200
 
-# Characters the dialog draws with no width, where the user reads a skill from elsewhere, and that a model reads:
-# controls, format characters (the tags U+E0000 to U+E007F, which spell ASCII; the zero width space; the overrides of
-# the direction of the text), private use, and the variation selectors past the first sixteen. Kept: the line feed,
-# the tab, and the zero width joiner and non-joiner, which Persian, the scripts of India and emoji need.
-_SHOWN = frozenset("\n\t\u200c\u200d")
-_HIDDEN_CATEGORIES = frozenset(("Cc", "Cf", "Co", "Cs"))
+# Characters the dialog draws with no width, where the user reads a skill from elsewhere, and that a model reads.
+# Default_Ignorable_Code_Point of Unicode (DerivedCoreProperties.txt): the tags U+E0000 to U+E0FFF, which spell
+# ASCII, the variation selectors, the fillers of Hangul, the zero width space, the overrides of the direction...
+_IGNORABLE = ((0x00AD, 0x00AD), (0x034F, 0x034F), (0x061C, 0x061C), (0x115F, 0x1160), (0x17B4, 0x17B5),
+              (0x180B, 0x180F), (0x200B, 0x200F), (0x202A, 0x202E), (0x2060, 0x206F), (0x3164, 0x3164),
+              (0xFE00, 0xFE0F), (0xFEFF, 0xFEFF), (0xFFA0, 0xFFA0), (0xFFF0, 0xFFF8), (0x1BCA0, 0x1BCA3),
+              (0x1D173, 0x1D17A), (0xE0000, 0xE0FFF))
+# ...with the controls, the format characters, private use, the code points with no character yet (a format
+# character of a later Unicode than the one of this Python is one of them) and the separators of lines and paragraphs
+# (U+2028: a line of the header the dialog shows as two, a "description:" line of its own).
+_HIDDEN_CATEGORIES = frozenset(("Cc", "Cf", "Co", "Cs", "Cn", "Zl", "Zp"))
+# Kept, alone or two together after a character that shows: the joiners (Persian, the scripts of India, emoji), the
+# marks of the direction (Hebrew and Arabic pasted), the soft hyphen, and the selectors of the look of an emoji
+# ("❤️‍🔥" holds U+FE0F then U+200D). Never three in a row: a run of them is a message no one sees.
+_KEPT_IGNORABLE = frozenset("\u00ad\u200c\u200d\u200e\u200f\ufe0e\ufe0f")
+MAX_IGNORABLE_RUN = 2
+_SHOWN = frozenset("\n\t")
+
+
+def _ignorable(char: str) -> bool:
+    code = ord(char)
+    return any(low <= code <= high for low, high in _IGNORABLE) \
+        or (char not in _SHOWN and unicodedata.category(char) in _HIDDEN_CATEGORIES)
 
 
 def hidden_character(text: str) -> Optional[str]:
-    """The first character of ``text`` that does not show where the user reads it, as ``U+XXXX``; None without one."""
+    """The first character of ``text`` that does not show where the user reads it, as ``U+XXXX at line N``; None
+    without one."""
+    run = 0
+    line = 1
     for char in text:
-        if char in _SHOWN:
+        if char == "\n":
+            line += 1
+        if not _ignorable(char):
+            run = 0
             continue
-        if unicodedata.category(char) in _HIDDEN_CATEGORIES or 0xE0100 <= ord(char) <= 0xE01EF:
-            return f"U+{ord(char):04X}"
+        run += 1
+        if char not in _KEPT_IGNORABLE or run > MAX_IGNORABLE_RUN:
+            return f"U+{ord(char):04X} at line {line}"
     return None
 
 
-def _is_link(path: Path, folder: Path) -> bool:
-    """Whether ``path`` is not really in ``folder``: a symbolic link, or a junction of Windows, to another place."""
-    return path.is_symlink() or path.resolve().parent != folder.resolve()
+def readable(text: str) -> str:
+    """The text of a skill from elsewhere as the user reads it and the model receives it: no space at the end of a
+    line, two empty lines in a row at most (thousands of them pushed an instruction below what the dialog shows)."""
+    lines = [line.rstrip() for line in text.split("\n")]
+    kept: List[str] = []
+    for line in lines:
+        if not line and len(kept) >= 2 and not kept[-1] and not kept[-2]:
+            continue
+        kept.append(line)
+    return "\n".join(kept)
+
+
+def _is_junction(path: str) -> bool:
+    """A junction of Windows (os.path.isjunction since Python 3.12); False elsewhere.
+
+    Before Python 3.12 (QGIS 3.22 to 3.34 on Windows) a junction is told by where it resolves to, reached to find out.
+    """
+    check = getattr(os.path, "isjunction", None)
+    if check is not None:
+        return bool(check(path))
+    if os.name != "nt":
+        return False
+    try:
+        return Path(path).resolve().parent != Path(path).parent.resolve()
+    except OSError:
+        return True
+
+
+def _entries(folder: Path, limit: Optional[int]) -> Optional[List[os.DirEntry]]:
+    """The entries of ``folder`` by name, read without following a link; None past ``limit`` entries."""
+    entries: List[os.DirEntry] = []
+    with os.scandir(folder) as listing:
+        for entry in listing:
+            entries.append(entry)
+            if limit is not None and len(entries) > limit:
+                return None
+    return sorted(entries, key=lambda entry: entry.name)
+
+
+def _read_skill_file(source: str, elsewhere: bool) -> Optional[str]:
+    """The text of ``source`` (a SKILL.md), read without following a link; None when there is none."""
+    try:
+        info = os.lstat(source)
+    except FileNotFoundError:
+        return None
+    if stat.S_ISLNK(info.st_mode) or _is_junction(source):
+        raise SkillError("SKILL.md is a link: a skill is a folder of its own, with its own SKILL.md")
+    if not stat.S_ISREG(info.st_mode):
+        return None
+    with open(source, "rb") as stream:  # never more than the limit, even when the file grew since lstat
+        data = stream.read(MAX_FILE + 1)
+    if elsewhere and len(data) > MAX_FILE:
+        raise SkillError(f"SKILL.md is over {MAX_FILE // 1024} KB")
+    return data.decode("utf-8")
 
 
 def read_folder(folder: Path, trust: str = "builtin", errors: Optional[List[str]] = None,
-                limit: Optional[int] = None) -> Dict[str, Skill]:
+                limit: Optional[int] = None, reserved: frozenset = frozenset()) -> Dict[str, Skill]:
     """The skills of ``folder`` (one sub-folder each, holding SKILL.md), by name; ``export`` and ``_x`` left out.
 
-    Without ``errors``, a skill that does not follow the standard raises ``SkillError``. With it, such a skill is
-    left out and its reason added: one wrong skill does not take the others away (skills from elsewhere), nor the
-    whole agent (a folder left in ``skills/`` of the plugin by a copy made by hand).
+    Without ``errors``, a skill that does not follow the standard raises ``SkillError`` (``OSError`` for a folder
+    that cannot be read). With it, such a skill or folder is left out and its reason added: one wrong skill does not
+    take the others away (skills from elsewhere), nor the whole agent (a folder left in ``skills/`` of the plugin by
+    a copy made by hand, or one that cannot be read).
 
     A skill from elsewhere (``trust`` other than builtin) is data someone else may have written: a link, a text
-    holding a character that does not show, and what comes after ``limit`` skills or ``MAX_SCANNED`` sub-folders are
-    left out, each with its reason."""
+    holding a character that does not show, a name in ``reserved`` (the skills of FilterMate) and what comes after
+    ``limit`` skills are left out, each with its reason, and a folder of more than ``MAX_ENTRIES`` entries is not
+    read. A message never quotes its words (``safe_name``): it is logged, and the log may reach the model."""
     found: Dict[str, Skill] = {}
-    if not folder.is_dir():
-        return found
     elsewhere = trust != "builtin"
-    scanned = 0
-    for sub in sorted(folder.iterdir()):
-        if not sub.is_dir() or sub.name == EXPORT_DIR or sub.name.startswith(("_", ".")):
+    try:
+        entries = _entries(folder, MAX_ENTRIES if elsewhere else None)
+    except FileNotFoundError:
+        return found
+    except OSError as exc:
+        if errors is None:
+            raise
+        errors.append(f"{safe_name(folder.name)}: cannot be read ({type(exc).__name__})")
+        return found
+    if entries is None:
+        if errors is not None:
+            errors.append(f"{safe_name(folder.name)}: more than {MAX_ENTRIES} entries, not read")
+        return found
+    for entry in entries:
+        name = entry.name
+        if name == EXPORT_DIR or name.startswith(("_", ".")):
             continue
-        source = sub / "SKILL.md"
         try:
-            if elsewhere:
-                scanned += 1
-                if scanned > MAX_SCANNED or (limit is not None and len(found) >= limit):
-                    if errors is not None:
-                        errors.append(f"{folder.name}: the folders after {sub.name} are not read ({MAX_SCANNED} "
-                                      f"folders and {limit or MAX_SCANNED} skills at most)")
-                    break
-                if _is_link(sub, folder) or (source.exists() and _is_link(source, sub)):
+            if entry.is_symlink() or _is_junction(entry.path):
+                if elsewhere:
                     raise SkillError("a link: a skill is a folder of its own, with its own SKILL.md")
-            if not source.is_file() or source.is_symlink():
                 continue
-            if source.stat().st_size > MAX_FILE:
-                raise SkillError(f"{sub.name}/SKILL.md is over {MAX_FILE // 1024} KB")
-            text = source.read_text(encoding="utf-8")
-            hidden = hidden_character(text.lstrip("\ufeff").replace("\r\n", "\n")) if elsewhere else None
-            if hidden:
-                raise SkillError(f"SKILL.md holds a character that does not show ({hidden})")
-            skill = parse(text, sub, trust)
-            if skill.name != sub.name:
-                raise SkillError(f"{sub.name}/SKILL.md is named {skill.name!r}: the folder and the name are the same")
-        except (SkillError, OSError, UnicodeDecodeError) as exc:
+            if not entry.is_dir(follow_symlinks=False):
+                continue
+            if elsewhere and limit is not None and len(found) >= limit:
+                if errors is not None:
+                    errors.append(f"{safe_name(folder.name)}: the folders after {safe_name(name)} are not read "
+                                  f"({limit} skills at most)")
+                break
+            text = _read_skill_file(os.path.join(entry.path, "SKILL.md"), elsewhere)
+            if text is None:
+                continue
+            if elsewhere:
+                text = readable(text.lstrip("\ufeff").replace("\r\n", "\n"))
+                hidden = hidden_character(text)
+                if hidden:
+                    raise SkillError(f"SKILL.md holds a character that does not show ({hidden})")
+            skill = parse(text, Path(entry.path), trust)
+            if skill.name != name:
+                raise SkillError(f"its SKILL.md is named {skill.name!r}: the folder and the name are the same")
+            if elsewhere and skill.name in reserved:
+                raise SkillError("a skill of FilterMate has that name")
+        except SkillError as exc:
             if errors is None:
                 raise
-            errors.append(f"{sub.name}: {exc}")
+            errors.append(f"{safe_name(name)}: {exc}")
+            continue
+        except (OSError, UnicodeDecodeError) as exc:
+            if errors is None:
+                raise
+            errors.append(f"{safe_name(name)}: SKILL.md cannot be read ({type(exc).__name__})")
             continue
         found[skill.name] = skill
     return found
+
+
+def _folder_names(folder: Path) -> frozenset:
+    """The names of the sub-folders of ``folder``, read or not as skills."""
+    try:
+        return frozenset(entry.name for entry in os.scandir(folder) if entry.is_dir(follow_symlinks=False))
+    except OSError:
+        return frozenset()
 
 
 # What does not follow the standard in skills/ of the plugin: the tests keep it empty. At run time such a folder is
@@ -227,6 +343,9 @@ BUILTIN_ERRORS: List[str] = []
 SKILLS: Dict[str, Skill] = read_folder(SKILLS_DIR, errors=BUILTIN_ERRORS)
 for _error in BUILTIN_ERRORS:
     logger.warning("Skill of FilterMate left out: %s", _error)
+# The names a skill from elsewhere cannot take: those of the skills of FilterMate, a folder left out among them too
+# (its name would otherwise be free for a skill of a project).
+RESERVED: frozenset = frozenset(SKILLS) | _folder_names(SKILLS_DIR)
 # Skills of the QGIS profile of the user and of the open project (adapters/agent/skill_sources.py), for the chat only.
 EXTRA: Dict[str, Skill] = {}
 
@@ -236,7 +355,7 @@ def set_extra(skills: Dict[str, Skill]) -> List[str]:
     EXTRA.clear()
     left_out = []
     for name, skill in skills.items():
-        if name in SKILLS or skill.trust == "builtin":
+        if name in RESERVED or skill.trust == "builtin":
             left_out.append(f"{name}: a skill of FilterMate has that name")
             continue
         if len(EXTRA) >= MAX_EXTRA:

@@ -11,7 +11,7 @@ import time
 from typing import Sequence, Tuple
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, QTimer, pyqtSignal
-from qgis.PyQt.QtGui import QColor, QFont
+from qgis.PyQt.QtGui import QColor, QFont, QTextOption
 from qgis.PyQt.QtWidgets import (
     QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMenu,
@@ -125,7 +125,11 @@ def ask_plain(parent, title: str, text: str) -> bool:
 
 
 def ask_code(parent, title: str, text: str, code: str) -> bool:
-    """Yes or no on code written by a model: the whole code is shown, as plain text, and No is the default."""
+    """Yes or no on code written by a model, or on a skill from elsewhere: the whole text is shown, as plain text,
+    and No is the default.
+
+    Every line is wrapped, a word too long too: what comes after thousands of spaces, or a line of 300 characters,
+    was off to the right of the view, read by the model and not by the user (2026-11-13)."""
     dialog = QDialog(parent)
     dialog.setWindowTitle(title)
     dialog.resize(720, 520)
@@ -140,7 +144,8 @@ def ask_code(parent, title: str, text: str, code: str) -> bool:
     mono = QFont("monospace")
     mono.setStyleHint(QFont.StyleHint.Monospace)
     view.setFont(mono)
-    view.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+    view.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+    view.setWordWrapMode(QTextOption.WrapMode.WrapAtWordBoundaryOrAnywhere)
     buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Yes | QDialogButtonBox.StandardButton.No, dialog)
     buttons.button(QDialogButtonBox.StandardButton.No).setDefault(True)
     buttons.button(QDialogButtonBox.StandardButton.No).setFocus()
