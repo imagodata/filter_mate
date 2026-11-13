@@ -38,6 +38,20 @@ clé et choisit un modèle, ou prend Ollama en local.
   - le modèle, avec des suggestions pour chaque fournisseur, et un bouton « Tester » qui envoie une requête minuscule
     et dit si la clé et le modèle répondent ;
   - le texte d'accueil du panneau ne parle plus du quota gratuit.
+- **Ollama guidé** (ajouté par l'utilisateur le 13/11 ; Ollama devient la seule voie gratuite) :
+  - Ollama ne répond pas à l'adresse : une note dit « Ollama does not answer at <address>: install it, start it, then
+    Refresh », avec un lien vers `https://ollama.com/download` et un bouton Actualiser (la liste des modèles est lue
+    de nouveau) ;
+  - Ollama répond mais n'a aucun modèle, ou pas celui tapé : un bouton « Download » télécharge le modèle dans Ollama
+    (`POST <address>/api/pull`, en flux) ;
+  - modèle proposé par défaut : `qwen3.5:4b`, le seul mesuré au banc. Il tient dans un GPU de 8 Go avec tous les
+    outils (42 cas sur 69, `docs/AGENT_MODE.md`). `qwen3:8b` ne tient pas dans 8 Go. L'utilisateur peut taper un
+    autre nom ;
+  - avant le téléchargement, une question avec le nom du modèle : il pèse plusieurs Go. La taille exacte s'affiche
+    dès que le flux la donne ;
+  - pendant le téléchargement : une barre de progression et un bouton Annuler. À la fin, la liste des modèles est lue
+    de nouveau et le modèle est choisi ;
+  - le téléchargement ne va qu'à l'adresse d'Ollama réglée dans le dialogue, comme la liste des modèles aujourd'hui.
 - **Messages** : retirer ceux du quota des 34 catalogues et ajouter les nouveaux (skill `i18n-pipeline`).
 - **Documentation** : `README.md`, `docs/AGENT_MODE.md`, `docs/ARCHITECTURE.md`, CHANGELOG (section non publiée).
 - **Ce que fait l'utilisateur, pas le code** : couper le relais déployé quand il le veut

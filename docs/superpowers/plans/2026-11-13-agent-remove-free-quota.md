@@ -229,7 +229,76 @@ Expected: every test passes
 git add -A && git commit -m "AGENT settings: the provider tab guides a first use: where to get a key, Test, the provider's models"
 ```
 
-### Task 3: Le relais, ses contrôles, sa documentation et les catalogues
+### Task 3: Ollama guidé : l'installer, télécharger un modèle
+
+**Files:**
+- Modify: `core/agent/providers/ollama_chat.py` (fonctions pures près de `TAGS_PATH`, ligne 213)
+- Modify: `ui/widgets/agent_panel.py` (onglet Fournisseur, à côté de `_fetch_ollama_models` et `_on_ollama_models`,
+  lignes 1421-1460)
+- Test: `tests/unit/agent/test_ollama_provider.py`, `tests/unit/ui/test_agent_provider_tab.py`
+
+**Interfaces:**
+- Consumes: l'onglet Fournisseur de la tâche 2.
+- Produces, dans `core/agent/providers/ollama_chat.py` :
+  - `PULL_PATH = "/api/pull"` ;
+  - `RECOMMENDED_LOCAL_MODEL = "qwen3.5:4b"` ;
+  - `OLLAMA_DOWNLOAD_PAGE = "https://ollama.com/download"` ;
+  - `pull_body(model: str) -> bytes`, qui encode `{"model": model, "stream": true}` ;
+  - `pull_progress(line: bytes) -> Optional[Tuple[str, int, int]]`, qui renvoie (statut, octets reçus, octets au
+    total) ; `None` pour une ligne illisible ; une ligne avec `error` lève `ProviderError` avec son texte.
+
+- [ ] **Step 1: Write the failing tests**
+
+```python
+def test_pull_body():
+    assert json.loads(pull_body("qwen3.5:4b")) == {"model": "qwen3.5:4b", "stream": True}
+
+def test_pull_progress_lines():
+    assert pull_progress(b'{"status":"pulling a1b2","digest":"sha256:a1b2","total":3400000000,"completed":1700000000}') \
+        == ("pulling a1b2", 1700000000, 3400000000)
+    assert pull_progress(b'{"status":"success"}') == ("success", 0, 0)
+    assert pull_progress(b"not json") is None
+    with pytest.raises(ProviderError, match="file does not exist"):
+        pull_progress(b'{"error":"pull model manifest: file does not exist"}')
+```
+
+  In `tests/unit/ui/test_agent_provider_tab.py`, Ollama chosen:
+  - `test_ollama_not_answering_offers_install`: when the model list fails, the install note and its link to
+    `OLLAMA_DOWNLOAD_PAGE` are visible, and so is Refresh.
+  - `test_ollama_without_the_model_offers_download`: the list answers without `qwen3.5:4b` and the model field is
+    empty, so the field shows `qwen3.5:4b` and Download is visible.
+  - `test_download_asks_first`: Download with the question answered no sends nothing (no request made).
+
+- [ ] **Step 2: Run them, check they fail**
+
+Run: `python -m pytest tests/unit/agent/test_ollama_provider.py tests/unit/ui/test_agent_provider_tab.py -v`
+Expected: FAIL (`pull_body` not defined)
+
+- [ ] **Step 3: Implement**
+  - The pure functions above.
+  - In the dialog:
+    - the install note with its link and Refresh (Refresh calls `_fetch_ollama_models`);
+    - Download asks first;
+    - then it posts `pull_body` to `<address>/api/pull` with the dialog's network manager, without a total timeout:
+      only a silence of 60 s ends it;
+    - it reads the lines as they come and updates a `QProgressBar` (busy until a total is known);
+    - Cancel calls `reply.abort()`;
+    - at `success` it reads the model list again and selects the model;
+    - an error is shown in the result label.
+  - Closing the dialog during a download aborts it (as `_closing` does for the model list).
+
+- [ ] **Step 4: Run the tests**
+
+Run: `python -m pytest tests/unit/agent tests/unit/ui -q`
+Expected: every test passes
+
+- [ ] **Step 5: Lint and commit**
+
+```bash
+git add -A && git commit -m "AGENT settings: Ollama guided: where to install it, a model downloaded from the dialog"
+```
+
+### Task 4: Le relais, ses contrôles, sa documentation et les catalogues
 
 **Files:**
 - Delete: `free-quota-proxy/` (dossier entier), `tests/qgis_headless/check_free_quota_live.py`
@@ -242,7 +311,7 @@ git add -A && git commit -m "AGENT settings: the provider tab guides a first use
 - Modify: `i18n/FilterMate_*.ts` et `.qm` (34 catalogues)
 
 **Interfaces:**
-- Consumes: les messages retirés par la tâche 1 et ajoutés par la tâche 2.
+- Consumes: les messages retirés par la tâche 1 et ajoutés par les tâches 2 et 3.
 
 - [ ] **Step 1: Check nothing points to the relay any more**
 
@@ -251,7 +320,8 @@ Expected: only the CHANGELOG lines of past releases and the new line of the unre
 
 - [ ] **Step 2: Update the 34 catalogs** with the skill `i18n-pipeline`:
   - mark the messages of the quota obsolete;
-  - add the messages of task 2 (the welcome note, « Create a key », « Test », the result words) in every language;
+  - add the messages of tasks 2 and 3 (the welcome note, « Create a key », « Test », the result words, the Ollama
+    install note, « Refresh », « Download », the download question and progress) in every language;
   - compile the `.qm` with `lrelease` in Docker.
 
 Expected: `python -m pytest tests/unit/test_i18n*.py -q` passes.
