@@ -199,12 +199,15 @@ def set_layers_visibility(layers: List[str], visible: bool) -> Dict[str, Any]:
     return {'done': done, 'failed': failed, 'visible': bool(visible)}
 
 
-def _probe(url: str) -> Tuple[str, RemoteFile]:
-    """Where a link ends once its redirects are followed, and what its server says of the file, without reading it."""
+def _probe(url: str, checked: Dict[str, str]) -> Tuple[str, RemoteFile]:
+    """Where a link ends once its redirects are followed, and what its server says of the file, without reading it.
+
+    ``checked``: what the names resolved in this tool call answered (resolved_problem).
+    """
     answers = {}
 
     def head(link: str):
-        problem = resolved_problem(link)  # each hop: a redirect is checked by its name in follow_redirects
+        problem = resolved_problem(link, checked=checked)  # each hop: a redirect is checked by its name in follow_redirects
         if problem:
             raise ValueError(f"this link cannot be read: {problem}")
         try:
@@ -222,18 +225,19 @@ def _discard(path: str) -> None:
     shutil.rmtree(os.path.dirname(path), ignore_errors=True)
 
 
-def _download(url: str, found: RemoteFile) -> str:
+def _download(url: str, found: RemoteFile, checked: Dict[str, str]) -> str:
     """Copy a file its server only gives whole to the QGIS profile; returns the path of the copy.
 
     Bounded in size and in time, stopped by Stop, and the interface stays alive meanwhile. Each copy is written
     in a new folder of its own, under its final name: no copy a layer reads is ever replaced or removed, two
     downloads of one URL never share a file, and nothing is renamed (an antivirus holds a new file on Windows).
+    ``checked``: what the names resolved in this tool call answered (resolved_problem).
 
     Raises:
         ValueError: Too large, too slow, cut, stopped, or refused by the server or the disk; nothing is kept.
     """
     from qgis.core import QgsApplication
-    problem = resolved_problem(url)
+    problem = resolved_problem(url, checked=checked)
     if problem:
         raise ValueError(f"this link cannot be read: {problem}")
     if found.size > MAX_DOWNLOAD:
@@ -353,11 +357,12 @@ def _add_layer(source: str, name: str, kind: str) -> Dict[str, Any]:
     title = (name or '').strip()
     opened, copy = source, ''
     if remote:
-        url, found = _probe(source)
+        checked: Dict[str, str] = {}  # each name is resolved once in this call, up to 3 s that QGIS waits
+        url, found = _probe(source, checked)
         if reads_in_place(url, kind, found):
             opened = gdal_source(url)
         else:
-            copy = _download(url, found)
+            copy = _download(url, found, checked)
             opened = _local_source(copy, kind)
         stem = found.name.rsplit('.', 1)[0]
         title = title or (stem if stem != 'layer' else '')  # an export with no file name keeps the end of its link
@@ -437,12 +442,14 @@ def remove_layers(layers: List[str]) -> Dict[str, Any]:
 
 
 def _json_answer(platform: str, url: str, body: Optional[bytes] = None, accept: str = 'application/json') -> Any:
+    """The JSON answer of a platform of the list, at ``url``: an address built on the one of the platform.
+
+    What its name resolves to is not judged (resolved_problem): the user chose it, and a local mirror or a portal
+    of the user's own network resolves to a local address. A link a portal gives is never asked here.
+    """
     headers = {'Accept': accept}
     if body is not None:
         headers['Content-Type'] = 'application/json'
-    problem = resolved_problem(url)
-    if problem:
-        raise ValueError(f"{platform} cannot be read: {problem}")
     try:
         reply = fetch(url, body=body, headers=headers, max_bytes=MAX_PAYLOAD, timeout_ms=45_000)
     except HttpFailure as exc:
