@@ -302,7 +302,10 @@ SETTINGS_TOOLS = (
 )
 
 LOAD_SKILL = "load_skill"
-# Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by core/agent/skills.py).
+
+
+# Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by
+# core/agent/skills.py).
 def skill_tool(offered: Optional[set] = None) -> ToolSpec:
     """load_skill, listing the skills whose required tools are among ``offered`` (the pyqgis skill: the expert mode)."""
     return ToolSpec(
