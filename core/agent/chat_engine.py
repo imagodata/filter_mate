@@ -15,7 +15,7 @@ from .messages import (
 )
 from .providers.base import HttpRequest
 from .session import STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
-from .permissions import ASK, CODE_TOOLS, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy
+from .permissions import ASK, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy, asked_alone
 from .tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
@@ -181,10 +181,10 @@ class ChatEngine:
         answers = []
         try:
             answered = self._confirm_together(calls)
-            for call in calls:
+            for position, call in enumerate(calls):
                 if self._cancelled:
                     break
-                answers.append(self._run_one(call, answered.get(call.call_id)))
+                answers.append(self._run_one(call, answered.get(position)))
         finally:
             self._running_tools = False
         if self._cancelled:
@@ -194,23 +194,27 @@ class ChatEngine:
         self._session.add_tool_results(answers)
         self._defer(lambda: self._request_model(generation))
 
-    def _confirm_together(self, calls: Sequence[ToolCallPart]) -> Dict[str, bool]:
-        """One question for the calls of a turn the user is asked about, when there are several: ``{call id: yes}``.
+    def _confirm_together(self, calls: Sequence[ToolCallPart]) -> Dict[int, bool]:
+        """One question for the calls of a turn the user is asked about, when there are several.
 
-        Code is left out: each run is read in a dialog of its own. A listener without ``confirm_many`` is asked
-        call by call, as before.
+        ``{position in calls: yes}``, by position and not by call id: a server may give two calls the same id, and
+        the answer to the listed ones then reached a call that was not listed (code, run without its dialog).
+        Code and the other tools asked alone (``asked_alone``) are left out: each is read in a dialog of its own;
+        so are the actions past ``MAX_ASKED_TOGETHER``, which the question would not list.
+        A listener without ``confirm_many`` is asked call by call, as before.
         """
-        asked = [call for call in calls if self._executor.verdict(call, self._policy) == ASK
-                 and call.name not in CODE_TOOLS]
+        asked = [(position, call) for position, call in enumerate(calls)
+                 if self._executor.verdict(call, self._policy) == ASK
+                 and not asked_alone(call.name, self._executor.spec(call.name))][:MAX_ASKED_TOGETHER]
         confirm_many = getattr(self._listener, "confirm_many", None)
         if len(asked) < 2 or confirm_many is None:
             return {}
         try:
-            yes = bool(confirm_many(list(asked)))
+            yes = bool(confirm_many([call for _position, call in asked]))
         except Exception:
             logger.exception("Agent confirmation failed")
             yes = False
-        return {call.call_id: yes for call in asked}
+        return {position: yes for position, _call in asked}
 
     def _run_one(self, call: ToolCallPart, answered: Optional[bool] = None) -> ToolResultPart:
         verdict = self._executor.verdict(call, self._policy)

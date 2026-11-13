@@ -37,6 +37,9 @@ MAX_MADE = 20  # layers kept per step as made by it: a Processing call makes a f
 MAX_LAYER_REF = 1000
 # The arguments of every step of a recipe, as JSON: a filter, a style or a Processing call each fit many times over.
 MAX_RECIPE_CHARS = 50_000
+# Lists and objects inside the arguments of a step: a Processing call holds a few levels. A recipe comes with the
+# project, and the functions that walk the arguments call themselves once per level.
+MAX_ARGUMENT_DEPTH = 16
 
 # Never kept: their effect belongs to the conversation (notes, widgets, history), to the user's own reading of code
 # at each run, or to an application that may not be there next time (connectors, named mcp_...).
@@ -127,6 +130,23 @@ def _clean_made(made: Any) -> List[Dict[str, str]]:
         if len(cleaned) >= MAX_MADE:
             break
     return cleaned
+
+
+def _too_deep(value: Any, limit: int = MAX_ARGUMENT_DEPTH) -> bool:
+    """Whether lists and objects nest beyond ``limit`` levels in ``value``; walked without recursion."""
+    pending = [(value, 1)]
+    while pending:
+        item, depth = pending.pop()
+        if isinstance(item, dict):
+            children = item.values()
+        elif isinstance(item, (list, tuple)):
+            children = item
+        else:
+            continue
+        if depth > limit:
+            return True
+        pending.extend((child, depth + 1) for child in children)
+    return False
 
 
 def _clean_step(step: Any) -> Optional[Dict[str, Any]]:
@@ -260,6 +280,10 @@ def _clean(recipe: Any) -> Optional[Dict[str, Any]]:
     if not isinstance(recipe, dict) or not isinstance(recipe.get("id"), str) or not isinstance(recipe.get("steps"), list):
         return None
     name = plain(recipe.get("name"), MAX_NAME)
+    if any(isinstance(item, dict) and _too_deep(item.get("arguments")) for item in recipe["steps"][:MAX_STEPS]):
+        # 2026-11-13: 1,500 levels in a forged recipe raised RecursionError in the run, which left the panel busy.
+        # The whole recipe, not the step: without one of its steps a recipe does something else.
+        return None
     steps = [step for step in (_clean_step(item) for item in recipe["steps"][:MAX_STEPS]) if step is not None]
     if not name or not steps:
         return None
@@ -354,7 +378,7 @@ def saved(recipes: Sequence[Dict[str, Any]], name: str, request: str,
     """``recipes`` with this one kept; a recipe of the same name (any case) is replaced, in its place.
 
     Raises:
-        RecipeError: No name, no step, too many steps or recipes, or arguments too long.
+        RecipeError: No name, no step, too many steps or recipes, or arguments too long or nested too deep.
     """
     name = plain(name, MAX_NAME + 1)
     if not name:
@@ -369,6 +393,9 @@ def saved(recipes: Sequence[Dict[str, Any]], name: str, request: str,
     if len(json.dumps([[step["arguments"], step.get("made")] for step in steps], ensure_ascii=False,
                       default=str)) > MAX_RECIPE_CHARS:
         raise RecipeError("the steps of this request are too long to keep as a recipe")
+    if any(_too_deep(step["arguments"]) for step in steps):  # what is kept must be what is read back
+        raise RecipeError(f"a step of this request nests its arguments beyond {MAX_ARGUMENT_DEPTH} levels: it cannot "
+                          "be kept as a recipe")
     kept_recipes = list(recipes)
     for index, recipe in enumerate(kept_recipes):
         if recipe["name"].casefold() == name.casefold():
