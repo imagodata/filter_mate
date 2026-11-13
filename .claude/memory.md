@@ -1265,3 +1265,13 @@ Result: Que veux-tu faire dans cette session ?
 - Limites connues : le subset grossit d'un opérande par filtre différent combiné (pas de plafond) ; `_with_negations`
   met un NOT couvrant une conjonction devant chaque EXISTS ; le budget inline SpatiaLite ignore les prédicats gardés ;
   après unfilter, le nettoyage des vues par le tracker peut supprimer une vue que lit le subset restauré (antérieur).
+
+## [2026-11-13] Sélection de la couche source après un filtre : seulement avec IS_SELECTING
+- Décision utilisateur : après filter / unfilter / reset, `FilterEngineTask._restore_source_layer_selection` ne
+  resélectionne les entités source (`task.feature_fids`) que si IS_SELECTING est actif ; avant, toujours, et l'entité
+  source passait sélectionnée sur la carte bouton coupé.
+- L'état vient de `task_parameters["task"]["is_selecting"]`, posé par `TaskParameterBuilder._is_selecting_active`
+  (bouton `pushButton_checkable_exploring_selecting`, à défaut `PROJECT_LAYERS[...]["exploring"]["is_selecting"]`) ;
+  paramètres construits ailleurs sans la clé → réglage `exploring.is_selecting` de la couche, faux par défaut.
+- Piège de tests : `tests/unit/core/tasks/...` avant `tests/unit/adapters/...` dans une même commande pytest → le paquet
+  `tests/unit/core` masque `core` (ImportError `core.filter`) ; lancer séparément ou toute la suite.

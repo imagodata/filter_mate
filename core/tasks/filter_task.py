@@ -3126,8 +3126,17 @@ class FilterEngineTask(QgsTask):
             logger.info(f"{len(dropped)} materialized view(s) of canceled tasks dropped")
 
     def _restore_source_layer_selection(self):
-        """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector."""
+        """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector.
+
+        Only when IS_SELECTING is on: otherwise FilterMate does not drive the QGIS selection
+        and the source features must not turn selected after a filter (2026-11-13).
+        """
         if not self.source_layer or not is_valid_layer(self.source_layer):
+            return
+        is_selecting = self.task_parameters.get("task", {}).get("is_selecting")
+        if is_selecting is None:  # parameters not built by the dock: the layer's setting
+            is_selecting = (self.task_parameters.get("exploring") or {}).get("is_selecting", False)
+        if not is_selecting:
             return
         from ..domain.source_capability import classify_layer
         if classify_layer(self.source_layer).requires_server_translation:
