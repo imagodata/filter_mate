@@ -876,8 +876,12 @@ class _ServiceLayer(_Layer):
     ("WFS", WFS_URI, ["cleabs", "nom_officiel", "code_insee", "population"], "cleabs"),
     ("WFS", WFS_URI, ["fid", "population"], "$id"),                     # a WFS "fid" is never trusted
 ])
-def test_primary_key_never_falls_back_to_the_first_integer_field(provider, source, field_names, expected):
-    """Names only (the uniqueness probe is not loaded here; see test_stable_key.py)."""
+def test_primary_key_never_falls_back_to_the_first_integer_field(provider, source, field_names, expected, monkeypatch):
+    """Names only: the uniqueness probe is kept out (see test_stable_key.py).
+
+    It was out only when another test had left a stand-in of the plugin package: run alone, the real probe was
+    imported and found "ID" unique on this stand-in layer."""
+    monkeypatch.setitem(sys.modules, f"{ROOT}.adapters.qgis.source_capability_probe", None)  # import halted
     layer = _ServiceLayer("communes", provider=provider, source=source, field_names=field_names)
     builder = ogr_builder.OGRExpressionBuilder(task_params={})
     assert builder._get_primary_key(layer) == expected
