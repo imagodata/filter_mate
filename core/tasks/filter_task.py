@@ -315,6 +315,15 @@ class FilterEngineTask(QgsTask):
             self.task_parameters['_processing_settings'] = capture_processing_settings()
         except Exception:  # nosec B110 - the workers then use a context without the settings
             pass
+        # The global, project and layer variables of the source layer, read here on the main thread
+        # for the readings of the source selection (2026-11-13, source_refusal.with_layer_context)
+        try:
+            from ...adapters.backends.source_refusal import SOURCE_CONTEXT_KEY, layer_context
+            source_layer = QgsProject.instance().mapLayer(self.task_parameters.get('infos', {}).get('layer_id') or '')
+            if source_layer is not None:
+                self.task_parameters[SOURCE_CONTEXT_KEY] = layer_context(source_layer)
+        except Exception:  # nosec B110 - the readings build the context in the worker, as before
+            pass
         try:
             from ...adapters.qgis.source_capability_probe import capture_network_manager
             capture_network_manager()

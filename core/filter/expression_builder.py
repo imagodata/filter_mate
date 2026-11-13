@@ -39,6 +39,15 @@ def _source_selection_refusal(layer_name: str, unreadable: bool = False):
     return source_selection_refusal(layer_name, unreadable=unreadable)
 
 
+def _with_source_context(request, layer, task_parameters):
+    """adapters.backends.source_refusal.with_layer_context, with the source context the task read on the main thread."""
+    try:
+        from ...adapters.backends.source_refusal import SOURCE_CONTEXT_KEY, with_layer_context
+    except ImportError:  # imported from the repository root (tests)
+        from adapters.backends.source_refusal import SOURCE_CONTEXT_KEY, with_layer_context
+    return with_layer_context(request, layer, task_parameters.get(SOURCE_CONTEXT_KEY))
+
+
 def record_task_view(task_parameters, mv_ref) -> None:
     """Record a materialized view as created by the running filter task (``_parent_task``).
 
@@ -1177,6 +1186,10 @@ class ExpressionBuilder:
         to evaluate is refused, as SpatiaLite's _features_matching does (it read
         nothing, and FALSE emptied the targets with no word).
 
+        2026-11-13: read in the variables of the source layer (with_layer_context),
+        also through its copy without subset: ``"pop" > @seuil`` read NULL and
+        kept nothing, refused or emptying the targets.
+
         Args:
             limit: Read at most this many features (None: all of them).
 
@@ -1196,6 +1209,7 @@ class ExpressionBuilder:
             logger.error(f"   ❌ The source selection does not parse: {parsed.parserErrorString()}")
             raise _source_selection_refusal(self.source_layer.name(), unreadable=True)
         request.setFilterExpression(expression)
+        _with_source_context(request, self.source_layer, self.task_parameters)
         layer = self.source_layer
         if self.task_parameters.get('source_selection_reads_whole_layer') and layer.subsetString():
             layer = self._unfiltered_source() or layer

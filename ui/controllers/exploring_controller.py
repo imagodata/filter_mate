@@ -49,10 +49,11 @@ def _with_layer_context(request, layer):
     2026-11-12: a request filtered by an expression has no context of its own:
     a custom selection "id" > @seuil read every variable as NULL and selected
     nothing, while the filter task (which evaluates in that context) filtered.
+    The context is the filter task's (adapters.backends.source_refusal.with_layer_context).
     """
     try:
-        from qgis.core import QgsExpressionContext, QgsExpressionContextUtils
-        request.setExpressionContext(QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer)))
+        from ...adapters.backends.source_refusal import with_layer_context
+        with_layer_context(request, layer)
     except Exception:  # nosec B110 - no context: the request evaluates without variables, as before
         pass
     return request
@@ -722,8 +723,11 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if mode is None:
             return self._empty_remote_selection('', refused=True)
         filter_expression = request.filterExpression()
+        filter_text = filter_expression.expression() if filter_expression is not None else ''
+        # with the values of the variables it reads (2026-11-13: a selection on @seuil outlived its change)
+        from ...adapters.backends.source_refusal import variable_values
         signature = (layer.id(), layer.source(), layer.subsetString(), dw.current_exploring_groupbox,
-                     filter_expression.expression() if filter_expression is not None else '',
+                     filter_text, variable_values(filter_text, layer),
                      request.filterFid(), tuple(sorted(request.filterFids())))
         ui_revision = self._remote_ui_revision()
         signature += (ui_revision,)

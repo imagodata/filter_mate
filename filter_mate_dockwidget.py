@@ -2078,11 +2078,23 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         except Exception:  # nosec B110 - Cursor change is cosmetic - non-critical
             pass
 
+    @staticmethod
+    def _expression_cache_key(layer_id: str, expression: str):
+        """The key of an expression result: its layer, text, the layer's subset and the variables it reads.
+
+        2026-11-13: the values of the variables it reads too, or a selection on
+        @seuil stayed that of the former value until the entry expired (60 s).
+        """
+        layer = QgsProject.instance().mapLayer(layer_id)
+        if layer is None:
+            return (layer_id, expression, "", ())
+        from .adapters.backends.source_refusal import variable_values
+        return (layer_id, expression, layer.subsetString(), variable_values(expression, layer))
+
     def _get_cached_expression_result(self, layer_id: str, expression: str):
         """v4.0 Sprint 16: Get cached expression result (includes subsetString for multi-step filtering)."""
         import time
-        layer = QgsProject.instance().mapLayer(layer_id)
-        cache_key = (layer_id, expression, layer.subsetString() if layer else "")
+        cache_key = self._expression_cache_key(layer_id, expression)
         if cache_key not in self._expression_cache: return None
         features, timestamp = self._expression_cache[cache_key]
         if time.time() - timestamp > self._expression_cache_max_age:
@@ -2095,9 +2107,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if len(self._expression_cache) >= self._expression_cache_max_size:
             oldest_key = min(self._expression_cache.keys(), key=lambda k: self._expression_cache[k][1])
             del self._expression_cache[oldest_key]
-        layer = QgsProject.instance().mapLayer(layer_id)
-        cache_key = (layer_id, expression, layer.subsetString() if layer else "")
-        self._expression_cache[cache_key] = (features, time.time())
+        self._expression_cache[self._expression_cache_key(layer_id, expression)] = (features, time.time())
 
     def invalidate_expression_cache(self, layer_id: str = None):
         """v4.0 Sprint 16: Invalidate expression cache (layer_id=None clears all)."""
@@ -4980,12 +4990,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # This bypasses the guards that can prevent features from being returned
         features = []
         try:
-            from qgis.core import QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
-            request = QgsFeatureRequest().setFilterExpression(expression)
+            from qgis.core import QgsFeatureRequest
+            from .adapters.backends.source_refusal import with_layer_context
             # 2026-11-12: the global, project and layer variables, as the filter task reads them (a request
             # has no context of its own: "id" > @seuil selected nothing). Read here, on the main thread.
-            request.setExpressionContext(QgsExpressionContext(
-                QgsExpressionContextUtils.globalProjectLayerScopes(self.current_layer)))
+            request = with_layer_context(QgsFeatureRequest().setFilterExpression(expression), self.current_layer)
             features = list(self.current_layer.getFeatures(request))
             logger.info(f"exploring_custom_selection: Loaded {len(features)} features matching expression '{expression[:50]}...'")
         except Exception as e:

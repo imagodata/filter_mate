@@ -136,7 +136,13 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
     stable_key.NAMED = 'named'
     stable_key.key_candidates = lambda names, local=True: [name for name in names
                                                            if name.lower() in ('gml_id', 'id', 'cleabs')]
-    for module in (async_query, probe, formatter, utils, stable_key):
+    # the values of the variables an expression reads, part of the signature of a read: tested in QGIS
+    # (tests/qgis_headless/check_source_selection_context.py); the package itself is not imported here
+    backends = types.ModuleType('filter_mate.adapters.backends')
+    backends.__path__ = []
+    source_refusal = types.ModuleType('filter_mate.adapters.backends.source_refusal')
+    source_refusal.variable_values = lambda expression, layer: ()
+    for module in (async_query, probe, formatter, utils, stable_key, backends, source_refusal):
         monkeypatch.setitem(sys.modules, module.__name__, module)
     return SimpleNamespace(async_query=async_query, probe=probe)
 
