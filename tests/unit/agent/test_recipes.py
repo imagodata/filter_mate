@@ -6,7 +6,8 @@ import pytest
 
 from core.agent.permissions import AGENT_OWN, PermissionPolicy, RUN
 from core.agent.recipes import (
-    HEADER, LIVE_TOOLS, MAX_MADE, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find, fingerprint,
+    HEADER, LIVE_TOOLS, MAX_ARGUMENT_DEPTH, MAX_MADE, MAX_NAME, MAX_RECIPES, MAX_STEPS, NOT_KEPT, RecipeError, dumps, find,
+    fingerprint,
     followed_sources, kept, live_problem, made_layers, pair_made, parse, plain, recipes_block, remap, saved,
     stale_reference, steps_of, summary, with_live, without,
 )
@@ -318,3 +319,49 @@ class TestMadeLayers:
         steps = [{"tool": "run_algorithm", "arguments": self.BUFFER, "label": "b", "made": made}] * 2
         with pytest.raises(RecipeError):
             saved([], "Big", "", steps)
+
+
+class TestNestedArguments:
+    """2026-11-13: a recipe is a text of the project, which may come from someone else. Arguments nested 1,500
+    levels deep raised RecursionError in the functions that walk them, during the run."""
+
+    @staticmethod
+    def _stored(levels):
+        nested = "[" * levels + '"a"' + "]" * levels
+        return ('[{"id":"r1","name":"n","steps":[{"tool":"set_layers_visibility","arguments":{"layers":["A"],'
+                '"visible":true}},{"tool":"apply_filter","arguments":{"x":%s,"layer_name":"B","expression":"1"}}]}]'
+                % nested)
+
+    def test_a_recipe_nested_beyond_any_real_call_is_not_read(self):
+        # The whole recipe: without one of its steps it would do something else.
+        assert parse(self._stored(200)) == []
+
+    def test_the_levels_of_a_real_call_are_kept(self):
+        # The arguments are the first level, so the list may nest MAX_ARGUMENT_DEPTH - 1 times.
+        kept_steps = parse(self._stored(MAX_ARGUMENT_DEPTH - 1))[0]["steps"]
+        assert [step["tool"] for step in kept_steps] == ["set_layers_visibility", "apply_filter"]
+        assert parse(self._stored(MAX_ARGUMENT_DEPTH)) == []
+
+    def test_what_cannot_be_read_back_is_not_saved(self):
+        """A step kept at the save and dropped at the next read left a recipe that filtered the wrong layer."""
+        def step(levels):
+            nested = "a"
+            for _ in range(levels):
+                nested = [nested]
+            return {"tool": "run_algorithm", "arguments": {"parameters": nested}, "label": "x"}
+
+        ok = saved([], "R", "", [step(MAX_ARGUMENT_DEPTH - 1)])
+        assert parse(dumps(ok)) and len(parse(dumps(ok))[0]["steps"]) == 1
+        with pytest.raises(RecipeError):
+            saved([], "R", "", [step(MAX_ARGUMENT_DEPTH - 1), step(MAX_ARGUMENT_DEPTH)])
+
+    def test_a_geometry_as_geojson_is_not_too_deep(self):
+        polygon = {"type": "Feature", "geometry": {"type": "MultiPolygon", "coordinates": [[[[0, 0], [1, 0], [1, 1], [0, 0]]]]}}
+        kept_recipes = saved([], "R", "", [{"tool": "add_features", "arguments": {"layer": "A", "features": [polygon]},
+                                            "label": "x"}])
+        assert len(parse(dumps(kept_recipes))[0]["steps"]) == 1
+
+    def test_what_is_kept_can_be_walked(self):
+        step = parse(self._stored(MAX_ARGUMENT_DEPTH - 1))[0]["steps"][1]
+        assert stale_reference(step["tool"], step["arguments"], {"a"}) == "a"
+        assert remap(step["tool"], step["arguments"], {"a": "b"}, {})["x"] != step["arguments"]["x"]

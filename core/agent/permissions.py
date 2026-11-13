@@ -75,6 +75,27 @@ AGENT_OWN = frozenset({"undo_agent_step", "add_project_note", "remove_project_no
 # the user before and after, at every level, advisor included (2026-11-12, decided with the user); at the autonomous
 # level, how the panel looks changes without a question. The settings of the agent are refused by the tool itself.
 SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile"})
+# Tools whose question holds what the one question for several actions has no room for: the address of a source and
+# what reading it implies, the service a layer comes from, the features deleted, the file written, the settings
+# before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
+ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({"add_layer", "add_service_layer", "delete_features",
+                                                        "export_layout"})
+
+
+# How many actions one question lists. A yes is for what the question shows: past this number the actions are
+# asked one by one (2026-11-13: the 21st action of a turn or of a recipe was approved behind a "(+1)").
+MAX_ASKED_TOGETHER = 20
+
+
+def asked_alone(name: str, spec=None) -> bool:
+    """Whether a call the user is asked about gets a question of its own, never one line among several.
+
+    2026-11-13 (review of 5.1.0): the grouped question showed "Layer added: Parks" for a remote source whose
+    address and warning only the single question shows. Also every tool that reaches outside (a connector: its
+    arguments are what leaves) and a tool this version does not know.
+    """
+    return name in ASKED_ALONE or spec is None or bool(spec.open_world and not spec.read_only)
+
 
 PROTECTED_REFUSAL = ("Not done: the user protected {} from the agent in this project. Read them, use them as a source, "
                      "zoom to them, but never change them (filter, style, edit, rename, remove). Tell the user; do not "

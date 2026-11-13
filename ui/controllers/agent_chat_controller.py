@@ -33,8 +33,8 @@ from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
 )
 from ...core.agent.permissions import (
-    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, CODE_TOOLS, PROTECTED, REFUSE, RUN, STANDARD, TURNED_OFF, PermissionPolicy, level_note,
-    risk_of,
+    ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, RUN, STANDARD, TURNED_OFF, PermissionPolicy,
+    asked_alone, level_note, risk_of,
 )
 from ...adapters.agent.protected_layers import ProjectProtection, read_ids as read_protected, write_ids as write_protected
 from ...core.agent.recipes import (
@@ -943,46 +943,57 @@ class AgentChatController(QObject):
         policy = PermissionPolicy(STANDARD if level == AUTONOMOUS else level, protector=self._protection,
                                   rules=values.rules)
         title = (_tr("Live recipe: {} (its source was saved)") if live else _tr("Recipe: {}")).format(recipe["name"])
-        self._replaying, self._replay_stop = True, False
-        self._checkpoint.label = title
-        if not live:  # a live run must not pull the user away from the history or the settings
-            self.panel.show_thread()
-        if live:
-            self.panel.add_note(title)
-            self._record("note", title)
-        else:
-            self.panel.add_user(title)
-            self._record("user", title)
-        self.panel.set_working(True)
-        self.panel.set_can_undo(False)
-        self._show_undo_state()
-        done, stop = 0, ""
-        # The steps the user would be asked about, asked together when there are several: one yes for the recipe.
+        steps = recipe["steps"]
+        # number: the step at hand; executed: the last step whose tool returned without an error; asking: before any
+        # step runs.
+        done, stop, number, executed, asking = 0, "", 1, 0, True
         together = {}
-        asked = []
-        ahead_ids, ahead_names = set(), set()  # the layers earlier steps made the first time
-        for number, step in enumerate(recipe["steps"], 1):
-            call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
-            verdict = executor.verdict(call, policy) if call.name in available else RUN
-            # A step on a layer an earlier step makes is asked alone, once that layer is there: the question then
-            # names the layer it will change, not the one of the first time.
-            on_made = stale_reference(call.name, call.arguments, ahead_ids, ahead_names)
-            if (verdict == ASK or (level == ADVISOR and verdict == REFUSE)) and call.name not in CODE_TOOLS \
-                    and not on_made:
-                asked.append(call)
-            ahead_ids.update(old["id"] for old in step.get("made", ()))
-            ahead_names.update(old["name"] for old in step.get("made", ()))
-            renamed = self._renamed_to(step["tool"], step["arguments"])
-            if renamed:
-                ahead_names.add(renamed)
-        if len(asked) > 1 and not live:
-            yes = self.confirm_many(asked, title)
-            together = {call.call_id: yes for call in asked}
         # The layers earlier steps made the first time (id -> (step, name); name -> step), and those they made in this
         # run instead (id of the first time -> id now; name -> id now, the last layer made under that name).
         made_before, made_names, new_ids, new_names = {}, {}, {}, {}
+        # 2026-11-13: everything after this line runs under the finally that frees the panel. The steps asked together
+        # were read before the try, and an error there (a recipe is a text of the project) left the panel busy for good.
+        self._replaying, self._replay_stop = True, False
         try:
+            self._checkpoint.label = title
+            if not live:  # a live run must not pull the user away from the history or the settings
+                self.panel.show_thread()
+            if live:
+                self.panel.add_note(title)
+                self._record("note", title)
+            else:
+                self.panel.add_user(title)
+                self._record("user", title)
+            self.panel.set_working(True)
+            self.panel.set_can_undo(False)
+            self._show_undo_state()
+            # The steps the user would be asked about, asked together when there are several: one yes for the recipe.
+            asked = []  # (number of the step, its call)
+            ahead_ids, ahead_names = set(), set()  # the layers earlier steps made the first time
             for number, step in enumerate(recipe["steps"], 1):
+                call = ToolCallPart(f"recipe-{recipe_id}-{number}", step["tool"], dict(step["arguments"]))
+                verdict = executor.verdict(call, policy) if call.name in available else RUN
+                # A step on a layer an earlier step makes is asked alone, once that layer is there: the question then
+                # names the layer it will change, not the one of the first time. So is a step whose question holds
+                # more than one line of a list can (the address of a source, the features deleted).
+                on_made = stale_reference(call.name, call.arguments, ahead_ids, ahead_names)
+                if (verdict == ASK or (level == ADVISOR and verdict == REFUSE)) and not on_made \
+                        and not asked_alone(call.name, executor.spec(call.name)) and len(asked) < MAX_ASKED_TOGETHER:
+                    asked.append((number, call))
+                ahead_ids.update(old["id"] for old in step.get("made", ()))
+                ahead_names.update(old["name"] for old in step.get("made", ()))
+                renamed = self._renamed_to(step["tool"], step["arguments"])
+                if renamed:
+                    ahead_names.add(renamed)
+            if len(asked) > 1 and not live:
+                yes = self.confirm_many([call for _number, call in asked], title)
+                together = {call.call_id: yes for _number, call in asked}
+                if not yes:
+                    # No to the list is no to the recipe: no step runs, and no other question follows.
+                    number = asked[0][0]
+                    stop = _tr("Step {} was not run: {}.").format(number, steps[number - 1].get("label") or "")
+            asking = False
+            for number, step in enumerate(() if stop else steps, 1):
                 present = set(QgsProject.instance().mapLayers())
                 names_now = {name: layer_id for name, layer_id in new_names.items() if layer_id in present}
                 layer_params = self._layer_params(step)
@@ -1044,6 +1055,8 @@ class AgentChatController(QObject):
                 result = executor.execute(call)
                 if self._abandoned:  # its project closed during the step
                     break
+                if not result.is_error:
+                    executed = number
                 if not result.is_error and step.get("made"):
                     pairs = pair_made(step["made"], made_layers(before, self._project_layers()))
                     for old in step["made"]:
@@ -1063,6 +1076,15 @@ class AgentChatController(QObject):
                     stop = _tr("Step {} failed: {}").format(number, one_line(result.content, MAX_DETAIL_CHARS))
                     break
                 done += 1
+        except Exception:  # the run ends there and says so; why is in the log, as for a tool that fails
+            logger.exception("Recipe run failed")
+            if not asking and executed == number:  # its tool ran: what the run does after a step failed
+                done = number
+                if number < len(steps):
+                    stop = _tr("Stopped before step {}.").format(number + 1)
+            else:
+                number = 1 if asking else number
+                stop = _tr("Step {} was not run: {}.").format(number, steps[number - 1].get("label") or "")
         finally:
             abandoned, self._abandoned = self._abandoned, False
             self._replaying, self._replay_stop = False, False
@@ -1778,14 +1800,17 @@ class AgentChatController(QObject):
 
     def confirm_many(self, calls, title: str = "") -> bool:
         """One question for several actions of a turn (or of a recipe): all of them, or none."""
+        if len(calls) > MAX_ASKED_TOGETHER:  # a yes is for what the question shows, and it lists no more
+            logger.error("Agent confirmation: %d actions in one question, %d at most", len(calls), MAX_ASKED_TOGETHER)
+            return False
         lines = []
-        for number, call in enumerate(calls[:MAX_LISTED], 1):
-            detail = one_line(self._run_detail(call), 160)
+        for number, call in enumerate(calls, 1):
+            # As the single question: what is written for the tool, else its arguments as they are.
+            detail = one_line(self._run_detail(call), 300) or one_line(
+                json.dumps(call.arguments, ensure_ascii=False, default=str), 300)
             lines.append(f"{number}. {one_line(self._describe(call), 160)}" + (f" — {detail}" if detail else ""))
             if call.name in ("change_settings", "apply_settings_profile"):  # each setting before and after
                 lines.extend(f"    {line}" for line in self._settings_lines(call)[0])
-        if len(calls) > MAX_LISTED:
-            lines.append(f"(+{len(calls) - MAX_LISTED})")
         text = _tr("The agent wants to do these {} actions:\n{}\n\nDo you agree to all of them? No runs none of "
                    "them.").format(len(calls), "\n".join(lines))
         return bool(self._ask_user(title or _tr("FilterMate agent"), text))

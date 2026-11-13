@@ -7,7 +7,7 @@ from core.agent.messages import STOP_TOOL_USE, ToolCallPart
 from core.agent.permissions import SETTINGS_TOOLS as SETTINGS_WRITES
 from core.agent.permissions import (
     ADVISOR, ADVISOR_REFUSAL, AGENT_OWN, ASK, AUTONOMOUS, BUFFER, CAREFUL, DEFAULT_LEVEL, LEVELS, LOCAL, OUTSIDE, PROJECT, READ,
-    REFUSE, RUN, STANDARD, VIEW, PermissionPolicy, level_note, level_or_default, risk_of,
+    MAX_ASKED_TOGETHER, REFUSE, RUN, STANDARD, VIEW, PermissionPolicy, asked_alone, level_note, level_or_default, risk_of,
 )
 from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
@@ -516,3 +516,107 @@ class TestOneQuestionForATurn:
         seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("c1", "write", {}),
                            ToolCallPart("c2", "other", {}))
         assert [entry for entry in listener.log if entry[0] == "confirm"] == [("confirm", "write"), ("confirm", "other")]
+
+
+def run_tools(listener, policy, tools, *calls):
+    session = AgentSession(create_provider(ProviderConfig("anthropic", "m")), tools, "S")
+    seen = []
+    handlers = {tool.name: (lambda name: lambda a: seen.append(name) or {})(tool.name) for tool in tools}
+    transport = Transport()
+    engine = ChatEngine(session, ToolExecutor(tools, handlers), transport, listener, Checkpoint(), policy=policy)
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, *calls))
+    return seen, session
+
+
+class YesTogetherNoAlone(ManyListener):
+    """Says yes to the question for several actions, and no to every question asked alone."""
+
+    def confirm(self, c):
+        super().confirm(c)
+        return False
+
+
+class TestAskedAlone:
+    """2026-11-13 (review of 5.1.0): what the one question for several actions cannot show is asked alone.
+
+    The grouped question read "Layer added: Parks" for a remote source: its address and what reading it implies
+    are only in the question of add_layer. And its answer, kept by call id, reached a call that was not listed
+    when a server gave two calls the same id.
+    """
+
+    def test_the_tools_asked_alone(self):
+        tools = tools_by_name()
+        for name in ("add_layer", "add_service_layer", "delete_features", "export_layout", "change_settings",
+                     "apply_settings_profile"):
+            assert asked_alone(name, tools[name]), name  # in the catalog, and asked alone
+        assert asked_alone("run_pyqgis", spec("run_pyqgis", destructive=True))
+        for name in ("apply_filter", "cross_filter", "remove_layers", "export_layers", "set_layer_style",
+                     "update_features"):
+            assert not asked_alone(name, tools[name]), name
+
+    def test_a_connector_and_an_unknown_tool_are_asked_alone(self):
+        assert asked_alone("mcp_acme_send", spec("mcp_acme_send", open_world=True))
+        assert asked_alone("mcp_acme_wipe", spec("mcp_acme_wipe", open_world=True, destructive=True))
+        assert asked_alone("unknown", None)
+        assert not asked_alone("write", spec("write"))
+
+    def test_a_remote_source_is_never_one_line_of_a_list(self):
+        tools = [spec("add_layer", open_world=True), spec("remove_layers", destructive=True),
+                 spec("export_layers", destructive=True)]
+        listener = ManyListener(True)
+        seen, _ = run_tools(
+            listener, PermissionPolicy(STANDARD), tools,
+            ToolCallPart("c1", "add_layer", {"source": "https://tracker.example/p.geojson", "name": "Parks"}),
+            ToolCallPart("c2", "remove_layers", {"layers": ["A"]}), ToolCallPart("c3", "export_layers", {"layers": ["A"]}))
+        assert listener.many == [["remove_layers", "export_layers"]]
+        assert [entry for entry in listener.log if entry[0] == "confirm"] == [("confirm", "add_layer")]
+        assert seen == ["add_layer", "remove_layers", "export_layers"]
+
+    def test_with_one_action_left_to_list_each_is_asked_alone(self):
+        tools = [spec("add_layer", open_world=True), spec("remove_layers", destructive=True)]
+        listener = ManyListener(True)
+        run_tools(listener, PermissionPolicy(STANDARD), tools,
+                  ToolCallPart("c1", "add_layer", {"source": "https://tracker.example/p.geojson"}),
+                  ToolCallPart("c2", "remove_layers", {"layers": ["A"]}))
+        assert listener.many == []
+        assert [entry for entry in listener.log if entry[0] == "confirm"] == [
+            ("confirm", "add_layer"), ("confirm", "remove_layers")]
+
+    def test_declined_alone_while_the_others_are_accepted_together(self):
+        tools = [spec("add_layer", open_world=True), spec("remove_layers", destructive=True),
+                 spec("export_layers", destructive=True)]
+        seen, _ = run_tools(
+            YesTogetherNoAlone(True), PermissionPolicy(STANDARD), tools,
+            ToolCallPart("c1", "add_layer", {"source": "https://tracker.example/p.geojson"}),
+            ToolCallPart("c2", "remove_layers", {"layers": ["A"]}), ToolCallPart("c3", "export_layers", {"layers": ["A"]}))
+        assert seen == ["remove_layers", "export_layers"]
+
+    def test_the_same_call_id_twice_does_not_run_code_unread(self):
+        listener = YesTogetherNoAlone(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), ToolCallPart("x", "write", {}),
+                           ToolCallPart("x", "other", {}), ToolCallPart("x", "run_pyqgis", {"code": "print(1)"}))
+        assert listener.many == [["write", "other"]]
+        assert ("confirm", "run_pyqgis") in listener.log  # its own dialog, which said no
+        assert seen == ["write", "other"]
+
+    def test_settings_keep_their_card_among_other_calls(self):
+        """A change of settings listed with other actions was applied at the yes, without its card."""
+        tools = [spec("change_settings"), spec("write"), spec("other")]
+        for level in (CAREFUL, ADVISOR):
+            listener = ManyListener(True)
+            run_tools(listener, PermissionPolicy(level), tools, ToolCallPart("c1", "change_settings", {"changes": []}),
+                      ToolCallPart("c2", "write", {}), ToolCallPart("c3", "other", {}))
+            assert all("change_settings" not in names for names in listener.many), level
+            if level == CAREFUL:
+                assert listener.many == [["write", "other"]]
+                assert ("confirm", "change_settings") in listener.log
+
+    def test_one_question_lists_no_more_than_it_shows(self):
+        """The 21st action of a turn was approved behind "(+1)": past the limit each action is asked alone."""
+        calls = [ToolCallPart(f"c{number}", "write", {}) for number in range(MAX_ASKED_TOGETHER + 2)]
+        listener = ManyListener(True)
+        seen, _ = run_with(listener, PermissionPolicy(CAREFUL), *calls)
+        assert [len(names) for names in listener.many] == [MAX_ASKED_TOGETHER]
+        assert len([entry for entry in listener.log if entry[0] == "confirm"]) == 2
+        assert len(seen) == MAX_ASKED_TOGETHER + 2

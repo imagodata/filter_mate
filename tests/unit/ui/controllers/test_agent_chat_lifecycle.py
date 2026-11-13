@@ -535,3 +535,126 @@ def test_shutdown_goes_on_when_a_step_fails(ctrl_module, controller):
     assert controller._mcp.closed == 1
     assert not (project.cleared.slots or project.readProject.slots or project.fileNameChanged.slots)
     forget()
+
+
+def _recipe_tools(monkeypatch, controller, ran, names=("add_layer", "remove_layers", "export_layers", "apply_filter")):
+    catalog = sys.modules[f"{_PKG}.core.agent.tool_catalog"]
+    tools = [tool for tool in catalog.chat_tools() if tool.name in names]
+    handlers = {tool.name: (lambda name: lambda arguments: ran.append(name) or {"ok": True})(tool.name) for tool in tools}
+    monkeypatch.setattr(controller, "tools_and_handlers", lambda values: (tools, handlers, []))
+
+
+def test_a_recipe_that_cannot_be_read_frees_the_panel(ctrl_module, controller, monkeypatch):
+    """2026-11-13: the steps asked together were read before the try; an error there (RecursionError on a forged
+    recipe) left the panel busy until QGIS restarted: no request, no undo, no recipe."""
+    ran = []
+    _recipe_tools(monkeypatch, controller, ran)
+
+    def broken(*args, **kwargs):
+        raise RecursionError("maximum recursion depth exceeded")
+
+    monkeypatch.setattr(ctrl_module, "stale_reference", broken)
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "A", "expression": "1"}, "label": "one"}]}]
+    controller.panel.reset_mock()
+    assert controller.run_recipe("r1") is False
+    assert ran == []
+    assert not controller.chat_busy() and not controller._replaying
+    controller.panel.set_working.assert_called_with(False)
+    note = controller.panel.add_note.call_args[0][0]
+    assert "Step 1 was not run" in note and "recursion" not in note  # said in the thread; why is in the log
+
+
+def test_a_panel_that_fails_at_the_start_of_a_recipe_is_not_left_busy(ctrl_module, controller, monkeypatch):
+    ran = []
+    _recipe_tools(monkeypatch, controller, ran)
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "A", "expression": "1"}, "label": "one"}]}]
+    controller.panel.add_user.side_effect = RuntimeError("wrapped C/C++ object has been deleted")
+    assert controller.run_recipe("r1") is False
+    assert ran == [] and not controller.chat_busy()
+
+
+def test_what_fails_after_a_step_ran_does_not_say_the_step_failed(ctrl_module, controller, monkeypatch):
+    ran = []
+    _recipe_tools(monkeypatch, controller, ran)
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "apply_filter", "arguments": {"layer_name": "A", "expression": "1"}, "label": "one"},
+        {"tool": "apply_filter", "arguments": {"layer_name": "B", "expression": "1"}, "label": "two"}]}]
+
+    def broken(*args, **kwargs):
+        raise RuntimeError("the journal is closed")
+
+    monkeypatch.setattr(controller, "_log_action", broken)
+    controller.panel.reset_mock()
+    assert controller.run_recipe("r1") is False
+    assert ran == ["apply_filter"]  # the first step ran, the run stopped there
+    note = controller.panel.add_note.call_args[0][0]
+    assert "Stopped before step 2" in note and "failed" not in note
+    assert "The 1 steps before stay" in note
+    assert not controller.chat_busy()
+
+
+def test_no_to_the_list_of_a_recipe_runs_and_asks_nothing_more(ctrl_module, controller, monkeypatch):
+    """A recipe went on after the no: the source asked alone was asked again, and added."""
+    asked, ran = [], []
+    controller._ask_user = lambda title, text: asked.append(text) or False
+    _recipe_tools(monkeypatch, controller, ran)
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "add_layer", "arguments": {"source": "https://tracker.example/p.geojson", "name": "Parks"}, "label": "x"},
+        {"tool": "remove_layers", "arguments": {"layers": ["A"]}, "label": "y"},
+        {"tool": "export_layers", "arguments": {"layers": ["A"]}, "label": "z"}]}]
+    controller.panel.reset_mock()
+    assert controller.run_recipe("r1") is False
+    assert ran == [] and len(asked) == 1
+    assert "Step 2 was not run" in controller.panel.add_note.call_args[0][0]
+
+
+def test_a_recipe_asks_a_deletion_alone_with_its_expression(ctrl_module, controller, monkeypatch):
+    asked, ran = [], []
+    controller._ask_user = lambda title, text: asked.append(text) or True
+    _recipe_tools(monkeypatch, controller, ran, names=("delete_features", "remove_layers", "export_layers"))
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "remove_layers", "arguments": {"layers": ["A"]}, "label": "y"},
+        {"tool": "export_layers", "arguments": {"layers": ["B"]}, "label": "z"},
+        {"tool": "delete_features", "arguments": {"layer": "parcels", "expression": '"owner" = 7'}, "label": "x"}]}]
+    assert controller.run_recipe("r1") is True
+    assert len(asked) == 2 and '"owner" = 7' in asked[1] and '"owner" = 7' not in asked[0]
+
+
+def test_a_question_never_approves_more_than_it_lists(ctrl_module, dock):
+    asked = []
+    controller = ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock,
+                                                 ask_user=lambda title, text: asked.append(text) or True)
+    call = sys.modules[f"{_PKG}.core.agent.messages"].ToolCallPart
+    limit = sys.modules[f"{_PKG}.core.agent.permissions"].MAX_ASKED_TOGETHER
+    calls = [call(str(number), "remove_layers", {"layers": [f"L{number}"]}) for number in range(limit + 1)]
+    assert controller.confirm_many(calls) is False and asked == []
+    assert controller.confirm_many(calls[:limit]) is True and f"L{limit - 1}" in asked[0]
+
+
+def test_a_recipe_asks_a_remote_source_alone_with_its_address(ctrl_module, controller, monkeypatch):
+    """2026-11-13: one question listed "Layer added: Parks" and "Layers removed: A": the address was never shown."""
+    asked, ran = [], []
+    controller._ask_user = lambda title, text: asked.append(text) or True
+    _recipe_tools(monkeypatch, controller, ran)
+    ctrl_module._test_recipes.recipes = [{"id": "r1", "name": "R", "request": "", "steps": [
+        {"tool": "add_layer", "arguments": {"source": "https://tracker.example/p.geojson", "name": "Parks"}, "label": "x"},
+        {"tool": "remove_layers", "arguments": {"layers": ["A"]}, "label": "y"},
+        {"tool": "export_layers", "arguments": {"layers": ["A"]}, "label": "z"}]}]
+    assert controller.run_recipe("r1") is True
+    assert ran == ["add_layer", "remove_layers", "export_layers"]
+    together, alone = asked[0], asked[1]  # the list first, then the source when its step comes
+    assert len(asked) == 2 and "tracker.example" in alone and "tracker.example" not in together
+    assert "Parks" not in together
+
+
+def test_the_question_for_several_actions_shows_their_arguments(ctrl_module, dock):
+    """As the single question does for a tool without words of its own: the arguments as they are."""
+    asked = []
+    controller = ctrl_module.AgentChatController(lambda page: None, MagicMock(), dock,
+                                                 ask_user=lambda title, text: asked.append(text) or True)
+    call = sys.modules[f"{_PKG}.core.agent.messages"].ToolCallPart
+    controller.confirm_many([call("1", "apply_filter", {"layer_name": "roads", "expression": '"kind" = 1'}),
+                             call("2", "export_layers", {"layers": ["roads"], "format": "gpkg"})])
+    assert '\\"kind\\" = 1' in asked[0] and "gpkg" in asked[0]
