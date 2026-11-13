@@ -504,8 +504,8 @@ class SimilarResult:
     # The time allowed ran out before every window was searched.
     stopped_early: bool = False
     seconds: float = 0.0
-    # {"sam_score", "area_m2"} of the example as SAM drew it.
-    example: Dict[str, Any] = field(default_factory=dict)
+    # {"count", "sam_score": {"median", "minimum"}, "area_m2": {"minimum", "maximum"}} of the examples as SAM drew them.
+    examples: Dict[str, Any] = field(default_factory=dict)
     # {"median", "minimum"} of the appearance (cosine of the features with the example's) of the objects found.
     appearance: Optional[Dict[str, Any]] = None
 
@@ -1004,7 +1004,8 @@ class InMemoryAccessor:
         self.layers.append(summary)
         return SimilarResult(layer={"layer_id": summary.layer_id, "name": summary.name, "layer_kind": "vector",
                                     "provider_type": "ogr", "crs_authid": summary.crs_authid, "feature_count": 3},
-                             objects=3, examined=12, windows=1, windows_planned=1, example={"sam_score": 0.9})
+                             objects=3, examined=12, windows=1, windows_planned=1,
+                             examples={"count": 1, "sam_score": {"median": 0.9, "minimum": 0.9}})
 
     def zoom_to(self, layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: Optional[str] = None,
                 selected_only: bool = False) -> ViewState:

@@ -391,6 +391,16 @@ class TestSimilarWithSam:
         assert not segmentation.is_similar(strip, 100.0, 0.785, (0.5, 2.0), True)
         assert segmentation.is_similar(self.polygon(100.0, 40.0), 100.0, 0.785, (0.5, 2.0), True)
 
+    def test_several_references_widen_the_bounds(self):
+        # Several examples (the agent's objects drawn in the dock): the smallest to the largest of them.
+        assert segmentation.is_similar(self.polygon(30.0, 22.0), [50.0, 200.0], [0.785], (0.5, 2.0), False)
+        assert not segmentation.is_similar(self.polygon(30.0, 22.0), 200.0, 0.785, (0.5, 2.0), False)
+        assert segmentation.is_similar(self.polygon(300.0, 70.0), [50.0, 200.0], [0.785], (0.5, 2.0), False)
+        assert not segmentation.is_similar(self.polygon(300.0, 70.0), 50.0, 0.785, (0.5, 2.0), False)
+        strip = self.polygon(100.0, 104.0)
+        assert segmentation.is_similar(strip, [100.0], [0.2, 0.785], (0.5, 2.0), True)
+        assert not segmentation.is_similar(self.polygon(100.0, 40.0), [], [], (0.5, 2.0), False)
+
     def test_an_invalid_geometry_is_no_overlap(self):
         def broken(*_args):
             raise ValueError('GEOS')

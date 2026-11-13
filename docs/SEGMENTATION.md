@@ -123,13 +123,20 @@ The AGENT section, the REST API and the MCP servers reach these objects too (`do
   and adds the objects as a layer with `sam_score` and `sam_iou`, written to a temporary GeoPackage (*Make Permanent*
   keeps it). "Which footprints no longer match the orthophoto?" is that call, then `select_features` on
   `"sam_iou" < 0.5`.
-- **Like an example.** `similar_objects` takes an example (one selected feature of a layer, or the last object drawn
-  in the dock), has SAM draw it, then looks window by window over the area searched (the extent given, or the visible
-  map) for the places whose encoder features look like it, draws them, and keeps those of 0.5 to 2 times its area and
-  shape whose features look like it (cosine at least 0.8). No colour is read, so it needs no values of the raster.
+- **Like an example.** `similar_objects` takes examples (one selected feature of a layer, or every object drawn
+  in the dock), has SAM draw them, then looks window by window over the area searched (the extent given, or the visible
+  map) for the places whose encoder features look like one of them, draws them, and keeps those of 0.5 to 2 times
+  their area and shape whose features look like the nearest of them (cosine at least 0.8). No colour is read, so it
+  needs no values of the raster.
   That is the *feature peaks only* setting measured below: on buildings of the 25 cm Cerdagne orthophoto, about half
   of what it finds is right and it finds about a fifth of what is there. The layer is to be checked, not counted; the
-  agent is told so.
+  agent is told so. Until 2026-11-13 the dock gave its last object only: on the pools of the same orthophoto
+  (27 to 90 m², two to six cells of the coarsest feature map against five to twenty-five for the buildings of the
+  calibration), a small pool drawn last left `examined` at 0 to 2 over the whole kilometre and nothing was found,
+  while a mid-sized one found three of the other six pools. With every drawn object as an example (best cosine of
+  them, at the same 0.7 and 0.8), four of the seven pools are found in turn, held out one by one, for about one
+  bright roof kept beside them; lowering the thresholds to 0.6 and 0.75 found no more pools and kept three times
+  as many roofs, so the thresholds stayed.
 
 SAM holds QGIS while it draws (about 2 s for each window of 1024 pixels): the run stops between two windows past 20 s
 and says how far it went, and other changes from the API are refused meanwhile. Only the objects that select in the

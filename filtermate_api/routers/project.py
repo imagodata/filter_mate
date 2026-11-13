@@ -262,7 +262,7 @@ class SimilarObjectsBody(BaseModel):
     example_layer: str = Field(default="", max_length=_MAX_NAME,
                                description="Vector layer id or name whose one selected feature is the example")
     use_dock_object: bool = Field(default=False,
-                                  description="The example is the last object drawn on this raster in the FilterMate dock")
+                                  description="The examples are the objects drawn on this raster in the FilterMate dock")
     extent_wkt: str = Field(default="", max_length=100_000, description="Area searched as WKT (default: the visible map)")
     extent_crs: str = Field(default="", max_length=64, description="CRS of extent_wkt, e.g. EPSG:2154 (default: the raster's)")
     same_shape: bool = Field(default=True, description="Keep only objects shaped like the example (compactness)")

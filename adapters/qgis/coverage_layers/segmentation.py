@@ -708,16 +708,24 @@ def overlap(first: Any, second: Any) -> float:
         return 0.0
 
 
-def is_similar(geometry: Any, reference_area: float, reference_compactness: float, ratio: Tuple[float, float], shape: bool) -> bool:
-    """Whether an object drawn by SAM is like the clicked one: its area, and its compactness with ``shape``, within the ratios."""
+def is_similar(geometry: Any, reference_area: Any, reference_compactness: Any, ratio: Tuple[float, float], shape: bool) -> bool:
+    """Whether an object drawn by SAM is like the clicked ones: its area, and its compactness with ``shape``, within the ratios.
+
+    ``reference_area`` and ``reference_compactness``: one value, or the values of several reference
+    objects: the bounds then run from the smallest to the largest of them
+    (:func:`~.raster_adapter.similar_area_bounds`).
+    """
     from .geometry_tools import compactness
     from .raster_adapter import similar_area_bounds, similar_shape_bounds
-    bounds = similar_area_bounds([reference_area], ratio)
+    areas = [reference_area] if isinstance(reference_area, (int, float)) else list(reference_area or ())
+    bounds = similar_area_bounds(areas, ratio)
     if bounds is None or not bounds[0] <= geometry.area() <= bounds[1]:
         return False
     if not shape:
         return True
-    shapes = similar_shape_bounds([reference_compactness], ratio)
+    compactnesses = [reference_compactness] if isinstance(reference_compactness, (int, float)) \
+        else list(reference_compactness or ())
+    shapes = similar_shape_bounds(compactnesses, ratio)
     return shapes is None or shapes[0] <= compactness(geometry) <= shapes[1]
 
 

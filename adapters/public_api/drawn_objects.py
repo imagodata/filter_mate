@@ -11,7 +11,7 @@ import logging
 import math
 import statistics
 import time
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from ...core.domain.layer_kind import LayerKind
 from .operations import layer_kind, resolve_layer, running
@@ -405,17 +405,24 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
                     name: str = '') -> Dict[str, Any]:
     """SAM finds on ``raster`` the objects that look like an example, as a new polygon layer of the project.
 
-    The example (one selected feature of ``example_layer``; with ``use_dock_object`` the last object
-    drawn on this raster in the dock, from ``dock_objects`` by layer id; or ``example_wkt``) is drawn by
-    SAM; then, window by window over the area searched (the extent given, or the visible map), the
-    places whose encoder features look like it are drawn, and those of an area within
-    :data:`SIMILAR_RATIO` of the example's (and of its shape with ``same_shape``) that look like it are
-    kept. The layer is a temporary GeoPackage with ``appearance`` (cosine of the features, 0 to 1) and
-    ``area_m2``. About half of what it finds is right (see :data:`SIMILAR_FEATURE_MIN`).
+    The examples (one selected feature of ``example_layer``; with ``use_dock_object`` every object
+    drawn on this raster in the dock, from ``dock_objects`` by layer id; or ``example_wkt``) are drawn
+    by SAM; then, window by window over the area searched (the extent given, or the visible map), the
+    places whose encoder features look like one of them are drawn, and those of an area within
+    :data:`SIMILAR_RATIO` of the examples' (and of their shape with ``same_shape``) that look like one
+    of them are kept: with several examples, resembling the nearest of them is what counts, in the
+    candidates as in the appearance. One drawn object taken alone decided everything before
+    2026-11-13: the last one drawn, a small pool of a 25 cm orthophoto (two to four cells of the
+    coarsest feature map), left almost no place over :data:`SIMILAR_FEATURE_MIN` anywhere and the
+    search answered nothing (``examined`` 0 to 2 over the whole orthophoto); with the six pools the
+    user had drawn as examples together, the held-out pools are found at the same thresholds. The
+    layer is a temporary GeoPackage with ``appearance`` (cosine of the features with the nearest
+    example's, 0 to 1) and ``area_m2``. About half of what it finds is right (see
+    :data:`SIMILAR_FEATURE_MIN`).
 
     Returns:
-        ``{layer, objects, examined, windows, windows_planned, stopped_early, seconds, example, appearance}``;
-        ``layer`` is None when nothing was found (no layer is added then).
+        ``{layer, objects, examined, windows, windows_planned, stopped_early, seconds, examples,
+        appearance}``; ``layer`` is None when nothing was found (no layer is added then).
 
     Raises:
         ValueError: A layer or an example that does not fit, an area too large, SAM not installed.
@@ -443,14 +450,16 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
         if not drawn_here:
             raise ValueError(f"no object is drawn on '{image_name}' in the FilterMate dock: map_context lists the "
                              "rasters that have some (drawn_objects)")
-        example_wkt, example_crs = drawn_here[-1], ''  # the last one drawn, in the CRS of the raster
-    example = _example_geometry(image, example_layer, example_wkt, example_crs)
-    prompt = seg.prompt_of(example)
-    if prompt is None:
+        geometries = [_example_geometry(image, '', wkt, '') for wkt in drawn_here]  # in the CRS of the raster
+    else:
+        geometries = [_example_geometry(image, example_layer, example_wkt, example_crs)]
+    prompts = [prompt for prompt in (seg.prompt_of(geometry) for geometry in geometries) if prompt is not None]
+    if not prompts:
         raise ValueError("the example is neither a point nor a polygon")
     extent = image.extent()
     raster_bounds = (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum())
-    if not extent.contains(QgsPointXY(prompt.x, prompt.y)):
+    prompts = [prompt for prompt in prompts if extent.contains(QgsPointXY(prompt.x, prompt.y))]
+    if not prompts:
         raise ValueError(f"the example does not lie on '{image_name}'")
     if not seg.model_state().ready:
         raise ValueError(SAM_NOT_INSTALLED)
@@ -461,8 +470,9 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
     cells = [side / count for side, count in ((extent.width(), image.width()), (extent.height(), image.height()))
              if count > 0 and side > 0]
     native = min(cells) if len(cells) == 2 else 0.0
-    first = seg.plan_prompts([prompt], raster_bounds, native, size,
-                             seg.PROMPT_POINT_VIEW_METRES * _metres_to_units(image.crs()))[0][0]
+    planned = seg.plan_prompts(prompts, raster_bounds, native, size,
+                               seg.PROMPT_POINT_VIEW_METRES * _metres_to_units(image.crs()))
+    first = planned[0][0]
     area = _search_area(image, extent_wkt, extent_crs, first.rectangle())
     windows = search_windows(first, area, raster_bounds, first.cell, size)
     if len(windows) > MAX_SEARCH_WINDOWS:
@@ -479,30 +489,50 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
     found, examined, done, stopped_early = [], 0, 0, False
     # Qt serves events while the windows are drawn: a REST call queued meanwhile is refused, not run nested.
     with running("similar_objects"):
-        embedding = model.embed(seg.image_to_rgb(seg.render_window(settings, image, first, lambda: False)))
-        reference, score, mask = seg.prompt_object_mask(model, embedding, first, prompt, crs_wkt)
-        reference = reference.intersection(bounds) if reference is not None else None
-        features = seg.pooled_features(embedding, mask)
-        if reference is None or reference.isEmpty() or features is None:
+        embeddings: Dict[Tuple[float, float, float, int], Any] = {}
+
+        def embedded(window):
+            key = (window.x_min, window.y_max, window.cell, window.size)
+            if key not in embeddings:
+                embeddings[key] = model.embed(seg.image_to_rgb(seg.render_window(settings, image, window, lambda: False)))
+            return embeddings[key]
+
+        references = []  # (geometry as SAM drew it, its pooled features, its score), one per example drawn
+        for window, indexes in planned:
+            embedding = embedded(window)
+            for index in indexes:
+                reference, score, mask = seg.prompt_object_mask(model, embedding, window, prompts[index], crs_wkt)
+                reference = reference.intersection(bounds) if reference is not None else None
+                features = seg.pooled_features(embedding, mask)
+                if reference is None or reference.isEmpty() or features is None:
+                    continue
+                references.append((reference, features, float(score)))
+        if not references:
             raise ValueError("SAM drew no object under the example")
-        reference_area, reference_shape = reference.area(), compactness(reference)
-        kept = [reference]
+        reference_areas = [reference.area() for reference, _features, _score in references]
+        reference_shapes = [compactness(reference) for reference, _features, _score in references]
+        kept = [reference for reference, _features, _score in references]
         for index, window in enumerate(windows):
             if index and time.monotonic() - begin > BUDGET_SECONDS:
                 stopped_early = True
                 break
-            if index:
-                embedding = model.embed(seg.image_to_rgb(seg.render_window(settings, image, window, lambda: False)))
+            embedding = embedded(window)
             done += 1
             coarse = seg.coarse_features(embedding)
             if coarse is None:
                 continue
             step = window.size / coarse.shape[1]
+            peaks: Dict[Tuple[int, int], float] = {}  # (row, column) -> its best cosine over the examples
+            for _reference, features, _score in references:
+                for cosine, row, column in seg.similarity_peaks(coarse, features, SIMILAR_FEATURE_MIN):
+                    if cosine > peaks.get((row, column), -1.0):
+                        peaks[(row, column)] = cosine
             candidates = []
-            for _cosine, row, column in seg.similarity_peaks(coarse, features, SIMILAR_FEATURE_MIN):
+            for (row, column), _cosine in sorted(peaks.items(), key=lambda item: (-item[1], item[0])):
                 x, y = window.to_map((column + 0.5) * step, (row + 0.5) * step)
                 if area.contains(QgsPointXY(x, y)) and _inside_window(window, x, y, raster_bounds) \
-                        and not reference.contains(QgsGeometry.fromPointXY(QgsPointXY(x, y))):
+                        and not any(reference.contains(QgsGeometry.fromPointXY(QgsPointXY(x, y)))
+                                    for reference, _features, _score in references):
                     candidates.append((x, y))
                     if len(candidates) >= SIMILAR_PER_WINDOW:
                         break
@@ -516,19 +546,25 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
                 if drawn is None or drawn.isEmpty() or any(seg.overlap(drawn, other) >= seg.SAME_OBJECT_IOU
                                                            for other in kept):
                     continue
-                if not seg.is_similar(drawn, reference_area, reference_shape, SIMILAR_RATIO, bool(same_shape)):
+                if not seg.is_similar(drawn, reference_areas, reference_shapes, SIMILAR_RATIO, bool(same_shape)):
                     continue
                 kept.append(drawn)
                 pooled = seg.pooled_features(embedding, drawn_mask)
-                appearance = float(np.dot(pooled, features)) if pooled is not None else None
+                appearance = max((float(np.dot(pooled, features)) for _reference, features, _score in references),
+                                 default=None) if pooled is not None else None
                 if appearance is None or appearance >= SIMILAR_APPEARANCE_MIN:
                     found.append((drawn, appearance))
     seconds = time.monotonic() - begin
     measure = seg.area_measure(image.crs())
+    scores = [score for _reference, _features, score in references]
+    measured = [value for reference, _features, _score in references
+                if (value := _rounded(measure(reference))) is not None]
     answer: Dict[str, Any] = {
         'layer': None, 'objects': len(found), 'examined': examined, 'windows': done, 'windows_planned': len(windows),
         'stopped_early': stopped_early, 'seconds': round(seconds, 1),
-        'example': {'sam_score': round(float(score), 3), 'area_m2': _rounded(measure(reference))},
+        'examples': {'count': len(references),
+                     'sam_score': {'median': round(statistics.median(scores), 3), 'minimum': round(min(scores), 3)},
+                     'area_m2': {'minimum': min(measured), 'maximum': max(measured)} if measured else {}},
     }
     if not found:
         return answer

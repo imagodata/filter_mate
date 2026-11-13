@@ -298,9 +298,10 @@ class TestSimilarObjects:
         module = plugin_modules["adapters.public_api.drawn_objects"]
         module.similar_objects.return_value = {"layer": None, "objects": 0, "examined": 5, "windows": 1,
                                                "windows_planned": 2, "stopped_early": False, "seconds": 2.0,
-                                               "example": {"sam_score": 0.9, "area_m2": 120.0}}
+                                               "examples": {"count": 2, "sam_score": {"median": 0.9, "minimum": 0.8}}}
         result = _accessor({"R1": [ROOF]}).similar_objects("ortho", use_dock_object=True, extent_wkt="POLYGON((0 0))")
         assert isinstance(result, SimilarResult) and result.examined == 5 and result.layer is None
+        assert result.examples["count"] == 2
         kwargs = module.similar_objects.call_args.kwargs
         assert kwargs["dock_objects"] == {"R1": [ROOF]} and kwargs["use_dock_object"] is True
         assert kwargs["extent_wkt"] == "POLYGON((0 0))" and len(dispatched) == 1
