@@ -4477,6 +4477,21 @@ What would you like to do?</translation>
         <translation>Dışa aktarmayı zip'le</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Karşılaştır: son süzgeçten önceki harita çizginin solunda, şimdiki hâli sağında; çizgi fareyi izler</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Son süzgeçten önce ve sonra karşılaştır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Karşılaştırılacak bir şey yok: burada geri alınacak süzgeç yok.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Favori yöneticisi kullanılamıyor</translation>

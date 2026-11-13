@@ -4477,6 +4477,21 @@ What would you like to do?</translation>
         <translation>መላኪያውን ዚፕ አድርግ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>ማነጻጸር፦ ከመጨረሻው ማጣሪያ በፊት ያለው ካርታ ከመስመሩ በግራ፣ የአሁኑ በቀኝ፤ መስመሩ አይጡን ይከተላል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>ከመጨረሻው ማጣሪያ በፊትና በኋላ አነጻጽር</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>የሚነጻጸር የለም፦ እዚህ የሚቀለበስ ማጣሪያ የለም።</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>ተወዳጆች አስተዳዳሪ አይገኝም</translation>

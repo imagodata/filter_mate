@@ -4477,6 +4477,21 @@ What would you like to do?</translation>
         <translation>Pakkaa vienti zip-tiedostoon</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Vertaa: kartta ennen viimeisintä suodatinta viivan vasemmalla puolella, nykyinen oikealla; viiva seuraa hiirtä</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Vertaa ennen ja jälkeen viimeisimmän suodattimen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Ei mitään verrattavaa: täällä ei ole kumottavaa suodatinta.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Suosikkien hallinta ei ole kaytettavissa</translation>

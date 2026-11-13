@@ -4477,6 +4477,21 @@ What would you like to do?</translation>
         <translation>I-zip ang export</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Ihambing: ang mapa bago ang huling filter sa kaliwa ng linya, ang kasalukuyan sa kanan; sumusunod ang linya sa mouse</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>Ihambing bago at pagkatapos ng huling filter</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Walang maihahambing: walang filter na maa-undo rito.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Hindi available ang manager ng mga paborito</translation>

@@ -4477,6 +4477,21 @@ What would you like to do?</translation>
         <translation>Nén zip bản xuất</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="97"/>
+        <source>Compare: the map before the last filter left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>So sánh: bản đồ trước bộ lọc cuối ở bên trái đường, bản đồ hiện tại ở bên phải; đường di chuyển theo chuột</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="99"/>
+        <source>Compare before and after the last filter</source>
+        <translation>So sánh trước và sau bộ lọc cuối</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="160"/>
+        <source>Nothing to compare: no filter to undo here.</source>
+        <translation>Không có gì để so sánh: ở đây không có bộ lọc nào để hoàn tác.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Trinh quan ly yeu thich khong kha dung</translation>
