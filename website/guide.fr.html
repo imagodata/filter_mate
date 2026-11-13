@@ -872,15 +872,14 @@ processing.run("filtermate:batch_filter", {
 
     <h3>Choisir un modèle</h3>
     <ul>
-        <li><strong>Quota gratuit.</strong> La première fois, les réglages proposent quelques requêtes gratuites par mois, par un relais de FilterMate vers Claude Haiku 5.5 (Anthropic), sans clé à saisir. Le relais compte ce qui est dépensé et ne garde aucune conversation. Une fois le quota épuisé, le panneau demande votre propre clé d'API.</li>
-        <li><strong>Votre propre fournisseur.</strong> Claude, Mistral, OpenAI, tout serveur compatible OpenAI, ou un modèle Ollama local.</li>
+        <li><strong>Votre propre fournisseur.</strong> Claude, Mistral, OpenAI, tout serveur compatible OpenAI, ou un modèle Ollama local. Les réglages renvoient vers la page où créer une clé, la testent et listent les modèles. Pour Ollama, ils disent où l'installer et laissent télécharger un modèle depuis la boîte de dialogue.</li>
         <li><strong>La clé</strong> est conservée dans la base d'authentification de QGIS, qui demande son mot de passe maître, jamais dans un fichier de réglages. Elle n'est envoyée qu'au serveur pour lequel elle a été saisie, et vous pouvez la supprimer dans les réglages.</li>
         <li><strong>Consentement.</strong> Rien ne quitte votre ordinateur avant que vous ayez choisi un modèle et donné votre accord. Changer de fournisseur ou d'adresse le redemande.</li>
     </ul>
 
     <figure>
-        <img src="img/guide/agent-settings-fr.png" alt="Réglages d'AGENT, onglet Fournisseur : le quota gratuit choisi, ce qui quitte la machine, la case d'accord" loading="lazy" width="766" height="660">
-        <figcaption>Les réglages d'AGENT : le fournisseur (ici le quota gratuit), ce qui lui est envoyé, et l'accord demandé avant que quoi que ce soit ne quitte l'ordinateur. <em>Sources</em> et <em>Autres applications</em> sont les onglets suivants.</figcaption>
+        <img src="img/guide/agent-settings-fr.png" alt="Réglages d'AGENT, onglet Fournisseur : le fournisseur, ce qui quitte la machine, la case d'accord" loading="lazy" width="766" height="660">
+        <figcaption>Les réglages d'AGENT : le fournisseur, ce qui lui est envoyé, et l'accord demandé avant que quoi que ce soit ne quitte l'ordinateur. <em>Sources</em> et <em>Autres applications</em> sont les onglets suivants.</figcaption>
     </figure>
 
     <h3>Ce que vous voyez</h3>
@@ -938,7 +937,7 @@ processing.run("filtermate:batch_filter", {
     </ul>
     <p>
         Les valeurs d'attributs ne partent au modèle que si vous les autorisez dans les réglages : sans cela, les outils qui lisent des valeurs (<code>field_values</code>, <code>layer_statistics</code>, <code>sample_features</code>, <code>identify_at</code>) ne sont pas proposés.
-        Les valeurs déjà écrites dans des filtres et des favoris partent quand même, et la boîte de dialogue le dit. Avec le quota gratuit, la requête passe par le relais jusqu'à Claude Haiku 5.5.
+        Les valeurs déjà écrites dans des filtres et des favoris partent quand même, et la boîte de dialogue le dit.
     </p>
 
     <h3>Serveur MCP intégré au plugin</h3>
@@ -977,7 +976,7 @@ processing.run("filtermate:batch_filter", {
         <tr><td>Le panneau s'ouvre dans la mauvaise langue</td><td>Fixez <code>LANGUAGE</code> explicitement au lieu d'<em>auto</em>.</td></tr>
         <tr><td>Un filtre d'une ancienne session est toujours appliqué</td><td>Les filtres vivent dans le fichier de projet. Utilisez <strong>Unfilter</strong>, ou effacez le filtre fournisseur dans les propriétés de la couche.</td></tr>
         <tr><td>La section AGENT est absente</td><td>L'option <code>AGENT</code> de l'onglet Configuration est désactivée. Activez-la et rouvrez le panneau.</td></tr>
-        <tr><td>AGENT demande ma propre clé d'API</td><td>Le quota gratuit est épuisé, le vôtre pour le mois ou le total du relais. Saisissez une clé dans les réglages d'AGENT, ou choisissez un autre fournisseur, par exemple un modèle Ollama local.</td></tr>
+        <tr><td>AGENT demande ma propre clé d'API</td><td>Aucune clé n'est encore saisie. Saisissez-en une dans les réglages d'AGENT, ou choisissez un modèle Ollama local.</td></tr>
         <tr><td>Un modèle local donne un délai dépassé</td><td>Le délai réseau de QGIS s'applique à l'agent (60 s par défaut). Un modèle local lent à démarrer peut en demander plus, et le message le dit.</td></tr>
         <tr><td>SAM n'est pas installé : onnxruntime a été refusé ou l'installation a échoué</td><td>Si vous refusez la question, les cibles d'objets utilisent le moteur couleur, et le bouton <em>Install SAM…</em> du groupe PIPETTE la repropose. Si pip échoue (pas de réseau, pas de pip), la raison est dans le journal de FilterMate et le groupe affiche la commande à lancer à la main dans un terminal, l'OSGeo4W Shell sous Windows.</td></tr>
         <tr><td>Le modèle SAM ne se télécharge pas, ou est signalé abîmé</td><td>Le téléchargement passe par le proxy HTTP des options de QGIS et peut être annulé. Chaque fichier est vérifié par son SHA-256 avant de remplacer quoi que ce soit. Cliquez sur <em>Repair the model…</em> pour remplacer les mauvais fichiers.</td></tr>
