@@ -236,6 +236,21 @@ Perché: {}
         <translation>La fonte risponde.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
+        <source>Enter your API key first.</source>
+        <translation>Inserisci prima la tua chiave API.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1479"/>
+        <source>It answers: choose a model in the list.</source>
+        <translation>Risponde: scegli un modello dalla lista.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1478"/>
+        <source>The provider listed no model: type the name of one.</source>
+        <translation>Il provider non ha elencato alcun modello: digita il nome di uno.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
@@ -1414,6 +1429,26 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>Prova</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1441"/>
+        <source>Create a key</source>
+        <translation>Crea una chiave</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="549"/>
+        <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
+        <translation>Serve un fornitore di IA: la tua chiave API, o un modello locale con Ollama. Nulla viene inviato prima del tuo consenso.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="932"/>
+        <source>Send one short request to this provider, and list its models</source>
+        <translation>Invia una breve richiesta a questo provider ed elenca i suoi modelli</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>The test could not be made.</source>
+        <translation>Impossibile eseguire il test.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1021"/>

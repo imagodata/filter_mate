@@ -270,7 +270,7 @@ class TestShared:
 
     @pytest.mark.parametrize("status,body,kind", [
         (401, b'{"error":{"message":"bad key"}}', "auth"),
-        (402, b'{"detail":"free quota used"}', "quota"),
+        (402, b'{"detail":"quota used"}', "quota"),
         (400, b'{"error":{"type":"invalid_request_error","message":"Your credit balance is too low"}}', "quota"),
         (429, b'{"error":{"code":"insufficient_quota","message":"You exceeded your current quota"}}', "quota"),
         (429, b'{"error":{"message":"slow down"}}', "rate_limit"),

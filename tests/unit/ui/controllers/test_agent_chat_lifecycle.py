@@ -167,7 +167,6 @@ def ctrl_module(monkeypatch):
         _module(monkeypatch, name)
     _module(monkeypatch, ".adapters.agent.settings", load_settings=lambda: SETTINGS,
             KeyStoreError=type("KeyStoreError", (Exception,), {}))
-    _module(monkeypatch, ".adapters.agent.free_quota", FreeQuotaError=type("FreeQuotaError", (Exception,), {}))
     store = _module(monkeypatch, ".adapters.agent.transcript_store", project_key=lambda: "key", load=lambda key: [])
     store.saved = []
     store.save = lambda key, transcript: store.saved.append((key, list(transcript)))
