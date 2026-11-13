@@ -163,3 +163,57 @@ class TestOddAnswers:
 class TestExtraDomains:
     def test_a_typo_is_not_part_of_the_address(self):
         assert parse_extra_domains("x.org:KIND, y.org:ckan") == {"y.org": ("ckan", "y.org")}
+
+
+# --- the address a name resolves to (audit of 12/11/2026: the name only was judged) --------------------------------
+
+def _resolver(*addresses):
+    """socket.getaddrinfo answering ``addresses`` (and recording the names asked)."""
+    asked = []
+
+    def resolve(host, port):
+        asked.append(host)
+        return [(2 if ":" not in address else 10, 1, 6, "", (address, 0)) for address in addresses]
+    resolve.asked = asked
+    return resolve
+
+
+@pytest.mark.parametrize("addresses", [
+    ("127.0.0.1",), ("10.0.0.7",), ("192.168.1.20",), ("172.16.5.4",), ("169.254.169.254",),  # metadata of a cloud
+    ("100.64.0.1",), ("0.0.0.0",), ("::1",), ("fe80::1%eth0",), ("fd00::5",), ("::ffff:127.0.0.1",),
+    ("93.184.215.14", "10.0.0.7"),  # one address of the local network among public ones is enough
+])
+def test_a_public_name_resolving_to_a_local_address_is_refused(addresses):
+    from core.agent.open_data import resolved_problem
+    assert resolved_problem("https://data.example.org/a.gpkg", resolve=_resolver(*addresses)) \
+        == "only a public address can be read"
+
+
+def test_a_name_resolving_to_public_addresses_is_read():
+    from core.agent.open_data import resolved_problem
+    resolve = _resolver("93.184.215.14", "2606:2800:21f:cb07:6820:80da:af6b:8b2c")
+    assert resolved_problem("https://data.example.org/a.gpkg", resolve=resolve) == ""
+    assert resolve.asked == ["data.example.org"]
+
+
+def test_an_address_is_not_resolved_and_an_unknown_name_is_left_to_the_request():
+    from core.agent.open_data import resolved_problem
+    resolve = _resolver("127.0.0.1")
+    assert resolved_problem("https://93.184.215.14/a.gpkg", resolve=resolve) == "" and resolve.asked == []
+
+    def unknown(host, port):
+        raise OSError("Name or service not known")
+    assert resolved_problem("https://nowhere.example.org/a.gpkg", resolve=unknown) == ""
+
+
+def test_a_resolver_that_does_not_answer_never_holds_qgis():
+    import time
+    from core.agent.open_data import resolved_problem
+
+    def slow(host, port):
+        time.sleep(2)
+        return [(2, 1, 6, "", ("93.184.215.14", 0))]
+    started = time.monotonic()
+    assert resolved_problem("https://data.example.org/a.gpkg", resolve=slow, timeout=0.1) \
+        == "the address of this server could not be checked in time"
+    assert time.monotonic() - started < 1
