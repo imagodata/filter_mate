@@ -37,6 +37,7 @@ TOP_KEYS = ("name", "title", "description")
 META_KEYS = ("version", "plugin_min", "audience", "tools", "risk", "trust", "requires")
 MAX_TITLE = 100  # what the question to the user shows of it, and what the model receives: the same
 MAX_DESCRIPTION = 300
+CONNECTOR_PREFIX = "connector-"  # the names of the entries of load_skill for the MCP connectors (core/agent/connectors.py)
 MAX_BODY = 9000  # characters, about 2,300 tokens: what one load_skill costs a request
 
 
@@ -361,6 +362,9 @@ def set_extra(skills: Dict[str, Skill]) -> List[str]:
     EXTRA.clear()
     left_out = []
     for name, skill in skills.items():
+        if name.startswith(CONNECTOR_PREFIX):
+            left_out.append(f"{name}: a name kept for the connectors")
+            continue
         if name in RESERVED or skill.trust == "builtin":
             left_out.append(f"{name}: a skill of FilterMate has that name")
             continue
