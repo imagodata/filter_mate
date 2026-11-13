@@ -286,13 +286,16 @@ def checked_value(setting: Setting, value: Any) -> Any:
             raise ValueError(f"{setting.path} takes a number")
         if isinstance(value, float) and not math.isfinite(value):
             raise ValueError(f"{setting.path} takes a finite number")
+        maximum = setting.maximum if setting.maximum is not None else MAX_NUMBER
         if isinstance(default, int):
             if isinstance(value, float) and not value.is_integer():
                 raise ValueError(f"{setting.path} takes a whole number")
             number: Any = int(value)
         else:
-            number = float(value)
-        maximum = setting.maximum if setting.maximum is not None else MAX_NUMBER
+            try:
+                number = float(value)
+            except OverflowError:  # a whole number of hundreds of digits (a profile, a model): out of range
+                raise ValueError(f"{setting.path} is {maximum} at most") from None
         if setting.minimum is not None and number < setting.minimum:
             raise ValueError(f"{setting.path} is {setting.minimum} at least")
         if number > maximum:

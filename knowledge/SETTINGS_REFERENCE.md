@@ -40,7 +40,7 @@
 | Setting | Default | Allowed | Description |
 |---|---|---|---|
 | `max_features` | 20000 |  | Maximum remote rows copied for an exact local filter (one extra row detects truncation) |
-| `timeout_seconds` | 90 |  | Maximum remote read and local evaluation duration in seconds |
+| `timeout_seconds` | 90 | 1–86400 | Maximum remote read and local evaluation duration in seconds |
 
 ## Settings > Performance > Server filters
 
@@ -48,8 +48,8 @@
 
 | Setting | Default | Allowed | Description |
 |---|---|---|---|
-| `wfs_timeout_seconds` | 60 |  | Maximum wait for a WFS or OGC API Features server filter, in seconds (1 to 600); the previous filter is kept after it |
-| `timeout_seconds` | 30 |  | Maximum wait for a server filter on other services (ArcGIS Feature Server, databases), in seconds (1 to 600); the previous filter is kept after it |
+| `wfs_timeout_seconds` | 60 | 1–600 | Maximum wait for a WFS or OGC API Features server filter, in seconds (1 to 600); the previous filter is kept after it |
+| `timeout_seconds` | 30 | 1–600 | Maximum wait for a server filter on other services (ArcGIS Feature Server, databases), in seconds (1 to 600); the previous filter is kept after it |
 
 ## Settings > Performance > SMALL_DATASET_OPTIMIZATION
 

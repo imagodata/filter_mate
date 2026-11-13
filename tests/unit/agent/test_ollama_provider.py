@@ -173,6 +173,19 @@ class TestInstalledModels:
         for nothing in (None, {}, {"models": "x"}, [], "text"):
             assert installed_models(nothing) == []
 
+    def test_whatever_a_server_answers_in_details_never_raises(self):
+        """2026-11-13: families as a number raised in a slot of the settings dialog; as a text, an embedding model
+        was listed (its letters were joined, "b e r t")."""
+        from core.agent.providers.ollama_chat import installed_models
+        payload = {"models": [
+            {"name": "a", "details": {"families": "bert"}},
+            {"name": "b", "details": {"families": 3}},
+            {"name": "c", "details": {"families": None, "family": "llama"}},
+            {"name": "d", "details": "odd"},
+            {"name": " e "}, {"name": "e"}, {"name": 5},
+            {"name": "all-minilm", "details": {"family": "bert", "families": []}}]}  # [] says nothing: the family
+        assert installed_models(payload) == ["b", "c", "d", "e"]
+
     def test_where_ollama_lists_them(self):
         from core.agent.providers.ollama_chat import tags_url
         assert tags_url("") == "http://localhost:11434/api/tags"

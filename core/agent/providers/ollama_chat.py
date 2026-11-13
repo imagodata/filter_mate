@@ -225,13 +225,19 @@ def installed_models(payload: Any) -> List[str]:
     names: List[str] = []
     for model in models if isinstance(models, list) else ():
         name = model.get("name") or model.get("model") if isinstance(model, dict) else None
-        if not isinstance(name, str) or not name.strip() or name in names:
+        name = name.strip() if isinstance(name, str) else ""
+        if not name or name in names:
             continue
         details = model.get("details") if isinstance(model.get("details"), dict) else {}
-        families = " ".join(str(item) for item in (details.get("families") or [details.get("family") or ""]))
+        # A list of families, one family as a text, or anything else a server may answer: never an error here,
+        # this runs in a slot of the settings dialog.
+        listed = details.get("families")
+        if not isinstance(listed, (list, tuple)) or not listed:  # [] said nothing: the family says it
+            listed = [listed if isinstance(listed, str) else details.get("family") or ""]
+        families = " ".join(str(item) for item in listed)
         if "embed" in name.lower() or "bert" in families.lower():  # nomic-embed-text, mxbai-embed…: no chat
             continue
-        names.append(name.strip())
+        names.append(name)
         if len(names) >= MAX_LISTED_MODELS:
             break
     return names

@@ -236,3 +236,24 @@ def test_change_settings_rules_and_grant():
 
 def test_a_recipe_never_keeps_a_change_of_the_settings():
     assert CHANGE_SETTINGS in NOT_KEPT
+
+
+def test_a_huge_whole_number_for_a_decimal_setting_is_out_of_range(default):
+    """2026-11-13: float() of a whole number of hundreds of digits (a profile, a model) raised OverflowError."""
+    resolution = _row(read_settings(None, default), "APP.OPTIONS.CROSS_FILTER.point_cloud_footprint_resolution")
+    assert isinstance(resolution.default, float)
+    with pytest.raises(ValueError, match="at most"):
+        checked_value(resolution, 10 ** 400)
+
+
+@pytest.mark.parametrize("path, maximum", [
+    ("APP.OPTIONS.REMOTE_MATERIALIZATION.timeout_seconds", 86400),  # it accepted any duration: a day at most
+    ("APP.OPTIONS.SERVER_FILTER.wfs_timeout_seconds", 600),
+    ("APP.OPTIONS.SERVER_FILTER.timeout_seconds", 600)])
+def test_the_timeouts_are_bounded_as_their_descriptions_say(default, path, maximum):
+    timeout = _row(read_settings(None, default), path)
+    assert (timeout.minimum, timeout.maximum) == (1, maximum)
+    assert checked_value(timeout, maximum) == maximum
+    for wrong in (0, maximum + 1):
+        with pytest.raises(ValueError):
+            checked_value(timeout, wrong)

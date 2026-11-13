@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Protocol, Sequence
 from urllib.parse import urlsplit
@@ -69,9 +70,21 @@ def check_base_url(url: str, secret: Any) -> None:
     """
     parts = urlsplit(url)
     if parts.scheme not in ("http", "https") or not parts.hostname:
-        raise ValueError(f"not an http(s) URL: {url!r}")
+        raise ValueError(f"not an http(s) URL: {without_credentials(url)!r}")
     if parts.scheme == "http" and secret and parts.hostname not in _LOOPBACK:
         raise ValueError("an API key is only sent over https, or to this machine")
+
+
+# A URL up to its last "@" before the query: a user:password typed in the address, which may hold "/" (a generated
+# password), with or without "http://". A pattern, not urlsplit, which refuses an address it cannot parse (an IPv6
+# left open) and would then have shown it whole. A path holding "@" loses what comes before it: shown, not used.
+_CREDENTIALS = re.compile(r"^(?:([A-Za-z][A-Za-z0-9+.-]*:)?//)?[^?#]*@")
+
+
+def without_credentials(url: str) -> str:
+    """``url`` as shown to the user (a tooltip, a message): a ``user:password@`` typed in the address is left out."""
+    return _CREDENTIALS.sub(lambda match: (match.group(1) or "") + "//" if "//" in match.group(0) else "", url,
+                            count=1)
 
 
 def encode_json(body: Dict[str, Any]) -> bytes:

@@ -603,8 +603,12 @@ class AgentChatController(QObject):
         if self._mcp.error:
             self._say(_tr("The MCP server could not start: {}").format(self._mcp.error), error=True, offer_settings=True)
 
-    def tools_and_handlers(self, values: AgentSettings):
-        """The tools of the plugin under the ticks of the settings, without the external connectors."""
+    def tools_and_handlers(self, values: AgentSettings, for_chat: bool = True):
+        """The tools of the plugin under the ticks of the settings, without the external connectors.
+
+        ``for_chat``: False for another application (the MCP server of the plugin), which is not the small local
+        model the lighter set is made for.
+        """
         active = enabled(all_sources(custom_from_json(values.custom_sources)), values.enabled_sources)
         kinds = {source.kind for source in active}
         accessor = self._accessor()
@@ -637,7 +641,7 @@ class AgentChatController(QObject):
         # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on); of a skill from elsewhere
         # the user has not allowed, its name only
         tools = [skill_tool(offered, skill_approved) if tool.name == LOAD_SKILL else tool for tool in tools]
-        if self.local_filtering(values):
+        if for_chat and self.local_filtering(values):
             tools = list(filtering_only(tools))
         # A connector alone does not open the web to add_layer: only a data source the user ticked does.
         handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
@@ -997,7 +1001,8 @@ class AgentChatController(QObject):
             self._refresh_recipes()
             return False
         values = load_settings()
-        tools, handlers, _active = self.tools_and_handlers(values)
+        # No model runs a recipe: the lighter set of a small local model would stop its steps (2026-11-13)
+        tools, handlers, _active = self.tools_and_handlers(values, for_chat=False)
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         available = {tool.name for tool in tools}
         self._policy.set_level(values.autonomy)

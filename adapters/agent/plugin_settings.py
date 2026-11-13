@@ -165,14 +165,23 @@ def _profile_file(arguments: Dict[str, Any]):
 def planned_profile(arguments: Dict[str, Any]):
     """(rows of plan, left out, name) of the profile a call names; ``ValueError`` when it cannot be read."""
     import stat
-    path = _profile_file(arguments)
+    from ...filtermate_api.export_root import ExportRootError
+    import os
+    try:
+        path = _profile_file(arguments)
+    except (ExportRootError, RuntimeError) as exc:  # the export folder cannot be used (RuntimeError: a loop of links)
+        raise ValueError(str(exc)) from None
     try:
         info = path.lstat()
         if not stat.S_ISREG(info.st_mode):  # a link, a pipe, a device: never read
             raise ValueError(f"no profile {path.name}")
-        with open(path, "rb") as stream:
+        # Opened without following a link and without waiting, then checked again: one put there since lstat
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
+        with os.fdopen(os.open(str(path), flags), "rb") as stream:
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                raise ValueError(f"no profile {path.name}")
             data = stream.read(settings_profile.MAX_BYTES + 1)
-        text = data.decode("utf-8")
+        text = data.decode("utf-8-sig")  # Notepad saves UTF-8 with a mark at the start
     except FileNotFoundError:
         raise ValueError(f"no profile {path.name}") from None
     except (OSError, UnicodeDecodeError) as exc:
@@ -183,19 +192,42 @@ def planned_profile(arguments: Dict[str, Any]):
 
 
 def _export_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
+    import os
+    import stat
+    from ...filtermate_api.export_root import ExportRootError
     try:
         file = settings_profile.file_name(str(arguments.get("name", "")))
         folder = _profiles_folder()
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError, ExportRootError, RuntimeError) as exc:
         raise ToolFailure(str(exc)) from None
     target = folder / file
-    if target.exists() and not arguments.get("replace"):
+    try:
+        info = target.lstat()
+    except FileNotFoundError:
+        info = None
+    except OSError as exc:
+        raise ToolFailure(f"The profile could not be written ({type(exc).__name__}).") from None
+    if info is not None and stat.S_ISLNK(info.st_mode):
+        # 2026-11-13: a link in profiles/ (dangling: not seen by exists()) was followed, and the profile written
+        # wherever it pointed. The reading already refuses a link.
+        raise ToolFailure(f"{file} is a link, not a profile: the user removes it, or choose another name.")
+    if info is not None and not stat.S_ISREG(info.st_mode):  # a pipe would hold QGIS until someone reads it
+        raise ToolFailure(f"{file} is not a file: the user removes it, or choose another name.")
+    if info is not None and not arguments.get("replace"):
         raise ToolFailure(f"A profile {file} exists already: ask the user, then call again with replace true to "
                           f"replace it, or choose another name.")
     profile = settings_profile.build(settings_rows(), str(arguments["name"]))
     try:
         folder.mkdir(mode=0o700, parents=True, exist_ok=True)
-        target.write_text(settings_profile.dumps(profile), encoding="utf-8")
+        # O_NOFOLLOW where the system has it: a link put there between the check and the write is refused too.
+        # O_BINARY on Windows: the descriptor in text mode would turn the \r\n of the stream into \r\r\n.
+        flags = (os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+                 | getattr(os, "O_BINARY", 0))
+        descriptor = os.open(str(target), flags, 0o600)
+        if hasattr(os, "fchmod"):
+            os.fchmod(descriptor, 0o600)  # a profile written before, readable by others, is the user's alone too
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(settings_profile.dumps(profile))
     except OSError as exc:
         raise ToolFailure(f"The profile could not be written ({type(exc).__name__}).") from None
     return {"file": f"{PROFILES_FOLDER}/{file}", "folder": "the export folder", "name": profile["name"],

@@ -26,6 +26,7 @@ from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
+from ...core.agent.providers.base import check_base_url, without_credentials
 from ...core.agent.providers.ollama_chat import installed_models, tags_url
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
@@ -50,6 +51,7 @@ PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (A
 # Only what can be named without going stale: the user can type any model.
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
 OLLAMA_TAGS_TIMEOUT_MS = 2000  # a local server answers at once; a missing one must not hold the dialog
+OLLAMA_TAGS_MAX_BYTES = 1_000_000  # the list of the installed models: a few KB
 
 
 MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
@@ -964,6 +966,7 @@ class AgentSettingsDialog(QDialog):
         consent_layout.addWidget(self.consent)
         consent_layout.addWidget(consent_note)
         self._models_reply = None  # the request listing the models of Ollama, while it runs
+        self._closing = False  # done() has begun: no new request (the address loses the focus while it hides)
         self.preset.currentIndexChanged.connect(self._on_preset)
         self.base_url.textChanged.connect(self._on_destination)
         self.base_url.editingFinished.connect(self._fetch_ollama_models)
@@ -1414,8 +1417,11 @@ class AgentSettingsDialog(QDialog):
         """List the models Ollama has installed, without waiting for it: the typed name stays, a missing server is
         said in the tooltip of the field."""
         if self._models_reply is not None:
-            self._models_reply.abort()
-            self._models_reply = None
+            # Forgotten first: abort() says "finished" at once, and the reply must not be taken for the current one.
+            reply, self._models_reply = self._models_reply, None
+            reply.abort()
+        if self._closing:
+            return
         if self.preset.currentData() != "ollama":
             self.model.setToolTip("")
             return
@@ -1423,15 +1429,29 @@ class AgentSettingsDialog(QDialog):
         from qgis.PyQt.QtCore import QUrl
         from qgis.PyQt.QtNetwork import QNetworkRequest
         url = tags_url(self.base_url.text().strip() or PRESETS["ollama"][1])
+        try:
+            check_base_url(url, None)  # http(s) only: a file:// address typed here was read as it was
+        except ValueError:
+            self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
+                without_credentials(url)))
+            return
         request = QNetworkRequest(QUrl(url))
         if hasattr(request, "setTransferTimeout"):
             request.setTransferTimeout(OLLAMA_TAGS_TIMEOUT_MS)
         reply = QgsNetworkAccessManager.instance().get(request)
         self._models_reply = reply
+        # Qt keeps all of a reply until it is finished, and the timeout is one of silence: a server that never
+        # stops sending is cut at the limit, not read for a minute.
+        reply.downloadProgress.connect(
+            lambda received, _total, answered=reply: answered.abort() if received > OLLAMA_TAGS_MAX_BYTES else None)
         reply.finished.connect(lambda answered=reply, address=url: self._on_ollama_models(answered, address))
 
     def done(self, result) -> None:  # noqa: D401 - Qt name
-        """Closed: a list of models still on its way must not reach a dialog that is gone."""
+        """Closed: a list of models still on its way must not reach a dialog that is gone.
+
+        2026-11-13: the address loses the focus while super().done() hides the dialog, and editingFinished then
+        sent a new request, answered once the dialog was deleted. None is sent once done() has begun."""
+        self._closing = True
         if self._models_reply is not None:
             reply, self._models_reply = self._models_reply, None
             reply.abort()
@@ -1445,15 +1465,17 @@ class AgentSettingsDialog(QDialog):
         names = []
         try:
             import json
-            names = installed_models(json.loads(bytes(reply.readAll()).decode("utf-8", "replace") or "{}"))
-        except (ValueError, RecursionError):
+            names = installed_models(json.loads(
+                bytes(reply.read(OLLAMA_TAGS_MAX_BYTES) or b"").decode("utf-8", "replace") or "{}"))
+        except Exception:  # whatever a server answers (read() gives None without a body): this is a slot
             names = []
         finally:
             reply.deleteLater()
         if self.preset.currentData() != "ollama":
             return
         if not names:
-            self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(address))
+            self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
+                without_credentials(address)))
             return
         typed = self.model.currentText().strip()
         self.model.clear()

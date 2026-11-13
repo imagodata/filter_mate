@@ -90,7 +90,9 @@ class AgentMcpBridge:
             self._server.close()
             return
         try:
-            tools, handlers, _active = self._host.tools_and_handlers(values)
+            # The whole set: "only the tools that filter" is a choice for a small local model in the chat, and it
+            # took the settings, the skills, the styles and Processing away from every other application.
+            tools, handlers, _active = self._host.tools_and_handlers(values, for_chat=False)
         except Exception as exc:
             logger.exception("MCP server: tools unavailable")
             self.error = str(exc)[:200]
