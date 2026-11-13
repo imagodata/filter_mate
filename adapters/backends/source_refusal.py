@@ -15,7 +15,15 @@ The message names the selection, which these preparations read
 (FilterEngineTask._source_selection_qgis_expression), not the source filter:
 under AND NOT the source filter of a selection keeping nothing, NOT (x), keeps
 every feature.
+
+The requests that read the features an expression keeps, in the variables of
+a layer, are built here too (with_layer_context): by these preparations, the
+PostgreSQL source selection, EXPLORING and the public API.
 """
+
+# task_parameters key: the context of the source layer, read on the main thread
+# when the filter task is created (FilterEngineTask.__init__).
+SOURCE_CONTEXT_KEY = '_source_expression_context'
 
 
 class SourceSelectionError(ValueError):
@@ -49,23 +57,77 @@ def source_selection_refusal(layer_name: str, unreadable: bool = False) -> Sourc
     return SourceSelectionError(text.format(layer_name))
 
 
-def selection_request(expression, layer):
-    """The request that reads the features ``expression`` keeps, in the variables of ``layer``.
+def layer_context(layer):
+    """The global, project and layer variables of ``layer`` (QgsExpressionContext), read where it is called.
+
+    The project scope reads the project: call it on the main thread when it
+    can be (FilterEngineTask.__init__ keeps the source layer's under
+    SOURCE_CONTEXT_KEY).
+    """
+    from qgis.core import QgsExpressionContext, QgsExpressionContextUtils
+    return QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
+
+
+def with_layer_context(request, layer, context=None):
+    """``request`` with the global, project and layer variables of ``layer``.
 
     A QgsFeatureRequest filtered by an expression has no context of its own:
-    the QGIS text of a native subset may read ``@variables`` (folded into the
-    subset with the global, project and layer values), which a bare request
-    reads as NULL, keeping no feature (2026-11-12). The context is the one the
-    translation and the hybrid subset read, built in the same task thread.
+    ``"pop" > @seuil`` reads the variable as NULL and keeps no feature, and
+    ``$area`` is planar, in the units of the layer CRS, where QGIS measures on
+    the ellipsoid of the project (2026-11-12).
+
+    ``layer`` is the layer whose variables the expression reads: the source
+    layer also when its features are read through a copy without its subset
+    (2026-11-13: the copy, out of the project, has none of its layer variables,
+    and another @layer_name / @layer_id).
+
+    Args:
+        request: A QgsFeatureRequest, changed and returned.
+        layer: The layer whose context the expression is evaluated in.
+        context: The context of ``layer`` read before (layer_context, on the
+            main thread); a copy of it is used. None, or the context of
+            another layer: read now.
+
+    Returns:
+        QgsFeatureRequest: ``request``.
+    """
+    from qgis.core import QgsExpressionContext
+    if context is not None and context.variable('layer_id') == layer.id():
+        request.setExpressionContext(QgsExpressionContext(context))
+    else:
+        request.setExpressionContext(layer_context(layer))
+    return request
+
+
+def selection_request(expression, layer, context=None):
+    """The request that reads the features ``expression`` keeps, in the variables of ``layer``.
+
+    The QGIS text of a native subset may read ``@variables`` (folded into the
+    subset with the global, project and layer values): the source features
+    are read in the same values (with_layer_context).
 
     Args:
         expression: A parsed QgsExpression.
-        layer: The source layer.
+        layer: The source layer (not a copy of it: see with_layer_context).
+        context: Its context read on the main thread (SOURCE_CONTEXT_KEY), if any.
 
     Returns:
         QgsFeatureRequest: Filtered by ``expression`` in the layer's context.
     """
-    from qgis.core import QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
-    request = QgsFeatureRequest(expression)
-    request.setExpressionContext(QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer)))
-    return request
+    from qgis.core import QgsFeatureRequest
+    return with_layer_context(QgsFeatureRequest(expression), layer, context)
+
+
+def variable_values(expression, layer):
+    """The values of the variables ``expression`` reads in the context of ``layer``: part of a cache key.
+
+    2026-11-13: the features of an EXPLORING expression were cached by its
+    text; after a change of @seuil the selection stayed that of the former
+    value until the cache expired. Empty when the expression reads none.
+    """
+    from qgis.core import QgsExpression
+    names = sorted(QgsExpression(expression or '').referencedVariables())
+    if not names:
+        return ()
+    context = layer_context(layer)
+    return tuple((name, repr(context.variable(name))) for name in names)

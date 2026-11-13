@@ -9,6 +9,7 @@ project and layer scopes) filtered. The method is extracted with ast and run
 against recording fakes.
 """
 import ast
+import importlib.util
 import sys
 import types
 from pathlib import Path
@@ -17,6 +18,7 @@ from types import SimpleNamespace
 import pytest
 
 _DOCK = Path(__file__).resolve().parents[3] / "filter_mate_dockwidget.py"
+_REFUSAL = Path(__file__).resolve().parents[3] / "adapters" / "backends" / "source_refusal.py"
 
 
 class Request:
@@ -65,6 +67,14 @@ def method(monkeypatch):
         for key, value in attrs.items():
             setattr(module, key, value)
         monkeypatch.setitem(sys.modules, name, module)
+    # the helper the filter task reads the source selection with, for real (it imports qgis.core when called)
+    backends = types.ModuleType('filter_mate.adapters.backends')
+    backends.__path__ = []
+    monkeypatch.setitem(sys.modules, 'filter_mate.adapters.backends', backends)
+    spec = importlib.util.spec_from_file_location('filter_mate.adapters.backends.source_refusal', _REFUSAL)
+    refusal = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, spec.name, refusal)
+    spec.loader.exec_module(refusal)
     tree = ast.parse(_DOCK.read_text(encoding='utf-8'))
     cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'FilterMateDockWidget')
     node = next(item for item in cls.body if isinstance(item, ast.FunctionDef)

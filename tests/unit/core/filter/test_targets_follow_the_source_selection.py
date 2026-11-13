@@ -158,8 +158,13 @@ class _Request:
 
     def __init__(self):
         self.expression = None
+        self.context = None
 
     def setFlags(self, flags):
+        return self
+
+    def setExpressionContext(self, context):  # the variables of the source layer (with_layer_context)
+        self.context = context
         return self
 
     def setFilterExpression(self, expression):
@@ -202,8 +207,34 @@ def _source_layer(kept, subset=EXISTS_OLD, requests=None):
     return layer, requests
 
 
+def _importable_refusal(monkeypatch):
+    """``adapters.backends.source_refusal`` importable by its top-level name, the ``adapters`` package not imported.
+
+    The builder is imported from the repository root here, so it falls back on
+    ``adapters.backends.source_refusal`` (the refusals, and the context the
+    selection is read in); the ``adapters`` package itself cannot be imported
+    that way (relative imports beyond it).
+    """
+    import types
+    name = "adapters.backends.source_refusal"
+    loaded = sys.modules.get(name)
+    if loaded is not None:  # the refusal fixture loaded it first: one SourceSelectionError, the one it gives
+        return loaded
+    for package_name, path in (("adapters", _ROOT / "adapters"),
+                               ("adapters.backends", _ROOT / "adapters" / "backends")):
+        package = types.ModuleType(package_name)
+        package.__path__ = [str(path)]
+        monkeypatch.setitem(sys.modules, package_name, package)
+    spec = importlib.util.spec_from_file_location(name, _ROOT / "adapters" / "backends" / "source_refusal.py")
+    module = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, name, module)
+    spec.loader.exec_module(module)
+    return module
+
+
 def _builder(monkeypatch, task, layer, unfiltered=None):
     """The builder of the distant filters; ``unfiltered``: the copy of the source without its subset."""
+    _importable_refusal(monkeypatch)
     monkeypatch.setattr(sys.modules["qgis.core"], "QgsFeatureRequest", _Request, raising=False)
     monkeypatch.setattr(sys.modules["qgis.core"], "QgsExpression", _Expression, raising=False)
     builder = ExpressionBuilder(task_parameters=task.task_parameters, source_layer=layer,
@@ -231,6 +262,8 @@ def test_path_3a_reads_the_selection_through_the_old_subset(facade_module, monke
 
     assert [request.expression for request in requests] == ['"pop" > 1000']
     assert source_filter == "<FIDS [4]>"
+    # read in the variables of the source layer: "pop" > @seuil kept nothing without them (2026-11-13)
+    assert requests[0].context is not None
 
 
 def test_path_3a_selection_keeping_nothing_matches_no_source_feature(facade_module, monkeypatch):
@@ -265,22 +298,8 @@ X_EXISTS = 'EXISTS (SELECT 1 FROM "public"."other" AS o WHERE o."id" = "src"."id
 
 @pytest.fixture
 def refusal(monkeypatch):
-    """SourceSelectionError, its module importable by its top-level name and the translation plain.
-
-    The builder is imported from the repository root here, so it falls back on
-    ``adapters.backends.source_refusal``; the ``adapters`` package itself
-    cannot be imported that way (relative imports beyond it).
-    """
-    import types
-    for name, path in (("adapters", _ROOT / "adapters"), ("adapters.backends", _ROOT / "adapters" / "backends")):
-        package = types.ModuleType(name)
-        package.__path__ = [str(path)]
-        monkeypatch.setitem(sys.modules, name, package)
-    name = "adapters.backends.source_refusal"
-    spec = importlib.util.spec_from_file_location(name, _ROOT / "adapters" / "backends" / "source_refusal.py")
-    module = importlib.util.module_from_spec(spec)
-    monkeypatch.setitem(sys.modules, name, module)
-    spec.loader.exec_module(module)
+    """SourceSelectionError, its module importable by its top-level name and the translation plain."""
+    module = _importable_refusal(monkeypatch)
     monkeypatch.setattr(sys.modules["qgis.PyQt.QtCore"], "QCoreApplication",
                         MagicMock(translate=lambda context, text: text), raising=False)
     monkeypatch.setattr(_Expression, "unreadable", set())

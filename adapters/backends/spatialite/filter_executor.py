@@ -474,7 +474,7 @@ def resolve_spatialite_features(
             # on the layer yet; read the features it keeps, never the whole
             # layer (a custom expression keeping nothing filtered the targets
             # by every source feature).
-            features = _features_matching(source_layer, expression)
+            features = _features_matching(source_layer, expression, task_parameters=context.task_parameters)
         else:
             from qgis.core import QgsMessageLog, Qgis
             QgsMessageLog.logMessage(
@@ -520,22 +520,30 @@ def _unfiltered_copy(layer):
     return None
 
 
-def _features_matching(layer, expression: str) -> List:
+def _features_matching(layer, expression: str, source_layer=None, task_parameters=None) -> List:
     """The source features ``expression`` keeps, read in QGIS.
 
     2026-11-12: an expression that does not parse or fails to evaluate is
     refused (``SourceSelectionError``); it used to leave the whole layer as
     the source.
+
+    Args:
+        layer: The layer read: the source layer, or a copy of it without its subset.
+        expression: The QGIS text of the selection.
+        source_layer: The source layer when ``layer`` is a copy (2026-11-13:
+            the expression reads its variables, the copy has none).
+        task_parameters: The task's, holding the source context read on the main thread.
     """
     from qgis.core import QgsExpression
-    from ..source_refusal import selection_request, source_selection_refusal
+    from ..source_refusal import SOURCE_CONTEXT_KEY, selection_request, source_selection_refusal
     expr = QgsExpression(expression)
     if expr.hasParserError():
         logger.error(f"[Spatialite] Source expression does not parse: {expr.parserErrorString()}")
         raise source_selection_refusal(layer.name(), unreadable=True)
     try:
         # the layer's variables: the QGIS text of a native subset may read @variables
-        features = list(layer.getFeatures(selection_request(expr, layer)))
+        request = selection_request(expr, source_layer or layer, (task_parameters or {}).get(SOURCE_CONTEXT_KEY))
+        features = list(layer.getFeatures(request))
     except Exception as e:
         logger.error(f"[Spatialite] Source expression failed: {e}")
         raise source_selection_refusal(layer.name(), unreadable=True) from e
@@ -851,7 +859,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
                     # says nothing of the new selection
                     scope = _unfiltered_copy(source_layer) or source_layer
                 try:
-                    features = _features_matching(scope, filter_to_use)
+                    features = _features_matching(scope, filter_to_use, source_layer, context.task_parameters)
                 except SourceSelectionError:
                     # The layer read by its mode showed nothing already; the
                     # expression may be the SQL of its provider, not QGIS.
