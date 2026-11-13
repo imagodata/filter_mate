@@ -386,6 +386,26 @@ Run it?</translation>
         <translation>The agent wants to change these settings of FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Other</source>
+        <translation>Other</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Answer</source>
+        <translation>Answer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>No answer</source>
+        <translation>No answer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="798"/>
+        <source>Close without answering</source>
+        <translation>Close without answering</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
         <source>They stay for every project; undoing the turn puts them back.</source>
         <translation>They stay for every project; undoing the turn puts them back.</translation>

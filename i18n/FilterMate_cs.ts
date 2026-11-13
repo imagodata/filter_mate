@@ -457,6 +457,26 @@ Spustit?</translation>
         <translation>Agent chce změnit tato nastavení FilterMate</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Other</source>
+        <translation>Jiné</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Answer</source>
+        <translation>Odpovědět</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>No answer</source>
+        <translation>Bez odpovědi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="798"/>
+        <source>Close without answering</source>
+        <translation>Zavřít bez odpovědi</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
         <source>They stay for every project; undoing the turn puts them back.</source>
         <translation>Platí pro všechny projekty; vrácením tohoto kola se obnoví původní hodnoty.</translation>

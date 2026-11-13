@@ -457,6 +457,26 @@ Ausführen?</translation>
         <translation>Der Agent möchte diese Einstellungen von FilterMate ändern</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Other</source>
+        <translation>Andere</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Answer</source>
+        <translation>Antworten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>No answer</source>
+        <translation>Keine Antwort</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="798"/>
+        <source>Close without answering</source>
+        <translation>Schließen, ohne zu antworten</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
         <source>They stay for every project; undoing the turn puts them back.</source>
         <translation>Sie gelten für alle Projekte; wird die Runde rückgängig gemacht, werden sie zurückgesetzt.</translation>

@@ -457,6 +457,26 @@ Run it?</source>
         <translation>एजेंट FilterMate की ये सेटिंग्स बदलना चाहता है</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Other</source>
+        <translation>अन्य</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Answer</source>
+        <translation>उत्तर दें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>No answer</source>
+        <translation>कोई उत्तर नहीं</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="798"/>
+        <source>Close without answering</source>
+        <translation>उत्तर दिए बिना बंद करें</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
         <source>They stay for every project; undoing the turn puts them back.</source>
         <translation>ये सभी प्रोजेक्ट पर लागू रहती हैं; इस बारी को पूर्ववत करने पर ये पहले जैसी हो जाती हैं।</translation>

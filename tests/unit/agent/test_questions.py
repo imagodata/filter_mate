@@ -70,6 +70,16 @@ class TestAnswersPayload:
 
 
 class TestCatalogEntry:
+    def test_neither_served_to_another_application_nor_kept_in_a_recipe(self):
+        # The MCP bridge serves the tools that are neither chat_only nor history (agent_mcp_bridge); a recipe
+        # keeps no read-only chat-only call (recipes.kept): asking cannot be replayed without the user.
+        from core.agent.recipes import kept, steps_of
+        tools = {tool.name: tool for tool in chat_tools()}
+        served = [tool for tool in chat_tools() if not tool.manages_history and not tool.chat_only]
+        assert ASK_USER not in {tool.name for tool in served}
+        assert not kept(ASK_USER, tools[ASK_USER], failed=False)
+        assert steps_of([(ASK_USER, {"questions": []}, False, "Ask the user")], tools) == []
+
     def test_ask_user_is_a_chat_tool_kept_for_a_local_model(self):
         tools = {tool.name: tool for tool in chat_tools()}
         spec = tools[ASK_USER]

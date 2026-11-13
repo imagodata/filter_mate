@@ -457,6 +457,26 @@ Run it?</source>
         <translation>يريد الوكيل تغيير إعدادات FilterMate التالية</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Other</source>
+        <translation>أخرى</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>Answer</source>
+        <translation>رد</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="797"/>
+        <source>No answer</source>
+        <translation>لا رد</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="798"/>
+        <source>Close without answering</source>
+        <translation>إغلاق دون رد</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1720"/>
         <source>They stay for every project; undoing the turn puts them back.</source>
         <translation>تبقى سارية لجميع المشاريع؛ التراجع عن الدور يعيدها كما كانت.</translation>
