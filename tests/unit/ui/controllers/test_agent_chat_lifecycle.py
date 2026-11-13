@@ -670,3 +670,139 @@ def test_the_question_for_several_actions_shows_their_arguments(ctrl_module, doc
     controller.confirm_many([call("1", "apply_filter", {"layer_name": "roads", "expression": '"kind" = 1'}),
                              call("2", "export_layers", {"layers": ["roads"], "format": "gpkg"})])
     assert '\\"kind\\" = 1' in asked[0] and "gpkg" in asked[0]
+
+
+# --- 10: the setup with the agent, offered once per version -----------------------------------------------------
+
+
+class FakeSettings:
+    """QgsSettings: one store for every instance."""
+
+    values = {}
+
+    def value(self, key, default=None):
+        return FakeSettings.values.get(key, default)
+
+    def setValue(self, key, value):  # noqa: N802 - Qt name
+        FakeSettings.values[key] = value
+
+
+class FakeCard:
+    """A card of the thread with its two buttons (ui/widgets/agent_thread.SettingsCard)."""
+
+    def __init__(self):
+        self.apply_requested, self.cancel_requested = FakeSignal(), FakeSignal()
+        self.done, self.accepted = False, None
+
+    def finish(self, accepted):
+        if not self.done:
+            self.done, self.accepted = True, accepted
+
+
+@pytest.fixture
+def offer(ctrl_module, controller, dock, monkeypatch):
+    """A controller whose dock has the AGENT section folded, as it is when the plugin opens."""
+    FakeSettings.values = {}
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsSettings", FakeSettings, raising=False)
+    state = types.SimpleNamespace(cards=[], opened=[], sent=[], agent_open=False, key=controller.SETUP_OFFERED_KEY)
+    controller.panel.add_settings_card = lambda texts, lines, reason: state.cards.append(FakeCard()) or state.cards[-1]
+    dock._fm_sections = types.SimpleNamespace(is_open=lambda key: state.agent_open,
+                                              open_top=lambda key: state.opened.append(key))
+    controller._on_send = state.sent.append
+    return state
+
+
+def test_an_offer_nobody_saw_is_not_kept_as_made(controller, offer):
+    """2026-11-13: the card went in the folded AGENT section and the version was kept as offered at once."""
+    assert controller.offer_setup_once("9.9.9") is True
+    assert len(offer.cards) == 1 and offer.key not in FakeSettings.values
+    assert controller.offer_setup_once("9.9.9") is False and len(offer.cards) == 1  # one card, not one per call
+
+    controller._on_panel_shown()  # the user opens AGENT: the card is in view
+    assert FakeSettings.values[offer.key] == "9.9.9"
+    assert controller.offer_setup_once("9.9.9") is False
+
+
+def test_an_offer_made_in_the_open_section_is_kept_at_once(controller, offer):
+    offer.agent_open = True
+    assert controller.offer_setup_once("9.9.9") is True
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_an_offer_nobody_saw_comes_back_in_the_thread_of_another_project(controller, offer):
+    """Opening a project empties the thread: the card went with it, for good."""
+    controller.offer_setup_once("9.9.9")
+    project = FakeQgsProject.project
+    project.cleared.emit()
+    project.readProject.emit()
+    assert len(offer.cards) >= 2 and not offer.cards[-1].done and offer.key not in FakeSettings.values
+
+    controller._on_panel_shown()
+    shown = len(offer.cards)
+    project.cleared.emit()
+    project.readProject.emit()
+    assert len(offer.cards) == shown  # seen once: it does not come back
+
+
+def test_start_during_a_request_leaves_the_offer_open(controller, offer):
+    """The card read "Setup started." while the panel said to wait: nothing to start it again from."""
+    controller.offer_setup_once("9.9.9")
+    card = offer.cards[0]
+    controller._building = True
+    card.apply_requested.emit()
+    assert not card.done and offer.sent == []
+    assert "Wait" in controller.panel.set_status.call_args.args[0]
+
+    controller._building = False
+    card.apply_requested.emit()
+    assert card.done and card.accepted is True and len(offer.sent) == 1
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_the_agent_section_opens_before_the_setup_says_to_wait(controller, offer):
+    """Started from the QGIS menu during a request: the message was said in the folded section."""
+    controller._building = True
+    assert controller.start_setup() is False
+    assert offer.opened == ["agent"] and offer.sent == []
+
+
+def test_a_setup_started_from_a_menu_closes_the_offer(controller, offer):
+    """The first opening of a version from the menu entry left a card to start what was already running."""
+    controller.offer_setup_once("9.9.9")
+    assert controller.start_setup() is True
+    card = offer.cards[0]
+    assert card.done and card.accepted is True and len(offer.sent) == 1
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_not_now_without_a_provider_gives_the_welcome_back(ctrl_module, controller, offer, monkeypatch):
+    """The card replaced the welcome and its "Connect a provider" button: after "Not now" the panel showed a closed
+    card above an input that takes nothing."""
+    monkeypatch.setattr(ctrl_module, "load_settings", lambda: types.SimpleNamespace(**{**vars(SETTINGS), "ready": False}))
+    controller.offer_setup_once("9.9.9")
+    controller.panel.clear_thread.reset_mock()
+    offer.cards[0].cancel_requested.emit()
+    controller.panel.clear_thread.assert_called_once_with()
+    assert "Not now" in controller.panel.set_status.call_args.args[0]
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_not_now_with_a_provider_keeps_the_card_and_what_it_says(controller, offer):
+    controller.offer_setup_once("9.9.9")
+    controller.panel.clear_thread.reset_mock()
+    card = offer.cards[0]
+    card.cancel_requested.emit()
+    assert card.done and card.accepted is False
+    controller.panel.clear_thread.assert_not_called()
+    assert FakeSettings.values[offer.key] == "9.9.9"
+
+
+def test_a_new_conversation_does_not_bring_the_offer_back(controller, offer):
+    """The user asked for an empty thread: the offer is not put in it again at the next project."""
+    controller.offer_setup_once("9.9.9")
+    controller.new_conversation()
+    assert FakeSettings.values[offer.key] == "9.9.9"
+    shown = len(offer.cards)
+    FakeQgsProject.project.cleared.emit()
+    FakeQgsProject.project.readProject.emit()
+    assert len(offer.cards) == shown

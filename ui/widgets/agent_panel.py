@@ -250,6 +250,7 @@ class AgentPanel(QFrame):
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
     setup_requested = pyqtSignal()
+    shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
@@ -692,6 +693,7 @@ class AgentPanel(QFrame):
         super().showEvent(event)
         self._refresh_look()
         self.input.setFocus()
+        self.shown.emit()
 
     # --- state ----------------------------------------------------------------
 
