@@ -1098,7 +1098,7 @@ class LayersManagementEngineTask(QgsTask):
 
             # Check if PostgreSQL layer using ctid (no PRIMARY KEY)
             primary_key = result[0]
-            if layer.providerType() == 'postgres' and primary_key == 'ctid':
+            if layer.providerType() == 'postgres' and primary_key == 'ctid' and len(layer.primaryKeyAttributes()) < 2:
                 # Store warning for display on main thread in finished()
                 # DO NOT call iface.messageBar() here - causes crash (access violation)
                 warning_msg = self.tr(
@@ -1341,20 +1341,27 @@ class LayersManagementEngineTask(QgsTask):
         if not isinstance(stored, str) or not stored or stored == 'ctid':
             return
         try:
-            if layer.providerType() == 'postgres':
-                return
+            is_postgresql = layer.providerType() == 'postgres'
             fields = layer.fields()
             names = [field.name() for field in fields]
             declared = [fields[index].name() for index in layer.primaryKeyAttributes()]
         except (RuntimeError, AttributeError, IndexError):
             return
+        # 2026-11-13: one field of a composite key (the first one) was stored as the key
+        composite_part = len(declared) > 1 and stored in declared
+        if is_postgresql:
+            if composite_part:
+                infos["primary_key_name"], infos["primary_key_idx"], infos["primary_key_type"], \
+                    infos["primary_key_is_numeric"] = ('ctid', -1, 'tid', False)
+                logger.info(f"Layer '{layer.name()}': '{stored}' is one field of a composite key, now 'ctid'")
+            return
         from ..domain.source_capability import classify_layer
         from ..domain.stable_key import FEATURE_ID_KEY, looks_like_key_name
-        if stored in declared or stored == FEATURE_ID_KEY:
+        if (stored in declared and not composite_part) or stored == FEATURE_ID_KEY:
             return
         capability = classify_layer(layer)
-        if stored not in names:
-            pass  # gone: chosen again
+        if stored not in names or composite_part:
+            pass  # gone, or one field of a composite key: chosen again
         elif capability.is_remote:
             if looks_like_key_name(stored) and stored.lower() != 'fid':
                 return
@@ -1442,6 +1449,13 @@ class LayersManagementEngineTask(QgsTask):
 
         # 1. Check provider-declared primary key (always trust)
         primary_key_index = layer.primaryKeyAttributes()
+        if len(primary_key_index) > 1:
+            # 2026-11-13: the first field of a composite key ((id, year) of a partitioned table) was returned below
+            # as a unique key, and "id" IN (...) kept every year of a selected id.
+            if is_postgresql:
+                logger.warning(f"PostgreSQL layer '{layer.name()}': composite primary key, rows keyed by 'ctid'")
+                return ('ctid', -1, 'tid', False)
+            primary_key_index = []  # no field of it is a key alone: the names and the feature id below
         if len(primary_key_index) > 0:
             for field_id in primary_key_index:
                 if self.isCanceled():

@@ -12,7 +12,11 @@ sharing a population with a selected one.
 
 Order:
 
-1. the key the provider declares;
+1. the key the provider declares, when it is ONE field (2026-11-13: of a
+   composite key, ``(id, year)`` of a partitioned table, the first field was
+   taken for a unique key, so ``"id" IN (...)`` kept every year of a selected
+   id). A composite key is no key list: PostgreSQL rows are keyed by their
+   ``ctid`` (:func:`single_declared_key`), the other layers go on below;
 2. a field named like a key:
 
    - on a local layer (file, memory, virtual...): ``id``, ``gml_id``,
@@ -94,6 +98,39 @@ def key_candidates(field_names: Sequence[str], local: bool = True) -> List[str]:
     return ordered
 
 
+POSTGRESQL_ROW_KEY = 'ctid'  # the row id of PostgreSQL: unique while the row is not updated
+
+
+def single_declared_key(indexes: Iterable[int], fields, provider_type: str = '') -> Optional[str]:
+    """The name of the key the provider declares when it is one field.
+
+    2026-11-13: callers took the first field of the key, of a composite key too (``(id, year)`` of a partitioned
+    table), and wrote ``"id" IN (...)``: every year of a selected id was kept. A composite key gives
+    :data:`POSTGRESQL_ROW_KEY` on PostgreSQL, None elsewhere (the caller goes on with its own search).
+
+    Args:
+        indexes: ``primaryKeyAttributes()`` of the layer, or ``pkAttributeIndexes()`` of its provider.
+        fields: The fields of the layer (``QgsFields``, read by ``[index]``).
+        provider_type: ``providerType()`` of the layer.
+
+    Raises:
+        IndexError: The one index is past the fields.
+    """
+    try:
+        indexes = [int(index) for index in (indexes or ())]
+    except (TypeError, ValueError):
+        return None
+    if len(indexes) > 1:
+        return POSTGRESQL_ROW_KEY if str(provider_type).lower() == 'postgres' else None
+    if not indexes or indexes[0] < 0:
+        return None
+    # An index past the fields (a column removed meanwhile) raises as the callers' fields()[index] did: a clear
+    # error, never another key chosen in silence.
+    field = fields[indexes[0]]  # QgsFields raises IndexError past its fields
+    name = field.name()
+    return name if isinstance(name, str) and name else None
+
+
 def choose_key(field_names: Sequence[str], declared: Iterable[str] = (), local: bool = True,
                is_unique: Optional[Callable[[str], Optional[bool]]] = None) -> KeyChoice:
     """Pick the stable key of a layer.
@@ -112,9 +149,9 @@ def choose_key(field_names: Sequence[str], declared: Iterable[str] = (), local: 
         KeyChoice: never "the first integer field".
     """
     names = [name for name in field_names if isinstance(name, str)]
-    for name in declared:
-        if isinstance(name, str) and name in names:
-            return KeyChoice(name, DECLARED)
+    declared = [name for name in declared if isinstance(name, str) and name in names]
+    if len(declared) == 1:  # a composite key: none of its fields alone is a key
+        return KeyChoice(declared[0], DECLARED)
     for name in key_candidates(names, local):
         if not local:
             return KeyChoice(name, NAMED)

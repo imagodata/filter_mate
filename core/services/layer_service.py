@@ -363,9 +363,10 @@ class LayerService(QObject):
                 return None
 
             # 1. Try to get from provider (always trust declared PK)
-            pk_indexes = layer.primaryKeyAttributes()
-            if pk_indexes:
-                return fields[pk_indexes[0]].name()
+            from ..domain.stable_key import single_declared_key  # never the first field of a composite key
+            declared = single_declared_key(layer.primaryKeyAttributes(), fields, layer.providerType())
+            if declared:
+                return declared
 
             # 2. Look for exact match PK names (case-insensitive)
             for f in fields:

@@ -233,9 +233,11 @@ class FilterParameterBuilder:
 
         # Auto-fill primary_key_name
         if "primary_key_name" not in infos or infos["primary_key_name"] is None:
-            pk_indices = context.source_layer.primaryKeyAttributes()
-            if pk_indices:
-                infos["primary_key_name"] = context.source_layer.fields()[pk_indices[0]].name()
+            from ..domain.stable_key import single_declared_key  # never the first field of a composite key
+            declared = single_declared_key(context.source_layer.primaryKeyAttributes(), context.source_layer.fields(),
+                                           context.source_layer.providerType())
+            if declared:
+                infos["primary_key_name"] = declared
             else:
                 if context.source_layer.fields():
                     infos["primary_key_name"] = context.source_layer.fields()[0].name()
@@ -686,10 +688,10 @@ class LayerFilterBuilder:
         return 'NULL'
 
     def _detect_primary_key(self, layer: 'QgsVectorLayer') -> Optional[str]:
-        pk_attrs = layer.primaryKeyAttributes()
-        if pk_attrs:
-            field_obj = layer.fields()[pk_attrs[0]]
-            return field_obj.name()
+        from ..domain.stable_key import single_declared_key  # never the first field of a composite key
+        declared = single_declared_key(layer.primaryKeyAttributes(), layer.fields(), layer.providerType())
+        if declared:
+            return declared
 
         for f in layer.fields():
             if 'id' in f.name().lower():

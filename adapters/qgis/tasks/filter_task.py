@@ -212,9 +212,10 @@ class FilterTask(BaseFilterMateTask):
     def _get_pk_field(self, layer) -> str:
         """Get primary key field name."""
         try:
-            pk_attrs = layer.primaryKeyAttributes()
-            if pk_attrs:
-                return layer.fields()[pk_attrs[0]].name()
+            from ....core.domain.stable_key import single_declared_key  # never the first field of a composite key
+            declared = single_declared_key(layer.primaryKeyAttributes(), layer.fields(), layer.providerType())
+            if declared:
+                return declared
         except Exception:  # nosec B110 - PK field lookup best-effort, falls back to default "fid" below
             pass
         return "fid"

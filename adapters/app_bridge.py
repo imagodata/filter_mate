@@ -404,11 +404,10 @@ def _extract_primary_key(layer: 'QgsVectorLayer') -> str:
 
         # Try to get PK from provider's pkAttributeIndexes
         if hasattr(provider, 'pkAttributeIndexes'):
-            pk_indexes = provider.pkAttributeIndexes()
-            if pk_indexes:
-                fields = layer.fields()
-                if pk_indexes[0] < fields.count():
-                    return fields.at(pk_indexes[0]).name()
+            from ..core.domain.stable_key import single_declared_key  # never the first field of a composite key
+            declared = single_declared_key(provider.pkAttributeIndexes(), layer.fields(), layer.providerType())
+            if declared:
+                return declared
 
         # Fallback: look for common PK field names
         fields = layer.fields()

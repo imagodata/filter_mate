@@ -158,12 +158,11 @@ class QGISVectorLayerAdapter(IVectorLayer):
         # Try to get primary key from data provider
         data_provider = self._layer.dataProvider()
         if data_provider:
-            pk_indexes = data_provider.pkAttributeIndexes()
-            if pk_indexes and len(pk_indexes) > 0:
-                fields = self._layer.fields()
-                pk_idx = pk_indexes[0]  # Take first PK if composite
-                if pk_idx >= 0 and pk_idx < fields.count():
-                    return fields.at(pk_idx).name()
+            from ...core.domain.stable_key import single_declared_key  # never the first field of a composite key
+            declared = single_declared_key(data_provider.pkAttributeIndexes(), self._layer.fields(),
+                                           self._layer.providerType())
+            if declared:
+                return declared
 
         # Fallback: look for common PK field names
         field_names_lower = [f.lower() for f in self.field_names()]

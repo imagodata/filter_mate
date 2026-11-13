@@ -26,6 +26,7 @@ import pytest
 
 from core.domain.stable_key import (
     DECLARED, FEATURE_ID, FEATURE_ID_KEY, NAMED, NONE, choose_key, is_feature_id_key, looks_like_key_name,
+    single_declared_key,
 )
 
 pytestmark = pytest.mark.unit
@@ -324,3 +325,61 @@ def test_postgres_stored_key_is_kept():
     variables = {"infos": {"primary_key_name": "population"}}
     TASK._migrate_unreliable_primary_key(variables, layer)
     assert variables["infos"]["primary_key_name"] == "population"
+
+
+# --- composite keys (2026-11-13: the first field was taken for a unique key) ----------------------------------------
+
+PARTITIONED = [('id', True), ('year', True), ('nom', False)]
+PARTITIONED_ROWS = [(1, 2020, 'a'), (1, 2021, 'a'), (2, 2020, 'b')]  # "id" repeats from one year to the next
+PG_URI = "dbname='x' table=\"public\".\"parcels\" (geom)"
+
+
+def test_choose_key_takes_no_field_of_a_composite_key():
+    assert choose_key(['id', 'year', 'nom'], declared=['id', 'year']).origin == FEATURE_ID
+    assert choose_key(['id', 'year', 'nom'], declared=['id', 'year'], is_unique=_unique('id')).name == 'id'  # proven
+    assert choose_key(['id', 'year'], declared=['id']).origin == DECLARED  # one field: the key it was
+
+
+def test_single_declared_key():
+    fields = _Fields([_Field('id', True), _Field('year', True)])
+    assert single_declared_key([0], fields, 'postgres') == 'id'
+    assert single_declared_key([0, 1], fields, 'postgres') == 'ctid'  # the row of PostgreSQL, unique
+    assert single_declared_key([0, 1], fields, 'spatialite') is None  # the caller goes on with its own search
+    assert single_declared_key([], fields, 'postgres') is None
+    assert single_declared_key([-1], fields, 'ogr') is None
+    with pytest.raises(IndexError):  # a column removed meanwhile: a clear error, as fields()[index] gave
+        single_declared_key([5], fields, 'ogr')
+
+
+def test_a_composite_postgres_key_keys_the_rows_by_ctid():
+    layer = _Layer('postgres', PG_URI, PARTITIONED, declared=[0, 1])
+    layer.featureCount = lambda: 10
+    assert TASK.search_primary_key_from_layer(layer) == ('ctid', -1, 'tid', False)
+
+
+def test_a_composite_local_key_is_not_its_first_field():
+    layer = _Layer('spatialite', "dbname='/data/x.sqlite' table=\"parcels\" (geom)", PARTITIONED, PARTITIONED_ROWS,
+                   declared=[0, 1])
+    assert TASK.search_primary_key_from_layer(layer)[0] != 'id'
+
+
+def test_a_stored_field_of_a_composite_postgres_key_becomes_ctid():
+    layer = _Layer('postgres', PG_URI, PARTITIONED, declared=[0, 1])
+    variables = {"infos": {"primary_key_name": "id", "primary_key_idx": 0}}
+    TASK._migrate_unreliable_primary_key(variables, layer)
+    assert (variables["infos"]["primary_key_name"], variables["infos"]["primary_key_idx"]) == ('ctid', -1)
+
+
+def test_a_single_declared_postgres_key_stays():
+    layer = _Layer('postgres', PG_URI, PARTITIONED, declared=[0])
+    variables = {"infos": {"primary_key_name": "id"}}
+    TASK._migrate_unreliable_primary_key(variables, layer)
+    assert variables["infos"]["primary_key_name"] == "id"
+
+
+def test_a_stored_field_of_a_composite_local_key_is_chosen_again():
+    layer = _Layer('spatialite', "dbname='/data/x.sqlite' table=\"parcels\" (geom)", PARTITIONED, PARTITIONED_ROWS,
+                   declared=[0, 1])
+    variables = {"infos": {"primary_key_name": "id"}}
+    TASK._migrate_unreliable_primary_key(variables, layer)
+    assert variables["infos"]["primary_key_name"] != "id"

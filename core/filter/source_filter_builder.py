@@ -86,10 +86,10 @@ def get_primary_key_field(layer) -> Optional[str]:
 
     # Try to get primary key from provider
     try:
-        pk_attrs = layer.primaryKeyAttributes()
-        if pk_attrs:
-            fields = layer.fields()
-            return fields[pk_attrs[0]].name()
+        from ..domain.stable_key import single_declared_key  # never the first field of a composite key
+        name = single_declared_key(layer.primaryKeyAttributes(), layer.fields(), layer.providerType())
+        if name:
+            return name
     except Exception:  # nosec B110 - fall back to common PK name search below
         pass
 

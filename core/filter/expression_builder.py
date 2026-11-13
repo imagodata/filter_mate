@@ -1369,10 +1369,11 @@ class ExpressionBuilder:
 
         # Try to get from provider
         try:
-            pk_attrs = self.source_layer.primaryKeyAttributes()
-            if pk_attrs:
-                fields = self.source_layer.fields()
-                return fields[pk_attrs[0]].name()
+            from ..domain.stable_key import single_declared_key  # never the first field of a composite key
+            name = single_declared_key(self.source_layer.primaryKeyAttributes(), self.source_layer.fields(),
+                                       self.source_layer.providerType())
+            if name:
+                return name
         except Exception:  # nosec B110 - fall back to common PK name search below
             pass
 
