@@ -61,7 +61,6 @@ SOURCES = \
     ../ui/managers/optimization_manager.py \
     ../ui/managers/configuration_manager.py \
     ../core/export/layer_exporter.py \
-    ../adapters/agent/free_quota.py \
     ../adapters/agent/settings.py \
     ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
     ../ui/controllers/agent_chat_controller.py \
