@@ -1546,6 +1546,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>رفض Ollama تنزيل {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>فشل تنزيل {}.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>تعذّر الوصول إلى Ollama على {}.</translation>

@@ -91,10 +91,11 @@ class OllamaChatProvider:
             "model": config.model,
             "stream": True,
             "messages": _wire_messages(system, messages),
-            "tools": [{"type": "function", "function": {
-                "name": tool.name, "description": tool.description, "parameters": tool.input_schema}}
-                for tool in tools],
         }
+        if tools:
+            body["tools"] = [{"type": "function", "function": {
+                "name": tool.name, "description": tool.description, "parameters": tool.input_schema}}
+                for tool in tools]
         size = len(encode_json(body))
         body["options"] = {"num_ctx": context_for(size)}
         headers = {"content-type": "application/json", "accept": "application/x-ndjson"}
@@ -224,8 +225,19 @@ def tags_url(base_url: str) -> str:
     return native_base(base_url or "http://localhost:11434") + TAGS_PATH
 
 
-def installed_models(payload: Any) -> List[str]:
-    """The names of the chat models of an answer of ``/api/tags``, in its order; embedding models left out."""
+def canonical_model(name: str) -> str:
+    """``name`` as Ollama names it: without a tag, the model is its ``:latest`` (``llama3`` is ``llama3:latest``)."""
+    name = name.strip()
+    return name if ":" in name.rsplit("/", 1)[-1] else name + ":latest"
+
+
+def installed_models(payload: Any, limit: Optional[int] = MAX_LISTED_MODELS) -> List[str]:
+    """The names of the chat models of an answer of ``/api/tags``, in its order; embedding models left out.
+
+    Args:
+        payload: The decoded answer.
+        limit: At most this many names (a list to show); ``None`` for all of them (is this one installed?).
+    """
     models = payload.get("models") if isinstance(payload, dict) else None
     names: List[str] = []
     for model in models if isinstance(models, list) else ():
@@ -243,7 +255,7 @@ def installed_models(payload: Any) -> List[str]:
         if "embed" in name.lower() or "bert" in families.lower():  # nomic-embed-text, mxbai-embed…: no chat
             continue
         names.append(name)
-        if len(names) >= MAX_LISTED_MODELS:
+        if limit is not None and len(names) >= limit:
             break
     return names
 

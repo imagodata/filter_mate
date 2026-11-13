@@ -1546,6 +1546,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ollama የ{}ን ማውረድ እምቢ አለ።</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>{}ን ማውረድ አልተሳካም።</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollamaን በ{} ላይ ማግኘት አልተቻለም።</translation>

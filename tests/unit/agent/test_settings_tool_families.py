@@ -41,6 +41,12 @@ def fake_qgs_settings(monkeypatch):
         def setValue(self, key, value):
             store[key] = value
 
+        def contains(self, key):
+            return key in store
+
+        def remove(self, key):
+            store.pop(key, None)
+
     monkeypatch.setattr(agent_settings, "QgsSettings", FakeQgsSettings)
     return store
 

@@ -1546,6 +1546,11 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Ollama ha rebutjat la baixada de {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>La baixada de {} ha fallat.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>No s'ha pogut contactar amb Ollama a {}.</translation>

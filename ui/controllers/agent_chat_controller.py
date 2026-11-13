@@ -47,7 +47,7 @@ from ...core.agent.messages import (
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
-from ...core.agent.providers.base import HttpRequest, error_from_response
+from ...core.agent.providers.base import HttpRequest, encode_json, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
@@ -92,7 +92,12 @@ MAX_DETAIL_CHARS = 200
 PROVIDER_TEST_ASK = "Reply with OK."
 PROVIDER_TEST_TOKENS = 16
 PROVIDER_TEST_WAIT_MS = 30_000
-PROVIDER_TEST_MAX_BYTES = 1_000_000
+# A local model loads from the disk at its first request (cold CPU, a thinking model): the Test waits longer for it,
+# asks for a few tokens only, and a context far smaller than the chat's (the adapter asks 16k at least).
+PROVIDER_TEST_OLLAMA_WAIT_MS = 120_000
+PROVIDER_TEST_OLLAMA_LIST_WAIT_MS = 5_000  # the list after a request that failed: a server that is gone is not awaited
+PROVIDER_TEST_OLLAMA_CONTEXT = 2_048
+PROVIDER_TEST_MAX_BYTES = 4_000_000  # the list of OpenRouter, a few MB
 MAX_CONNECTOR_TOOLS = 60  # a provider limits the tools of a request, and each one is paid for at every turn
 MAX_LISTED = 20
 NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values, layer_statistics, sample_features "
@@ -1446,27 +1451,32 @@ class AgentChatController(QObject):
             provider = create_provider(config)
             ask = Message(ROLE_USER, (TextPart(PROVIDER_TEST_ASK),))
             chat = provider.build_request("A connection test.", [ask], [])
+            if kind == KIND_OLLAMA:
+                chat = AgentChatController._small_ollama_test(chat)
         except (KeyStoreError, ValueError) as exc:
-            return False, str(exc).replace(key, "…") if key else str(exc), ()
+            return False, without_key(str(exc), key), ()
 
         def said(error: ProviderError) -> str:
             text = AgentChatController._error_message(error)
-            return text.replace(key, "…") if key else text
+            return without_key(text, key)
 
         error: Optional[ProviderError] = None
         if model:
-            error, content = AgentChatController._call_provider(chat)
+            error, content = AgentChatController._call_provider(
+                chat, wait_ms=PROVIDER_TEST_OLLAMA_WAIT_MS if kind == KIND_OLLAMA else PROVIDER_TEST_WAIT_MS)
             if error is None:
                 parser = provider.new_parser()
                 failed = [event for event in parser.feed(content) + parser.close() if isinstance(event, StreamFailure)]
                 error = failed[0].error if failed else None
-            if error is not None and error.kind in (ERROR_AUTH, ERROR_NETWORK):
-                return False, said(error), ()  # the list would say the same
+            # The list would say the same, but for Ollama: it may be there and slow, and its list helps the user next.
+            if error is not None and (error.kind == ERROR_AUTH or (error.kind == ERROR_NETWORK and kind != KIND_OLLAMA)):
+                return False, said(error), ()
         headers = {name: value for name, value in chat.headers.items()
                    if name.lower() not in ("content-type", "accept", "anthropic-beta")}
         headers["accept"] = "application/json"
         listing_error, content = AgentChatController._call_provider(
-            HttpRequest(listing_url(kind, address), headers), post=False)
+            HttpRequest(listing_url(kind, address), headers), post=False,
+            wait_ms=PROVIDER_TEST_OLLAMA_LIST_WAIT_MS if error is not None and kind == KIND_OLLAMA else PROVIDER_TEST_WAIT_MS)
         models = models_from_listing(kind, content) if listing_error is None else ()
         if error is not None:
             return False, said(error), models
@@ -1479,11 +1489,19 @@ class AgentChatController(QObject):
         return True, _tr("It answers: choose a model in the list."), models
 
     @staticmethod
-    def _call_provider(request: HttpRequest, post: bool = True) -> Tuple[Optional[ProviderError], bytes]:
+    def _small_ollama_test(request: HttpRequest) -> HttpRequest:
+        """The request of the Test for Ollama: a few tokens of answer and a small context, for the Test only."""
+        body = json.loads(request.body)
+        body["options"] = {"num_ctx": PROVIDER_TEST_OLLAMA_CONTEXT, "num_predict": PROVIDER_TEST_TOKENS}
+        return replace(request, body=encode_json(body))
+
+    @staticmethod
+    def _call_provider(request: HttpRequest, post: bool = True,
+                       wait_ms: int = PROVIDER_TEST_WAIT_MS) -> Tuple[Optional[ProviderError], bytes]:
         """One bounded call, waiting in a local event loop: (the failure worded as the chat words it, the answer)."""
         try:
             answer = fetch(request.url, request.body if post else None, request.headers,
-                           max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=PROVIDER_TEST_WAIT_MS)
+                           max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=wait_ms)
         except HttpFailure as exc:
             return ProviderError(ERROR_NETWORK, str(exc)), b""
         if answer.status >= 300:  # a redirection is not followed: the key must not go elsewhere

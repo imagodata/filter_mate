@@ -52,6 +52,12 @@ def fake_qgs_settings(monkeypatch):
         def setValue(self, key, value):
             store[key] = value
 
+        def contains(self, key):
+            return key in store
+
+        def remove(self, key):
+            store.pop(key, None)
+
     monkeypatch.setattr(agent_settings, "QgsSettings", FakeQgsSettings)
     return store
 
@@ -80,6 +86,29 @@ def test_free_profile_reads_as_no_provider(fake_qgs_settings):
     values = agent_settings.load_settings()
     assert values.preset == "anthropic"
     assert not values.has_consent and not values.ready
+
+
+def test_the_address_of_the_relay_does_not_follow_a_free_profile_to_anthropic(fake_qgs_settings):
+    """The old dialog saved the hidden relay address under "free": Test would have sent the new key there."""
+    fake_qgs_settings.update({"filter_mate/agent/preset": "free", "filter_mate/agent/base_url": RELAY,
+                              "filter_mate/agent/authcfg": "cfg", "filter_mate/agent/key_target": RELAY})
+    values = agent_settings.load_settings()
+    assert values.preset == "anthropic" and values.base_url == ""
+    assert values.target == "https://api.anthropic.com" and not values.has_key
+
+
+def test_the_address_of_a_known_provider_is_kept(fake_qgs_settings):
+    fake_qgs_settings.update({"filter_mate/agent/preset": "openai", "filter_mate/agent/base_url": "https://relay.example.com/v1"})
+    assert agent_settings.load_settings().base_url == "https://relay.example.com/v1"
+
+
+def test_the_relay_token_is_removed_from_the_profile(fake_qgs_settings):
+    fake_qgs_settings.update({"filter_mate/agent/free_token": "relay-token", "filter_mate/agent/free_token_target": RELAY,
+                              "filter_mate/agent/preset": "ollama"})
+    agent_settings.load_settings()
+    assert not [key for key in fake_qgs_settings if "free_token" in key]
+    assert fake_qgs_settings["filter_mate/agent/preset"] == "ollama"
+    agent_settings.load_settings()  # nothing left: loading again is harmless
 
 
 def test_view_map_offered_with_values(monkeypatch):

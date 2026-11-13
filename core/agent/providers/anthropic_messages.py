@@ -71,8 +71,8 @@ class AnthropicProvider:
             # Caches everything up to the last block, and follows the conversation as it grows.
             "cache_control": {"type": "ephemeral"},
             "system": [{"type": "text", "text": system}],
-            "tools": [{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema}
-                      for tool in tools],
+            **({"tools": [{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema}
+                          for tool in tools]} if tools else {}),  # an empty list is refused by some servers
             "messages": [{"role": message.role, "content": _content(message)} for message in messages],
         }
         if config.effort:

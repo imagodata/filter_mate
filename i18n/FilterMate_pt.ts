@@ -1546,6 +1546,11 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>O Ollama recusou a transferência de {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>A transferência de {} falhou.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Não foi possível contactar o Ollama em {}.</translation>
