@@ -42,6 +42,7 @@ from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_excha
 from agent.settings_reference import (  # noqa: E402
     describe as describe_settings, get as get_setting, plan as plan_settings, read_settings, set_leaf)
 from agent.performance import summary as performance_summary  # noqa: E402
+from agent.questions import answers_payload, parse_questions  # noqa: E402
 from agent.families import bringing, unlocked  # noqa: E402
 from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
@@ -444,7 +445,16 @@ class SimulatedProject:
                     "seconds": 9.5, "example": {"sam_score": 0.94, "area_m2": 142.0},
                     "appearance": {"median": 0.86, "minimum": 0.8}}
 
+        def ask_user(args):
+            """The simulated user picks the first option of each question (the recommended one, by the tool's word)."""
+            try:
+                questions = parse_questions(args.get("questions"))
+            except ValueError as exc:
+                raise ToolFailure(str(exc)) from None
+            return answers_payload(questions, [([question.options[0].label], "") for question in questions])
+
         return {
+            "ask_user": ask_user,
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
             "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
@@ -574,10 +584,16 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
         if stray:
             continue  # a correction is fine, a filter left on another layer is not
         # Each expected step is judged on the last write of its tool: a model that corrects a call is not
-        # blamed for the first try, nor for an earlier step that the correction pushed back.
+        # blamed for the first try, nor for an earlier step that the correction pushed back. A step of a tool
+        # that writes nothing (ask_user) is judged on its last call: the case asks that it was called at all.
         latest = {call.name: call for call in writes}
-        if all(step["tool"] in latest and matches(step.get("args", {}), latest[step["tool"]].arguments, by_ref)
-               for step in steps):
+        called = {call.name: call for call in calls}
+
+        def step_made(step):
+            call = latest.get(step["tool"]) or (called.get(step["tool"]) if step["tool"] not in write_tools else None)
+            return call is not None and matches(step.get("args", {}), call.arguments, by_ref)
+
+        if all(step_made(step) for step in steps):
             return ""
     return f"writes do not match: {[(call.name, call.arguments) for call in writes]}"
 

@@ -89,7 +89,57 @@
    "id": "setup_asks_first",
    "trap": true,
    "prompt": "Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.",
-   "expect": [],
+   "expect": [
+    [
+     {
+      "tool": "ask_user",
+      "args": {},
+      "call_args": {
+       "questions": [
+        {
+         "question": "What do you mostly do with FilterMate?",
+         "header": "Use",
+         "options": [
+          {
+           "label": "Filter and export (Recommended)"
+          },
+          {
+           "label": "Explore data"
+          }
+         ]
+        },
+        {
+         "question": "How large is your screen?",
+         "header": "Screen",
+         "options": [
+          {
+           "label": "Usual (Recommended)"
+          },
+          {
+           "label": "Small"
+          },
+          {
+           "label": "Very large"
+          }
+         ]
+        },
+        {
+         "question": "Is your data large or remote?",
+         "header": "Data",
+         "options": [
+          {
+           "label": "Local files (Recommended)"
+          },
+          {
+           "label": "Large or remote"
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   ],
    "forbid": [
     "change_settings",
     "apply_settings_profile",
