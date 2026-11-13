@@ -477,6 +477,81 @@ Pentru ce: {}
         <translation>Aceste setări s-au schimbat de când agentul le-a propus: cereți-i din nou.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>profilul dvs. QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>dosarul acestui proiect</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agentul vrea să urmeze abilitatea „{}” ({}). Provine din {}, nu din FilterMate: citiți-o mai întâi. Nu îi dă agentului niciun drept: fiecare modificare este în continuare cerută așa cum indică setările dvs. Permiteți agentului să o folosească? Nu veți mai fi întrebat până când nu se schimbă.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>O abilitate pentru agent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Configurați FilterMate cu agentul?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Câteva întrebări, apoi setările afișate înainte și după: nimic nu se schimbă până nu le aplicați. Mai târziu: meniul Vector &gt; FilterMate &gt; Configurare FilterMate cu agentul.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Pornire</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Nu acum</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Configurarea a pornit.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Nu acum: meniul o pornește când doriți.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Aspect: limbă, temă, dimensiunea panoului</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Datele dumneavoastră: PostgreSQL, rastere, nori de puncte, timpi de așteptare</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Agentul: ce poate face singur, ce straturi nu modifică niciodată</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Așteptați finalul cererii, apoi porniți din nou configurarea.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Ajută-mă să configurez FilterMate pentru calculatorul și datele mele: uită-te la ce conține acest proiect, pune-mi câteva întrebări, apoi propune setările.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Editarea {} (nesalvată)</translation>
@@ -1033,6 +1108,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Setările agentului</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Configurare FilterMate cu agentul…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Permite trimiterea valorilor atributelor</translation>
@@ -1171,6 +1251,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Doar instrumentele care filtrează, pentru un calculator lent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Oferirea instrumentelor unei sarcini după ce agentul îi încarcă instrucțiunile</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Cereri mai ușoare, pentru un model lent sau local: instrumentele care filtrează și citesc sunt oferite mereu; cele pentru Processing, stiluri, machete, editare, SAM și date deschise vin atunci când agentul încarcă abilitatea sarcinii respective. Celelalte aplicații primesc mereu toate instrumentele.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Faceți clic pe indicatorul ★ și selectați 'Adăugați filtrul curent la fav
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Resetare configurare și bază de date</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Configurare FilterMate cu agentul</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Agentul pune câteva întrebări și propune setările FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Secțiunea AGENT este dezactivată: activați APP.OPTIONS.AGENT.enabled în configurație, apoi reporniți QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

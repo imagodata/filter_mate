@@ -219,6 +219,7 @@ class AgentPanel(QFrame):
     stop_requested = pyqtSignal()
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
+    setup_requested = pyqtSignal()
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
@@ -321,6 +322,8 @@ class AgentPanel(QFrame):
         self.set_recipes([], False)
         self.new_action = menu.addAction(_tr("New conversation"))
         self.new_action.triggered.connect(self.new_conversation_requested)
+        self.setup_action = menu.addAction(_tr("Set FilterMate up with the agent…"))
+        self.setup_action.triggered.connect(self.setup_requested)
         self.settings_action = menu.addAction(_tr("Agent settings"))
         self.settings_action.triggered.connect(self.settings_requested)
         self.more_button.setMenu(menu)
@@ -990,6 +993,14 @@ class AgentSettingsDialog(QDialog):
         general_layout.addLayout(form)
         general_layout.addWidget(self.key_note)
         general_layout.addWidget(self.local_filtering_only)
+        self.tool_families = QCheckBox(_tr("Offer the tools of a task once the agent loads its instructions"), self)
+        self.tool_families.setObjectName("checkBox_agent_tool_families")
+        self.tool_families.setChecked(values.tool_families)
+        self.tool_families.setToolTip(_tr(
+            "Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of "
+            "Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that "
+            "task. Other applications always get every tool."))
+        general_layout.addWidget(self.tool_families)
         general_layout.addWidget(self.free_notice)
         general_layout.addWidget(line)
         general_layout.addWidget(leaving)

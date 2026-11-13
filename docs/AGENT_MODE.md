@@ -551,11 +551,14 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   (never a path the model gives: a share or a probe of the disk), 40 changes at most, each shown, and lists what it
   left out.
 - `diagnose_performance` sums up the `⏱` lines of the end of `logs/filtermate.log` (`core/agent/performance.py`).
-- Skills (`core/agent/skills.py`): `configuration` says how to find, explain and change a setting, what never to change,
-  and how to read the timings of a slow filter. The MCP server of the plugin serves it as the prompt
-  `filtermate_configuration` and the settings reference as the resource `filtermate://settings/reference`;
-  `skills/filtermate-configuration/SKILL.md` is the same text as an Agent Skill for an application connected to it
-  (`scripts/export_agent_skills.py`, checked by a test).
+- Skills: one folder each in `skills/` of the plugin, `SKILL.md` (header of an Agent Skill plus the fields of
+  FilterMate under `metadata`, then the instructions) and `evals.json` (its cases for the bench); the standard is
+  `skills/README.md`, checked by `tests/unit/agent/test_skills_standard.py`, read by `core/agent/skills.py` without
+  YAML. `configuration` says how to find, explain and change a setting, what never to change, and how to read the
+  timings of a slow filter. The MCP server of the plugin serves the skills of audience `mcp` as prompts
+  (`filtermate_configuration`) and the settings reference as the resource `filtermate://settings/reference`;
+  `skills/export/filtermate-<name>/SKILL.md` is the same text as an Agent Skill for an application connected to it
+  (`scripts/export_agent_skills.py`, checked by a test; not in the plugin zip).
 
 What the chat adds to the REST checks, because a model can be steered by what it reads:
 
@@ -643,6 +646,7 @@ already filtered or a road selected. Without that, a model that checks its work 
 | Claude Haiku 5.5, through the free quota relay, 3 cases with tools | 3/3 |
 | Claude Haiku 5.5, direct, 63 cases, 41 tools (2026-11-11) | 58/63; the 5 failures read one by one: 4 came from the bench (a simulated cross filter that dropped the filter it was combined with, a layout and a zoom counted as changes of layers, an edit by selection not accepted), 1 from the model (a favorite applied a second time by hand, a line of the prompt since); those 5 cases again: 5/5 |
 | Claude Haiku 5.5, direct, 68 cases, 47 tools (2026-11-11, main 9c065293) | 66/68, about 0.33 $ (1.9 M tokens written to the cache, 6.3 M read, 55 k out); the 2 failures came from the bench: `field_computed` (the simulated layer did not get the field `add_field` added, so the model saw it empty and filled it again with `update_features`; its first call was right, with a formula guarded against 0 floors) and `theme_save` ("keep the view as Relief": a bookmark is as right as a map theme since bookmarks exist; both accepted now, and `theme_named` asks for a map theme by name); those cases again: 3/3 |
+| Claude Haiku 5.5, direct, 82 cases, A/B of the skills (2026-11-13) | the prompt of 5.1.0, every domain in it: 80/82; the prompt with analysis, cartography, editing, raster-objects and open-data taken out into skills (`--prompt skills`, about 1,000 tokens lighter): 77/82, with load_skill called 16 times against 7. One run each, within the noise (cross_nothing_kept fails now and then), so the prompt of 5.1.0 stays. Two new cases were too strict for both: a scale reached with zoom_to on an extent (as right as code: a tool first), and a deletion read as hiding (the prompt now says it is the data). About 0.8 $ for both |
 
 The first live run gave 31/39 on a project that kept no state: every failure came from the bench.
 

@@ -477,6 +477,81 @@ Patakbuhin?</translation>
         <translation>Nagbago ang mga setting na ito mula nang imungkahi ng agent: hilingin itong muli.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>iyong QGIS profile</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>folder ng proyektong ito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Gusto ng agent na sundin ang skill na &quot;{}&quot; ({}). Galing ito sa {}, hindi sa FilterMate: basahin muna ito. Hindi ito nagbibigay ng anumang karapatan sa agent: hinihingi pa rin ang bawat pagbabago ayon sa iyong mga setting. Payagan ang agent na gamitin ito? Hindi na ito itatanong muli hangga't hindi ito nagbabago.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Isang skill para sa agent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>I-set up ang FilterMate gamit ang agent?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Ilang tanong, pagkatapos ay ipapakita ang mga setting bago at pagkatapos: walang magbabago hangga't hindi ninyo inilalapat. Mamaya: menu Vector &gt; FilterMate &gt; I-set up ang FilterMate gamit ang agent.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Simulan</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Hindi ngayon</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Nasimulan na ang setup.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Hindi ngayon: sisimulan ito ng menu kapag gusto ninyo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Itsura: wika, tema, laki ng panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Ang inyong data: PostgreSQL, mga raster, mga point cloud, mga timeout</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Ang agent: ano ang puwede nitong gawin nang mag-isa, aling mga layer ang hindi nito kailanman binabago</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Hintaying matapos ang request, pagkatapos ay simulan muli ang setup.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Tulungan mo akong i-set up ang FilterMate para sa computer at data ko: tingnan mo kung ano ang laman ng proyektong ito, magtanong ka sa akin ng ilang bagay, pagkatapos ay imungkahi mo ang mga setting.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Pagbabago sa {} (hindi naka-save)</translation>
@@ -1033,6 +1108,11 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>Mga setting ng agent</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>I-set up ang FilterMate gamit ang agent…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Payagang maipadala ang mga halaga ng attribute</translation>
@@ -1171,6 +1251,16 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Ang mga tool lang na nagsasala, para sa mabagal na computer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Ialok ang mga tool ng isang gawain kapag na-load na ng agent ang mga tagubilin nito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Mas magaang na mga kahilingan, para sa mabagal o lokal na model: palaging iniaalok ang mga tool na nagsasala at nagbabasa; ang mga para sa Processing, mga istilo, mga layout, pag-edit, SAM at open data ay dumarating kapag na-load ng agent ang skill ng gawaing iyon. Palaging nakukuha ng ibang mga application ang lahat ng tool.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>I-reset ang pagsasaayos at database</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>I-set up ang FilterMate gamit ang agent</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Nagtatanong ang agent ng ilang bagay at nagmumungkahi ng mga setting ng FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Naka-off ang seksyong AGENT: i-on ang APP.OPTIONS.AGENT.enabled sa pagsasaayos, pagkatapos ay i-restart ang QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

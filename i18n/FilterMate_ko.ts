@@ -477,6 +477,81 @@ Run it?</source>
         <translation>에이전트가 제안한 이후 이 설정이 변경되었습니다. 다시 요청하세요.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>QGIS 프로필</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>이 프로젝트의 폴더</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>에이전트가 스킬 '{}'({})을(를) 따르려고 합니다. 이 스킬은 FilterMate가 아닌 {}에서 왔습니다. 먼저 읽어 보세요. 에이전트에게 어떤 권한도 주지 않습니다. 모든 변경은 여전히 설정에 따라 확인을 요청합니다. 에이전트가 이 스킬을 사용하도록 허용하시겠습니까? 내용이 바뀌기 전까지 다시 묻지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>에이전트용 스킬</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>에이전트로 FilterMate를 설정하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>몇 가지 질문 후 변경 전후의 설정을 보여 드립니다. 적용하기 전까지는 아무것도 바뀌지 않습니다. 나중에: 메뉴 벡터 &gt; FilterMate &gt; 에이전트로 FilterMate 설정.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>시작</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>나중에</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>설정을 시작했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>나중에: 원할 때 메뉴에서 시작할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>모양: 언어, 테마, 패널 크기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>데이터: PostgreSQL, 래스터, 포인트 클라우드, 시간 제한</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>에이전트: 혼자 할 수 있는 일, 절대 변경하지 않는 레이어</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>요청이 끝날 때까지 기다린 다음 설정을 다시 시작하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>내 컴퓨터와 데이터에 맞게 FilterMate 설정하는 걸 도와줘: 이 프로젝트에 뭐가 있는지 보고, 몇 가지 물어본 다음, 설정을 제안해 줘.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} 편집 (저장 안 됨)</translation>
@@ -1033,6 +1108,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>에이전트 설정</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>에이전트로 FilterMate 설정…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>속성 값 전송 허용</translation>
@@ -1171,6 +1251,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>느린 컴퓨터를 위해 필터링 도구만</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>에이전트가 작업 지침을 불러온 뒤에 해당 작업의 도구 제공</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>느리거나 로컬인 모델을 위한 더 가벼운 요청: 필터링과 읽기 도구는 항상 제공되며, Processing, 스타일, 레이아웃, 편집, SAM, 공개 데이터 도구는 에이전트가 해당 작업의 스킬을 불러올 때 제공됩니다. 다른 애플리케이션은 항상 모든 도구를 받습니다.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>설정 및 데이터베이스 초기화</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>에이전트로 FilterMate 설정</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>에이전트가 몇 가지 질문을 하고 FilterMate 설정을 제안합니다</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>AGENT 섹션이 꺼져 있습니다: 구성에서 APP.OPTIONS.AGENT.enabled 옵션을 켠 다음 QGIS를 다시 시작하세요.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

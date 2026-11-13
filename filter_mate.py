@@ -415,6 +415,15 @@ class FilterMate:
                 parent=self.iface.mainWindow(),
                 status_tip=self.tr(u'Open FilterMate panel'))
 
+            # The setup with the agent: also offered once per version, in the AGENT panel
+            self.add_action(
+                icon_path,
+                text=self.tr(u'Set up FilterMate with the agent'),
+                callback=self.setup_with_agent,
+                parent=self.iface.mainWindow(),
+                add_to_toolbar=False,
+                status_tip=self.tr(u'The agent asks a few questions and proposes the settings of FilterMate'))
+
             # Action to reset configuration and database
             reset_icon_path = os.path.join(self.plugin_dir, 'icons', 'parameters.png')
             self.add_action(
@@ -1796,6 +1805,31 @@ class FilterMate:
         if cb.isChecked():
             settings.setValue('FilterMate/discord_welcome_dismissed', True)
 
+    def _offer_agent_setup(self) -> None:
+        """The first opening of a version: the AGENT panel offers the setup with the agent, once."""
+        chat = getattr(getattr(self.app, 'dockwidget', None), '_agent_chat', None) if self.app else None
+        if chat is None:
+            return
+        try:
+            chat.offer_setup_once()
+        except Exception:
+            logger.exception("FilterMate: the setup with the agent could not be offered")
+
+    def setup_with_agent(self):
+        """Vector > FilterMate > Set up FilterMate with the agent: the panel opened, then the setup started."""
+        if not self.pluginIsActive or not self.app or not getattr(self.app, 'dockwidget', None):
+            self.run()
+        dock = getattr(self.app, 'dockwidget', None) if self.app else None
+        if dock is not None and not dock.isVisible():
+            dock.show()
+        chat = getattr(dock, '_agent_chat', None) if dock is not None else None
+        if chat is None:
+            self.iface.messageBar().pushInfo(
+                "FilterMate", self.tr("The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the "
+                                      "configuration, then restart QGIS."))
+            return
+        chat.start_setup()
+
     WHATS_NEW_VERSION = 5
 
     def _show_whats_new(self) -> bool:
@@ -1894,6 +1928,7 @@ class FilterMate:
                             self._show_discord_welcome()
                         self._init_extensions_dockwidget_ui()
                         self.app.dockwidget.install_agent_panel(self)
+                        self._offer_agent_setup()
                 else:
                     # App already exists, call run() which will show the dockwidget
                     # and refresh layers if needed

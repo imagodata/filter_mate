@@ -645,6 +645,51 @@ def s_agent_settings_profile_check():
     return waits(0.5)
 
 
+def s_agent_skill_from_profile_check():
+    """A skill in FilterMate/skills of the profile: offered by load_skill, asked once, loaded as data."""
+    sources = importlib.import_module(f'{PACKAGE}.adapters.agent.skill_sources')
+    load_settings = importlib.import_module(f'{PACKAGE}.adapters.agent.settings').load_settings
+    folder = sources.user_folder() / 'team-naming'
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / 'SKILL.md').write_text("---\nname: team-naming\ntitle: Our naming rules\ndescription: how this team "
+                                     "names its layers\n---\n\n# Naming\n\nLayers are named after the theme.\n",
+                                     encoding='utf-8')
+    chat, asked = agent_chat(), []
+    original = chat._ask_code
+    chat._ask_code = lambda title, text, code: asked.append(code) or True
+    try:
+        tools, handlers, _active = chat.tools_and_handlers(load_settings())
+        offered = next(tool for tool in tools if tool.name == 'load_skill').input_schema['properties']['name']['enum']
+        first = handlers['load_skill']({'name': 'team-naming'})
+        second = handlers['load_skill']({'name': 'team-naming'})
+    finally:
+        chat._ask_code = original
+        shutil.rmtree(folder, ignore_errors=True)
+    check('skill of the profile: offered, asked once, loaded as data with no right',
+          'team-naming' in offered and len(asked) == 1 and first.get('from') == 'user'
+          and first['instructions'].startswith('This skill comes from the QGIS profile') and second == first,
+          f"offered={offered} asked={len(asked)} first={str(first)[:120]}")
+    return waits(0.2)
+
+
+def s_agent_setup_offer_check():
+    """The setup with the agent: offered once per version (a card of the thread), an entry of both menus."""
+    import qgis.utils
+    chat = agent_chat()
+    before = len(chat._settings_cards)
+    first = chat.offer_setup_once('smoke-9.9.9')
+    second = chat.offer_setup_once('smoke-9.9.9')
+    cards = len(chat._settings_cards)
+    shown = cards >= 1 and 'Set FilterMate up with the agent?' in chat.panel.thread.toPlainText()
+    plugin = qgis.utils.plugins[PACKAGE]
+    entries = [action.text() for action in plugin.actions]
+    check('setup with the agent: offered once per version, in the QGIS menu and the panel menu',
+          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and 'Set up FilterMate with the agent' in entries
+          and chat.panel.setup_action is not None, f"first={first} second={second} entries={entries}")
+    chat.new_conversation()  # the checks of the AGENT section that follow expect its welcome
+    return waits(0.2)
+
+
 def s_qt6_enums_check():
     """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
     from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
@@ -1831,6 +1876,8 @@ def s_finish():
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
+         s_agent_skill_from_profile_check,
+         s_agent_setup_offer_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_vector_check,

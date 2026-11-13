@@ -52,7 +52,7 @@ from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.tool_catalog import (
     ADD_NOTE, CREATE_WIDGET, FILTERING_NOTE, REMOVE_NOTE, REMOVE_RECIPE, REMOVE_WIDGET, RUN_PYTHON, SAVE_RECIPE, UNDO_AGENT_STEP,
-    VIEW_MAP, chat_tools, filtering_only,
+    LOAD_SKILL, VIEW_MAP, chat_tools, filtering_only, skill_tool,
 )
 from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as widget_replaced, summary as widget_summary, without
 from ...core.domain.layer_kind import LayerKind
@@ -183,6 +183,7 @@ class AgentChatController(QObject):
         self.panel.resend_requested.connect(self._on_resend)
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.settings_requested.connect(self.open_settings)
+        self.panel.setup_requested.connect(self.start_setup)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
         self._stat_timer = QTimer(self)
@@ -420,6 +421,75 @@ class AgentChatController(QObject):
 
     # --- settings ---------------------------------------------------------------
 
+    def _approve_skill(self, skill) -> bool:
+        """A skill from the profile or the project folder: the user reads all of it before it guides the agent."""
+        place = {"user": _tr("your QGIS profile"), "project": _tr("the folder of this project")}.get(skill.trust, "")
+        text = _tr("The agent wants to follow the skill \"{}\" ({}). It comes from {}, not from FilterMate: read it "
+                   "before. It gives the agent no right: every change stays asked as your settings say. Let the agent "
+                   "use it? It is not asked again until it changes.").format(
+            one_line(skill.title, 100), one_line(skill.name, 40), place)
+        return bool(self._ask_code(_tr("A skill for the agent"), text, skill.body))
+
+    SETUP_OFFERED_KEY = "FilterMate/agent/setup_offered_version"
+
+    @staticmethod
+    def setup_offer_due(offered: str, version: str) -> bool:
+        """The setup is offered once for each version installed: not again for the version it was offered for."""
+        return bool(version) and offered != version
+
+    def plugin_version(self) -> str:
+        """The version of metadata.txt of the plugin, "" when it cannot be read."""
+        import configparser
+        import os
+        folder = getattr(self._plugin, "plugin_dir", "") or os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__))))
+        parser = configparser.ConfigParser(interpolation=None)
+        try:
+            parser.read(os.path.join(folder, "metadata.txt"), encoding="utf-8")
+            return parser.get("general", "version", fallback="").strip()
+        except (configparser.Error, OSError):
+            return ""
+
+    def offer_setup_once(self, version: str = "") -> bool:
+        """The first time this version opens: a card in the thread offers to set FilterMate up with the agent.
+
+        Kept as offered at once, whatever the answer: never offered again for this version (the menu entries start
+        it at any time). True when offered."""
+        from qgis.core import QgsSettings
+        version = version or self.plugin_version()
+        settings = QgsSettings()
+        if not self.setup_offer_due(str(settings.value(self.SETUP_OFFERED_KEY, "") or ""), version):
+            return False
+        settings.setValue(self.SETUP_OFFERED_KEY, version)
+        texts = {"heading": _tr("Set FilterMate up with the agent?"),
+                 "note": _tr("A few questions, then the settings shown before and after: nothing changes until you "
+                             "apply. Later: menu Vector > FilterMate > Set up FilterMate with the agent."),
+                 "apply": _tr("Start"), "cancel": _tr("Not now"),
+                 "accepted": _tr("Setup started."), "declined": _tr("Not now: the menu starts it when you want.")}
+        lines = [_tr("Look: language, theme, size of the panel"),
+                 _tr("Your data: PostgreSQL, rasters, point clouds, timeouts"),
+                 _tr("The agent: what it may do alone, which layers it never changes")]
+        card = self.panel.add_settings_card(texts, lines, "")
+        card.apply_requested.connect(lambda: (card.finish(True), self.start_setup()))
+        card.cancel_requested.connect(lambda: card.finish(False))
+        self._settings_cards.append(card)
+        return True
+
+    def start_setup(self) -> None:
+        """Set FilterMate up with the agent: the AGENT section opened, and a request that starts the setup. The
+        settings of the agent are asked first when it has none (the usual way of a first request)."""
+        if self.chat_busy():
+            self._say(_tr("Wait for the end of the request, then start the setup again."), error=True)
+            return
+        sections = getattr(self._parent_widget, "_fm_sections", None)
+        if sections is not None and hasattr(sections, "open_top"):
+            try:
+                sections.open_top("agent")
+            except Exception:
+                logger.debug("Agent: section not opened for the setup", exc_info=True)
+        self._on_send(_tr("Help me set FilterMate up for my computer and my data: look at what this project holds, "
+                          "ask me a few questions, then propose the settings."))
+
     def _settings_link_tool(self, arguments) -> dict:
         """show_settings_link: a button in the thread, to a tab of the agent settings or to a setting."""
         from ...core.agent.settings_reference import get as get_setting
@@ -494,10 +564,12 @@ class AgentChatController(QObject):
                 return False
             chosen = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(), dialog.consent.isChecked(),
                       dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(), authcfg, target,
-                      key_target, dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked())
+                      key_target, dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked(),
+                      dialog.tool_families.isChecked())
             same_chat = chosen == (values.preset, values.model, values.base_url, values.consent, values.send_values,
                                    values.enabled_sources, values.custom_sources, values.authcfg, values.consent_target,
-                                   values.key_target, values.expert_python, values.local_filtering_only) and not key
+                                   values.key_target, values.expert_python, values.local_filtering_only,
+                                   values.tool_families) and not key
             save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
                                         base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
                                         send_values=dialog.send_values.isChecked(), enabled_sources=dialog.chosen_sources(),
@@ -508,6 +580,7 @@ class AgentChatController(QObject):
                                         mcp_token=dialog.chosen_mcp_token(),
                                         expert_python=dialog.expert_python.isChecked(),
                                         local_filtering_only=dialog.local_filtering_only.isChecked(),
+                                        tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
                                         tool_rules=json.dumps(dialog.chosen_tool_rules())))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
@@ -552,6 +625,14 @@ class AgentChatController(QObject):
         if KIND_STAC not in kinds:
             left_out.add(IMAGERY_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
+        offered = {tool.name for tool in tools}
+        try:  # the skills of the profile and of the project folder, read again (the project may have changed)
+            from ...adapters.agent.skill_sources import refresh as refresh_skills
+            refresh_skills()
+        except Exception:
+            logger.debug("Agent: skills from elsewhere not read", exc_info=True)
+        # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on)
+        tools = [skill_tool(offered) if tool.name == LOAD_SKILL else tool for tool in tools]
         if self.local_filtering(values):
             tools = list(filtering_only(tools))
         # A connector alone does not open the web to add_layer: only a data source the user ticked does.
@@ -559,7 +640,7 @@ class AgentChatController(QObject):
                                   allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
-        handlers.update(settings_handlers())
+        handlers.update(settings_handlers(offered, self._approve_skill))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
         handlers[RUN_PYTHON] = self._python_tool
         handlers[VIEW_MAP] = self._view_map_tool
@@ -1155,6 +1236,30 @@ class AgentChatController(QObject):
         self._forget_undone_steps(request)
         return {"undone": request, "restored": restored, "left": left}
 
+    def _families(self, values: AgentSettings, tools, handlers):
+        """With the families of tools on: the tools of a task left out until its skill is loaded, then offered to the
+        engine of this conversation (core/agent/families.py)."""
+        if not values.tool_families:
+            return tools, handlers, set()
+        from ...core.agent import skills as skill_registry
+        from ...core.agent.families import hidden_tools, unlocked
+        hidden = hidden_tools(tools, skill_registry.SKILLS.values())
+        if not hidden or LOAD_SKILL not in {tool.name for tool in tools}:
+            return tools, handlers, set()
+        later = {tool.name: tool for tool in tools if tool.name in hidden}
+        load = handlers[LOAD_SKILL]
+
+        def load_and_offer(arguments):
+            answer = load(arguments)
+            skill = skill_registry.all_skills().get(str(arguments.get("name", "")))
+            names = sorted(unlocked(skill, set(later))) if skill is not None else []
+            if names and self._engine is not None:
+                self._engine.offer_tools([later.pop(name) for name in names])
+                answer = dict(answer, tools_now_offered=names)
+            return answer
+        return ([tool for tool in tools if tool.name not in hidden], dict(handlers, **{LOAD_SKILL: load_and_offer}),
+                hidden)
+
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
         values = load_settings()
@@ -1184,10 +1289,13 @@ class AgentChatController(QObject):
         finally:
             self.panel.set_working(False)
         reachable = [source for source in active if source.title not in unreachable]
+        tools, handlers, held = self._families(values, tools, handlers)
         session = AgentSession(provider, tools, self._prompt(values, reachable))
         if unreachable:
             self.panel.add_note(_tr("Not reachable for this conversation: {}").format(", ".join(unreachable)))
-        return ChatEngine(session, ToolExecutor(tools, self._chat_owned(handlers)), QtTransport(self), self,
+        executor = ToolExecutor(tools, self._chat_owned(handlers))
+        executor.hold(held)
+        return ChatEngine(session, executor, QtTransport(self), self,
                           self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
 
     @staticmethod

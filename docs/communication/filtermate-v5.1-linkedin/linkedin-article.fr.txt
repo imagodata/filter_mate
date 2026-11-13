@@ -1,0 +1,60 @@
+FilterMate 5.1 : demandez à QGIS en une phrase, vérifiez chaque étape, annulez d'un clic
+
+FilterMate est un plugin QGIS gratuit et open source qui porte une sélection d'une couche vers les autres : les bâtiments près des routes principales, les parcelles en forte pente, les points LiDAR sous les toits. Vecteurs, rasters et nuages de points peuvent tous être source ou cible.
+
+La version 5.1 ajoute au panneau une nouvelle section, AGENT, expérimentale. Vous écrivez une demande, et FilterMate l'exécute dans votre projet, étape par étape, sous vos yeux.
+
+1. Demandez en une phrase
+
+« Les bâtiments au-dessus de 1200 m dans la commune sélectionnée. » « Garde les parcelles à moins de 50 m de la rivière, puis exporte-les en GeoPackage. » « Un curseur sur la hauteur des bâtiments. »
+
+L'agent commence par lire le projet : les couches, leurs champs, des statistiques, des échantillons d'entités, ce qui se trouve en un point. Il ne devine pas les noms de champs. Ensuite il filtre, sélectionne, zoome, affiche ou masque des couches, lance des algorithmes Processing de QGIS, met en forme et étiquette une couche, range et renomme les couches, prépare une mise en page, ajoute des données ouvertes et exporte.
+
+Il peut aussi laisser des contrôles sous la conversation : une plage sur un champ numérique, des valeurs à cocher, un compte ou une moyenne qui suit les filtres, un petit graphique en barres. Ils sont enregistrés avec le projet, et c'est FilterMate qui écrit leurs filtres, pas le modèle.
+
+2. Vérifiez chaque étape
+
+Chaque filtre annonce combien d'entités il garde. Un filtre écrit par le modèle est une simple clause WHERE, contrôlée avant de s'exécuter. Les modifications vont dans le tampon d'édition de QGIS : rien n'est enregistré tant que vous n'enregistrez pas.
+
+Vous décidez jusqu'où il va seul. Quatre niveaux d'autonomie :
+• Conseiller : lit et explique les étapes, ne change rien.
+• Prudent : demande avant chaque changement, filtres compris.
+• Standard, par défaut : demande avant ce qui ne s'annule pas (exports, couches ajoutées ou retirées, suppressions).
+• Autonome : exporte et retire aussi sans demander, mais demande toujours avant le réseau, les connecteurs et le code.
+
+Vous pouvez fixer une règle par outil (toujours demander, toujours autoriser, jamais) et cocher les couches que l'agent ne doit jamais modifier. Il les lit toujours et peut s'en servir comme source.
+
+3. Annulez d'un clic
+
+Chaque demande est un tour. Annuler et Rétablir parcourent les tours : filtres, styles, couches ajoutées ou retirées, groupes, champs, jointures. Dans la page Historique, « Annuler jusqu'ici » revient à n'importe quelle étape. Si vous avez modifié une couche vous-même après une demande, annuler cette demande laisse votre modification telle quelle, et le dit.
+
+Votre modèle, sans compte
+
+Claude, Mistral, OpenAI, tout serveur compatible OpenAI, ou un modèle local avec Ollama. Votre clé reste dans la base d'authentification de QGIS. Pour essayer sans clé, quelques requêtes gratuites par mois passent par un relais de FilterMate vers Claude Haiku 5.5.
+
+Pour être précis sur les données : l'agent lit des valeurs de champs et des échantillons d'entités, qui partent chez le fournisseur choisi. Avec un modèle local Ollama, rien ne quitte votre ordinateur. Rien n'est envoyé avant que vous ayez choisi un modèle et donné votre accord.
+
+Les recettes : rejouer sans le modèle
+
+Quand une demande a fait ce que vous vouliez, gardez-la comme recette dans le projet. « Rejouer sans le modèle » rejoue ses étapes sans aucune requête à un fournisseur : rien d'envoyé, rien de payé. Une recette peut aussi se relancer d'elle-même à chaque enregistrement des modifications de sa couche source : vous modifiez les zones, vous enregistrez, et les bâtiments des zones sont filtrés à nouveau.
+
+Des objets dessinés par SAM
+
+Dans la pipette raster, un clic ou une boîte, et le modèle SAM 2.1 dessine l'objet, en local sur le processeur (modèle de 62 Mo, sans carte graphique). L'objet filtre les autres couches, ou devient une couche de polygones. Un algorithme Processing dessine un objet par point ou par emprise d'une couche : sur 40 bâtiments de la BD TOPO, sur une orthophoto à 25 cm, le recouvrement médian avec les contours de référence est de 0,81. Expérimental aussi.
+
+Pour qui automatise
+
+Un serveur MCP intégré, désactivé par défaut, permet à Claude Code ou à un autre client MCP de votre ordinateur de piloter FilterMate avec les mêmes outils et les mêmes règles. À noter pour les scripts : l'API REST et le serveur MCP stdio n'acceptent plus que des clauses WHERE simples dans leurs filtres.
+
+Et le filtrage lui-même
+
+Les couches PostgreSQL, SpatiaLite, GeoPackage et fichiers gardent au plus près ce que QGIS garde : un filtre géométrique se combine désormais avec le précédent en OU et en ET, une expression que PostgreSQL ne sait pas exécuter est évaluée par QGIS, et un filtre sur un texte dans un Shapefile respecte la casse.
+
+FilterMate 5.1 fonctionne de QGIS 3.22 à 4.x, en Qt5 et Qt6, dans 34 langues. Les nouveaux textes ont été traduits automatiquement : les corrections de locuteurs natifs sont bienvenues.
+
+Installez-le depuis le gestionnaire d'extensions de QGIS (cherchez « FilterMate »), ou découvrez-le ici :
+https://imagodata.github.io/filter_mate/index.fr.html#agent
+
+Que lui demanderiez-vous en premier ? Et votre organisation voudrait-elle une clé partagée pour son équipe ? Dites-le-moi en commentaire.
+
+#QGIS #SIG #OpenSource #Géomatique #LiDAR

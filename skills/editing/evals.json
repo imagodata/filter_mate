@@ -1,0 +1,131 @@
+{
+ "cases": [
+  {
+   "id": "edit_values",
+   "prompt": "Dans la couche communes, mets le champ dept à 31 pour la commune de Muret.",
+   "expect": [
+    [
+     {
+      "tool": "update_features",
+      "args": {
+       "layer": "communes",
+       "values": {
+        "dept": "31"
+       },
+       "expression": {
+        "contains": [
+         "nom",
+         "Muret"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "communes",
+       "values": {
+        "dept": "31"
+       },
+       "expression": "\"nom\" = 'Muret'"
+      }
+     }
+    ],
+    [
+     {
+      "tool": "select_features",
+      "args": {
+       "layer": "communes",
+       "expression": {
+        "contains": [
+         "nom",
+         "Muret"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "communes",
+       "expression": "\"nom\" = 'Muret'"
+      }
+     },
+     {
+      "tool": "update_features",
+      "args": {
+       "layer": "communes",
+       "values": {
+        "dept": "31"
+       },
+       "selected_only": true
+      },
+      "call_args": {
+       "layer": "communes",
+       "values": {
+        "dept": "31"
+       },
+       "selected_only": true
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "export_layers",
+    "apply_filter",
+    "delete_features"
+   ]
+  },
+  {
+   "id": "hide_is_no_delete",
+   "prompt": "Cache les communes du département 32.",
+   "expect": [
+    [
+     {
+      "tool": "apply_filter",
+      "args": {
+       "layer_name": "communes",
+       "expression": {
+        "contains": [
+         "dept",
+         "32"
+        ]
+       }
+      },
+      "call_args": {
+       "layer_name": "communes",
+       "expression": "\"dept\" <> '32'"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "delete_features",
+    "update_features",
+    "export_layers"
+   ],
+   "trap": true
+  },
+  {
+   "id": "edit_delete_paths",
+   "prompt": "Supprime des données de la couche routes les tronçons de nature Chemin : je ne veux pas un filtre, ils doivent disparaître de la couche.",
+   "expect": [
+    [
+     {
+      "tool": "delete_features",
+      "args": {
+       "layer": "routes",
+       "expression": {
+        "contains": [
+         "Chemin"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "routes",
+       "expression": "\"nature\" = 'Chemin'"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "clear_filters",
+    "apply_filter"
+   ]
+  }
+ ]
+}

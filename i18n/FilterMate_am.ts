@@ -477,6 +477,81 @@ Run it?</source>
         <translation>ወኪሉ ካቀረባቸው በኋላ እነዚህ ቅንብሮች ተለውጠዋል፦ እንደገና ይጠይቁት።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>የQGIS መገለጫዎ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>የዚህ ፕሮጀክት አቃፊ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>ወኪሉ &quot;{}&quot; ({}) የተባለውን ክህሎት መከተል ይፈልጋል። ምንጩ {} ነው እንጂ FilterMate አይደለም፦ አስቀድመው ያንብቡት። ለወኪሉ ምንም መብት አይሰጥም፦ እያንዳንዱ ለውጥ አሁንም ቅንብሮችዎ በሚሉት መሰረት ይጠየቃል። ወኪሉ እንዲጠቀምበት ይፈቅዳሉ? እስኪቀየር ድረስ ዳግም አይጠየቅም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>ለወኪሉ የሚሆን ክህሎት</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>FilterMate በወኪሉ ይዋቀር?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>ጥቂት ጥያቄዎች፣ ከዚያ ቅንብሮቹ በፊትና በኋላ ይታያሉ፦ እስኪተገብሩ ድረስ ምንም አይለወጥም። በኋላ፦ ምናሌ ቬክተር &gt; FilterMate &gt; FilterMateን በወኪሉ አዋቅር።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>ጀምር</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>አሁን አይደለም</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>ማዋቀሩ ተጀምሯል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>አሁን አይደለም፦ በፈለጉ ጊዜ ምናሌው ያስጀምረዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>ገጽታ፦ ቋንቋ፣ ጭብጥ፣ የፓነሉ መጠን</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>የእርስዎ ውሂብ፦ PostgreSQL፣ ራስተሮች፣ የነጥብ ደመናዎች፣ የጊዜ ገደቦች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>ወኪሉ፦ ብቻውን ማድረግ የሚችለው፣ በፍጹም የማይለውጣቸው ንብርብሮች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>ጥያቄው እስኪያልቅ ይጠብቁ፣ ከዚያ ማዋቀሩን እንደገና ያስጀምሩ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>FilterMateን ለኮምፒውተሬና ለውሂቤ እንዳዋቅር እርዳኝ፦ ይህ ፕሮጀክት ምን እንደያዘ ተመልከት፣ ጥቂት ጥያቄዎችን ጠይቀኝ፣ ከዚያ ቅንብሮቹን አቅርብ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>የ{} ማስተካከያ (አልተቀመጠም)</translation>
@@ -1033,6 +1108,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>የወኪል ቅንብሮች</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMateን በወኪሉ አዋቅር…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>የባህሪ እሴቶች እንዲላኩ ፍቀድ</translation>
@@ -1171,6 +1251,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>ለዝግተኛ ኮምፒውተር፣ የሚያጣሩ መሣሪያዎችን ብቻ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>የአንድ ተግባር መሣሪያዎችን ወኪሉ መመሪያዎቹን ሲጭን ብቻ ማቅረብ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>ቀለል ያሉ ጥያቄዎች፣ ለዝግተኛ ወይም አካባቢያዊ ሞዴል፦ የሚያጣሩና የሚያነቡ መሣሪያዎች ሁልጊዜ ይቀርባሉ፤ የProcessing፣ የቅጦች፣ የገጽ አቀማመጦች፣ የአርትዖት፣ የSAM እና የክፍት ውሂብ መሣሪያዎች ወኪሉ የዚያን ተግባር ክህሎት ሲጭን ይመጣሉ። ሌሎች መተግበሪያዎች ሁልጊዜ ሁሉንም መሣሪያዎች ያገኛሉ።</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>ውቅረትና ዳታቤዝ ዳግም አስጀምር</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMateን በወኪሉ አዋቅር</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>ወኪሉ ጥቂት ጥያቄዎችን ይጠይቃል የFilterMate ቅንብሮችንም ያቀርባል</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>የAGENT ክፍል ጠፍቷል፦ በውቅረቱ ውስጥ APP.OPTIONS.AGENT.enabled የሚለውን ያብሩ፣ ከዚያ QGISን እንደገና ያስጀምሩ።</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

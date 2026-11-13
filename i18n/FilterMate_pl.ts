@@ -477,6 +477,81 @@ Uruchomić?</translation>
         <translation>Te ustawienia zmieniły się od chwili, gdy agent je zaproponował: poproś go ponownie.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>Twojego profilu QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>folderu tego projektu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agent chce zastosować umiejętność „{}” ({}). Pochodzi z {}, a nie z FilterMate: najpierw ją przeczytaj. Nie daje agentowi żadnych uprawnień: każda zmiana nadal wymaga zgody zgodnie z Twoimi ustawieniami. Pozwolić agentowi z niej korzystać? Pytanie nie pojawi się ponownie, dopóki umiejętność się nie zmieni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Umiejętność dla agenta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Skonfigurować FilterMate z agentem?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Kilka pytań, potem ustawienia przed i po: nic się nie zmieni, dopóki ich nie zastosujesz. Później: menu Wektor &gt; FilterMate &gt; Skonfiguruj FilterMate z agentem.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Rozpocznij</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Nie teraz</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Konfiguracja rozpoczęta.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Nie teraz: menu uruchomi ją, kiedy zechcesz.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Wygląd: język, motyw, rozmiar panelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Twoje dane: PostgreSQL, rastry, chmury punktów, limity czasu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Agent: co może robić sam, których warstw nigdy nie zmienia</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Poczekaj na zakończenie żądania, a potem ponownie uruchom konfigurację.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Pomóż mi skonfigurować FilterMate dla mojego komputera i moich danych: zobacz, co zawiera ten projekt, zadaj mi kilka pytań, a potem zaproponuj ustawienia.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Edycja warstwy {} (niezapisana)</translation>
@@ -1033,6 +1108,11 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <translation>Ustawienia agenta</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Skonfiguruj FilterMate z agentem…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Zezwalaj na wysyłanie wartości atrybutów</translation>
@@ -1171,6 +1251,16 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Tylko narzędzia filtrujące, dla wolnego komputera</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Udostępniaj narzędzia zadania dopiero po wczytaniu jego instrukcji przez agenta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lżejsze żądania, dla wolnego lub lokalnego modelu: narzędzia filtrujące i odczytujące są zawsze udostępniane; narzędzia Processing, stylów, wydruków, edycji, SAM i otwartych danych pojawiają się, gdy agent wczyta umiejętność danego zadania. Inne aplikacje zawsze otrzymują wszystkie narzędzia.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Kliknij wskaźnik ★ i wybierz 'Dodaj bieżący filtr do ulubionych', aby zapis
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Zresetuj konfigurację i bazę danych</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Skonfiguruj FilterMate z agentem</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Agent zadaje kilka pytań i proponuje ustawienia FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Sekcja AGENT jest wyłączona: włącz APP.OPTIONS.AGENT.enabled w konfiguracji, a potem uruchom ponownie QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

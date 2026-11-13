@@ -33,7 +33,10 @@ from qgis.core import (
     QgsVectorLayer,
     QgsFeature,
     QgsFeatureRequest,
-    QgsExpression
+    QgsExpression,
+    QgsExpressionContext,
+    QgsExpressionContextScope,
+    QgsExpressionContextUtils,
 )
 from qgis.PyQt.QtCore import pyqtSignal, QObject
 
@@ -63,6 +66,26 @@ class ExpressionEvaluationSignals(QObject):
     # Emitted when task is cancelled
     # Args: (layer_id: str)
     cancelled = pyqtSignal(str)
+
+
+def scalar_variables(layer, expression) -> dict:
+    """The values of the variables ``expression`` reads, from the global, project and layer scopes.
+
+    Read on the main thread. A request has no context of its own: without it
+    ``"id" > @seuil`` read the variable as NULL and kept nothing (2026-11-12).
+    Only NULL, booleans, numbers and texts are handed to a worker (never a
+    layer or another project object).
+    """
+    names = QgsExpression(expression or '').referencedVariables()
+    if not names:
+        return {}
+    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
+    values = {}
+    for name in names:
+        value = context.variable(name)
+        if value is None or isinstance(value, (bool, int, float, str)):
+            values[name] = value
+    return values
 
 
 class ExpressionEvaluationTask(QgsTask):
@@ -136,6 +159,8 @@ class ExpressionEvaluationTask(QgsTask):
         self._total_count = 0
         # The layer's fields, read on the main thread with the feature source (2026-10-17)
         self._fields = None
+        # The values of the variables the expression reads, on the main thread too (2026-11-12)
+        self._variables = {}
 
         # Parsed expression cached between _validate_inputs and _build_feature_request
         self._qgs_expr: Optional[QgsExpression] = None
@@ -169,6 +194,7 @@ class ExpressionEvaluationTask(QgsTask):
                     self._feature_source = provider.featureSource()
                     self._total_count = provider.featureCount()
                     self._fields = self.layer.fields()
+                    self._variables = scalar_variables(self.layer, self.expression_string)
             except (RuntimeError, AttributeError) as e:
                 logger.warning(f"Could not prepare feature source for {self.layer_name}: {e}")
                 self._feature_source = None
@@ -257,6 +283,16 @@ class ExpressionEvaluationTask(QgsTask):
             # Geometry flag (can save memory/time if not needed)
             if not self.include_geometry:
                 request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+
+            variables = getattr(self, '_variables', None)
+            if variables:
+                # values read on the main thread (_read_variables): a scope of plain values in the worker
+                scope = QgsExpressionContextScope()
+                for name, value in variables.items():
+                    scope.setVariable(name, value)
+                context = QgsExpressionContext()
+                context.appendScope(scope)
+                request.setExpressionContext(context)
 
             return request
 

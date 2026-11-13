@@ -477,6 +477,81 @@ Futtatja?</translation>
         <translation>Ezek a beállítások megváltoztak, mióta az ügynök javasolta őket: kérje újra.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>az Ön QGIS-profilja</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>ennek a projektnek a mappája</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Az ügynök a(z) „{}” ({}) készséget szeretné követni. Forrása: {}, nem a FilterMate: előbb olvassa el. Nem ad jogot az ügynöknek: minden módosításhoz továbbra is a beállításai szerint kér engedélyt. Engedélyezi, hogy az ügynök használja? Amíg nem változik, nem kérdezünk rá újra.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Készség az ügynöknek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Beállítja a FilterMate-et az ügynökkel?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Néhány kérdés, majd a beállítások előtte és utána: semmi sem változik, amíg nem alkalmazza őket. Később: Vektor menü &gt; FilterMate &gt; FilterMate beállítása az ügynökkel.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Indítás</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Most nem</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>A beállítás elindult.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Most nem: a menüből akkor indíthatja, amikor szeretné.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Megjelenés: nyelv, téma, a panel mérete</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Az Ön adatai: PostgreSQL, raszterek, pontfelhők, időkorlátok</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Az ügynök: mit tehet egyedül, mely rétegeket nem módosítja soha</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Várja meg a kérés végét, majd indítsa újra a beállítást.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Segíts beállítani a FilterMate-et a gépemhez és az adataimhoz: nézd meg, mit tartalmaz ez a projekt, tegyél fel néhány kérdést, aztán javasold a beállításokat.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} szerkesztése (nincs mentve)</translation>
@@ -1033,6 +1108,11 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Az ügynök beállításai</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMate beállítása az ügynökkel…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Attribútumértékek küldésének engedélyezése</translation>
@@ -1171,6 +1251,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Csak a szűrő eszközök, lassú számítógéphez</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Egy feladat eszközeinek felkínálása, miután az ügynök betöltötte annak utasításait</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Könnyebb kérések lassú vagy helyi modellhez: a szűrő és olvasó eszközök mindig elérhetők; a Processing, a stílusok, a nyomtatási elrendezések, a szerkesztés, a SAM és a nyílt adatok eszközei akkor jönnek, amikor az ügynök betölti az adott feladat készségét. A többi alkalmazás mindig minden eszközt megkap.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Kattintson a ★ jelzőre és válassza a 'Jelenlegi szűrő hozzáadása a kedv
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Konfiguráció és adatbázis visszaállítása</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMate beállítása az ügynökkel</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Az ügynök feltesz néhány kérdést, és javaslatot tesz a FilterMate beállításaira</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Az AGENT szakasz ki van kapcsolva: kapcsolja be az APP.OPTIONS.AGENT.enabled beállítást a konfigurációban, majd indítsa újra a QGIS-t.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

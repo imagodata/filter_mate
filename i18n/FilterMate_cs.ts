@@ -477,6 +477,81 @@ Spustit?</translation>
         <translation>Tato nastavení se změnila od chvíle, kdy je agent navrhl: požádejte ho znovu.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>vašeho profilu QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>složky tohoto projektu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agent chce použít dovednost „{}“ ({}). Pochází z {}, nikoli z FilterMate: nejprve si ji přečtěte. Nedává agentovi žádná práva: každá změna se stále vyžaduje ke schválení podle vašeho nastavení. Povolit agentovi ji používat? Dokud se nezmění, nebudete znovu dotázáni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Dovednost pro agenta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Nastavit FilterMate s agentem?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Několik otázek, pak nastavení zobrazená před a po: nic se nezmění, dokud je nepoužijete. Později: nabídka Vektor &gt; FilterMate &gt; Nastavit FilterMate s agentem.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Spustit</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Teď ne</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Nastavení spuštěno.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Teď ne: nabídka ho spustí, kdy budete chtít.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Vzhled: jazyk, motiv, velikost panelu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Vaše data: PostgreSQL, rastry, mračna bodů, časové limity</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Agent: co smí dělat sám, které vrstvy nikdy nemění</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Počkejte na konec požadavku a pak spusťte nastavení znovu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Pomoz mi nastavit FilterMate pro můj počítač a moje data: podívej se, co tento projekt obsahuje, polož mi pár otázek a pak navrhni nastavení.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Úprava vrstvy {} (neuloženo)</translation>
@@ -1033,6 +1108,11 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Nastavení agenta</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Nastavit FilterMate s agentem…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Povolit odesílání hodnot atributů</translation>
@@ -1171,6 +1251,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Jen nástroje, které filtrují, pro pomalý počítač</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Nabízet nástroje úlohy až poté, co agent načte její pokyny</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lehčí požadavky pro pomalý nebo místní model: nástroje, které filtrují a čtou, se nabízejí vždy; nástroje pro Processing, styly, tiskové sestavy, editaci, SAM a otevřená data přicházejí, když agent načte dovednost dané úlohy. Ostatní aplikace dostávají vždy všechny nástroje.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3799,6 +3889,21 @@ Klikněte na indikátor ★ a vyberte „Přidat aktuální filtr do oblíbenýc
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Obnovit konfiguraci a databázi</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Nastavit FilterMate s agentem</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Agent položí několik otázek a navrhne nastavení FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Sekce AGENT je vypnutá: zapněte APP.OPTIONS.AGENT.enabled v konfiguraci a pak restartujte QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

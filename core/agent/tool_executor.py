@@ -85,6 +85,17 @@ class ToolExecutor:
     def __init__(self, tools: Sequence[ToolSpec], handlers: Mapping[str, Handler]) -> None:
         self._tools = {tool.name: tool for tool in tools}
         self._handlers = dict(handlers)
+        self._held: set = set()
+
+    def offer(self, tools: Sequence[ToolSpec]) -> None:
+        """Tools run from now on (a family of tools, once its skill is loaded); their handlers were given already."""
+        for tool in tools:
+            self._tools.setdefault(tool.name, tool)
+            self._held.discard(tool.name)
+
+    def hold(self, names) -> None:
+        """Tools offered later, with the skill of their task: a call of one says so instead of "unknown"."""
+        self._held = set(names)
 
     def spec(self, name: str) -> Optional[ToolSpec]:
         return self._tools.get(name)
@@ -122,6 +133,9 @@ class ToolExecutor:
 
         tool = self._tools.get(call.name)
         handler = self._handlers.get(call.name)
+        if tool is None and call.name in self._held:
+            return failure(f"{call.name} comes with the instructions of its task: call load_skill with the skill of "
+                           f"that task first (its list says which), then call {call.name} again.")
         if tool is None or handler is None:
             return failure(f"Unknown tool {call.name!r}.")
         if call.parse_error:

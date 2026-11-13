@@ -477,6 +477,81 @@ Chạy không?</translation>
         <translation>Các cài đặt này đã thay đổi kể từ khi tác tử đề xuất: hãy yêu cầu tác tử lại.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>hồ sơ QGIS của bạn</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>thư mục của dự án này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Tác tử muốn làm theo kỹ năng “{}” ({}). Kỹ năng này đến từ {}, không phải từ FilterMate: hãy đọc trước. Nó không trao cho tác tử quyền nào: mọi thay đổi vẫn được hỏi theo cài đặt của bạn. Cho phép tác tử sử dụng nó? Sẽ không hỏi lại cho đến khi nó thay đổi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Một kỹ năng cho tác tử</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Thiết lập FilterMate với tác tử?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Vài câu hỏi, sau đó các cài đặt được hiển thị trước và sau: không có gì thay đổi cho đến khi bạn áp dụng. Sau này: menu Vector &gt; FilterMate &gt; Thiết lập FilterMate với tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Bắt đầu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Để sau</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Đã bắt đầu thiết lập.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Để sau: menu sẽ khởi động thiết lập khi bạn muốn.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Giao diện: ngôn ngữ, chủ đề, kích thước bảng điều khiển</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Dữ liệu của bạn: PostgreSQL, raster, đám mây điểm, thời gian chờ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Tác tử: những gì nó được tự làm, những lớp nó không bao giờ thay đổi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Hãy chờ yêu cầu kết thúc, rồi bắt đầu lại thiết lập.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Giúp mình thiết lập FilterMate cho máy tính và dữ liệu của mình: xem dự án này chứa gì, hỏi mình vài câu, rồi đề xuất các cài đặt.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Chỉnh sửa {} (chưa lưu)</translation>
@@ -1033,6 +1108,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Cài đặt tác tử</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Thiết lập FilterMate với tác tử…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Cho phép gửi giá trị thuộc tính</translation>
@@ -1171,6 +1251,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Chỉ các công cụ lọc, cho máy tính chậm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Cung cấp công cụ của một tác vụ khi tác tử tải hướng dẫn của tác vụ đó</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Yêu cầu nhẹ hơn, cho mô hình chậm hoặc cục bộ: các công cụ lọc và đọc luôn được cung cấp; các công cụ Processing, kiểu, bố cục, chỉnh sửa, SAM và dữ liệu mở sẽ có khi tác tử tải kỹ năng của tác vụ đó. Các ứng dụng khác luôn nhận được mọi công cụ.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Nhan vao chi bao ★ va chon 'Them bo loc hien tai vao yeu thich' de luu yeu thi
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Đặt lại cấu hình và cơ sở dữ liệu</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Thiết lập FilterMate với tác tử</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Tác tử hỏi vài câu và đề xuất các cài đặt của FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Phần AGENT đang tắt: bật APP.OPTIONS.AGENT.enabled trong cấu hình, rồi khởi động lại QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

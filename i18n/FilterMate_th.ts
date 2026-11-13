@@ -477,6 +477,81 @@ Run it?</source>
         <translation>การตั้งค่าเหล่านี้เปลี่ยนไปตั้งแต่เอเจนต์เสนอ: โปรดขอให้เอเจนต์เสนออีกครั้ง</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>โปรไฟล์ QGIS ของคุณ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>โฟลเดอร์ของโปรเจกต์นี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>เอเจนต์ต้องการทำตามทักษะ “{}” ({}) ทักษะนี้มาจาก{} ไม่ใช่จาก FilterMate: โปรดอ่านก่อน ทักษะนี้ไม่ได้ให้สิทธิ์ใดแก่เอเจนต์: ทุกการเปลี่ยนแปลงยังคงต้องขออนุญาตตามการตั้งค่าของคุณ อนุญาตให้เอเจนต์ใช้หรือไม่? จะไม่ถามอีกจนกว่าทักษะจะเปลี่ยนแปลง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>ทักษะสำหรับเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>ตั้งค่า FilterMate ด้วยเอเจนต์หรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>มีคำถามไม่กี่ข้อ แล้วจะแสดงการตั้งค่าก่อนและหลัง: จะไม่มีอะไรเปลี่ยนจนกว่าคุณจะนำไปใช้ ภายหลัง: เมนู เวกเตอร์ &gt; FilterMate &gt; ตั้งค่า FilterMate ด้วยเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>เริ่ม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>ไว้ทีหลัง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>เริ่มการตั้งค่าแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>ไว้ทีหลัง: เมนูจะเริ่มการตั้งค่าเมื่อคุณต้องการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>รูปลักษณ์: ภาษา ธีม ขนาดของแผง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>ข้อมูลของคุณ: PostgreSQL, ราสเตอร์, พอยต์คลาวด์, การหมดเวลา</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>เอเจนต์: สิ่งที่ทำได้เอง และเลเยอร์ที่จะไม่เปลี่ยนเลย</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>รอให้คำขอเสร็จสิ้น แล้วเริ่มการตั้งค่าอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>ช่วยฉันตั้งค่า FilterMate สำหรับคอมพิวเตอร์และข้อมูลของฉันหน่อย: ดูว่าโปรเจกต์นี้มีอะไรบ้าง ถามฉันสักสองสามข้อ แล้วเสนอการตั้งค่า</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>การแก้ไข {} (ยังไม่บันทึก)</translation>
@@ -1033,6 +1108,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>การตั้งค่าเอเจนต์</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>ตั้งค่า FilterMate ด้วยเอเจนต์…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>อนุญาตให้ส่งค่าแอตทริบิวต์</translation>
@@ -1171,6 +1251,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>เฉพาะเครื่องมือกรอง สำหรับคอมพิวเตอร์ที่ช้า</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>เสนอเครื่องมือของงานเมื่อเอเจนต์โหลดคำแนะนำของงานนั้นแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>คำขอที่เบาลง สำหรับโมเดลที่ช้าหรือโมเดลภายในเครื่อง: เครื่องมือกรองและอ่านจะถูกเสนอเสมอ ส่วนเครื่องมือของ Processing, สไตล์, เลย์เอาต์, การแก้ไข, SAM และข้อมูลเปิดจะมาเมื่อเอเจนต์โหลดทักษะของงานนั้น แอปพลิเคชันอื่นจะได้รับเครื่องมือทั้งหมดเสมอ</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>รีเซ็ตการกำหนดค่าและฐานข้อมูล</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>ตั้งค่า FilterMate ด้วยเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>เอเจนต์จะถามคำถามสองสามข้อและเสนอการตั้งค่าของ FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>ส่วน AGENT ปิดอยู่: เปิด APP.OPTIONS.AGENT.enabled ในการกำหนดค่า แล้วรีสตาร์ต QGIS</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

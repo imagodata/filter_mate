@@ -153,6 +153,7 @@ def _controller_class(warning):
         'QgsRectangle': lambda extent: extent, 'QColor': lambda *args: args, 'QTimer': MagicMock(),
         'QgsCoordinateTransform': MagicMock(), 'QgsProject': MagicMock(), 'show_warning': warning,
         'logger': MagicMock(), 'WHOLE_LAYER': object(),
+        '_with_layer_context': lambda request, layer: request,  # variables: tested in QGIS
     }
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(_MODULE), 'exec'), namespace)
     methods = {name: namespace[name] for name in _METHODS}

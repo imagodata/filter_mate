@@ -477,6 +477,81 @@ Ajetaanko?</translation>
         <translation>Nämä asetukset ovat muuttuneet sen jälkeen, kun agentti ehdotti niitä: pyydä sitä uudelleen.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>QGIS-profiilistasi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>tämän projektin kansiosta</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Agentti haluaa noudattaa taitoa ”{}” ({}). Se on peräisin {}, ei FilterMatesta: lue se ensin. Se ei anna agentille mitään oikeuksia: jokaisesta muutoksesta kysytään edelleen asetustesi mukaisesti. Annetaanko agentin käyttää sitä? Tätä ei kysytä uudelleen ennen kuin se muuttuu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Taito agentille</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Määritetäänkö FilterMate agentin avulla?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Muutama kysymys, sitten asetukset ennen ja jälkeen: mikään ei muutu ennen kuin otat ne käyttöön. Myöhemmin: valikko Vektori &gt; FilterMate &gt; Määritä FilterMate agentin avulla.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Aloita</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Ei nyt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Määritys aloitettu.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Ei nyt: valikosta voit aloittaa sen milloin haluat.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Ulkoasu: kieli, teema, paneelin koko</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Omat tietosi: PostgreSQL, rasterit, pistepilvet, aikakatkaisut</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Agentti: mitä se saa tehdä yksin, mihin tasoihin se ei koskaan koske</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Odota, että pyyntö päättyy, ja aloita sitten määritys uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Auta minua määrittämään FilterMate tietokoneelleni ja tiedoilleni: katso, mitä tämä projekti sisältää, kysy minulta muutama kysymys ja ehdota sitten asetuksia.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Tason {} muokkaus (tallentamatta)</translation>
@@ -1033,6 +1108,11 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Agentin asetukset</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Määritä FilterMate agentin avulla…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Salli attribuuttiarvojen lähettäminen</translation>
@@ -1171,6 +1251,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Vain suodattavat työkalut, hitaalle tietokoneelle</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Tarjoa tehtävän työkalut vasta, kun agentti lataa sen ohjeet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Kevyemmät pyynnöt hitaalle tai paikalliselle mallille: suodattavat ja lukevat työkalut tarjotaan aina; Processingin, tyylien, taittojen, muokkauksen, SAMin ja avoimen datan työkalut tulevat, kun agentti lataa kyseisen tehtävän taidon. Muut sovellukset saavat aina kaikki työkalut.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Napsauta ★-ilmaisinta ja valitse 'Lisaa nykyinen suodatin suosikkeihin' tallen
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Palauta asetukset ja tietokanta</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Määritä FilterMate agentin avulla</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Agentti kysyy muutaman kysymyksen ja ehdottaa FilterMaten asetuksia</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>AGENT-osio on poistettu käytöstä: ota APP.OPTIONS.AGENT.enabled käyttöön konfiguraatiossa ja käynnistä sitten QGIS uudelleen.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

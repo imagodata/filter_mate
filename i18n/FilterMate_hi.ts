@@ -477,6 +477,81 @@ Run it?</source>
         <translation>एजेंट द्वारा प्रस्तावित किए जाने के बाद ये सेटिंग्स बदल गई हैं: उससे फिर से पूछें।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>आपकी QGIS प्रोफ़ाइल</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>इस प्रोजेक्ट का फ़ोल्डर</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>एजेंट कौशल &quot;{}&quot; ({}) का पालन करना चाहता है। इसका स्रोत {} है, FilterMate नहीं: पहले इसे पढ़ें। यह एजेंट को कोई अधिकार नहीं देता: हर बदलाव के लिए अब भी आपकी सेटिंग्स के अनुसार पूछा जाएगा। क्या एजेंट को इसका उपयोग करने दें? जब तक यह नहीं बदलता, दोबारा नहीं पूछा जाएगा।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>एजेंट के लिए एक कौशल</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>एजेंट के साथ FilterMate सेट अप करें?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>कुछ प्रश्न, फिर पहले और बाद की सेटिंग्स दिखाई जाती हैं: जब तक आप लागू नहीं करते, कुछ नहीं बदलता। बाद में: मेनू वेक्टर &gt; FilterMate &gt; एजेंट के साथ FilterMate सेट अप करें।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>शुरू करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>अभी नहीं</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>सेटअप शुरू हो गया।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>अभी नहीं: जब आप चाहें, मेनू इसे शुरू करता है।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>रूप: भाषा, थीम, पैनल का आकार</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>आपका डेटा: PostgreSQL, रास्टर, पॉइंट क्लाउड, टाइमआउट</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>एजेंट: यह अकेले क्या कर सकता है, कौन-सी लेयर यह कभी नहीं बदलता</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>अनुरोध पूरा होने तक प्रतीक्षा करें, फिर सेटअप दोबारा शुरू करें।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>मेरे कंप्यूटर और मेरे डेटा के लिए FilterMate सेट अप करने में मेरी मदद करो: देखो कि इस प्रोजेक्ट में क्या है, मुझसे कुछ सवाल पूछो, फिर सेटिंग्स सुझाओ।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>{} का संपादन (सहेजा नहीं गया)</translation>
@@ -1033,6 +1108,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>एजेंट सेटिंग्स</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>एजेंट के साथ FilterMate सेट अप करें…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>विशेषता मान भेजने की अनुमति दें</translation>
@@ -1171,6 +1251,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>धीमे कंप्यूटर के लिए, केवल फ़िल्टर करने वाले टूल</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>किसी कार्य के टूल तभी दें जब एजेंट उसके निर्देश लोड कर ले</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>हल्के अनुरोध, किसी धीमे या स्थानीय मॉडल के लिए: फ़िल्टर करने और पढ़ने वाले टूल हमेशा दिए जाते हैं; Processing, शैलियों, लेआउट, संपादन, SAM और ओपन डेटा के टूल तब आते हैं जब एजेंट उस कार्य का कौशल लोड करता है। अन्य एप्लिकेशन को हमेशा सभी टूल मिलते हैं।</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>कॉन्फ़िगरेशन और डेटाबेस रीसेट करें</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>एजेंट के साथ FilterMate सेट अप करें</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>एजेंट कुछ प्रश्न पूछता है और FilterMate की सेटिंग्स सुझाता है</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>AGENT अनुभाग बंद है: कॉन्फ़िगरेशन में APP.OPTIONS.AGENT.enabled चालू करें, फिर QGIS पुनः आरंभ करें।</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

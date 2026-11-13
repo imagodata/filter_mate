@@ -42,9 +42,10 @@ from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_excha
 from agent.settings_reference import (  # noqa: E402
     describe as describe_settings, get as get_setting, plan as plan_settings, read_settings, set_leaf)
 from agent.performance import summary as performance_summary  # noqa: E402
-from agent.skills import load as load_skill  # noqa: E402
+from agent.families import hidden_tools, unlocked  # noqa: E402
+from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
-from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog  # noqa: E402
+from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog, skill_tool  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
 
 CASES_PATH = Path(__file__).with_name("agent_eval_cases.json")
@@ -105,6 +106,7 @@ class SimulatedProject:
         self.selected: List[str] = list(setup.get("selected", ["communes"]))
         self.empty: List[str] = list(setup.get("empty", []))  # layers a relation filter leaves with no feature
         self.settings: Dict[str, Any] = {}  # the configuration of FilterMate: its defaults, then what was changed
+        self.offered: set = set()  # the tools of the case (load_skill offers the skills they allow)
 
     def _get_setting(self, args):
         try:
@@ -494,7 +496,11 @@ class SimulatedProject:
                 changed_only=bool(args.get("changed_only")), limit=args.get("limit", 25)),
             "get_setting": self._get_setting,
             "change_settings": self._change_settings,
-            "load_skill": lambda args: load_skill(args["name"]),
+            "load_skill": lambda args: load_skill(args["name"], self.offered),
+            "run_pyqgis": lambda args: {"ok": True, "printed": "", "result": None},
+            "create_widget": lambda args: {"widget": {"id": "w1", "kind": args["kind"], "layer": args["layer"],
+                                                      "field": args.get("field", "")}, "widgets": []},
+            "remove_widget": lambda args: {"widgets": []},
             "export_settings_profile": lambda args: {"path": f"profiles/{args['name']}.json", "name": args["name"],
                                                      "settings": 0},
             "apply_settings_profile": lambda args: {"changed": [], "unchanged": [], "profile": args.get("name", "")},
@@ -637,14 +643,42 @@ def fits(case: Dict[str, Any], names) -> bool:
     return any(all(step["tool"] in names for step in steps) for steps in (case.get("expect") or [[]]))
 
 
-def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False) -> Dict[str, Any]:
+def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
+             prompt: str = "", families: bool = False) -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict. ``filtering``: the tools a local model gets by default."""
     project = SimulatedProject(case.get("setup"))
-    # Off by default (the expert mode), or nothing to draw in a simulated project (view_map).
-    tools = tuple(tool for tool in chat_tools() if tool.name not in ("run_pyqgis", "view_map")
+    # Off by default (the expert mode: a case says "expert": true to turn it on), or nothing to draw in a simulated
+    # project (view_map).
+    left_out = ("view_map",) if case.get("expert") else ("run_pyqgis", "view_map")
+    tools = tuple(tool for tool in chat_tools() if tool.name not in left_out
                   and (not filtering or tool.name in FILTERING_TOOLS))
-    session = AgentSession(provider, tools, SYSTEM_PROMPT + (FILTERING_NOTE if filtering else ""), AgentLimits())
-    executor = ToolExecutor(tools, project.handlers())
+    offered = {tool.name for tool in tools}
+    tools = tuple(skill_tool(offered) if tool.name == "load_skill" else tool for tool in tools)
+    hidden: Dict[str, Any] = {}
+    if families:  # the tools of a task offered once its skill is loaded (core/agent/families.py)
+        names = hidden_tools(tools, SKILLS.values())
+        hidden = {tool.name: tool for tool in tools if tool.name in names}
+        tools = tuple(tool for tool in tools if tool.name not in names)
+    session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else ""),
+                           AgentLimits())
+    project.offered = offered
+    handlers_of_case = project.handlers()
+    if hidden:
+        load = handlers_of_case["load_skill"]
+
+        def load_and_offer(arguments):
+            answer = load(arguments)
+            skill = SKILLS.get(arguments.get("name", ""))
+            names = sorted(unlocked(skill, set(hidden))) if skill is not None else []
+            if names:
+                offered_now = [hidden.pop(name) for name in names]
+                session.offer(offered_now)
+                executor.offer(offered_now)
+                answer = dict(answer, tools_now_offered=names)
+            return answer
+        handlers_of_case["load_skill"] = load_and_offer
+    executor = ToolExecutor(tools, handlers_of_case)
+    executor.hold(hidden)
     # As the chat sends it: the state of the project after the request.
     handlers = project.handlers()
     context = project_summary(handlers["list_layers"]({})["layers"],
@@ -664,9 +698,16 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False)
             "cache_write_tokens": session.usage.cache_write_tokens}
 
 
+SKILLS_PATH = Path(__file__).resolve().parent.parent / "skills"
+
+
 def load_cases(only: Optional[Sequence[str]] = None) -> List[Dict[str, Any]]:
+    """The shared cases, then those of each skill (skills/<name>/evals.json)."""
     with open(CASES_PATH, encoding="utf-8") as stream:
         cases = json.load(stream)["cases"]
+    for evals in sorted(SKILLS_PATH.glob("*/evals.json")):
+        with open(evals, encoding="utf-8") as stream:
+            cases += json.load(stream)["cases"]
     return [case for case in cases if not only or case["id"] in only]
 
 
@@ -678,6 +719,10 @@ def expected_script(case: Dict[str, Any]) -> List[Dict[str, Any]]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--live", action="store_true", help="call the provider (costs money)")
+    parser.add_argument("--families", action="store_true",
+                        help="the tools of a task offered once its skill is loaded (the option of the agent)")
+    parser.add_argument("--prompt", choices=("current", "skills"), default="current",
+                        help="skills: the system prompt with the domains taken out into skills (the A/B of the skills)")
     parser.add_argument("--provider", choices=sorted(PRESETS), default="anthropic")
     parser.add_argument("--model", help="model name; required with --live")
     parser.add_argument("--base-url", help="instead of the provider's usual address")
@@ -695,12 +740,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         api_key=os.environ.get(KEY_VARIABLE, "") if args.live else ""))
     results = []
     filtering = args.tools == "filtering"
+    legacy_prompt = ""
+    if args.prompt == "skills":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from agent_eval_prompts import SKILLS_SYSTEM_PROMPT  # noqa: E402
+        legacy_prompt = SKILLS_SYSTEM_PROMPT
     for case in load_cases(args.case):
         if filtering and not fits(case, FILTERING_TOOLS):
             continue
         transport = UrllibTransport() if args.live else ScriptedTransport(expected_script(case))
         started = time.monotonic()
-        result = run_case(case, provider, transport, filtering)
+        result = run_case(case, provider, transport, filtering, prompt=legacy_prompt, families=args.families)
         result["seconds"] = round(time.monotonic() - started, 1)
         results.append(result)
         status = "PASS" if result["passed"] else "FAIL"

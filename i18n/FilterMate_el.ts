@@ -477,6 +477,81 @@ Run it?</source>
         <translation>Αυτές οι ρυθμίσεις άλλαξαν από τότε που τις πρότεινε ο πράκτορας: ζητήστε του τις ξανά.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>your QGIS profile</source>
+        <translation>το προφίλ σας στο QGIS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="425"/>
+        <source>the folder of this project</source>
+        <translation>τον φάκελο αυτού του έργου</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="426"/>
+        <source>The agent wants to follow the skill &quot;{}&quot; ({}). It comes from {}, not from FilterMate: read it before. It gives the agent no right: every change stays asked as your settings say. Let the agent use it? It is not asked again until it changes.</source>
+        <translation>Ο πράκτορας θέλει να ακολουθήσει τη δεξιότητα «{}» ({}). Προέρχεται από {}, όχι από το FilterMate: διαβάστε την πρώτα. Δεν δίνει κανένα δικαίωμα στον πράκτορα: κάθε αλλαγή εξακολουθεί να ζητείται όπως ορίζουν οι ρυθμίσεις σας. Να επιτραπεί στον πράκτορα να τη χρησιμοποιήσει; Δεν θα ερωτηθείτε ξανά μέχρι να αλλάξει.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="430"/>
+        <source>A skill for the agent</source>
+        <translation>Μια δεξιότητα για τον πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Ρύθμιση του FilterMate με τον πράκτορα;</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Μερικές ερωτήσεις και μετά οι ρυθμίσεις πριν και μετά: τίποτα δεν αλλάζει μέχρι να τις εφαρμόσετε. Αργότερα: μενού Διανυσματικό &gt; FilterMate &gt; Ρύθμιση του FilterMate με τον πράκτορα.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Έναρξη</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Όχι τώρα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Η ρύθμιση ξεκίνησε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Όχι τώρα: το μενού την ξεκινά όποτε θέλετε.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Εμφάνιση: γλώσσα, θέμα, μέγεθος του πίνακα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Τα δεδομένα σας: PostgreSQL, ράστερ, νέφη σημείων, χρονικά όρια</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Ο πράκτορας: τι μπορεί να κάνει μόνος του, ποια επίπεδα δεν αλλάζει ποτέ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Περιμένετε να τελειώσει το αίτημα και μετά ξεκινήστε ξανά τη ρύθμιση.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Βοήθησέ με να ρυθμίσω το FilterMate για τον υπολογιστή μου και τα δεδομένα μου: δες τι περιέχει αυτό το έργο, κάνε μου μερικές ερωτήσεις και μετά πρότεινε τις ρυθμίσεις.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Επεξεργασία του {} (μη αποθηκευμένη)</translation>
@@ -1033,6 +1108,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ρυθμίσεις πράκτορα</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Ρύθμιση του FilterMate με τον πράκτορα…</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
         <source>Allow attribute values to be sent</source>
         <translation>Να επιτρέπεται η αποστολή τιμών χαρακτηριστικών</translation>
@@ -1171,6 +1251,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="888"/>
         <source>Only the tools that filter, for a slow computer</source>
         <translation>Μόνο τα εργαλεία φιλτραρίσματος, για αργό υπολογιστή</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Προσφορά των εργαλείων μιας εργασίας μόλις ο πράκτορας φορτώσει τις οδηγίες της</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Ελαφρύτερα αιτήματα, για αργό ή τοπικό μοντέλο: τα εργαλεία φιλτραρίσματος και ανάγνωσης προσφέρονται πάντα· εκείνα του Processing, των στυλ, των διατάξεων, της επεξεργασίας, του SAM και των ανοικτών δεδομένων έρχονται όταν ο πράκτορας φορτώσει τη δεξιότητα της αντίστοιχης εργασίας. Οι άλλες εφαρμογές λαμβάνουν πάντα όλα τα εργαλεία.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -3800,6 +3890,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Επαναφορά διαμόρφωσης και βάσης δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Ρύθμιση του FilterMate με τον πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Ο πράκτορας κάνει μερικές ερωτήσεις και προτείνει τις ρυθμίσεις του FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Η ενότητα AGENT είναι απενεργοποιημένη: ενεργοποιήστε το APP.OPTIONS.AGENT.enabled στη διαμόρφωση και μετά επανεκκινήστε το QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>
