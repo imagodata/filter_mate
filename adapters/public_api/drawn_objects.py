@@ -42,6 +42,9 @@ SIMILAR_APPEARANCE_MIN = 0.8
 SIMILAR_RATIO = (0.5, 2.0)
 # The area searched is cut in windows of 1024 pixels at the cell of the example; past this many it is refused.
 MAX_SEARCH_WINDOWS = 64
+# Objects of the dock taken as examples of similar_objects, the last ones drawn: each may need a window of its
+# own, drawn by SAM (about 2 s) before the search starts.
+MAX_EXAMPLES = 8
 # Windows overlap by twice this many pixels, and a place nearer than this to the edge of its window is left to the
 # next window (unless the edge is the raster's): an object across an edge is drawn whole by one of them.
 WINDOW_MARGIN_PIXELS = 32
@@ -405,7 +408,7 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
                     name: str = '') -> Dict[str, Any]:
     """SAM finds on ``raster`` the objects that look like an example, as a new polygon layer of the project.
 
-    The examples (one selected feature of ``example_layer``; with ``use_dock_object`` every object
+    The examples (one selected feature of ``example_layer``; with ``use_dock_object`` the last :data:`MAX_EXAMPLES` objects
     drawn on this raster in the dock, from ``dock_objects`` by layer id; or ``example_wkt``) are drawn
     by SAM; then, window by window over the area searched (the extent given, or the visible map), the
     places whose encoder features look like one of them are drawn, and those of an area within
@@ -450,7 +453,8 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
         if not drawn_here:
             raise ValueError(f"no object is drawn on '{image_name}' in the FilterMate dock: map_context lists the "
                              "rasters that have some (drawn_objects)")
-        geometries = [_example_geometry(image, '', wkt, '') for wkt in drawn_here]  # in the CRS of the raster
+        # in the CRS of the raster
+        geometries = [_example_geometry(image, '', wkt, '') for wkt in drawn_here[-MAX_EXAMPLES:]]
     else:
         geometries = [_example_geometry(image, example_layer, example_wkt, example_crs)]
     prompts = [prompt for prompt in (seg.prompt_of(geometry) for geometry in geometries) if prompt is not None]
@@ -489,16 +493,24 @@ def similar_objects(raster: str, example_layer: str = '', use_dock_object: bool 
     found, examined, done, stopped_early = [], 0, 0, False
     # Qt serves events while the windows are drawn: a REST call queued meanwhile is refused, not run nested.
     with running("similar_objects"):
-        embeddings: Dict[Tuple[float, float, float, int], Any] = {}
+        def key_of(window) -> Tuple[float, float, float, int]:
+            return (window.x_min, window.y_max, window.cell, window.size)
 
         def embedded(window):
-            key = (window.x_min, window.y_max, window.cell, window.size)
-            if key not in embeddings:
-                embeddings[key] = model.embed(seg.image_to_rgb(seg.render_window(settings, image, window, lambda: False)))
-            return embeddings[key]
+            # Only the first window is kept (about 16 MB each): it is the first one searched too.
+            if kept_embedding and kept_embedding[0] == key_of(window):
+                return kept_embedding[1]
+            embedding = model.embed(seg.image_to_rgb(seg.render_window(settings, image, window, lambda: False)))
+            if not kept_embedding:
+                kept_embedding.extend((key_of(window), embedding))
+            return embedding
 
+        kept_embedding: List[Any] = []
         references = []  # (geometry as SAM drew it, its pooled features, its score), one per example drawn
         for window, indexes in planned:
+            if references and time.monotonic() - begin > BUDGET_SECONDS:
+                stopped_early = True  # the examples drawn so far are the examples
+                break
             embedding = embedded(window)
             for index in indexes:
                 reference, score, mask = seg.prompt_object_mask(model, embedding, window, prompts[index], crs_wkt)

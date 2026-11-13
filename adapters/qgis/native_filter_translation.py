@@ -53,7 +53,7 @@ _BOOL_ID, _INT_IDS, _DOUBLE_ID, _STRING_ID = 1, (2, 3, 4, 5), 6, 10
 _POSTGRES_TEXT = ('text', 'varchar')
 # PostgreSQL server encodings that hold neither the long s (U+017F) nor the Kelvin sign (U+212A)
 _NO_OTHER_CASES = ('LATIN1', 'LATIN2', 'LATIN9', 'WIN1250', 'WIN1251', 'WIN1252')
-_SERVER_ENCODINGS = {}  # connection (without its password) -> server_encoding, read once per session
+_SERVER_ENCODINGS = {}  # connection info of the layer -> server_encoding, read once per session
 _NOT_PLAIN_TEXT = ('json', 'jsonb')
 
 
@@ -143,7 +143,7 @@ def server_encoding(layer):
         key = uri.connectionInfo(False)
         if key not in _SERVER_ENCODINGS:
             from qgis.core import QgsProviderRegistry
-            connection = QgsProviderRegistry.instance().providerMetadata('postgres').createConnection(uri.uri(), {})
+            connection = QgsProviderRegistry.instance().providerMetadata('postgres').createConnection(uri.uri(False), {})
             rows = connection.executeSql('SHOW server_encoding')
             _SERVER_ENCODINGS[key] = str(rows[0][0]).strip().upper()
         return _SERVER_ENCODINGS[key]

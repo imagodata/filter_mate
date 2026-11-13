@@ -901,8 +901,8 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Find with SAM, on a raster, the objects that look like an example; adds them as a layer.
 
-        SAM draws the examples (with use_dock_object, every object drawn on the raster in the dock), then looks,
-        window by window over the area searched, for the places whose encoder features look like one of them,
+        SAM draws the examples (with use_dock_object, the objects drawn on the raster in the dock, the last 8 at
+        most), then looks, window by window over the area searched, for the places whose encoder features look like one of them,
         draws them, and keeps those of 0.5 to 2 times their area (and shape) that look like one of them. The new
         polygon layer is a temporary GeoPackage with appearance (0 to 1, how much an object looks like the
         nearest example) and area_m2. Measured on buildings of a 25 cm orthophoto: about half of what it finds is

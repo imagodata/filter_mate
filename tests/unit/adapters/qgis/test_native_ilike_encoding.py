@@ -26,7 +26,7 @@ def translation():
 
 
 def _layer(info="host=db dbname=gis"):
-    uri = types.SimpleNamespace(connectionInfo=lambda expand=True: info, uri=lambda: info + " table=t")
+    uri = types.SimpleNamespace(connectionInfo=lambda expand=True: info, uri=lambda expand=True: info + " table=t")
     return types.SimpleNamespace(dataProvider=lambda: types.SimpleNamespace(uri=lambda: uri))
 
 

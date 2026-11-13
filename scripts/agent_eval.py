@@ -442,7 +442,8 @@ class SimulatedProject:
             return {"layer": {"layer_id": added["id"], "name": name, "layer_kind": "vector", "provider_type": "ogr",
                               "crs_authid": "EPSG:2154", "feature_count": 9},
                     "objects": 9, "examined": 31, "windows": 2, "windows_planned": 2, "stopped_early": False,
-                    "seconds": 9.5, "example": {"sam_score": 0.94, "area_m2": 142.0},
+                    "seconds": 9.5, "examples": {"count": 1, "sam_score": {"median": 0.94, "minimum": 0.94},
+                                                  "area_m2": {"minimum": 142.0, "maximum": 142.0}},
                     "appearance": {"median": 0.86, "minimum": 0.8}}
 
         def ask_user(args):
