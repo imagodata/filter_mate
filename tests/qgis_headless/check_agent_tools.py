@@ -823,6 +823,20 @@ def check_processing(project, gpkg):
     clipped = tools.run_algorithm("native:extractbyextent", {"INPUT": "communes",
                                                              "EXTENT": [650000.5, 6859999, 650010.5, 6860001]})
     check("processing: an extent as four numbers", clipped["layers"][0]["feature_count"] == 10, clipped)
+    # 2026-11-13: a merge added "layer" and "path" to its output, the path the source of each layer.
+    merge = tools._registry().algorithmById("native:mergevectorlayers")
+    if merge is not None and any(item.name() == "ADD_SOURCE_FIELDS" for item in merge.parameterDefinitions()):
+        offered = [row["name"] for row in tools.describe_algorithm("native:mergevectorlayers")["parameters"]]
+        fields = []
+        for given in ({"LAYERS": ["communes"]}, {"LAYERS": ["communes"], "ADD_SOURCE_FIELDS": True}):
+            merged = project.mapLayer(tools.run_algorithm("native:mergevectorlayers", given)["layers"][0]["layer_id"])
+            fields.append([field.name() for field in merged.fields()])
+        check("processing: a merge never writes the sources of its layers, whatever is given",
+              "ADD_SOURCE_FIELDS" not in offered and not any({"path", "layer"} & set(names) for names in fields)
+              and all("pop" in names for names in fields), (offered, fields))
+    else:  # QGIS before the option: its output always holds the sources
+        check("processing: a merge that would write the sources of its layers is refused",
+              refused(tools.run_algorithm, "native:mergevectorlayers", {"LAYERS": ["communes"]}))
     stats_id = "native:basicstatisticsforfields" if tools._registry().algorithmById(
         "native:basicstatisticsforfields") else "qgis:basicstatisticsforfields"
     stats = tools.run_algorithm(stats_id, {"INPUT_LAYER": "communes", "FIELD_NAME": "pop"})

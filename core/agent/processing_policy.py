@@ -14,11 +14,12 @@ accepted, not of what is refused:
   rows of an interpolation (each a layer of the project), and plain values. Any other type (a file or a folder, a
   database connection, a layout, a map theme, a PROJ operation, which names a grid by path or URL, or a type this
   list does not know) is refused when required and stays unset when optional. An output is a temporary layer;
-- the few algorithms that make a layer from code or SQL a model would write, or send data out, are refused by name.
+- the few algorithms that make a layer from code or SQL a model would write, or send data out, are refused by name;
+- a parameter that would write the sources of the layers in the output is set by FilterMate, never by the model.
 """
 from __future__ import annotations
 
-from typing import Iterable, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, Optional, Sequence, Tuple
 
 PROVIDERS = ("native", "qgis")
 # What makes a layer: FilterMate gives each a temporary file, never a path from the model.
@@ -51,18 +52,28 @@ VALUE_ALGORITHMS = frozenset({
     "qgis:rasterlayerstatistics", "native:rasterlayerproperties", "native:rasterlayeruniquevaluesreport",
     "native:listuniquevalues", "qgis:listuniquevalues", "native:rastersurfacevolume",
 })
-# They make a layer, from SQL or Python written by the model, or from a database or a web server, or send data out.
-DENIED = frozenset({
-    "qgis:executesql", "native:executesql", "qgis:advancedpythonfieldcalculator",
-    "qgis:postgisexecuteandloadsql", "native:postgisexecuteandloadsql",
-    "native:httprequest", "native:filedownloader", "native:downloadvectortiles",
-    "native:batchnominatimgeocoder",  # sends the addresses of a layer to the Nominatim server of OpenStreetMap
-    "native:openurl",  # hands a URL or a file to the system (it makes no layer, refused by name all the same)
-    "native:zonalstatistics",  # "in place": it adds fields to the source of its input
-    # A layer of the sources of the layers given: the paths of this machine, the hosts and users of its databases,
-    # which the model would then read (audit of 12/11/2026)
-    "native:exportlayersinformation",
-})
+_CODE = "it runs code or SQL written by the model"
+_NETWORK = "it sends a request out of this machine, to an address or with data the model chose"
+_SOURCES = ("it writes the source of each layer (a path of this machine, the host and the user of a database) in a "
+            "layer the model would then read")
+# Refused by name, each with what it does: they make a layer from SQL or Python written by the model, or from a
+# database or a web server, or send data out.
+DENIED: Dict[str, str] = {
+    "qgis:executesql": _CODE, "native:executesql": _CODE, "qgis:advancedpythonfieldcalculator": _CODE,
+    "qgis:postgisexecuteandloadsql": _CODE, "native:postgisexecuteandloadsql": _CODE,
+    "native:httprequest": _NETWORK, "native:filedownloader": _NETWORK, "native:downloadvectortiles": _NETWORK,
+    "native:batchnominatimgeocoder": _NETWORK,  # the addresses of a layer, to the Nominatim server of OpenStreetMap
+    # It makes no layer, refused by name all the same.
+    "native:openurl": "it hands a URL or a file to the system",
+    "native:zonalstatistics": "it adds fields to the source of its input, in place",
+    "native:exportlayersinformation": _SOURCES,  # audit of 12/11/2026
+}
+# Set by FilterMate whatever the model gives, and not offered to it. An algorithm is refused where QGIS has no such
+# parameter. native:mergevectorlayers adds "layer" and "path" (the source of each layer) to its output unless
+# ADD_SOURCE_FIELDS is off (seen in QGIS 3.44 on 13/11/2026; older versions always add them).
+FORCED: Dict[str, Dict[str, Any]] = {
+    "native:mergevectorlayers": {"ADD_SOURCE_FIELDS": False},
+}
 
 Parameter = Tuple[str, str, bool]  # name, type, optional
 
@@ -73,7 +84,9 @@ def refusal(algorithm_id: str, provider_id: str, parameters: Sequence[Parameter]
         return (f"only the algorithms of QGIS itself (providers {', '.join(PROVIDERS)}) can be run, not those of "
                 f"'{provider_id}'")
     if algorithm_id in DENIED:
-        return "it runs code, SQL or a network request written by the model"
+        return DENIED[algorithm_id]
+    if any(name not in {given for given, _, _ in parameters} for name in forced_values(algorithm_id)):
+        return f"in this version of QGIS {_SOURCES}"
     if deprecated:
         return "it is deprecated in this version of QGIS"
     forbidden = sorted({kind for _, kind, optional in parameters if not optional and kind not in GIVEN_TYPES
@@ -86,6 +99,11 @@ def refusal(algorithm_id: str, provider_id: str, parameters: Sequence[Parameter]
     if not any(kind in LAYER_DESTINATIONS for _, kind, _ in parameters) and algorithm_id not in VALUE_ALGORITHMS:
         return "it makes no layer: it acts on the project or on a data source in place"
     return ""
+
+
+def forced_values(algorithm_id: str) -> Dict[str, Any]:
+    """The parameters of ``algorithm_id`` FilterMate sets itself, with their values; {} for most algorithms."""
+    return dict(FORCED.get(algorithm_id, {}))
 
 
 def matches(query: str, texts: Iterable[Optional[str]]) -> bool:
