@@ -30,17 +30,19 @@ def entry_name(source: Source) -> str:
 
 def _bounded(text: str, limit: int) -> str:
     """``text`` as one item of the list of load_skill: ``;`` parts the items, so it becomes ``,``."""
-    return text.replace(";", ",").strip()[:limit]
+    return text.replace(";", ",").strip()[:limit].strip()
 
 
 def _title(source: Source) -> str:
-    """The title the user gave, unless one of its characters does not show: the host of the address stands for it."""
+    """The title the user gave, unless it is empty or one of its characters does not show: the host of the address
+    stands for it, and the id of the source when the host is empty or hides a character too."""
     if not source.title.strip() or hidden_character(source.title) is not None:
         try:
             host = urlsplit(source.address).hostname
         except ValueError:
             host = None
-        return host or source.id
+        # The host is the user's text too (an address may hold a character that does not show): the id is ours.
+        return host if host and hidden_character(host) is None else source.id
     return source.title
 
 

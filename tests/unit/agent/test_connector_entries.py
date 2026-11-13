@@ -20,10 +20,21 @@ def test_each_enabled_connector_is_an_entry_with_its_title_and_note():
     ("Team​data", "mcp.example.org: " + USER_ADDED),  # a character that does not show: the host instead
     ("\U000e0041bc", "mcp.example.org: " + USER_ADDED),
     ("T" * 150, "T" * 100 + ": " + USER_ADDED),            # skills.MAX_TITLE
+    ("T" * 99 + " x" * 5, "T" * 99 + ": " + USER_ADDED),   # a cut landing on a space leaves no trailing space
 ])
 def test_a_connector_the_user_added_is_named_by_its_own_title_bounded(title, line):
     source = Source("mcp_mcp_example_org_mcp_abc123", title, "mcp", "https://mcp.example.org/mcp")
     assert connector_entries([source])[0].line == line
+
+
+@pytest.mark.parametrize("title, address, line", [
+    ("\u200b", "https://h\u200b.example/mcp", "id_x: " + USER_ADDED),  # the host hides a character too: the id
+    ("Team\u200bdata", "https://h\u200b.example/mcp", "id_x: " + USER_ADDED),
+    ("Team\u200bdata", "https://", "id_x: " + USER_ADDED),             # an address with no host: the id
+    ("   ", "https://mcp.example.org/mcp", "mcp.example.org: " + USER_ADDED),  # a title of spaces: the host
+])
+def test_the_fallback_never_shows_a_hidden_character_or_nothing(title, address, line):
+    assert connector_entries([Source("id_x", title, "mcp", address)])[0].line == line
 
 
 def test_load_skill_lists_the_connectors_after_the_skills():
@@ -37,7 +48,7 @@ def test_load_skill_lists_the_connectors_after_the_skills():
 
 def test_load_skill_for_the_connectors_alone():
     tool = skill_tool(None, connectors=[("connector-a", "A: data")], with_skills=False)
-    assert tool.input_schema["properties"]["name"]["enum"] == ["connector-a"] and "configuration" not in tool.description
+    assert tool.input_schema["properties"]["name"]["enum"] == ["connector-a"] and " Skills:" not in tool.description
 
 
 def test_a_skill_from_elsewhere_cannot_take_a_connector_name():
