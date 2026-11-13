@@ -2616,10 +2616,12 @@ class FilterMateApp:
 
         if self._undo_redo_handler:
             current_layer = self.dockwidget.current_layer
+            # Undo / Redo also restore the layers to filter checked on screen, only when their button is on
+            # (_handle_undo_redo); the dock asks again when either changes (_connect_undo_redo_state)
+            targets_button = getattr(self.dockwidget, 'pushButton_checkable_filtering_layers_to_filter', None)
             layers_to_filter = (
-                self.dockwidget.PROJECT_LAYERS.get(current_layer.id(), {})
-                .get("filtering", {}).get("layers_to_filter", [])
-                if current_layer and current_layer.id() in self.dockwidget.PROJECT_LAYERS
+                self.dockwidget.get_layers_to_filter()
+                if current_layer and targets_button is not None and targets_button.isChecked()
                 else []
             )
             self._undo_redo_handler.update_button_states(

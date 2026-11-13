@@ -814,6 +814,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         from .ui.controllers.centroid_targets_sync import CentroidTargetsSync
         self._centroid_targets = CentroidTargetsSync(self)
         self._centroid_targets.connect()
+        self._connect_undo_redo_state()
 
         # Initialize ConfigurationManager BEFORE tab widget setup (needed for custom widget creation)
         from .ui.managers.configuration_manager import ConfigurationManager
@@ -3752,6 +3753,35 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if sync is not None:
             sync.schedule()
 
+    def _connect_undo_redo_state(self):
+        """Undo / Redo follow the targets key and the targets checked on screen.
+
+        With the key on, Undo / Redo also restore the targets checked on screen
+        (FilterMateApp._handle_undo_redo). A click in the list emits only the model's
+        itemChanged, a layer change empties the list and fills it again: each change
+        asks for the state of the buttons once, on the next event loop pass (as
+        CentroidTargetsSync does for the centroid button).
+        """
+        timer = QTimer(self)
+        timer.setSingleShot(True)
+        timer.setInterval(0)
+        timer.timeout.connect(self._emit_undo_redo_state)
+        self._undo_redo_state_timer = timer
+        model = self.checkableComboBoxLayer_filtering_layers_to_filter.model()
+        for signal in (model.itemChanged, model.rowsRemoved, model.modelReset):
+            signal.connect(self._schedule_undo_redo_state)
+
+    def _schedule_undo_redo_state(self, *_args):
+        """Ask for the state of Undo / Redo on the next event loop pass, once for a burst of changes."""
+        timer = getattr(self, '_undo_redo_state_timer', None)
+        if timer is not None:
+            timer.start()
+
+    def _emit_undo_redo_state(self):
+        if getattr(self, '_filtering_in_progress', False):
+            return  # the end of the filter computes it (FilterResultHandler)
+        self.undoRedoStateRequested.emit()
+
     def set_all_centroid_targets(self, enabled):
         """FilterMate 5: every checked line / polygon target uses its centroids (or none does)."""
         sync = getattr(self, '_centroid_targets', None)
@@ -6437,6 +6467,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._controller_integration and hasattr(self._controller_integration, 'delegate_filtering_layers_to_filter_state_changed'):
             self._controller_integration.delegate_filtering_layers_to_filter_state_changed(is_checked)
         self._schedule_centroid_targets()  # the centroid button follows the targets key
+        self._schedule_undo_redo_state()  # Undo / Redo too: with the key on, they restore the targets
 
         logger.debug(f"filtering_layers_to_filter_state_changed: is_checked={is_checked}")
 
@@ -7611,11 +7642,25 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         owner = getattr(self, 'filter_mate_app', None) or app
         app_tasks = getattr(owner, 'appTasks', None) if owner is not None else None
         previous_task = app_tasks.get(task_name) if isinstance(app_tasks, dict) else None
+        # Undo / Redo: the app may refuse the step too (nothing to undo, the last entry is another layer's).
+        history = getattr(owner, 'history_manager', None) if owner is not None else None
+        step = None
+        if task_name in ('undo', 'redo') and history is not None:
+            step = history.peek_undo() if task_name == 'undo' else history.peek_redo()
         self.launchingTask.emit(task_name)
         if task_name in ('filter', 'unfilter', 'reset') and isinstance(app_tasks, dict) \
                 and app_tasks.get(task_name) is previous_task:
             logger.info(f"launchTaskEvent: vector {task_name} not launched, raster / point cloud targets left as they are")
             return
+        if task_name in ('undo', 'redo'):
+            # The undo steps of the targets pair with the filters of this source: they follow a step the app
+            # took on an entry of this source only (a step taken moves the entry to the other stack).
+            taken = None
+            if history is not None:
+                taken = history.peek_redo() if task_name == 'undo' else history.peek_undo()
+            if step is None or taken is not step or not step.layer_ids or step.layer_ids[0] != source_layer.id():
+                logger.info(f"launchTaskEvent: no vector {task_name} of this source, raster / point cloud targets left as they are")
+                return
         if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):
             integration.delegate_vector_source_coverage_task(task_name, source_layer, coverage_targets)
 

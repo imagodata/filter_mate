@@ -148,11 +148,14 @@ class TestVectorFilterWithCoverageTargets:
         return namespace["launchTaskEvent"]
 
     @staticmethod
-    def _dock(app_creates_the_task, legacy=False, coverage_busy=False):
-        """The dock as FilterMateApp leaves it: ``filter_mate_app`` (AppInitializer), ``app`` (legacy only)."""
+    def _dock(app_creates_the_task, legacy=False, coverage_busy=False, history=None, app_steps=False):
+        """The dock as FilterMateApp leaves it: ``filter_mate_app`` (AppInitializer), ``app`` (legacy only).
+
+        ``app_steps``: the app takes the Undo / Redo step of ``history`` (the vector history).
+        """
         from types import SimpleNamespace
         from unittest.mock import MagicMock
-        app = SimpleNamespace(appTasks={"filter": None, "unfilter": None, "reset": None},
+        app = SimpleNamespace(appTasks={"filter": None, "unfilter": None, "reset": None}, history_manager=history,
                               _initializing_project=False, _loading_new_project=False)
         integration = MagicMock()
         integration.delegate_point_cloud_task.return_value = False
@@ -166,6 +169,8 @@ class TestVectorFilterWithCoverageTargets:
             emitted.append(task_name)
             if app_creates_the_task and task_name in app.appTasks:
                 app.appTasks[task_name] = object()
+            if app_steps and task_name in ("undo", "redo"):
+                getattr(history, task_name)()
 
         dock = SimpleNamespace(_controller_integration=integration, widgets_initialized=True, current_layer=layer,
                                PROJECT_LAYERS={"v1": {"filtering": {}}},
@@ -188,10 +193,76 @@ class TestVectorFilterWithCoverageTargets:
         self._launch_task_event()(dock, None, task_name)
         integration.delegate_vector_source_coverage_task.assert_called_once_with(task_name, dock.current_layer, ["r1"])
 
-    def test_undo_is_still_mirrored(self):
-        dock, integration = self._dock(app_creates_the_task=False)
-        self._launch_task_event()(dock, None, "undo")
-        integration.delegate_vector_source_coverage_task.assert_called_once_with("undo", dock.current_layer, ["r1"])
+    @staticmethod
+    def _history(*sources, undone=0):
+        """The vector history after a filter of each source alone, ``undone`` of them undone."""
+        from core.services.history_service import HistoryService
+        history = HistoryService()
+        for source in sources:
+            history.get_or_create_history(source).push_state(f"{source} filter", 1)
+        for _ in range(undone):
+            history.undo()
+        return history
+
+    @pytest.mark.parametrize("task_name, undone", [("undo", 0), ("redo", 1)])
+    def test_vector_step_of_this_source_reaches_the_coverage_targets(self, task_name, undone):
+        dock, integration = self._dock(app_creates_the_task=False, history=self._history("v1", undone=undone),
+                                       app_steps=True)
+        self._launch_task_event()(dock, None, task_name)
+        integration.delegate_vector_source_coverage_task.assert_called_once_with(task_name, dock.current_layer, ["r1"])
+
+    @pytest.mark.parametrize("task_name, undone", [("undo", 0), ("redo", 1)])
+    @pytest.mark.parametrize("sources", [(), ("v1", "x")], ids=["nothing_to_step", "last_entry_of_another_layer"])
+    def test_refused_vector_step_leaves_the_coverage_targets(self, task_name, undone, sources):
+        """The vector Undo refused (the last entry is another layer's): its targets were restored all the same."""
+        history = self._history(*sources, undone=undone if sources else 0)
+        dock, integration = self._dock(app_creates_the_task=False, history=history)
+        self._launch_task_event()(dock, None, task_name)
+        assert dock.emitted == [task_name]
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    @pytest.mark.parametrize("task_name, undone", [("undo", 0), ("redo", 1)])
+    def test_vector_step_of_another_source_leaves_the_coverage_targets(self, task_name, undone):
+        """Undo with the layers to filter on can take the entry of a checked layer: not a step of this source."""
+        dock, integration = self._dock(app_creates_the_task=False, history=self._history("x", undone=undone),
+                                       app_steps=True)
+        self._launch_task_event()(dock, None, task_name)
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    @pytest.mark.parametrize("task_name", ["undo", "redo"])
+    def test_step_without_layers_leaves_the_coverage_targets(self, task_name):
+        """An entry restored without layers (HistoryService.deserialize) is left alone, not read at [0]."""
+        from types import SimpleNamespace
+        entry = SimpleNamespace(layer_ids=())
+        stacks = {"undo": [entry] if task_name == "undo" else [],
+                  "redo": [] if task_name == "undo" else [entry]}
+
+        class _History:
+            def peek_undo(self):
+                return stacks["undo"][-1] if stacks["undo"] else None
+
+            def peek_redo(self):
+                return stacks["redo"][-1] if stacks["redo"] else None
+
+            def undo(self):
+                stacks["redo"].append(stacks["undo"].pop())
+
+            def redo(self):
+                stacks["undo"].append(stacks["redo"].pop())
+
+        dock, integration = self._dock(app_creates_the_task=False, history=_History(), app_steps=True)
+        self._launch_task_event()(dock, None, task_name)
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    @pytest.mark.parametrize("task_name", ["undo", "redo"])
+    def test_coverage_source_steps_without_the_vector_history(self, task_name):
+        """A raster / point cloud source walks its own history, whatever the vector one holds."""
+        dock, integration = self._dock(app_creates_the_task=False, history=self._history())
+        integration.delegate_point_cloud_task.return_value = True
+        self._launch_task_event()(dock, None, task_name)
+        integration.delegate_point_cloud_task.assert_called_once_with(task_name)
+        assert dock.emitted == []
+        integration.delegate_vector_source_coverage_task.assert_not_called()
 
     @pytest.mark.parametrize("task_name", ["filter", "unfilter", "reset", "undo", "redo"])
     def test_nothing_runs_while_the_coverage_targets_are_still_clipped(self, task_name):
