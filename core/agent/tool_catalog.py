@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from .skills import names as skill_names, skill_list
+from .skills import Approved, names as skill_names, skill_list
 
 CATALOG_PATH = Path(__file__).with_name("tool_catalog.json")
 
@@ -306,14 +306,17 @@ LOAD_SKILL = "load_skill"
 
 # Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by
 # core/agent/skills.py).
-def skill_tool(offered: Optional[set] = None) -> ToolSpec:
-    """load_skill, listing the skills whose required tools are among ``offered`` (the pyqgis skill: the expert mode)."""
+def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = None, audience: str = "chat") -> ToolSpec:
+    """load_skill, listing the skills of ``audience`` whose required tools are among ``offered`` (the pyqgis skill:
+    the expert mode). ``approved`` tells which skills from elsewhere the user allowed: the others are named, and
+    none of their words is in the description (core/agent/skills.skill_list)."""
     return ToolSpec(
         name=LOAD_SKILL, title="Load the instructions of a task",
         description=("Load the instructions for one kind of task, before doing it: they say how to work and where to "
                      "look. Call it once per conversation and task, then follow them. Skills: "
-                     + skill_list(offered) + "."),
-        input_schema={"type": "object", "properties": {"name": {"type": "string", "enum": list(skill_names(offered))}},
+                     + skill_list(offered, approved, audience) + "."),
+        input_schema={"type": "object",
+                      "properties": {"name": {"type": "string", "enum": list(skill_names(offered, audience))}},
                       "required": ["name"], "additionalProperties": False},
         read_only=True, idempotent=True)
 

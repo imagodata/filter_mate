@@ -20,7 +20,7 @@ from ...core.agent.json_schema import validate
 from ...core.agent.mcp_server import EXTERNAL_MARK, HttpResponse, McpPrompt, McpProtocol, McpResource, RequestHead
 from ...core.agent.messages import ToolCallPart, ToolResultPart
 from ...core.agent.permissions import ASK, RULE_ALLOW, TURNED_OFF, PermissionPolicy
-from ...core.agent.tool_catalog import MCP_ONLY, ToolSpec
+from ...core.agent.tool_catalog import LOAD_SKILL, MCP_ONLY, ToolSpec, skill_tool
 from ...core.agent.tool_executor import ToolExecutor
 
 logger = logging.getLogger("FilterMate.agent")
@@ -97,7 +97,16 @@ class AgentMcpBridge:
             self._server.close()
             return
         # The history and the notes of the chat stay its own; the images of the map are this server's alone.
-        self._tools = tuple(tool for tool in tools if not tool.manages_history and not tool.chat_only) + MCP_ONLY
+        served = [tool for tool in tools if not tool.manages_history and not tool.chat_only]
+        # load_skill of another application: the skills of the plugin written for it (audience mcp) that its own
+        # tools allow, as its prompts. Never a skill of the profile or of the project, which the user allows for
+        # the chat, nor one that needs a tool of the chat (pyqgis).
+        names = {tool.name for tool in served}
+        if LOAD_SKILL in names:
+            from ...adapters.agent.plugin_settings import skill_loader
+            served = [skill_tool(names, audience="mcp") if tool.name == LOAD_SKILL else tool for tool in served]
+            handlers = {**handlers, LOAD_SKILL: skill_loader(names, audience="mcp")}
+        self._tools = tuple(served) + MCP_ONLY
         self._executor = ToolExecutor(self._tools, {**handlers, **image_handlers()})
         if not self._server.serves(values.mcp_port, values.mcp_token):
             self.error = self._server.listen(values.mcp_port, values.mcp_token)

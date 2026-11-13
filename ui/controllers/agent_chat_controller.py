@@ -428,7 +428,9 @@ class AgentChatController(QObject):
                    "before. It gives the agent no right: every change stays asked as your settings say. Let the agent "
                    "use it? It is not asked again until it changes.").format(
             one_line(skill.title, 100), one_line(skill.name, 40), place)
-        return bool(self._ask_code(_tr("A skill for the agent"), text, skill.body))
+        # All of it the model may receive, not the instructions alone: its line in the list of load_skill too.
+        from ...core.agent.skills import shown
+        return bool(self._ask_code(_tr("A skill for the agent"), text, shown(skill)))
 
     SETUP_OFFERED_KEY = "FilterMate/agent/setup_offered_version"
 
@@ -626,13 +628,15 @@ class AgentChatController(QObject):
             left_out.add(IMAGERY_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
         offered = {tool.name for tool in tools}
+        skill_approved = None
         try:  # the skills of the profile and of the project folder, read again (the project may have changed)
-            from ...adapters.agent.skill_sources import refresh as refresh_skills
+            from ...adapters.agent.skill_sources import approved as skill_approved, refresh as refresh_skills
             refresh_skills()
         except Exception:
             logger.debug("Agent: skills from elsewhere not read", exc_info=True)
-        # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on)
-        tools = [skill_tool(offered) if tool.name == LOAD_SKILL else tool for tool in tools]
+        # load_skill lists the skills the tools offered allow (pyqgis: the expert mode on); of a skill from elsewhere
+        # the user has not allowed, its name only
+        tools = [skill_tool(offered, skill_approved) if tool.name == LOAD_SKILL else tool for tool in tools]
         if self.local_filtering(values):
             tools = list(filtering_only(tools))
         # A connector alone does not open the web to add_layer: only a data source the user ticked does.

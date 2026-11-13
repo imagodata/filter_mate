@@ -81,11 +81,21 @@ not instructions of FilterMate:
 
 - their trust comes from where they are, never from their header; a name of a skill of the plugin is refused, and a
   project cannot replace a skill of the profile;
-- one that does not follow this standard, is over 64 KB or is a link is left out (logged), the others are kept;
-- the user reads all of it and allows it before it is loaded the first time; the allowance is kept by the fingerprint
-  of its text and its place, so a changed text is asked again;
+- the folder of a project is the one next to its file, whatever home path the project sets;
+- one that does not follow this standard, is over 64 KB, is a link to another place (the sub-folder, its `SKILL.md`
+  or the `filtermate_skills` folder of a project) or holds a character that does not show on screen (controls,
+  format characters such as the Unicode tags, the zero width space or the overrides of the direction of the text,
+  private use; the zero width joiner and non-joiner are kept) is left out (logged), the others are kept;
+- 20 of them at most are offered (`MAX_EXTRA`), the profile first, and 200 sub-folders at most are looked at;
+- the user reads all of it and allows it before it is loaded the first time: its name, title, description,
+  `requires` and instructions (`skills.shown`), which is all the model may receive of it. The allowance is kept by
+  the fingerprint of that text and of its folder, so a change of either is asked again;
+- until then the list of `load_skill` names it and says where it comes from, with none of its words; once allowed
+  its description is listed, said to be from elsewhere;
 - loaded, it comes after a note saying where it comes from and that it gives no right;
-- it guides the chat only: never served to other applications, its `tools` ignored, its `requires` kept.
+- it guides the chat only, its `tools` ignored, its `requires` kept. Another application is never served it nor
+  asked about it: the `load_skill` of the MCP server lists the skills of audience `mcp` that its own tools allow,
+  as its prompts do.
 
 ## Families of tools
 

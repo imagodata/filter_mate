@@ -41,13 +41,17 @@ def user_folder() -> Optional[Path]:
 
 
 def project_folder() -> Optional[Path]:
-    """``filtermate_skills`` next to the open project file; None for a project never saved."""
+    """``filtermate_skills`` next to the open project file; None for a project never saved or kept in a database.
+
+    The folder of the file itself, not ``homePath()``: a project can set its home path to any place (the share of
+    another computer too), which was then read at each request, on the main thread (2026-11-13).
+    """
     try:
         from qgis.core import QgsProject
-        home = QgsProject.instance().homePath()
+        path = QgsProject.instance().absoluteFilePath()
     except Exception:
         return None
-    return Path(home) / PROJECT_FOLDER if home else None
+    return Path(path).parent / PROJECT_FOLDER if path else None
 
 
 def refresh() -> List[str]:
@@ -58,7 +62,12 @@ def refresh() -> List[str]:
         if folder is None:
             continue
         try:
-            for name, skill in skills.read_folder(folder, trust=trust, errors=errors).items():
+            if trust == "project" and folder.is_dir() and (folder.is_symlink()
+                                                           or folder.resolve().parent != folder.parent.resolve()):
+                errors.append(f"{folder.name}: a link, the skills of a project are in its own folder")
+                continue
+            for name, skill in skills.read_folder(folder, trust=trust, errors=errors,
+                                                  limit=skills.MAX_EXTRA).items():
                 if name in found:  # the profile first: a project cannot replace a skill the user keeps
                     errors.append(f"{name}: a skill of the profile has that name")
                     continue
