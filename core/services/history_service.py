@@ -58,9 +58,9 @@ class LayerHistory:
         previous_expression = ""
         previous_entries = self._parent.get_history_for_layer(self.layer_id)
         if previous_entries:
-            # The expression in the last entry is what we're replacing
-            last_entry = previous_entries[-1]
-            previous_expression = last_entry.expression
+            # What the last entry gave this layer is what we're replacing: its
+            # expression only when this layer was its source, not one of its targets
+            previous_expression = previous_entries[-1].expression_for(self.layer_id) or ""
 
         # Create history entry with correct previous_filters for undo
         entry = HistoryEntry.create(
@@ -97,7 +97,8 @@ class HistoryEntry:
 
     Attributes:
         entry_id: Unique identifier for this entry
-        expression: The filter expression applied
+        expression: The filter expression of the source layer (layer_ids[0]);
+            expression_for() gives each layer its own
         layer_ids: Tuple of layer IDs that were filtered
         previous_filters: Tuple of (layer_id, previous_subset_string) pairs
         timestamp: When the operation was performed
@@ -177,6 +178,27 @@ class HistoryEntry:
         for lid, prev_filter in self.previous_filters:
             if lid == layer_id:
                 return prev_filter
+        return None
+
+    def expression_for(self, layer_id: str) -> Optional[str]:
+        """
+        Get the filter expression this entry applied to a specific layer.
+
+        ``expression`` is the source's (layer_ids[0]) only: the subset of each
+        target is in the ``remote_layers`` metadata (push_global_state). A target
+        given the source's expression names the source's table in its own query.
+
+        Args:
+            layer_id: Layer ID to look up
+
+        Returns:
+            Expression of that layer, or None when the entry holds none for it
+        """
+        if self.layer_ids and layer_id == self.layer_ids[0]:
+            return self.expression
+        layer_info = (self.get_metadata_value('remote_layers') or {}).get(layer_id)
+        if isinstance(layer_info, dict):
+            return layer_info.get('expression', '')
         return None
 
     def get_metadata_value(self, key: str) -> Optional[Any]:
@@ -496,27 +518,7 @@ class HistoryService:
 
             for layer_id in all_layer_ids:
                 layer_entries = self.get_history_for_layer(layer_id)
-                if layer_entries:
-                    last_entry = layer_entries[-1]
-
-                    # Determine the expression for this specific layer
-                    if layer_id in last_entry.layer_ids:
-                        if layer_id == last_entry.layer_ids[0]:
-                            # This layer was the source of the last entry
-                            prev_expr = last_entry.expression
-                        else:
-                            # This layer was a remote layer - check metadata
-                            remote_meta = last_entry.get_metadata_value('remote_layers') or {}
-                            if layer_id in remote_meta:
-                                layer_info = remote_meta[layer_id]
-                                prev_expr = layer_info.get('expression', '') if isinstance(layer_info, dict) else ''
-                            else:
-                                prev_expr = ""
-                    else:
-                        prev_expr = ""
-                else:
-                    prev_expr = ""
-
+                prev_expr = (layer_entries[-1].expression_for(layer_id) or "") if layer_entries else ""
                 previous_filters.append((layer_id, prev_expr))
 
             logger.debug(f"Queried history for previous_expressions ({len(previous_filters)} layers)")
@@ -632,8 +634,8 @@ class HistoryService:
         if entry.layer_ids[0] == layer_id:
             # The source left: the first remaining layer takes its place. An entry
             # without per-layer expressions keeps the one it applied to every layer.
-            # It stays in remote_layers too: a global redo or the previous expression
-            # of a later filter look a layer up there when it is not the current one.
+            # It stays in remote_layers too, with the same expression (expression_for
+            # reads the source from expression, every other layer from there).
             source_info = remote_layers.get(layer_ids[0])
             if isinstance(source_info, dict):
                 expression = source_info.get('expression', '')
