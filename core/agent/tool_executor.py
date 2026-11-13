@@ -85,17 +85,18 @@ class ToolExecutor:
     def __init__(self, tools: Sequence[ToolSpec], handlers: Mapping[str, Handler]) -> None:
         self._tools = {tool.name: tool for tool in tools}
         self._handlers = dict(handlers)
-        self._held: set = set()
+        self._held: Dict[str, Tuple[str, ...]] = {}
 
     def offer(self, tools: Sequence[ToolSpec]) -> None:
         """Tools run from now on (a family of tools, once its skill is loaded); their handlers were given already."""
         for tool in tools:
             self._tools.setdefault(tool.name, tool)
-            self._held.discard(tool.name)
+            self._held.pop(tool.name, None)
 
     def hold(self, names) -> None:
-        """Tools offered later, with the skill of their task: a call of one says so instead of "unknown"."""
-        self._held = set(names)
+        """Tools offered later, with the skill of their task: a call of one says so instead of "unknown". ``names``
+        maps each tool to the skills that bring it (``families.bringing``), which that answer names."""
+        self._held = {name: tuple(names[name]) if isinstance(names, dict) else () for name in names}
 
     def spec(self, name: str) -> Optional[ToolSpec]:
         return self._tools.get(name)
@@ -134,8 +135,10 @@ class ToolExecutor:
         tool = self._tools.get(call.name)
         handler = self._handlers.get(call.name)
         if tool is None and call.name in self._held:
-            return failure(f"{call.name} comes with the instructions of its task: call load_skill with the skill of "
-                           f"that task first (its list says which), then call {call.name} again.")
+            # The skills by name: the list of load_skill does not say which tool comes with which (2026-11-13).
+            skills = " or ".join(f'"{name}"' for name in self._held[call.name]) or "the skill of that task"
+            return failure(f"{call.name} comes with the instructions of its task: call load_skill with {skills} "
+                           f"first, then call {call.name} again.")
         if tool is None or handler is None:
             return failure(f"Unknown tool {call.name!r}.")
         if call.parse_error:

@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .skills import Approved, names as skill_names, skill_list
 
@@ -307,10 +307,11 @@ LOAD_SKILL = "load_skill"
 # Instructions for one kind of task, sent when the task comes rather than with every request (skills/<name>/, read by
 # core/agent/skills.py).
 def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = None, audience: str = "chat",
-               connectors: Sequence[Tuple[str, str]] = (), with_skills: bool = True) -> ToolSpec:
+               connectors: Sequence[Tuple[str, str]] = (), with_skills: bool = True,
+               declined: Optional[Approved] = None) -> ToolSpec:
     """load_skill, listing the skills of ``audience`` whose required tools are among ``offered`` (the pyqgis skill:
-    the expert mode). ``approved`` tells which skills from elsewhere the user allowed: the others are named, and
-    none of their words is in the description (core/agent/skills.skill_list).
+    the expert mode). ``approved`` tells which skills from elsewhere the user allowed, ``declined`` which they said no
+    to: the others are named, and none of their words is in the description (core/agent/skills.skill_list).
 
     ``connectors``: pairs ``(entry name, line)`` of the MCP connectors the user enabled (core/agent/connectors.py),
     listed after the skills. ``with_skills`` False: the connectors alone."""
@@ -318,7 +319,7 @@ def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = Non
     description = ("Load the instructions for one kind of task, before doing it: they say how to work and where to "
                    "look. Call it once per conversation and task, then follow them.")
     if with_skills:
-        description += " Skills: " + skill_list(offered, approved, audience) + "."
+        description += " Skills: " + skill_list(offered, approved, audience, declined) + "."
     if connectors:
         names += [name for name, _ in connectors]
         description += (" Connectors the user enabled, loaded the same way when the request needs their data (the user "
@@ -329,6 +330,16 @@ def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = Non
         input_schema={"type": "object", "properties": {"name": {"type": "string", "enum": names}},
                       "required": ["name"], "additionalProperties": False},
         read_only=True, idempotent=True)
+
+
+def with_skill_tool(tools, offered: Optional[set] = None, approved: Optional[Approved] = None, audience: str = "chat",
+                    declined: Optional[Approved] = None) -> List[ToolSpec]:
+    """``tools`` with load_skill as ``skill_tool`` makes it, or without it when it would list no skill (skills/ missing
+    or unreadable): some providers refuse an empty enum, and the whole request with it (2026-11-13)."""
+    listed = skill_tool(offered, approved, audience, declined=declined)
+    if not listed.input_schema["properties"]["name"]["enum"]:
+        return [tool for tool in tools if tool.name != LOAD_SKILL]
+    return [listed if tool.name == LOAD_SKILL else tool for tool in tools]
 
 
 SKILL_TOOLS = (skill_tool(),)
