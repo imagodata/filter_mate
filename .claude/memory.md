@@ -1275,3 +1275,15 @@ Result: Que veux-tu faire dans cette session ?
   paramètres construits ailleurs sans la clé → réglage `exploring.is_selecting` de la couche, faux par défaut.
 - Piège de tests : `tests/unit/core/tasks/...` avant `tests/unit/adapters/...` dans une même commande pytest → le paquet
   `tests/unit/core` masque `core` (ImportError `core.filter`) ; lancer séparément ou toute la suite.
+
+## [2026-11-13] 5.1.1 : exemples du dock, ILIKE hors UTF-8, tas corrompu par SAM (PR #450)
+- `similar_objects` avec `use_dock_object` : les 8 derniers objets du dock sont des exemples (`MAX_EXAMPLES`), meilleur
+  cosinus sur les exemples, bornes d'aire et de forme du plus petit au plus grand ; réponse `examples`, plus `example`.
+- `ILIKE` PostgreSQL : ſ et K écrits seulement pour une base UTF8 (`server_encoding`, lu une fois par connexion avec
+  l'URI de la couche, authcfg non développé) ; encodage inconnu : s / k laissés à QGIS.
+- Un QObject créé par C++ dans un fil de travail (fournisseur raster) ne doit pas être donné à un objet C++ qui le
+  détruira pendant que son enveloppe Python vit (PyQt5 : `PyQtMonitor` efface la même clé depuis deux fils, tas
+  corrompu, plantage plus tard n'importe où). `open_drawing` garde le fournisseur côté Python et relâche le pipe avant.
+  Même motif non traité : `raster_materialization.py`, `exporters.py`.
+- Piège de banc : `QgsFeatureRequest(expression)` sur une couche postgres est compilé en SQL ; pour une référence
+  « ce que QGIS répond », évaluer entité par entité.
