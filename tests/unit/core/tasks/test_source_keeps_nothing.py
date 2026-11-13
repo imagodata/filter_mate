@@ -99,12 +99,21 @@ def qgis(monkeypatch):
     class _Request:
         def __init__(self, *args):
             self.args = args  # (expression,) for a filtered request
+            self.context = None
 
         def setNoAttributes(self):
             return self
 
+        def setExpressionContext(self, context):
+            self.context = context
+            return self
+
     monkeypatch.setattr(core, "QgsExpression", _Expression, raising=False)
     monkeypatch.setattr(core, "QgsFeatureRequest", _Request, raising=False)
+    # the context of a layer: its scopes, as QgsExpressionContextUtils.globalProjectLayerScopes gives them
+    monkeypatch.setattr(core, "QgsExpressionContextUtils", SimpleNamespace(
+        globalProjectLayerScopes=lambda layer: ('global', 'project', layer.name())), raising=False)
+    monkeypatch.setattr(core, "QgsExpressionContext", lambda scopes: ('context',) + tuple(scopes), raising=False)
     monkeypatch.setattr(sys.modules["qgis.PyQt.QtCore"], "QCoreApplication",
                         SimpleNamespace(translate=lambda context, text: text), raising=False)
     return state
@@ -292,6 +301,33 @@ def test_ogr_expression_features_become_the_source(qgis):
 
     assert result is memory_layer
     assert memory.call_args[0][0] == kept
+
+
+def test_the_fallbacks_read_the_selection_in_the_variables_of_the_layer(qgis):
+    """2026-11-12 (review): the QGIS text of a native subset may read @variables, folded into the subset;
+    a request without context read them as NULL and kept nothing (the targets were refused)."""
+    kept = [MagicMock(name="kept")]
+    spatialite = _load("adapters.backends.spatialite.filter_executor", "adapters/backends/spatialite/filter_executor.py")
+    layer = _Layer(kept=kept)
+    context = _spatialite_context(spatialite, layer, '"pop" > @seuil')
+    mode, metadata = spatialite.determine_spatialite_source_mode(context)
+    features, _ = spatialite.resolve_spatialite_features(context, mode, metadata)
+    assert features == kept
+    filtered = [request for request in layer.requests if getattr(request, "args", None)]
+    assert filtered and all(request.context == ('context', 'global', 'project', 'routes') for request in filtered)
+
+    ogr = _load("adapters.backends.ogr.filter_executor", "adapters/backends/ogr/filter_executor.py")
+    layer = _Layer(kept=kept)
+    memory_layer = MagicMock()
+    memory_layer.featureCount.return_value = 1
+    validate = ogr.validate_ogr_result_layer
+    try:
+        ogr.validate_ogr_result_layer = lambda result: (result is memory_layer, None)
+        ogr.prepare_ogr_source_geom(_ogr_context(ogr, layer, '"pop" > @seuil', MagicMock(return_value=memory_layer)))
+    finally:
+        ogr.validate_ogr_result_layer = validate
+    filtered = [request for request in layer.requests if getattr(request, "args", None)]
+    assert filtered and all(request.context == ('context', 'global', 'project', 'routes') for request in filtered)
 
 
 # ---------------------------------------------------------------------------

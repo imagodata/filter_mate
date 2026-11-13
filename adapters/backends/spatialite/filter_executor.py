@@ -527,14 +527,15 @@ def _features_matching(layer, expression: str) -> List:
     refused (``SourceSelectionError``); it used to leave the whole layer as
     the source.
     """
-    from qgis.core import QgsExpression, QgsFeatureRequest
-    from ..source_refusal import source_selection_refusal
+    from qgis.core import QgsExpression
+    from ..source_refusal import selection_request, source_selection_refusal
     expr = QgsExpression(expression)
     if expr.hasParserError():
         logger.error(f"[Spatialite] Source expression does not parse: {expr.parserErrorString()}")
         raise source_selection_refusal(layer.name(), unreadable=True)
     try:
-        features = list(layer.getFeatures(QgsFeatureRequest(expr)))
+        # the layer's variables: the QGIS text of a native subset may read @variables
+        features = list(layer.getFeatures(selection_request(expr, layer)))
     except Exception as e:
         logger.error(f"[Spatialite] Source expression failed: {e}")
         raise source_selection_refusal(layer.name(), unreadable=True) from e

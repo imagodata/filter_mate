@@ -154,7 +154,41 @@ CASES = [
     ('regexp_match("nom", \'^R\') > 0', ()),
     ('$id > 3', ()),
     ('"pop" > 5 AND regexp_match("nom", \'^R\') > 0', ()),
+    # variables folded to constants (VARIABLES below; @fm_lv on each layer, @fm_gv global)
+    ('"pop" > @seuil', ALL),                            # the text '5' compared with a number: 5
+    ('"pop" = @seuil', ALL),
+    ('var(\'seuil\') < "pop"', ALL),
+    ('"pop" < @fm_lv', ALL),                            # a layer variable
+    ('"ratio" = @reel', ALL),                           # '0.3': within the tolerance
+    ('"pop" >= @grand', ALL),                           # '1e3'
+    ('"pop" > @qgis_version_no / 10000', ALL),
+    ('"pop" > 3 AND "ratio" < @deux', ALL),
+    ('"nom" = @nom_cible', DB),
+    ('"nom" = @fm_gv', DB),                             # a global variable
+    ('"nom" LIKE @motif', DB),
+    ('"nom" = @project_title', DB),
+    ('"nom" <> @layer_name', DB),
+    ('"code" = @seuil', DB),                            # two texts: '5' is not ' 5'
+    ('"nom" IN (@nom_cible, \'route\')', DB),
+    ('"pop" > \'5\'', ALL),                             # texts read as numbers, as QGIS reads them
+    ('"pop" = \'7\'', ALL),
+    ('\'7\' = "pop"', ALL),
+    ('"ratio" = \'0.3\'', ALL),
+    ('"ratio" > \'1e-05\'', ALL),
+    ('"pop" <= \'+3\'', ALL),
+    ('"pop" > @espace', ()),                            # ' 5': only the plainest writing
+    ('"pop" > \' 5\'', ()),
+    ('"pop" > @row_number', ()),                        # not a constant
+    ('"pop" > @inconnue', ()),
+    ('"pop" > @project_crs', ()),                       # NULL here
+    ('"pop" IN (@seuil, 7)', ()),
+    ('"pop" BETWEEN @seuil AND 9', ()),
+    ('with_variable(\'seuil\', 9, "pop" > @seuil)', ()),
 ]
+# Project / global variables of the check; @fm_lv = '7' is set on each layer.
+VARIABLES = {'seuil': '5', 'reel': '0.3', 'grand': '1e3', 'deux': '2', 'nom_cible': 'Route', 'motif': 'Route%',
+             'espace': ' 5'}
+PROJECT_TITLE = 'Route'
 
 app = QgsApplication([], False)
 app.initQgis()
@@ -228,8 +262,13 @@ def keys(layer):
     return sorted(feature['id'] for feature in layer.getFeatures(QgsFeatureRequest()))
 
 
-def reference(layer, text):
-    """Keys of the features QGIS itself keeps, evaluated one by one without the provider."""
+def reference(layer, text, errors_drop=False):
+    """Keys of the features QGIS itself keeps, evaluated one by one without the provider.
+
+    ``errors_drop``: a feature QGIS cannot evaluate is not kept, as QGIS's own
+    filter (QgsFeatureRequest) does: the NaN coordinates of an empty geometry
+    stop the evaluation with an error at their first use (measured).
+    """
     expression = QgsExpression(text)
     context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer))
     expression.prepare(context)
@@ -238,6 +277,8 @@ def reference(layer, text):
         context.setFeature(feature)
         value = expression.evaluate(context)
         if expression.hasEvalError():
+            if errors_drop:
+                continue
             raise ValueError(expression.evalErrorString())
         if value is not None and value == value and bool(value) and str(value) != 'NULL':
             kept.append(feature['id'])
@@ -281,7 +322,8 @@ def executor_path(label, layer, provider_type):
     dialect = native_dialect_for_layer(layer)
     for text, required in (('"pop" BETWEEN 3 AND 9', ALL), ('"pop" / 2 = 3.5', ALL),
                            ('"nom" LIKE \'Route%\'', ALL), ('"nom" LIKE \'route%\'', ALL),
-                           ('"nom" = \'route\'', ALL), ('"pop" > 5 AND "nom" = \'Route\'', ALL)):
+                           ('"nom" = \'route\'', ALL), ('"pop" > 5 AND "nom" = \'Route\'', ALL),
+                           ('"pop" > @seuil', ALL), ('"nom" = @nom_cible', ALL), ('"pop" = \'7\'', ALL)):
         layer.setSubsetString('')
         expected = reference(layer, text)
         executor = AttributeFilterExecutor(layer=layer, provider_type=provider_type, primary_key='id')
@@ -311,6 +353,9 @@ HYBRID_CASES = [
     '-"pop" IS NULL',
     'coalesce(abs("pop"), 7) > 6',                         # the sanitizer truncates COALESCE(abs(CAST(...
     '"ratio" = 6656395.210250434 AND regexp_match("nom", \'^G\') > 0',
+    '"pop" > @seuil AND regexp_match("nom", \'^R\') > 0',  # the native part holds a variable
+    'with_variable(\'seuil\', 9, "pop" > @seuil)',          # @seuil is 9 there, not the project's 5
+    '"ratio" > 1e-30 AND regexp_match("nom", \'^R\') > 0',     # dump() writes 1e-30 as 0: no native part
 ]
 # (old subset, combine operator, expression): hybrid with AND only, the former path otherwise
 COMBINED_CASES = [
@@ -367,12 +412,12 @@ def hybrid_path(label, layer, provider_type):
                f"subset={subset!r:.160} expected={expected} got={got}")
 
 
-def combined_reference(layer, old, operator, text):
+def combined_reference(layer, old, operator, text, errors_drop=False):
     """What QGIS keeps for ``text`` combined with ``old`` as the task combines them."""
     joined = {'AND': '({}) AND ({})', 'OR': '({}) OR ({})', 'AND NOT': '({}) AND NOT ({})'}.get(operator, '{1}')
     if not old:
         joined = 'NOT ({1})' if operator == 'AND NOT' else '{1}'
-    return reference(layer, joined.format(old, text))
+    return reference(layer, joined.format(old, text), errors_drop)
 
 
 # OGR SQL compares texts with = and IN without their case, with LIKE with it
@@ -414,6 +459,8 @@ TEXT_CASES = [
     (None, None, '"nom" = \'route\' OR "nom" IS NULL', True, 'LIKE'),
     (None, None, '("nom" = \'route\' OR "ratio" > 4) AND "pop" IS NOT NULL', True, 'LIKE'),
     (None, None, 'NOT ("pop" > 5) OR "nom" = \'Route\'', True, 'LIKE'),
+    (None, None, '"nom" = @nom_cible', True, 'LIKE'),                 # a variable folded to its text
+    (None, None, '"nom" LIKE @motif', True, None),
     # the former conversion: a wildcard in the text, two fields, more than 10 values, a NOT, a
     # negation, _ in a pattern, ILIKE with k / s, AND NOT
     (None, None, '"nom" = \'route_66\'', False, None),
@@ -438,6 +485,47 @@ TEXT_CASES = [
 ]
 
 
+# The QGIS text of a native subset, read again by the source preparations of a geometric filter
+# (SpatiaLite FALLBACK, OGR EXPRESSION_FALLBACK: the subset is queued for the main thread, the worker
+# still sees the whole layer). It may read @variables: read in the layer's context, not as NULL.
+FALLBACK_CASES = ['"pop" > @seuil', '"pop" > @seuil AND "ratio" < @deux', '"pop" < @fm_lv']
+
+
+def fallback_path(label, layer, provider_type):
+    """The features the file backends' source fallbacks read for the QGIS text of the source filter."""
+    from qgis.core import QgsFeature, QgsVectorLayer
+    for text in FALLBACK_CASES:
+        layer.setSubsetString('')
+        expected = reference(layer, text)
+        try:
+            if provider_type == 'spatialite':
+                from filter_mate.adapters.backends.spatialite import filter_executor as mod
+                context = mod.SpatialiteSourceContext(source_layer=layer, task_parameters={'task': {'features': []}},
+                                                      expression=text)
+                mode, metadata = mod.determine_spatialite_source_mode(context)
+                features, _ = mod.resolve_spatialite_features(context, mode, metadata)
+                got = sorted(feature['id'] for feature in features)
+            else:
+                from filter_mate.adapters.backends.ogr import filter_executor as mod
+                read = []
+
+                def memory(features, crs, name):
+                    read.extend(features)
+                    copy = QgsVectorLayer(f'Point?crs={crs.authid()}&field=id:integer', name, 'memory')
+                    copy.dataProvider().addFeatures([QgsFeature(copy.fields()) for _ in features])
+                    return copy
+                context = mod.OGRSourceContext(source_layer=layer, task_parameters={'task': {'features': []}},
+                                               expression=text, create_memory_layer_from_features=memory)
+                mode = mod.determine_source_mode(context)[0]
+                mod.prepare_ogr_source_geom(context)
+                got = sorted(feature['id'] for feature in read)
+            detail = f"mode={mode}"
+        except Exception as exc:
+            got, detail = None, f"raised {type(exc).__name__}: {exc}"
+        report('PASS' if got == expected else 'FAIL', f"{label} fallback: {text}",
+               f"{detail} expected={expected} got={got}")
+
+
 def text_path(label, layer, provider_type):
     """OGR SQL texts written with LIKE, through the plugin's entry: QGIS's answer, or the former conversion."""
     for old, operator, text, must_write, form in TEXT_CASES:
@@ -452,6 +540,226 @@ def text_path(label, layer, provider_type):
                 status = 'FAIL'
         report(status, f"{label} text {operator}: {old} / {text}",
                f"subset={subset!r:.200} expected={expected} got={got}")
+
+
+# Geometric functions: written where the source returns QGIS's own double (PostGIS: bounds of points
+# and lines, x / y / $x / $y of points; GeoPackage: bounds of points), left to QGIS elsewhere (polygons:
+# a curved one is bounded by every ring in PostGIS). Empty and NULL geometries, multi-parts, an
+# invalid polygon whose hole lies outside its shell, and arcs on PostGIS (a generic column read as
+# lines / polygons). (expression, layer tags that MUST write it: 'pg' PostGIS points and lines,
+# 'pg_pts' PostGIS points, 'gpkg_pts' GeoPackage points)
+X, Y, X0, Y0 = 700500, 6600500, 700123.456789, 6600234.5678
+BOUNDS = ('pg', 'gpkg_pts')
+GEOM_CASES = [
+    (f'x_min($geometry) > {X}', BOUNDS),
+    (f'x_max($geometry) <= {X}', BOUNDS),
+    (f'y_min($geometry) < {Y}', BOUNDS),
+    (f'y_max($geometry) >= {Y}', BOUNDS),
+    (f'x_min($geometry) = {X0}', BOUNDS),
+    (f'x_min($geometry) <> {X0}', BOUNDS),
+    (f'y_min($geometry) = {Y0}', BOUNDS),
+    (f'NOT (x_min($geometry) > {X})', BOUNDS),
+    (f'x_min($geometry) BETWEEN 700100 AND {X}', BOUNDS),
+    (f'x_min($geometry) NOT BETWEEN 700100 AND {X}', BOUNDS),
+    ('x_max($geometry) - x_min($geometry) > 100', BOUNDS),
+    ('(y_max($geometry) - y_min($geometry)) / 1000 < 0.5', BOUNDS),
+    (f'abs(x_min($geometry) - {X}) < 300', BOUNDS),
+    (f'x_min($geometry) > {X} AND "pop" > 3', BOUNDS),
+    (f'NOT (x_min($geometry) > {X} AND "pop" > 3)', ()),  # QGIS stops on the empty geometry, SQL goes on
+    (f'x_min($geometry) > {X} OR "pop" > 6', ()),
+    (f'"pop" > 6 OR x_min($geometry) > {X}', ()),
+    (f'CASE WHEN x_min($geometry) > {X} THEN 1 ELSE 2 END = 2', ()),
+    (f'x($geometry) > {X}', ('pg_pts',)),
+    (f'y($geometry) <= {Y}', ('pg_pts',)),
+    (f'x($geometry) = {X0}', ('pg_pts',)),
+    (f'x($geometry) <> {X0}', ('pg_pts',)),
+    (f'$x > {X}', ('pg_pts',)),
+    (f'$y < {Y}', ('pg_pts',)),
+    (f'NOT ($x > {X})', ('pg_pts',)),
+    ('x($geometry) < 1', ('pg_pts',)),                  # an empty multipoint: 0 in QGIS
+    # left to QGIS
+    ('x_min($geometry) IS NULL', ()),                    # NaN in QGIS for an empty geometry, NULL in the source
+    (f'coalesce(x_min($geometry), 0) < {X}', ()),
+    ('area($geometry) > 1000', ()),
+    ('length($geometry) > 500', ()),
+    ('perimeter($geometry) > 500', ()),
+    ('num_points($geometry) > 3', ()),
+    ('$area > 1000', ()),
+    ('$length > 500', ()),
+    ('geometry_type($geometry) = \'Point\'', ()),
+    (f'x_min(@geometry) > {X}', ()),
+]
+# Through the plugin's entry (safe_set_subset_string, PostgreSQL type casting, hybrid): (expression,
+# tags that must write it natively or as a hybrid subset)
+GEOM_EXECUTOR_CASES = [
+    (f'x_min($geometry) > {X}', BOUNDS),
+    (f'x($geometry) > {X}', ('pg_pts',)),
+    (f'$y < {Y}', ('pg_pts',)),
+    (f'x_min($geometry) > {X} AND "pop" % 2 = 0', ()),       # hybrid: not where QGIS stops on an empty geometry
+    ('length($geometry) > 500', ()),
+]
+# (old subset, combine operator, expression, tags that must write it): under the NOT of AND NOT an
+# empty geometry gives NOT (NULL AND FALSE), TRUE in SQL where QGIS stops on the NaN
+GEOM_COMBINED_CASES = [
+    (None, 'AND NOT', f'x_min($geometry) > {X}', BOUNDS),
+    (None, 'AND NOT', f'x_min($geometry) > {X} AND "pop" > 3', ()),
+    ('"pop" > 2', 'AND NOT', f'x_min($geometry) > {X} AND "pop" > 3', ()),
+    ('"pop" > 2', 'AND NOT', f'x_min($geometry) < {X}', BOUNDS),
+    ('"pop" > 2', 'OR', f'x_min($geometry) > {X}', BOUNDS),
+    ('"pop" > 2', 'OR', f'x_min($geometry) > {X} AND "pop" < 5', BOUNDS),
+    ('"pop" > 2', 'AND', f'x_min($geometry) > {X}', BOUNDS),
+]
+POINTS = [
+    (1, 1, 'POINT (700123.456789 6600234.5678)'), (2, 2, 'POINT (700500 6600500)'),
+    (3, 3, 'POINT (700777.125 6600111.875)'), (4, 4, 'POINT (700499.99999999994 6600500.0000000001)'),
+    (5, 1, 'POINT EMPTY'), (6, 6, None), (7, 7, 'POINT (700900.3 6600900.7)'),
+    (8, 8, 'POINT (700050.05 6600950.95)'),
+]
+# GDAL writes a multipoint into a layer of points (with a warning), QGIS reads it as it is
+GPKG_POINTS = POINTS + [(9, 9, 'MULTIPOINT ((700100 6600100),(700900.5 6600800.25))')]
+PG_ANY_POINTS = GPKG_POINTS + [
+    (10, 10, 'MULTIPOINT ((700600 6600400))'), (11, 11, 'MULTIPOINT (EMPTY,(700700 6600700))'),
+    (12, 12, 'MULTIPOINT ((700300 6600300),EMPTY)'), (13, 13, 'POINT Z (700400 6600600 12)'),
+]
+LINES = [
+    (1, 1, 'MULTILINESTRING ((700000.5 6600000.25,700300.75 6600400.125))'),
+    (2, 2, 'MULTILINESTRING ((700400 6600400,700410 6600410,700420 6600400))'),
+    (3, 3, 'MULTILINESTRING ((700100 6600900,700900 6600100),(700950.5 6600950.5,700990 6600990))'),
+    (4, 4, 'MULTILINESTRING EMPTY'), (5, 5, None),
+    (6, 6, 'MULTILINESTRING ((700123.456789 6600234.5678,700800 6600800))'),
+]
+PG_ANY_LINES = LINES + [
+    (7, 7, 'CIRCULARSTRING (700000 6600000,700500.5 6600400.25,701000 6600000.5)'),
+    (8, 8, 'COMPOUNDCURVE ((700200 6600200,700300 6600200),CIRCULARSTRING (700300 6600200,700350 6600250.5,'
+           '700400 6600200))'),
+    (9, 9, 'LINESTRING (700600.5 6600600.5,700700 6600100)'),
+]
+POLYGONS = [
+    (1, 1, 'MULTIPOLYGON (((700000 6600000,700600 6600000,700600 6600600,700000 6600600,700000 6600000),'
+           '(700100 6600100,700200 6600100,700200 6600200,700100 6600100)))'),
+    (2, 2, 'MULTIPOLYGON (((700400 6600400,700410 6600400,700410 6600410,700400 6600400)),'
+           '((700900.5 6600900.5,700950 6600900.5,700950 6600950,700900.5 6600900.5)))'),
+    (3, 3, 'MULTIPOLYGON (((700100 6600100,700200 6600100,700200 6600200,700100 6600200,700100 6600100),'
+           '(700600 6600600,700700 6600600,700700 6600700,700600 6600600)))'),     # a hole outside its shell
+    (4, 4, 'MULTIPOLYGON EMPTY'), (5, 5, None),
+]
+PG_ANY_POLYGONS = POLYGONS + [
+    (6, 6, 'CURVEPOLYGON (CIRCULARSTRING (700300 6600300,700500.5 6600333.25,700300 6600300))'),
+    # a hole outside the shell: ST_XMax 700800, QGIS 700600 (PostGIS bounds every ring of a curve polygon)
+    (7, 7, 'CURVEPOLYGON (CIRCULARSTRING (700000 6600000,700600 6600000,700000 6600000),'
+           '(700700 6600700,700800 6600700,700800 6600800,700700 6600700))'),
+]
+
+
+def write_geo_file(path, driver_name, layer_name, geometry_type, rows):
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(2154)
+    source = ogr.GetDriverByName(driver_name).CreateDataSource(path)
+    layer = source.CreateLayer(layer_name, srs, geometry_type)
+    for name in ('id', 'pop'):
+        layer.CreateField(ogr.FieldDefn(name, ogr.OFTInteger))
+    for key, pop, wkt in rows:
+        feature = ogr.Feature(layer.GetLayerDefn())
+        feature.SetField('id', key)
+        feature.SetField('pop', pop)
+        if wkt:
+            feature.SetGeometry(ogr.CreateGeometryFromWkt(wkt))
+        layer.CreateFeature(feature)
+    source = None
+
+
+def postgres_geo_layers(dsn):
+    """Typed columns, then one generic column read as points, lines and polygons (arcs, multipoints)."""
+    from qgis.core import Qgis
+    connection = QgsProviderRegistry.instance().providerMetadata('postgres').createConnection(dsn, {})
+    any_points = PG_ANY_POINTS
+    if Qgis.QGIS_VERSION_INT < 40000:  # $x of an empty multipoint crashes QGIS 4.2.3 (3.44.15: 0)
+        any_points = any_points + [(14, 14, 'MULTIPOINT EMPTY')]
+    layers = []
+    for table, column_type, wkb, rows, tags in (
+            ('fm_geo_pts', 'geometry(Point, 2154)', 'Point', POINTS, {'pg', 'pg_pts'}),
+            ('fm_geo_lines', 'geometry(MultiLineString, 2154)', 'MultiLineString', LINES, {'pg'}),
+            ('fm_geo_polys', 'geometry(MultiPolygon, 2154)', 'MultiPolygon', POLYGONS, set()),
+            ('fm_geo_any_pts', 'geometry', 'Point', any_points, {'pg', 'pg_pts'}),
+            ('fm_geo_any_lines', 'geometry', 'LineString', PG_ANY_LINES, {'pg'}),
+            ('fm_geo_any_polys', 'geometry', 'Polygon', PG_ANY_POLYGONS, set())):
+        connection.executeSql(f'DROP TABLE IF EXISTS public.{table}')
+        connection.executeSql(f'CREATE TABLE public.{table} (id integer PRIMARY KEY, pop integer, geom {column_type})')
+        values = ', '.join('({}, {}, {})'.format(key, pop, "ST_GeomFromText('{}', 2154)".format(wkt) if wkt else 'NULL')
+                           for key, pop, wkt in rows)
+        connection.executeSql(f'INSERT INTO public.{table} VALUES {values}')  # nosec B608 - test data
+        uri = f"{dsn} key='id' srid=2154 type={wkb} table=\"public\".\"{table}\" (geom)"
+        layers.append((f'postgres {table}', QgsVectorLayer(uri, table, 'postgres'), 'postgresql', tags))
+    return layers
+
+
+def geo_layers(work):
+    layers = []
+    for name, wkb, rows, tags in (('pts', ogr.wkbPoint, GPKG_POINTS, {'gpkg_pts'}),
+                                  ('lines', ogr.wkbMultiLineString, LINES, set()),
+                                  ('polys', ogr.wkbMultiPolygon, POLYGONS, set()),
+                                  ('curves', ogr.wkbCompoundCurve, [(1, 1, 'COMPOUNDCURVE ((700200 6600200,'
+                                                                    '700300 6600200))'), (2, 2, None)], set())):
+        path = os.path.join(work, f'geo_{name}.gpkg')
+        write_geo_file(path, 'GPKG', name, wkb, rows)
+        layers.append((f'gpkg {name}', QgsVectorLayer(f'{path}|layername={name}', name, 'ogr'), 'spatialite', tags))
+    path = os.path.join(work, 'geo_pts.shp')
+    write_geo_file(path, 'ESRI Shapefile', 'geo_pts', ogr.wkbPoint, POINTS)
+    layers.append(('shp pts', QgsVectorLayer(path, 'geo_pts', 'ogr'), 'ogr', set()))
+    return layers
+
+
+def geometry_path(label, layer, provider_type, tags):
+    """Geometric functions written by the translation, then through the plugin's entry."""
+    from filter_mate.adapters.qgis.native_filter_translation import translate_for_layer
+    for text, required in GEOM_CASES:
+        layer.setSubsetString('')
+        name = f"{label}: {text}"
+        try:
+            expected = reference(layer, text, errors_drop=True)
+            result = translate_for_layer(layer, text)
+        except Exception as exc:
+            traceback.print_exc()
+            report('FAIL', name, f"raised {type(exc).__name__}: {exc}")
+            continue
+        must = bool(tags & set(required))
+        if result is None or result.status.value != 'FULL':
+            reason = 'no dialect' if result is None else f"{result.status.value}: {result.reason}"
+            report('FAIL' if must else 'SKIP', name, f"not written ({reason})")
+            continue
+        accepted = layer.setSubsetString(result.sql)
+        got = keys(layer) if accepted else None
+        layer.setSubsetString('')
+        status = 'PASS' if got == expected else 'FAIL'
+        if not must:
+            status = 'FAIL'  # written where it was not measured equal
+        report(status, name, f"sql={result.sql!r:.240} expected={expected} got={got} accepted={accepted}")
+    for text, required in GEOM_EXECUTOR_CASES:
+        layer.setSubsetString('')
+        expected = reference(layer, text, errors_drop=True)
+        written, subset, got = run_executor(layer, provider_type, text)
+        must = bool(tags & set(required))
+        status = ('PASS' if got == expected else 'FAIL') if written else ('FAIL' if must else 'OLD')
+        report(status, f"{label} executor: {text}", f"subset={subset!r:.240} expected={expected} got={got}")
+    for old, operator, text, required in GEOM_COMBINED_CASES:
+        layer.setSubsetString('')
+        expected = combined_reference(layer, old, operator, text, errors_drop=True)
+        written, subset, got = run_executor(layer, provider_type, text, old, operator)
+        must = bool(tags & set(required))
+        status = ('PASS' if got == expected else 'FAIL') if written else ('FAIL' if must else 'OLD')
+        report(status, f"{label} combined {operator}: {old} / {text}",
+               f"subset={subset!r:.240} expected={expected} got={got}")
+
+
+def set_variables(layers):
+    from qgis.core import QgsProject
+    project = QgsProject.instance()
+    project.setTitle(PROJECT_TITLE)
+    for name, value in VARIABLES.items():
+        QgsExpressionContextUtils.setProjectVariable(project, name, value)
+    QgsExpressionContextUtils.setGlobalVariable('fm_gv', 'route')
+    for _, layer, *_ in layers:
+        QgsExpressionContextUtils.setLayerVariable(layer, 'fm_lv', '7')
 
 
 def main():
@@ -479,6 +787,8 @@ def main():
     dsn = os.environ.get('FM_PG_DSN')
     if dsn:
         layers += [(label, layer, 'postgresql') for label, layer in postgres_layers(dsn)]
+    geometric = geo_layers(work) + (postgres_geo_layers(dsn) if dsn else [])
+    set_variables(layers + geometric)
     for label, layer, provider_type in layers:
         print(f"INFO  {label}: valid={layer.isValid()} features={len(keys(layer))}", flush=True)
         try:
@@ -487,9 +797,20 @@ def main():
             hybrid_path(label, layer, provider_type)
             if provider_type == 'ogr':
                 text_path(label, layer, provider_type)
+            if provider_type in ('ogr', 'spatialite'):
+                fallback_path(label, layer, provider_type)
         except Exception as exc:
             traceback.print_exc()
             report('FAIL', f"{label} raised {type(exc).__name__}: {exc}")
+    for label, layer, provider_type, tags in geometric:
+        print(f"INFO  {label}: valid={layer.isValid()} features={len(keys(layer))} wkbType={layer.wkbType()}",
+              flush=True)
+        try:
+            geometry_path(label, layer, provider_type, tags)
+        except Exception as exc:
+            traceback.print_exc()
+            report('FAIL', f"{label} raised {type(exc).__name__}: {exc}")
+    QgsExpressionContextUtils.removeGlobalVariable('fm_gv')
 
     failed = results.count('FAIL')
     print(f"\n{results.count('PASS')} passed, {failed} failed, {results.count('SKIP')} left to QGIS, "

@@ -860,14 +860,15 @@ def prepare_ogr_source_geom(
         # 2026-11-12: an expression that keeps nothing, or cannot be read, is
         # refused; the layer used to stay whole (every source feature filtered
         # the targets while the source showed none).
-        from qgis.core import QgsFeatureRequest, QgsExpression
-        from ..source_refusal import source_selection_refusal
+        from qgis.core import QgsExpression
+        from ..source_refusal import selection_request, source_selection_refusal
         expr = QgsExpression(filter_to_use)
         if expr.hasParserError():
             logger.error(f"[OGR]   Expression parse error: {expr.parserErrorString()}")
             raise source_selection_refusal(layer.name(), unreadable=True)
         try:
-            filtered_features = list(layer.getFeatures(QgsFeatureRequest(expr)))
+            # the layer's variables: the QGIS text of a native subset may read @variables
+            filtered_features = list(layer.getFeatures(selection_request(expr, layer)))
         except Exception as e:
             logger.error(f"[OGR]   Expression filtering failed: {e}")
             raise source_selection_refusal(layer.name(), unreadable=True) from e
