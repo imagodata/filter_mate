@@ -8,9 +8,9 @@ host-free core. ``PostgreSQLSqlBuilder`` builds the SQL; what needs the host
 goes through four methods a host overrides:
 
 - ``_connection_for_layer(layer)``: DB-API connection to the layer's database
-  (statement timeout, pre-computed buffer tables); None by default, then the
-  timeout is skipped and a dynamic buffer is inlined (in filter chaining,
-  where only the table works, the builder answers None);
+  (pre-computed buffer tables); None by default, then a dynamic buffer is
+  inlined (in filter chaining, where only the table works, the builder answers
+  None);
 - ``_notify_user_warning(message)``: a warning meant for the user; the log by default;
 - ``_authid_to_srid(authid)`` / ``_srid_is_geographic(srid)``: CRS lookups;
   by default an ``EPSG:n`` code and a list of known lon/lat SRIDs.
@@ -147,7 +147,7 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
         - Larger: Use EXISTS subquery with source filter
 
         FIX v4.2.12 (2026-01-21): Detects complex query scenarios (buffer expression + filter chaining)
-        and warns user about potential performance impact. Sets 2-minute timeout for protection.
+        and warns user about potential performance impact.
 
         Args:
             layer_props: Layer properties (schema, table, geometry field, etc.)
@@ -413,10 +413,6 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
         # DIAGNOSTIC: Log the final expression
         self.log_info(f"✅ PostgreSQL expression built: {final_expr[:200]}...")
 
-        # FIX v4.2.12: Set query timeout if complex query detected
-        if hasattr(self, '_is_complex_query') and self._is_complex_query:
-            self._set_query_timeout(layer_props.get('layer'))
-
         return final_expr
 
     def build_expression_optimized(
@@ -650,7 +646,11 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
         - Nested EXISTS subqueries (cartesian product)
         - Missing spatial indexes
 
-        Sets self._is_complex_query flag for timeout enforcement.
+        Sets self._is_complex_query.
+
+        2026-11-13: it also set a "statement_timeout" of 2 minutes, on a psycopg2 connection opened for that alone,
+        never closed and left idle in a transaction, while the filter runs through the connection of the QGIS
+        provider (setSubsetString): it protected nothing. Removed, and the message no longer promises it.
         """
         self._is_complex_query = False
 
@@ -671,7 +671,7 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
                 self._notify_user_warning(
                     f"⚠️ FilterMate: Complex query on '{layer_name}'\n"
                     f"Combining dynamic buffer ({buffer_expression[:30]}...) with filter chaining.\n"
-                    "Query may take 10-60 seconds. A 2-minute timeout is set for protection.\n"
+                    "Query may take 10-60 seconds.\n"
                     "Consider using static buffer values for better performance."
                 )
             except Exception as e:
@@ -684,50 +684,15 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
     def _connection_for_layer(self, layer):
         """DB-API connection to the database of ``layer``, None when the host gives none.
 
-        Used for the statement timeout of complex queries and the
-        pre-computed buffer tables of dynamic buffers: without a connection
-        the timeout is skipped and the buffer is inlined in the SQL, except in
-        filter chaining, where the builder answers None (OGR fallback).
+        Used for the pre-computed buffer tables of dynamic buffers: without a
+        connection the buffer is inlined in the SQL, except in filter chaining,
+        where the builder answers None (OGR fallback).
         """
         return None
 
     def _notify_user_warning(self, message: str) -> None:
         """Show ``message`` to the user; the log when the host has no other place."""
         self.log_warning(message)
-
-    def _set_query_timeout(self, layer) -> None:
-        """
-        Set PostgreSQL statement timeout for complex queries.
-
-        FIX v4.2.12 (2026-01-21): Protection against infinite queries.
-        Sets timeout to 120 seconds (2 minutes) for complex buffer+chaining scenarios.
-
-        Args:
-            layer: QGIS layer with PostgreSQL provider
-        """
-        if not layer:
-            return
-
-        try:
-            # Get PostgreSQL connection from layer
-            connexion = self._connection_for_layer(layer)
-
-            if not connexion:
-                self.log_warning("No PostgreSQL connection available for timeout")
-                return
-
-            # Set statement timeout (120 seconds = 2 minutes)
-            timeout_ms = 120000  # 120 seconds in milliseconds
-
-            with connexion.cursor() as cursor:
-                cursor.execute(f"SET statement_timeout = {timeout_ms}")
-
-            self.log_info(f"✅ Query timeout set: {timeout_ms / 1000:.0f} seconds")
-            self.log_info("   → Protection against infinite queries enabled")
-
-        except Exception as e:
-            self.log_warning(f"Could not set query timeout: {e}")
-            # Non-critical - continue anyway
 
     @staticmethod
     def _quote_ident(name) -> str:
@@ -1649,7 +1614,7 @@ class PostgreSQLSqlBuilder(GeometricFilterPort):
             # CRITICAL: Use temp table for ALL dynamic buffer expressions
             # The freeze happens during mapCanvas.refresh() when QGIS renders all 7 layers simultaneously
             # Each layer's setSubsetString contains inline ST_Buffer(CASE WHEN...) that recalculates
-            # for every feature during rendering - causes multi-minute freeze even with timeout protection
+            # for every feature during rendering - causes multi-minute freeze
             if buffer_expression:
                 self.log_info("🚀 Creating pre-calculated buffer table (prevents freeze on canvas refresh)")
             else:

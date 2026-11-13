@@ -279,15 +279,56 @@ class FilterMate:
         else:
             logger.error(f"Translation file not found: {locale_path}")
 
+    def _add_menu_actions(self):
+        """The entries of Vector > FilterMate, the first one in the toolbar too."""
+        icon_path = os.path.join(self.plugin_dir, 'icon.png')
+
+        # Main action to open FilterMate
+        self._open_action = self.add_action(
+            icon_path,
+            text=self.tr(u'FilterMate'),
+            callback=self.run,
+            parent=self.iface.mainWindow(),
+            status_tip=self.tr(u'Open FilterMate panel'))
+
+        # The setup with the agent: also offered once per version, in the AGENT panel
+        self._setup_action = self.add_action(
+            icon_path,
+            text=self.tr(u'Set up FilterMate with the agent'),
+            callback=self.setup_with_agent,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False,
+            status_tip=self.tr(u'The agent asks a few questions and proposes the settings of FilterMate'))
+
+        # Action to reset configuration and database
+        reset_icon_path = os.path.join(self.plugin_dir, 'icons', 'parameters.png')
+        self._reset_action = self.add_action(
+            reset_icon_path,
+            text=self.tr(u'Reset configuration and database'),
+            callback=self.reset_configuration,
+            parent=self.iface.mainWindow(),
+            add_to_toolbar=False,
+            status_tip=self.tr(u'Reset the default configuration and delete the SQLite database'))
+
     def retranslate_actions(self):
-        """Retranslate menu and toolbar action texts after a language change."""
+        """Retranslate menu and toolbar action texts after a language change.
+
+        Each entry is found by its own reference, never by its place in ``self.actions``: an entry added between
+        two others (the setup with the agent) took the words of the one after it.
+        """
         self.menu = self.tr(u'&FilterMate')
-        if len(self.actions) >= 1:
-            self.actions[0].setText(self.tr(u'FilterMate'))
-            self.actions[0].setStatusTip(self.tr(u'Open FilterMate panel'))
-        if len(self.actions) >= 2:
-            self.actions[1].setText(self.tr(u'Reset configuration and database'))
-            self.actions[1].setStatusTip(self.tr(u'Reset the default configuration and delete the SQLite database'))
+        entries = (
+            ('_open_action', self.tr(u'FilterMate'), self.tr(u'Open FilterMate panel')),
+            ('_setup_action', self.tr(u'Set up FilterMate with the agent'),
+             self.tr(u'The agent asks a few questions and proposes the settings of FilterMate')),
+            ('_reset_action', self.tr(u'Reset configuration and database'),
+             self.tr(u'Reset the default configuration and delete the SQLite database')),
+        )
+        for name, text, status_tip in entries:
+            action = getattr(self, name, None)
+            if action is not None:
+                action.setText(text)
+                action.setStatusTip(status_tip)
 
     def add_action(
         self,
@@ -405,34 +446,7 @@ class FilterMate:
             self._check_geometry_validation_settings()
 
             logger.debug("FilterMate.initGui: Creating actions")
-            icon_path = os.path.join(self.plugin_dir, 'icon.png')
-
-            # Main action to open FilterMate
-            self.add_action(
-                icon_path,
-                text=self.tr(u'FilterMate'),
-                callback=self.run,
-                parent=self.iface.mainWindow(),
-                status_tip=self.tr(u'Open FilterMate panel'))
-
-            # The setup with the agent: also offered once per version, in the AGENT panel
-            self.add_action(
-                icon_path,
-                text=self.tr(u'Set up FilterMate with the agent'),
-                callback=self.setup_with_agent,
-                parent=self.iface.mainWindow(),
-                add_to_toolbar=False,
-                status_tip=self.tr(u'The agent asks a few questions and proposes the settings of FilterMate'))
-
-            # Action to reset configuration and database
-            reset_icon_path = os.path.join(self.plugin_dir, 'icons', 'parameters.png')
-            self.add_action(
-                reset_icon_path,
-                text=self.tr(u'Reset configuration and database'),
-                callback=self.reset_configuration,
-                parent=self.iface.mainWindow(),
-                add_to_toolbar=False,
-                status_tip=self.tr(u'Reset the default configuration and delete the SQLite database'))
+            self._add_menu_actions()
 
             # Connect signals to handle project changes and automatically reload layers
             # Note: layersAdded signal is NOT connected to avoid freeze issues

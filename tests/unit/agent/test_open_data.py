@@ -217,3 +217,72 @@ def test_a_resolver_that_does_not_answer_never_holds_qgis():
     assert resolved_problem("https://data.example.org/a.gpkg", resolve=slow, timeout=0.1) \
         == "the address of this server could not be checked in time"
     assert time.monotonic() - started < 1
+
+
+def test_a_name_is_resolved_once_per_tool_call():
+    """Each resolution may hold QGIS up to 3 s: a link, its redirects and its download share one (audit of 13/11)."""
+    from core.agent.open_data import resolved_problem
+    resolve, checked = _resolver("93.184.215.14"), {}
+    for url in ("https://data.example.org/a.gpkg", "https://data.example.org/b.gpkg", "https://cdn.example.org/a.gpkg",
+                "https://data.example.org/a.gpkg"):
+        assert resolved_problem(url, resolve=resolve, checked=checked) == ""
+    assert resolve.asked == ["data.example.org", "cdn.example.org"]
+    refused = _resolver("10.0.0.7")
+    assert resolved_problem("https://inside.example.org/a", resolve=refused, checked=checked) \
+        == resolved_problem("https://inside.example.org/b", resolve=refused, checked=checked) \
+        == "only a public address can be read"
+    assert refused.asked == ["inside.example.org"]
+    alone = _resolver("93.184.215.14")  # without the memory of a call, nothing is kept
+    resolved_problem("https://data.example.org/a.gpkg", resolve=alone)
+    resolved_problem("https://data.example.org/a.gpkg", resolve=alone)
+    assert alone.asked == ["data.example.org"] * 2
+
+
+@pytest.mark.parametrize("address", [
+    "64:ff9b::a00:1", "64:ff9b::a9fe:a9fe", "64:ff9b::7f00:1",  # NAT64: the gateway reaches 10.0.0.1, the metadata, itself
+    "64:ff9b:1::a00:1", "64:ff9b:1:a00:1::",  # a NAT64 of the local network
+    "2002:a00:1::1", "2002:a9fe:a9fe::",  # 6to4
+    "2001:0:4136:e378:8000:63bf:f5ff:fffe",  # Teredo
+    "::ffff:10.0.0.1", "::ffff:169.254.169.254",  # mapped
+])
+def test_a_local_ipv4_carried_in_an_ipv6_address_is_refused(address):
+    from core.agent.open_data import resolved_problem
+    assert resolved_problem("https://data.example.org/a.gpkg", resolve=_resolver(address)) \
+        == "only a public address can be read"
+
+
+def test_a_public_ipv4_carried_by_nat64_is_read():
+    """An IPv6 only network (DNS64) gives every IPv4 server an address in 64:ff9b::/96."""
+    from core.agent.open_data import resolved_problem
+    assert resolved_problem("https://data.example.org/a.gpkg", resolve=_resolver("64:ff9b::5db8:d70e")) == ""
+    assert source_problem("https://[64:ff9b::93.184.215.14]/a.gpkg", True) == ""
+
+
+@pytest.mark.parametrize("url", ["https://[64:ff9b::10.0.0.1]/a.gpkg", "https://[64:ff9b::169.254.169.254]/a.gpkg",
+                                 "https://[::ffff:10.0.0.1]/a.gpkg"])
+def test_a_local_ipv4_carried_in_an_ipv6_url_is_refused(url):
+    assert source_problem(url, True) == "only a public address can be read"
+
+
+@pytest.mark.parametrize("url", [
+    # Python resolves the IDNA 2003 form (fass, xn--4xa), Qt 6 the IDNA 2008 one (xn--fa-hia, xn--3xa), curl its own.
+    "https://faß.example.org/a.gpkg", "https://ς.example.org/a.gpkg", "https://a‍b.example.org/a.gpkg",
+    "https://ｅｘａｍｐｌｅ.org/a.gpkg", "https://données.example.org/a.gpkg",
+    # Qt decodes a host written in percent-encoding (fass.example.org); Python resolves it as written, and fails.
+    "https://fa%73s.example.org/a.gpkg", "https://fa%C3%9F.example.org/a.gpkg",
+])
+def test_a_host_name_that_is_not_plain_ascii_is_refused(url):
+    problem = source_problem(url, True)
+    assert "plain ASCII" in problem and "xn--" in problem
+
+
+def test_a_name_in_its_ascii_form_is_read():
+    """Qt 5, Qt 6, curl and Python all ask for an ASCII name as it is written."""
+    assert source_problem("https://xn--fa-hia.example.org/a.gpkg", True) == ""
+    assert source_problem("https://open-data_2.example.org/a.gpkg", True) == ""
+
+
+def test_a_redirect_to_a_name_that_is_not_plain_ascii_is_not_followed():
+    from core.agent.open_data import follow_redirects
+    with pytest.raises(ValueError, match="plain ASCII"):
+        follow_redirects("https://data.example.org/a.gpkg", lambda url: (302, "https://faß.example.org/a.gpkg"))

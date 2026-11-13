@@ -80,7 +80,8 @@ to the open project file (trust `project`) follow the same layout (`adapters/age
 not instructions of FilterMate:
 
 - their trust comes from where they are, never from their header; a name of a skill of the plugin is refused, and a
-  project cannot replace a skill of the profile;
+  project cannot replace a skill of the profile; a name starting with `connector-` is refused too (the MCP connectors
+  are entries of `load_skill` under that prefix);
 - the folder of a project is the one next to its file, whatever home path the project sets;
 - one that does not follow this standard, is over 64 KB, is a link to another place (the sub-folder, its `SKILL.md`
   or the skills folder itself, told before it is followed) or holds a character that does not show on screen
@@ -107,7 +108,7 @@ not instructions of FilterMate:
 
 ## Families of tools
 
-With the option *Offer the tools of a task once the agent loads its instructions* (off by default), the tools a skill
+With the option *Offer the tools of a task once the agent loads its instructions* (on by default), the tools a skill
 of the plugin names in `tools` or `requires` are left out of the requests until the agent loads that skill; the tools
 that filter and read (`FILTERING_TOOLS`) and `load_skill` are always offered (`core/agent/families.py`). Name in
 `tools` every tool the task needs: a tool left out of it stays hidden while the skill guides the model.

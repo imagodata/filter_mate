@@ -8,6 +8,8 @@ one: a 401 or a TLS error is a failure, not a dialog that a remote server gets t
 """
 from __future__ import annotations
 
+import re
+
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Callable, Dict, Iterator, Mapping, Optional, Tuple
@@ -27,7 +29,9 @@ _ACTIVE = []  # (whose, stop) of each wait Stop can end
 _OWNER = [""]  # whose waits start now: CHAT inside owned_by(CHAT), "" for another application
 
 
-_SEPARATORS = (b"\n\n", b"\r\n\r\n")  # the blank line that ends a server-sent event
+# The blank line that ends a server-sent event: two ends of line, each CRLF, LF or CR, in any mix. A CR before an
+# LF is the start of one CRLF, never an end of line of its own: "\r\n" alone is no blank line.
+_BLANK_LINE = re.compile(rb"(?:\r\n|\r(?!\n)|\n)(?:\r\n|\r|\n)")
 _SEPARATOR_TAIL = 3  # what of a separator may end a chunk: "\r\n\r" before its last "\n"
 
 
@@ -45,7 +49,7 @@ def ends_an_event(tail: bytes, chunk: bytes) -> Tuple[bool, bytes]:
         (whether a separator is there, the tail to give with the next chunk).
     """
     window = tail + chunk
-    return any(separator in window for separator in _SEPARATORS), window[-_SEPARATOR_TAIL:]
+    return _BLANK_LINE.search(window) is not None, window[-_SEPARATOR_TAIL:]
 
 
 class HttpFailure(Exception):

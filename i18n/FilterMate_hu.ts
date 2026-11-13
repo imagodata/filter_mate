@@ -1273,9 +1273,9 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Egy feladat eszközeinek felkínálása, miután az ügynök betöltötte annak utasításait</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Könnyebb kérések lassú vagy helyi modellhez: a szűrő és olvasó eszközök mindig elérhetők; a Processing, a stílusok, a nyomtatási elrendezések, a szerkesztés, a SAM és a nyílt adatok eszközei akkor jönnek, amikor az ügynök betölti az adott feladat készségét. A többi alkalmazás mindig minden eszközt megkap.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Könnyebb kérések: a szűrő és olvasó eszközök mindig elérhetők; a Processing, a stílusok, a nyomtatási elrendezések, a szerkesztés, a SAM és a nyílt adatok eszközei akkor jönnek, amikor az ügynök betölti az adott feladat készségét. A többi alkalmazás mindig minden eszközt megkap.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Az Ollama elutasította a(z) {} letöltését.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>A(z) {} letöltése sikertelen volt.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>

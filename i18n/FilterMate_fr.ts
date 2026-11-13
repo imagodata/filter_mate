@@ -1302,6 +1302,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ollama a refusé le téléchargement de {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Le téléchargement de {} a échoué.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollama est injoignable à {}.</translation>
@@ -1565,9 +1570,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Proposer les outils d'une tâche une fois ses consignes chargées par l'agent</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Requêtes plus légères, pour un modèle lent ou local : les outils qui filtrent et lisent sont toujours proposés ; ceux de Processing, des styles, des mises en page, de l'édition, de SAM et des données ouvertes arrivent quand l'agent charge le skill de cette tâche. Les autres applications reçoivent toujours tous les outils.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Requêtes plus légères : les outils qui filtrent et lisent sont toujours proposés ; ceux de Processing, des styles, des mises en page, de l'édition, de SAM et des données ouvertes arrivent quand l'agent charge le skill de cette tâche. Les autres applications reçoivent toujours tous les outils.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

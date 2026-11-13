@@ -7,7 +7,7 @@ embedding, speech and image models too; Ollama answers its own ``/api/tags`` (se
 from __future__ import annotations
 
 import json
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from .ollama_chat import MAX_LISTED_MODELS, installed_models, tags_url
 
@@ -20,8 +20,15 @@ KEY_PAGES: Dict[str, str] = {
 }
 
 # Parts of an id that tell a model which does not chat.
-_NOT_CHAT = ("embed", "tts", "whisper", "dall-e", "moderation", "image", "audio", "transcribe", "realtime", "search")
+_NOT_CHAT = ("embed", "tts", "whisper", "dall-e", "moderation", "image", "audio", "transcribe", "realtime", "search",
+             "sora", "babbage", "davinci")
 ANTHROPIC_PAGE_SIZE = 100  # its list gives 20 models unless asked for more
+
+
+def _created(entry) -> Optional[int]:
+    """The ``created`` timestamp of an entry of the list, when it has one."""
+    value = entry.get("created") if isinstance(entry, dict) else None
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
 def listing_url(kind: str, base_url: str) -> str:
@@ -50,8 +57,11 @@ def models_from_listing(kind: str, data: bytes) -> Tuple[str, ...]:
     if kind == "ollama":
         return tuple(installed_models(payload))
     entries = payload.get("data") if isinstance(payload, dict) else None
+    entries = list(entries) if isinstance(entries, list) else []
+    if any(_created(entry) is not None for entry in entries):  # OpenAI lists in no order: the cap keeps the recent
+        entries.sort(key=lambda entry: -(_created(entry) if _created(entry) is not None else float("-inf")))
     names = []
-    for entry in entries if isinstance(entries, list) else ():
+    for entry in entries:
         name = entry.get("id") if isinstance(entry, dict) else None
         if not isinstance(name, str) or not name.strip() or name in names:
             continue

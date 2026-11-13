@@ -76,8 +76,10 @@ class AgentSettings:
     local_filtering_only: bool = False
     # Exceptions of the Tools tab, as JSON {tool: "ask" | "allow" | "never"}: they override the level for that tool.
     tool_rules: str = "{}"
-    # Families of tools (core/agent/families.py): the tools of a task offered once its skill is loaded. Off by default.
-    tool_families: bool = False
+    # Families of tools (core/agent/families.py): the tools of a task offered once its skill is loaded. On by default
+    # since lot A (the connectors come the same way); saved under its own key: the old one, "tool_families", held an
+    # "off" that every saved profile carried without the user having chosen it.
+    tool_families: bool = True
 
     @property
     def rules(self) -> dict:
@@ -128,13 +130,26 @@ def _port(value) -> int:
     return port if 1024 <= port <= 65535 else DEFAULT_PORT
 
 
+# Keys of the free quota (removed in 5.1): the token of its relay stays in a profile that used it.
+_FORMER_KEYS = ("free_token", "free_token_target")
+
+
+def _forget_former_keys(settings) -> None:
+    for name in _FORMER_KEYS:
+        if settings.contains(_PREFIX + name):
+            settings.remove(_PREFIX + name)
+
+
 def load_settings() -> AgentSettings:
     settings = QgsSettings()
+    _forget_former_keys(settings)
     preset = str(settings.value(_PREFIX + "preset", DEFAULT_PRESET) or DEFAULT_PRESET)
+    known = preset in PRESETS
     return AgentSettings(
-        preset=preset if preset in PRESETS else DEFAULT_PRESET,
+        preset=preset if known else DEFAULT_PRESET,
         model=str(settings.value(_PREFIX + "model", "") or ""),
-        base_url=str(settings.value(_PREFIX + "base_url", "") or ""),
+        # The address saved under a preset that is gone (the relay of the free quota) is not the one of Anthropic.
+        base_url=str(settings.value(_PREFIX + "base_url", "") or "") if known else "",
         consent=settings.value(_PREFIX + "consent", False, type=bool),
         send_values=settings.value(_PREFIX + "send_values", True, type=bool),
         enabled_sources=_enabled_sources(settings),
@@ -149,7 +164,7 @@ def load_settings() -> AgentSettings:
         local_filtering_only=settings.value(_PREFIX + "local_filtering_only", False, type=bool),
         autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")),
         tool_rules=str(settings.value(_PREFIX + "tool_rules", "{}") or "{}"),
-        tool_families=settings.value(_PREFIX + "tool_families", False, type=bool))
+        tool_families=settings.value(_PREFIX + "offer_tools_by_task", True, type=bool))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -161,7 +176,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "send_values", values.send_values)
     settings.setValue(_PREFIX + "expert_python", values.expert_python)
     settings.setValue(_PREFIX + "local_filtering_only", values.local_filtering_only)
-    settings.setValue(_PREFIX + "tool_families", values.tool_families)
+    settings.setValue(_PREFIX + "offer_tools_by_task", values.tool_families)
     settings.setValue(_PREFIX + "enabled_sources", json.dumps(list(values.enabled_sources)))
     settings.setValue(_PREFIX + "custom_sources", values.custom_sources)
     settings.setValue(_PREFIX + "authcfg", values.authcfg)

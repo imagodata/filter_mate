@@ -112,7 +112,7 @@ class TestTypesNotKnownAsSafe:
         assert tools._value(definition("DISTANCE", "distance"), 12.5) == 12.5
 
     def test_an_optional_unknown_parameter_stays_unset(self, project):
-        algorithm = SimpleNamespace(parameterDefinitions=lambda: [
+        algorithm = SimpleNamespace(id=lambda: "native:reprojectlayer", parameterDefinitions=lambda: [
             definition("INPUT", "source"), definition("OPERATION", "coordinateoperation", optional=True)])
         values, made = tools._parameters(algorithm, {"INPUT": "points"})
         assert values == {"INPUT": "points_1a2b"} and made == []
@@ -130,3 +130,28 @@ class TestTypesNotKnownAsSafe:
         answer = tools.describe_algorithm("qgis:idwinterpolation")
         assert [row["name"] for row in answer["parameters"]] == ["INTERPOLATION_DATA", "OUTPUT"]
         assert "::|::" in answer["parameters"][0]["value"] and answer["left_out"] == ["OPERATION"]
+
+
+class TestValuesSetByFilterMate:
+    """native:mergevectorlayers writes the source of each layer in its output unless ADD_SOURCE_FIELDS is off."""
+
+    @staticmethod
+    def _merge():
+        definitions = [definition("LAYERS", "multilayer"), definition("ADD_SOURCE_FIELDS", "boolean", optional=True),
+                       definition("OUTPUT", "sink")]
+        return SimpleNamespace(
+            id=lambda: "native:mergevectorlayers", displayName=lambda: "Merge", group=lambda: "Vector general",
+            shortHelpString=lambda: "", shortDescription=lambda: "", flags=lambda: 0,
+            provider=lambda: SimpleNamespace(id=lambda: "native"), outputDefinitions=lambda: [],
+            parameterDefinitions=lambda: definitions)
+
+    @pytest.mark.parametrize("given", [{"LAYERS": ["points"]}, {"LAYERS": ["points"], "ADD_SOURCE_FIELDS": True}])
+    def test_the_source_fields_are_off_whatever_the_model_gives(self, project, monkeypatch, given):
+        monkeypatch.setattr(tools, "_destination_path", lambda item: "/tmp/output.gpkg")
+        values, _made = tools._parameters(self._merge(), given)
+        assert values["ADD_SOURCE_FIELDS"] is False
+
+    def test_describe_does_not_offer_what_the_model_cannot_set(self, project, monkeypatch):
+        monkeypatch.setattr(tools, "_registry", lambda: SimpleNamespace(algorithmById=lambda _id: self._merge()))
+        answer = tools.describe_algorithm("native:mergevectorlayers")
+        assert [row["name"] for row in answer["parameters"]] == ["LAYERS", "OUTPUT"]

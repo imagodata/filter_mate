@@ -1273,9 +1273,9 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Nabízet nástroje úlohy až poté, co agent načte její pokyny</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Lehčí požadavky pro pomalý nebo místní model: nástroje, které filtrují a čtou, se nabízejí vždy; nástroje pro Processing, styly, tiskové sestavy, editaci, SAM a otevřená data přicházejí, když agent načte dovednost dané úlohy. Ostatní aplikace dostávají vždy všechny nástroje.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lehčí požadavky: nástroje, které filtrují a čtou, se nabízejí vždy; nástroje pro Processing, styly, tiskové sestavy, editaci, SAM a otevřená data přicházejí, když agent načte dovednost dané úlohy. Ostatní aplikace dostávají vždy všechny nástroje.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Ollama odmítla stažení {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Stažení {} se nezdařilo.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>

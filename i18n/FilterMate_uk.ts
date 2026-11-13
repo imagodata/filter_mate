@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Пропонувати інструменти завдання, щойно агент завантажить його інструкції</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Легші запити для повільної або локальної моделі: інструменти фільтрування й читання пропонуються завжди; інструменти Processing, стилів, макетів, редагування, SAM і відкритих даних з'являються, коли агент завантажує навичку відповідного завдання. Інші застосунки завжди отримують усі інструменти.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Легші запити: інструменти фільтрування й читання пропонуються завжди; інструменти Processing, стилів, макетів, редагування, SAM і відкритих даних з'являються, коли агент завантажує навичку відповідного завдання. Інші застосунки завжди отримують усі інструменти.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Ollama відхилила завантаження {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Не вдалося завантажити {}.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>

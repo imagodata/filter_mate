@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>에이전트가 작업 지침을 불러온 뒤에 해당 작업의 도구 제공</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>느리거나 로컬인 모델을 위한 더 가벼운 요청: 필터링과 읽기 도구는 항상 제공되며, Processing, 스타일, 레이아웃, 편집, SAM, 공개 데이터 도구는 에이전트가 해당 작업의 스킬을 불러올 때 제공됩니다. 다른 애플리케이션은 항상 모든 도구를 받습니다.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>더 가벼운 요청: 필터링과 읽기 도구는 항상 제공되며, Processing, 스타일, 레이아웃, 편집, SAM, 공개 데이터 도구는 에이전트가 해당 작업의 스킬을 불러올 때 제공됩니다. 다른 애플리케이션은 항상 모든 도구를 받습니다.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Ollama가 {}의 다운로드를 거부했습니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>{}의 다운로드에 실패했습니다.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>

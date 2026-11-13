@@ -1273,9 +1273,9 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <translation>Udostępniaj narzędzia zadania dopiero po wczytaniu jego instrukcji przez agenta</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Lżejsze żądania, dla wolnego lub lokalnego modelu: narzędzia filtrujące i odczytujące są zawsze udostępniane; narzędzia Processing, stylów, wydruków, edycji, SAM i otwartych danych pojawiają się, gdy agent wczyta umiejętność danego zadania. Inne aplikacje zawsze otrzymują wszystkie narzędzia.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lżejsze żądania: narzędzia filtrujące i odczytujące są zawsze udostępniane; narzędzia Processing, stylów, wydruków, edycji, SAM i otwartych danych pojawiają się, gdy agent wczyta umiejętność danego zadania. Inne aplikacje zawsze otrzymują wszystkie narzędzia.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Ollama odmówiła pobrania {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Pobieranie {} nie powiodło się.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>

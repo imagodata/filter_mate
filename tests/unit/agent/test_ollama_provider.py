@@ -65,6 +65,10 @@ class TestRequest:
         assert body["options"] == {"num_ctx": CONTEXT_STEPS[0]}
         assert "authorization" not in request.headers
 
+    def test_no_tools_means_no_tools_key(self):
+        request = ollama().build_request("S", [Message(ROLE_USER, (TextPart("bonjour"),))], [])
+        assert "tools" not in json.loads(request.body)
+
     def test_every_tool_asks_for_32k_the_filtering_ones_for_16k(self):
         """The system prompt and every tool of the chat: about 73,000 characters, well past Ollama's 4096 tokens."""
         hello = [Message(ROLE_USER, (TextPart("bonjour"),))]

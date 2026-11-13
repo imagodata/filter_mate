@@ -47,7 +47,7 @@ from ...core.agent.messages import (
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
-from ...core.agent.providers.base import HttpRequest, error_from_response
+from ...core.agent.providers.base import HttpRequest, encode_json, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
@@ -92,7 +92,12 @@ MAX_DETAIL_CHARS = 200
 PROVIDER_TEST_ASK = "Reply with OK."
 PROVIDER_TEST_TOKENS = 16
 PROVIDER_TEST_WAIT_MS = 30_000
-PROVIDER_TEST_MAX_BYTES = 1_000_000
+# A local model loads from the disk at its first request (cold CPU, a thinking model): the Test waits longer for it,
+# asks for a few tokens only, and a context far smaller than the chat's (the adapter asks 16k at least).
+PROVIDER_TEST_OLLAMA_WAIT_MS = 120_000
+PROVIDER_TEST_OLLAMA_LIST_WAIT_MS = 5_000  # the list after a request that failed: a server that is gone is not awaited
+PROVIDER_TEST_OLLAMA_CONTEXT = 2_048
+PROVIDER_TEST_MAX_BYTES = 4_000_000  # the list of OpenRouter, a few MB
 MAX_CONNECTOR_TOOLS = 60  # a provider limits the tools of a request, and each one is paid for at every turn
 MAX_LISTED = 20
 NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values, layer_statistics, sample_features "
@@ -168,6 +173,8 @@ class AgentChatController(QObject):
         # A change of the settings is proposed in the thread (SettingsCard) unless a test answers the questions.
         self._card_questions = ask_user is None
         self._settings_cards = []  # the cards of the thread, kept alive with it
+        self._setup_offer = ""  # the version whose setup offer nobody has seen yet
+        self._setup_card = None  # its card, while it waits for an answer
         self._settings_outcomes = []  # what the user chose on a card since the last request, told to the model
         manager = getattr(parent_widget, '_config_model_manager', None)
         self._settings_applier = manager.apply_settings if manager is not None else None
@@ -192,6 +199,7 @@ class AgentChatController(QObject):
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.settings_requested.connect(self.open_settings)
         self.panel.setup_requested.connect(self.start_setup)
+        self.panel.shown.connect(self._on_panel_shown)
         self.panel.new_conversation_requested.connect(self.new_conversation)
         self._stat_layers = {}  # layer id -> layer whose changes refresh the numbers of the widgets
         self._stat_timer = QTimer(self)
@@ -293,6 +301,7 @@ class AgentChatController(QObject):
     def _on_project_read(self, *_args) -> None:
         """Another project is open: its own transcript comes back."""
         self._restore_transcript()
+        self._offer_setup_again()
         self._refresh_history()
 
     # --- transcript and history -------------------------------------------------
@@ -311,6 +320,7 @@ class AgentChatController(QObject):
         self._drop_engine()
         self.panel.input.forget()
         self.panel.clear_thread()
+        self._setup_card = None  # it went with the thread
         if not self._transcript:
             return
         for item in self._transcript:
@@ -425,6 +435,7 @@ class AgentChatController(QObject):
         self._transcript, self._transcript_key = [], ""
         self.panel.input.forget()
         self._reset_view()
+        self._offer_setup_again()
         self._refresh_history()
 
     # --- settings ---------------------------------------------------------------
@@ -463,14 +474,21 @@ class AgentChatController(QObject):
     def offer_setup_once(self, version: str = "") -> bool:
         """The first time this version opens: a card in the thread offers to set FilterMate up with the agent.
 
-        Kept as offered at once, whatever the answer: never offered again for this version (the menu entries start
-        it at any time). True when offered."""
+        Kept as offered once the card was in view (the AGENT section open), whatever the answer: never offered
+        again for this version (the menu entries start it at any time). The section is folded when the plugin
+        opens: until it is opened the card comes back when another project empties the thread. True when offered."""
         from qgis.core import QgsSettings
         version = version or self.plugin_version()
-        settings = QgsSettings()
-        if not self.setup_offer_due(str(settings.value(self.SETUP_OFFERED_KEY, "") or ""), version):
-            return False
-        settings.setValue(self.SETUP_OFFERED_KEY, version)
+        if self._setup_offer == version or not self.setup_offer_due(
+                str(QgsSettings().value(self.SETUP_OFFERED_KEY, "") or ""), version):
+            return False  # its card already waits in the thread, or it was offered before
+        self._setup_offer = version
+        self._show_setup_offer()
+        if self._agent_shown():
+            self._keep_setup_offered()
+        return True
+
+    def _show_setup_offer(self) -> None:
         texts = {"heading": _tr("Set FilterMate up with the agent?"),
                  "note": _tr("A few questions, then the settings shown before and after: nothing changes until you "
                              "apply. Later: menu Vector > FilterMate > Set up FilterMate with the agent."),
@@ -480,25 +498,75 @@ class AgentChatController(QObject):
                  _tr("Your data: PostgreSQL, rasters, point clouds, timeouts"),
                  _tr("The agent: what it may do alone, which layers it never changes")]
         card = self.panel.add_settings_card(texts, lines, "")
-        card.apply_requested.connect(lambda: (card.finish(True), self.start_setup()))
-        card.cancel_requested.connect(lambda: card.finish(False))
+        card.apply_requested.connect(self.start_setup)  # closed by start_setup, once the setup really starts
+        card.cancel_requested.connect(self._decline_setup)
+        self._setup_card = card
         self._settings_cards.append(card)
-        return True
 
-    def start_setup(self) -> None:
-        """Set FilterMate up with the agent: the AGENT section opened, and a request that starts the setup. The
-        settings of the agent are asked first when it has none (the usual way of a first request)."""
-        if self.chat_busy():
-            self._say(_tr("Wait for the end of the request, then start the setup again."), error=True)
+    def _offer_setup_again(self) -> None:
+        """The thread was emptied for another project before anyone saw the offer: its card comes back."""
+        if self._setup_offer:
+            self._show_setup_offer()
+
+    def _agent_shown(self) -> bool:
+        """Whether the AGENT section is open. A dock without sections to fold hides nothing."""
+        sections = getattr(self._parent_widget, "_fm_sections", None)
+        if sections is None or not hasattr(sections, "is_open"):
+            return True
+        try:
+            return bool(sections.is_open("agent"))
+        except Exception:
+            logger.debug("Agent: the state of the section could not be read", exc_info=True)
+            return True
+
+    def _on_panel_shown(self) -> None:
+        """The AGENT section opens: an offer that waited in it is in view."""
+        if self._setup_card is not None:
+            self._keep_setup_offered()
+
+    def _keep_setup_offered(self) -> None:
+        """The offer was seen or answered, or the setup started: not offered again for this version."""
+        if self._setup_offer:
+            from qgis.core import QgsSettings
+            QgsSettings().setValue(self.SETUP_OFFERED_KEY, self._setup_offer)
+            self._setup_offer = ""
+
+    def _decline_setup(self) -> None:
+        """"Not now" on the offer. Without a provider and with nothing else in the thread, the welcome comes back:
+        it has the button that connects a provider, and the thread would show a closed card above an input that
+        takes nothing."""
+        card, self._setup_card = self._setup_card, None
+        self._keep_setup_offered()
+        if card is None or card.done:
             return
+        card.finish(False)
+        if not self._transcript and not load_settings().ready:
+            self.panel.clear_thread()
+            self._say(_tr("Not now: the menu starts it when you want."))
+
+    def start_setup(self) -> bool:
+        """Set FilterMate up with the agent: the AGENT section opened, and a request that starts the setup. The
+        settings of the agent are asked first when it has none (the usual way of a first request). True when the
+        request was handed over; an offer waiting in the thread is closed then, not before."""
         sections = getattr(self._parent_widget, "_fm_sections", None)
         if sections is not None and hasattr(sections, "open_top"):
-            try:
+            try:  # first: what is said below must be in view
                 sections.open_top("agent")
             except Exception:
                 logger.debug("Agent: section not opened for the setup", exc_info=True)
+        if self.chat_busy():
+            self._say(_tr("Wait for the end of the request, then start the setup again."), error=True)
+            return False
+        if self._mcp.busy:
+            self._say(_tr("Another application is changing the project: try again in a moment."))
+            return False
+        self._keep_setup_offered()
+        card, self._setup_card = self._setup_card, None
+        if card is not None and not card.done:
+            card.finish(True)
         self._on_send(_tr("Help me set FilterMate up for my computer and my data: look at what this project holds, "
                           "ask me a few questions, then propose the settings."))
+        return True
 
     def _settings_link_tool(self, arguments) -> dict:
         """show_settings_link: a button in the thread, to a tab of the agent settings or to a setting."""
@@ -1446,27 +1514,32 @@ class AgentChatController(QObject):
             provider = create_provider(config)
             ask = Message(ROLE_USER, (TextPart(PROVIDER_TEST_ASK),))
             chat = provider.build_request("A connection test.", [ask], [])
+            if kind == KIND_OLLAMA:
+                chat = AgentChatController._small_ollama_test(chat)
         except (KeyStoreError, ValueError) as exc:
-            return False, str(exc).replace(key, "…") if key else str(exc), ()
+            return False, without_key(str(exc), key), ()
 
         def said(error: ProviderError) -> str:
             text = AgentChatController._error_message(error)
-            return text.replace(key, "…") if key else text
+            return without_key(text, key)
 
         error: Optional[ProviderError] = None
         if model:
-            error, content = AgentChatController._call_provider(chat)
+            error, content = AgentChatController._call_provider(
+                chat, wait_ms=PROVIDER_TEST_OLLAMA_WAIT_MS if kind == KIND_OLLAMA else PROVIDER_TEST_WAIT_MS)
             if error is None:
                 parser = provider.new_parser()
                 failed = [event for event in parser.feed(content) + parser.close() if isinstance(event, StreamFailure)]
                 error = failed[0].error if failed else None
-            if error is not None and error.kind in (ERROR_AUTH, ERROR_NETWORK):
-                return False, said(error), ()  # the list would say the same
+            # The list would say the same, but for Ollama: it may be there and slow, and its list helps the user next.
+            if error is not None and (error.kind == ERROR_AUTH or (error.kind == ERROR_NETWORK and kind != KIND_OLLAMA)):
+                return False, said(error), ()
         headers = {name: value for name, value in chat.headers.items()
                    if name.lower() not in ("content-type", "accept", "anthropic-beta")}
         headers["accept"] = "application/json"
         listing_error, content = AgentChatController._call_provider(
-            HttpRequest(listing_url(kind, address), headers), post=False)
+            HttpRequest(listing_url(kind, address), headers), post=False,
+            wait_ms=PROVIDER_TEST_OLLAMA_LIST_WAIT_MS if error is not None and kind == KIND_OLLAMA else PROVIDER_TEST_WAIT_MS)
         models = models_from_listing(kind, content) if listing_error is None else ()
         if error is not None:
             return False, said(error), models
@@ -1479,11 +1552,19 @@ class AgentChatController(QObject):
         return True, _tr("It answers: choose a model in the list."), models
 
     @staticmethod
-    def _call_provider(request: HttpRequest, post: bool = True) -> Tuple[Optional[ProviderError], bytes]:
+    def _small_ollama_test(request: HttpRequest) -> HttpRequest:
+        """The request of the Test for Ollama: a few tokens of answer and a small context, for the Test only."""
+        body = json.loads(request.body)
+        body["options"] = {"num_ctx": PROVIDER_TEST_OLLAMA_CONTEXT, "num_predict": PROVIDER_TEST_TOKENS}
+        return replace(request, body=encode_json(body))
+
+    @staticmethod
+    def _call_provider(request: HttpRequest, post: bool = True,
+                       wait_ms: int = PROVIDER_TEST_WAIT_MS) -> Tuple[Optional[ProviderError], bytes]:
         """One bounded call, waiting in a local event loop: (the failure worded as the chat words it, the answer)."""
         try:
             answer = fetch(request.url, request.body if post else None, request.headers,
-                           max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=PROVIDER_TEST_WAIT_MS)
+                           max_bytes=PROVIDER_TEST_MAX_BYTES, timeout_ms=wait_ms)
         except HttpFailure as exc:
             return ProviderError(ERROR_NETWORK, str(exc)), b""
         if answer.status >= 300:  # a redirection is not followed: the key must not go elsewhere
@@ -1511,9 +1592,11 @@ class AgentChatController(QObject):
         self._seen = None  # another conversation has seen nothing yet
         self.panel.clear_thread()
         self._links, self._settings_cards, self._settings_outcomes = [], [], []
+        self._setup_card = None  # it went with the thread
 
     def new_conversation(self) -> None:
         """The user starts again: what this project's conversation kept is forgotten."""
+        self._keep_setup_offered()  # an empty thread was asked for: the offer does not come back in it
         self._reset_view()
         self._transcript = []
         self.panel.input.forget()

@@ -27,10 +27,10 @@ from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
-from ...core.agent.providers.base import check_base_url, without_credentials
+from ...core.agent.providers.base import check_base_url, without_credentials, without_key
 from ...core.agent.providers.model_list import KEY_PAGES
 from ...core.agent.providers.ollama_chat import (
-    OLLAMA_DOWNLOAD_PAGE, RECOMMENDED_LOCAL_MODEL, PullError, installed_models, pull_body, pull_progress, pull_url,
+    OLLAMA_DOWNLOAD_PAGE, RECOMMENDED_LOCAL_MODEL, PullError, canonical_model, installed_models, pull_body, pull_progress, pull_url,
     tags_url,
 )
 from ...core.agent.sources import (
@@ -68,6 +68,15 @@ MAX_RECIPE_STEPS_SHOWN = 12  # steps listed in the menu of a recipe
 
 def _tr(text: str) -> str:
     return QCoreApplication.translate("AgentPanel", text)
+
+
+def _belongs_to_another(model: str, preset: str) -> bool:
+    """Is ``model`` a model of a provider other than ``preset``, one the dialog knows (suggested, or a Claude name)?"""
+    if not model:
+        return False
+    if any(model in names for name, names in MODEL_SUGGESTIONS.items() if name != preset):
+        return True
+    return model.startswith("claude-") and preset != "anthropic"
 
 
 def _size_text(size: int) -> str:
@@ -241,6 +250,7 @@ class AgentPanel(QFrame):
     undo_requested = pyqtSignal()
     settings_requested = pyqtSignal()
     setup_requested = pyqtSignal()
+    shown = pyqtSignal()  # the panel comes in view: its section opens, or the dock shows it
     new_conversation_requested = pyqtSignal()
     redo_requested = pyqtSignal()
     history_requested = pyqtSignal()
@@ -683,6 +693,7 @@ class AgentPanel(QFrame):
         super().showEvent(event)
         self._refresh_look()
         self.input.setFocus()
+        self.shown.emit()
 
     # --- state ----------------------------------------------------------------
 
@@ -916,6 +927,7 @@ class AgentSettingsDialog(QDialog):
         # (preset, model, address, typed key) -> (it answers, what to say, the chat models it lists): the Test button.
         self._provider_tester = provider_tester
         self._testing = False  # a provider is being tested: the wait spins the event loop, a second click is ignored
+        self._close_asked = None  # the result of a Save, a Cancel or an Esc that came during a test: done() waits for its end
         self._values = values
         self._target_of = target_of
         self.forget_key = False
@@ -1074,7 +1086,8 @@ class AgentSettingsDialog(QDialog):
         form.addRow(self.key_label, key_box)
         form.addRow(self.address_label, self.base_url)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
-        buttons.button(QDialogButtonBox.StandardButton.Save).setObjectName("pushButton_agent_settings_save")
+        self.save_button = buttons.button(QDialogButtonBox.StandardButton.Save)
+        self.save_button.setObjectName("pushButton_agent_settings_save")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         line = QFrame(self)
@@ -1090,9 +1103,9 @@ class AgentSettingsDialog(QDialog):
         self.tool_families.setObjectName("checkBox_agent_tool_families")
         self.tool_families.setChecked(values.tool_families)
         self.tool_families.setToolTip(_tr(
-            "Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of "
-            "Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that "
-            "task. Other applications always get every tool."))
+            "Lighter requests: the tools that filter and read are always offered; those of Processing, styles, "
+            "layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications "
+            "always get every tool."))
         general_layout.addWidget(self.tool_families)
         general_layout.addWidget(line)
         general_layout.addWidget(leaving)
@@ -1488,7 +1501,8 @@ class AgentSettingsDialog(QDialog):
         typed = self.model.currentText()
         self.model.clear()
         self.model.addItems(MODEL_SUGGESTIONS.get(name, ()))
-        self.model.setEditText(typed if name not in MODEL_SUGGESTIONS or typed else "")
+        # The name of a model of another provider is not one of this one: Ollama would offer to download it.
+        self.model.setEditText("" if _belongs_to_another(typed.strip(), name) else typed)
         self.base_url.setPlaceholderText(PRESETS[name][1])
         no_key = name == "ollama"
         self.local_filtering_only.setVisible(name == "ollama")
@@ -1566,18 +1580,24 @@ class AgentSettingsDialog(QDialog):
         self.provider_test_button.setEnabled(False)
         self._show_provider_result(_tr("Testing…"))
         QCoreApplication.processEvents()
+        message, models = "", ()
         try:
-            try:
-                _answers, message, models = self._provider_tester(preset, model, base_url, key)
-            except Exception:  # a tester that fails is said, not raised from a slot
-                message, models = _tr("The test could not be made."), ()
+            if self._close_asked is None:  # a close that came with that click: nothing is sent
+                try:
+                    _answers, message, models = self._provider_tester(preset, model, base_url, key)
+                except Exception:  # a tester that fails is said, not raised from a slot
+                    message, models = _tr("The test could not be made."), ()
         finally:
             self._testing = False
             self.provider_test_button.setEnabled(True)
+        asked, self._close_asked = self._close_asked, None
+        if asked is not None:  # Save, Cancel or Esc came meanwhile: it closes now
+            self.done(asked)
+            return
         if self.preset.currentData() != preset:
             return
         # A provider may echo what it was sent in its errors.
-        self._show_provider_result(str(message).replace(key, "…") if key else str(message))
+        self._show_provider_result(without_key(str(message), key))
         if models:
             typed = self.model.currentText()
             self.model.clear()
@@ -1594,7 +1614,16 @@ class AgentSettingsDialog(QDialog):
         """Closed: a list of models still on its way must not reach a dialog that is gone.
 
         2026-11-13: the address loses the focus while super().done() hides the dialog, and editingFinished then
-        sent a new request, answered once the dialog was deleted. None is sent once done() has begun."""
+        sent a new request, answered once the dialog was deleted. None is sent once done() has begun.
+
+        During a Test (the wait spins the event loop) it closes when the test ends: closed at once, the dialog would
+        hide while the controller stays blocked in its event loop, a second dialog could be opened, and this one would save
+        last. A Save during a download is refused: it would abort it and keep a model that is not there."""
+        if self._testing:
+            self._close_asked = result
+            return
+        if self._pull_reply is not None and result == QDialog.DialogCode.Accepted:
+            return
         self._closing = True
         if self._models_reply is not None:
             reply, self._models_reply = self._models_reply, None
@@ -1607,19 +1636,20 @@ class AgentSettingsDialog(QDialog):
             reply.deleteLater()
             return
         self._models_reply = None
-        names, answers = [], False
+        names, every_name, answers = [], [], False
         try:
             import json
             payload = json.loads(bytes(reply.read(OLLAMA_TAGS_MAX_BYTES) or b"").decode("utf-8", "replace") or "{}")
             names = installed_models(payload)
+            every_name = installed_models(payload, limit=None)  # the list shown is cut; "is it installed?" is not
             answers = isinstance(payload, dict) and isinstance(payload.get("models"), list)  # Ollama says its models
         except Exception:  # whatever a server answers (read() gives None without a body): this is a slot
-            names, answers = [], False
+            names, every_name, answers = [], [], False
         finally:
             reply.deleteLater()
         if self.preset.currentData() != "ollama":
             return
-        self._set_ollama_state(answers, names, address)
+        self._set_ollama_state(answers, every_name, address)
         if not names:
             self._forget_listed_models()
             if answers:  # Ollama is there and has no chat model: the one that fits a small GPU is proposed
@@ -1650,7 +1680,8 @@ class AgentSettingsDialog(QDialog):
         ollama = self.preset.currentData() == "ollama"
         pulling = self._pull_reply is not None
         wanted = self.model.currentText().strip()
-        offer = (ollama and self._ollama_up is True and bool(wanted) and wanted not in self._ollama_installed
+        installed = {canonical_model(name) for name in self._ollama_installed}  # "llama3" is "llama3:latest"
+        offer = (ollama and self._ollama_up is True and bool(wanted) and canonical_model(wanted) not in installed
                  and not pulling)
         self.ollama_install_row.setVisible(ollama and self._ollama_up is False and not pulling)
         self.ollama_download_button.setVisible(offer)
@@ -1693,8 +1724,8 @@ class AgentSettingsDialog(QDialog):
         reply.finished.connect(lambda answered=reply: self._on_pull_finished(answered))
         self._pull_idle.start()
         self.ollama_progress.setRange(0, 0)  # busy until a size is known
-        for widget in (self.preset, self.model, self.base_url, self.provider_test_button):
-            widget.setEnabled(False)
+        for widget in (self.preset, self.model, self.base_url, self.provider_test_button, self.save_button):
+            widget.setEnabled(False)  # Save too: it would abort the download and keep a model that is not there
         self._show_provider_result(_tr("Downloading {}…").format(model))
         self._update_ollama_widgets()
 
@@ -1778,6 +1809,8 @@ class AgentSettingsDialog(QDialog):
                     self._show_provider_result(_tr("The download ended before its end."))
                 elif isinstance(status, int) and status >= 400:
                     self._show_provider_result(_tr("Ollama refused the download of {}.").format(self._pull_model))
+                elif isinstance(status, int) and status >= 300:  # a redirection is not followed: not a download
+                    self._show_provider_result(_tr("The download of {} failed.").format(self._pull_model))
                 elif isinstance(status, int) and status > 0:  # answered, then the stream was cut
                     self._show_provider_result(_tr("The connection to Ollama was lost during the download of {}.")
                                                .format(self._pull_model))
@@ -1788,10 +1821,11 @@ class AgentSettingsDialog(QDialog):
         self._pull_reply = None
         self._pull_buffer = bytearray()
         reply.deleteLater()
-        for widget in (self.preset, self.model, self.base_url):
+        for widget in (self.preset, self.model, self.base_url, self.save_button):
             widget.setEnabled(True)
         self.provider_test_button.setEnabled(self._provider_tester is not None)
         if self._pull_end == "success" and not self._closing:
+            self._ollama_installed += (self._pull_model,)  # installed, whatever the next list says
             self.model.setEditText(self._pull_model)
             self._fetch_ollama_models()  # the list now has it
         self._update_ollama_widgets()

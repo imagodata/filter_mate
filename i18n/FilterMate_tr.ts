@@ -1273,9 +1273,9 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Bir görevin araçlarını, Aracı o görevin talimatlarını yükleyince sun</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Yavaş veya yerel bir model için daha hafif istekler: süzme ve okuma araçları her zaman sunulur; Processing, stiller, yerleşimler, düzenleme, SAM ve açık veri araçları ise Aracı o görevin becerisini yüklediğinde gelir. Diğer uygulamalar her zaman tüm araçları alır.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Daha hafif istekler: süzme ve okuma araçları her zaman sunulur; Processing, stiller, yerleşimler, düzenleme, SAM ve açık veri araçları ise Aracı o görevin becerisini yüklediğinde gelir. Diğer uygulamalar her zaman tüm araçları alır.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Ollama {} indirmesini reddetti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>{} indirilemedi.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>

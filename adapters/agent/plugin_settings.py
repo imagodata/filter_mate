@@ -184,7 +184,11 @@ def planned_profile(arguments: Dict[str, Any]):
             data = stream.read(settings_profile.MAX_BYTES + len(_BOM) + 1)
         # Notepad saves UTF-8 with a mark at the start: not counted, so that a profile too long is said so (the
         # mark took three bytes of the text read, cut in the middle of the JSON: "not JSON")
-        text = data[len(_BOM):].decode("utf-8") if data.startswith(_BOM) else data.decode("utf-8")
+        data = data[len(_BOM):] if data.startswith(_BOM) else data
+        if len(data) > settings_profile.MAX_BYTES:
+            # Said before decoding: what was read stops anywhere, in the middle of a character too.
+            raise ValueError(f"a profile is {settings_profile.MAX_BYTES // 1024} KB at most")
+        text = data.decode("utf-8")
     except FileNotFoundError:
         raise ValueError(f"no profile {path.name}") from None
     except (OSError, UnicodeDecodeError) as exc:
@@ -197,6 +201,7 @@ def planned_profile(arguments: Dict[str, Any]):
 def _export_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
     import os
     import stat
+    import tempfile
     from ...filtermate_api.export_root import ExportRootError
     try:
         file = settings_profile.file_name(str(arguments.get("name", "")))
@@ -220,17 +225,24 @@ def _export_profile(arguments: Dict[str, Any]) -> Dict[str, Any]:
         raise ToolFailure(f"A profile {file} exists already: ask the user, then call again with replace true to "
                           f"replace it, or choose another name.")
     profile = settings_profile.build(settings_rows(), str(arguments["name"]))
+    text = settings_profile.dumps(profile)
     try:
         folder.mkdir(mode=0o700, parents=True, exist_ok=True)
-        # O_NOFOLLOW where the system has it: a link put there between the check and the write is refused too.
-        # O_BINARY on Windows: the descriptor in text mode would turn the \r\n of the stream into \r\r\n.
-        flags = (os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
-                 | getattr(os, "O_BINARY", 0))
-        descriptor = os.open(str(target), flags, 0o600)
-        if hasattr(os, "fchmod"):
-            os.fchmod(descriptor, 0o600)  # a profile written before, readable by others, is the user's alone too
-        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
-            stream.write(settings_profile.dumps(profile))
+        # Written beside (a new file of the user alone, mode 0600), then put in place of the profile. A write that
+        # fails (a full disk) leaves the former profile as it was: opened to be emptied, it stayed empty. Putting
+        # a file in place never follows a link: one put there since the check is replaced, nothing is written
+        # where it led.
+        descriptor, beside = tempfile.mkstemp(prefix=f".{file}.", suffix=".tmp", dir=str(folder))
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+                stream.write(text)
+            os.replace(beside, str(target))
+        except BaseException:
+            try:
+                os.unlink(beside)
+            except OSError:
+                pass
+            raise
     except OSError as exc:
         raise ToolFailure(f"The profile could not be written ({type(exc).__name__}).") from None
     return {"file": f"{PROFILES_FOLDER}/{file}", "folder": "the export folder", "name": profile["name"],

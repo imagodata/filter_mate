@@ -50,6 +50,27 @@ def test_at_most_as_many_models_as_ollama_lists():
     assert len(models_from_listing("openai_compatible", data)) == MAX_LISTED_MODELS == 50
 
 
+def test_the_newest_models_come_first_before_the_cap():
+    """OpenAI lists in no order, and more than 50 models: the cut must keep the recent ones."""
+    entries = [{"id": f"old{index}", "created": 1_600_000_000 + index} for index in range(MAX_LISTED_MODELS + 10)]
+    entries.insert(5, {"id": "gpt-new", "created": 1_900_000_000})
+    entries.insert(9, {"id": "no-date"})
+    models = models_from_listing("openai_compatible", json.dumps({"data": entries}).encode())
+    assert len(models) == MAX_LISTED_MODELS and models[0] == "gpt-new" and models[1] == f"old{MAX_LISTED_MODELS + 9}"
+    assert "no-date" not in models  # an entry without a date comes after the dated ones
+
+
+def test_the_order_of_a_list_without_dates_is_kept():
+    data = b'{"data":[{"id":"b","created":"x"},{"id":"a"},{"id":"c","created":true}]}'
+    assert models_from_listing("openai_compatible", data) == ("b", "a", "c")
+
+
+@pytest.mark.parametrize("name", ["sora-2", "babbage-002", "davinci-002", "gpt-4o-mini-tts", "omni-moderation-latest"])
+def test_models_that_do_not_chat_are_dropped(name):
+    assert models_from_listing("openai_compatible", json.dumps({"data": [{"id": name}, {"id": "gpt-x"}]}).encode()) \
+        == ("gpt-x",)
+
+
 def test_key_pages_are_https():
     assert set(KEY_PAGES) == {"anthropic", "mistral", "openai"}
     assert all(url.startswith("https://") for url in KEY_PAGES.values())

@@ -1273,9 +1273,9 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <translation>Tilby verktøyene for en oppgave når agenten har lastet instruksjonene for den</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Lettere forespørsler for en treg eller lokal modell: verktøyene som filtrerer og leser, tilbys alltid; de for Processing, stiler, utforminger, redigering, SAM og åpne data kommer når agenten laster ferdigheten for den oppgaven. Andre programmer får alltid alle verktøyene.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lettere forespørsler: verktøyene som filtrerer og leser, tilbys alltid; de for Processing, stiler, utforminger, redigering, SAM og åpne data kommer når agenten laster ferdigheten for den oppgaven. Andre programmer får alltid alle verktøyene.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
@@ -1544,6 +1544,11 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="1780"/>
         <source>Ollama refused the download of {}.</source>
         <translation>Ollama avviste nedlastingen av {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Nedlastingen av {} mislyktes.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
