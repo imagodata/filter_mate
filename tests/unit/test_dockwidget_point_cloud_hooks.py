@@ -230,6 +230,31 @@ class TestVectorFilterWithCoverageTargets:
         integration.delegate_vector_source_coverage_task.assert_not_called()
 
     @pytest.mark.parametrize("task_name", ["undo", "redo"])
+    def test_step_without_layers_leaves_the_coverage_targets(self, task_name):
+        """An entry restored without layers (HistoryService.deserialize) is left alone, not read at [0]."""
+        from types import SimpleNamespace
+        entry = SimpleNamespace(layer_ids=())
+        stacks = {"undo": [entry] if task_name == "undo" else [],
+                  "redo": [] if task_name == "undo" else [entry]}
+
+        class _History:
+            def peek_undo(self):
+                return stacks["undo"][-1] if stacks["undo"] else None
+
+            def peek_redo(self):
+                return stacks["redo"][-1] if stacks["redo"] else None
+
+            def undo(self):
+                stacks["redo"].append(stacks["undo"].pop())
+
+            def redo(self):
+                stacks["undo"].append(stacks["redo"].pop())
+
+        dock, integration = self._dock(app_creates_the_task=False, history=_History(), app_steps=True)
+        self._launch_task_event()(dock, None, task_name)
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    @pytest.mark.parametrize("task_name", ["undo", "redo"])
     def test_coverage_source_steps_without_the_vector_history(self, task_name):
         """A raster / point cloud source walks its own history, whatever the vector one holds."""
         dock, integration = self._dock(app_creates_the_task=False, history=self._history())
