@@ -14,8 +14,8 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.processing_policy import (
-    FILE_DESTINATIONS, GIVEN_TYPES, INTERPOLATION_DATA, LAYER_DESTINATIONS, LAYER_INPUTS, MULTI_LAYER_INPUTS, matches,
-    refusal,
+    FILE_DESTINATIONS, GIVEN_TYPES, INTERPOLATION_DATA, LAYER_DESTINATIONS, LAYER_INPUTS, MULTI_LAYER_INPUTS,
+    forced_values, matches, refusal,
 )
 from ...core.agent.sql_guard import processing_expression_problem
 from ...core.domain.layer_kind import LayerKind
@@ -213,8 +213,9 @@ def describe_algorithm(algorithm_id: str) -> Dict[str, Any]:
     """
     algorithm = _algorithm(algorithm_id)
     parameters, left_out = [], []
+    forced = forced_values(algorithm.id())
     for definition in algorithm.parameterDefinitions():
-        if _hidden(definition):
+        if _hidden(definition) or definition.name() in forced:  # set by FilterMate: not the model's to give
             continue
         if definition.type() not in GIVEN_TYPES and definition.type() not in LAYER_DESTINATIONS:
             left_out.append(definition.name())
@@ -406,6 +407,7 @@ def _parameters(algorithm, given: Dict[str, Any]) -> Tuple[Dict[str, Any], List[
             continue
         if name in given and given[name] is not None:
             values[name] = _value(definition, given[name])
+    values.update(forced_values(algorithm.id()))  # whatever was given: see processing_policy.FORCED
     return values, made
 
 
