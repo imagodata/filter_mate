@@ -27,7 +27,7 @@ import time
 import traceback
 import types
 
-from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
+from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsSettings, QgsVectorLayer
 from qgis.PyQt.QtCore import QCoreApplication, QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
 from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QPushButton, QScrollArea, QToolButton
@@ -659,16 +659,26 @@ def s_agent_skill_from_profile_check():
     chat._ask_code = lambda title, text, code: asked.append(code) or True
     try:
         tools, handlers, _active = chat.tools_and_handlers(load_settings())
-        offered = next(tool for tool in tools if tool.name == 'load_skill').input_schema['properties']['name']['enum']
+        tool = next(tool for tool in tools if tool.name == 'load_skill')
+        offered = tool.input_schema['properties']['name']['enum']
         first = handlers['load_skill']({'name': 'team-naming'})
         second = handlers['load_skill']({'name': 'team-naming'})
+        again, _handlers, _active = chat.tools_and_handlers(load_settings())
+        allowed = next(tool for tool in again if tool.name == 'load_skill').description
     finally:
         chat._ask_code = original
         shutil.rmtree(folder, ignore_errors=True)
+        QgsSettings().remove(sources.APPROVED_KEY)
     check('skill of the profile: offered, asked once, loaded as data with no right',
           'team-naming' in offered and len(asked) == 1 and first.get('from') == 'user'
           and first['instructions'].startswith('This skill comes from the QGIS profile') and second == first,
           f"offered={offered} asked={len(asked)} first={str(first)[:120]}")
+    # 2026-11-13: its description reached the model with every request before the user had read the skill
+    check('skill of the profile: its words reach the model only once the user read them, all of them shown',
+          'how this team names' not in tool.description and 'team-naming: a skill from the QGIS profile' in tool.description
+          and asked and 'description: how this team names its layers' in asked[0] and 'title: Our naming rules' in asked[0]
+          and 'team-naming (from the QGIS profile of the user): how this team names its layers' in allowed,
+          f"before={tool.description[-160:]!r} asked={asked[:1]} after={allowed[-160:]!r}")
     return waits(0.2)
 
 

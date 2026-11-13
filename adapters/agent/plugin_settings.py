@@ -284,21 +284,31 @@ def _diagnose(_arguments: Dict[str, Any]) -> Dict[str, Any]:
 SkillApprover = Callable[["skills.Skill"], bool]
 
 
-def _skill_loader(offered: Optional[set], approve: Optional[SkillApprover] = None):
+def skill_loader(offered: Optional[set], approve: Optional[SkillApprover] = None, audience: str = "chat"):
+    """The handler of load_skill for ``audience``: the chat, or ``mcp`` for another application.
+
+    A skill from elsewhere is of the chat only (``skills.set_extra``): another application is never asked about one
+    and never receives one. 2026-11-13: the MCP server of the plugin served the handler of the chat, so a client
+    listed these skills, opened the question of the chat ("The agent wants to follow...") and got the text.
+    """
     def load_skill(arguments: Dict[str, Any]) -> Dict[str, Any]:
         name = str(arguments.get("name", ""))
         skill = skills.all_skills().get(name)
-        if skill is not None and skill.trust != "builtin":
-            from .skill_sources import approved, remember
-            if not approved(skill):
-                if approve is None or not approve(skill):
-                    raise ToolFailure(f"The user did not allow the skill {name!r} (it comes from {skill.trust}, not "
-                                      f"from FilterMate). Go on without it; do not ask for it again in this request.")
-                remember(skill)
         try:
-            return skills.load(name, offered)
+            if skill is None or audience not in skill.audience:
+                raise KeyError(name)
+            if skill.trust != "builtin":
+                from .skill_sources import approved, remember
+                if not approved(skill):
+                    if approve is None or not approve(skill):
+                        raise ToolFailure(f"The user did not allow the skill {name!r} (it comes from {skill.trust}, "
+                                          f"not from FilterMate). Go on without it; do not ask for it again in this "
+                                          f"request.")
+                    remember(skill)
+            # The skill the user was asked about, not one read again by name while the question was open.
+            return skills.answer(skill, offered, audience)
         except KeyError:
-            raise ToolFailure(f"No skill {name!r}: {', '.join(skills.names(offered))}.") from None
+            raise ToolFailure(f"No skill {name!r}: {', '.join(skills.names(offered, audience))}.") from None
     return load_skill
 
 
@@ -307,5 +317,5 @@ def settings_handlers(offered: Optional[set] = None,
     """The handlers of the settings and skill tools, by name; ``offered``: the tools offered (load_skill offers only
     the skills whose required tools are among them); ``approve``: asks the user before a skill from elsewhere."""
     return {DESCRIBE_SETTINGS: _describe, GET_SETTING: _get, CHANGE_SETTINGS: _change,
-            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: _skill_loader(offered, approve),
+            DIAGNOSE_PERFORMANCE: _diagnose, LOAD_SKILL: skill_loader(offered, approve),
             EXPORT_SETTINGS_PROFILE: _export_profile, APPLY_SETTINGS_PROFILE: _apply_profile}
