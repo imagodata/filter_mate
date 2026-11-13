@@ -100,6 +100,11 @@ class ChatEngine:
     def busy(self) -> bool:
         return self._busy
 
+    def offer_tools(self, tools) -> None:
+        """A family of tools offered from the next turn on, to the model and to the executor."""
+        self._session.offer(tools)
+        self._executor.offer(tools)
+
     @property
     def summarized(self) -> int:
         """Requests of this conversation summed up so far, to keep what is sent short."""

@@ -1193,6 +1193,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>เฉพาะเครื่องมือกรอง สำหรับคอมพิวเตอร์ที่ช้า</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>เสนอเครื่องมือของงานเมื่อเอเจนต์โหลดคำแนะนำของงานนั้นแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>คำขอที่เบาลง สำหรับโมเดลที่ช้าหรือโมเดลภายในเครื่อง: เครื่องมือกรองและอ่านจะถูกเสนอเสมอ ส่วนเครื่องมือของ Processing, สไตล์, เลย์เอาต์, การแก้ไข, SAM และข้อมูลเปิดจะมาเมื่อเอเจนต์โหลดทักษะของงานนั้น แอปพลิเคชันอื่นจะได้รับเครื่องมือทั้งหมดเสมอ</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama ไม่ได้แสดงโมเดลใดที่ {} : พิมพ์ชื่อโมเดล</translation>

@@ -1193,6 +1193,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Només les eines que filtren, per a un ordinador lent</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Oferir les eines d'una tasca un cop l'agent n'ha carregat les instruccions</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Sol·licituds més lleugeres, per a un model lent o local: les eines que filtren i llegeixen s'ofereixen sempre; les de Processing, estils, dissenys, edició, SAM i dades obertes arriben quan l'agent carrega l'habilitat d'aquesta tasca. Les altres aplicacions reben sempre totes les eines.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama no ha llistat cap model a {}: escriviu-ne el nom d'un.</translation>

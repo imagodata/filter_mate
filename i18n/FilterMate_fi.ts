@@ -1193,6 +1193,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Vain suodattavat työkalut, hitaalle tietokoneelle</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Tarjoa tehtävän työkalut vasta, kun agentti lataa sen ohjeet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Kevyemmät pyynnöt hitaalle tai paikalliselle mallille: suodattavat ja lukevat työkalut tarjotaan aina; Processingin, tyylien, taittojen, muokkauksen, SAMin ja avoimen datan työkalut tulevat, kun agentti lataa kyseisen tehtävän taidon. Muut sovellukset saavat aina kaikki työkalut.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama ei listannut yhtään mallia osoitteessa {}: kirjoita mallin nimi.</translation>

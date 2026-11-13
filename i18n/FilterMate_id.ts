@@ -1193,6 +1193,16 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <translation>Hanya alat yang memfilter, untuk komputer lambat</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Tawarkan alat suatu tugas setelah agen memuat instruksinya</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Permintaan lebih ringan, untuk model yang lambat atau lokal: alat yang memfilter dan membaca selalu ditawarkan; alat Processing, gaya, tata letak, penyuntingan, SAM, dan data terbuka datang saat agen memuat keterampilan tugas tersebut. Aplikasi lain selalu mendapatkan semua alat.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama tidak menampilkan model apa pun di {}: ketik nama salah satunya.</translation>

@@ -42,7 +42,8 @@ from agent.session import STATUS_RUN_TOOLS, AgentLimits, AgentSession, run_excha
 from agent.settings_reference import (  # noqa: E402
     describe as describe_settings, get as get_setting, plan as plan_settings, read_settings, set_leaf)
 from agent.performance import summary as performance_summary  # noqa: E402
-from agent.skills import load as load_skill  # noqa: E402
+from agent.families import hidden_tools, unlocked  # noqa: E402
+from agent.skills import SKILLS, load as load_skill  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import CHAT_ONLY, FILTERING_NOTE, FILTERING_TOOLS, SETTINGS_TOOLS, chat_tools, load_catalog, skill_tool  # noqa: E402
 from agent.tool_executor import ToolExecutor, ToolFailure  # noqa: E402
@@ -643,7 +644,7 @@ def fits(case: Dict[str, Any], names) -> bool:
 
 
 def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
-             prompt: str = "") -> Dict[str, Any]:
+             prompt: str = "", families: bool = False) -> Dict[str, Any]:
     """Play one case; the outcome as a JSON-ready dict. ``filtering``: the tools a local model gets by default."""
     project = SimulatedProject(case.get("setup"))
     # Off by default (the expert mode: a case says "expert": true to turn it on), or nothing to draw in a simulated
@@ -653,10 +654,31 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
                   and (not filtering or tool.name in FILTERING_TOOLS))
     offered = {tool.name for tool in tools}
     tools = tuple(skill_tool(offered) if tool.name == "load_skill" else tool for tool in tools)
+    hidden: Dict[str, Any] = {}
+    if families:  # the tools of a task offered once its skill is loaded (core/agent/families.py)
+        names = hidden_tools(tools, SKILLS.values())
+        hidden = {tool.name: tool for tool in tools if tool.name in names}
+        tools = tuple(tool for tool in tools if tool.name not in names)
     session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else ""),
                            AgentLimits())
     project.offered = offered
-    executor = ToolExecutor(tools, project.handlers())
+    handlers_of_case = project.handlers()
+    if hidden:
+        load = handlers_of_case["load_skill"]
+
+        def load_and_offer(arguments):
+            answer = load(arguments)
+            skill = SKILLS.get(arguments.get("name", ""))
+            names = sorted(unlocked(skill, set(hidden))) if skill is not None else []
+            if names:
+                offered_now = [hidden.pop(name) for name in names]
+                session.offer(offered_now)
+                executor.offer(offered_now)
+                answer = dict(answer, tools_now_offered=names)
+            return answer
+        handlers_of_case["load_skill"] = load_and_offer
+    executor = ToolExecutor(tools, handlers_of_case)
+    executor.hold(hidden)
     # As the chat sends it: the state of the project after the request.
     handlers = project.handlers()
     context = project_summary(handlers["list_layers"]({})["layers"],
@@ -697,6 +719,8 @@ def expected_script(case: Dict[str, Any]) -> List[Dict[str, Any]]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--live", action="store_true", help="call the provider (costs money)")
+    parser.add_argument("--families", action="store_true",
+                        help="the tools of a task offered once its skill is loaded (the option of the agent)")
     parser.add_argument("--prompt", choices=("current", "skills"), default="current",
                         help="skills: the system prompt with the domains taken out into skills (the A/B of the skills)")
     parser.add_argument("--provider", choices=sorted(PRESETS), default="anthropic")
@@ -726,7 +750,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             continue
         transport = UrllibTransport() if args.live else ScriptedTransport(expected_script(case))
         started = time.monotonic()
-        result = run_case(case, provider, transport, filtering, prompt=legacy_prompt)
+        result = run_case(case, provider, transport, filtering, prompt=legacy_prompt, families=args.families)
         result["seconds"] = round(time.monotonic() - started, 1)
         results.append(result)
         status = "PASS" if result["passed"] else "FAIL"

@@ -1193,6 +1193,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Csak a szűrő eszközök, lassú számítógéphez</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Egy feladat eszközeinek felkínálása, miután az ügynök betöltötte annak utasításait</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Könnyebb kérések lassú vagy helyi modellhez: a szűrő és olvasó eszközök mindig elérhetők; a Processing, a stílusok, a nyomtatási elrendezések, a szerkesztés, a SAM és a nyílt adatok eszközei akkor jönnek, amikor az ügynök betölti az adott feladat készségét. A többi alkalmazás mindig minden eszközt megkap.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Az Ollama nem listázott modellt itt: {}. Írja be egy modell nevét.</translation>

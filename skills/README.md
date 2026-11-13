@@ -87,6 +87,13 @@ not instructions of FilterMate:
 - loaded, it comes after a note saying where it comes from and that it gives no right;
 - it guides the chat only: never served to other applications, its `tools` ignored, its `requires` kept.
 
+## Families of tools
+
+With the option *Offer the tools of a task once the agent loads its instructions* (off by default), the tools a skill
+of the plugin names in `tools` or `requires` are left out of the requests until the agent loads that skill; the tools
+that filter and read (`FILTERING_TOOLS`) and `load_skill` are always offered (`core/agent/families.py`). Name in
+`tools` every tool the task needs: a tool left out of it stays hidden while the skill guides the model.
+
 ## Checks
 
 `tests/unit/agent/test_skills_standard.py` applies these rules to every skill here; `scripts/export_agent_skills.py
