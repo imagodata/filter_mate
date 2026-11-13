@@ -172,7 +172,7 @@ class CompareController(QObject):
         # A vector source also filters raster and point cloud targets: Undo replays that cross operation only when
         # it is the one the last run recorded (CoverageModeController, task 'undo') and the vector step is an entry
         # of this source (launchTaskEvent).
-        if coverage is not None and entry is not None and entry.layer_ids[0] == current.id():
+        if coverage is not None and entry is not None and entry.layer_ids and entry.layer_ids[0] == current.id():
             try:
                 runs = (getattr(coverage, "_linked_runs", None) or {}).get(current.id()) or []
                 operation = coverage.service.history.peek_undo(current.id())

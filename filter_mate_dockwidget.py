@@ -7658,7 +7658,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             taken = None
             if history is not None:
                 taken = history.peek_redo() if task_name == 'undo' else history.peek_undo()
-            if step is None or taken is not step or step.layer_ids[0] != source_layer.id():
+            if step is None or taken is not step or not step.layer_ids or step.layer_ids[0] != source_layer.id():
                 logger.info(f"launchTaskEvent: no vector {task_name} of this source, raster / point cloud targets left as they are")
                 return
         if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):
