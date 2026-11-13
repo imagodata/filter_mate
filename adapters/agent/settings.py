@@ -76,8 +76,10 @@ class AgentSettings:
     local_filtering_only: bool = False
     # Exceptions of the Tools tab, as JSON {tool: "ask" | "allow" | "never"}: they override the level for that tool.
     tool_rules: str = "{}"
-    # Families of tools (core/agent/families.py): the tools of a task offered once its skill is loaded. Off by default.
-    tool_families: bool = False
+    # Families of tools (core/agent/families.py): the tools of a task offered once its skill is loaded. On by default
+    # since lot A (the connectors come the same way); saved under its own key: the old one, "tool_families", held an
+    # "off" that every saved profile carried without the user having chosen it.
+    tool_families: bool = True
 
     @property
     def rules(self) -> dict:
@@ -162,7 +164,7 @@ def load_settings() -> AgentSettings:
         local_filtering_only=settings.value(_PREFIX + "local_filtering_only", False, type=bool),
         autonomy=level_or_default(str(settings.value(_PREFIX + "autonomy", DEFAULT_LEVEL) or "")),
         tool_rules=str(settings.value(_PREFIX + "tool_rules", "{}") or "{}"),
-        tool_families=settings.value(_PREFIX + "tool_families", False, type=bool))
+        tool_families=settings.value(_PREFIX + "offer_tools_by_task", True, type=bool))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -174,7 +176,7 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "send_values", values.send_values)
     settings.setValue(_PREFIX + "expert_python", values.expert_python)
     settings.setValue(_PREFIX + "local_filtering_only", values.local_filtering_only)
-    settings.setValue(_PREFIX + "tool_families", values.tool_families)
+    settings.setValue(_PREFIX + "offer_tools_by_task", values.tool_families)
     settings.setValue(_PREFIX + "enabled_sources", json.dumps(list(values.enabled_sources)))
     settings.setValue(_PREFIX + "custom_sources", values.custom_sources)
     settings.setValue(_PREFIX + "authcfg", values.authcfg)

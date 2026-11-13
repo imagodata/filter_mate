@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>เสนอเครื่องมือของงานเมื่อเอเจนต์โหลดคำแนะนำของงานนั้นแล้ว</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>คำขอที่เบาลง สำหรับโมเดลที่ช้าหรือโมเดลภายในเครื่อง: เครื่องมือกรองและอ่านจะถูกเสนอเสมอ ส่วนเครื่องมือของ Processing, สไตล์, เลย์เอาต์, การแก้ไข, SAM และข้อมูลเปิดจะมาเมื่อเอเจนต์โหลดทักษะของงานนั้น แอปพลิเคชันอื่นจะได้รับเครื่องมือทั้งหมดเสมอ</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>คำขอที่เบาลง: เครื่องมือกรองและอ่านจะถูกเสนอเสมอ ส่วนเครื่องมือของ Processing, สไตล์, เลย์เอาต์, การแก้ไข, SAM และข้อมูลเปิดจะมาเมื่อเอเจนต์โหลดทักษะของงานนั้น แอปพลิเคชันอื่นจะได้รับเครื่องมือทั้งหมดเสมอ</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

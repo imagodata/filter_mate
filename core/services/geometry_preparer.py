@@ -324,8 +324,9 @@ def prepare_geometries_by_provider(
 
     Raises:
         SourceSelectionError: The source selection keeps no feature or cannot be
-            read. 2026-11-12: let through the SpatiaLite → OGR fallback, whose
-            failure ends in the source layer used whole below.
+            read. 2026-11-12: let through the SpatiaLite → OGR fallback.
+            2026-11-13: raised too when a target of OGR or SpatiaLite has no
+            source geometry at all (the source layer was used whole).
     """
     from ...adapters.backends.source_refusal import SourceSelectionError
 
@@ -646,12 +647,15 @@ def prepare_geometries_by_provider(
                 logger.error("    4. Geometry preparation failed")
                 logger.error("=" * 60)
 
-                # v2.8.6: Try to use source_layer directly as emergency fallback
-                if source_layer and source_layer.isValid() and source_layer.featureCount() > 0:
-                    logger.warning("  → EMERGENCY FALLBACK: Using source_layer directly as ogr_source_geom")
-                    result['ogr_source_geom'] = source_layer
-                    logger.info(f"  → ogr_source_geom set to source_layer ({source_layer.featureCount()} features)")
-
             logger.info("=" * 60)
+
+        # 2026-11-13: the source layer used to stand in for both, "EMERGENCY FALLBACK", whole: the targets were
+        # filtered by every source feature where a selection or an expression kept some (and only when a logger
+        # was given). A target of OGR or SpatiaLite needs one of them: refused, as a selection that cannot be read.
+        # A PostgreSQL source of PostgreSQL targets needs neither.
+        if not result['spatialite_source_geom'] and not result['ogr_source_geom'] \
+                and ('ogr' in provider_list or 'spatialite' in provider_list):
+            from ...adapters.backends.source_refusal import source_selection_refusal
+            raise source_selection_refusal(source_layer.name() if source_layer else '', unreadable=True)
 
     return result

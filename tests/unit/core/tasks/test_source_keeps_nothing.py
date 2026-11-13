@@ -374,6 +374,47 @@ def test_geometry_preparer_lets_the_postgresql_refusal_through(qgis):
     ogr_callback.assert_not_called()
 
 
+class _ValidLayer(_Layer):
+    def isValid(self):
+        return True
+
+
+class _LargeLayer(_ValidLayer):
+    def featureCount(self):
+        return 120  # past the 50 features of the PostgreSQL WKT mode
+
+
+def test_no_source_geometry_is_refused_never_the_whole_source_layer(qgis):
+    """2026-11-13: the "EMERGENCY FALLBACK" used the source layer, whole, as the source geometry when none could be
+    prepared: the targets were filtered by all its features where a selection kept some. Reached by PostgreSQL
+    targets of a source of another provider (OGR added to the providers, no WKT below 50 features)."""
+    mod = _load("core.services.geometry_preparer", "core/services/geometry_preparer.py")
+    refusal = _refusal_class()
+    ogr_callback = MagicMock(return_value=None)
+    with pytest.raises(refusal, match="cannot be evaluated"):
+        mod.prepare_geometries_by_provider(
+            provider_list=['postgresql'], task_parameters={'task': {'features': []}},
+            source_layer=_LargeLayer(), param_source_provider_type='ogr', param_buffer_expression='',
+            layers_dict={}, prepare_postgresql_geom_callback=MagicMock(),
+            prepare_spatialite_geom_callback=MagicMock(return_value=None),
+            prepare_ogr_geom_callback=ogr_callback,
+            logger=logging.getLogger("test"), postgresql_available=True)
+    ogr_callback.assert_called_once()  # the OGR preparation was tried, and gave nothing
+
+
+def test_a_postgresql_source_of_postgresql_targets_needs_no_other_geometry(qgis):
+    mod = _load("core.services.geometry_preparer", "core/services/geometry_preparer.py")
+    result = mod.prepare_geometries_by_provider(
+        provider_list=['postgresql'], task_parameters={'task': {'features': []}},
+        source_layer=_ValidLayer(), param_source_provider_type='postgresql', param_buffer_expression='',
+        layers_dict={'postgresql': [(MagicMock(), {})]},
+        prepare_postgresql_geom_callback=MagicMock(return_value='EXISTS (SELECT 1)'),
+        prepare_spatialite_geom_callback=MagicMock(return_value=None),
+        prepare_ogr_geom_callback=MagicMock(return_value=None),
+        logger=logging.getLogger("test"), postgresql_available=True)
+    assert result['postgresql_source_geom'] == 'EXISTS (SELECT 1)' and result['ogr_source_geom'] is None
+
+
 def test_orchestrator_shows_the_refusal_and_leaves_the_targets(qgis):
     mod = _load("core.tasks.filtering_orchestrator", "core/tasks/filtering_orchestrator.py")
     refusal = _refusal_class()
