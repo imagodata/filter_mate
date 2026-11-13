@@ -1193,6 +1193,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Chỉ các công cụ lọc, cho máy tính chậm</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Cung cấp công cụ của một tác vụ khi tác tử tải hướng dẫn của tác vụ đó</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Yêu cầu nhẹ hơn, cho mô hình chậm hoặc cục bộ: các công cụ lọc và đọc luôn được cung cấp; các công cụ Processing, kiểu, bố cục, chỉnh sửa, SAM và dữ liệu mở sẽ có khi tác tử tải kỹ năng của tác vụ đó. Các ứng dụng khác luôn nhận được mọi công cụ.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama không liệt kê mô hình nào tại {}: hãy nhập tên một mô hình.</translation>

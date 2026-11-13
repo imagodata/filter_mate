@@ -1193,6 +1193,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>仅筛选工具，适用于较慢的电脑</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>在智能体加载某项任务的说明后再提供该任务的工具</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>为较慢或本地模型减轻请求：筛选和读取工具始终提供；Processing、样式、布局、编辑、SAM 和开放数据的工具会在智能体加载相应任务的技能时提供。其他应用程序始终获得全部工具。</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama 在 {} 未列出任何模型：请输入模型名称。</translation>

@@ -99,6 +99,16 @@ class AgentSession:
         self._messages.append(Message(ROLE_USER, parts))
         self._turns = 0
 
+    def offer(self, tools: Sequence[ToolSpec]) -> None:
+        """More tools from the next request on (a family of tools, once its skill is loaded), after those offered:
+        the start of the list stays the same for the prompt cache."""
+        known = {tool.name for tool in self._tools}
+        self._tools = self._tools + tuple(tool for tool in tools if tool.name not in known)
+
+    @property
+    def tool_names(self) -> Tuple[str, ...]:
+        return tuple(tool.name for tool in self._tools)
+
     def abandon_request(self) -> None:
         """Forget the current request, after a failure or a refusal: it would be replayed with every later one."""
         del self._messages[self._request_start:]

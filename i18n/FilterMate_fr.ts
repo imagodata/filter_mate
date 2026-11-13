@@ -1345,6 +1345,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Seulement les outils qui filtrent, pour un ordinateur lent</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Proposer les outils d'une tâche une fois ses consignes chargées par l'agent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Requêtes plus légères, pour un modèle lent ou local : les outils qui filtrent et lisent sont toujours proposés ; ceux de Processing, des styles, des mises en page, de l'édition, de SAM et des données ouvertes arrivent quand l'agent charge le skill de cette tâche. Les autres applications reçoivent toujours tous les outils.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama n'a listé aucun modèle à {} : tapez le nom d'un modèle.</translation>

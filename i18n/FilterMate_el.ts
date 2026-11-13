@@ -1193,6 +1193,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Μόνο τα εργαλεία φιλτραρίσματος, για αργό υπολογιστή</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Προσφορά των εργαλείων μιας εργασίας μόλις ο πράκτορας φορτώσει τις οδηγίες της</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Ελαφρύτερα αιτήματα, για αργό ή τοπικό μοντέλο: τα εργαλεία φιλτραρίσματος και ανάγνωσης προσφέρονται πάντα· εκείνα του Processing, των στυλ, των διατάξεων, της επεξεργασίας, του SAM και των ανοικτών δεδομένων έρχονται όταν ο πράκτορας φορτώσει τη δεξιότητα της αντίστοιχης εργασίας. Οι άλλες εφαρμογές λαμβάνουν πάντα όλα τα εργαλεία.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Το Ollama δεν εμφάνισε κανένα μοντέλο στο {}: πληκτρολογήστε το όνομα ενός.</translation>

@@ -1193,6 +1193,16 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Alleen de filterhulpmiddelen, voor een trage computer</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>De hulpmiddelen van een taak aanbieden zodra de agent de instructies ervan laadt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lichtere verzoeken, voor een traag of lokaal model: de hulpmiddelen die filteren en lezen worden altijd aangeboden; die voor Processing, stijlen, lay-outs, bewerken, SAM en open data komen erbij wanneer de agent de vaardigheid van die taak laadt. Andere toepassingen krijgen altijd alle hulpmiddelen.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama gaf op {} geen modellen: typ de naam van een model.</translation>

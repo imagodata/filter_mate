@@ -1193,6 +1193,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Jen nástroje, které filtrují, pro pomalý počítač</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Nabízet nástroje úlohy až poté, co agent načte její pokyny</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lehčí požadavky pro pomalý nebo místní model: nástroje, které filtrují a čtou, se nabízejí vždy; nástroje pro Processing, styly, tiskové sestavy, editaci, SAM a otevřená data přicházejí, když agent načte dovednost dané úlohy. Ostatní aplikace dostávají vždy všechny nástroje.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama na {} nevypsala žádný model: zadejte název modelu.</translation>

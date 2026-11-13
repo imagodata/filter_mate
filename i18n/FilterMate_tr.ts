@@ -1193,6 +1193,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Yavaş bir bilgisayar için yalnızca süzme araçları</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Bir görevin araçlarını, Aracı o görevin talimatlarını yükleyince sun</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Yavaş veya yerel bir model için daha hafif istekler: süzme ve okuma araçları her zaman sunulur; Processing, stiller, yerleşimler, düzenleme, SAM ve açık veri araçları ise Aracı o görevin becerisini yüklediğinde gelir. Diğer uygulamalar her zaman tüm araçları alır.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama {} adresinde hiçbir model listelemedi: bir modelin adını yazın.</translation>

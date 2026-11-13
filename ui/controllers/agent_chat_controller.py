@@ -503,10 +503,12 @@ class AgentChatController(QObject):
                 return False
             chosen = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(), dialog.consent.isChecked(),
                       dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(), authcfg, target,
-                      key_target, dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked())
+                      key_target, dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked(),
+                      dialog.tool_families.isChecked())
             same_chat = chosen == (values.preset, values.model, values.base_url, values.consent, values.send_values,
                                    values.enabled_sources, values.custom_sources, values.authcfg, values.consent_target,
-                                   values.key_target, values.expert_python, values.local_filtering_only) and not key
+                                   values.key_target, values.expert_python, values.local_filtering_only,
+                                   values.tool_families) and not key
             save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
                                         base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
                                         send_values=dialog.send_values.isChecked(), enabled_sources=dialog.chosen_sources(),
@@ -517,6 +519,7 @@ class AgentChatController(QObject):
                                         mcp_token=dialog.chosen_mcp_token(),
                                         expert_python=dialog.expert_python.isChecked(),
                                         local_filtering_only=dialog.local_filtering_only.isChecked(),
+                                        tool_families=dialog.tool_families.isChecked(),
                                         autonomy=dialog.chosen_autonomy(),
                                         tool_rules=json.dumps(dialog.chosen_tool_rules())))
             self._policy.set_level(dialog.chosen_autonomy())  # another level asks again what was allowed
@@ -1172,6 +1175,30 @@ class AgentChatController(QObject):
         self._forget_undone_steps(request)
         return {"undone": request, "restored": restored, "left": left}
 
+    def _families(self, values: AgentSettings, tools, handlers):
+        """With the families of tools on: the tools of a task left out until its skill is loaded, then offered to the
+        engine of this conversation (core/agent/families.py)."""
+        if not values.tool_families:
+            return tools, handlers, set()
+        from ...core.agent import skills as skill_registry
+        from ...core.agent.families import hidden_tools, unlocked
+        hidden = hidden_tools(tools, skill_registry.SKILLS.values())
+        if not hidden or LOAD_SKILL not in {tool.name for tool in tools}:
+            return tools, handlers, set()
+        later = {tool.name: tool for tool in tools if tool.name in hidden}
+        load = handlers[LOAD_SKILL]
+
+        def load_and_offer(arguments):
+            answer = load(arguments)
+            skill = skill_registry.all_skills().get(str(arguments.get("name", "")))
+            names = sorted(unlocked(skill, set(later))) if skill is not None else []
+            if names and self._engine is not None:
+                self._engine.offer_tools([later.pop(name) for name in names])
+                answer = dict(answer, tools_now_offered=names)
+            return answer
+        return ([tool for tool in tools if tool.name not in hidden], dict(handlers, **{LOAD_SKILL: load_and_offer}),
+                hidden)
+
     def _build_engine(self) -> Optional[ChatEngine]:
         """A conversation from the settings; None, after saying why, when they are not complete."""
         values = load_settings()
@@ -1201,10 +1228,13 @@ class AgentChatController(QObject):
         finally:
             self.panel.set_working(False)
         reachable = [source for source in active if source.title not in unreachable]
+        tools, handlers, held = self._families(values, tools, handlers)
         session = AgentSession(provider, tools, self._prompt(values, reachable))
         if unreachable:
             self.panel.add_note(_tr("Not reachable for this conversation: {}").format(", ".join(unreachable)))
-        return ChatEngine(session, ToolExecutor(tools, self._chat_owned(handlers)), QtTransport(self), self,
+        executor = ToolExecutor(tools, self._chat_owned(handlers))
+        executor.hold(held)
+        return ChatEngine(session, executor, QtTransport(self), self,
                           self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
 
     @staticmethod

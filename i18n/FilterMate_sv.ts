@@ -1193,6 +1193,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Bara verktygen som filtrerar, för en långsam dator</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Erbjud en uppgifts verktyg när agenten har läst in dess instruktioner</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lättare förfrågningar för en långsam eller lokal modell: verktygen som filtrerar och läser erbjuds alltid; de för Processing, stilar, layouter, redigering, SAM och öppna data kommer när agenten läser in färdigheten för den uppgiften. Andra program får alltid alla verktyg.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama listade inga modeller på {}: skriv namnet på en.</translation>

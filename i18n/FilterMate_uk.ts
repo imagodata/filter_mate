@@ -1193,6 +1193,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Лише інструменти фільтрування, для повільного комп'ютера</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="993"/>
+        <source>Offer the tools of a task once the agent loads its instructions</source>
+        <translation>Пропонувати інструменти завдання, щойно агент завантажить його інструкції</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
+        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Легші запити для повільної або локальної моделі: інструменти фільтрування й читання пропонуються завжди; інструменти Processing, стилів, макетів, редагування, SAM і відкритих даних з'являються, коли агент завантажує навичку відповідного завдання. Інші застосунки завжди отримують усі інструменти.</translation>
+    </message>
+    <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
         <source>Ollama did not list any model at {}: type the name of one.</source>
         <translation>Ollama не показала жодної моделі за адресою {}: введіть назву моделі.</translation>
