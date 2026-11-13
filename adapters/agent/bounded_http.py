@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Callable, Dict, Iterator, Mapping, Optional
+from typing import Callable, Dict, Iterator, Mapping, Optional, Tuple
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QByteArray, QEventLoop, QTimer, QUrl
@@ -25,6 +25,27 @@ _USER_AGENT = b"FilterMate-QGIS-plugin"
 CHAT = "chat"
 _ACTIVE = []  # (whose, stop) of each wait Stop can end
 _OWNER = [""]  # whose waits start now: CHAT inside owned_by(CHAT), "" for another application
+
+
+_SEPARATORS = (b"\n\n", b"\r\n\r\n")  # the blank line that ends a server-sent event
+_SEPARATOR_TAIL = 3  # what of a separator may end a chunk: "\r\n\r" before its last "\n"
+
+
+def ends_an_event(tail: bytes, chunk: bytes) -> Tuple[bool, bytes]:
+    """Whether ``chunk`` completes a blank line, the end of a server-sent event, with the end of the chunk before it.
+
+    2026-11-13: only the chunk itself was looked at, so a separator cut between two chunks ("...\n" then "\n...")
+    ended no event, and the request waited for another event or for its timeout.
+
+    Args:
+        tail: What ``ends_an_event`` returned for the chunk before (b"" for the first one).
+        chunk: The bytes just received.
+
+    Returns:
+        (whether a separator is there, the tail to give with the next chunk).
+    """
+    window = tail + chunk
+    return any(separator in window for separator in _SEPARATORS), window[-_SEPARATOR_TAIL:]
 
 
 class HttpFailure(Exception):
@@ -100,6 +121,7 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
     buffer = bytearray()
     received = [0]
     state: Dict[str, Optional[str]] = {"failure": None}
+    tail = [b""]  # the end of the chunk before, where a separator may begin
     loop = QEventLoop()
 
     def status_code() -> int:
@@ -127,8 +149,10 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
             return
         chunk = bytes(reply.readAll())
         keep(chunk)
-        if not state["failure"] and done is not None and (b"\n\n" in chunk or b"\r\n\r\n" in chunk) \
-                and done(bytes(buffer)):
+        if state["failure"] or done is None:
+            return
+        ended, tail[0] = ends_an_event(tail[0], chunk)
+        if ended and done(bytes(buffer)):
             loop.quit()
 
     def on_headers() -> None:
