@@ -497,6 +497,61 @@ Uitvoeren?</translation>
         <translation>Een vaardigheid voor de agent</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>FilterMate instellen met de agent?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Een paar vragen, daarna de instellingen voor en na: er verandert niets totdat u toepast. Later: menu Vector &gt; FilterMate &gt; FilterMate instellen met de agent.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Starten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Niet nu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Instellen gestart.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Niet nu: het menu start het wanneer u wilt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Uiterlijk: taal, thema, grootte van het paneel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Uw gegevens: PostgreSQL, rasters, puntenwolken, time-outs</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>De agent: wat hij zelfstandig mag doen, welke lagen hij nooit wijzigt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Wacht tot het verzoek is afgerond en start het instellen daarna opnieuw.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Help me FilterMate in te stellen voor mijn computer en mijn gegevens: kijk wat dit project bevat, stel me een paar vragen en stel daarna de instellingen voor.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Bewerking van {} (niet opgeslagen)</translation>
@@ -1051,6 +1106,11 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Agentinstellingen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>FilterMate instellen met de agent…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3830,6 +3890,21 @@ Klik op de ★-indicator en selecteer 'Huidig filter toevoegen aan favorieten' o
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Configuratie en database resetten</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>FilterMate instellen met de agent</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>De agent stelt een paar vragen en stelt de instellingen van FilterMate voor</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>De sectie AGENT is uitgeschakeld: schakel APP.OPTIONS.AGENT.enabled in de configuratie in en start QGIS daarna opnieuw.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

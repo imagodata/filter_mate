@@ -497,6 +497,61 @@ Run it?</source>
         <translation>Навык для агента</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="464"/>
+        <source>Set FilterMate up with the agent?</source>
+        <translation>Настроить FilterMate с помощью агента?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="465"/>
+        <source>A few questions, then the settings shown before and after: nothing changes until you apply. Later: menu Vector &gt; FilterMate &gt; Set up FilterMate with the agent.</source>
+        <translation>Несколько вопросов, затем настройки до и после: ничего не изменится, пока вы их не примените. Позже: меню Вектор &gt; FilterMate &gt; Настроить FilterMate с помощью агента.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Start</source>
+        <translation>Начать</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="467"/>
+        <source>Not now</source>
+        <translation>Не сейчас</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Setup started.</source>
+        <translation>Настройка запущена.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="468"/>
+        <source>Not now: the menu starts it when you want.</source>
+        <translation>Не сейчас: меню запустит её, когда захотите.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="469"/>
+        <source>Look: language, theme, size of the panel</source>
+        <translation>Внешний вид: язык, тема, размер панели</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="470"/>
+        <source>Your data: PostgreSQL, rasters, point clouds, timeouts</source>
+        <translation>Ваши данные: PostgreSQL, растры, облака точек, тайм-ауты</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="471"/>
+        <source>The agent: what it may do alone, which layers it never changes</source>
+        <translation>Агент: что он может делать сам, какие слои он никогда не меняет</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="482"/>
+        <source>Wait for the end of the request, then start the setup again.</source>
+        <translation>Дождитесь окончания запроса, затем снова запустите настройку.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="490"/>
+        <source>Help me set FilterMate up for my computer and my data: look at what this project holds, ask me a few questions, then propose the settings.</source>
+        <translation>Помоги мне настроить FilterMate для моего компьютера и моих данных: посмотри, что содержит этот проект, задай мне несколько вопросов, затем предложи настройки.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>Edit of {} (not saved)</source>
         <translation>Правка слоя {} (не сохранено)</translation>
@@ -1051,6 +1106,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="216"/>
         <source>Agent settings</source>
         <translation>Настройки агента</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="325"/>
+        <source>Set FilterMate up with the agent…</source>
+        <translation>Настроить FilterMate с помощью агента…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="737"/>
@@ -3830,6 +3890,21 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Сбросить конфигурацию и базу данных</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="421"/>
+        <source>Set up FilterMate with the agent</source>
+        <translation>Настроить FilterMate с помощью агента</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="425"/>
+        <source>The agent asks a few questions and proposes the settings of FilterMate</source>
+        <translation>Агент задаёт несколько вопросов и предлагает настройки FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../../filter_mate.py" line="1828"/>
+        <source>The AGENT section is turned off: turn on APP.OPTIONS.AGENT.enabled in the configuration, then restart QGIS.</source>
+        <translation>Раздел AGENT отключён: включите APP.OPTIONS.AGENT.enabled в конфигурации, затем перезапустите QGIS.</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="372"/>

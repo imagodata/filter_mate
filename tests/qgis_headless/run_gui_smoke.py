@@ -672,6 +672,24 @@ def s_agent_skill_from_profile_check():
     return waits(0.2)
 
 
+def s_agent_setup_offer_check():
+    """The setup with the agent: offered once per version (a card of the thread), an entry of both menus."""
+    import qgis.utils
+    chat = agent_chat()
+    before = len(chat._settings_cards)
+    first = chat.offer_setup_once('smoke-9.9.9')
+    second = chat.offer_setup_once('smoke-9.9.9')
+    cards = len(chat._settings_cards)
+    shown = cards >= 1 and 'Set FilterMate up with the agent?' in chat.panel.thread.toPlainText()
+    plugin = qgis.utils.plugins[PACKAGE]
+    entries = [action.text() for action in plugin.actions]
+    check('setup with the agent: offered once per version, in the QGIS menu and the panel menu',
+          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and 'Set up FilterMate with the agent' in entries
+          and chat.panel.setup_action is not None, f"first={first} second={second} entries={entries}")
+    chat.new_conversation()  # the checks of the AGENT section that follow expect its welcome
+    return waits(0.2)
+
+
 def s_qt6_enums_check():
     """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
     from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
@@ -1810,6 +1828,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_ui_profile_check, s_agent_settings, s_agent_settings_check, s_agent_settings_undo_check,
          s_agent_settings_card_check, s_agent_settings_link_check, s_agent_settings_profile_check,
          s_agent_skill_from_profile_check,
+         s_agent_setup_offer_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
