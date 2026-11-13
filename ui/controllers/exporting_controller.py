@@ -272,6 +272,7 @@ class ExportingController(BaseController):
             from qgis.core import QgsVectorLayer, QgsProject
             from qgis.PyQt.QtCore import Qt
             from ...adapters.qgis.source_capability_probe import is_remote_layer
+            from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
             from ...infrastructure.utils import geometry_type_to_string
             from ...infrastructure.utils.validation_utils import is_layer_source_available
 
@@ -360,6 +361,8 @@ class ExportingController(BaseController):
                     continue
 
                 layer_id = layer_info["layer_id"]
+                if is_non_analysis_raster(project.mapLayer(layer_id)):
+                    continue  # a web map service: kept for colour picking, never exported (2026-11-13)
                 layer_name = layer_info["layer_name"]
                 layer_crs_authid = layer_info["layer_crs_authid"]
                 geom_type = layer_info["layer_geometry_type"]

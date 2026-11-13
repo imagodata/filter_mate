@@ -59,6 +59,10 @@ def _check_destination(path, sources) -> None:
         raise ValueError(f"not written: {path} is the data source of the layer '{name}'")
 
 
+RENDERED_NOT_EXPORTED = ("a web map service (WMS, WMTS, XYZ tiles, ArcGIS MapServer) is an image drawn on request, "
+                         "not data: it is not exported")
+
+
 class RasterExportJob:
     """Write a raster layer as it is currently displayed (filtered pixels = NoData).
 
@@ -68,6 +72,11 @@ class RasterExportJob:
 
     def __init__(self, layer, path: str, fmt: str = 'GTiff', crs=None, compress: str = 'DEFLATE') -> None:
         from qgis.core import QgsProject, QgsRasterPipe
+        from ..point_cloud_capability import is_non_analysis_raster
+        if is_non_analysis_raster(layer):
+            # 2026-11-13: a web map service was exported like data; an XYZ layer at its maximal zoom is the whole
+            # world at full resolution, read tile by tile.
+            raise ValueError(RENDERED_NOT_EXPORTED)
         self.layer_name = layer.name()
         self.path = path
         _check_destination(path, export_sources((layer,)))
