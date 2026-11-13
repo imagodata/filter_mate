@@ -190,3 +190,42 @@ class TestInstalledModels:
         from core.agent.providers.ollama_chat import tags_url
         assert tags_url("") == "http://localhost:11434/api/tags"
         assert tags_url("http://gpu.lan:11434/v1/") == "http://gpu.lan:11434/api/tags"
+
+
+class TestPull:
+    """The download of a model into Ollama, from the settings dialog: what is posted, what each line says."""
+
+    def test_pull_body(self):
+        from core.agent.providers.ollama_chat import pull_body
+        assert json.loads(pull_body("qwen3.5:4b")) == {"model": "qwen3.5:4b", "stream": True}
+
+    def test_where_it_is_posted_and_the_model_it_proposes(self):
+        from core.agent.providers.ollama_chat import (
+            OLLAMA_DOWNLOAD_PAGE, PULL_PATH, RECOMMENDED_LOCAL_MODEL, pull_url)
+        assert PULL_PATH == "/api/pull" and RECOMMENDED_LOCAL_MODEL == "qwen3.5:4b"
+        assert OLLAMA_DOWNLOAD_PAGE == "https://ollama.com/download"
+        assert pull_url("") == "http://localhost:11434/api/pull"
+        assert pull_url("http://gpu.lan:11434/v1/") == "http://gpu.lan:11434/api/pull"
+
+    def test_pull_progress_lines(self):
+        from core.agent.providers.ollama_chat import PullError, pull_progress
+        line = b'{"status":"pulling a1b2","digest":"sha256:a1b2","total":3400000000,"completed":1700000000}'
+        assert pull_progress(line) == ("pulling a1b2", 1700000000, 3400000000)
+        assert pull_progress(b'{"status":"success"}') == ("success", 0, 0)
+        assert pull_progress(b'{"status":"pulling manifest"}\r') == ("pulling manifest", 0, 0)
+        for unreadable in (b"not json", b"", b"[1]", b'{"status":5}', b'{}', b"\xff\xfe"):
+            assert pull_progress(unreadable) is None
+        with pytest.raises(PullError, match="file does not exist"):
+            pull_progress(b'{"error":"pull model manifest: file does not exist"}')
+
+    def test_odd_sizes_are_not_sizes(self):
+        from core.agent.providers.ollama_chat import pull_progress
+        assert pull_progress(b'{"status":"x","total":"big","completed":-3}') == ("x", 0, 0)
+        assert pull_progress(b'{"status":"x","total":true,"completed":5}') == ("x", 0, 0)
+        assert pull_progress(b'{"status":"x","total":100,"completed":500}') == ("x", 100, 100)  # never past the total
+
+    def test_an_error_is_a_provider_error_with_its_text_cut(self):
+        from core.agent.providers.ollama_chat import PullError, pull_progress
+        with pytest.raises(PullError) as raised:
+            pull_progress(json.dumps({"error": "x" * 900}).encode())
+        assert raised.value.error.message == "x" * 500

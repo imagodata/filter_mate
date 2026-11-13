@@ -5,10 +5,13 @@ Loaded under a private package with ``qgis.PyQt`` pointing at PyQt5 for the impo
 for the other tests), and ``qgis.core`` mocked: no request leaves, the tester is a fake. Skipped without PyQt5.
 """
 import importlib
+import json
 import os
 import pathlib
 import sys
 import types
+import xml.etree.ElementTree as ElementTree
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -52,6 +55,7 @@ def _load():
 
 _APP, panel_module, settings_module, model_list = _load()
 AgentSettingsDialog = panel_module.AgentSettingsDialog
+ollama_chat = importlib.import_module(f"{_PKG}.core.agent.providers.ollama_chat")
 SECRET = "sk-test-0123456789abcdef"
 
 
@@ -218,3 +222,322 @@ def test_the_welcome_note_names_the_two_ways_in():
     note = panel_module.AgentPanel().welcome_note.text()
     assert note == ("It needs an AI provider: your own API key, or a local model with Ollama. "
                     "Nothing is sent before you agree.")
+
+
+def test_a_removed_key_is_not_tested_as_if_it_were_still_there():
+    """After Remove, the tester would still read the stored key and say it answers."""
+    tester = FakeTester((True, "It answers.", ()))
+    dialog = _dialog("openai", tester, authcfg="abc123", key_target="x")
+    dialog._on_forget()
+    dialog.provider_test_button.click()
+    assert tester.calls == [] and dialog.provider_result.text() == "Enter your API key first."
+    dialog.key.setText(SECRET)
+    dialog.provider_test_button.click()
+    assert len(tester.calls) == 1 and dialog.provider_result.text() == "It answers."
+
+
+def test_the_key_link_escapes_what_a_translation_says(monkeypatch):
+    real = panel_module._tr
+    monkeypatch.setattr(panel_module, "_tr", lambda text: "Create <b> & key" if text == "Create a key" else real(text))
+    dialog = _dialog("openai")
+    link = ElementTree.fromstring(dialog.key_link.text())  # one well-formed link: nothing leaked into the markup
+    assert link.tag == "a" and link.attrib == {"href": model_list.KEY_PAGES["openai"]}
+    assert link.text == "Create <b> & key" and len(link) == 0
+
+
+# -- Ollama: where to install it, a model to download --------------------------------------------------------------
+
+
+class FakeReply(QtCore.QObject):
+    """A QNetworkReply that says what the test feeds it, as the real one does: readyRead, then finished."""
+
+    readyRead = QtCore.pyqtSignal()  # noqa: N815 - Qt names
+    finished = QtCore.pyqtSignal()
+    downloadProgress = QtCore.pyqtSignal(int, int)  # noqa: N815
+
+    def __init__(self):
+        super().__init__()
+        self.body, self.code, self.status, self.aborted, self.done = b"", 0, None, 0, False
+
+    def read(self, _limit):
+        return self.body
+
+    def readAll(self):  # noqa: N802
+        body, self.body = self.body, b""
+        return body
+
+    def error(self):
+        return self.code
+
+    def attribute(self, _attribute):
+        return self.status
+
+    def abort(self):
+        self.aborted += 1
+        self.code = 5
+        self._finish()
+
+    def deleteLater(self):  # noqa: N802
+        pass
+
+    def _finish(self):
+        if not self.done:  # Qt says it once
+            self.done = True
+            self.finished.emit()
+
+    def send(self, data):
+        self.body += data
+        self.readyRead.emit()
+
+    def end(self, data=b""):
+        self.body += data
+        self._finish()
+
+
+class FakeNetwork:
+    """qgis.core.QgsNetworkAccessManager and the request classes of QtNetwork, recording what is sent."""
+
+    def __init__(self):
+        self.gets, self.posts = [], []
+
+    def get(self, request):
+        reply = FakeReply()
+        self.gets.append((request, reply))
+        return reply
+
+    def post(self, request, data):
+        reply = FakeReply()
+        self.posts.append((request, bytes(data), reply))
+        return reply
+
+    @property
+    def listing(self):
+        return self.gets[-1][1]
+
+    @property
+    def download(self):
+        return self.posts[-1][2]
+
+
+class FakeRequest:
+    KnownHeaders = SimpleNamespace(ContentTypeHeader="content-type")
+    Attribute = SimpleNamespace(HttpStatusCodeAttribute="status", RedirectPolicyAttribute="redirect")
+    RedirectPolicy = SimpleNamespace(ManualRedirectPolicy="manual")
+
+    def __init__(self, url):
+        self.url, self.headers, self.attributes = url.toString(), {}, {}
+
+    def setHeader(self, name, value):  # noqa: N802
+        self.headers[name] = value
+
+    def setAttribute(self, name, value):  # noqa: N802
+        self.attributes[name] = value
+
+    def setTransferTimeout(self, _ms):  # noqa: N802
+        pass
+
+
+@pytest.fixture
+def network(monkeypatch):
+    fake = FakeNetwork()
+    monkeypatch.setitem(sys.modules, "qgis.core", SimpleNamespace(
+        QgsNetworkAccessManager=SimpleNamespace(instance=lambda: fake)))
+    monkeypatch.setitem(sys.modules, "qgis.PyQt.QtNetwork", SimpleNamespace(
+        QNetworkRequest=FakeRequest,
+        QNetworkReply=SimpleNamespace(NetworkError=SimpleNamespace(NoError=0, OperationCanceledError=5))))
+    return fake
+
+
+def _ollama(network, model="", base_url=""):
+    """The dialog on Ollama; it asked for the list of the models, not answered yet."""
+    settings = settings_module.AgentSettings(preset="ollama", model=model, base_url=base_url)
+    dialog = AgentSettingsDialog(settings, settings_module.target_of, None, provider_tester=FakeTester((True, "", ())))
+    assert len(network.gets) == 1
+    return dialog
+
+
+def _installed(*names, families=None):
+    models = [{"name": name, "details": {"families": families or ["llama"]}} for name in names]
+    return json.dumps({"models": models}).encode()
+
+
+def _lines(*payloads):
+    return b"".join(json.dumps(payload).encode() + b"\n" for payload in payloads)
+
+
+def test_ollama_not_answering_offers_install(network):
+    dialog = _ollama(network, base_url="http://gpu.lan:11434")
+    network.listing.end(b"")  # a closed port: no body
+    assert not _hidden(dialog, dialog.ollama_install_row) and not _hidden(dialog, dialog.ollama_refresh_button)
+    assert ollama_chat.OLLAMA_DOWNLOAD_PAGE in dialog.ollama_install_note.text()
+    assert "http://gpu.lan:11434" in dialog.ollama_install_note.text()
+    assert _hidden(dialog, dialog.ollama_download_button)
+    dialog.ollama_refresh_button.click()  # asks again
+    assert len(network.gets) == 2
+
+
+def test_the_install_note_goes_when_ollama_answers(network):
+    dialog = _ollama(network, model="qwen3:8b")
+    network.listing.end(b"")
+    dialog.ollama_refresh_button.click()
+    network.listing.end(_installed("qwen3:8b"))
+    assert _hidden(dialog, dialog.ollama_install_row) and _hidden(dialog, dialog.ollama_download_button)
+
+
+def test_the_install_note_is_not_for_the_other_providers(network):
+    dialog = _ollama(network)
+    network.listing.end(b"")
+    dialog.preset.setCurrentIndex(dialog.preset.findData("openai"))
+    assert _hidden(dialog, dialog.ollama_install_row) and _hidden(dialog, dialog.ollama_download_row)
+
+
+def test_ollama_without_the_model_offers_download(network):
+    dialog = _ollama(network)
+    network.listing.end(_installed("nomic-embed-text", families=["nomic-bert"]))  # no chat model at all
+    assert dialog.model.currentText() == "qwen3.5:4b"
+    assert not _hidden(dialog, dialog.ollama_download_button) and _hidden(dialog, dialog.ollama_install_row)
+
+
+def test_ollama_with_a_model_proposes_that_one_and_no_download(network):
+    dialog = _ollama(network)
+    network.listing.end(_installed("qwen3:8b", "llama3"))
+    assert dialog.model.currentText() == "qwen3:8b" and _hidden(dialog, dialog.ollama_download_button)
+
+
+def test_a_typed_model_that_is_not_installed_offers_download(network):
+    dialog = _ollama(network)
+    network.listing.end(_installed("qwen3:8b"))
+    dialog.model.setEditText("llama3")
+    assert not _hidden(dialog, dialog.ollama_download_button)
+    dialog.model.setEditText("qwen3:8b")
+    assert _hidden(dialog, dialog.ollama_download_button)
+    dialog.model.setEditText("")
+    assert _hidden(dialog, dialog.ollama_download_button)
+
+
+def test_download_asks_first(network, monkeypatch):
+    questions = []
+    monkeypatch.setattr(panel_module, "ask_plain", lambda parent, title, text: questions.append(text) or False)
+    dialog = _ollama(network)
+    network.listing.end(_installed())
+    dialog.ollama_download_button.click()
+    assert network.posts == [] and "qwen3.5:4b" in questions[0]
+    assert dialog.ollama_cancel_button.isHidden() and dialog.preset.isEnabled()
+
+
+def _downloading(network, monkeypatch, **kwargs):
+    monkeypatch.setattr(panel_module, "ask_plain", lambda *args: True)
+    dialog = _ollama(network, **kwargs)
+    network.listing.end(_installed())
+    dialog.ollama_download_button.click()
+    return dialog
+
+
+def test_download_posts_to_the_address_of_the_dialog_only(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch, base_url="http://gpu.lan:11434/v1")
+    request, body, _reply = network.posts[0]
+    assert request.url == "http://gpu.lan:11434/api/pull"
+    assert json.loads(body) == {"model": "qwen3.5:4b", "stream": True}
+    assert request.attributes["redirect"] == "manual"  # a redirection is not followed
+    assert len(network.posts) == 1 and not _hidden(dialog, dialog.ollama_cancel_button)
+
+
+def test_download_shows_its_progress_and_closes_the_way_for_nothing_else(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    bar = dialog.ollama_progress
+    assert not _hidden(dialog, bar) and bar.maximum() == 0  # busy: no size yet
+    assert not (dialog.preset.isEnabled() or dialog.model.isEnabled() or dialog.provider_test_button.isEnabled())
+    assert _hidden(dialog, dialog.ollama_download_button)
+    network.download.send(_lines({"status": "pulling manifest"}))
+    assert bar.maximum() == 0 and "pulling manifest" in dialog.provider_result.text()
+    network.download.send(_lines({"status": "pulling a1b2", "total": 3_400_000_000, "completed": 1_700_000_000}))
+    assert (bar.minimum(), bar.maximum(), bar.value()) == (0, 1000, 500)
+    assert dialog.provider_result.text() == "Downloading qwen3.5:4b: 1.7 GB of 3.4 GB"
+    dialog.provider_test_button.click()  # nothing is tested meanwhile
+    assert dialog.provider_result.text().startswith("Downloading")
+
+
+def test_a_line_cut_between_two_chunks_is_read_whole(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    line = json.dumps({"status": "pulling x", "total": 2_000_000, "completed": 1_000_000}).encode()
+    network.download.send(line[:20])
+    assert dialog.ollama_progress.maximum() == 0
+    network.download.send(line[20:] + b"\n")
+    assert dialog.ollama_progress.value() == 500 and "1 MB of 2 MB" in dialog.provider_result.text()
+
+
+def test_download_success_reads_the_list_again_and_selects_the_model(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.send(_lines({"status": "pulling a", "total": 10, "completed": 10}, {"status": "success"}))
+    assert network.download.aborted == 1  # nothing more is read
+    assert dialog.provider_result.text() == "qwen3.5:4b is downloaded."
+    assert dialog.preset.isEnabled() and dialog.model.isEnabled() and dialog.provider_test_button.isEnabled()
+    assert _hidden(dialog, dialog.ollama_cancel_button) and _hidden(dialog, dialog.ollama_progress)
+    assert len(network.gets) == 2  # the list, again
+    network.listing.end(_installed("qwen3.5:4b"))
+    assert dialog.model.currentText() == "qwen3.5:4b" and _models(dialog) == ["qwen3.5:4b"]
+    assert _hidden(dialog, dialog.ollama_download_button) and _hidden(dialog, dialog.ollama_download_row)
+
+
+def test_an_error_line_of_the_stream_is_shown(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.send(_lines({"status": "pulling manifest"}, {"error": "pull model manifest: file does not exist"}))
+    assert dialog.provider_result.text() == (
+        "Ollama could not download qwen3.5:4b: pull model manifest: file does not exist")
+    assert dialog.preset.isEnabled() and dialog.model.isEnabled() and len(network.gets) == 1
+    assert not _hidden(dialog, dialog.ollama_download_button)  # the model is still missing: try again
+
+
+def test_an_error_answered_with_a_status_is_shown(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.status, network.download.code = 404, 203
+    network.download.end(_lines({"error": "pull model manifest: file does not exist"}))
+    assert "file does not exist" in dialog.provider_result.text() and dialog.preset.isEnabled()
+
+
+def test_cancel_stops_the_download(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.send(_lines({"status": "pulling a", "total": 10, "completed": 3}))
+    dialog.ollama_cancel_button.click()
+    assert network.download.aborted == 1 and dialog.provider_result.text() == "Download cancelled."
+    assert dialog.preset.isEnabled() and dialog.provider_test_button.isEnabled() and len(network.gets) == 1
+    assert _hidden(dialog, dialog.ollama_cancel_button) and not _hidden(dialog, dialog.ollama_download_button)
+    network.download.send(_lines({"status": "success"}))  # a late chunk is not read
+    assert dialog.provider_result.text() == "Download cancelled."
+
+
+def test_closing_the_dialog_aborts_the_download(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    dialog.done(0)
+    assert network.download.aborted == 1 and len(network.gets) == 1 and dialog._pull_reply is None
+    assert not dialog._pull_idle.isActive()
+
+
+def test_a_silence_ends_the_download(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    assert dialog._pull_idle.isActive() and dialog._pull_idle.interval() == 60_000  # no total timeout, only silence
+    dialog._pull_idle.timeout.emit()
+    assert network.download.aborted == 1 and "60 seconds" in dialog.provider_result.text()
+    assert dialog.preset.isEnabled()
+
+
+def test_download_that_cannot_reach_ollama_says_so(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch, base_url="http://gpu.lan:11434")
+    network.download.code = 1
+    network.download.end()
+    assert dialog.provider_result.text() == "Ollama could not be reached at http://gpu.lan:11434/api/pull."
+    assert dialog.model.isEnabled()
+
+
+def test_a_stream_that_stops_without_success_is_said(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.send(_lines({"status": "pulling a", "total": 10, "completed": 3}))
+    network.download.end()
+    assert dialog.provider_result.text() == "The download ended before its end."
+    assert dialog.preset.isEnabled()
+
+
+def test_a_line_that_never_ends_is_not_kept(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.send(b"x" * (panel_module.OLLAMA_PULL_MAX_LINE + 1))
+    assert network.download.aborted == 1 and "could not be read" in dialog.provider_result.text()
