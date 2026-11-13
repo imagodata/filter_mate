@@ -1273,9 +1273,9 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>Ialok ang mga tool ng isang gawain kapag na-load na ng agent ang mga tagubilin nito</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Mas magaang na mga kahilingan, para sa mabagal o lokal na model: palaging iniaalok ang mga tool na nagsasala at nagbabasa; ang mga para sa Processing, mga istilo, mga layout, pag-edit, SAM at open data ay dumarating kapag na-load ng agent ang skill ng gawaing iyon. Palaging nakukuha ng ibang mga application ang lahat ng tool.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Mas magaang na mga kahilingan: palaging iniaalok ang mga tool na nagsasala at nagbabasa; ang mga para sa Processing, mga istilo, mga layout, pag-edit, SAM at open data ay dumarating kapag na-load ng agent ang skill ng gawaing iyon. Palaging nakukuha ng ibang mga application ang lahat ng tool.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

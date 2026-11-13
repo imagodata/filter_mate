@@ -1273,9 +1273,9 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Vazifa vositalarini agent uning ko'rsatmalarini yuklagandan keyin taklif qilish</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Sekin yoki mahalliy model uchun yengilroq so'rovlar: filtrlovchi va o'qiydigan vositalar doim taklif qilinadi; Processing, uslublar, maketlar, tahrirlash, SAM va ochiq ma'lumotlar vositalari esa agent o'sha vazifaning ko'nikmasini yuklaganda keladi. Boshqa ilovalar doim barcha vositalarni oladi.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Yengilroq so'rovlar: filtrlovchi va o'qiydigan vositalar doim taklif qilinadi; Processing, uslublar, maketlar, tahrirlash, SAM va ochiq ma'lumotlar vositalari esa agent o'sha vazifaning ko'nikmasini yuklaganda keladi. Boshqa ilovalar doim barcha vositalarni oladi.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

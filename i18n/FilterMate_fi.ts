@@ -1273,9 +1273,9 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Tarjoa tehtävän työkalut vasta, kun agentti lataa sen ohjeet</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Kevyemmät pyynnöt hitaalle tai paikalliselle mallille: suodattavat ja lukevat työkalut tarjotaan aina; Processingin, tyylien, taittojen, muokkauksen, SAMin ja avoimen datan työkalut tulevat, kun agentti lataa kyseisen tehtävän taidon. Muut sovellukset saavat aina kaikki työkalut.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Kevyemmät pyynnöt: suodattavat ja lukevat työkalut tarjotaan aina; Processingin, tyylien, taittojen, muokkauksen, SAMin ja avoimen datan työkalut tulevat, kun agentti lataa kyseisen tehtävän taidon. Muut sovellukset saavat aina kaikki työkalut.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ofrecer las herramientas de una tarea cuando el agente cargue sus instrucciones</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Solicitudes más ligeras, para un modelo lento o local: las herramientas que filtran y leen se ofrecen siempre; las de Processing, estilos, diseños, edición, SAM y datos abiertos llegan cuando el agente carga la habilidad de esa tarea. Las demás aplicaciones reciben siempre todas las herramientas.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Solicitudes más ligeras: las herramientas que filtran y leen se ofrecen siempre; las de Processing, estilos, diseños, edición, SAM y datos abiertos llegan cuando el agente carga la habilidad de esa tarea. Las demás aplicaciones reciben siempre todas las herramientas.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

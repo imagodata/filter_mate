@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>किसी कार्य के टूल तभी दें जब एजेंट उसके निर्देश लोड कर ले</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>हल्के अनुरोध, किसी धीमे या स्थानीय मॉडल के लिए: फ़िल्टर करने और पढ़ने वाले टूल हमेशा दिए जाते हैं; Processing, शैलियों, लेआउट, संपादन, SAM और ओपन डेटा के टूल तब आते हैं जब एजेंट उस कार्य का कौशल लोड करता है। अन्य एप्लिकेशन को हमेशा सभी टूल मिलते हैं।</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>हल्के अनुरोध: फ़िल्टर करने और पढ़ने वाले टूल हमेशा दिए जाते हैं; Processing, शैलियों, लेआउट, संपादन, SAM और ओपन डेटा के टूल तब आते हैं जब एजेंट उस कार्य का कौशल लोड करता है। अन्य एप्लिकेशन को हमेशा सभी टूल मिलते हैं।</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

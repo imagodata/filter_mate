@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>የአንድ ተግባር መሣሪያዎችን ወኪሉ መመሪያዎቹን ሲጭን ብቻ ማቅረብ</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>ቀለል ያሉ ጥያቄዎች፣ ለዝግተኛ ወይም አካባቢያዊ ሞዴል፦ የሚያጣሩና የሚያነቡ መሣሪያዎች ሁልጊዜ ይቀርባሉ፤ የProcessing፣ የቅጦች፣ የገጽ አቀማመጦች፣ የአርትዖት፣ የSAM እና የክፍት ውሂብ መሣሪያዎች ወኪሉ የዚያን ተግባር ክህሎት ሲጭን ይመጣሉ። ሌሎች መተግበሪያዎች ሁልጊዜ ሁሉንም መሣሪያዎች ያገኛሉ።</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>ቀለል ያሉ ጥያቄዎች፦ የሚያጣሩና የሚያነቡ መሣሪያዎች ሁልጊዜ ይቀርባሉ፤ የProcessing፣ የቅጦች፣ የገጽ አቀማመጦች፣ የአርትዖት፣ የSAM እና የክፍት ውሂብ መሣሪያዎች ወኪሉ የዚያን ተግባር ክህሎት ሲጭን ይመጣሉ። ሌሎች መተግበሪያዎች ሁልጊዜ ሁሉንም መሣሪያዎች ያገኛሉ።</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Families of tools: the tools of one kind of task, offered to the chat once the agent loads its skill.
 
-Plain Python. An option of the agent (off by default): fewer tools in each request, for a slow or local model. The
+Plain Python. An option of the agent (on by default): fewer tools in each request. The
 tools that filter and read (``FILTERING_TOOLS``) are always offered, and load_skill; the other tools a skill of the
 plugin names come with that skill. A tool no skill names stays offered, and a skill from elsewhere unlocks nothing
 (its tools are ignored, ``skills.set_extra``). Other applications (MCP) always get every tool.

@@ -1273,9 +1273,9 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Oferirea instrumentelor unei sarcini după ce agentul îi încarcă instrucțiunile</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Cereri mai ușoare, pentru un model lent sau local: instrumentele care filtrează și citesc sunt oferite mereu; cele pentru Processing, stiluri, machete, editare, SAM și date deschise vin atunci când agentul încarcă abilitatea sarcinii respective. Celelalte aplicații primesc mereu toate instrumentele.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Cereri mai ușoare: instrumentele care filtrează și citesc sunt oferite mereu; cele pentru Processing, stiluri, machete, editare, SAM și date deschise vin atunci când agentul încarcă abilitatea sarcinii respective. Celelalte aplicații primesc mereu toate instrumentele.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
