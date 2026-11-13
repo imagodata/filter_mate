@@ -118,7 +118,8 @@ def test_several_operands_keep_their_parentheses():
 @pytest.mark.parametrize('dialect', [POSTGRESQL, SQLITE, OGR_SQL])
 def test_mixed_types_are_left_to_qgis(dialect):
     assert 'same type' in refused(binary('>', col('code'), lit(10)), dialect)
-    assert 'same type' in refused(binary('=', col('pop'), lit('10')), dialect)
+    assert 'same type' in refused(binary('=', col('pop'), lit('dix')), dialect)
+    assert 'same type' in refused(binary('=', col('pop'), lit(' 10')), dialect)  # a space: not the plainest
 
 
 @pytest.mark.parametrize('dialect', [POSTGRESQL, SQLITE])

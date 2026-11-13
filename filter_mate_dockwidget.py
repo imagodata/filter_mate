@@ -4980,8 +4980,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # This bypasses the guards that can prevent features from being returned
         features = []
         try:
-            from qgis.core import QgsFeatureRequest
+            from qgis.core import QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
             request = QgsFeatureRequest().setFilterExpression(expression)
+            # 2026-11-12: the global, project and layer variables, as the filter task reads them (a request
+            # has no context of its own: "id" > @seuil selected nothing). Read here, on the main thread.
+            request.setExpressionContext(QgsExpressionContext(
+                QgsExpressionContextUtils.globalProjectLayerScopes(self.current_layer)))
             features = list(self.current_layer.getFeatures(request))
             logger.info(f"exploring_custom_selection: Loaded {len(features)} features matching expression '{expression[:50]}...'")
         except Exception as e:

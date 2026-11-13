@@ -41,7 +41,41 @@ QGIS adapter), and only where the source gives the answer QGIS gives:
 Everywhere: the sign of a value that is not a literal is not written (QGIS
 reads -NULL of an integer or real field as 0, the sources as NULL); SQLite
 reads about one decimal literal in 4,000 one unit in the last place off, so
-reals are written as an integer significand over a power of two.
+reals are written as an integer significand over a power of two. A text
+constant that reads as a number (``'5'``, ``'0.3'``, ``'1e3'``, no space)
+compared with a number is compared as a number, as QGIS compares it.
+
+Variables (``@name``, ``var('name')``) are folded to the constant the caller
+read in the global, project and layer scopes (``variables``): the subset is
+written once and stays as written, as every FilterMate subset (a variable
+changed afterwards does not filter again). A variable of the feature, the
+map, the canvas, a layout or an atlas, or one the caller did not give, is
+not written.
+
+Geometric functions (``geometry``: the source's geometry column) are
+written where the source returns QGIS's own double, compared bit for bit on
+real layers (QGIS 4.2.3 / 3.44.15, PostGIS 3.4, GDAL 3.10 / 3.12):
+
+- ``x_min`` / ``x_max`` / ``y_min`` / ``y_max`` of ``$geometry``: PostGIS
+  ``ST_XMin``... on point and line layers (arcs included; the box of a
+  curved polygon holds every ring in PostGIS, the shell only in QGIS);
+  GeoPackage ``ST_MinX``... (GDAL's own functions, the blob header's
+  envelope) on point layers only (GDAL's envelope of a polygon holds a ring
+  outside the shell, of an arc differs in the last bits);
+- ``x`` / ``y`` / ``$x`` / ``$y`` on a PostGIS point layer (a generic column
+  read as points also holds multipoints: centroid / first point, and QGIS's
+  0 for an empty multipoint).
+
+QGIS gives NaN for an empty geometry and stops the evaluation with an error
+at its first use (the feature is not kept, measured), the source gives NULL:
+the same through comparisons, arithmetic, BETWEEN, NOT and a top-level AND,
+so a geometric value is not written under OR, CASE / if, an AND under NOT,
+IS NULL or coalesce (SQL goes on past the NULL). Left to QGIS: ``area`` (QGIS sums the ring
+in another order: 2,000 polygons of 2,000 differ in the last bits),
+``length`` / ``perimeter`` (arcs differ, and a PostGIS layer typed as lines
+reads arcs from a generic column), ``num_points`` (compound curves, empty
+points), ``$area`` / ``$length`` / ``$perimeter`` (ellipsoid and units of
+the project), and everything on OGR SQL.
 
 Known limits, not detected: an integer arithmetic that overflows 64 bits
 (QGIS wraps, SQLite turns to a real), integer field values beyond 2^53
@@ -89,6 +123,45 @@ _IDENTIFIER_REFUSED = ('"', "'", '\\', '--', '/*', '*/')
 # Other cases of k and s in a Unicode case-insensitive regular expression.
 _OTHER_CASES = {'k': 'K', 's': 'ſ'}
 
+# A text QGIS reads as a number (QString::toDouble, C locale), written in the
+# plainest form only: ASCII digits, no space, no leading or trailing point.
+_INTEGER_TEXT = re.compile(r'[+-]?[0-9]+')
+_NUMBER_TEXT = re.compile(r'[+-]?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?')
+
+# Variables that depend on the feature, the map, the canvas, a layout, an
+# atlas, a symbol, a form or the time of evaluation. None of them is in the
+# global, project and layer scopes the adapter reads (where QGIS also marks
+# its variables static or not): refused here too, whatever the caller gives.
+_DYNAMIC_VARIABLES = frozenset((
+    'row_number', 'geometry', 'feature', 'id', 'parent', 'element', 'value', 'layer', 'layers', 'layer_ids',
+    'zoom_level', 'vector_tile_zoom', 'scale_value', 'snapping_results', 'form_mode', 'notification_message',
+    'feature_count', 'counter', 'now', 'today'))
+_DYNAMIC_PREFIXES = ('_', 'map_', 'canvas_', 'atlas_', 'layout_', 'symbol_', 'geometry_', 'cluster_', 'item_',
+                     'grid_', 'frame_', 'current_', 'parent_', 'animation_', 'algorithm_', 'model_', 'processing_',
+                     'mesh_', 'chart_', 'legend_', 'plot_', 'fullextent_', 'user_cursor', 'layer_cursor', 'now_',
+                     'time_', 'utc_')
+# Functions whose arguments the writer reads: variables are folded there only.
+_FOLDED_THROUGH = ('if', 'coalesce', 'abs', 'floor', 'ceil')
+
+# Geometry sources whose functions were compared with QGIS.
+POSTGIS = 'postgis'
+GEOPACKAGE = 'gpkg'
+# QGIS function -> PostGIS, GeoPackage (GDAL's own SQL functions) function
+_BOUNDS = {'x_min': ('ST_XMin', 'ST_MinX'), 'x_max': ('ST_XMax', 'ST_MaxX'),
+           'y_min': ('ST_YMin', 'ST_MinY'), 'y_max': ('ST_YMax', 'ST_MaxY')}
+_COORDINATES = ('x', 'y', '$x', '$y')
+# NaN in QGIS for an empty geometry, NULL in the source
+_GEOMETRY_VALUES = frozenset(_BOUNDS) | frozenset(_COORDINATES)
+_NOT_WRITTEN_GEOMETRY = {
+    'area': 'QGIS sums the area of a ring in another order than the source (the last bits differ)',
+    'length': 'the length of an arc differs in the last bits, and a PostGIS layer of lines may read arcs',
+    'perimeter': 'the length of an arc differs in the last bits, and a PostGIS layer of polygons may read arcs',
+    'num_points': 'compound curves and empty points are counted differently',
+    '$area': 'ellipsoidal and in the units of the project',
+    '$length': 'ellipsoidal and in the units of the project',
+    '$perimeter': 'ellipsoidal and in the units of the project',
+}
+
 
 @dataclass(frozen=True)
 class NativeTranslation:
@@ -108,6 +181,17 @@ class NativeTranslation:
         composite: Whether ``sql`` holds AND, OR or NOT (the user's, or the
             tolerance of a real's equality). OGR SQL gives FALSE to TRUE AND
             NULL: such a subset must not be negated there.
+        geometric: Whether ``sql`` holds a coordinate of the geometry: NULL
+            in the source where QGIS stops on the NaN of an empty geometry.
+            Holding AND, OR or NOT too, it must not be negated (``NOT (NULL
+            AND FALSE)`` is TRUE, QGIS keeps nothing). Under the OR of a
+            combination with an old subset it is not refused: FilterMate
+            combines kept sets (``old OR NULL`` keeps the old features, as the
+            union of both filters does, where QGIS evaluating ``old OR new``
+            stops on the NaN when ``old`` is FALSE or NULL: not kept either).
+        native_exact: Whether ``native_expression`` gives back every number
+            of ``sql``: QGIS's ``node.dump()`` writes 1e-30 as 0. When it does
+            not, QGIS must not evaluate that text for the native part.
     """
 
     status: TranslationStatus
@@ -118,24 +202,119 @@ class NativeTranslation:
     native_columns: frozenset = frozenset()
     predicate: bool = False
     composite: bool = False
+    geometric: bool = False
+    native_exact: bool = True
+
+
+@dataclass(frozen=True)
+class NativeGeometry:
+    """The geometry column of a source whose geometric functions are written.
+
+    Attributes:
+        column: Name of the geometry column.
+        kind: QGIS geometry type of the layer: ``point``, ``line`` or ``polygon``.
+        source: ``postgis``, or ``gpkg`` (a GeoPackage read by GDAL).
+        curved: Whether the layer's geometry type is curved.
+    """
+
+    column: str
+    kind: str
+    source: str
+    curved: bool = False
 
 
 def _class(kind: str) -> str:
     return 'number' if kind in _NUMERIC else kind
 
 
+def _safe_identifier(name) -> bool:
+    return (isinstance(name, str) and bool(name) and not any(part in name for part in _IDENTIFIER_REFUSED)
+            and not any(ord(char) < 32 for char in name))
+
+
+def _is_geometry(node: Node) -> bool:
+    """``$geometry``: the geometry of the feature."""
+    return node.kind == 'function' and str(node.value).lower() == '$geometry' and not node.children
+
+
+def _holds_geometry_value(node: Node) -> bool:
+    """Whether a value may be NaN in QGIS where the source gives NULL (an empty geometry)."""
+    if node.kind == 'function' and str(node.value).lower() in _GEOMETRY_VALUES:
+        return True
+    return any(_holds_geometry_value(child) for child in node.children)
+
+
+def _number_from_text(node: Node, other_type: str) -> Node:
+    """A text constant compared with a number, as QGIS compares them: as a number.
+
+    QGIS compares two values as numbers when they are not both texts and both
+    read as numbers (``"pop" > '5'``, a project variable holding 5 is the text
+    '5'). Only the plainest writings are converted; any other text is left
+    as it is (and the comparison of a text with a number is not written).
+    """
+    if other_type not in _NUMERIC or node.kind != 'literal' or not isinstance(node.value, str):
+        return node
+    if _INTEGER_TEXT.fullmatch(node.value):
+        return Node('literal', int(node.value), (), node.text)
+    if _NUMBER_TEXT.fullmatch(node.value):
+        value = float(node.value)
+        if value == 0 and any(digit in '123456789' for digit in re.split('[eE]', node.value)[0]):
+            # an underflow: QString::toDouble fails and QGIS compares the texts ('1' > '1e-400' is
+            # FALSE, measured); a subnormal ('3e-324') is read as a number
+            return node
+        return Node('literal', value, (), node.text)
+    return node
+
+
+def _is_constant_variable(name: str, variables) -> bool:
+    if name not in variables or name in _DYNAMIC_VARIABLES or name.startswith(_DYNAMIC_PREFIXES):
+        return False
+    value = variables[name]
+    return is_null_value(value) or isinstance(value, (bool, int, float, str))
+
+
+def _fold_variables(node: Node, variables) -> Node:
+    """Replace each variable known as a constant by a literal of its value (QGIS text kept).
+
+    Not inside a function the writer does not read (``with_variable``,
+    ``aggregate``... give a variable another value there).
+    """
+    if node.kind == 'function':
+        name = str(node.value).lower()
+        if name == 'var':
+            argument = node.children[0] if len(node.children) == 1 else None
+            if (argument is not None and argument.kind == 'literal' and isinstance(argument.value, str)
+                    and _is_constant_variable(argument.value, variables)):
+                return Node('literal', variables[argument.value], (), node.text)
+            return node
+        if name not in _FOLDED_THROUGH:
+            return node
+    if not node.children:
+        return node
+    children = tuple(_fold_variables(child, variables) for child in node.children)
+    if all(new is old for new, old in zip(children, node.children)):
+        return node
+    return Node(node.kind, node.value, children, node.text)
+
+
 class _Writer:
     """Writes one AND operand; raises :class:`Unsupported` on anything unproven."""
 
-    def __init__(self, dialect: str, types: Dict[str, Optional[str]], case_sensitive_like: bool = False):
+    def __init__(self, dialect: str, types: Dict[str, Optional[str]], case_sensitive_like: bool = False,
+                 geometry: Optional[NativeGeometry] = None):
         self.dialect = dialect
         self.types = types
+        self.geometry = geometry
         self.ands = 0  # AND written so far, user's or ours (OGR SQL: no NOT over one)
         self.connectives = 0  # AND, OR, NOT written so far
         self.columns = set()
         # OGR SQL: texts compared with LIKE, outside any NOT only
         self.case_sensitive_like = case_sensitive_like and dialect == OGR_SQL
         self.negations = 0  # NOT around the node being written
+        # OR, CASE / if, or AND under a NOT around the node: SQL goes on past a NULL there where QGIS stops
+        # on an evaluation error (a geometric value of an empty geometry)
+        self.alternatives = 0
+        self.geometric = False  # a coordinate of the geometry written
 
     # -- values -----------------------------------------------------------------
 
@@ -258,6 +437,7 @@ class _Writer:
         if not children or len(children) % 2:
             raise Unsupported('A CASE without a complete WHEN ... THEN')
         parts, types = [], []
+        self.alternatives += 1
         for index in range(0, len(children), 2):
             then, then_type = self.value(children[index + 1], depth + 1)
             parts.append('WHEN {} THEN {}'.format(self.predicate(children[index], depth + 1), then))
@@ -266,13 +446,21 @@ class _Writer:
             other, other_type = self.value(otherwise, depth + 1)
             parts.append('ELSE {}'.format(other))
             types.append(other_type)
+        self.alternatives -= 1
         return '(CASE {} END)'.format(' '.join(parts)), self._merged_type(types)
 
     def _function(self, node: Node, depth: int) -> Tuple[str, str]:
         name = str(node.value).lower()
+        if name == 'var':  # the variables known as constants are literals already
+            raise Unsupported('A variable that is not a constant of QGIS, the project or the layer: {}'.format(
+                node.text))
         if self.dialect == OGR_SQL:
             raise Unsupported('Functions are not written in OGR SQL: {}'.format(name))
         count = len(node.children)
+        if name in _GEOMETRY_VALUES:
+            return self._geometry_value(name, node)
+        if name in _NOT_WRITTEN_GEOMETRY:
+            raise Unsupported('Geometric function not translated, {}: {}'.format(_NOT_WRITTEN_GEOMETRY[name], name))
         if name == 'if' and count == 3:
             # if(c, a, b): b when c is false or NULL, as CASE ... ELSE
             return self._case(Node('condition', True, node.children, node.text), depth)
@@ -280,6 +468,9 @@ class _Writer:
         types = [type_ for _, type_ in arguments]
         text = ', '.join(sql for sql, _ in arguments)
         if name == 'coalesce' and count >= 2:  # SQLite refuses COALESCE(x)
+            if any(_holds_geometry_value(child) for child in node.children):
+                raise Unsupported('coalesce of a geometric value: NaN in QGIS for an empty geometry, '
+                                  'NULL in the source')
             return 'COALESCE({})'.format(text), self._merged_type(types)
         if name == 'abs' and count == 1 and types[0] in _NUMERIC:
             # a double in QGIS (no overflow on the smallest integer)
@@ -291,6 +482,65 @@ class _Writer:
         # lower() / upper(): Unicode in QGIS, ASCII letters only in SQLite, the locale of the database in
         # PostgreSQL (a C database leaves 'É' as it is, a UTF-8 one folds 'İ' to 'i').
         raise Unsupported('Function not translated: {}'.format(name))
+
+    def _geometry_value(self, name: str, node: Node) -> Tuple[str, str]:
+        """A coordinate of ``$geometry``, a double equal to QGIS's (compared bit for bit on real layers).
+
+        Empty geometry: QGIS gives NaN and stops the evaluation with an error
+        at its first use (the feature is not kept), the source gives NULL.
+        Measured the same (not kept) through comparisons, arithmetic, abs,
+        BETWEEN, NOT and a top-level AND; not through OR (``NULL OR TRUE``),
+        CASE / if (``WHEN NULL`` takes ELSE), an AND under NOT (``NULL AND
+        FALSE`` is FALSE in SQL where QGIS stops), IS NULL and coalesce.
+        """
+        if self.alternatives:
+            raise Unsupported('A geometric value under OR, CASE or a negated AND: QGIS stops on an empty '
+                              'geometry, the source goes on with NULL')
+        self.geometric = True
+        geometry = self.geometry
+        if name.startswith('$'):
+            if node.children:
+                raise Unsupported('Not a geometric function of the feature: {}'.format(node.text))
+        elif len(node.children) != 1 or not _is_geometry(node.children[0]):
+            raise Unsupported('A geometric function written for $geometry only: {}'.format(node.text))
+        if geometry is None:
+            raise Unsupported('No geometry column written for this source: {}'.format(name))
+        if not _safe_identifier(geometry.column):
+            raise Unsupported('A geometry column name that cannot be written safely: {}'.format(geometry.column))
+        column = '"' + geometry.column + '"'
+        if geometry.source == POSTGIS:
+            shape = 'CAST({} AS geometry)'.format(column)  # a geography column as QGIS reads it (planar)
+        elif geometry.source == GEOPACKAGE:
+            shape = column
+        else:
+            raise Unsupported('Geometric functions are not written for this source: {}'.format(geometry.source))
+        if name in _BOUNDS:
+            if geometry.source == POSTGIS:
+                # The box of a CURVEPOLYGON / MULTISURFACE holds every ring in PostGIS, QGIS's bounding box
+                # the shell's only (a hole outside: 30 against 10), and a generic column read as polygons
+                # holds them whatever the layer's type: points and lines only (arcs measured exact).
+                if geometry.kind == 'polygon':
+                    raise Unsupported('{} of a PostGIS layer of polygons (curved ones bound every ring)'.format(name))
+                return '{}({})'.format(_BOUNDS[name][0], shape), REAL
+            # ST_MinX... read the envelope of the GeoPackage blob header: GDAL's envelope of a polygon holds a
+            # ring outside the shell, of an arc differs in the last bits (430 arcs of 500), and a layer of
+            # lines may store either. Points only: no arithmetic there. A header written wrong by another
+            # tool than GDAL is not detected.
+            if geometry.kind != 'point' or geometry.curved:
+                raise Unsupported('{} of a GeoPackage layer written for points only'.format(name))
+            return '{}({})'.format(_BOUNDS[name][1], shape), REAL
+        # x / y: centroid, $x / $y: first point ($x of an empty multipoint: 0 in QGIS 3.44.15, a crash of
+        # QGIS 4.2.3; written 0). A PostGIS layer of points read from a generic column
+        # also holds multipoints; QGIS gives 0 for an empty multipoint, NaN when a part is empty.
+        if geometry.source != POSTGIS or geometry.kind != 'point':
+            raise Unsupported('{} written for a PostGIS layer of points only'.format(name))
+        axis = 'ST_X' if name.endswith('x') else 'ST_Y'
+        empty = "WHEN ST_IsEmpty({0}) AND ST_GeometryType({0}) <> 'ST_Point' THEN CAST(0 AS double precision)"
+        if name.startswith('$'):
+            rest = 'ELSE {1}(ST_GeometryN({0}, 1))'
+        else:
+            rest = 'WHEN ST_NumGeometries({0}) = ST_NPoints({0}) THEN {1}(ST_Centroid({0}))'
+        return ('(CASE ' + empty + ' ' + rest + ' END)').format(shape, axis), REAL
 
     # -- predicates -------------------------------------------------------------
 
@@ -305,8 +555,12 @@ class _Writer:
                 self.connectives += 1
                 if operator == 'AND':
                     self.ands += 1
-                return '({} {} {})'.format(self.predicate(node.children[0], depth + 1), operator,
-                                          self.predicate(node.children[1], depth + 1))
+                alternative = operator == 'OR' or self.negations > 0
+                self.alternatives += alternative
+                written = '({} {} {})'.format(self.predicate(node.children[0], depth + 1), operator,
+                                              self.predicate(node.children[1], depth + 1))
+                self.alternatives -= alternative
+                return written
             if operator in ('IS', 'IS NOT'):
                 return self._is_null(node, depth)
             if operator in _COMPARISONS:
@@ -332,6 +586,8 @@ class _Writer:
         left, right = node.children
         if right.kind != 'literal' or not is_null_value(right.value):
             raise Unsupported('Only IS NULL and IS NOT NULL are written')
+        if _holds_geometry_value(left):
+            raise Unsupported('IS NULL of a geometric value: NaN in QGIS for an empty geometry, NULL in the source')
         sql, _ = self.value(left, depth + 1)
         return '({} {} NULL)'.format(sql, node.value)
 
@@ -371,6 +627,10 @@ class _Writer:
 
     def _comparison(self, node: Node, depth: int) -> str:
         (left, left_type), (right, right_type) = (self.value(child, depth + 1) for child in node.children)
+        numbers = (_number_from_text(node.children[0], right_type), _number_from_text(node.children[1], left_type))
+        if any(new is not old for new, old in zip(numbers, node.children)):
+            node = Node('binary', node.value, numbers, node.text)
+            (left, left_type), (right, right_type) = (self.value(child, depth + 1) for child in node.children)
         operator = node.value
         self._comparable(left_type, right_type, operator not in ('=', '<>'), as_like=operator == '=')
         if self.dialect == OGR_SQL and left_type == TEXT:
@@ -418,6 +678,10 @@ class _Writer:
             raise Unsupported('BETWEEN is written for numbers only')
         bounds = []
         for bound in (low_node, high_node):
+            if _holds_geometry_value(bound):
+                # a hidden AND: 20 NOT BETWEEN NULL AND 10 is TRUE, QGIS stops on the NaN of an empty geometry
+                raise Unsupported('A geometric value as a BETWEEN bound: QGIS stops on an empty geometry, the '
+                                  'source goes on with NULL')
             if self.dialect == OGR_SQL:
                 if bound.kind != 'literal':
                     raise Unsupported('OGR SQL reads a BETWEEN bound with the type of the first two operands')
@@ -544,8 +808,52 @@ def _strip_outer_parentheses(sql: str) -> str:
     return sql[1:-1]
 
 
+def _dump_round_trips(node: Node) -> bool:
+    """Whether the QGIS text of each number of a tree reads back as the number.
+
+    ``node.dump()`` writes a real with 17 decimals at most (1e-30 is '0',
+    -1e-30 '- 0', measured in 4.2.3 and 3.44.15).
+    """
+    stack = [node]
+    while stack:
+        current = stack.pop()
+        value = current.value
+        if current.kind == 'literal' and isinstance(value, (int, float)) and not isinstance(value, bool):
+            try:
+                if float(current.text.replace(' ', '')) != value:
+                    return False
+            except (ValueError, OverflowError):
+                return False
+        stack.extend(current.children)
+    return True
+
+
+def referenced_variables(node: Node) -> frozenset:
+    """Names of the variables a tree reads by a literal name (``@name``, ``var('name')``)."""
+    names, stack = set(), [node]
+    while stack:
+        current = stack.pop()
+        if (current.kind == 'function' and str(current.value).lower() == 'var' and len(current.children) == 1
+                and current.children[0].kind == 'literal' and isinstance(current.children[0].value, str)):
+            names.add(current.children[0].value)
+        stack.extend(current.children)
+    return frozenset(names)
+
+
+def uses_geometry(node: Node) -> bool:
+    """Whether a tree holds a geometric function this module may write (it then needs ``geometry``)."""
+    stack = [node]
+    while stack:
+        current = stack.pop()
+        if current.kind == 'function' and str(current.value).lower() in _GEOMETRY_VALUES:
+            return True
+        stack.extend(current.children)
+    return False
+
+
 def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
-                     case_sensitive_like: bool = False) -> NativeTranslation:
+                     case_sensitive_like: bool = False, variables: Optional[Dict[str, object]] = None,
+                     geometry: Optional[NativeGeometry] = None) -> NativeTranslation:
     """Write a QGIS predicate for a data source, splitting a top-level AND only.
 
     Args:
@@ -558,6 +866,12 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
             OGR_SQL_LIKE_AS_ILIKE, data read as UTF-8). Texts compared with
             =, IN, LIKE or ILIKE outside any NOT are then written with LIKE.
             The subset must not be negated by the caller (AND NOT).
+        variables: Values of the variables that are constants where the
+            filter is applied (global, project and layer scopes, static in
+            QGIS), by exact name. Folded into the subset, which does not
+            follow a later change of the variable.
+        geometry: The source's geometry column, for the geometric functions
+            written natively; None writes none.
 
     Returns:
         NativeTranslation; nothing is dropped, the untranslated operands are
@@ -567,7 +881,7 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
         return NativeTranslation(TranslationStatus.NONE, local_expression=node.text,
                                  reason='Unknown dialect: {}'.format(dialect))
     written, native, local, reasons, columns = [], [], [], [], set()
-    connectives = [0]
+    connectives, geometric, exact = [0], [False], [True]
 
     def visit(part: Node) -> None:
         if part.kind == 'binary' and part.value == 'AND':
@@ -575,11 +889,14 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
                 visit(child)
             return
         try:
-            writer = _Writer(dialect, types, case_sensitive_like)
+            writer = _Writer(dialect, types, case_sensitive_like, geometry)
+            original, part = part, _fold_variables(part, variables or {})
             written.append(writer.predicate(part))
             native.append('(' + part.text + ')')
             columns.update(writer.columns)
             connectives[0] += writer.connectives
+            geometric[0] = geometric[0] or writer.geometric
+            exact[0] = exact[0] and _dump_round_trips(original)
         except Unsupported as exc:
             local.append('(' + part.text + ')')
             reasons.append(str(exc))
@@ -594,7 +911,8 @@ def translate_native(node: Node, dialect: str, types: Dict[str, Optional[str]],
     sql = _strip_outer_parentheses(written[0]) if len(written) == 1 else ' AND '.join(written)
     return NativeTranslation(status, sql, ' AND '.join(local), '; '.join(dict.fromkeys(reasons)),
                              ' AND '.join(native), frozenset(columns), _is_predicate(node),
-                             connectives[0] > 0 or len(written) > 1)
+                             connectives[0] > 0 or len(written) > 1, geometric[0],
+                             exact[0])
 
 
 # Hybrid subsets are written for SQLite only. OGR SQL (GDAL 3.13) refuses an
@@ -670,4 +988,5 @@ def hybrid_sql(native_sql: str, passing, failing, key: str, numeric: bool, diale
 
 __all__ = ['DIALECTS', 'NativeTranslation', 'OGR_SQL', 'POSTGRESQL', 'SQLITE', 'translate_native',
            'HYBRID_MAX_KEYS', 'hybrid_sql', 'key_reference', 'INT', 'REAL', 'TEXT', 'BOOL', 'OTHER',
-           'OGR_LIKE_LIST_MAX']
+           'OGR_LIKE_LIST_MAX', 'NativeGeometry', 'POSTGIS', 'GEOPACKAGE', 'referenced_variables',
+           'uses_geometry']

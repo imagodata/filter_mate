@@ -47,3 +47,25 @@ def source_selection_refusal(layer_name: str, unreadable: bool = False) -> Sourc
             'SourceSelection',
             "The selection of '{0}' keeps no feature: nothing was filtered.")
     return SourceSelectionError(text.format(layer_name))
+
+
+def selection_request(expression, layer):
+    """The request that reads the features ``expression`` keeps, in the variables of ``layer``.
+
+    A QgsFeatureRequest filtered by an expression has no context of its own:
+    the QGIS text of a native subset may read ``@variables`` (folded into the
+    subset with the global, project and layer values), which a bare request
+    reads as NULL, keeping no feature (2026-11-12). The context is the one the
+    translation and the hybrid subset read, built in the same task thread.
+
+    Args:
+        expression: A parsed QgsExpression.
+        layer: The source layer.
+
+    Returns:
+        QgsFeatureRequest: Filtered by ``expression`` in the layer's context.
+    """
+    from qgis.core import QgsExpressionContext, QgsExpressionContextUtils, QgsFeatureRequest
+    request = QgsFeatureRequest(expression)
+    request.setExpressionContext(QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(layer)))
+    return request

@@ -12,7 +12,8 @@ FilterMate on PostGIS: three cases of the 2026-11-12 PostgreSQL fixes (QGIS GUI 
   unfilter, then a filter with a buffer expression (the materialized-view path): the distant layers
   are filtered all the same.
 - ``native``: attribute filters of the source written in the native SQL of PostgreSQL (ILIKE, the
-  tolerance of a real equality, a float division) or as a hybrid list of keys (regexp_match), each
+  tolerance of a real equality, a float division, a project variable, x_min of the geometry) or as a
+  hybrid list of keys (regexp_match), each
   compared with QGIS's own answer, then a geometric filter from the source filtered that way.
 - ``or_buffer``: a first filter with a buffer expression from a selection holding OR and BETWEEN,
   then a second one on another selection with the OR operator, to the same target and to a new one
@@ -351,6 +352,8 @@ def s_setup():
         os.environ['PGSERVICEFILE'] = path  # read by QGIS's libpq and by psycopg2's at each connection
     layers = [pg_layer(table, table) for table in (SRC, TGT_A, TGT_B)]
     project.addMapLayers(layers)
+    from qgis.core import QgsExpressionContextUtils
+    QgsExpressionContextUtils.setProjectVariable(project, 'fm_seuil', '1500')  # case 'native'
     STATE['total'] = {table: sql(f"SELECT count(*) FROM public.{table}")[0][0] for table in (TGT_A, TGT_B)}
     check(f"PostGIS layers load ({CASE})", all(item.isValid() for item in layers),
           ' '.join(f"{item.name()}={item.featureCount()}" for item in layers)
@@ -485,6 +488,8 @@ NATIVE_EXPRESSIONS = [
     '"nom" LIKE \'R%\' AND "id" <= 300',
     '"nom" IS NULL OR "ratio" >= 2',
     'regexp_match("nom", \'^R\') > 0 AND "id" <= 500',  # left to QGIS in part: a hybrid list of keys
+    '"id" > @fm_seuil',                   # a project variable (the text '1500'), folded to the number 1500
+    'x_min($geometry) > 700500 AND "id" <= 1000',      # polygons: x_min left to QGIS (hybrid keys)
 ]
 if os.environ.get('FM_PG_NATIVE_ONLY'):  # a part of the text of the expressions to run
     NATIVE_EXPRESSIONS = [text for text in NATIVE_EXPRESSIONS if os.environ['FM_PG_NATIVE_ONLY'] in text]
