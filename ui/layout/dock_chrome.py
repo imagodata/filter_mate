@@ -5,10 +5,11 @@
   and height, drawn here rather than taken from the style (their pixmaps sat lower than the star on Windows).
 * The source tag (``Vector · OGR``) sits in the layer card, at its top right; the row that held both is gone.
 * Two stacks, each an accordion with the same headers: AGENT / EXPLORING above the splitter handle, FILTERING /
-  EXPORTING / CONFIGURATION below. In each, one section is open at most, and a click on an open header folds it.
+  EXPORTING / CONFIGURATION below. Above, one section is always open: a click on the open header leaves it open,
+  the stack never folds to its headers. Below, one section is open at most, and a click on the open header folds it.
 * AGENT and FILTERING do not go together: FILTERING works on what EXPLORING selects. Opening AGENT folds EXPLORING
   and FILTERING; opening FILTERING opens EXPLORING and folds AGENT. EXPORTING and CONFIGURATION stay as they are.
-* A stack with nothing open shrinks to its headers, so the other one takes the room.
+* The lower stack with nothing open shrinks to its headers, so the upper one takes the room.
 * Between them, the splitter handle goes from one stack held to its headers and its smallest open section to the
   other: no cap on either stack (EXPLORING stopped at 700 px, the tool box at 650 px).
 """
@@ -313,18 +314,20 @@ class DockSections(QObject):
         return page is not None and not page.isHidden()
 
     def open_top(self, key: Optional[str]) -> None:
-        """Open ``key`` in the top stack and apply the rules (None folds both)."""
+        """Open ``key`` in the top stack and apply the rules. One section of it stays open: None, or a section
+        that is not there, opens EXPLORING."""
         if key == "agent" and self._toolbox.currentWidget() is getattr(self._dock, "FILTERING", None):
             self._toolbox.setCurrentWidget(self._nothing)  # FILTERING works on EXPLORING, which AGENT folds
         self._open_top(key)
 
     def _open_top(self, key: Optional[str]) -> None:
+        if key not in self._pages:  # never nothing open above
+            key = "exploring"
         for name, page in self._pages.items():
             page.setVisible(name == key)
             self._headers[name].setChecked(name == key)
         header = self._headers["exploring"]
-        header.setToolTip(_tr("Hide EXPLORING to give room to the sections") if key == "exploring"
-                          else _tr("Show EXPLORING"))
+        header.setToolTip("" if key == "exploring" else _tr("Show EXPLORING"))
         self._fit()
         request = getattr(self._dock, "undoRedoStateRequested", None)
         if request is not None:  # Undo and Redo follow AGENT when it opens or folds
@@ -334,7 +337,12 @@ class DockSections(QObject):
                 pass
 
     def _on_top_header(self, key: str) -> None:
-        self.open_top(None if self.is_open(key) else key)
+        """A click on a folded header opens it; on the open one, it leaves it open (and checked: the click
+        unchecked it)."""
+        if self.is_open(key):
+            self._headers[key].setChecked(True)
+            return
+        self.open_top(key)
 
     # --- the bottom stack ------------------------------------------------------------
 

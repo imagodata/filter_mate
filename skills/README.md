@@ -86,8 +86,9 @@ not instructions of FilterMate:
   or the skills folder itself, told before it is followed) or holds a character that does not show on screen
   (controls, format characters, the default ignorable code points of Unicode such as the tags, the variation
   selectors and the fillers of Hangul, code points with no character yet, separators of lines) is left out, the
-  others are kept. Kept, one or two together: the zero width joiner and non-joiner, the marks of the direction, the
-  soft hyphen and the selectors of the look of an emoji. The log gives the reason, never the words of the skill (the
+  others are kept. Kept, one or two together: the zero width joiner and non-joiner, the marks of the direction (the
+  Arabic letter mark too), the soft hyphen and the selectors of the look of an emoji; and the flags of England,
+  Scotland and Wales, the only sequences of tags kept. The log gives the reason, never the words of the skill (the
   log reaches the model through `diagnose_performance`);
 - spaces at the end of a line are taken away and three empty lines in a row become two, in what the user reads and
   in what the model receives alike; the question wraps every line;

@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import ipaddress
 import re
+import socket
+import threading
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 from urllib.parse import parse_qs, quote, unquote, urljoin, urlsplit
 
 KIND_DATAGOUV = "datagouv"
@@ -270,6 +272,63 @@ def _url_problem(url: str) -> str:
     except ValueError:  # 127.1, 0x7f.0.0.1: a real name ends with letters
         return "" if host.rsplit(".", 1)[-1].isalpha() else "only a public address can be read"
     return "" if address.is_global else "only a public address can be read"
+
+
+RESOLVE_TIMEOUT_S = 3.0  # a name a resolver cannot answer for in this time is not read
+
+
+def resolved_problem(url: str, resolve: Optional[Callable[..., Any]] = None,
+                     timeout: float = RESOLVE_TIMEOUT_S) -> str:
+    """Why ``url`` cannot be read once its name is resolved; "" when every address of it is public.
+
+    _url_problem judges the name only: a public name that resolves to 127.0.0.1, to the local network or to the
+    metadata of a cloud (169.254.169.254) passed (audit of 12/11/2026). Called just before a request to a server
+    a model or a portal named, never for one the user chose (a connector, a WFS of the settings). The name is
+    resolved again by the request itself, so a server that answers another address meanwhile (rebinding) is not
+    stopped: this closes the plain case. The resolution runs in a thread of its own, ``timeout`` at most, so a slow
+    resolver never holds QGIS.
+
+    Args:
+        url: An address _url_problem already accepted.
+        resolve: socket.getaddrinfo, or a stand-in for the tests.
+        timeout: Seconds to wait for the resolver.
+    """
+    try:
+        host = (urlsplit(url).hostname or "").strip("[]")
+    except ValueError:
+        return "this URL cannot be read"
+    if not host:
+        return "this URL cannot be read"
+    try:
+        ipaddress.ip_address(host)
+        return ""  # an address, not a name: _url_problem judged it
+    except ValueError:
+        pass
+    found: Dict[str, Any] = {}
+
+    def work() -> None:
+        try:
+            found["infos"] = (resolve or socket.getaddrinfo)(host, None)
+        except (OSError, UnicodeError) as exc:
+            found["error"] = exc
+
+    worker = threading.Thread(target=work, name="FilterMate resolve", daemon=True)
+    worker.start()
+    worker.join(timeout)
+    if worker.is_alive():
+        return "the address of this server could not be checked in time"
+    if "error" in found:
+        return ""  # a name nobody knows: the request says so in its own words
+    for info in found.get("infos") or ():
+        try:
+            address = ipaddress.ip_address(str(info[4][0]).split("%", 1)[0])
+        except (ValueError, IndexError, TypeError):
+            return "only a public address can be read"
+        if address.version == 6 and address.ipv4_mapped is not None:
+            address = address.ipv4_mapped
+        if not address.is_global:
+            return "only a public address can be read"
+    return ""
 
 
 @dataclass(frozen=True)

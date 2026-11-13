@@ -1755,6 +1755,10 @@ def s_agent_panel():
           not sections.is_open('exploring') and toolbox.currentWidget() not in (d.FILTERING, d.EXPORTING, d.CONFIGURATION))
     check('agent: its own state', d.tabTools_current_index == -1, str(d.tabTools_current_index))
     check('agent: filter button off here', not filter_button.isEnabled())
+    agent_header.click()
+    QApplication.processEvents()
+    check('stacks: a click on the open AGENT leaves it open', sections.is_open('agent') and agent_header.isChecked()
+          and not sections.is_open('exploring') and not exploring_header.isChecked())
     check('stacks: the lower headers stay', all(b.isVisible() for b in bottom_headers))
     QApplication.processEvents()
     span = max(b.geometry().bottom() for b in bottom_headers) - min(b.geometry().top() for b in bottom_headers)
@@ -1827,11 +1831,13 @@ def s_agent_panel():
           sections.is_open('exploring') and not sections.is_open('agent'))
     exploring_header.click()
     QApplication.processEvents()
-    check('stacks: a click on the open EXPLORING folds it', not sections.is_open('exploring') and
-          not sections.is_open('agent') and sections.top.maximumHeight() < 200, str(sections.top.maximumHeight()))
-    exploring_header.click()
+    check('stacks: a click on the open EXPLORING leaves it open (one section always open above)',
+          sections.is_open('exploring') and exploring_header.isChecked() and not sections.is_open('agent')
+          and toolbox.currentWidget() is d.FILTERING)
+    sections.open_top(None)
     QApplication.processEvents()
-    check('stacks: and opens it again', sections.is_open('exploring'))
+    check('stacks: open_top(None) folds nothing above', sections.is_open('exploring') and exploring_header.isChecked()
+          and not agent_header.isChecked())
 
     # Lot 1 of the undo plan: AGENT open, the action bar walks the steps of the agent.
     target = d.current_layer

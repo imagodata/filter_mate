@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.open_data import (
     KIND_STAC, KIND_WFS, RemoteFile, archive_member, follow_redirects, gdal_source, is_web_page, megabytes,
-    parse_results, parse_stac_items, reads_in_place, remote_file, resolve_platform, search_url, source_problem,
-    stac_search_body, valid_day,
+    parse_results, parse_stac_items, reads_in_place, remote_file, resolve_platform, resolved_problem, search_url,
+    source_problem, stac_search_body, valid_day,
 )
 from ...core.agent.sql_guard import expression_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
@@ -204,6 +204,9 @@ def _probe(url: str) -> Tuple[str, RemoteFile]:
     answers = {}
 
     def head(link: str):
+        problem = resolved_problem(link)  # each hop: a redirect is checked by its name in follow_redirects
+        if problem:
+            raise ValueError(f"this link cannot be read: {problem}")
         try:
             answers[link] = fetch(link, headers={'Range': 'bytes=0-0'}, headers_only=True, timeout_ms=20_000)
         except HttpFailure as exc:
@@ -230,6 +233,9 @@ def _download(url: str, found: RemoteFile) -> str:
         ValueError: Too large, too slow, cut, stopped, or refused by the server or the disk; nothing is kept.
     """
     from qgis.core import QgsApplication
+    problem = resolved_problem(url)
+    if problem:
+        raise ValueError(f"this link cannot be read: {problem}")
     if found.size > MAX_DOWNLOAD:
         raise ValueError(f"this file weighs {megabytes(found.size)}, more than the {megabytes(MAX_DOWNLOAD)} a layer "
                          f"can be made of: {_SMALLER}")
@@ -434,6 +440,9 @@ def _json_answer(platform: str, url: str, body: Optional[bytes] = None, accept: 
     headers = {'Accept': accept}
     if body is not None:
         headers['Content-Type'] = 'application/json'
+    problem = resolved_problem(url)
+    if problem:
+        raise ValueError(f"{platform} cannot be read: {problem}")
     try:
         reply = fetch(url, body=body, headers=headers, max_bytes=MAX_PAYLOAD, timeout_ms=45_000)
     except HttpFailure as exc:

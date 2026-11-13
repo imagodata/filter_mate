@@ -236,6 +236,21 @@ Do you agree?</source>
         <translation>Източникът отговаря.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
+        <source>Enter your API key first.</source>
+        <translation>Първо въведете своя API ключ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1479"/>
+        <source>It answers: choose a model in the list.</source>
+        <translation>Отговаря: изберете модел от списъка.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1478"/>
+        <source>The provider listed no model: type the name of one.</source>
+        <translation>Доставчикът не изброи нито един модел: въведете името на модел.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
@@ -1414,6 +1429,26 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>Тест</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1441"/>
+        <source>Create a key</source>
+        <translation>Създаване на ключ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="549"/>
+        <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
+        <translation>Нужен е доставчик на ИИ: вашият собствен API ключ или локален модел с Ollama. Нищо не се изпраща преди вашето съгласие.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="932"/>
+        <source>Send one short request to this provider, and list its models</source>
+        <translation>Изпратете една кратка заявка до този доставчик и изброете неговите модели</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>The test could not be made.</source>
+        <translation>Тестът не можа да бъде извършен.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1021"/>

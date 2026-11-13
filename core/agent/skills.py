@@ -173,9 +173,13 @@ _HIDDEN_CATEGORIES = frozenset(("Cc", "Cf", "Co", "Cs", "Cn", "Zl", "Zp"))
 # Kept, alone or two together after a character that shows: the joiners (Persian, the scripts of India, emoji), the
 # marks of the direction (Hebrew and Arabic pasted), the soft hyphen, and the selectors of the look of an emoji
 # ("❤️‍🔥" holds U+FE0F then U+200D). Never three in a row: a run of them is a message no one sees.
-_KEPT_IGNORABLE = frozenset("\u00ad\u200c\u200d\u200e\u200f\ufe0e\ufe0f")
+_KEPT_IGNORABLE = frozenset("\u00ad\u061c\u200c\u200d\u200e\u200f\ufe0e\ufe0f")
 MAX_IGNORABLE_RUN = 2
 _SHOWN = frozenset("\n\t")
+# The flags of England, Scotland and Wales, the only ones Unicode recommends among those spelled with tags: these exact
+# sequences carry nothing else, where tags in general spell any ASCII a model reads.
+_TAG_FLAGS = tuple("\U0001f3f4" + "".join(chr(0xE0000 + ord(letter)) for letter in code) + "\U000e007f"
+                   for code in ("gbeng", "gbsct", "gbwls"))
 
 
 def _ignorable(char: str) -> bool:
@@ -187,6 +191,8 @@ def _ignorable(char: str) -> bool:
 def hidden_character(text: str) -> Optional[str]:
     """The first character of ``text`` that does not show where the user reads it, as ``U+XXXX at line N``; None
     without one."""
+    for flag in _TAG_FLAGS:
+        text = text.replace(flag, "\U0001f3f4")
     run = 0
     line = 1
     for char in text:

@@ -1331,6 +1331,19 @@ def check_remote_files(project_control, project, work):
             "communes-test.zip"], kept())
         check("remote: the first request asks for one byte, the copy for the file",
               asked.count("/exports/shp") == 2 and asked.count("/exports/csv") == 2, asked)
+        # 2026-11-13: the name was judged, not the address it resolves to
+        import socket
+        real_resolve = socket.getaddrinfo
+        socket.getaddrinfo = lambda host, *args, **kwargs: (
+            [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 0))]
+            if host == "fm-test.example.org" else real_resolve(host, *args, **kwargs))
+        try:
+            requests_before = len(asked)
+            refused("a public name that resolves to this machine is not read", "/exports/geojson",
+                    "only a public address can be read")
+            check("remote: nothing was asked of that server", len(asked) == requests_before, asked[requests_before:])
+        finally:
+            socket.getaddrinfo = real_resolve
         first = project.mapLayersByName("communes-test")
         first = next(layer for layer in first if layer.source().startswith("/vsizip/"))
         zipped = first.source()[len("/vsizip/"):].split(".zip/", 1)[0] + ".zip"

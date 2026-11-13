@@ -500,6 +500,8 @@ class TaskParameterBuilder:
         params = {
             "features": features,
             "feature_fids": feature_fids,  # Thread-safe FIDs for recovery
+            # The task selects the source features again after the filter only with IS_SELECTING on
+            "is_selecting": self._is_selecting_active(),
             "expression": validated_expression,
             "options": self._dockwidget.project_props.get("OPTIONS", {}) if self._dockwidget else {},
             "layers": layers_to_filter,
@@ -516,6 +518,25 @@ class TaskParameterBuilder:
             params["forced_backends"] = self._dockwidget.forced_backends
 
         return params
+
+    def _is_selecting_active(self) -> bool:
+        """Whether IS_SELECTING is on: the dock button, else the current layer's setting."""
+        dw = self._dockwidget
+        if dw is None:
+            return False
+        button = getattr(dw, 'pushButton_checkable_exploring_selecting', None)
+        if button is not None:
+            try:
+                return bool(button.isChecked())
+            except RuntimeError:  # the button of a closed dock
+                pass
+        layer = getattr(dw, 'current_layer', None)
+        try:
+            layer_id = layer.id() if layer is not None else None
+        except RuntimeError:  # a deleted layer
+            return False
+        exploring = (self._project_layers or {}).get(layer_id, {}).get('exploring') or {}
+        return bool(exploring.get('is_selecting', False))
 
     def sync_ui_to_project_layers(self, current_layer: 'QgsVectorLayer') -> Dict[str, Any]:
         """

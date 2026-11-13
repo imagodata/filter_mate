@@ -139,6 +139,8 @@ def test_the_words_of_a_skill_the_user_has_not_read_are_not_in_the_list(tmp_path
     "\U000e0000", "\U000e0080", "\u2065", "\ufff0", "\u034f", "\u180b", "\u17b4", "\u115f", "\u3164", "\uffa0",
     "\ufe00", "\u0378", "\u2028", "\u2029",
     "\u200d\u200c\u200d",  # joiners kept one or two together: three in a row are a message no one sees
+    "\U0001f3f4\U000e0075\U000e0073\U000e0063\U000e0061\U000e007f",  # a flag of tags Unicode does not recommend: tags spell any ASCII
+    "\U0001f3f4\U000e0067\U000e0062\U000e0073\U000e0063\U000e0074\U000e007f\U000e0072\U000e0075\U000e006e",  # a flag kept, then tags past it
 ])
 def test_a_text_with_a_character_that_does_not_show_is_refused(tmp_path, hidden):
     for place, text in (("body", _skill(body=f"Theme{hidden} first.")), ("title", _skill(title=f"Our{hidden} rules")),
@@ -147,14 +149,17 @@ def test_a_text_with_a_character_that_does_not_show_is_refused(tmp_path, hidden)
         _write(folder, "naming", text=text)
         errors = []
         assert skills.read_folder(folder, trust="project", errors=errors) == {}, place
-        assert "does not show" in errors[0] and f"U+{ord(hidden[0]):04X}" in errors[0]
+        assert "does not show" in errors[0]
+        if skills._ignorable(hidden[0]):  # a flag starts with a character that shows
+            assert f"U+{ord(hidden[0]):04X}" in errors[0]
 
 
 def test_the_characters_a_language_needs_are_kept(tmp_path):
     # Persian with its zero width non-joiner, emoji made with a joiner and a selector, Hebrew with a mark of the
     # direction, a soft hyphen, accents, a tab; Notepad's byte order mark
     body = ("می‌خواهم لایه‌ها را نام‌گذاری کنم.\n\tLes thèmes d'abord 👩‍💻 ❤\ufe0f\u200d🔥."
-            "\nשלום\u200e FilterMate, inter\u00adcommunal.")
+            "\nשלום\u200e FilterMate, inter\u00adcommunal. \u0661\u061c\u0662"
+            "\n\U0001f3f4\U000e0067\U000e0062\U000e0073\U000e0063\U000e0074\U000e007f \U0001f3f4\U000e0067\U000e0062\U000e0077\U000e006c\U000e0073\U000e007f")  # letter mark, flags
     _write(tmp_path, "naming", text="﻿" + _skill(body=body).replace("\n", "\r\n"))
     found = skills.read_folder(tmp_path, trust="user", errors=[])
     assert found["naming"].body == body + "\n"

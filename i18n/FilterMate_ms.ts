@@ -236,6 +236,21 @@ Adakah anda bersetuju?</translation>
         <translation>Sumber menjawab.</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
+        <source>Enter your API key first.</source>
+        <translation>Masukkan kunci API anda dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1479"/>
+        <source>It answers: choose a model in the list.</source>
+        <translation>Ia menjawab: pilih model daripada senarai.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="1478"/>
+        <source>The provider listed no model: type the name of one.</source>
+        <translation>Pembekal tidak menyenaraikan sebarang model: taip nama salah satunya.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="607"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
@@ -1414,6 +1429,26 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <location filename="../ui/widgets/agent_panel.py" line="928"/>
         <source>Test</source>
         <translation>Uji</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1441"/>
+        <source>Create a key</source>
+        <translation>Cipta kunci</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="549"/>
+        <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
+        <translation>Ia memerlukan pembekal AI: kunci API anda sendiri atau model setempat dengan Ollama. Tiada apa yang dihantar sebelum anda bersetuju.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="932"/>
+        <source>Send one short request to this provider, and list its models</source>
+        <translation>Hantar satu permintaan ringkas kepada pembekal ini dan senaraikan modelnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1501"/>
+        <source>The test could not be made.</source>
+        <translation>Ujian tidak dapat dilakukan.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="1021"/>
