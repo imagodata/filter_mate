@@ -81,7 +81,9 @@ class TestProfiles:
         assert not elsewhere.exists()
 
     @needs_links
-    def test_a_link_put_there_after_the_check_is_refused_too(self, profiles, tmp_path, monkeypatch):
+    def test_a_link_put_there_after_the_check_is_never_followed(self, profiles, tmp_path, monkeypatch):
+        """The profile is written beside, then put in place of what is there: the link is replaced, and nothing is
+        written where it led."""
         profiles.mkdir()
         elsewhere = tmp_path / "elsewhere.json"
         (profiles / "team.json").symlink_to(elsewhere)
@@ -92,9 +94,10 @@ class TestProfiles:
                 raise FileNotFoundError(self)
             return real_lstat(self)
         monkeypatch.setattr(type(profiles), "lstat", before_the_link)
-        with pytest.raises(ToolFailure, match="could not be written"):
-            plugin_settings._export_profile({"name": "team", "replace": True})
+        plugin_settings._export_profile({"name": "team", "replace": True})
+        monkeypatch.undo()
         assert not elsewhere.exists()
+        assert not (profiles / "team.json").is_symlink() and (profiles / "team.json").is_file()
 
     @needs_links
     def test_a_profile_replaced_is_the_users_alone_too(self, profiles):
@@ -131,6 +134,43 @@ class TestProfiles:
             (profiles / "team.json").write_bytes(mark + too_long)
             with pytest.raises(ValueError, match="KB at most"):
                 plugin_settings.planned_profile({"name": "team"})
+
+    def test_a_profile_too_long_cut_inside_a_character_is_said_too_long(self, profiles):
+        """Only the start of the file is read: cut in the middle of an accented letter, it could not be decoded and
+        the profile "cannot be read (UnicodeDecodeError)", which says nothing of its size."""
+        profiles.mkdir()
+        letters = "é".encode("utf-8") * plugin_settings.settings_profile.MAX_BYTES
+        (profiles / "team.json").write_bytes(b'{"name": "x' + letters + b'"}')  # the cut falls inside an "é"
+        with pytest.raises(ValueError, match="KB at most"):
+            plugin_settings.planned_profile({"name": "team"})
+
+    def test_a_replacement_that_fails_leaves_the_former_profile(self, profiles, monkeypatch):
+        """The file was emptied when opened, before anything was written: a write that failed (a full disk) left
+        the profile of the team empty."""
+        plugin_settings._export_profile({"name": "team"})
+        former = (profiles / "team.json").read_bytes()
+        real_fdopen = os.fdopen
+
+        class FullDisk:
+            def __init__(self, stream):
+                self._stream = stream
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                self._stream.close()
+
+            def write(self, text):
+                raise OSError(28, "No space left on device")
+
+        monkeypatch.setattr(os, "fdopen",
+                            lambda descriptor, *args, **kwargs: FullDisk(real_fdopen(descriptor, *args, **kwargs)))
+        with pytest.raises(ToolFailure, match="could not be written"):
+            plugin_settings._export_profile({"name": "team", "replace": True})
+        monkeypatch.undo()
+        assert (profiles / "team.json").read_bytes() == former
+        assert sorted(item.name for item in profiles.iterdir()) == ["team.json"]  # nothing half written stays
 
     def test_a_profile_saved_with_a_byte_order_mark_is_read(self, profiles):
         """Notepad saves UTF-8 with a mark at the start."""

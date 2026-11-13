@@ -48,17 +48,36 @@ EVENT_CRLF = EVENT.replace(b"\n", b"\r\n")
 
 @pytest.mark.parametrize("answer", [EVENT, EVENT_CRLF])
 def test_an_event_ends_wherever_the_chunks_cut_it(bounded_http, answer):
-    # the blank line is at the end only: the second chunk always completes it, the first never does
+    # The blank line is at the end only: the second chunk always completes it. The first one never does, but for
+    # a CRLF blank line cut before its LF: the CR is already an end of line, whatever follows it.
     for cut in range(1, len(answer)):
-        assert _ends(bounded_http, [answer[:cut], answer[cut:]]) == [False, True], cut
+        first, second = _ends(bounded_http, [answer[:cut], answer[cut:]])
+        assert second is True and first is answer[:cut].endswith(b"\r\n\r"), cut
 
 
 def test_a_separator_given_byte_by_byte_ends_the_event(bounded_http):
     ended = _ends(bounded_http, [bytes([byte]) for byte in EVENT_CRLF])
-    assert ended[-1] and not any(ended[:-1])
+    assert ended[-1] and not any(ended[:-2])  # seen from the CR of the blank line, and with its LF
 
 
 def test_no_blank_line_ends_no_event(bounded_http):
     assert _ends(bounded_http, [b"event: message\n", b"data: {", b'"id": 1}\n']) == [False, False, False]
     # a line feed at the end of one chunk and the next starting with text: one line, not a blank one
     assert _ends(bounded_http, [b"data: a\n", b"data: b"]) == [False, False]
+
+
+@pytest.mark.parametrize("blank", [b"\n\r\n", b"\r\n\n", b"\r\r", b"\r\n\r", b"\n\r"])
+def test_a_blank_line_of_mixed_line_ends_ends_the_event(bounded_http, blank):
+    """A line of an event stream ends with CRLF, LF or CR: only "\\n\\n" and "\\r\\n\\r\\n" were seen, and a
+    server mixing them (LF after its data, CRLF for the blank line) left the request waiting for its timeout."""
+    answer = b'data: {"id": 1}' + blank
+    assert _ends(bounded_http, [answer]) == [True]
+    for cut in range(1, len(answer)):
+        assert _ends(bounded_http, [answer[:cut], answer[cut:]])[-1] is True, cut
+
+
+def test_one_line_end_is_not_a_blank_line(bounded_http):
+    """CRLF is one end of line, not two: it must not be read as CR then LF."""
+    assert _ends(bounded_http, [b"data: a\r\ndata: b\r\n"]) == [False]
+    assert _ends(bounded_http, [b"data: a\r", b"\ndata: b\r", b"\n"]) == [False, False, False]
+    assert _ends(bounded_http, [b"data: a\rdata: b\r"]) == [False]
