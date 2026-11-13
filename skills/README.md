@@ -107,7 +107,7 @@ not instructions of FilterMate:
 
 ## Families of tools
 
-With the option *Offer the tools of a task once the agent loads its instructions* (off by default), the tools a skill
+With the option *Offer the tools of a task once the agent loads its instructions* (on by default), the tools a skill
 of the plugin names in `tools` or `requires` are left out of the requests until the agent loads that skill; the tools
 that filter and read (`FILTERING_TOOLS`) and `load_skill` are always offered (`core/agent/families.py`). Name in
 `tools` every tool the task needs: a tool left out of it stays hidden while the skill guides the model.

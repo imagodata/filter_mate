@@ -1273,9 +1273,9 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>عرض أدوات المهمة بعد أن يحمّل الوكيل تعليماتها</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>طلبات أخف، لنموذج بطيء أو محلي: تُعرض أدوات التصفية والقراءة دائمًا؛ أما أدوات Processing والأنماط والتخطيطات والتحرير وSAM والبيانات المفتوحة فتأتي عندما يحمّل الوكيل مهارة تلك المهمة. تحصل التطبيقات الأخرى دائمًا على جميع الأدوات.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>طلبات أخف: تُعرض أدوات التصفية والقراءة دائمًا؛ أما أدوات Processing والأنماط والتخطيطات والتحرير وSAM والبيانات المفتوحة فتأتي عندما يحمّل الوكيل مهارة تلك المهمة. تحصل التطبيقات الأخرى دائمًا على جميع الأدوات.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>

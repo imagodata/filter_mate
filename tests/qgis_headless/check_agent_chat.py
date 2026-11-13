@@ -454,6 +454,29 @@ def check_checkpoint(layer):
     layer.setSubsetString("")
 
 
+def check_families(chat, provider, settings, ask):
+    """The tools of a task are left out of the first request and offered from the next turn once its skill is loaded."""
+    from filter_mate.adapters.agent.settings import AgentSettings, target_of
+    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
+
+    settings(tool_families=True)
+    provider.reset((200, {}, tool_turn("load_skill", {"name": "cartography"})), (200, {}, text_turn("ok")))
+    check("families: a request that loads a skill ends", ask("how do I style a layer?"))
+
+    def names(index):
+        return [tool["name"] for tool in provider.requests[index]["body"]["tools"]]
+
+    check("families: the first request leaves the styles out",
+          len(provider.requests) == 2 and "set_layer_style" not in names(0) and "load_skill" in names(0),
+          [len(provider.requests)] + names(0))
+    check("families: the skill offers them from the next turn, after the others",
+          len(provider.requests) == 2 and "set_layer_style" in names(1) and names(1)[:len(names(0))] == names(0),
+          names(1)[:5])
+    check("families: on by default in the dialog",
+          AgentSettingsDialog(AgentSettings(), target_of).tool_families.isChecked())
+    settings()
+
+
 def check_chat(provider, layer, authcfg, work):
     from filter_mate.adapters.agent.settings import AgentSettings, load_settings, save_settings, target_of
     from filter_mate.adapters.public_api.filter_mate_public_api import FilterMatePublicAPI
@@ -487,8 +510,11 @@ def check_chat(provider, layer, authcfg, work):
     check("nothing to undo: no button", not panel.undo_offered() and not panel.undo_button.isVisible())
 
     def settings(**changes):
+        # The families of tools are off here (they are on by default): these checks call the tools directly, without
+        # load_skill; check_families turns them on.
         values = dict(preset="anthropic", model="test-model", base_url=provider.url, consent=True, authcfg=authcfg,
-                      consent_target=target_of("anthropic", provider.url), key_target=target_of("anthropic", provider.url))
+                      consent_target=target_of("anthropic", provider.url), key_target=target_of("anthropic", provider.url),
+                      tool_families=False)
         values.update(changes)
         save_settings(AgentSettings(**values))
         chat._refresh_ready()  # as the settings dialog does once saved
@@ -672,6 +698,8 @@ def check_chat(provider, layer, authcfg, work):
     chat._on_undo()
     check("undoing the turn brings the CRS back", QgsProject.instance().crs().authid() == "EPSG:4326",
           QgsProject.instance().crs().authid())
+    # Here and not after the first filter: settings() starts a new conversation, and the checks above build on one.
+    check_families(chat, provider, settings, ask)
 
     offered = [tool.name for tool in chat.tools_and_handlers(load_settings())[0]]
     check("view_map is offered with a key of the user and shared values", "view_map" in offered, offered)

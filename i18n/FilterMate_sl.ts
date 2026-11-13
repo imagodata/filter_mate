@@ -1273,9 +1273,9 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Orodja opravila ponudi šele, ko agent naloži njegova navodila</translation>
     </message>
     <message>
-        <location filename="../../ui/widgets/agent_panel.py" line="996"/>
-        <source>Lighter requests, for a slow or local model: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
-        <translation>Lažje zahteve za počasen ali lokalni model: orodja, ki filtrirajo in berejo, so vedno na voljo; orodja za Processing, sloge, postavitve, urejanje, SAM in odprte podatke pridejo, ko agent naloži veščino tega opravila. Druge aplikacije vedno dobijo vsa orodja.</translation>
+        <location filename="../ui/widgets/agent_panel.py" line="1093"/>
+        <source>Lighter requests: the tools that filter and read are always offered; those of Processing, styles, layouts, editing, SAM and open data come when the agent loads the skill of that task. Other applications always get every tool.</source>
+        <translation>Lažje zahteve: orodja, ki filtrirajo in berejo, so vedno na voljo; orodja za Processing, sloge, postavitve, urejanje, SAM in odprte podatke pridejo, ko agent naloži veščino tega opravila. Druge aplikacije vedno dobijo vsa orodja.</translation>
     </message>
     <message>
         <location filename="../../ui/widgets/agent_panel.py" line="1396"/>
