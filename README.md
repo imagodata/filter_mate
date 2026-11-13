@@ -63,7 +63,7 @@ the original source back, and project files are always saved with the original s
   12 layers from a 2.9 GB department-wide GeoPackage were filtered in under a second. Timings depend on the data, hardware and cache.
 - 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result.
 - 🤖 **AGENT** (experimental): a chat in the panel that drives FilterMate and QGIS from a sentence, Processing algorithms included, with Claude, Mistral,
-  OpenAI or any compatible server, a local Ollama model, or a few free requests a month to try it. Filters apply at once
+  OpenAI or any compatible server, a local Ollama model (the settings help to install it and to download a model). Filters apply at once
   and each step can be undone; exports and added or removed layers are confirmed. You choose how far it goes alone
   (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
   it again without any model, or by themselves each time the edits of their source are saved. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: open data portals,
@@ -102,7 +102,7 @@ Manual install: download a zip from [GitHub Releases](https://github.com/imagoda
 | ☁️ PDAL (optional) | PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing. Without it, point clouds are clipped by the QGIS exporter. |
 | 🌐 REST API (optional) | `pip install -r requirements-api.txt` (FastAPI, Uvicorn, Pydantic). |
 | 🧩 SAM (optional) | `onnxruntime`, installed into your QGIS profile after one confirmation, and the model (62 MB), downloaded on request. |
-| 🤖 AGENT | An API key of a provider (kept in the QGIS authentication database), a local Ollama model, or the free quota. Nothing else to install. |
+| 🤖 AGENT | An API key of a provider (kept in the QGIS authentication database), or a local Ollama model. Nothing else to install. |
 
 ## 🤖 Automation in two lines
 
@@ -123,7 +123,7 @@ The same operation is available as the `filtermate:cross_filter_from_raster` Pro
 |---|---|
 | 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
 | 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Sixteen business questions covering all nine combinations: twelve QGIS recordings and four illustrated recipes, in English and French. |
-| 🤖 [docs/AGENT_MODE.md](docs/AGENT_MODE.md) | The AGENT section: providers, free quota, tools, levels of autonomy, undo, recipes, widgets, sources, the built-in MCP server. |
+| 🤖 [docs/AGENT_MODE.md](docs/AGENT_MODE.md) | The AGENT section: providers, tools, levels of autonomy, undo, recipes, widgets, sources, the built-in MCP server. |
 | 🧩 [docs/SEGMENTATION.md](docs/SEGMENTATION.md) | Objects drawn by SAM: set up, use, Processing, what it is good at, with measured results. |
 | ⚙️ [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API, MCP servers. |
 | ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |

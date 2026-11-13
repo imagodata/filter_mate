@@ -1436,6 +1436,126 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Schlüssel erstellen</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="953"/>
+        <source>Refresh</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="955"/>
+        <source>Look for Ollama and the models it has installed</source>
+        <translation>Ollama und die dort installierten Modelle suchen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <source>Download</source>
+        <translation>Herunterladen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="965"/>
+        <source>Download this model into Ollama</source>
+        <translation>Dieses Modell in Ollama herunterladen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="970"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1563"/>
+        <source>Enter your API key first.</source>
+        <translation>Geben Sie zuerst Ihren API-Schlüssel ein.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1626"/>
+        <source>Ollama has no chat model yet: download one.</source>
+        <translation>Ollama hat noch kein Chat-Modell: Laden Sie eines herunter.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1642"/>
+        <source>Ollama does not answer at {}: install it, start it, then Refresh.</source>
+        <translation>Ollama antwortet unter {} nicht: Installieren und starten Sie es und klicken Sie dann auf Aktualisieren.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1645"/>
+        <source>Get Ollama</source>
+        <translation>Ollama herunterladen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1673"/>
+        <source>This address is not a web address.</source>
+        <translation>Diese Adresse ist keine Webadresse.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1675"/>
+        <source>Download a model</source>
+        <translation>Ein Modell herunterladen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1676"/>
+        <source>Download {} into Ollama? A model weighs several GB: it takes a while, and the space on the disk of the computer that runs Ollama.</source>
+        <translation>{} in Ollama herunterladen? Ein Modell umfasst mehrere GB: Das dauert eine Weile und braucht Platz auf der Festplatte des Rechners, auf dem Ollama läuft.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1698"/>
+        <source>Downloading {}…</source>
+        <translation>{} wird heruntergeladen…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1761"/>
+        <source>Downloading {}: {}</source>
+        <translation>{} wird heruntergeladen: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>{} of {}</source>
+        <translation>{} von {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1702"/>
+        <source>Download cancelled.</source>
+        <translation>Download abgebrochen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1705"/>
+        <source>Ollama sent nothing for {} seconds: the download was stopped.</source>
+        <translation>Ollama hat {} Sekunden lang nichts gesendet: Der Download wurde angehalten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1742"/>
+        <source>Ollama could not download {}: {}</source>
+        <translation>Ollama konnte {} nicht herunterladen: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1748"/>
+        <source>The answer of Ollama could not be read.</source>
+        <translation>Die Antwort von Ollama konnte nicht gelesen werden.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1752"/>
+        <source>{} is downloaded.</source>
+        <translation>{} wurde heruntergeladen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1778"/>
+        <source>The download ended before its end.</source>
+        <translation>Der Download endete vor seinem Ende.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1780"/>
+        <source>Ollama refused the download of {}.</source>
+        <translation>Ollama hat den Download von {} abgelehnt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1785"/>
+        <source>Ollama could not be reached at {}.</source>
+        <translation>Ollama ist unter {} nicht erreichbar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1782"/>
+        <source>The connection to Ollama was lost during the download of {}.</source>
+        <translation>Die Verbindung zu Ollama ging während des Downloads von {} verloren.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="549"/>
         <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
         <translation>Er braucht einen KI-Anbieter: Ihren eigenen API-Schlüssel oder ein lokales Modell mit Ollama. Vor Ihrer Zustimmung wird nichts gesendet.</translation>

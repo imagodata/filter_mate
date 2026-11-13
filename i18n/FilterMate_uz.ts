@@ -1436,6 +1436,126 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Kalit yaratish</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="953"/>
+        <source>Refresh</source>
+        <translation>Yangilash</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="955"/>
+        <source>Look for Ollama and the models it has installed</source>
+        <translation>Ollama va unda o'rnatilgan modellarni qidirish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <source>Download</source>
+        <translation>Yuklab olish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="965"/>
+        <source>Download this model into Ollama</source>
+        <translation>Bu modelni Ollama'ga yuklab olish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="970"/>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1563"/>
+        <source>Enter your API key first.</source>
+        <translation>Avval API kalitingizni kiriting.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1626"/>
+        <source>Ollama has no chat model yet: download one.</source>
+        <translation>Ollama'da hali chat modeli yo'q: bittasini yuklab oling.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1642"/>
+        <source>Ollama does not answer at {}: install it, start it, then Refresh.</source>
+        <translation>Ollama {} manzilida javob bermayapti: uni o'rnating, ishga tushiring, so'ng Yangilash tugmasini bosing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1645"/>
+        <source>Get Ollama</source>
+        <translation>Ollama'ni olish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1673"/>
+        <source>This address is not a web address.</source>
+        <translation>Bu manzil veb-manzil emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1675"/>
+        <source>Download a model</source>
+        <translation>Modelni yuklab olish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1676"/>
+        <source>Download {} into Ollama? A model weighs several GB: it takes a while, and the space on the disk of the computer that runs Ollama.</source>
+        <translation>{} Ollama'ga yuklab olinsinmi? Model bir necha GB hajmda: bu vaqt oladi va Ollama ishlayotgan kompyuter diskida joy egallaydi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1698"/>
+        <source>Downloading {}…</source>
+        <translation>{} yuklab olinmoqda…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1761"/>
+        <source>Downloading {}: {}</source>
+        <translation>{} yuklab olinmoqda: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>{} of {}</source>
+        <translation>{} / {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1702"/>
+        <source>Download cancelled.</source>
+        <translation>Yuklab olish bekor qilindi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1705"/>
+        <source>Ollama sent nothing for {} seconds: the download was stopped.</source>
+        <translation>Ollama {} soniya davomida hech narsa yubormadi: yuklab olish to'xtatildi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1742"/>
+        <source>Ollama could not download {}: {}</source>
+        <translation>Ollama {} modelini yuklab ola olmadi: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1748"/>
+        <source>The answer of Ollama could not be read.</source>
+        <translation>Ollama javobini o'qib bo'lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1752"/>
+        <source>{} is downloaded.</source>
+        <translation>{} yuklab olindi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1778"/>
+        <source>The download ended before its end.</source>
+        <translation>Yuklab olish tugashidan oldin to'xtadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1780"/>
+        <source>Ollama refused the download of {}.</source>
+        <translation>Ollama {} ni yuklab olishni rad etdi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1785"/>
+        <source>Ollama could not be reached at {}.</source>
+        <translation>{} manzilidagi Ollama'ga ulanib bo'lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1782"/>
+        <source>The connection to Ollama was lost during the download of {}.</source>
+        <translation>{} yuklab olinayotganda Ollama bilan aloqa uzildi.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="549"/>
         <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
         <translation>Sun'iy intellekt provayderi kerak: o'z API kalitingiz yoki Ollama bilan mahalliy model. Roziligingizdan oldin hech narsa yuborilmaydi.</translation>

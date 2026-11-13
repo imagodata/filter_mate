@@ -1436,6 +1436,126 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <translation>Buat kunci</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="953"/>
+        <source>Refresh</source>
+        <translation>Segarkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="955"/>
+        <source>Look for Ollama and the models it has installed</source>
+        <translation>Cari Ollama dan model yang terpasang di dalamnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <source>Download</source>
+        <translation>Unduh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="965"/>
+        <source>Download this model into Ollama</source>
+        <translation>Unduh model ini ke Ollama</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="970"/>
+        <source>Cancel</source>
+        <translation>Batal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1563"/>
+        <source>Enter your API key first.</source>
+        <translation>Masukkan kunci API Anda terlebih dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1626"/>
+        <source>Ollama has no chat model yet: download one.</source>
+        <translation>Ollama belum memiliki model obrolan: unduh satu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1642"/>
+        <source>Ollama does not answer at {}: install it, start it, then Refresh.</source>
+        <translation>Ollama tidak menjawab di {}: pasang, jalankan, lalu klik Segarkan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1645"/>
+        <source>Get Ollama</source>
+        <translation>Dapatkan Ollama</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1673"/>
+        <source>This address is not a web address.</source>
+        <translation>Alamat ini bukan alamat web.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1675"/>
+        <source>Download a model</source>
+        <translation>Unduh model</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1676"/>
+        <source>Download {} into Ollama? A model weighs several GB: it takes a while, and the space on the disk of the computer that runs Ollama.</source>
+        <translation>Unduh {} ke Ollama? Satu model berukuran beberapa GB: butuh waktu dan ruang di disk komputer yang menjalankan Ollama.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1698"/>
+        <source>Downloading {}…</source>
+        <translation>Mengunduh {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1761"/>
+        <source>Downloading {}: {}</source>
+        <translation>Mengunduh {}: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>{} of {}</source>
+        <translation>{} dari {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1702"/>
+        <source>Download cancelled.</source>
+        <translation>Pengunduhan dibatalkan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1705"/>
+        <source>Ollama sent nothing for {} seconds: the download was stopped.</source>
+        <translation>Ollama tidak mengirim apa pun selama {} detik: pengunduhan dihentikan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1742"/>
+        <source>Ollama could not download {}: {}</source>
+        <translation>Ollama tidak dapat mengunduh {}: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1748"/>
+        <source>The answer of Ollama could not be read.</source>
+        <translation>Jawaban Ollama tidak dapat dibaca.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1752"/>
+        <source>{} is downloaded.</source>
+        <translation>{} telah diunduh.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1778"/>
+        <source>The download ended before its end.</source>
+        <translation>Pengunduhan berakhir sebelum selesai.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1780"/>
+        <source>Ollama refused the download of {}.</source>
+        <translation>Ollama menolak pengunduhan {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1785"/>
+        <source>Ollama could not be reached at {}.</source>
+        <translation>Ollama tidak dapat dihubungi di {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1782"/>
+        <source>The connection to Ollama was lost during the download of {}.</source>
+        <translation>Koneksi ke Ollama terputus saat mengunduh {}.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="549"/>
         <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
         <translation>Diperlukan penyedia AI: kunci API Anda sendiri, atau model lokal dengan Ollama. Tidak ada yang dikirim sebelum Anda setuju.</translation>

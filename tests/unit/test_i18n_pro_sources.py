@@ -8,7 +8,7 @@ import os
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SKIPPED_DIRS = {'tests', 'scripts', 'website', 'docs', '_bmad', 'free-quota-proxy', 'i18n', '.git', '.claude',
+SKIPPED_DIRS = {'tests', 'scripts', 'website', 'docs', '_bmad', 'i18n', '.git', '.claude',
                 'node_modules', '__pycache__'}
 TRANSLATES = re.compile(r"QCoreApplication\.translate\(|\.tr\(|\b_tr\(")
 # Modules not in the project file yet, their strings not translated (empty since the backlog was translated).

@@ -1436,6 +1436,126 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>キーを作成</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="953"/>
+        <source>Refresh</source>
+        <translation>更新</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="955"/>
+        <source>Look for Ollama and the models it has installed</source>
+        <translation>Ollama とインストール済みのモデルを探す</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="963"/>
+        <source>Download</source>
+        <translation>ダウンロード</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="965"/>
+        <source>Download this model into Ollama</source>
+        <translation>このモデルを Ollama にダウンロード</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="970"/>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1563"/>
+        <source>Enter your API key first.</source>
+        <translation>先に API キーを入力してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1626"/>
+        <source>Ollama has no chat model yet: download one.</source>
+        <translation>Ollama にはまだチャットモデルがありません。1 つダウンロードしてください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1642"/>
+        <source>Ollama does not answer at {}: install it, start it, then Refresh.</source>
+        <translation>Ollama が {} で応答しません。インストールして起動し、更新を押してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1645"/>
+        <source>Get Ollama</source>
+        <translation>Ollama を入手</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1673"/>
+        <source>This address is not a web address.</source>
+        <translation>このアドレスは Web アドレスではありません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1675"/>
+        <source>Download a model</source>
+        <translation>モデルをダウンロード</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1676"/>
+        <source>Download {} into Ollama? A model weighs several GB: it takes a while, and the space on the disk of the computer that runs Ollama.</source>
+        <translation>{} を Ollama にダウンロードしますか？ モデルは数 GB あり、時間がかかり、Ollama を実行しているコンピューターのディスク容量も使います。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1698"/>
+        <source>Downloading {}…</source>
+        <translation>{} をダウンロード中…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1761"/>
+        <source>Downloading {}: {}</source>
+        <translation>{} をダウンロード中: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1757"/>
+        <source>{} of {}</source>
+        <translation>{} / {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1702"/>
+        <source>Download cancelled.</source>
+        <translation>ダウンロードをキャンセルしました。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1705"/>
+        <source>Ollama sent nothing for {} seconds: the download was stopped.</source>
+        <translation>Ollama が {} 秒間何も送ってきませんでした。ダウンロードを停止しました。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1742"/>
+        <source>Ollama could not download {}: {}</source>
+        <translation>Ollama が {} をダウンロードできませんでした: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1748"/>
+        <source>The answer of Ollama could not be read.</source>
+        <translation>Ollama の応答を読み取れませんでした。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1752"/>
+        <source>{} is downloaded.</source>
+        <translation>{} をダウンロードしました。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1778"/>
+        <source>The download ended before its end.</source>
+        <translation>ダウンロードが途中で終了しました。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1780"/>
+        <source>Ollama refused the download of {}.</source>
+        <translation>Ollama が {} のダウンロードを拒否しました。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1785"/>
+        <source>Ollama could not be reached at {}.</source>
+        <translation>{} の Ollama に接続できませんでした。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1782"/>
+        <source>The connection to Ollama was lost during the download of {}.</source>
+        <translation>{} のダウンロード中に Ollama との接続が切れました。</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="549"/>
         <source>It needs an AI provider: your own API key, or a local model with Ollama. Nothing is sent before you agree.</source>
         <translation>AI プロバイダーが必要です：ご自身の API キー、または Ollama のローカルモデル。同意する前に何も送信されません。</translation>

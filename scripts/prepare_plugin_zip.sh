@@ -101,8 +101,6 @@ rsync -a --quiet ${FILES_FROM[@]+"${FILES_FROM[@]}"} \
     --exclude='/skills/export' \
     --exclude='/skills/export/**' \
     --exclude='knowledge/**' \
-    --exclude='/free-quota-proxy' \
-    --exclude='/free-quota-proxy/**' \
     --exclude='website' \
     --exclude='website/**' \
     --exclude='tests' \

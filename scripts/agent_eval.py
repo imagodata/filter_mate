@@ -81,7 +81,7 @@ SAM_GUIDE_LIMIT = 200
 FAVORITES = [{"favorite_id": "fav-1", "name": "Communes denses", "description": "Plus de 10 000 habitants",
               "layer_name": "communes", "expression": "\"population\" > 10000"}]
 EXTENT_WKT = "POLYGON((570000 6270000, 580000 6270000, 580000 6280000, 570000 6280000, 570000 6270000))"
-# Says what is calling: some hosts, such as the Cloudflare edge of the free quota relay, refuse Python's default.
+# Says what is calling: some hosts, such as a Cloudflare edge, refuse Python's default.
 USER_AGENT = "FilterMate-agent-eval"
 
 

@@ -2,19 +2,19 @@
 
 Status: the steps below are in the code, first published in 5.1.0 (experimental). The chat is on by default
 (`APP.OPTIONS.AGENT.enabled`, read when the panel opens; a configuration written while it was off is turned on once), with
-a free quota and then the user's own key. For developers of FilterMate; the user guide has a chapter for users
+the user's own key or a local Ollama model. For developers of FilterMate; the user guide has a chapter for users
 (https://imagodata.github.io/filter_mate/guide.html#agent).
 
 ## Goal
 
 An AGENT section, first in the upper stack of the dock, before EXPLORING: the user writes "buildings above 1200 m in the selected commune" and the agent filters.
-Any provider, a few free requests through a relay, then the user's own key, and external MCP clients on the same tools.
+Any provider with the user's own key, or a local Ollama model, and external MCP clients on the same tools.
 
 | Step | Content | State |
 |---|---|---|
 | 1. Foundations | Neutral conversation, provider adapters, tool catalog, read tools, evaluation bench | done |
 | 2. Chat | Panel, Qt transport, key in `QgsAuthManager`, undo of a whole turn | done |
-| 3. Free quota | Relay holding the key, limits per token, per address and per month | done |
+| 3. Free quota | A relay holding a key, for a few free requests (removed on 2026-11-13: the agent works with the user's own key or a local model) | removed |
 | 4. Native MCP | Local MCP server without dependencies, shared activity log | done |
 | 5. Map context | The map, the layer tree and what changed, sent with each request; style, joins, relations on demand | done |
 | 6. Reading the data | Statistics by group, lengths and areas, a sample of features, what lies at a point | done |
@@ -76,6 +76,11 @@ request (two sizes only: each new size makes Ollama load the model again), and r
 An address saved with `/v1` still works, and a consent given for it still counts.
 The settings list the models Ollama has installed (`GET /api/tags`, `installed_models`; 2 s at most, read while the
 dialog stays usable), embedding models left out; a name already typed is kept.
+The Provider tab guides Ollama: when nothing answers at the address typed, a note says to install it (with the link of
+its download page) and Refresh asks again; when the model typed is not installed, Download posts it to `<address>/api/pull`
+(`pull_url`, `pull_body`, `pull_progress` of `ollama_chat.py`) after a question, as the download weighs several GB. The
+progress is read line by line, Cancel stops it, and the request has no total timeout: only a silence of 60 s ends it
+(the transfer timeout of the request is that silence). A Test and a download never run together.
 
 What a local model can run, measured on 2026-11-11 (Ollama 0.30.10, RTX 5070 Laptop GPU of 8 GB, WSL 2):
 
@@ -181,8 +186,7 @@ Rules worth keeping:
   tool out, as the default settings do.
 - **Vision**: `view_map`, a tool of the chat alone, answers with the map rendered by `map_images.map_image` (the
   view, an extent as WKT, or the whole of a layer), a JPEG in `ToolResultPart.images` (`WithImages`, as the
-  MCP-only `map_image` and `contact_sheet`). Offered only with a key of the user (the free quota relay takes no
-  image) and when attribute values are shared (a map shows its labels): a decision of the user, 2026-11-11.
+  MCP-only `map_image` and `contact_sheet`). Offered only with a provider that takes an image and when attribute values are shared (a map shows its labels): a decision of the user, 2026-11-11.
   Claude gets the image in the `tool_result`; an OpenAI-compatible server, whose tool messages hold text only, in
   a user message right after. An image goes with the request it was taken in only: before the next request it
   is replaced by a line saying it was there. A model that reads no image may refuse the request.
@@ -633,7 +637,7 @@ untrusted data is best run with a database role that cannot write.
 
 69 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
 read-only requests, and one attribute value holding a prompt injection. A case is scored on the filters finally applied.
-It is what decides the model of the free quota, and whether a local model is good enough to offer. `--json` writes, for each case, the tools called and their
+It is what decides whether a model, in particular a local one, is good enough to offer. `--json` writes, for each case, the tools called and their
 arguments (on the simulated project, no data of a user), to read a failure without running it again.
 
 The simulated project keeps what each change did, as QGIS does: `filter_state` and `list_layers` show the filters
@@ -643,7 +647,6 @@ already filtered or a road selected. Without that, a model that checks its work 
 | Run (2026-11-10) | Result |
 |---|---|
 | Claude Haiku 5.5, direct | 39/39, about 0.09 $ estimated from the token counts |
-| Claude Haiku 5.5, through the free quota relay, 3 cases with tools | 3/3 |
 | Claude Haiku 5.5, direct, 63 cases, 41 tools (2026-11-11) | 58/63; the 5 failures read one by one: 4 came from the bench (a simulated cross filter that dropped the filter it was combined with, a layout and a zoom counted as changes of layers, an edit by selection not accepted), 1 from the model (a favorite applied a second time by hand, a line of the prompt since); those 5 cases again: 5/5 |
 | Claude Haiku 5.5, direct, 68 cases, 47 tools (2026-11-11, main 9c065293) | 66/68, about 0.33 $ (1.9 M tokens written to the cache, 6.3 M read, 55 k out); the 2 failures came from the bench: `field_computed` (the simulated layer did not get the field `add_field` added, so the model saw it empty and filled it again with `update_features`; its first call was right, with a formula guarded against 0 floors) and `theme_save` ("keep the view as Relief": a bookmark is as right as a map theme since bookmarks exist; both accepted now, and `theme_named` asks for a map theme by name); those cases again: 3/3 |
 | Claude Haiku 5.5, direct, 82 cases, A/B of the skills (2026-11-13) | the prompt of 5.1.0, every domain in it: 80/82; the prompt with analysis, cartography, editing, raster-objects and open-data taken out into skills (`--prompt skills`, about 1,000 tokens lighter): 77/82, with load_skill called 16 times against 7. One run each, within the noise (cross_nothing_kept fails now and then), so the prompt of 5.1.0 stays. Two new cases were too strict for both: a scale reached with zoom_to on an extent (as right as code: a tool first), and a deletion read as hiding (the prompt now says it is the data). About 0.8 $ for both |
@@ -689,17 +692,3 @@ Requests are served one at a time, on the Qt main thread, where the tools have t
 
 The token is kept in the QGIS settings, not in the authentication database: reading it at startup must not ask for the master
 password, and the client's own configuration holds a copy anyway. **New access token** replaces it.
-
-## Free quota
-
-`free-quota-proxy/` is a Cloudflare Worker, outside the plugin zip, that relays the requests of the panel to the Messages API with
-one server-side key. It is deployed at https://filtermate-free-quota.filtermate-free-quota-proxy.workers.dev and set in `FREE_QUOTA_URL` (`core/agent/providers/__init__.py`); a user can
-point to another relay with `APP.OPTIONS.AGENT.free_quota_url`. `tests/qgis_headless/check_free_quota_live.py` sends one real
-request through it, the way the plugin does.
-
-Limits by default, all set on the relay: 200 $ a month for the whole service, 0.50 $ a month per access token, 2 $ a month
-per IP address (an IPv6 address counts for its /64), 3 new tokens per address and per day, 300 requests per token and per day,
-Claude Haiku 5.5 only, no image. Once a limit is reached, the panel asks for the user's own key. The relay counts what is spent
-and keeps no conversation.
-
-See `free-quota-proxy/README.md` for deployment, every limit and what happens when the budget is reached.

@@ -14,7 +14,7 @@ small model, after its tools, may have nothing to add) ends the request without 
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from ..messages import (
     ERROR_STREAM, ROLE_ASSISTANT, ROLE_USER, STOP_END, STOP_MAX_TOKENS, STOP_OTHER, STOP_TOOL_USE, Message,
@@ -211,7 +211,12 @@ class OllamaStreamParser:
 
 
 TAGS_PATH = "/api/tags"
+PULL_PATH = "/api/pull"
 MAX_LISTED_MODELS = 50
+# The one local model measured on the bench (docs/AGENT_MODE.md): it fits a GPU of 8 GB with every tool.
+RECOMMENDED_LOCAL_MODEL = "qwen3.5:4b"
+OLLAMA_DOWNLOAD_PAGE = "https://ollama.com/download"
+_MAX_PULL_ERROR = 500
 
 
 def tags_url(base_url: str) -> str:
@@ -241,3 +246,47 @@ def installed_models(payload: Any) -> List[str]:
         if len(names) >= MAX_LISTED_MODELS:
             break
     return names
+
+
+class PullError(Exception):
+    """Ollama said, in a line of the stream of ``/api/pull``, that the download failed: ``error`` holds its words.
+
+    ``ProviderError`` is a record of the events of a chat, not an exception: it travels in this one."""
+
+    def __init__(self, error: ProviderError) -> None:
+        super().__init__(error.message)
+        self.error = error
+
+
+def pull_url(base_url: str) -> str:
+    """Where Ollama downloads a model: the same server as the list of its models."""
+    return native_base(base_url or "http://localhost:11434") + PULL_PATH
+
+
+def pull_body(model: str) -> bytes:
+    """The request of a download: a stream of lines of progress, one per chunk."""
+    return encode_json({"model": model, "stream": True})
+
+
+def _bytes_count(value: Any) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else 0
+
+
+def pull_progress(line: bytes) -> Optional[Tuple[str, int, int]]:
+    """(status, bytes received, bytes in all) of a line of the stream of a download; None for a line not readable.
+
+    The sizes are those of the layer being downloaded (0 while it is not known: the manifest, the check at the end).
+    Raises ``PullError`` for a line that carries an error."""
+    try:
+        payload = json.loads(bytes(line).decode("utf-8"))
+    except (ValueError, RecursionError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("error"):
+        raise PullError(ProviderError(ERROR_STREAM, str(payload["error"])[:_MAX_PULL_ERROR]))
+    status = payload.get("status")
+    if not isinstance(status, str):
+        return None
+    total, completed = _bytes_count(payload.get("total")), _bytes_count(payload.get("completed"))
+    return status, min(completed, total) if total else 0, total
