@@ -325,7 +325,7 @@ class FakeRequest:
     RedirectPolicy = SimpleNamespace(ManualRedirectPolicy="manual")
 
     def __init__(self, url):
-        self.url, self.headers, self.attributes = url.toString(), {}, {}
+        self.url, self.headers, self.attributes, self.timeout = url.toString(), {}, {}, None
 
     def setHeader(self, name, value):  # noqa: N802
         self.headers[name] = value
@@ -333,8 +333,8 @@ class FakeRequest:
     def setAttribute(self, name, value):  # noqa: N802
         self.attributes[name] = value
 
-    def setTransferTimeout(self, _ms):  # noqa: N802
-        pass
+    def setTransferTimeout(self, ms):  # noqa: N802
+        self.timeout = ms
 
 
 @pytest.fixture
@@ -525,8 +525,63 @@ def test_download_that_cannot_reach_ollama_says_so(network, monkeypatch):
     dialog = _downloading(network, monkeypatch, base_url="http://gpu.lan:11434")
     network.download.code = 1
     network.download.end()
-    assert dialog.provider_result.text() == "Ollama could not be reached at http://gpu.lan:11434/api/pull."
+    assert dialog.provider_result.text() == "Ollama could not be reached at http://gpu.lan:11434."
     assert dialog.model.isEnabled()
+
+
+def test_the_download_has_the_silence_limit_as_its_transfer_timeout(network, monkeypatch):
+    _downloading(network, monkeypatch)
+    # A QGIS default (60 s, for the whole transfer on some builds) must never cut a download of several GB.
+    assert network.posts[0][0].timeout == panel_module.OLLAMA_PULL_IDLE_MS
+
+
+def test_a_stream_cut_with_status_200_says_the_connection_was_lost(network, monkeypatch):
+    dialog = _downloading(network, monkeypatch)
+    network.download.send(_lines({"status": "pulling a", "total": 10, "completed": 3}))
+    network.download.status, network.download.code = 200, 4  # RemoteHostClosedError: the server went away
+    network.download.end()
+    assert dialog.provider_result.text() == "The connection to Ollama was lost during the download of qwen3.5:4b."
+
+
+@pytest.mark.parametrize("status", [404, 500])
+def test_a_refusal_with_an_http_status_says_ollama_refused(network, monkeypatch, status):
+    dialog = _downloading(network, monkeypatch)
+    network.download.status, network.download.code = status, 203
+    network.download.end()
+    assert dialog.provider_result.text() == "Ollama refused the download of qwen3.5:4b."
+
+
+def test_the_install_note_and_the_errors_show_the_address_typed_without_credentials(network, monkeypatch):
+    dialog = _ollama(network, base_url="http://user:secret@gpu.lan:11434/")
+    network.listing.end(b"")
+    note = dialog.ollama_install_note.text()
+    assert "at http://gpu.lan:11434: install" in note and "/api/" not in note and "secret" not in note
+    assert "http://gpu.lan:11434" in dialog.model.toolTip() and "/api/" not in dialog.model.toolTip()
+    monkeypatch.setattr(panel_module, "ask_plain", lambda *args: True)
+    dialog.ollama_refresh_button.click()
+    network.listing.end(_installed())
+    dialog.model.setEditText("qwen3.5:4b")
+    dialog.ollama_download_button.click()
+    network.download.code = 1
+    network.download.end()
+    assert dialog.provider_result.text() == "Ollama could not be reached at http://gpu.lan:11434."
+
+
+def test_download_is_refused_while_a_test_runs(network, monkeypatch):
+    questions = []
+    monkeypatch.setattr(panel_module, "ask_plain", lambda parent, title, text: questions.append(text) or True)
+    holder = {}
+
+    def tester(preset, model, base_url, key):
+        holder["dialog"]._on_download_model()  # a click that the nested event loop let through
+        return True, "It answers.", ()
+
+    settings = settings_module.AgentSettings(preset="ollama", model="", base_url="")
+    dialog = holder["dialog"] = AgentSettingsDialog(settings, settings_module.target_of, None, provider_tester=tester)
+    network.listing.end(_installed())
+    dialog.provider_test_button.click()
+    assert questions == [] and network.posts == [] and dialog._pull_reply is None
+    assert dialog.provider_result.text() == "It answers."
 
 
 def test_a_stream_that_stops_without_success_is_said(network, monkeypatch):

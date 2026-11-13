@@ -1526,8 +1526,8 @@ class AgentSettingsDialog(QDialog):
         except ValueError:
             self._forget_listed_models()
             self.model.setToolTip(_tr("Ollama did not list any model at {}: type the name of one.").format(
-                without_credentials(url)))
-            self._set_ollama_state(False, (), url)
+                without_credentials(self._ollama_address())))
+            self._set_ollama_state(False, (), self._ollama_address())
             return
         request = QNetworkRequest(QUrl(url))
         if hasattr(request, "setTransferTimeout"):
@@ -1538,7 +1538,12 @@ class AgentSettingsDialog(QDialog):
         # stops sending is cut at the limit, not read for a minute.
         reply.downloadProgress.connect(
             lambda received, _total, answered=reply: answered.abort() if received > OLLAMA_TAGS_MAX_BYTES else None)
-        reply.finished.connect(lambda answered=reply, address=url: self._on_ollama_models(answered, address))
+        reply.finished.connect(
+            lambda answered=reply, address=self._ollama_address(): self._on_ollama_models(answered, address))
+
+    def _ollama_address(self) -> str:
+        """The address of Ollama as typed in the dialog (its default when empty), not the URL of one of its routes."""
+        return self.base_url.text().strip().rstrip("/") or PRESETS["ollama"][1]
 
     def _show_provider_result(self, text: str) -> None:
         self.provider_result.setText(text)
@@ -1658,8 +1663,9 @@ class AgentSettingsDialog(QDialog):
     def _on_download_model(self) -> None:
         """Download: ask first (several GB), then post to the Ollama of this dialog and follow the lines it streams."""
         model = self.model.currentText().strip()
-        if self._pull_reply is not None or self._closing or self.preset.currentData() != "ollama" or not model:
-            return
+        if (self._pull_reply is not None or self._testing or self._closing or self.preset.currentData() != "ollama"
+                or not model):
+            return  # a Test spins the event loop: a click let through must not start a download beside it
         url = pull_url(self.base_url.text().strip() or PRESETS["ollama"][1])
         try:
             check_base_url(url, None)  # the same address as the list, http(s) only
@@ -1677,7 +1683,9 @@ class AgentSettingsDialog(QDialog):
         # Only to the address typed here: a redirection is not followed.
         request.setAttribute(QNetworkRequest.Attribute.RedirectPolicyAttribute,
                              QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
-        self._pull_model, self._pull_address, self._pull_end = model, url, None
+        if hasattr(request, "setTransferTimeout"):
+            request.setTransferTimeout(OLLAMA_PULL_IDLE_MS)  # the silence limit, not a default that cuts a long download
+        self._pull_model, self._pull_address, self._pull_end = model, self._ollama_address(), None
         self._pull_buffer = bytearray()
         reply = QgsNetworkAccessManager.instance().post(request, QByteArray(pull_body(model)))
         self._pull_reply = reply
@@ -1768,8 +1776,11 @@ class AgentSettingsDialog(QDialog):
                 status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
                 if reply.error() == QNetworkReply.NetworkError.NoError:
                     self._show_provider_result(_tr("The download ended before its end."))
-                elif isinstance(status, int) and status > 0:
+                elif isinstance(status, int) and status >= 400:
                     self._show_provider_result(_tr("Ollama refused the download of {}.").format(self._pull_model))
+                elif isinstance(status, int) and status > 0:  # answered, then the stream was cut
+                    self._show_provider_result(_tr("The connection to Ollama was lost during the download of {}.")
+                                               .format(self._pull_model))
                 else:
                     self._show_provider_result(_tr("Ollama could not be reached at {}.").format(
                         without_credentials(self._pull_address)))
