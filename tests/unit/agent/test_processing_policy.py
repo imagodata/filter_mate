@@ -2,7 +2,7 @@
 """Which Processing algorithms a model may run (core/agent/processing_policy.py) and what its formulas may hold."""
 import pytest
 
-from core.agent.processing_policy import DENIED, VALUE_ALGORITHMS, matches, refusal
+from core.agent.processing_policy import DENIED, VALUE_ALGORITHMS, forced_values, matches, refusal
 from core.agent.sql_guard import expression_problem, processing_expression_problem
 
 pytestmark = pytest.mark.unit
@@ -39,7 +39,7 @@ def test_code_sql_and_network_are_refused_by_name():
     for algorithm in ("qgis:executesql", "qgis:advancedpythonfieldcalculator", "native:postgisexecuteandloadsql",
                       "native:httprequest", "native:zonalstatistics"):
         assert algorithm in DENIED
-        assert "code, SQL or a network request" in refusal(algorithm, algorithm.split(":")[0], BUFFER)
+        assert refusal(algorithm, algorithm.split(":")[0], BUFFER) != ""
 
 
 def test_files_connections_and_layouts():
@@ -91,6 +91,29 @@ def test_the_sources_of_the_layers_are_not_made_a_layer_the_model_reads():
     parameters = [("LAYERS", "multilayer", False), ("OUTPUT", "sink", False)]
     assert refusal("native:exportlayersinformation", "native", parameters) != ""
     assert refusal("native:buffer", "native", BUFFER) == ""
+
+
+def test_a_merge_runs_without_the_sources_of_its_layers():
+    """2026-11-13, seen in QGIS 3.44: native:mergevectorlayers adds "layer" and "path" to its output, the path the
+    source of each layer (a folder of this machine, the host and the user of a database), which the model then reads.
+    ADD_SOURCE_FIELDS turns them off: FilterMate sets it, and refuses the algorithm where QGIS has no such option."""
+    merge = [("LAYERS", "multilayer", False), ("CRS", "crs", True), ("OUTPUT", "sink", False)]
+    assert refusal("native:mergevectorlayers", "native", merge + [("ADD_SOURCE_FIELDS", "boolean", True)]) == ""
+    assert forced_values("native:mergevectorlayers") == {"ADD_SOURCE_FIELDS": False}
+    assert "source" in refusal("native:mergevectorlayers", "native", merge)
+    assert forced_values("native:buffer") == {}
+
+
+def test_a_refusal_by_name_says_what_the_algorithm_does():
+    """Every one read "it runs code, SQL or a network request written by the model": wrong for those that write in
+    place or make a layer of the sources, and the model then looks for code it never wrote."""
+    in_place = refusal("native:zonalstatistics", "native", BUFFER)
+    sources = refusal("native:exportlayersinformation", "native", BUFFER)
+    assert "in place" in in_place and "SQL" not in in_place
+    assert "source" in sources and "SQL" not in sources
+    assert "SQL" in refusal("qgis:executesql", "qgis", BUFFER)
+    assert "request" in refusal("native:httprequest", "native", BUFFER)
+    assert all(refusal(algorithm, "native", BUFFER) for algorithm in DENIED)
 
 
 def test_deprecated():
