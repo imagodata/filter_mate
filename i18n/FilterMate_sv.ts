@@ -1546,6 +1546,11 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Ollama nekade nedladdningen av {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Nedladdningen av {} misslyckades.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollama kunde inte nås på {}.</translation>

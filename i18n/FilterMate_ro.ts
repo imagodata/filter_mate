@@ -1546,6 +1546,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Ollama a refuzat descărcarea {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Descărcarea {} a eșuat.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollama nu poate fi contactat la {}.</translation>

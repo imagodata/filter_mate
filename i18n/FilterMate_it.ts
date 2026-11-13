@@ -1546,6 +1546,11 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <translation>Ollama ha rifiutato il download di {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Il download di {} non è riuscito.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Impossibile raggiungere Ollama a {}.</translation>

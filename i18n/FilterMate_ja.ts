@@ -1546,6 +1546,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ollama が {} のダウンロードを拒否しました。</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>{} のダウンロードに失敗しました。</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>{} の Ollama に接続できませんでした。</translation>

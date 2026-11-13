@@ -1546,6 +1546,11 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Ollama weigerde de download van {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>De download van {} is mislukt.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollama is niet bereikbaar op {}.</translation>

@@ -1546,6 +1546,11 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Ollama je zavrnila prenos {}.</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="1811"/>
+        <source>The download of {} failed.</source>
+        <translation>Prenos {} ni uspel.</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="1785"/>
         <source>Ollama could not be reached at {}.</source>
         <translation>Ollame na {} ni bilo mogoče doseči.</translation>

@@ -81,6 +81,11 @@ class TestAnthropicRequest:
         assert body["tools"][0]["input_schema"] == TOOL.input_schema
         assert not {"temperature", "top_p", "top_k", "tool_choice"} & set(body)
 
+    def test_no_tools_means_no_tools_key(self):
+        """An empty list is left out: the Test of the Provider tab sends none, and some servers refuse []."""
+        request = claude().build_request("S", [Message(ROLE_USER, (TextPart("hi"),))], [])
+        assert "tools" not in json.loads(request.body)
+
     def test_same_conversation_same_bytes(self):
         messages = [Message(ROLE_USER, (TextPart("é"),))]
         assert claude().build_request("S", messages, [TOOL]).body == claude().build_request("S", messages, [TOOL]).body
@@ -196,6 +201,11 @@ class TestOpenAICompatible:
         assert json.loads(assistant["tool_calls"][0]["function"]["arguments"]) == {"a": "é"}
         assert body["messages"][3] == {"role": "tool", "tool_call_id": "c1", "content": "result"}
         assert body["tools"][0]["function"]["parameters"] == TOOL.input_schema
+
+    def test_no_tools_means_no_tools_key(self):
+        """OpenAI answers 400 (empty_array) to "tools": []: the key is left out when there is no tool."""
+        request = compatible().build_request("SYS", [Message(ROLE_USER, (TextPart("hi"),))], [])
+        assert "tools" not in json.loads(request.body)
 
     @pytest.mark.parametrize("step", [None, 3])
     def test_streamed_tool_call(self, step):

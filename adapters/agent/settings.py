@@ -128,13 +128,26 @@ def _port(value) -> int:
     return port if 1024 <= port <= 65535 else DEFAULT_PORT
 
 
+# Keys of the free quota (removed in 5.1): the token of its relay stays in a profile that used it.
+_FORMER_KEYS = ("free_token", "free_token_target")
+
+
+def _forget_former_keys(settings) -> None:
+    for name in _FORMER_KEYS:
+        if settings.contains(_PREFIX + name):
+            settings.remove(_PREFIX + name)
+
+
 def load_settings() -> AgentSettings:
     settings = QgsSettings()
+    _forget_former_keys(settings)
     preset = str(settings.value(_PREFIX + "preset", DEFAULT_PRESET) or DEFAULT_PRESET)
+    known = preset in PRESETS
     return AgentSettings(
-        preset=preset if preset in PRESETS else DEFAULT_PRESET,
+        preset=preset if known else DEFAULT_PRESET,
         model=str(settings.value(_PREFIX + "model", "") or ""),
-        base_url=str(settings.value(_PREFIX + "base_url", "") or ""),
+        # The address saved under a preset that is gone (the relay of the free quota) is not the one of Anthropic.
+        base_url=str(settings.value(_PREFIX + "base_url", "") or "") if known else "",
         consent=settings.value(_PREFIX + "consent", False, type=bool),
         send_values=settings.value(_PREFIX + "send_values", True, type=bool),
         enabled_sources=_enabled_sources(settings),

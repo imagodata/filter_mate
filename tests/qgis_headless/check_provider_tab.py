@@ -26,7 +26,7 @@ os.environ["QGIS_CUSTOM_CONFIG_PATH"] = HOME
 os.environ["QGIS_AUTH_DB_DIR_PATH"] = HOME
 
 from qgis.core import Qgis, QgsApplication  # noqa: E402
-from qgis.PyQt.QtCore import QCoreApplication  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, QTimer  # noqa: E402
 from qgis.PyQt.QtWidgets import QLabel  # noqa: E402
 
 RESULTS = []
@@ -71,6 +71,7 @@ class Provider:
 
     def __init__(self):
         self.requests = []
+        self.delay = 0.0  # seconds before the answer of /v1/messages: a Test that takes time
         provider = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -94,10 +95,13 @@ class Provider:
                     message = json.dumps({"error": {"message": f"Incorrect API key provided: {key}."}}).encode()
                     return self._answer(401, message)
                 if self.path == "/v1/messages":
+                    time.sleep(provider.delay)
                     return self._answer(200, CLAUDE_OK, "text/event-stream")
                 if self.path == "/v1/models?limit=100":
                     return self._answer(200, json.dumps({"data": [{"id": "claude-a"}, {"id": "claude-b"}]}).encode())
                 if self.path == "/m/v1/chat/completions":
+                    if body.get("tools") == []:  # what OpenAI does: 400 empty_array
+                        return self._answer(400, b'{"error":{"message":"[] is too short - tools"}}')
                     return self._answer(200, OPENAI_OK, "text/event-stream")
                 if self.path == "/m/v1/models":
                     return self._answer(200, json.dumps({"data": [
@@ -121,6 +125,7 @@ class FakeOllama:
 
     def __init__(self):
         self.installed, self.pulls, self.mode, self.gone = [], [], "ok", threading.Event()
+        self.chats = []  # the bodies of /api/chat
         self.release = threading.Event()
         ollama = self
 
@@ -148,6 +153,15 @@ class FakeOllama:
 
             def do_POST(self):  # noqa: N802
                 body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                if self.path == "/api/chat":
+                    ollama.chats.append(body)
+                    answer = json.dumps({"message": {"role": "assistant", "content": "OK"}, "done": True,
+                                         "done_reason": "stop"}).encode() + b"\n"
+                    self.send_response(200)
+                    self.send_header("Content-Length", str(len(answer)))
+                    self.end_headers()
+                    self.wfile.write(answer)
+                    return
                 ollama.pulls.append((self.path, body))
                 self.send_response(200)
                 self.send_header("Content-Type", "application/x-ndjson")
@@ -171,6 +185,9 @@ class FakeOllama:
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.url = f"http://127.0.0.1:{self.server.server_address[1]}"
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+
+AgentChatController_test = None  # set in main(): the Test of the controller
 
 
 def ollama_cases(AgentSettings, target_of, AgentSettingsDialog, panel_module):
@@ -203,9 +220,9 @@ def ollama_cases(AgentSettings, target_of, AgentSettingsDialog, panel_module):
           ollama.pulls and ollama.pulls[0] == ("/api/pull", {"model": "qwen3.5:4b", "stream": True}), ollama.pulls)
     check("download done: the list is read again, the model chosen, the controls back",
           wait(lambda: dialog.preset.isEnabled() and not dialog.ollama_cancel_button.isVisible())
-          and wait(lambda: not dialog.ollama_download_row.isVisible())
-          and dialog.model.currentText() == "qwen3.5:4b" and "qwen3.5:4b" in [
-              dialog.model.itemText(i) for i in range(dialog.model.count())] and
+          and wait(lambda: not dialog.ollama_download_row.isVisible())  # at once: the pulled model counts as installed
+          and wait(lambda: "qwen3.5:4b" in [dialog.model.itemText(i) for i in range(dialog.model.count())])
+          and dialog.model.currentText() == "qwen3.5:4b" and
           dialog.provider_result.text() == "qwen3.5:4b is downloaded.", dialog.provider_result.text())
     dialog.close()
 
@@ -244,6 +261,28 @@ def ollama_cases(AgentSettings, target_of, AgentSettingsDialog, panel_module):
     check("closing the dialog during a download drops the connection", wait(ollama.gone.is_set, 5))
     ollama.release.set()
 
+    # A profile migrated from the free quota keeps claude-haiku-5-5: Ollama must not offer to download it.
+    ollama.installed[:] = ["qwen3:8b"]
+    dialog = AgentSettingsDialog(AgentSettings(preset="anthropic", model="claude-haiku-5-5"), target_of, None,
+                                 provider_tester=AgentChatController_test)
+    dialog.base_url.setText(ollama.url)
+    dialog.show()
+    dialog.preset.setCurrentIndex(dialog.preset.findData("ollama"))
+    check("ollama after a Claude model: the Claude name is dropped, the installed model proposed, no Download",
+          wait(lambda: dialog.model.currentText() == "qwen3:8b") and not dialog.ollama_download_button.isVisible(),
+          dialog.model.currentText())
+    dialog.provider_test_button.click()
+    chat = ollama.chats[-1] if ollama.chats else {}
+    check("ollama Test: few tokens, a small context, no empty tools, and it answers",
+          dialog.provider_result.text() == "It answers." and chat.get("options", {}).get("num_predict") == 16
+          and chat["options"]["num_ctx"] <= 4096 and "tools" not in chat, (dialog.provider_result.text(), chat))
+    dialog.model.setEditText("qwen3")
+    check("ollama: qwen3 without its tag is qwen3:latest, a model that is not installed offers Download",
+          dialog.ollama_download_button.isVisible())
+    dialog.model.setEditText("qwen3:8b")
+    check("ollama: an installed model offers no Download", not dialog.ollama_download_button.isVisible())
+    dialog.close()
+
 
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}, Python {sys.version.split()[0]}", flush=True)
@@ -253,6 +292,8 @@ def main():
     from filter_mate.ui.widgets import agent_panel as panel_module
     from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog
 
+    global AgentChatController_test
+    AgentChatController_test = AgentChatController._test_provider
     provider = Provider()
     dialog = AgentSettingsDialog(AgentSettings(preset="anthropic"), target_of, None,
                                  provider_tester=AgentChatController._test_provider)
@@ -310,6 +351,24 @@ def main():
     dialog.provider_test_button.click()
     check("mistral with a model: through the OpenAI-compatible path", dialog.provider_result.text() == "It answers."
           and any(r[1] == "/m/v1/chat/completions" for r in provider.requests), dialog.provider_result.text())
+    check("mistral: the Test sends no empty list of tools (OpenAI answers 400 to it)",
+          dialog.provider_result.text() == "It answers.", dialog.provider_result.text())
+    dialog.close()
+
+    # A Save during a Test waits for its end: the dialog stays, and closes when the answer is there.
+    dialog = AgentSettingsDialog(AgentSettings(preset="anthropic", model="claude-mine"), target_of, None,
+                                 provider_tester=AgentChatController._test_provider)
+    dialog._fetch_ollama_models = lambda: None
+    dialog.base_url.setText(provider.url)
+    dialog.key.setText(GOOD_KEY)
+    dialog.show()
+    provider.delay, during = 1.0, []
+    QTimer.singleShot(200, dialog.accept)
+    QTimer.singleShot(600, lambda: during.append((dialog.isVisible(), dialog.result())))
+    dialog.provider_test_button.click()
+    provider.delay = 0.0
+    check("save during a Test: the dialog is still there during it, and closes, saved, at its end",
+          during == [(True, 0)] and not dialog.isVisible() and dialog.result() == 1, (during, dialog.result()))
     dialog.close()
 
     dialog = AgentSettingsDialog(AgentSettings(preset="anthropic"), target_of, None,
