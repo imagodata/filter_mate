@@ -14,6 +14,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Metadata key of an entry whose source left it: the layer its filter ran from (HistoryEntry.ran_from).
+RUN_SOURCE = 'run_source'
+
 
 class LayerHistory:
     """
@@ -209,6 +212,24 @@ class HistoryEntry:
             return layer_info.get('expression', '')
         return None
 
+    def ran_from(self, layer_id: str) -> bool:
+        """
+        True when this entry is a filter run from ``layer_id``, its source still in it.
+
+        Once the source left the entry (its part undone alone, the layer removed), the first
+        layer left holds layer_ids[0] for expression_for(), but the run is not its own: the
+        raster / point cloud steps of its runs must not pair with this entry.
+
+        Args:
+            layer_id: Layer ID to look up
+
+        Returns:
+            Whether the entry is a filter of ``layer_id`` as its source
+        """
+        if not self.layer_ids or self.layer_ids[0] != layer_id:
+            return False
+        return self.get_metadata_value(RUN_SOURCE) in (None, layer_id)
+
     def get_metadata_value(self, key: str) -> Optional[Any]:
         """Get value from metadata by key."""
         for k, v in self.metadata:
@@ -311,7 +332,10 @@ class HistoryService:
             return
 
         self._undo_stack.append(entry)
-        self._redo_stack.clear()
+        if self._undo_stack.maxlen != self._max_depth:
+            # Grown by the parts of steps undone / redone alone (_move_onto): max_depth again, the newest kept
+            self._undo_stack = deque(self._undo_stack, maxlen=self._max_depth)
+        self._redo_stack = deque(maxlen=self._max_depth)
         self._notify_change()
 
         logger.debug(f"History: pushed {entry.entry_id}, undo depth={len(self._undo_stack)}")
@@ -329,7 +353,7 @@ class HistoryService:
         self._is_performing_undo_redo = True
         try:
             entry = self._undo_stack.pop()
-            self._redo_stack.append(entry)
+            self._move_onto(False, entry)
             self._notify_change()
 
             logger.debug(f"History: undo {entry.entry_id}")
@@ -350,13 +374,86 @@ class HistoryService:
         self._is_performing_undo_redo = True
         try:
             entry = self._redo_stack.pop()
-            self._undo_stack.append(entry)
+            self._move_onto(True, entry)
             self._notify_change()
 
             logger.debug(f"History: redo {entry.entry_id}")
             return entry
         finally:
             self._is_performing_undo_redo = False
+
+    def undo_layer(self, layer_id: str) -> Optional[HistoryEntry]:
+        """
+        Undo the part of ``layer_id`` in the last entry, the rest of it left to undo.
+
+        2026-11-14: Undo without the layers to filter restores the current layer alone, and it
+        popped the whole entry of a filter of several layers: the other layers kept their filter
+        and lost their step. The entry now stays in its place without this layer (as
+        remove_history leaves it), and the redo stack gets an entry of this layer alone. An entry
+        of this layer alone moves whole, as undo() moves it.
+
+        Args:
+            layer_id: Layer whose part is undone
+
+        Returns:
+            What went to the redo stack, or None when the last entry does not hold ``layer_id``
+        """
+        return self._take_layer(True, layer_id)
+
+    def redo_layer(self, layer_id: str) -> Optional[HistoryEntry]:
+        """
+        Redo the part of ``layer_id`` in the next entry to redo, the rest of it left to redo.
+
+        The undo stack gets an entry of this layer alone (never joined again to the rest of
+        its step), the entry stays next to redo without this layer; as undo_layer().
+
+        Args:
+            layer_id: Layer whose part is redone
+
+        Returns:
+            What went to the undo stack, or None when the next entry does not hold ``layer_id``
+        """
+        return self._take_layer(False, layer_id)
+
+    def _take_layer(self, undo: bool, layer_id: str) -> Optional[HistoryEntry]:
+        """Move the part of ``layer_id`` of the top of the undo (``undo``) or redo stack onto the other one (the whole
+        entry when it has no other layer)."""
+        source = self._undo_stack if undo else self._redo_stack
+        if not source or layer_id not in source[-1].layer_ids:
+            return None
+
+        self._is_performing_undo_redo = True
+        try:
+            entry = source[-1]
+            rest = self._entry_without_layer(entry, layer_id)
+            if rest is None:
+                taken = source.pop()
+            else:
+                taken = self._entry_of_layer(entry, layer_id)
+                source[-1] = rest  # in its place: the other layers undo / redo it in the order of the stack
+            self._move_onto(not undo, taken)
+            self._notify_change()
+
+            logger.debug(f"History: moved the part of {layer_id} of {entry.entry_id}, rest kept: {rest is not None}")
+            return taken
+        finally:
+            self._is_performing_undo_redo = False
+
+    def _move_onto(self, undo: bool, entry: HistoryEntry) -> None:
+        """Put ``entry`` on top of the undo (``undo``) or redo stack, never dropping the oldest one there.
+
+        A step undone / redone in part makes two entries of one, and the stacks then hold more than max_depth
+        between them: a full deque dropped a step the user never left (2026-11-14, a part undone then redone lost
+        the oldest step of the history). max_depth is kept by push(), which drops the oldest steps as it always did.
+        """
+        stack = self._undo_stack if undo else self._redo_stack
+        if stack.maxlen is not None and len(stack) >= stack.maxlen:
+            stack = deque(stack, maxlen=len(stack) + 1)
+            if undo:
+                self._undo_stack = stack
+            else:
+                self._redo_stack = stack
+        stack.append(entry)
 
     def peek_undo(self) -> Optional[HistoryEntry]:
         """
@@ -593,7 +690,8 @@ class HistoryService:
         several layers lose this one (layer id, previous filter, remote_layers
         metadata) and stay for the others; when it was the source, the first
         remaining layer becomes the source with the expression it received
-        (layer_ids[0] and expression, as push_global_state records a source).
+        (layer_ids[0] and expression, as push_global_state records a source),
+        without the entry becoming a run of that layer (ran_from).
 
         Args:
             layer_id: ID of the removed layer
@@ -615,7 +713,7 @@ class HistoryService:
                 pruned = self._entry_without_layer(entry, layer_id)
                 if pruned is not None:
                     kept.append(pruned)
-            stacks.append(deque(kept, maxlen=self._max_depth))
+            stacks.append(deque(kept, maxlen=stack.maxlen))  # what _move_onto let it hold
 
         if touched:
             self._undo_stack, self._redo_stack = stacks
@@ -649,6 +747,8 @@ class HistoryService:
                 expression = source_info.get('expression', '')
                 if 'feature_count' in source_info:
                     metadata['source_feature_count'] = source_info['feature_count']
+            # Not a run of that layer (ran_from): its raster / point cloud steps stay with its own runs
+            metadata.setdefault(RUN_SOURCE, layer_id)
 
         return replace(
             entry,
@@ -657,6 +757,19 @@ class HistoryService:
             previous_filters=tuple(pf for pf in entry.previous_filters if pf[0] != layer_id),
             metadata=tuple(sorted(metadata.items())),
         )
+
+    @classmethod
+    def _entry_of_layer(cls, entry: HistoryEntry, layer_id: str) -> HistoryEntry:
+        """``entry`` with ``layer_id`` alone: its expression, its previous filter, its feature count.
+
+        Every other layer leaves it as remove_history takes one out; the entry keeps its id,
+        time and description, the step it is a part of.
+        """
+        part = entry
+        for other in entry.layer_ids:
+            if other != layer_id:
+                part = cls._entry_without_layer(part, other)
+        return part
 
     def set_on_change(
         self,

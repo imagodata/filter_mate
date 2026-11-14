@@ -293,10 +293,11 @@ class UndoRedoHandler:
         """
         Handle redo operation with intelligent layer selection logic.
 
-        v4.1.3: Redo now respects the history entry type rather than current checkbox state.
-        - If history entry is multi-layer (layer_count > 1): perform global redo
-        - If history entry is single-layer: perform layer-only redo
         The entry must be in the scope of the source layer, as for undo (_entry_in_scope).
+        - With layers to filter (use_global and layers_to_filter): an entry of several layers is
+          redone for every layer (global redo), as Undo restored them
+        - Without: the source layer alone, as Undo restores it (2026-11-14): its part of an entry
+          of several layers is redone, the rest stays to redo from the other layers
 
         Args:
             source_layer: The source layer for the redo operation
@@ -325,9 +326,6 @@ class UndoRedoHandler:
             logger.warning(f"handle_redo: layer {source_layer.name()} not in PROJECT_LAYERS")
             return False
 
-        # v4.1.3: Peek at history entry to determine redo type
-        # The entry type (multi-layer vs single-layer) determines the redo behavior,
-        # NOT the current state of the checkbox
         pending_entry = self._history_manager.peek_redo()
         if not pending_entry:
             logger.info("No redo history available")
@@ -338,14 +336,14 @@ class UndoRedoHandler:
             logger.info(f"Next redo entry is outside the scope of layer {source_layer.name()}, nothing to redo")
             return False
 
-        # Determine redo type from the history entry itself
-        is_multi_layer_entry = pending_entry.layer_count > 1
-
-        if is_multi_layer_entry:
-            logger.info(f"v4.1.3: History entry is multi-layer ({pending_entry.layer_count} layers) - using global redo")
+        # 2026-11-14: the scope of Undo. Without layers to filter, Redo filtered again every layer of an entry of
+        # several layers, those outside the scope too; it now redoes the part of the source layer alone, the rest
+        # of the entry stays to redo from its other layers.
+        if pending_entry.layer_count > 1 and use_global and layers_to_filter:
+            logger.info(f"History entry is multi-layer ({pending_entry.layer_count} layers) - using global redo")
             result = self._perform_global_redo(source_layer, project_layers)
         else:
-            logger.info("v4.1.3: History entry is single-layer - using layer redo")
+            logger.info("Redo of one layer (the entry's own, or the source layer's part of the entry)")
             result = self._perform_layer_redo(source_layer, project_layers)
 
         # Set up combobox protection if dockwidget provided
@@ -549,6 +547,7 @@ class UndoRedoHandler:
         """Perform undo for source layer only.
 
         v4.1.3: Simplified - caller has already verified entry exists via peek.
+        2026-11-14: the part of the other layers of the entry stays to undo (HistoryService.undo_layer).
         """
         logger.info("Performing source layer undo only")
 
@@ -571,7 +570,8 @@ class UndoRedoHandler:
 
         if not _restore_history_subset(source_layer, previous_expression):
             return False
-        self._history_manager.undo()
+        # Popping the whole entry left the other layers filtered, without their step
+        self._history_manager.undo_layer(source_layer.id())
 
         project_layers[source_layer.id()]["infos"]["is_already_subset"] = bool(previous_expression)
         logger.info(f"Undo source layer to: {previous_state.description}")
@@ -589,12 +589,14 @@ class UndoRedoHandler:
         source_layer: 'QgsVectorLayer',
         project_layers: Dict
     ) -> bool:
-        """Perform redo of a single-layer entry on its own layer.
+        """Perform redo of one layer: a single-layer entry on its own layer, or the source layer's part of an entry.
 
         v4.1.3: Simplified - caller has already verified entry exists via peek.
-        The stack is shared by every layer: the entry's layer is the current one
-        (source_layer) or one of its layers to filter (handle_redo checked its
-        scope), and the current layer must not get another layer's expression.
+        The stack is shared by every layer: the entry holds the current layer
+        (source_layer), or it is the entry of one of its layers to filter
+        (handle_redo checked its scope), and the current layer must not get
+        another layer's expression. 2026-11-14: of an entry of several layers,
+        the source layer's part alone (HistoryService.redo_layer).
         """
         logger.info("Performing single layer redo")
 
@@ -603,18 +605,17 @@ class UndoRedoHandler:
         if not next_state:
             return False
 
-        # For redo, we apply the expression that was recorded (the NEW expression)
-        # For single-layer entry, this is simply next_state.expression, of layer_ids[0]
-        layer_id = next_state.layer_ids[0]
+        # For redo, we apply the expression that was recorded (the NEW expression) for that layer
+        layer_id = source_layer.id() if source_layer.id() in next_state.layer_ids else next_state.layer_ids[0]
         layer = source_layer if layer_id == source_layer.id() else QgsProject.instance().mapLayer(layer_id)
         if not layer:
             logger.warning(f"Layer {layer_id} not found in QgsProject for redo")
             return False
-        expression = next_state.expression
+        expression = next_state.expression_for(layer_id) or ''
 
         if not _restore_history_subset(layer, expression):
             return False
-        self._history_manager.redo()
+        self._history_manager.redo_layer(layer_id)
         if layer_id in project_layers:
             project_layers[layer_id]["infos"]["is_already_subset"] = bool(expression)
         logger.info(f"Redo layer {layer.name()} to: {next_state.description}")
