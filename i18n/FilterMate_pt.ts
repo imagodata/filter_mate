@@ -4703,6 +4703,61 @@ What would you like to do?</translation>
         <translation>Nada para comparar: não há filtro para desfazer aqui.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="154"/>
+        <source>Pin the current state</source>
+        <translation>Fixar o estado atual</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="156"/>
+        <source>Remove the pin</source>
+        <translation>Remover a fixação</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="182"/>
+        <source>Right-click to pin the current state.</source>
+        <translation>Clique direito para fixar o estado atual.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="184"/>
+        <source>Compare: the map pinned at {} left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Comparar: o mapa fixado às {} à esquerda da linha, como está agora à direita; a linha segue o mouse</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="186"/>
+        <source>Right-click to pin again or remove the pin.</source>
+        <translation>Clique direito para fixar de novo ou remover a fixação.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="283"/>
+        <source>Map pinned at {}: Compare shows it left of the line.</source>
+        <translation>Mapa fixado às {}: Comparar mostra-o à esquerda da linha.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="311"/>
+        <source>Pinned {}</source>
+        <translation>Fixado {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="316"/>
+        <source>Before: {}</source>
+        <translation>Antes: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="317"/>
+        <source>Now</source>
+        <translation>Agora</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
+        <source>Compare cannot draw these layers as they were: {}</source>
+        <translation>Comparar não consegue desenhar estas camadas como estavam: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="356"/>
+        <source>Nothing changed since the pin.</source>
+        <translation>Nada mudou desde a fixação.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Gestor de favoritos não disponível</translation>

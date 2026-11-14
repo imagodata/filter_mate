@@ -4703,6 +4703,61 @@ What would you like to do?</translation>
         <translation>Ei mitään verrattavaa: täällä ei ole kumottavaa suodatinta.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="154"/>
+        <source>Pin the current state</source>
+        <translation>Kiinnitä nykyinen tila</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="156"/>
+        <source>Remove the pin</source>
+        <translation>Poista kiinnitys</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="182"/>
+        <source>Right-click to pin the current state.</source>
+        <translation>Kiinnitä nykyinen tila napsauttamalla hiiren oikealla painikkeella.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="184"/>
+        <source>Compare: the map pinned at {} left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Vertaa: klo {} kiinnitetty kartta viivan vasemmalla puolella, nykyinen oikealla; viiva seuraa hiirtä</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="186"/>
+        <source>Right-click to pin again or remove the pin.</source>
+        <translation>Kiinnitä uudelleen tai poista kiinnitys napsauttamalla hiiren oikealla painikkeella.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="283"/>
+        <source>Map pinned at {}: Compare shows it left of the line.</source>
+        <translation>Kartta kiinnitetty klo {}: Vertaa näyttää sen viivan vasemmalla puolella.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="311"/>
+        <source>Pinned {}</source>
+        <translation>Kiinnitetty {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="316"/>
+        <source>Before: {}</source>
+        <translation>Ennen: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="317"/>
+        <source>Now</source>
+        <translation>Nyt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
+        <source>Compare cannot draw these layers as they were: {}</source>
+        <translation>Vertaa ei voi piirtää näitä tasoja sellaisina kuin ne olivat: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="356"/>
+        <source>Nothing changed since the pin.</source>
+        <translation>Mikään ei ole muuttunut kiinnityksen jälkeen.</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>Suosikkien hallinta ei ole kaytettavissa</translation>
