@@ -3179,22 +3179,22 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
     <name>ExportGroupRecapDialog</name>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
-        <source>{0} couche(s)</source>
+        <source>{0} layer(s)</source>
         <translation>{0} lapisan</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
-        <source> dans {0} groupe(s)</source>
+        <source> in {0} group(s)</source>
         <translation> dalam {0} grup</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
-        <source> + {0} hors groupe</source>
+        <source> + {0} outside a group</source>
         <translation> + {0} di luar grup</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
-        <source>Destination : {0}</source>
+        <source>Destination: {0}</source>
         <translation>Tujuan: {0}</translation>
     </message>
     <message>
@@ -3204,12 +3204,12 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
-        <source>Annuler</source>
+        <source>Cancel</source>
         <translation>Batal</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
-        <source>Exporter</source>
+        <source>Export</source>
         <translation>Ekspor</translation>
     </message>
 </context>
