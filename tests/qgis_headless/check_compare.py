@@ -220,7 +220,12 @@ def check_fixed_line(canvas, session, full):
     item.fixed_note = "line fixed"
     item.set_labels("Before", "Now")
 
-    def release(x, button=Qt.MouseButton.LeftButton):
+    def release(x, button=Qt.MouseButton.LeftButton, pressed_at=-1):
+        """A click at ``x`` (pressed there, or at ``pressed_at``: a drag); ``pressed_at`` None: a release alone."""
+        if pressed_at is not None:
+            tool.canvasPressEvent(QgsMapMouseEvent(
+                canvas, QEvent.Type.MouseButtonPress, QPoint(x if pressed_at < 0 else pressed_at, 300), button,
+                button, Qt.KeyboardModifier.NoModifier))
         tool.canvasReleaseEvent(QgsMapMouseEvent(canvas, QEvent.Type.MouseButtonRelease, QPoint(x, 300), button,
                                                  Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
 
@@ -229,6 +234,13 @@ def check_fixed_line(canvas, session, full):
                                               Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
     check("a free line: no knob, the labels as given", not item.frozen and item.handle_rect().isEmpty()
           and item.shown_labels() == ("Before", "Now"))
+    # A review of 2026-11-14: a release alone (a menu closed over the map, the second half of a double click) and the
+    # end of a drag fixed or freed the line without the user meaning it.
+    release(200, pressed_at=None)
+    alone = item.frozen
+    release(200, pressed_at=420)
+    check("only a click made on the map fixes the line: not a release alone, not a drag", not alone and not item.frozen,
+          (alone, item.frozen))
     release(200)
     check("a click fixes the line where it is", item.frozen and abs(item.fraction - 0.25) < 0.01, item.fraction)
     move(600)

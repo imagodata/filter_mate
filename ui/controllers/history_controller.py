@@ -563,8 +563,9 @@ class HistoryController(QObject):
 
     @property
     def can_compare(self) -> bool:
-        """The map before an item can be compared: the dock has Compare."""
-        return self._compare is not None
+        """The map before an item can be compared: the dock has Compare, and its button (without it the comparison
+        would not end with the operations of the action bar)."""
+        return self._compare is not None and getattr(self._compare, "button", None) is not None
 
     def compare_selected(self, *_args) -> int:
         """Compare the map now with the map before the selected item; the number of layers drawn otherwise."""
@@ -588,8 +589,9 @@ class HistoryController(QObject):
             logger.warning("History: not read", exc_info=True)
             return 0
         item = agent_item(items, HISTORY_KEY, turn, step)
-        if item is None:  # undone meanwhile: the page of the agent is listed again
+        if item is None:  # undone meanwhile: said, rather than a click that does nothing
             logger.debug("History: turn %s, step %s no longer applied", turn, step)
+            self._say(_tr("Nothing to compare: nothing this step changed can be drawn."))
             return 0
         self.close_panel()
         return self._compare_item(items, item)

@@ -396,9 +396,12 @@ class SwipeTool(QgsMapTool):
     """The swipe line follows the mouse over the map; a left click fixes it where it is, another frees it. The wheel
     and the middle button still move the map: the canvas handles them whatever the tool."""
 
+    CLICK_SLACK = 4  # pixels the mouse may move between press and release and still be a click
+
     def __init__(self, canvas, item: SwipeItem) -> None:
         super().__init__(canvas)
         self._item = item
+        self._pressed = None  # where the left button went down on the map; None: not down here
 
     def _follow(self, event) -> None:
         width = self.canvas().width()
@@ -409,8 +412,17 @@ class SwipeTool(QgsMapTool):
         if self._item is not None and not self._item.frozen:
             self._follow(event)
 
+    def canvasPressEvent(self, event):  # noqa: N802 - Qt override
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._pressed = event.pos()
+
     def canvasReleaseEvent(self, event):  # noqa: N802 - Qt override
         if self._item is None or event.button() != Qt.MouseButton.LeftButton:
+            return
+        pressed, self._pressed = self._pressed, None
+        # Only a click made on the map: a release alone (a menu closed over the map, the second half of a double
+        # click) or the end of a drag changed the line without the user meaning it.
+        if pressed is None or (event.pos() - pressed).manhattanLength() > self.CLICK_SLACK:
             return
         self._follow(event)  # fixed where it was clicked; freed under the mouse
         self._item.set_frozen(not self._item.frozen)

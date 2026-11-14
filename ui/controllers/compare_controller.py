@@ -309,7 +309,6 @@ class CompareController(QObject):
         """Pin ``state`` (``map_state()`` of the map now, or of a step kept elsewhere): Compare shows it from now on."""
         self._pin = state
         self._sync_button()
-        self.pinChanged.emit()
         if self.session is not None and self.session.active and self._given is None:
             self._watch.start(self._canvas())
             try:
@@ -317,6 +316,7 @@ class CompareController(QObject):
             except Exception:
                 logger.warning("Compare: map not read", exc_info=True)
                 self._fail()
+        self.pinChanged.emit()  # last: a listener finds the comparison as the pin left it
 
     def unpin(self, *_args) -> None:
         """Forget the pin: Compare shows the map before the last operation again (when there is one)."""
@@ -326,9 +326,9 @@ class CompareController(QObject):
         self._follow_timer.stop()
         self._watch.stop()
         self._sync_button()
-        self.pinChanged.emit()
         if self.session is not None and self.session.active and self._given is None:
             self.start()
+        self.pinChanged.emit()  # last: a listener finds the comparison as the pin left it
 
     def compare_pin(self, *_args) -> int:
         """Compare with the pin, as a click on the button does (a step compared gives way to it); the number of layers
@@ -336,7 +336,14 @@ class CompareController(QObject):
         if self._pin is None:
             return 0
         self._said = ()  # a comparison asked again says again what it cannot draw
+        self._free_line()
         return self.start()
+
+    def _free_line(self) -> None:
+        """Another comparison begins on the same line: it follows the mouse again, wherever it was fixed."""
+        item = getattr(self.session, "item", None) if self.session is not None else None
+        if item is not None and item.frozen:
+            item.set_frozen(False)
 
     def _on_project_cleared(self, *_args) -> None:
         self.stop()
@@ -416,6 +423,7 @@ class CompareController(QObject):
         self._watch.stop()
         self._given = before
         self._said = ()
+        self._free_line()
         self._sync_button()  # available while it compares, Undo or not
         count = self._show(before, labels=labels)
         if count:
