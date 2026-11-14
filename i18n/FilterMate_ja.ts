@@ -3179,22 +3179,22 @@ Do you agree to all of them? No runs none of them.</source>
     <name>ExportGroupRecapDialog</name>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
-        <source>{0} couche(s)</source>
+        <source>{0} layer(s)</source>
         <translation>{0}個のレイヤー</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
-        <source> dans {0} groupe(s)</source>
+        <source> in {0} group(s)</source>
         <translation> {0}個のグループ内</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
-        <source> + {0} hors groupe</source>
+        <source> + {0} outside a group</source>
         <translation> + {0} グループ外</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
-        <source>Destination : {0}</source>
+        <source>Destination: {0}</source>
         <translation>出力先 : {0}</translation>
     </message>
     <message>
@@ -3204,12 +3204,12 @@ Do you agree to all of them? No runs none of them.</source>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
-        <source>Annuler</source>
+        <source>Cancel</source>
         <translation>キャンセル</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
-        <source>Exporter</source>
+        <source>Export</source>
         <translation>エクスポーター</translation>
     </message>
 </context>

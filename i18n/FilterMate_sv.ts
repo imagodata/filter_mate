@@ -3179,22 +3179,22 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
     <name>ExportGroupRecapDialog</name>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
-        <source>{0} couche(s)</source>
+        <source>{0} layer(s)</source>
         <translation>{0} lager</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
-        <source> dans {0} groupe(s)</source>
+        <source> in {0} group(s)</source>
         <translation> i {0} grupp(er)</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
-        <source> + {0} hors groupe</source>
+        <source> + {0} outside a group</source>
         <translation> + {0} utanfor grupp</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
-        <source>Destination : {0}</source>
+        <source>Destination: {0}</source>
         <translation>Destination: {0}</translation>
     </message>
     <message>
@@ -3204,12 +3204,12 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
-        <source>Annuler</source>
+        <source>Cancel</source>
         <translation>Avbryt</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
-        <source>Exporter</source>
+        <source>Export</source>
         <translation>Exportera</translation>
     </message>
 </context>

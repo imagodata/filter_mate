@@ -112,18 +112,18 @@ class ExportGroupRecapDialog(QDialog):
         group_count = self._count_groups(self._hierarchy)
         has_groups = group_count > 0
 
-        summary_text = self.tr("{0} couche(s)").format(self._layer_count)
+        summary_text = self.tr("{0} layer(s)").format(self._layer_count)
         if has_groups:
-            summary_text += self.tr(" dans {0} groupe(s)").format(group_count)
+            summary_text += self.tr(" in {0} group(s)").format(group_count)
         if ungrouped:
-            summary_text += self.tr(" + {0} hors groupe").format(len(ungrouped))
+            summary_text += self.tr(" + {0} outside a group").format(len(ungrouped))
 
         summary = QLabel(summary_text)
         summary.setStyleSheet("color: #666; margin-bottom: 4px;")
         layout.addWidget(summary)
 
         # Output path
-        path_label = QLabel(self.tr("Destination : {0}").format(self._output_path))
+        path_label = QLabel(self.tr("Destination: {0}").format(self._output_path))
         path_label.setWordWrap(True)
         path_label.setStyleSheet("color: #888; font-size: 9pt;")
         layout.addWidget(path_label)
@@ -151,13 +151,13 @@ class ExportGroupRecapDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
 
-        cancel_btn = QPushButton(self.tr("Annuler"))
+        cancel_btn = QPushButton(self.tr("Cancel"))
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(cancel_btn)
 
         button_layout.addStretch()
 
-        export_btn = QPushButton(self.tr("Exporter"))
+        export_btn = QPushButton(self.tr("Export"))
         export_btn.setDefault(True)
         export_btn.setStyleSheet(
             "QPushButton { background: #27ae60; color: white; padding: 8px 16px; "

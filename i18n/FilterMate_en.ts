@@ -3174,23 +3174,23 @@ Do you agree to all of them? No runs none of them.</translation>
     <name>ExportGroupRecapDialog</name>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
-        <source>{0} couche(s)</source>
-        <translation>{0} couche(s)</translation>
+        <source>{0} layer(s)</source>
+        <translation>{0} layer(s)</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
-        <source> dans {0} groupe(s)</source>
-        <translation> dans {0} groupe(s)</translation>
+        <source> in {0} group(s)</source>
+        <translation> in {0} group(s)</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
-        <source> + {0} hors groupe</source>
-        <translation> + {0} hors groupe</translation>
+        <source> + {0} outside a group</source>
+        <translation> + {0} outside a group</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
-        <source>Destination : {0}</source>
-        <translation>Destination : {0}</translation>
+        <source>Destination: {0}</source>
+        <translation>Destination: {0}</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="146"/>
@@ -3199,13 +3199,13 @@ Do you agree to all of them? No runs none of them.</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
-        <source>Annuler</source>
-        <translation>Annuler</translation>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
-        <source>Exporter</source>
-        <translation>Exporter</translation>
+        <source>Export</source>
+        <translation>Export</translation>
     </message>
 </context>
 <context>
