@@ -1,0 +1,27 @@
+🚀 360,577 buildings. 12 layers. ONE click. All inside QGIS.
+
+That's FilterMate 5.1, and you can watch it happen in 55 seconds 👇 (sound on 🔊)
+
+Stop exporting, clipping and re-importing. Ask your spatial question once:
+
+🗺️ Vector, raster, point cloud: any layer can be the source or the target
+⚡ Filters run in the SQL of each source (PostGIS, GeoPackage, SpatiaLite, files): nothing is copied
+🔗 Chain them: AND, OR, AND NOT, on several targets at once
+🏢 LiDAR: every building over 7 m, straight from the point cloud
+↩️ Undo, Redo, and Compare: slide a line across the map to see before and after
+📦 Export only the answer, in one GeoPackage that keeps your project
+🤖 Automate it all: Processing, Python and REST API, MCP
+
+And two brand-new sections (experimental, and already fun):
+
+🎯 SAM: one click on the orthophoto outlines the object. On your CPU. No GPU, no account.
+💬 AGENT: ask in one sentence, check every step, undo in one click. Your own API key, or a local Ollama model: in the video it runs on my laptop and nothing leaves it.
+
+No mock-up here: every second is the real plugin in QGIS 4.2, on open data of the IGN 🇫🇷
+
+✅ Free ✅ Open source ✅ QGIS 3.22 to 4.x
+👉 Install it in two clicks: links in the first comment
+
+Which one would you try first on your own data? Tell me below 👇
+
+#QGIS #GIS #OpenSource #Geospatial #LiDAR #GeoAI

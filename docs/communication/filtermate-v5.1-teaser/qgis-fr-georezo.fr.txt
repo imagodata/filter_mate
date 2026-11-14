@@ -1,0 +1,26 @@
+Objet : FilterMate 5.1 pour QGIS : filtres spatiaux vecteur / raster / LiDAR, SAM et agent (expérimentaux)
+
+Bonjour,
+
+FilterMate 5.1 est disponible dans le dépôt des extensions de QGIS (QGIS 3.22 à 4.x, gratuit, GPLv3).
+
+Le plugin porte une sélection d'une couche vers les autres : les bâtiments à moins de 300 m d'un cours d'eau, les parcelles en forte pente, les points LiDAR au-dessus d'une hauteur. Vecteur, raster et nuage de points peuvent être source ou cible, et le filtre est écrit dans le SQL de chaque source (PostGIS, GeoPackage, SpatiaLite, fichiers) : rien n'est copié.
+
+Une vidéo de 55 secondes (en anglais) montre le plugin dans QGIS 4.2 sur la BD TOPO et le LiDAR HD de l'IGN, autour de Toulouse : <lien de la vidéo>
+
+Ce que la 5.1 apporte :
+- une ligne Comparer, à côté d'Annuler et Rétablir, qui montre la carte avant et après le dernier filtre ;
+- des filtres attributaires écrits dans le SQL natif de la source, variables du projet comprises ;
+- SAM (expérimental) : un clic détoure un objet sur une orthophoto, sur le processeur, sans carte graphique. Mesuré sur des toits à 25 cm seulement ;
+- AGENT (expérimental) : un panneau de discussion qui filtre à partir d'une phrase, avec votre propre clé d'API ou un modèle local Ollama. Avec un modèle local, rien ne quitte l'ordinateur. Chaque étape annonce combien d'entités elle garde et s'annule.
+
+Limites connues : les filtres raster et nuage passent par des fichiers temporaires ; sans modèle local, l'agent envoie des valeurs de champs et des échantillons au fournisseur choisi.
+
+Site et guide : https://imagodata.github.io/filter_mate/index.fr.html
+Fiche : https://plugins.qgis.org/plugins/filter_mate/
+Code et tickets : https://github.com/imagodata/filter_mate
+
+Les retours sur vos propres données sont les bienvenus, en particulier sur SAM et sur l'agent.
+
+Cordialement,
+<signature>
