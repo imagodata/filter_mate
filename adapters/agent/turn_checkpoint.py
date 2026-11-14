@@ -44,11 +44,19 @@ class TurnCheckpoint:
         # a filter of the dock) is placed among them in the history of the project (core/domain/history_timeline.py).
         self._started = 0.0
         self._step_times: List[float] = []
+        # The call of each step of ``_steps``: which step a card of the thread shows (``step_of``).
+        self._calls: List[Any] = []
         self._open = False
         # The request of the turn being run, kept as the description of its operation.
         self.label = ""
         # Names a step from its tool call (the words the thread shows); None: the tool name.
         self.describe: Optional[Callable[[Any], str]] = None
+        # Called when a turn opens, before its first change is made (the map is pinned then, for Compare).
+        self.on_open: Optional[Callable[[], None]] = None
+        # What the last commit recorded, None when it recorded nothing: the ``op_id`` of its operation, and for each
+        # step of the turn kept (by ``step_of``) its rank in ``steps``, or None for a turn of a single step kept
+        # (``steps`` is empty then: the turn is that step).
+        self.recorded: Optional[Tuple[int, Dict[int, Optional[int]]]] = None
 
     @staticmethod
     def _snapshot(layer, kind):
@@ -74,6 +82,11 @@ class TurnCheckpoint:
         here" restores, step by step.
         """
         self._close_step()
+        if not self._open and self.on_open is not None:
+            try:  # what is done when a turn opens never keeps its change from being made
+                self.on_open()
+            except Exception:  # noqa: BLE001
+                logger.debug("Agent undo: the opening of a turn not followed", exc_info=True)
         now = time.time()
         if not self._open or not self._started:
             self._started = now
@@ -91,6 +104,7 @@ class TurnCheckpoint:
                 self._before[layer.id()] = (snapshot, kind)
         self._steps.append((self._label(call), states))
         self._step_times.append(now)
+        self._calls.append(call)
         self._step_recorder = EffectsRecorder(settings=False)
         if call is not None:
             self._effects.before_call(call, len(self._steps) - 1)
@@ -142,6 +156,13 @@ class TurnCheckpoint:
             placed.append(effect)
         return tuple(placed)
 
+    def step_of(self, call: Any) -> Optional[int]:
+        """The step of the turn under way begun for ``call`` (that very object: two calls may share an id), in the
+        order of ``begin``; None when no step was begun for it (a call that reads, or one of another turn)."""
+        if not self._open or call is None:
+            return None
+        return next((index for index, begun in enumerate(self._calls) if begun is call), None)
+
     def discard(self) -> None:
         """Forget the turn under way without recording it: its project is closing.
 
@@ -154,7 +175,8 @@ class TurnCheckpoint:
         self._steps = []
         self._effects = EffectsRecorder()
         self._step_effects, self._step_recorder = [], None
-        self._started, self._step_times = 0.0, []
+        self._started, self._step_times, self._calls = 0.0, [], []
+        self.recorded = None
         try:
             from .plugin_settings import take_applied
             take_applied()  # what the agent applied in that turn is not an effect of the next one
@@ -163,6 +185,7 @@ class TurnCheckpoint:
 
     def commit(self) -> Sequence[str]:
         """Record the turn when it changed something; names of the layers it changed."""
+        self.recorded = None
         if not self._open:
             return ()
         self._open = False
@@ -189,14 +212,16 @@ class TurnCheckpoint:
         self._before = {}
         self._steps = []
         self._step_effects = []
-        self._started, self._step_times = 0.0, []
+        self._started, self._step_times, self._calls = 0.0, [], []
         several = len(steps) > 1
-        _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
-                                                   steps=steps if several else (),
-                                                   step_effects=step_effects if several else (), effects=effects,
-                                                   started=started,
-                                                   step_times=step_times if several and len(step_times) == len(steps)
-                                                   else ()))
+        history = _api_service().history
+        operation = CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
+                                   steps=steps if several else (), step_effects=step_effects if several else (),
+                                   effects=effects, started=started,
+                                   step_times=step_times if several and len(step_times) == len(steps) else ())
+        history.push(operation)
+        if history.peek_undo(HISTORY_KEY) is operation:  # a turn that changed nothing is not kept
+            self.recorded = (operation.op_id, {index: rank if several else None for rank, index in enumerate(calls)})
         for effect in effects:
             if effect[0] in ("added", "removed", "style", "edits", "layout", "join") and len(effect) > 4 \
                     and effect[4] not in names:
@@ -224,6 +249,11 @@ class TurnCheckpoint:
         applied = [describe(operation, True) for operation in history.undo_stack(HISTORY_KEY)]
         undone = [describe(operation, False) for operation in reversed(history.redo_stack(HISTORY_KEY))]
         return applied + undone
+
+    @staticmethod
+    def applied() -> Tuple[CrossOperation, ...]:
+        """The operations of the turns still applied, oldest first (their rank is the one ``turns`` gives)."""
+        return _api_service().history.undo_stack(HISTORY_KEY)
 
     @staticmethod
     def can_undo() -> bool:

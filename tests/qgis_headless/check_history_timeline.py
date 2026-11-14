@@ -5,7 +5,7 @@ The three histories listed newest first (a vector filter of the dock, a raster o
 steps, a filter undone), what Undo and Redo would take marked as the action bar chooses its history, the list kept
 up to date while open, the map before a step compared (the image left of the line is the map of then) and pinned,
 the same from the history page of the agent (a turn or a step by its rank), the pin listed first to be compared or
-removed, the tooltips of Undo and Redo.
+removed (said so when taken by itself before a request of the agent), the tooltips of Undo and Redo.
 
     docker run --rm --init --network none -v "$PWD:/src:ro" -e QT_QPA_PLATFORM=offscreen qgis/qgis:ltr \\
         python3 /src/tests/qgis_headless/check_history_timeline.py
@@ -166,6 +166,10 @@ class Dock(QWidget):
 
     def get_layers_to_filter(self):
         return []
+
+
+# The menu of Compare before the history adds its entry.
+MENU = ["Pin the current state", "Remove the pin", "Pin the map before each request of the agent", "", "Horizontal line"]
 
 
 def main():
@@ -453,6 +457,17 @@ def main():
     controller.open(undo)
     check("a pin taken while closed is listed at the next opening", panel.pinned_at is not None
           and tree.topLevelItem(0).data(COLUMN_ORIGIN, INDEX_ROLE) == PIN_INDEX)
+    check("a pin of the user is not said to be taken before a request", not panel.pin_automatic
+          and not tree.topLevelItem(0).text(COLUMN_WHAT).endswith("(before the agent's request)"))
+    compare.unpin()
+    compare.set_auto_pin(True)
+    automatic = compare.read_automatic_pin()
+    pinned = automatic is not None and compare.pin_automatic(automatic)
+    listed = wait(lambda: panel.pin_automatic, 2)
+    top = tree.topLevelItem(0)
+    check("a pin taken before a request of the agent heads the list and says so", pinned and listed
+          and top.data(COLUMN_ORIGIN, INDEX_ROLE) == PIN_INDEX and top.text(COLUMN_WHAT).startswith("Pinned ")
+          and top.text(COLUMN_WHAT).endswith("(before the agent's request)"), top.text(COLUMN_WHAT))
     controller.close_panel()
     compare.unpin()
 
@@ -580,7 +595,7 @@ def main():
 
     # From the menu of Compare.
     texts = [action.text() for action in compare.menu.actions()]
-    check("Compare: History… in its menu", texts == ["Pin the current state", "Remove the pin", "", "History…"], texts)
+    check("Compare: History… in its menu", texts == MENU + ["", "History…"], texts)
     controller.history_action.trigger()
     check("History… opens the panel", controller.panel.isVisible())
     controller.close_panel()
@@ -591,7 +606,7 @@ def main():
                                                    undo.mapToGlobal(QPoint(4, 4))))
     QgsApplication.processEvents()
     check("torn down: no panel, no entry left in the menu of Compare", not controller.panel.isVisible()
-          and [action.text() for action in compare.menu.actions()] == ["Pin the current state", "Remove the pin"])
+          and [action.text() for action in compare.menu.actions()] == MENU)
     check("torn down: the tooltips of the .ui again", undo.toolTip() == "Undo the last filter"
           and redo.toolTip() == "Redo the last filter", (undo.toolTip(), redo.toolTip()))
     compare.pin()
@@ -617,7 +632,7 @@ def main():
                                                      button.mapToGlobal(QPoint(4, 4))))
     QgsApplication.processEvents()
     check("a setup failed half way is undone", raised and [action.text() for action in broken_compare.menu.actions()]
-          == ["Pin the current state", "Remove the pin"] and not any(
+          == MENU and not any(
               isinstance(child, QWidget) and child.objectName() == "frame_fm_history" and child.isVisible()
               for child in broken.findChildren(QWidget)))
     broken_compare.teardown()

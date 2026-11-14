@@ -19,7 +19,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .compare_states import BeforeMap, BeforeState, Effects, from_cross_operation, from_history_entry, map_with_effects
+from .compare_states import (UNSHOWN_EFFECTS, BeforeMap, BeforeState, Effects, from_cross_operation, from_history_entry,
+                             map_with_effects)
+
+# Effects of a turn of the agent that Compare draws (map_with_effects) or names (UNSHOWN_EFFECTS).
+MAP_EFFECTS = ("style", "visibility", "added", "removed") + UNSHOWN_EFFECTS
 
 KIND_VECTOR = "vector"
 KIND_COVERAGE = "coverage"
@@ -316,6 +320,42 @@ def agent_item(items: Iterable[TimelineItem], key: str, turn: int, step: Optiona
         return found
     return next((item for item in items if item.kind == KIND_STEP and item.key == key and item.ref is found.ref
                  and item.position == step), None)
+
+
+def _draws(befores: Sequence[Any], effects: Iterable[Tuple[Any, ...]]) -> bool:
+    """Whether a turn or a step changed the map as Compare draws or names it: a filter, a style, a layer shown, hidden,
+    added or removed, the layer tree... (not a note, a selection, a widget or a setting)."""
+    return bool(befores) or any(effect and effect[0] in MAP_EFFECTS for effect in effects)
+
+
+def changes_map(operation: Any) -> bool:
+    """Whether a turn of the agent (its operation) changed the map as Compare draws or names it."""
+    return _draws(getattr(operation, "changes", ()) or (), getattr(operation, "effects", ()) or ())
+
+
+def card_target(undo_stack: Sequence[Any], op_id: int, step: Optional[int]) -> Optional[Tuple[int, Optional[int], bool]]:
+    """What the card of an action of the agent compares with (``HistoryController.compare_agent_turn``): ``(turn,
+    step, exact)``, the rank of its turn in ``undo_stack`` (the turns applied, oldest first) and the rank of its step,
+    or None (the whole turn); ``exact``: that is the map before the action itself.
+
+    ``op_id``: the operation of the turn; ``step``: the rank of the action among the steps of the turn, None for a turn
+    of a single step (the turn is the action). Only the steps of the last turn applied are compared one by one (as the
+    history lists them): the card of a step of an earlier turn compares with the map before its whole turn, not
+    exact. None when the turn is no longer applied (undone, or forgotten), or when the action changed nothing of the
+    map.
+    """
+    rank = next((index for index, operation in enumerate(undo_stack) if getattr(operation, "op_id", None) == op_id),
+                None)
+    if rank is None:
+        return None
+    operation = undo_stack[rank]
+    if step is None:
+        return (rank, None, True) if changes_map(operation) else None
+    steps = getattr(operation, "steps", ()) or ()
+    step_effects = getattr(operation, "step_effects", ()) or ()
+    if not 0 <= step < len(steps) or not _draws(steps[step][1], step_effects[step] if step < len(step_effects) else ()):
+        return None
+    return (rank, step, True) if rank == len(undo_stack) - 1 else (rank, None, False)
 
 
 def _effects_of(operation: Any) -> Effects:

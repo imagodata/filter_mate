@@ -1205,6 +1205,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Kartan före den här begäran eller det här steget till vänster om en linje, kartan nu till höger om den</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Kartan före det här steget till vänster om en linje, kartan nu till höger om den</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Kartan före hela begäran till vänster om en linje, kartan nu till höger om den: bara stegen i den senaste begäran jämförs ett i taget</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROVA</translation>
@@ -4805,6 +4815,16 @@ What would you like to do?</translation>
         <translation>Ta bort fästningen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Fäst kartan före varje begäran till agenten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vågrät linje</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Klicka på kartan för att låsa linjen, klicka igen för att frigöra den.</translation>
@@ -4843,6 +4863,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fäst {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Fäst {} (före begäran till agenten)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

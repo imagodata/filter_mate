@@ -1205,6 +1205,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>El mapa d'abans d'aquesta petició o pas a l'esquerra d'una línia, el mapa actual a la dreta</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>El mapa d'abans d'aquest pas a l'esquerra d'una línia, el mapa actual a la dreta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>El mapa d'abans de tota la petició a l'esquerra d'una línia, el mapa actual a la dreta: només els passos de l'última petició es comparen un per un</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROVEU</translation>
@@ -4805,6 +4815,16 @@ What would you like to do?</translation>
         <translation>Treu la fixació</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Fixa el mapa abans de cada petició a l'agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Línia horitzontal</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Feu clic al mapa per bloquejar la línia; torneu-hi a fer clic per alliberar-la.</translation>
@@ -4843,6 +4863,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fixat {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Fixat {} (abans de la petició a l'agent)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

@@ -1205,6 +1205,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>इस अनुरोध या चरण से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>इस चरण से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>पूरे अनुरोध से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर: केवल अंतिम अनुरोध के चरणों की एक-एक करके तुलना होती है</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>आज़माएँ</translation>
@@ -4805,6 +4815,16 @@ What would you like to do?</translation>
         <translation>पिन हटाएँ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>एजेंट के हर अनुरोध से पहले नक्शा पिन करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>क्षैतिज रेखा</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>रेखा लॉक करने के लिए नक्शे पर क्लिक करें, छोड़ने के लिए फिर से क्लिक करें।</translation>
@@ -4843,6 +4863,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>पिन किया गया {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>पिन किया गया {} (एजेंट के अनुरोध से पहले)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

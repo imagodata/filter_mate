@@ -1205,6 +1205,16 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>O mapa antes deste pedido ou passo à esquerda de uma linha, o mapa atual à sua direita</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>O mapa antes deste passo à esquerda de uma linha, o mapa atual à sua direita</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>O mapa antes de todo o pedido à esquerda de uma linha, o mapa atual à sua direita: só os passos do último pedido são comparados um a um</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>EXPERIMENTE</translation>
@@ -4805,6 +4815,16 @@ What would you like to do?</translation>
         <translation>Remover a fixação</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Fixar o mapa antes de cada pedido ao agente</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Linha horizontal</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Clicar no mapa bloqueia a linha; clicar de novo liberta-a.</translation>
@@ -4843,6 +4863,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fixado {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Fixado {} (antes do pedido ao agente)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

@@ -1205,6 +1205,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Kartta ennen tätä pyyntöä tai vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Kartta ennen tätä vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Kartta ennen koko pyyntöä viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella: vain viimeisimmän pyynnön vaiheita verrataan yksitellen</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>KOKEILE</translation>
@@ -4805,6 +4815,16 @@ What would you like to do?</translation>
         <translation>Poista kiinnitys</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Kiinnitä kartta ennen jokaista agentille tehtyä pyyntöä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vaakasuora viiva</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Lukitse viiva napsauttamalla karttaa, vapauta se napsauttamalla uudelleen.</translation>
@@ -4843,6 +4863,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Kiinnitetty {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Kiinnitetty {} (ennen agentille tehtyä pyyntöä)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>
