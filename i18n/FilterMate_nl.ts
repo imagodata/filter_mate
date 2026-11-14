@@ -299,6 +299,11 @@ Gaat u akkoord?</translation>
         <translation>Niets om te herstellen.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>De agent is bezig: wacht tot hij klaar is.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Actieve filters worden gelezen</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>De kaart vóór deze stap vastzetten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Terug naar voor deze stap</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>De kaart zoals die was vóór deze stap: de sindsdien gewijzigde filters, stijlen en lagen worden teruggezet. Een nieuwe stap in de geschiedenis, die Ongedaan maken hier terugdraait.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

@@ -299,6 +299,11 @@ Onaylıyor musunuz?</translation>
         <translation>Geri yüklenecek bir şey yok.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Aracı çalışıyor: bitmesini bekleyin.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Etkin filtreler okunuyor</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Bu adımdan önceki haritayı sabitle</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Bu adımdan önceye dön</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Bu adımdan önceki haliyle harita: o zamandan beri değişen filtreler, stiller ve katmanlar geri alınır. Geçmişte yeni bir adım olur; burada Geri al ile geri alınabilir.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

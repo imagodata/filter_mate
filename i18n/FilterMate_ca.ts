@@ -299,6 +299,11 @@ Hi esteu d'acord?</translation>
         <translation>Res a restaurar.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>L'agent està treballant: espereu que acabi.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lectura dels filtres actius</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixa el mapa d'abans d'aquest pas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Tornar a abans d'aquest pas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>El mapa tal com era abans d'aquest pas: els filtres, els estils i les capes canviats des d'aleshores tornen enrere. Un pas nou de l'historial, que Desfés pot desfer aquí.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

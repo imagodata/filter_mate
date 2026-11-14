@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>没有可恢复的内容。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>智能体正在工作：请等待其完成。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>正在读取当前过滤器</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>固定此步骤之前的地图</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>返回到此步骤之前</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>此步骤之前的地图：此后更改的过滤器、样式和图层会恢复原状。这是历史记录中的新步骤，可在此处用“撤销”取消。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

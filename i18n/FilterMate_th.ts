@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>ไม่มีสิ่งที่ต้องกู้คืน</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>เอเจนต์กำลังทำงาน: โปรดรอจนกว่าจะเสร็จ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>กำลังอ่านตัวกรองที่ใช้งานอยู่</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>ปักหมุดแผนที่ก่อนขั้นตอนนี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>กลับไปก่อนขั้นตอนนี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>แผนที่ตามที่เป็นก่อนขั้นตอนนี้: ตัวกรอง สไตล์ และเลเยอร์ที่เปลี่ยนไปนับแต่นั้นจะย้อนกลับ เป็นขั้นตอนใหม่ในประวัติ ซึ่ง «เลิกทำ» ที่นี่สามารถยกเลิกได้</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>
