@@ -513,7 +513,11 @@ address, else its content type), its size, and whether the server gives parts of
   and `add_database_table` adds one as a layer, asked alone in its own words; the source is built by QGIS for a table
   the connection lists, and the address and the credentials never leave QGIS (a model names a connection by an id).
   Tools of the chat alone: the REST API and the MCP servers do not offer them, a caller there holds a key of
-  FilterMate, not the databases of the user. Limits: PostgreSQL only; a connection saved without its credentials
+  FilterMate, not the databases of the user. A view opens with the first key QGIS proposes, a column of several
+  kinds of geometries with the first kind, a table of several geometry columns by the one named. The id of a
+  connection follows its name and what it connects to: one made again elsewhere under the same name is not ticked.
+  The password QGIS keeps for the connection is in the source of the layer, as when the user adds the table from
+  the browser, so it is saved with the project; it never goes to the model. Limits: PostgreSQL only; a connection saved without its credentials
   asks for them in a QGIS dialog, or fails; the list is read on the main thread.
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
@@ -633,7 +637,8 @@ estimated:
 
 A web service is not read by any of them, but for `sample_features`: a few features of what the map shows (the
 extent of the map as the filter rectangle, 20 at most, no expression nor selection), which its server was already
-asked to draw it; never the layer as a whole. The answer says so in `scope`.
+asked to draw it: a layer unchecked or out of its scale range is refused; never the layer as a whole. Not measured:
+whether the WFS provider passes the limit to the server or reads the whole extent into its cache first. The answer says so in `scope`.
 
 Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
 
@@ -664,10 +669,12 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
 Style (`adapters/public_api/layer_style.py`): `set_layer_style` (vector: single, categorized on a field of 100 values
 at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation, or
 `rules`: 20 rules at most, each a condition held to the list of `select_features`, a color and a legend name, one
-of them with no condition for every other feature;
+of them with no condition for every other feature; a feature is drawn by the first rule it matches (QGIS draws it
+with every rule it matches: each rule is written to leave out what the rules before it took);
 raster: pseudocolor or gray stretch of a band, its range read from the statistics of the band or given, never read
 from a web service) and `set_labels` (a field, or an expression held to the list of `update_features`; size, color, halo, the scale
-from which they show; or off), with a ramp of the style of QGIS and an
+from which they show; or off; what is kept in a style is computed for every feature at every drawing, so `rpad`,
+`lpad`, `format_number`, `buffer` and numbers of ten digits are refused there), with a ramp of the style of QGIS and an
 opacity. The answer says how many classes were made, never their values. Before the first call of a turn on a layer,
 the turn checkpoint keeps its symbology, labels and rendering as XML (`exportNamedStyle`), and undoing the turn puts
 them back (`importNamedStyle`); redoing it applies the new style again.

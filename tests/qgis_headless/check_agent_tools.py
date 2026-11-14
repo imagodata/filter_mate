@@ -334,7 +334,8 @@ def check_style(project, gpkg, work):
     style.set_layer_style("communes", "rules", rules=[{"expression": '"pop" > 100', "color": "red"},
                                                       {"expression": '"pop" > 5000', "color": "blue"}])
     from qgis.core import QgsRenderContext
-    drawn_by = gpkg.renderer()
+    del children, rule_renderer  # of a renderer the layer no longer has
+    drawn_by = gpkg.renderer().clone()  # a copy: a rendering started on the renderer of the layer crashed QGIS 3.22
     context = QgsRenderContext()
     context.expressionContext().setFields(gpkg.fields())
     drawn_by.startRender(context, gpkg.fields())
@@ -343,6 +344,7 @@ def check_style(project, gpkg, work):
         context.expressionContext().setFeature(feature)
         counts.add(len(drawn_by.symbolsForFeature(feature, context)))
     drawn_by.stopRender(context)
+    del drawn_by, context
     check("style: a feature is drawn by the first rule it matches, never by two", counts <= {0, 1} and 1 in counts, counts)
     for call, label in ((lambda: style.set_layer_style("communes", "rules"), "rules without rules"),
                         (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": '"absent" = 1', "color": "red"}]),
