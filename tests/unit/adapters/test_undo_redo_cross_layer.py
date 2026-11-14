@@ -391,3 +391,93 @@ def test_compare_shows_the_raster_targets_undo_restores(env):
 
     assert compared(layers["pop"], []) == ["pop", "raster"]
     assert compared(layers["mro"], ["pop"]) == ["pop"]  # Undo takes POP's entry: MRO's raster target stays
+
+
+def test_undo_gives_back_what_the_layer_held_before_the_filter_not_what_the_history_last_said(env):
+    """2026-11-14: a layer changed outside the dock (a turn of the agent, a raster source, the query builder of
+    QGIS), then filtered in the dock. The entry took its previous filter from the last entry of the history, so
+    Undo went past the change made outside, and the history panel drew the map before that filter without it."""
+    handler, history, layers, applied = env
+    pop = layers["pop"]
+    parameters = {"infos": {"layer_provider_type": "ogr"}, "task": {"layers": []}}
+    handler.initialize_filter_history(pop, [], parameters)
+    pop.subsetString.return_value = "A"
+    handler.push_filter_to_history(pop, parameters, 5, "ogr", 1)
+    pop.subsetString.return_value = "OUTSIDE"  # not through the dock: the history knows nothing of it
+    handler.initialize_filter_history(pop, [], parameters)
+    pop.subsetString.return_value = "B"
+    handler.push_filter_to_history(pop, parameters, 5, "ogr", 1)
+    assert history.peek_undo().previous_filters == (("pop", "OUTSIDE"),)
+    assert handler.handle_undo(pop, [], False, None) is True
+    assert applied[-1] == ("pop", "OUTSIDE")
+
+
+def test_a_run_that_did_not_read_the_layers_takes_nothing_from_the_run_before(env):
+    """What was read before a run is for that run alone: the next push without a reading falls back on the history."""
+    handler, history, layers, applied = env
+    pop = layers["pop"]
+    parameters = {"infos": {"layer_provider_type": "ogr"}, "task": {"layers": []}}
+    handler.initialize_filter_history(pop, [], parameters)
+    pop.subsetString.return_value = "A"
+    handler.push_filter_to_history(pop, parameters, 5, "ogr", 1)
+    pop.subsetString.return_value = "B"
+    handler.push_filter_to_history(pop, parameters, 5, "ogr", 1)  # no initialize before this one
+    assert history.peek_undo().previous_filters == (("pop", "A"),)
+
+
+def _global_run(handler, layers, monkeypatch, after):
+    """One filter from Zones MRO with Zones POP as its target, as the dock runs it: read, filter, record."""
+    mro, pop = layers["mro"], layers["pop"]
+    monkeypatch.setattr(handler, "_get_project", lambda: types.SimpleNamespace(mapLayer=layers.get, mapLayers=lambda: layers))
+    targets = [{"layer_id": "pop", "layer_provider_type": "ogr"}]
+    parameters = {"infos": {"layer_provider_type": "ogr"}, "task": {"layers": targets}}
+    handler.initialize_filter_history(mro, targets, parameters)
+    mro.subsetString.return_value, pop.subsetString.return_value = after
+    monkeypatch.setattr(handler, "_collect_remote_layers_history", lambda *args: {"pop": (after[1], 3)})
+    handler.push_filter_to_history(mro, parameters, 5, "ogr", 2)
+
+
+def test_a_change_made_outside_the_dock_is_never_undone_as_a_step_of_the_dock(env, monkeypatch):
+    """A review of 2026-11-14. The "Pre-filter state" entry of a run took its previous filters from the history: the
+    second Undo gave Zones POP the filter of the run before, undoing what the agent had set meanwhile as if the dock
+    had done it."""
+    handler, history, layers, applied = env
+    mro, pop = layers["mro"], layers["pop"]
+    pop.subsetString.return_value = "OUTSIDE"
+    _global_run(handler, layers, monkeypatch, ("M2", "P2"))
+    assert dict(history.peek_undo().previous_filters) == {"mro": MRO_EXPR, "pop": "OUTSIDE"}
+    assert handler.handle_undo(mro, ["pop"], True, None) is True
+    assert pop.subsetString() == "OUTSIDE" and mro.subsetString() == MRO_EXPR
+    del applied[:]
+    assert handler.handle_undo(mro, ["pop"], True, None) is True  # the state before the run: nothing changes
+    assert pop.subsetString() == "OUTSIDE" and mro.subsetString() == MRO_EXPR, applied
+
+
+def test_the_first_filter_of_a_layer_never_takes_away_a_filter_set_outside_the_dock(env):
+    """A review of 2026-11-14: "Initial state" had "" as its previous filter, so a second Undo emptied a layer whose
+    filter the dock had never set."""
+    handler, history, layers, applied = env
+    history.clear()
+    feed = layers["feed"]
+    feed.subsetString.return_value = "X"  # set in QGIS, before any filter of the dock
+    parameters = {"infos": {"layer_provider_type": "ogr"}, "task": {"layers": []}}
+    handler.initialize_filter_history(feed, [], parameters)
+    feed.subsetString.return_value = "X AND y"
+    handler.push_filter_to_history(feed, parameters, 5, "ogr", 1)
+    assert handler.handle_undo(feed, [], False, None) is True and feed.subsetString() == "X"
+    handler.handle_undo(feed, [], False, None)
+    assert feed.subsetString() == "X"
+
+
+def test_the_reading_of_a_run_goes_with_its_parameters_not_with_the_handler(env):
+    """A review of 2026-11-14: a run refused after its layers were read left its reading to the run that ended next."""
+    handler, history, layers, applied = env
+    pop, feed = layers["pop"], layers["feed"]
+    first = {"infos": {"layer_provider_type": "ogr"}, "task": {"layers": []}}
+    handler.initialize_filter_history(pop, [], first)
+    pop.subsetString.return_value = "A"
+    refused = {"infos": {"layer_provider_type": "ogr"}, "task": {"layers": []}}
+    handler.initialize_filter_history(feed, [], refused)  # read, then never run
+    handler.push_filter_to_history(pop, first, 5, "ogr", 1)
+    assert history.peek_undo().previous_filters == (("pop", POP_EXPR),)
+    assert "before_run" not in first["task"]
