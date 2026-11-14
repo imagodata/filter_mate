@@ -278,6 +278,15 @@ def _is_polygon_layer(layer) -> bool:
         return False
 
 
+_TOO_MANY_KEYS = object()  # more matching features than a web service is sent as a list
+
+
+def BY_EXTENT() -> str:
+    """What is said of a web service cut by the extent of the source: the words of the dock (filter_executor)."""
+    from ...backends.ogr.filter_executor import _remote_message
+    return _remote_message('by_extent')
+
+
 class VectorTargetJob(TargetJob):
     """Keep the features of a vector target that satisfy the predicates."""
 
@@ -311,12 +320,18 @@ class VectorTargetJob(TargetJob):
         self._centroid_eligible = self._is_polygon or layer.geometryType() == line_type
         self._use_centroids = False
         self._pk, self._raw_pk = self._primary_key(layer)
+        self._no_key = ''
         if self._pk is None:
-            self._error = translate(
+            no_key = translate(
                 "VectorTargetJob",
                 "{0}: no unique key field, its features cannot be listed in its filter "
                 "(a web service, or a virtual layer without a unique id column)."
             ).format(layer.name())
+            if self._remote_target is not None and getattr(self._capability, 'takes_extent_subset', False):
+                # 2026-11-15: such a service is cut by the extent of the source (compute), which lists no key.
+                self._no_key = no_key
+            else:
+                self._error = no_key
         self._expression = ''
 
     def _unfiltered_source(self, layer: QgsVectorLayer):
@@ -396,6 +411,8 @@ class VectorTargetJob(TargetJob):
                               materialization_limits(ENV_VARS), self.feedback)
         self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
         if not outcome.complete:
+            if outcome.reason == 'key_limit':
+                return _TOO_MANY_KEYS  # compute() cuts by the extent of the source, or refuses with this reason
             if outcome.reason not in ('feature_limit', 'timeout'):
                 self.outcome.message = _remote_message(outcome.reason)
                 return None
@@ -454,7 +471,18 @@ class VectorTargetJob(TargetJob):
         coverage = float(request.coverage_min or 0.0) if self._is_polygon else 0.0
         complement = False
         if self._remote_target is not None:
+            if self._no_key:
+                # Nothing to list, so nothing to read: the server is asked what meets the extent of the source.
+                self._remote_target = None
+                if not self._cut_by_extent(geometry, request.methods):
+                    self.outcome.message = self._no_key
+                return
             kept = self._compute_remote(geometry, methods, parts, part_methods, coverage)
+            if kept is _TOO_MANY_KEYS:
+                if not self._cut_by_extent(geometry, request.methods):
+                    from ...backends.ogr.filter_executor import _remote_message
+                    self.outcome.message = _remote_message('key_limit')
+                return
             if kept is None:
                 return
             # Disjoint: the keys are those of the features that intersect (all inside the BBOX).
@@ -467,6 +495,8 @@ class VectorTargetJob(TargetJob):
         limit = capability.key_list_limit if capability is not None and capability.is_remote_service else None
         if limit and len(kept) > limit:
             self._source = None
+            if self._cut_by_extent(geometry, request.methods):
+                return
             self.outcome.message = translate(
                 "VectorTargetJob",
                 "{0} features to list, more than the {1} sent to a web service: narrow the source "
@@ -499,6 +529,36 @@ class VectorTargetJob(TargetJob):
             self.outcome.details['partial'] = True
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
+
+    def _cut_by_extent(self, geometry, methods) -> bool:
+        """Cut the target by the extent of the source, on the server, where its features cannot be listed.
+
+        2026-11-15: a web service was refused past 500 matching features, or without a stable key. A WFS is asked
+        what meets the rectangle of the source instead (``source_capability.extent_subset``): no key is listed, so
+        the result has no bound. It is a cut by extent, and says so: a feature inside the rectangle and outside the
+        source itself stays, whatever the predicate.
+
+        Returns:
+            False where the cut cannot be made, the job left as it was: a service that takes no such filter, AND NOT
+            or Disjoint (both keep what lies outside the rectangle, a negation the validated WFS dialect does not
+            write: what a server answers for a feature without geometry is not proven), an empty source.
+        """
+        from ....core.domain.source_capability import extent_subset
+        if self._capability is None or (self.operator or '').upper() == 'AND NOT' or geometry.isEmpty():
+            return False
+        if 'disjoint' in methods:
+            return False
+        box = geometry.boundingBox()
+        expression = extent_subset(self._capability, box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum())
+        if expression is None:
+            return False
+        self._source = None
+        self._expression = expression
+        self.outcome.details['by_extent'] = True
+        self.outcome.message = BY_EXTENT()
+        self.outcome.success = True
+        self.outcome.elapsed = time.perf_counter() - self._started
+        return True
 
     def _predicate_geometry(self, geometry):
         """The geometry used by the predicate; the original feature is retained in the target layer."""

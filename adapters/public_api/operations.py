@@ -461,6 +461,9 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
             if outcome.details.get('partial'):
                 # A web service read up to its budget: the features kept are exact, some may be missing.
                 per_layer[label]['partial'] = outcome.message
+            if outcome.details.get('by_extent'):
+                # A web service whose features cannot be listed: cut by the extent of the source, not its outline.
+                per_layer[label]['by_extent'] = outcome.message
         else:
             report.failed[label] = outcome.message or "failed"
             if outcome.details.get('internal_error'):

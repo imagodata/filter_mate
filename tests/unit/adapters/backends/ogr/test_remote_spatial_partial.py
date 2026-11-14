@@ -237,3 +237,96 @@ def test_a_complete_result_without_a_filter_writes_not(remote):
     applied, queued, builder = _apply(remote, outcome, None, "AND NOT")
     assert applied is True
     assert queued == ['NOT (\n"id" IN (1, 3)\n)']
+
+
+# --- cut by the extent of the source (2026-11-15) -------------------------------------------------------------------
+
+TOO_MANY = Outcome(keys=(), complete=False, fetched=600, reason="key_limit")
+BY_EXTENT = "Cut by the extent of the source"
+BOX = "intersects_bbox($geometry, geom_from_wkt('POLYGON((10 20, 30 20, 30 40.5, 10 40.5, 10 20))'))"
+
+
+@pytest.fixture
+def extent(remote, monkeypatch):
+    """A WFS, which takes a filter by extent, and a source whose rectangle is 10 20, 30 40.5."""
+    import core.domain.source_capability as capability  # the executor asks it under the package of the plugin
+    for name in ("core", "core.domain"):
+        if f"{_PKG}.{name}" not in sys.modules:
+            package = types.ModuleType(f"{_PKG}.{name}")
+            package.__path__ = []
+            monkeypatch.setitem(sys.modules, package.__name__, package)
+    monkeypatch.setitem(sys.modules, f"{_PKG}.core.domain.source_capability", capability)
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.source_capability_probe"], "capability_for_layer",
+                        lambda layer: capability.classify("WFS", "url='https://example.org/wfs' typename='a:b'"))
+    box = SimpleNamespace(xMinimum=lambda: 10.0, yMinimum=lambda: 20.0, xMaximum=lambda: 30.0, yMaximum=lambda: 40.5)
+    monkeypatch.setattr(_Geometry, "boundingBox", lambda self: box)
+    return remote
+
+
+@pytest.mark.parametrize("operator, old_subset, expected", [
+    (None, None, BOX), ("AND", '"nature" = 2', f'("nature" = 2) AND ({BOX})'),
+    ("OR", '"nature" = 2', f'("nature" = 2) OR ({BOX})'),
+])
+def test_more_keys_than_a_service_is_sent_cut_it_by_the_extent(extent, operator, old_subset, expected):
+    """It was refused: "More than 500 keys would be sent to the service"."""
+    applied, queued, builder = _apply(extent, TOO_MANY, old_subset, operator)
+    assert applied is True and queued == [expected]
+    assert extent.marked == [(False, expected)]  # nothing partial: the server answers every feature of the extent
+    assert any(warning.startswith(BY_EXTENT) for warning in builder.user_warnings) and not builder.last_error
+    assert builder.remote_materialization_outcome is None
+
+
+def test_a_list_too_long_once_the_old_keys_are_counted_is_cut_by_the_extent_too(extent, monkeypatch):
+    monkeypatch.setattr(_Builder, "_key_list_refusal",
+                        lambda self, layer, count=None: "600 features to list" if count is not None else "")
+    outcome = Outcome(keys=(1, 2), complete=True, fetched=2, reason="")
+    applied, queued, builder = _apply(extent, outcome, None, None)
+    assert applied is True and queued == [BOX]
+
+
+def test_a_service_without_a_stable_key_is_cut_by_the_extent_and_nothing_is_read(extent, monkeypatch):
+    monkeypatch.setattr(_Builder, "_key_list_refusal",
+                        lambda self, layer, count=None: "no unique key field" if count is None else "")
+    read = []
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.remote_materializer"], "materialize",
+                        lambda *args: read.append(1))
+    applied, queued, builder = _apply(extent, None, None, None)
+    assert applied is True and queued == [BOX] and not read
+    assert any(warning.startswith(BY_EXTENT) for warning in builder.user_warnings)
+
+
+def test_and_not_is_never_cut_by_the_extent(extent, monkeypatch):
+    """It would take away the features of the rectangle that do not match the source."""
+    applied, queued, builder = _apply(extent, TOO_MANY, '"nature" = 2', "AND NOT")
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("More than 500 keys would be sent")
+    monkeypatch.setattr(_Builder, "_key_list_refusal",
+                        lambda self, layer, count=None: "no unique key field" if count is None else "")
+    applied, queued, builder = _apply(extent, None, None, "AND NOT")
+    assert applied is False and queued == [] and builder.last_error == "no unique key field"
+
+
+def test_disjoint_is_not_cut_by_extent(extent):
+    """What lies outside the rectangle is a negation, which the validated WFS dialect does not write."""
+    queued = []
+    builder = _Builder(queued)
+    crs = object()
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "")
+    extent.outcome = TOO_MANY
+    applied = executor.apply_remote_spatial_filter(builder, layer, SimpleNamespace(crs=lambda: crs), ["disjoint"],
+                                                   None, None, False, None, None)
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("More than 500 keys would be sent")
+
+
+@pytest.mark.parametrize("provider", ["oapif", "arcgisfeatureserver"])
+def test_a_service_that_takes_no_filter_by_extent_is_refused_as_before(extent, monkeypatch, provider):
+    from core.domain.source_capability import classify
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.source_capability_probe"], "capability_for_layer",
+                        lambda layer: classify(provider, "url='https://example.org/x'"))
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.remote_materializer"], "unfiltered_snapshot",
+                        lambda layer: layer, raising=False)
+    applied, queued, builder = _apply(extent, TOO_MANY, None, None)
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("More than 500 keys would be sent")
+

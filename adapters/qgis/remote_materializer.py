@@ -478,7 +478,20 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             except RuntimeError:
                 unobserved()
                 return
-            inspect_body()  # cached replies can have data before readyRead is connected
+            # A reply that already finished signals nothing more: read what it holds now. Any
+            # other reply is read from its own signals, and only from them: a reply QGIS serves
+            # from its network cache already shows its bytes here, and peeking them empties the
+            # cache device before Qt announced them. Qt then never emits readyRead nor finished,
+            # the provider waits for QGIS's network timeout (60 s), and the abort that ends the
+            # wait is counted as a failed read (seen 2026-11-15 on the GetFeature COUNT=1 a WFS
+            # 2.0 layer sends when it opens, which QGIS caches).
+            try:
+                already_finished = on_reply(lambda live: live.isFinished())
+            except RuntimeError:
+                unobserved()
+                return
+            if already_finished:
+                inspect_body()
 
         preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(inspect_reply)
     message_log = QgsApplication.messageLog()

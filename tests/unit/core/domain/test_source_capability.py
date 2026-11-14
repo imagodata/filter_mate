@@ -163,3 +163,72 @@ def test_probe_never_counts_a_remote_layer():
     probe = _probe()
     assert probe.feature_count_or_none(_Layer("w2", "OAPIF", OAPIF_URI)) is None
     assert probe.is_remote_layer(_Layer("w3", "arcgisfeatureserver", AFS_URI))
+
+
+class TestExtentSubset:
+    """A web service cut by the extent of the source, where its features cannot be listed (2026-11-15)."""
+
+    def test_a_wfs_takes_a_filter_by_extent(self):
+        from core.domain.source_capability import extent_subset
+        capability = classify("WFS", WFS_URI)
+        assert capability.takes_extent_subset
+        subset = extent_subset(capability, 1.5, -2, 30, 40.25)
+        assert subset == ("intersects_bbox($geometry, geom_from_wkt('POLYGON((1.5 -2, 30 -2, 30 40.25, 1.5 40.25, "
+                          "1.5 -2))'))")
+
+    @pytest.mark.parametrize("provider, uri", [
+        ("OAPIF", OAPIF_URI), ("arcgisfeatureserver", "url='https://example.org/FeatureServer/0'"),
+        ("ogr", "/data/a.gpkg|layername=a"), ("postgres", "dbname='gis' table=\"a\""), ("memory", "Point"),
+    ])
+    def test_no_other_source_does(self, provider, uri):
+        """What an OGC API or an ArcGIS service is sent for such an expression was not read: refused as before."""
+        from core.domain.source_capability import extent_subset
+        capability = classify(provider, uri)
+        assert not capability.takes_extent_subset and extent_subset(capability, 0, 0, 1, 1) is None
+
+    def test_coordinates_are_plain_decimals(self):
+        """WKT in a filter sent to a server: never an exponent, nine decimals at most, no negative zero."""
+        from core.domain.source_capability import extent_subset
+        subset = extent_subset(classify("WFS", WFS_URI), 1e-7, -0.0, 652381.123456789123, 6.862e6)
+        assert "POLYGON((0.0000001 0, 652381.123456789 0, 652381.123456789 6862000, 0.0000001 6862000, " \
+               "0.0000001 0))" in subset
+        assert "e" not in subset.split("POLYGON")[1].lower()
+
+    @pytest.mark.parametrize("bounds", [
+        (float("nan"), 0, 1, 1), (0, 0, float("inf"), 1), (2, 0, 1, 1), (0, 2, 1, 1), ("a", 0, 1, 1), (None, 0, 1, 1),
+    ])
+    def test_a_rectangle_that_is_none_gives_no_filter(self, bounds):
+        from core.domain.source_capability import extent_subset
+        assert extent_subset(classify("WFS", WFS_URI), *bounds) is None
+
+    def test_a_point_is_a_rectangle(self):
+        """A source of one point: its extent has no size, the server is still asked what meets it."""
+        from core.domain.source_capability import extent_subset
+        assert "POLYGON((5 6, 5 6, 5 6, 5 6, 5 6))" in extent_subset(classify("WFS", WFS_URI), 5, 6, 5, 6)
+
+    @pytest.mark.parametrize("bounds", [
+        (1.5, -2, 30, 40.25), (0, 0, 0, 0), (-652381.123456789, 6862000, 652381.5, 6862000.25), (1e-7, 0, 1, 1),
+    ])
+    def test_the_rectangle_is_read_back_from_what_was_written(self, bounds):
+        """The validated server dialect reads the bounds of the WKT, and writes the filter again from them."""
+        from core.domain.source_capability import extent_expression, extent_of_wkt
+        written = extent_expression(*bounds)
+        wkt = written.split("geom_from_wkt('")[1].split("')")[0]
+        assert extent_of_wkt(wkt) == tuple(float(value) for value in bounds)
+        assert extent_expression(*extent_of_wkt(wkt)) == written
+
+    @pytest.mark.parametrize("wkt", [
+        "POLYGON((0 0, 10 0, 10 10, 0 10))",                       # not closed
+        "POLYGON((0 0, 10 0, 10 10, 0 10, 0 1))",                  # closed elsewhere
+        "POLYGON((0 0, 10 1, 10 10, 0 10, 0 0))",                  # not axis-aligned
+        "POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))",                  # the other way round
+        "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0),(1 1, 2 1, 2 2, 1 2, 1 1))",  # a hole
+        "POLYGON((0 0, 1e3 0, 1e3 10, 0 10, 0 0))",                # an exponent
+        "POLYGON((0 0 5, 10 0 5, 10 10 5, 0 10 5, 0 0 5))",        # a third coordinate
+        "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0)) ; DROP",           # something after
+        "MULTIPOLYGON(((0 0, 10 0, 10 10, 0 10, 0 0)))", "POINT(0 0)", "", None, 5,
+        "POLYGON((" + ", ".join(["0 0"] * 200) + "))",             # too long
+    ])
+    def test_nothing_else_is_read_as_an_extent(self, wkt):
+        from core.domain.source_capability import extent_of_wkt
+        assert extent_of_wkt(wkt) is None

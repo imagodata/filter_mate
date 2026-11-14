@@ -2,13 +2,17 @@
 
 Only AND may be split. A partial OR or NOT must stay entirely local.
 Provider syntax is selected from source_capability by the QGIS adapter.
+
+One spatial predicate is let through, for a WFS only: the filter by extent of
+``source_capability.extent_expression`` (node ``extent``), which QGIS sends as
+``<fes:BBOX>``. It is written here again from its four bounds, never copied.
 """
 import math
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Iterable, Tuple
 
-from ..domain.source_capability import ORACLE_IN_LIST_MAX, REMOTE_KEY_LIST_LIMIT
+from ..domain.source_capability import ORACLE_IN_LIST_MAX, REMOTE_KEY_LIST_LIMIT, extent_expression
 from .pk_formatter import QGIS_EXPRESSION, SQL, format_key_literal, is_null_value
 
 
@@ -114,11 +118,18 @@ def _render(node: Node, dialect: str, fields: Iterable[str], ilike_exact: bool) 
             ', '.join(_render(child, dialect, fields, ilike_exact) for child in node.children[1:]))
     if node.kind == 'unary' and node.value == 'NOT':
         return '(NOT {})'.format(_predicate(node.children[0], dialect, fields, ilike_exact))
+    if node.kind == 'extent':
+        if dialect != 'wfs':
+            raise Unsupported('A filter by extent is only proven for a WFS')
+        expression = extent_expression(*node.value) if isinstance(node.value, tuple) and len(node.value) == 4 else None
+        if expression is None:
+            raise Unsupported('Invalid extent')
+        return expression
     raise Unsupported('Unsupported expression: {}'.format(node.value or node.kind))
 
 
 def _predicate(node, dialect, fields, ilike_exact):
-    if node.kind not in ('binary', 'in', 'unary'):
+    if node.kind not in ('binary', 'in', 'unary', 'extent'):
         raise Unsupported('A filter must be a predicate')
     return _render(node, dialect, fields, ilike_exact)
 
