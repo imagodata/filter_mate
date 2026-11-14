@@ -120,6 +120,19 @@ Rules worth keeping:
   QGIS if the user turns that log on.
 - **Timeouts.** The network timeout of QGIS applies (60 s by default) and cannot be set per request: a local model slow
   to start may need more, and the message says so.
+- **A busy provider is asked again** (`core/agent/chat_engine.py`): after a 429, a 5xx or 529, an `overloaded_error`
+  or `rate_limit_error` in the stream, or a connection reset or timed out, the model turn is sent again, twice at most,
+  after the `Retry-After` of the server (30 s at most) or 2 s then 6 s. The wait is a `QTimer`, the status line says
+  it, and Stop during it ends the request. Never once text of the turn was shown (it would show twice), nor for a
+  refused key, a bad request (400, 404), a used-up quota or a refusal.
+- **A request that breaks off keeps what it did** (`AgentSession.interrupt_request`): after a failure, Stop or a
+  refusal, the conversation is cut after the last tool results, so every call kept has its result (a call that Stop
+  left unrun in its turn is answered "not run"), and a note in that message tells the model why the request stopped
+  there, that what those steps changed is in place in QGIS, and not to do them again without checking. The thread says
+  how many steps stay (Undo takes them back) and the request does not come back in the line: sent again whole, it
+  would do them twice; the user asks the agent to go on. A request that ran nothing is forgotten and comes back in the
+  line, to be sent again. The next request follows a message of tool results: the Anthropic adapter sends two
+  messages of the user in a row as one.
 - **Redirections are not followed**, since the key is in the headers.
 - **Undo this turn** captures every layer before the first change of a request and pushes one `CrossOperation` in the
   automation history: rasters and point clouds get their source back, a layer changed since is left alone, and the

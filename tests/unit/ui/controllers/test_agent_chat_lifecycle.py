@@ -435,6 +435,51 @@ def test_the_action_bar_follows_the_turn(ctrl_module, controller, dock):
     assert states[-1] is True
 
 
+# --- 6b: a request that breaks off after steps keeps them, and does not come back whole ---------------------------
+
+
+def _failure(ctrl_module, kind="stream"):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    return messages.StreamFailure(messages.ProviderError(kind, "The response was cut before its end."))
+
+
+def test_a_failure_after_steps_says_they_stay_and_keeps_the_request_out_of_the_line(ctrl_module, controller):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_tool_turn(ctrl_module))
+    transport.starts[1](_failure(ctrl_module))
+    detail = controller.panel.show_error.call_args[0][1]
+    assert "stopped midway: 1 steps were done" in detail and "go on" in detail
+    controller.panel.input.setText.assert_not_called()
+
+
+def test_a_failure_before_any_step_gives_the_request_back(ctrl_module, controller):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_failure(ctrl_module))
+    assert "back in the line below" in controller.panel.show_error.call_args[0][1]
+    controller.panel.input.setText.assert_called_with("add the parks")
+
+
+def test_stop_after_steps_says_they_stay(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_tool_turn(ctrl_module))
+    engine.cancel()
+    said = controller.panel.set_status.call_args[0][0]
+    assert said.startswith("Stopped midway: 1 steps were done")
+    controller.panel.input.setText.assert_not_called()
+
+
+def test_a_busy_provider_is_said_while_the_agent_waits(ctrl_module, controller):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    controller.on_retry(5.6, messages.ProviderError("server", "Overloaded", status=529))
+    assert controller.panel.set_status.call_args[0][0] == "The provider is busy, trying again in 6 s…"
+
+
 # --- 7: Stop ends the waits of the chat, not those of another application ------------------------------------
 
 

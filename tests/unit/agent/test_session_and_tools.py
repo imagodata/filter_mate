@@ -15,7 +15,7 @@ from core.agent.messages import (
 )
 from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
-from core.agent.session import AgentLimits, AgentSession, run_exchange
+from core.agent.session import CAUSE_FAILED, AgentLimits, AgentSession, run_exchange
 from core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from core.agent.tool_catalog import CHAT_ONLY, MCP_ONLY, NOT_IN_CHAT, SETTINGS_TOOLS, SKILL_TOOLS, ToolSpec, chat_tools, load_catalog
 from core.agent.tool_executor import MAX_RESULT_CHARS, ToolExecutor, ToolFailure, WithImages, bounded_json
@@ -190,12 +190,12 @@ class TestSession:
         assert chat.accept_turn(turn(STOP_END)).status == "done"
         assert len(chat.messages) == 1
 
-    def test_abandon_only_forgets_the_current_request(self):
+    def test_a_request_that_ran_nothing_is_forgotten_alone(self):
         chat = session()
         chat.add_user_text("first")
         chat.accept_turn(turn(STOP_END, TextPart("ok")))
         chat.add_user_text("second")
-        chat.abandon_request()
+        assert chat.interrupt_request(CAUSE_FAILED) == 0
         assert [m.text for m in chat.messages] == ["first", "ok"]
 
     def test_turn_limit_stops_without_a_dangling_call(self):
@@ -270,6 +270,15 @@ class TestExchange:
         chat = session()
         result = run_exchange(chat, "go", FakeTransport([failure]), self.executor([]))
         assert result.error.kind == "auth" and chat.messages == ()
+
+    def test_a_failure_after_tools_keeps_them_with_a_note(self):
+        failure = StreamFailure(ProviderError("server", "Overloaded", status=529))
+        chat = session()
+        transport = FakeTransport([turn(STOP_TOOL_USE, call("read", name="x"))], [failure])
+        result = run_exchange(chat, "go", transport, self.executor([]))
+        assert result.error.kind == "server"
+        assert [m.role for m in chat.messages] == [ROLE_USER, ROLE_ASSISTANT, ROLE_USER]
+        assert isinstance(chat.messages[-1].parts[0], ToolResultPart) and "broke off here" in chat.messages[-1].text
 
     def test_nobody_confirms_an_invalid_export(self):
         strict = ToolSpec("export", "Write a file there.", {"type": "object", "required": ["a"]}, destructive=True)

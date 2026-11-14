@@ -190,6 +190,11 @@ def check_transport(provider, pkg):
     check("stream: one final event", sum(isinstance(e, (TurnComplete, StreamFailure)) for e in events) == 1, events)
     check("stream: key sent in its header", provider.requests[0]["headers"].get("x-api-key") == SECRET)
     check("stream: valid body", provider.requests[0]["body"]["model"] == "m" and provider.requests[0]["path"] == "/v1/messages")
+    from qgis.PyQt.QtNetwork import QNetworkReply
+    from filter_mate.adapters.agent.qt_transport import _transient
+    check("transport: a reset connection is tried again, a refused one is not",
+          _transient(QNetworkReply.NetworkError.RemoteHostClosedError)
+          and not _transient(QNetworkReply.NetworkError.ConnectionRefusedError))
     wait(lambda: False, 0.1)
     from qgis.PyQt.QtCore import QObject
     parent = QObject()

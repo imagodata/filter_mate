@@ -2,19 +2,21 @@
 """Runs one user request at a time, without blocking: the event-driven twin of ``run_exchange``.
 
 Transport, undo point and user interface are injected, so this module stays free of Qt.
-Everything happens on the caller's thread; ``defer`` lets its event loop breathe between steps.
+Everything happens on the caller's thread; ``defer`` lets its event loop breathe between steps, and ``delay`` waits
+without blocking it before a request is sent again to a provider that was busy.
 """
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Callable, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from .messages import (
-    ERROR_STREAM, ProviderError, StreamEvent, StreamFailure, TextDelta, ToolCallPart, ToolResultPart, TurnComplete,
+    ERROR_NETWORK, ERROR_RATE_LIMIT, ERROR_SERVER, ERROR_STREAM, ProviderError, StreamEvent, StreamFailure, TextDelta,
+    ToolCallPart, ToolResultPart, TurnComplete,
 )
 from .providers.base import HttpRequest
-from .session import STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
+from .session import CAUSE_FAILED, CAUSE_STOPPED, STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
 from .permissions import ASK, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy, asked_alone
 from .tool_executor import Handler, ToolExecutor, connector_gate
 
@@ -27,6 +29,25 @@ OUTCOME_CANCELLED = "cancelled"
 
 _NO_UNDO_POINT = "The undo point could not be made, so nothing was done."
 
+# A model turn that failed for a reason that may pass (the provider busy or rate limited, a network failure that may
+# pass) is asked again, once after each of these waits in seconds, unless the provider said how long (Retry-After):
+# then that long, up to MAX_RETRY_WAIT.
+RETRY_WAITS = (2.0, 6.0)
+MAX_RETRY_WAIT = 30.0
+
+
+def worth_retrying(error: ProviderError) -> bool:
+    """A failure that may be over in a few seconds; never a refused key, a bad request or a used-up quota."""
+    return error.kind in (ERROR_RATE_LIMIT, ERROR_SERVER) or (error.kind == ERROR_NETWORK and error.transient)
+
+
+def retry_wait(error: ProviderError, tries: int) -> float:
+    """Seconds before the new try that follows ``tries`` earlier ones."""
+    wait = error.retry_after
+    if wait is None or not wait >= 0:  # NaN as well
+        wait = RETRY_WAITS[min(tries, len(RETRY_WAITS) - 1)]
+    return min(wait, MAX_RETRY_WAIT)
+
 
 @dataclass(frozen=True)
 class ChatOutcome:
@@ -36,6 +57,9 @@ class ChatOutcome:
     reason: str = ""
     error: Optional[ProviderError] = None
     changed_layers: Tuple[str, ...] = ()
+    # A request that broke off (failed, stopped, refused): the steps it had done, kept in the conversation. They stay
+    # in QGIS and the model knows them, so the request is not to be sent again whole.
+    kept_steps: int = 0
 
 
 class StreamHandle(Protocol):
@@ -70,6 +94,7 @@ class ChatListener(Protocol):
         """Does the user accept this call?"""
 
     # Optional: ``confirm_many(calls) -> bool``, one question for several calls of a turn, all or none.
+    # Optional: ``on_retry(seconds, error)``, the provider failed for a moment: the turn is asked again after this wait.
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         """The request is over."""
@@ -81,7 +106,8 @@ class ChatEngine:
     def __init__(self, session: AgentSession, executor: ToolExecutor, transport: AsyncTransport,
                  listener: ChatListener, checkpoint: Checkpoint,
                  defer: Callable[[Callable[[], None]], None] = lambda step: step(),
-                 policy: Optional[PermissionPolicy] = None) -> None:
+                 policy: Optional[PermissionPolicy] = None,
+                 delay: Callable[[float, Callable[[], None]], None] = lambda seconds, step: step()) -> None:
         self._session = session
         # Read at each call: the user may change the level, or allow a tool, while the conversation goes on.
         self._policy = policy if policy is not None else PermissionPolicy()
@@ -90,11 +116,14 @@ class ChatEngine:
         self._listener = listener
         self._checkpoint = checkpoint
         self._defer = defer
+        self._delay = delay
         self._busy = False
         self._running_tools = False
         self._cancelled = False
-        self._generation = 0  # an event of an earlier request is stale
+        self._generation = 0  # an event of an earlier request, or of a response tried again, is stale
         self._handle: Optional[StreamHandle] = None
+        self._tries = 0  # new tries of the current model turn
+        self._streamed = False  # text of the current model turn was shown
 
     @property
     def busy(self) -> bool:
@@ -121,6 +150,7 @@ class ChatEngine:
         if self._busy or not text.strip():
             return False
         self._busy, self._cancelled = True, False
+        self._tries = 0
         self._generation += 1
         self._session.add_user_text(text, context)
         self._request_model(self._generation)
@@ -136,8 +166,7 @@ class ChatEngine:
         handle, self._handle = self._handle, None
         if handle is not None:
             handle.abort()
-        self._session.abandon_request()
-        self._finish(ChatOutcome(OUTCOME_CANCELLED))
+        self._interrupt(OUTCOME_CANCELLED, CAUSE_STOPPED)  # a new try that waited is stale once it is over
 
     def _notify(self, callback: Callable[..., None], *args: Any) -> None:
         """What the interface does with an event must not stop the request."""
@@ -149,13 +178,14 @@ class ChatEngine:
     def _request_model(self, generation: int) -> None:
         if not self._busy or generation != self._generation:  # stopped while this step waited for the event loop
             return
+        self._streamed = False
         try:
             handle = self._transport.start(self._session.next_request(), self._session.new_parser(),
                                            lambda event: self._on_event(generation, event))
         except Exception:
             logger.exception("Agent request could not be started")
-            self._session.abandon_request()
-            self._finish(ChatOutcome(OUTCOME_FAILED, error=ProviderError(ERROR_STREAM, "The request could not be sent.")))
+            self._interrupt(OUTCOME_FAILED, CAUSE_FAILED,
+                            error=ProviderError(ERROR_STREAM, "The request could not be sent."))
             return
         if self._busy and generation == self._generation:
             self._handle = handle
@@ -164,13 +194,35 @@ class ChatEngine:
         if not self._busy or generation != self._generation:
             return
         if isinstance(event, TextDelta):
+            self._streamed = True
             self._notify(self._listener.on_text, event.text)
         elif isinstance(event, StreamFailure):
-            self._session.abandon_request()
-            self._finish(ChatOutcome(OUTCOME_FAILED, error=event.error))
+            self._handle = None
+            if not self._retry(event.error):
+                self._interrupt(OUTCOME_FAILED, CAUSE_FAILED, error=event.error)
         elif isinstance(event, TurnComplete):
             self._handle = None
+            self._tries = 0
             self._after_turn(generation, self._session.accept_turn(event))
+
+    def _retry(self, error: ProviderError) -> bool:
+        """Ask the model again, after a wait, for a failure that may pass; False when it is not worth it.
+
+        Only while nothing of the turn was shown: sent again, its text would show twice. Its tool calls come with the
+        end of the turn only, so none was taken yet. A Stop during the wait makes the new try stale.
+        """
+        if self._streamed or self._tries >= len(RETRY_WAITS) or not worth_retrying(error):
+            return False
+        wait = retry_wait(error, self._tries)
+        self._tries += 1
+        self._generation += 1  # an event the failed response would still send is stale
+        generation = self._generation
+        on_retry = getattr(self._listener, "on_retry", None)
+        if on_retry is not None:
+            self._notify(on_retry, wait, error)
+        logger.info("Agent provider failed (%s), trying again in %.0f s", error.kind, wait)
+        self._delay(wait, lambda: self._request_model(generation))
+        return True
 
     def _after_turn(self, generation: int, decision: TurnDecision) -> None:
         if decision.status == STATUS_RUN_TOOLS:
@@ -178,7 +230,7 @@ class ChatEngine:
         elif decision.status == STATUS_DONE:
             self._finish(ChatOutcome(OUTCOME_DONE))
         else:
-            self._finish(ChatOutcome(OUTCOME_STOPPED, reason=decision.reason))
+            self._finish(ChatOutcome(OUTCOME_STOPPED, reason=decision.reason, kept_steps=decision.kept))
 
     def _run_tools(self, generation: int, calls: Sequence[ToolCallPart]) -> None:
         if not self._busy or generation != self._generation:
@@ -193,9 +245,8 @@ class ChatEngine:
                 answers.append(self._run_one(call, answered.get(position)))
         finally:
             self._running_tools = False
-        if self._cancelled:
-            self._session.abandon_request()
-            self._finish(ChatOutcome(OUTCOME_CANCELLED))
+        if self._cancelled:  # the calls that ran stay, with their results; the others are answered as not run
+            self._interrupt(OUTCOME_CANCELLED, CAUSE_STOPPED, answers)
             return
         self._session.add_tool_results(answers)
         self._defer(lambda: self._request_model(generation))
@@ -255,6 +306,12 @@ class ChatEngine:
             logger.exception("Agent confirmation failed")
             return False
 
+    def _interrupt(self, status: str, cause: str, ran: Sequence[ToolResultPart] = (),
+                   error: Optional[ProviderError] = None) -> None:
+        """End a request before its end: what it ran stays in the conversation (``interrupt_request``)."""
+        kept = self._session.interrupt_request(cause, ran)
+        self._finish(ChatOutcome(status, error=error, kept_steps=kept))
+
     def _finish(self, outcome: ChatOutcome) -> None:
         self._busy = False
         self._handle = None
@@ -264,4 +321,4 @@ class ChatEngine:
         except Exception:
             logger.exception("Agent undo point could not be closed")
             changed = ()
-        self._notify(self._listener.on_finished, ChatOutcome(outcome.status, outcome.reason, outcome.error, changed))
+        self._notify(self._listener.on_finished, replace(outcome, changed_layers=changed))
