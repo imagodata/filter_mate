@@ -190,14 +190,14 @@ class TestSources:
 
     def test_described_for_the_model(self):
         names = describe_enabled(enabled(all_sources([]), ("datagouv", "datagouv_mcp")))
-        assert names == {"platforms": ["datagouv"], "geocoders": [], "basemaps": [], "databases": [],
+        assert names == {"platforms": ["datagouv"], "geocoders": [], "basemaps": [], "elevation": [], "databases": [],
                          "connectors": ["data.gouv.fr (MCP)"]}
 
     def test_a_basemap_is_named_apart_from_the_platforms(self):
         mine = make_source("https://tiles.example.org/{z}/{x}/{y}.png", "xyz")
         names = describe_enabled(enabled(all_sources([mine]), ("carto_light", mine.id)))
         assert names == {"platforms": [], "geocoders": [], "basemaps": ["carto_light", f"{mine.id} (tiles.example.org)"],
-                         "databases": [], "connectors": []}
+                         "elevation": [], "databases": [], "connectors": []}
 
     def test_a_database_of_qgis_is_a_source_named_by_an_id(self):
         """Its name is the user's; its address and its credentials stay in QGIS."""

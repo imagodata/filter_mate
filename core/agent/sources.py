@@ -10,9 +10,11 @@ from typing import Any, Dict, Iterable, List, Sequence, Tuple
 from urllib.parse import urlsplit
 
 from .basemaps import BASEMAPS, template_problem
+from .elevation import SOURCES as ELEVATION_SOURCES
 from .mcp_client import server_url_problem
 from .open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_WMS,
+    KIND_WMTS, KIND_XYZ,
     NO_DATA_KINDS, base_url,
 )
 
@@ -87,8 +89,11 @@ BUILT_IN: Tuple[Source, ...] = (
            "IGN Géoplateforme tools. Start it first: TRANSPORT_TYPE=http npx -y @ignfab/geocontext"),
     Source("osm_mcp", "OpenStreetMap (MCP)", KIND_MCP, "https://openstreetmap.caseyjhand.com/mcp", ORIGIN_COMMUNITY,
            "Places and Overpass queries, worldwide"),
-) + tuple(Source(basemap.id, basemap.title, KIND_XYZ, basemap.url,
-                 ORIGIN_OFFICIAL if basemap.official else ORIGIN_COMMUNITY, basemap.note) for basemap in BASEMAPS)
+) + tuple(Source(source.id, source.title, KIND_ELEVATION, source.base,
+                 ORIGIN_OFFICIAL if source.official else ORIGIN_COMMUNITY, source.note) for source in ELEVATION_SOURCES
+          ) + tuple(Source(basemap.id, basemap.title, KIND_XYZ, basemap.url,
+                           ORIGIN_OFFICIAL if basemap.official else ORIGIN_COMMUNITY, basemap.note)
+                    for basemap in BASEMAPS)
 _BUILT_IN_IDS = frozenset(source.id for source in BUILT_IN)
 
 
@@ -207,5 +212,6 @@ def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
                           if not source.is_connector and source.kind not in NO_DATA_KINDS],
             "geocoders": [named(source) for source in sources if source.kind == KIND_GEOCODER],
             "basemaps": [named(source) for source in sources if source.kind == KIND_XYZ],
+            "elevation": [named(source) for source in sources if source.kind == KIND_ELEVATION],
             "databases": [f"{source.id} ({source.title})" for source in sources if source.kind == KIND_DATABASE],
             "connectors": [source.title for source in sources if source.is_connector]}

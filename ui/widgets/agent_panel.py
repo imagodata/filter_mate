@@ -25,7 +25,7 @@ from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
 )
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
@@ -1476,8 +1476,10 @@ class AgentSettingsDialog(QDialog):
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
-        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC, KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)),
-                  (_tr("Satellite imagery"), lambda source: source.kind == KIND_STAC),
+        other = (KIND_MCP, KIND_STAC, KIND_ELEVATION, KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)
+        groups = ((_tr("Open data platforms"), lambda source: source.kind not in other),
+                  # An elevation model is measured from satellites too: listed with the imagery, under the same title.
+                  (_tr("Satellite imagery"), lambda source: source.kind in (KIND_STAC, KIND_ELEVATION)),
                   (_tr("Basemaps"), lambda source: source.kind == KIND_XYZ),
                   (_tr("Place search"), lambda source: source.kind == KIND_GEOCODER),
                   (_tr("Databases of QGIS"), lambda source: source.kind == KIND_DATABASE),

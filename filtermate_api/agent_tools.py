@@ -100,6 +100,11 @@ def _renamed(text: str, address: str, name: str) -> str:
 # The arguments of the tools that name a layer, by an id or a name.
 LAYER_ARGUMENTS = ("layer", "layers", "layer_name", "source_layer", "target_layers", "extent_layer", "join_layer",
                    "raster", "guide_layer", "example_layer", "above")
+# What set_layer_style takes besides the layer and the mode: always given (a default of the schema), or only when
+# the model gave it.
+_STYLE_DEFAULTS = ("field", "color", "ramp", "classes", "method", "invert", "band", "discrete", "blend", "azimuth",
+                   "altitude", "multidirectional")
+_STYLE_OPTIONAL = ("opacity", "minimum", "maximum", "rules", "cut", "width", "z_factor")
 
 
 def _one_layer_per_name(accessor: FilterMateAccessor, handler: Handler) -> Handler:
@@ -329,15 +334,19 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
                                                add=args["add"]))
 
     def set_layer_style(args: Dict[str, Any]) -> Dict[str, Any]:
-        options = {key: args[key] for key in ("field", "color", "ramp", "classes", "method", "invert", "band")}
-        options.update({key: args.get(key) for key in ("opacity", "minimum", "maximum", "rules")})
-        return asdict(accessor.set_layer_style(args["layer"], args["mode"], **options))
+        options = {key: args[key] for key in _STYLE_DEFAULTS}
+        options.update({key: args.get(key) for key in _STYLE_OPTIONAL})
+        answer = asdict(accessor.set_layer_style(args["layer"], args["mode"], **options))
+        # What the call did not set is not told: a hillshade has no ramp, a vector no band.
+        return {key: value for key, value in answer.items()
+                if value not in (None, "") and not (key == "classes" and not value)}
 
     def set_labels(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.set_labels(args["layer"], field=args["field"], enabled=args["enabled"],
                                           size=args.get("size"), color=args["color"], buffer=args["buffer"],
                                           expression=args["expression"],
-                                          visible_from_scale=args.get("visible_from_scale")))
+                                          visible_from_scale=args.get("visible_from_scale"),
+                                          placement=args["placement"]))
 
     def create_layout(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in ("title", "page", "orientation", "extent_layer", "legend", "scale_bar",
@@ -451,6 +460,24 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return _asked(args, lambda platform: asdict(accessor.add_basemap(
             platform, name=args["name"], extra_domains=extra_domains)))
 
+    def add_elevation(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = _asked(args, lambda platform: asdict(accessor.add_elevation(
+            platform, extent_wkt=args["extent_wkt"], crs=args["crs"], resolution=args.get("resolution"),
+            target_crs=args["target_crs"], name=args["name"], extra_domains=extra_domains)))
+        return {key: value for key, value in answer.items() if value not in (None, "")}
+
+    def contour_lines(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = asdict(accessor.contour_lines(args["layer"], args["interval"],
+                                               index_interval=args.get("index_interval"), band=args["band"],
+                                               name=args["name"]))
+        if not share_values:  # the heights of a raster of the user are values of the project
+            answer.pop("minimum", None)
+            answer.pop("maximum", None)
+        return {key: value for key, value in answer.items() if value is not None}
+
+    def duplicate_layer(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.duplicate_layer(args["layer"], name=args["name"]))
+
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         try:
             folder = resolve_export_folder(prepare_export_root(export_root), args["subfolder"])
@@ -483,6 +510,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,
+        "add_elevation": add_elevation, "contour_lines": contour_lines, "duplicate_layer": duplicate_layer,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
     }
     return {name: _guarded(_one_layer_per_name(accessor, handler)) for name, handler in handlers.items()}

@@ -19,7 +19,7 @@ can do::
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
@@ -311,6 +311,12 @@ class StyleResult:
     minimum: Optional[float] = None
     maximum: Optional[float] = None
     opacity: Optional[float] = None
+    # How the layer mixes with what is drawn under it, when the call set it.
+    blend: str = ""
+    # Raster, hillshade: where the light comes from, and how much the heights are stretched.
+    azimuth: Optional[float] = None
+    altitude: Optional[float] = None
+    z_factor: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -323,6 +329,8 @@ class LabelsResult:
     expression: str = ""
     # The labels show when the map is at least this close (1:visible_from_scale); None at every scale.
     visible_from_scale: Optional[float] = None
+    # Where the labels of lines go: auto, curved (on the line, following it) or horizontal.
+    placement: str = ""
 
 
 @dataclass(frozen=True)
@@ -525,6 +533,43 @@ class OpenDataResult:
     count: int = 0
 
 
+@dataclass(frozen=True)
+class ElevationResult:
+    """The elevation of an area, added to the project as a raster layer written on a grid in metres."""
+    layer_id: str
+    name: str
+    platform: str = ""
+    crs_authid: str = ""
+    # Size of a pixel, in metres, and of the grid, in pixels.
+    resolution: float = 0.0
+    width: int = 0
+    height: int = 0
+    # The heights it holds, in metres: what a ramp is stretched over and contours are drawn between.
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    mean: Optional[float] = None
+    size: str = ""
+    attribution: str = ""
+    note: str = ""
+
+
+@dataclass(frozen=True)
+class ContourResult:
+    """Contour lines drawn from a raster, added to the project as a line layer."""
+    layer_id: str
+    name: str
+    source_layer: str = ""
+    crs_authid: str = ""
+    feature_count: int = 0
+    interval: float = 0.0
+    index_interval: Optional[float] = None
+    index_count: int = 0
+    # The lowest and the highest level drawn.
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    fields: List[str] = field(default_factory=list)
+
+
 @dataclass
 class PlacesResult:
     """Places a geocoder answered with; each has name, label, kind, longitude, latitude, extent_wkt (EPSG:4326)."""
@@ -597,7 +642,7 @@ class FilterMateAccessor(Protocol):
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None) -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
         """Label a vector layer with a field or an expression, or turn its labels off; raises FilterRejected when refused."""
         ...
 
@@ -716,6 +761,25 @@ class FilterMateAccessor(Protocol):
 
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         """Add a web basemap under the layers; raises FilterRejected when its server gives no tile."""
+        ...
+
+    def add_elevation(self, platform: str = "copernicus_dem", extent_wkt: str = "", crs: str = "",
+                      resolution: Optional[float] = None, target_crs: str = "", name: str = "",
+                      extra_domains: Optional[str] = None) -> ElevationResult:
+        """Add the elevation of an area as a raster layer; raises FilterRejected when it cannot be read."""
+        ...
+
+    def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        """Ask an elevation source for the start of a tile; raises FilterRejected when its server gives none."""
+        ...
+
+    def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
+                      name: str = "") -> ContourResult:
+        """Draw the contour lines of a raster as a new line layer; raises FilterRejected when refused."""
+        ...
+
+    def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
+        """Add a second layer on the same data, just above the first; raises FilterRejected on an unknown one."""
         ...
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
@@ -898,16 +962,18 @@ class InMemoryAccessor:
             raise FilterRejected(f"layer {layer!r} not found")
         return StyleResult(layer_name=found.name, mode=mode, field=options.get("field") or "",
                            classes=(len(options.get("rules") or []) if mode == "rules" else
-                                    options.get("classes", 5) if mode in ("categorized", "graduated") else 0))
+                                    options.get("classes", 5) if mode in ("categorized", "graduated") else 0),
+                           opacity=options.get("opacity"), blend=options.get("blend") or "")
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None) -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
         found = self._find(layer)
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
         return LabelsResult(layer_name=found.name, labels=enabled, field=field if enabled else "",
-                            expression=expression if enabled else "", visible_from_scale=visible_from_scale)
+                            expression=expression if enabled else "", visible_from_scale=visible_from_scale,
+                            placement=placement if enabled else "")
 
     def create_layout(self, name: str, **options: Any) -> LayoutResult:
         if not name.strip():
@@ -1102,6 +1168,40 @@ class InMemoryAccessor:
 
     def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
         return None
+
+    def add_elevation(self, platform: str = "copernicus_dem", extent_wkt: str = "", crs: str = "",
+                      resolution: Optional[float] = None, target_crs: str = "", name: str = "",
+                      extra_domains: Optional[str] = None) -> ElevationResult:
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or "Elevation", provider_type="gdal",
+                               layer_kind="raster")
+        self.layers.append(summary)
+        return ElevationResult(layer_id=summary.layer_id, name=summary.name, platform=platform,
+                               crs_authid=target_crs or "EPSG:32631", resolution=resolution or 30.0, width=400,
+                               height=400, minimum=150.0, maximum=600.0, mean=230.0)
+
+    def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        return None
+
+    def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
+                      name: str = "") -> ContourResult:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or f"Contours {interval:g}",
+                               provider_type="ogr", layer_kind="vector", feature_count=18)
+        self.layers.append(summary)
+        return ContourResult(layer_id=summary.layer_id, name=summary.name, source_layer=found.name, feature_count=18,
+                             interval=interval, index_interval=index_interval,
+                             index_count=4 if index_interval else 0, minimum=175.0, maximum=600.0,
+                             fields=["elevation", "is_index"])
+
+    def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        summary = replace(found, layer_id=f"L{len(self.layers) + 1}", name=name or f"{found.name} (copy)")
+        self.layers.append(summary)
+        return summary
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
                    extra_domains: Optional[str] = None) -> PlacesResult:

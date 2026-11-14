@@ -120,6 +120,9 @@ class StyleRule(BaseModel):
         'QGIS condition (NOT SQL), as for select_features: "population" > 10000. Empty: every other feature'))
     color: str = Field(..., min_length=1, max_length=50, description="#rrggbb or a color name")
     label: str = Field(default="", max_length=100, description="Its name in the legend")
+    width: Optional[float] = Field(default=None, gt=0, le=20, description=(
+        "Width of the line or of the outline, or size of the point, in millimetres (0.2 thin, 0.5 thick); the "
+        "default of QGIS when left out"))
 
 
 class PointCloudCriteria(BaseModel):
@@ -604,21 +607,24 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Style a layer", idempotent=True))
     async def set_layer_style(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
-        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "keep"], Field(description=(
+        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "hillshade", "keep"], Field(description=(
             "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of "
             "a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band "
-            "values), gray (a gray stretch). Any of them replaces the style of the layer. keep: the style stays as "
-            "it is and only opacity changes (the only mode for a WMS, WMTS or basemap image)"))],
+            "values), gray (a gray stretch), hillshade (a shaded relief drawn from the elevations of the band). Any "
+            "of them replaces the style of the layer. keep: the style stays as it is and only opacity and blend "
+            "change (the only mode for a WMS, WMTS or basemap image)"))],
         rules: Annotated[Optional[List[StyleRule]], Field(max_length=20, description=(
             'rules: one symbol per condition; a feature is drawn by the first rule it matches: [{"expression": '
             '"\\"population\\" > 10000", "color": "#d7191c", "label": "Towns"}, {"expression": "", "color": '
             '"#cccccc", "label": "Others"}]. An empty expression is every other feature; without one, the features '
-            "no rule matches are not drawn"))] = None,
+            "no rule matches are not drawn. A rule may give a width, for lines drawn thicker than the others"))] = None,
         field: Annotated[str, Field(max_length=1000, description="Field for categorized and graduated")] = "",
         color: Annotated[str, Field(max_length=50, description="single: #rrggbb or a color name")] = "",
         ramp: Annotated[str, Field(max_length=100, description=(
-            "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo..."))] = "",
-        classes: Annotated[int, Field(ge=2, le=12, description="graduated: number of classes")] = 5,
+            "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo... or Terrain, the "
+            "tints of a relief map (green low ground, brown heights, pale summits) for an elevation raster"))] = "",
+        classes: Annotated[int, Field(ge=2, le=12, description=(
+            "graduated: number of classes; pseudocolor with discrete: number of color steps"))] = 5,
         method: Annotated[Literal["quantile", "equal_interval", "jenks", "pretty", "stddev"], Field(
             description="graduated: how the class breaks are found")] = "quantile",
         invert: Annotated[bool, Field(description="Reverse the color ramp")] = False,
@@ -626,18 +632,43 @@ def build_server(client: FilterMateClient) -> Any:
         band: Annotated[int, Field(ge=1, le=1000, description="Raster: the band drawn")] = 1,
         minimum: Annotated[Optional[float], Field(description="Raster: lowest value of the ramp (statistics by default)")] = None,
         maximum: Annotated[Optional[float], Field(description="Raster: highest value of the ramp")] = None,
+        cut: Annotated[Optional[float], Field(gt=0, le=49, description=(
+            "Raster, pseudocolor and gray: percent of the values left out at each end of the ramp when minimum or "
+            "maximum is not given: 2 stretches the colors from the 2nd to the 98th percentile, so that a few "
+            "extreme pixels do not flatten all the others"))] = None,
+        discrete: Annotated[bool, Field(description=(
+            "pseudocolor: flat color steps of equal height (classes of them) instead of a continuous ramp"))] = False,
+        width: Annotated[Optional[float], Field(gt=0, le=20, description=(
+            "single: width of the line or of the outline, or size of the point, in millimetres"))] = None,
+        blend: Annotated[Literal["", "normal", "multiply", "screen", "overlay", "darken", "lighten", "soft_light",
+                                 "hard_light"], Field(description=(
+            "How the layer mixes with what is drawn under it, with any mode: multiply darkens (a hillshade over a "
+            "colored elevation or a photograph), overlay and soft_light keep the lights and shadows of what is "
+            "under, screen lightens, normal covers. Left as it is when empty"))] = "",
+        azimuth: Annotated[float, Field(ge=0, le=360, description=(
+            "hillshade: where the light comes from, in degrees from the north (315: north-west, the usual)"))] = 315.0,
+        altitude: Annotated[float, Field(ge=0, le=90, description=(
+            "hillshade: height of the light above the horizon, in degrees"))] = 45.0,
+        z_factor: Annotated[Optional[float], Field(gt=0, le=1000, description=(
+            "hillshade: how much the heights are stretched: 1 by default, 2 or 3 to deepen a flat relief"))] = None,
+        multidirectional: Annotated[bool, Field(description=(
+            "hillshade: lit from several directions, which shows the slopes that face away from the light"))] = False,
     ) -> Dict[str, Any]:
-        """Change how a layer is drawn on the map: one symbol, categories, graduated classes, a raster ramp.
+        """Change how a layer is drawn on the map: one symbol, categories, graduated classes, rules, a raster ramp or
+        a shaded relief, its opacity and how it blends with what is under it.
 
-        Returns mode, field, classes (how many were made), ramp, method, and for a raster band, minimum and
-        maximum. The values of the classes are not returned: describe_layer and layer_statistics read the data. A
-        field with more than 100 values cannot be categorized. In the chat of FilterMate, undoing the turn brings
-        the previous style back.
+        Returns mode, field, classes (how many were made), ramp, method, opacity, blend, for a raster band, minimum
+        and maximum, and for a hillshade azimuth, altitude and z_factor. The values of the classes are not returned:
+        describe_layer and layer_statistics read the data. A field with more than 100 values cannot be categorized.
+        One layer is drawn one way: to show an elevation both as colors and as a hillshade, duplicate_layer makes
+        the second layer. In the chat of FilterMate, undoing the turn brings the previous style back.
         """
         return await call("POST", "/layers/style", _body(
             layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
-            invert=invert, opacity=opacity, band=band, minimum=minimum, maximum=maximum,
-            rules=[rule.model_dump() for rule in rules] if rules else None))
+            invert=invert, opacity=opacity, band=band, minimum=minimum, maximum=maximum, cut=cut, discrete=discrete,
+            width=width, blend=blend, azimuth=azimuth, altitude=altitude, z_factor=z_factor,
+            multidirectional=multidirectional,
+            rules=[rule.model_dump(exclude_none=True) for rule in rules] if rules else None))
 
     @mcp.tool(annotations=_write("Label a layer", idempotent=True))
     async def set_labels(
@@ -653,16 +684,19 @@ def build_server(client: FilterMateClient) -> Any:
         visible_from_scale: Annotated[Optional[float], Field(ge=1, le=1e9, description=(
             "Show the labels only when the map is at least this close: 50000 for 1:50 000 and closer. At every "
             "scale by default"))] = None,
+        placement: Annotated[Literal["auto", "curved", "horizontal"], Field(description=(
+            "For a layer of lines: curved writes each label on its line, following it (the heights of contours, "
+            "the names of rivers and roads), horizontal writes it flat; auto lets QGIS place it"))] = "auto",
     ) -> Dict[str, Any]:
         """Write the values of a field, or of an expression, next to the features of a vector layer on the map, or
         turn the labels off.
 
-        Returns labels (on or off), field or expression, and visible_from_scale. In the chat of FilterMate, undoing the turn brings the previous labels
-        back.
+        Returns labels (on or off), field or expression, visible_from_scale and placement. In the chat of FilterMate,
+        undoing the turn brings the previous labels back.
         """
         return await call("POST", "/layers/labels", _body(
             layer=layer, field=field, enabled=enabled, size=size, color=color, buffer=buffer, expression=expression,
-            visible_from_scale=visible_from_scale))
+            visible_from_scale=visible_from_scale, placement=placement))
 
     @mcp.tool(annotations=_write("Edit attributes of features", idempotent=False))  # a formula such as "pop" * 2
     async def update_features(
@@ -994,8 +1028,9 @@ def build_server(client: FilterMateClient) -> Any:
         platform: Annotated[str, Field(min_length=1, max_length=2000, description=(
             "A basemap the user allowed: osm_tiles (OpenStreetMap), carto_light (neutral light grey), "
             "carto_light_nolabels (the same with no place names, under layers that have labels), carto_dark, "
-            "carto_voyager, ign_plan and ign_ortho (France: map and aerial photographs), opentopomap (relief), or one "
-            "the user added, by the name the chat lists it under"))],
+            "carto_voyager, ign_plan and ign_ortho (France: map and aerial photographs), google_satellite (worldwide "
+            "satellite and aerial photographs), opentopomap (relief), or one the user added, by the name the chat "
+            "lists it under"))],
         name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: its title)")] = "",
     ) -> Dict[str, Any]:
         """Add a web basemap (XYZ tiles) to the project, under every other layer.
@@ -1005,6 +1040,77 @@ def build_server(client: FilterMateClient) -> Any:
         an address is never written here. Returns the layer summary. The chat of FilterMate asks the user first.
         """
         return await call("POST", "/layers/add-basemap", _body(platform=platform, name=name))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Add the elevation of an area", readOnlyHint=False,
+                                          destructiveHint=False, idempotentHint=False, openWorldHint=True))
+    async def add_elevation(
+        extent_wkt: Annotated[str, Field(max_length=100_000, description=(
+            "The area as WKT: the extent_wkt of find_place or of map_context. Empty: the visible map"))] = "",
+        crs: Annotated[str, Field(max_length=64, description=(
+            "CRS of extent_wkt: EPSG:4326 for the extent_wkt of find_place; the CRS of the map when empty"))] = "",
+        platform: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "An elevation source the user allowed: copernicus_dem (Copernicus GLO-30, worldwide, 30 m)"))] = "copernicus_dem",
+        resolution: Annotated[Optional[float], Field(ge=10, le=5000, description=(
+            "Size of a pixel in metres. Left out: the 30 m of the source, or coarser for a large area (the answer "
+            "says which)"))] = None,
+        target_crs: Annotated[str, Field(max_length=64, description=(
+            "A CRS in metres to write the raster in, such as EPSG:2154. Left out: the CRS of the project when it "
+            "is in metres, else the UTM zone of the area"))] = "",
+        name: Annotated[str, Field(max_length=200, description="Name of the layer in the project")] = "",
+    ) -> Dict[str, Any]:
+        """Add the elevation of an area to the project as a raster layer (a digital elevation model), read from an
+        elevation source the user allowed.
+
+        Only the area asked is read from the source, written on a grid in metres as a GeoTIFF kept in the QGIS
+        profile, and added under the data, above the basemaps. Then: set_layer_style with pseudocolor for colors by
+        height or hillshade for a shaded relief, contour_lines for contours, run_algorithm with native:slope or
+        native:aspect. Returns layer_id, name, crs_authid, resolution, width, height, minimum, maximum and mean (the
+        heights, in metres), size, attribution and note. An area of more than 16 squares of one degree is refused.
+        The chat of FilterMate asks the user first.
+        """
+        return await call("POST", "/layers/add-elevation", _body(
+            platform=platform, extent_wkt=extent_wkt, crs=crs, resolution=resolution, target_crs=target_crs,
+            name=name), timeout=ADD_LAYER_TIMEOUT)
+
+    @mcp.tool(annotations=_write("Draw contour lines", idempotent=False))
+    async def contour_lines(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description=(
+            "Raster layer id or name: an elevation model (the layer of add_elevation)"))],
+        interval: Annotated[float, Field(gt=0, le=100_000, description=(
+            "Height between two contours, in the units of the raster: 25 for a line every 25 m"))],
+        index_interval: Annotated[Optional[float], Field(gt=0, le=1_000_000, description=(
+            "Height between two index contours, a multiple of interval: 100 marks the contours at 100, 200, 300..."))] = None,
+        band: Annotated[int, Field(ge=1, le=1000, description="The band read")] = 1,
+        name: Annotated[str, Field(max_length=200, description="Name of the layer made")] = "",
+    ) -> Dict[str, Any]:
+        """Draw the contour lines of an elevation raster of the project as a new line layer, added on top.
+
+        Each line has the fields elevation (the height of its level) and is_index (1 for an index contour, 0 for
+        the others). The layer comes drawn in thin brown lines, the index contours thicker: set_layer_style with
+        rules on "is_index" = 1 changes it, and set_labels with placement curved writes the heights on the lines
+        (filter the labels with an expression such as if("is_index" = 1, "elevation", '')). It is a temporary
+        file: export_layers keeps it. Returns layer_id, name, feature_count, interval, index_interval,
+        index_count, minimum and maximum (the lowest and highest level drawn) and fields. A raster of more than 25
+        million pixels, or an interval that makes more than 500 levels, is refused. In the chat of FilterMate,
+        undoing the turn removes the layer.
+        """
+        return await call("POST", "/layers/contours", _body(
+            layer=layer, interval=interval, index_interval=index_interval, band=band, name=name),
+            timeout=ADD_LAYER_TIMEOUT)
+
+    @mcp.tool(annotations=_write("Duplicate a layer", idempotent=False))
+    async def duplicate_layer(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector or raster layer id or name")],
+        name: Annotated[str, Field(max_length=200, description="Name of the new layer (default: the name and (copy))")] = "",
+    ) -> Dict[str, Any]:
+        """Add a second layer on the same data as a layer, with its style and its filter, just above it.
+
+        For what one layer cannot show at once: an elevation raster drawn as colors by one layer and as a hillshade
+        by the other (set_layer_style with blend multiply on the one above), a line with a wider line under it.
+        Nothing is copied on disk. Returns the summary of the new layer. In the chat of FilterMate, undoing the
+        turn removes it.
+        """
+        return await call("POST", "/layers/duplicate", _body(layer=layer, name=name))
 
     @mcp.tool(annotations=ToolAnnotations(title="Search satellite imagery", readOnlyHint=True, openWorldHint=True))
     async def search_imagery(

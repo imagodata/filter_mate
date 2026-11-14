@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
+    ContourResult, ElevationResult,
     Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
@@ -121,6 +122,66 @@ def add_basemap(payload: AddBasemapBody, request: Request) -> LayerSummary:
     """Add a web basemap the user allowed, under the layers of the project."""
     try:
         return _accessor(request).add_basemap(payload.platform, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class AddElevationBody(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    platform: str = Field(default="copernicus_dem", min_length=1, max_length=200, description="Elevation source")
+    extent_wkt: str = Field(default="", max_length=100_000, description="Area as WKT (default: the visible map)")
+    crs: str = Field(default="", max_length=64, description="CRS of extent_wkt (default: the CRS of the map)")
+    resolution: Optional[float] = Field(default=None, ge=10, le=5000, description="Pixel size in metres")
+    target_crs: str = Field(default="", max_length=64, description="CRS in metres the raster is written in")
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/layers/add-elevation", response_model=ElevationResult)
+def add_elevation(payload: AddElevationBody, request: Request) -> ElevationResult:
+    """Add the elevation of an area, read from an elevation model the user allowed, as a raster layer."""
+    try:
+        return _accessor(request).add_elevation(
+            payload.platform, extent_wkt=payload.extent_wkt, crs=payload.crs, resolution=payload.resolution,
+            target_crs=payload.target_crs, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class ContoursBody(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    layer: LayerName
+    interval: float = Field(..., gt=0, le=100_000, description="Height between two contours")
+    index_interval: Optional[float] = Field(default=None, gt=0, le=1_000_000,
+                                            description="Height between two index contours, a multiple of interval")
+    band: int = Field(default=1, ge=1, le=1000)
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/layers/contours", response_model=ContourResult)
+def contour_lines(payload: ContoursBody, request: Request) -> ContourResult:
+    """Draw the contour lines of a raster of the project as a new line layer."""
+    try:
+        return _accessor(request).contour_lines(payload.layer, payload.interval,
+                                                index_interval=payload.index_interval, band=payload.band,
+                                                name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class DuplicateBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    layer: LayerName
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/layers/duplicate", response_model=LayerSummary)
+def duplicate_layer(payload: DuplicateBody, request: Request) -> LayerSummary:
+    """Add a second layer on the same data as a layer, just above it."""
+    try:
+        return _accessor(request).duplicate_layer(payload.layer, name=payload.name)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
