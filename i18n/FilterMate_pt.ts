@@ -236,6 +236,11 @@ Concorda?</translation>
         <translation>A fonte responde.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>O serviço responde, mas não encontrou nenhum lugar com o nome Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>A fonte fornece os seus mosaicos.</translation>
@@ -658,6 +663,11 @@ Ficam no buffer de edição até guardar as edições da camada, e anular a rond
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>A pesquisar imagens de satélite em {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>A pesquisar em {} o lugar {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Mapas base</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Pesquisa de lugares</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>Джерело відповідає.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Сервіс відповідає, але не знайшов місця з назвою Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Джерело віддає свої тайли.</translation>
@@ -658,6 +663,11 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Пошук супутникових знімків у {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Пошук у {}: місце {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Підкладки</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Пошук місць</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Godkänner du?</translation>
         <translation>Källan svarar.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Tjänsten svarar, men hittade ingen plats som heter Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Källan levererar sina kartrutor.</translation>
@@ -658,6 +663,11 @@ De ligger kvar i redigeringsbufferten tills du sparar lagrets redigeringar, och 
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Söker satellitbilder på {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Söker i {} efter platsen {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Bakgrundskartor</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Platssökning</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

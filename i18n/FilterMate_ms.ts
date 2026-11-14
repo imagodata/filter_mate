@@ -236,6 +236,11 @@ Adakah anda bersetuju?</translation>
         <translation>Sumber menjawab.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Perkhidmatan menjawab, tetapi tidak menemui tempat bernama Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Sumber menyediakan jubinnya.</translation>
@@ -658,6 +663,11 @@ Ciri kekal dalam penimbal suntingan sehingga anda menyimpan suntingan lapisan, d
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Mencari imejan satelit di {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Mencari di {} untuk tempat {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Adakah anda bersetuju dengan semuanya? Tidak bermaksud tiada yang dijalankan.</t
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Peta asas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Carian tempat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

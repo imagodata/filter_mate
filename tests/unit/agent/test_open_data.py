@@ -303,3 +303,63 @@ def test_a_point_cloud_is_told_by_its_extension():
     assert is_point_cloud("https://example.org/tiles/a.laz?download=1")
     assert not is_point_cloud("/data/las.gpkg") and not is_point_cloud("https://example.org/laz/a.geojson")
     assert not is_point_cloud("/data/a.gpkg|layername=cloud.laz")
+
+
+# --- places: what a geocoder answers --------------------------------------------------------------------------------
+
+def test_a_geocoder_is_asked_with_q_and_limit():
+    from core.agent.open_data import geocode_url
+    assert geocode_url("https://data.geopf.fr/geocodage/search", "12 rue de la Paix, Paris", 3) == (
+        "https://data.geopf.fr/geocodage/search?q=12%20rue%20de%20la%20Paix%2C%20Paris&limit=3")
+    assert geocode_url("https://g.example.org/api?lang=fr", "a&b=c", 99).endswith("?lang=fr&q=a%26b%3Dc&limit=10")
+
+
+def test_places_of_the_geoplateforme_and_of_photon():
+    from core.agent.open_data import parse_places
+    ign = {"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [1.433805, 43.604082]},
+           "properties": {"label": "Toulouse", "type": "municipality", "name": "Toulouse", "context": "31, Haute-Garonne, Occitanie"}}]}
+    place, = parse_places(ign)
+    assert place["name"] == "Toulouse" and place["label"] == "Toulouse (31, Haute-Garonne, Occitanie)"
+    assert place["kind"] == "municipality" and (place["longitude"], place["latitude"]) == (1.433805, 43.604082)
+    assert place["extent_wkt"].startswith("POLYGON((1.383805 43.554082, 1.483805 43.554082,")  # a town: 0.05 degree around
+    photon = {"features": [{"properties": {"osm_value": "city", "type": "city", "name": "Toulouse", "state": "Occitanie",
+                                           "country": "France", "extent": [1.3503311, 43.6687119, 1.5153356, 43.5326969]},
+                            "geometry": {"type": "Point", "coordinates": [1.4442433, 43.6044638]}}]}
+    place, = parse_places(photon)
+    assert place["label"] == "Toulouse, Occitanie, France" and place["kind"] == "city"
+    assert place["extent_wkt"] == ("POLYGON((1.350331 43.532697, 1.515336 43.532697, 1.515336 43.668712, "
+                                   "1.350331 43.668712, 1.350331 43.532697))")  # the extent of the place itself
+
+
+def test_what_is_no_place_is_left_out():
+    from core.agent.open_data import MAX_PLACES, parse_places
+    point = {"geometry": {"type": "Point", "coordinates": [2.0, 48.0]}, "properties": {"name": "x"}}
+    assert parse_places(None) == [] and parse_places({"features": "no"}) == [] and parse_places([point]) == []
+    odd = [None, {"geometry": {"type": "Polygon", "coordinates": []}}, {"geometry": {"type": "Point", "coordinates": ["a", 1]}},
+           {"geometry": {"type": "Point", "coordinates": [600000.0, 6200000.0]}}, {"geometry": None, "properties": None},
+           dict(point, properties={"name": "y", "extent": ["w", 1, 2, 3]})]
+    assert [place["name"] for place in parse_places({"features": odd})] == ["y"]
+    assert len(parse_places({"features": [point] * 50})) == MAX_PLACES
+
+
+def test_a_hostile_geocoder_answers_no_place_that_breaks_the_map():
+    """Review of 2026-11-14: a number of 400 digits raised, NaN went into the extent, a point with no name was kept."""
+    import json as _json
+    from core.agent.open_data import geocode_url, parse_places
+
+    def place(coordinates, **properties):
+        return {"geometry": {"type": "Point", "coordinates": coordinates}, "properties": properties}
+    huge = _json.loads('{"features": [{"geometry": {"type": "Point", "coordinates": [1' + "0" * 400 + ', 1]}, "properties": {"name": "x"}}]}')
+    assert parse_places(huge) == []
+    answer = {"features": [place([1.0, 43.0]), place([1.0, 43.0], name={"a": 1}, label=["x"]),
+                           place([float("nan"), 43.0], name="nan"),
+                           place([1.0, 43.0], name="far", extent=[100.0, 80.0, 170.0, -80.0]),
+                           place([1.0, 43.0], name="inf", extent=[float("-inf"), 44.0, float("inf"), 42.0]),
+                           place([1.0, 43.0], name="nanbox", extent=[float("nan"), 44.0, 2.0, 42.0]),
+                           place([1.0, 43.0], name="good\nname  here", extent=[0.5, 44.0, 2.0, 42.0])]}
+    places = parse_places(answer)
+    assert [item["name"] for item in places] == ["far", "inf", "nanbox", "good name here"]
+    around = "POLYGON((0.990000 42.990000, 1.010000 42.990000, 1.010000 43.010000, 0.990000 43.010000, 0.990000 42.990000))"
+    assert [item["extent_wkt"] for item in places[:3]] == [around] * 3  # an extent that is not around the point is not kept
+    assert places[3]["extent_wkt"].startswith("POLYGON((0.500000 42.000000, 2.000000 42.000000,")
+    assert geocode_url("https://h.example.org/search?key=1#frag", "a", 1) == "https://h.example.org/search?key=1&q=a&limit=1"

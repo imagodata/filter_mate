@@ -160,6 +160,11 @@
         <translation>It answers.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>It answers, but found no place named Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>It serves its tiles.</translation>
@@ -592,6 +597,11 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Searching satellite imagery on {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Searching {} for the place {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1451,6 +1461,11 @@ Do you agree to all of them? No runs none of them.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Basemaps</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Place search</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Gaat u akkoord?</translation>
         <translation>De bron antwoordt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>De dienst antwoordt, maar vond geen plaats met de naam Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>De bron levert zijn tegels.</translation>
@@ -658,6 +663,11 @@ Ze blijven in de bewerkingsbuffer tot u de bewerkingen van de laag opslaat, en h
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Satellietbeelden zoeken op {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Zoeken op {} naar de plaats {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Achtergrondkaarten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Plaatsen zoeken</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

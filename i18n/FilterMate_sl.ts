@@ -236,6 +236,11 @@ Se strinjate?</translation>
         <translation>Vir odgovarja.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Storitev odgovarja, vendar ni našla kraja z imenom Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Vir streže svoje ploščice.</translation>
@@ -658,6 +663,11 @@ Ostanejo v medpomnilniku urejanja, dokler ne shranite urejanj plasti, razveljavi
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Iskanje satelitskih posnetkov v {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Iskanje v {}: kraj {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Podlage</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Iskanje krajev</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Souhlasíte?</translation>
         <translation>Zdroj odpovídá.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Služba odpovídá, ale nenašla žádné místo s názvem Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Zdroj poskytuje své dlaždice.</translation>
@@ -658,6 +663,11 @@ Zůstanou ve vyrovnávací paměti úprav, dokud úpravy vrstvy neuložíte, a z
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Vyhledávání satelitních snímků v {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Hledání v {}: místo {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Podkladové mapy</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Vyhledávání míst</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

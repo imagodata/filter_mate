@@ -236,6 +236,11 @@ Onaylıyor musunuz?</translation>
         <translation>Kaynak yanıt veriyor.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Hizmet yanıt veriyor ancak Paris adlı bir yer bulamadı.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Kaynak karolarını sunuyor.</translation>
@@ -658,6 +663,11 @@ Katman düzenlemelerini kaydedene kadar düzenleme arabelleğinde kalırlar ve t
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>{} üzerinde uydu görüntüsü aranıyor</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>{} üzerinde yer aranıyor: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Altlık haritaları</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Yer arama</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

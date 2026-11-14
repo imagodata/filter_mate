@@ -941,19 +941,22 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layers/add", _body(source=source, name=name, kind=kind), timeout=ADD_LAYER_TIMEOUT)
 
-    @mcp.tool(annotations=ToolAnnotations(title="Add a layer of a WFS service", readOnlyHint=False, destructiveHint=False,
+    @mcp.tool(annotations=ToolAnnotations(title="Add a layer of a web service", readOnlyHint=False, destructiveHint=False,
                                           idempotentHint=False, openWorldHint=True))
     async def add_service_layer(
         platform: Annotated[str, Field(min_length=1, max_length=200, description=(
-            "A WFS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme)"))],
+            "A WFS, WMS or WMTS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme, data), ign_wmts or ign_wms "
+            "(IGN Géoplateforme, images)"))],
         typename: Annotated[str, Field(min_length=1, max_length=300, description=(
             "Layer id given by search_open_data on that platform, e.g. ADMINEXPRESS-COG-CARTO.LATEST:commune"))],
         name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: its title)")] = "",
     ) -> Dict[str, Any]:
-        """Add a layer of a WFS service, read from the service as the map moves and filtered on the server.
+        """Add a layer of a WFS, WMS or WMTS service, read from the service as the map moves.
 
-        Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the
-        user first.
+        A WFS layer is data, filtered on the server. A WMS or WMTS layer is an image drawn by the service (old maps,
+        orthophotos of a year, cadastre, land cover): put under the other layers, it cannot be filtered, read nor
+        exported. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate
+        asks the user first.
         """
         return await call("POST", "/layers/add-service", _body(platform=platform, typename=typename, name=name))
 
@@ -1016,10 +1019,27 @@ def build_server(client: FilterMateClient) -> Any:
 
         Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the
         resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a
-        resource url (geojson or gpkg first), or add_service_layer with the id on a WFS platform. The query is sent to
+        resource url (geojson or gpkg first), or add_service_layer with the id on a WFS, WMS or WMTS platform. The query is sent to
         the platform.
         """
         return await call("POST", "/open-data/search", _body(query=query, platform=platform, limit=limit))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Find a place", readOnlyHint=True, openWorldHint=True))
+    async def find_place(
+        query: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "The name of a place or an address, as the user wrote it: Toulouse, 12 rue de la Paix Paris"))],
+        platform: Annotated[str, Field(max_length=200, description=(
+            "A geocoder the user allowed: ign_geocoder (IGN Géoplateforme: France, addresses and communes), photon "
+            "(worldwide, from OpenStreetMap)"))] = "ign_geocoder",
+        limit: Annotated[int, Field(ge=1, le=10, description="Maximum number of places")] = 5,
+    ) -> Dict[str, Any]:
+        """Find where a place is, by its name or its address, on a geocoder the user allowed.
+
+        Returns places [{name, label, kind, longitude, latitude, extent_wkt}], the best match first. To show one, call
+        zoom_to with its extent_wkt and crs EPSG:4326. When several places could be the one meant, ask the user
+        which. The query is sent to the geocoder; nothing of the project is.
+        """
+        return await call("POST", "/places/find", _body(query=query, platform=platform, limit=limit))
 
     # -- export ----------------------------------------------------------------
 

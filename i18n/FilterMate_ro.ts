@@ -236,6 +236,11 @@ Sunteți de acord?</translation>
         <translation>Sursa răspunde.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Serviciul răspunde, dar nu a găsit niciun loc numit Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Sursa își furnizează dalele.</translation>
@@ -658,6 +663,11 @@ Rămân în memoria de editare până când salvați editările stratului, iar a
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Căutare de imagini satelitare pe {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Căutare pe {} după locul {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Hărți de bază</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Căutare de locuri</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

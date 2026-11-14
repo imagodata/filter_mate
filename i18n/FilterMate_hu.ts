@@ -236,6 +236,11 @@ Egyetért?</translation>
         <translation>A forrás válaszol.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>A szolgáltatás válaszol, de nem talált Paris nevű helyet.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>A forrás szolgáltatja a csempéit.</translation>
@@ -658,6 +663,11 @@ A szerkesztési pufferben maradnak, amíg nem menti a réteg szerkesztéseit, é
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Műholdfelvételek keresése itt: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Keresés itt: {}, hely: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1476,6 +1486,11 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Alaptérképek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Helykeresés</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -2181,8 +2181,8 @@
   },
   {
    "name": "add_service_layer",
-   "title": "Add a layer of a WFS service",
-   "description": "Add a layer of a WFS service, read from the service as the map moves and filtered on the server. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the user first.",
+   "title": "Add a layer of a web service",
+   "description": "Add a layer of a WFS, WMS or WMTS service, read from the service as the map moves. A WFS layer is data, filtered on the server. A WMS or WMTS layer is an image drawn by the service (old maps, orthophotos of a year, cadastre, land cover): put under the other layers, it cannot be filtered, read nor exported. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the user first.",
    "read_only": false,
    "destructive": false,
    "idempotent": false,
@@ -2190,7 +2190,7 @@
    "input_schema": {
     "properties": {
      "platform": {
-      "description": "A WFS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme)",
+      "description": "A WFS, WMS or WMTS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme, data), ign_wmts or ign_wms (IGN Géoplateforme, images)",
       "maxLength": 200,
       "minLength": 1,
       "type": "string"
@@ -2352,7 +2352,7 @@
   {
    "name": "search_open_data",
    "title": "Search open data",
-   "description": "Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of. Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a resource url (geojson or gpkg first), or add_service_layer with the id on a WFS platform. The query is sent to the platform.",
+   "description": "Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of. Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a resource url (geojson or gpkg first), or add_service_layer with the id on a WFS, WMS or WMTS platform. The query is sent to the platform.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -2375,6 +2375,42 @@
       "default": 10,
       "description": "Maximum number of datasets",
       "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "find_place",
+   "title": "Find a place",
+   "description": "Find where a place is, by its name or its address, on a geocoder the user allowed. Returns places [{name, label, kind, longitude, latitude, extent_wkt}], the best match first. To show one, call zoom_to with its extent_wkt and crs EPSG:4326. When several places could be the one meant, ask the user which. The query is sent to the geocoder; nothing of the project is.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "query": {
+      "description": "The name of a place or an address, as the user wrote it: Toulouse, 12 rue de la Paix Paris",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "platform": {
+      "default": "ign_geocoder",
+      "description": "A geocoder the user allowed: ign_geocoder (IGN Géoplateforme: France, addresses and communes), photon (worldwide, from OpenStreetMap)",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "limit": {
+      "default": 5,
+      "description": "Maximum number of places",
+      "maximum": 10,
       "minimum": 1,
       "type": "integer"
      }

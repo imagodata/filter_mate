@@ -91,7 +91,7 @@ def _guarded(handler: Handler) -> Handler:
 
 def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False,
                    platforms: Sequence[str] = (), extra_domains: str = "", share_values: bool = True,
-                   basemap_addresses: Optional[Mapping[str, str]] = None) -> Dict[str, Handler]:
+                   platform_aliases: Optional[Mapping[str, str]] = None) -> Dict[str, Handler]:
     """One handler per tool of the chat (see ``core.agent.tool_catalog.chat_tools``).
 
     ``allow_remote_sources`` False: no layer is read over the network. ``platforms``: the only ones that can be
@@ -104,7 +104,8 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         if name.lower() not in enabled_platforms:
             raise ToolFailure(f"{name!r} is not enabled in the agent sources. Enabled: "
                               f"{', '.join(sorted(enabled_platforms)) or 'none'}.")
-        return name
+        # A service the user added is named by its id: its address, which may hold a key, never goes to the model.
+        return (platform_aliases or {}).get(name.lower(), name)
 
     def list_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         return select_layers((asdict(layer) for layer in accessor.list_layers()), args.get("kind"),
@@ -385,10 +386,12 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return asdict(accessor.add_service_layer(_allowed_platform(args["platform"]), args["typename"],
                                                  name=args["name"], extra_domains=extra_domains))
 
+    def find_place(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.find_place(args["query"], platform=_allowed_platform(args["platform"]),
+                                          limit=args["limit"], extra_domains=extra_domains))
+
     def add_basemap(args: Dict[str, Any]) -> Dict[str, Any]:
-        named = _allowed_platform(args["platform"])
-        # A basemap the user added is named by its id: its address, which may hold a key, never goes to the model.
-        return asdict(accessor.add_basemap((basemap_addresses or {}).get(named.lower(), named), name=args["name"],
+        return asdict(accessor.add_basemap(_allowed_platform(args["platform"]), name=args["name"],
                                            extra_domains=extra_domains))
 
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -422,7 +425,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,
         "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
-        "add_service_layer": add_service_layer, "add_basemap": add_basemap, "search_imagery": search_imagery,
+        "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
     }
     return {name: _guarded(handler) for name, handler in handlers.items()}

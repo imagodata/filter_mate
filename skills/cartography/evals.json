@@ -305,6 +305,41 @@
     "apply_filter",
     "export_layers"
    ]
+  },
+  {
+   "id": "place_zoom",
+   "prompt": "Zoome sur Albi.",
+   "expect": [
+    [
+     {
+      "tool": "find_place",
+      "args": {
+       "query": {
+        "contains": [
+         "Albi"
+        ]
+       }
+      },
+      "call_args": {
+       "query": "Albi",
+       "platform": "ign_geocoder"
+      }
+     },
+     {
+      "tool": "zoom_to",
+      "args": {},
+      "call_args": {
+       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+       "crs": "EPSG:4326"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "add_layer",
+    "run_algorithm"
+   ]
   }
  ]
 }
