@@ -183,8 +183,8 @@ def test_back_to_a_step_restores_the_settings_changed_from_it(monkeypatch, check
 
 def test_a_count_widget_does_not_count_a_web_service(monkeypatch, packages):
     """2026-11-12: featureCount() of a WFS layer can be a request to its server, at each refresh of the widgets."""
-    _module(monkeypatch, ".adapters.qgis.source_capability_probe",
-            feature_count_or_none=lambda layer: None if layer.remote else layer.featureCount())
+    _module(monkeypatch, ".adapters.qgis.source_capability_probe", counts_cheaply=lambda layer: not layer.remote)
+    _module(monkeypatch, ".adapters.qgis.feature_count", exact_feature_count=lambda layer: layer.featureCount())
     for name in ("qgis.PyQt.QtCore",):
         monkeypatch.setitem(sys.modules, name, MagicMock())
     module = _load(monkeypatch, "adapters.agent.agent_widgets", "adapters/agent/agent_widgets.py")

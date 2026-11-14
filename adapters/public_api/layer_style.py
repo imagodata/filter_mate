@@ -92,9 +92,10 @@ def _read_values_guard(layer, all_values: bool) -> None:
     Raises:
         ValueError: A web service, or too many features shown.
     """
+    from ..qgis.feature_count import features_to_read
     from .introspection import MAX_STAT_FEATURES, _refuse_web_service
     _refuse_web_service(layer)
-    count = layer.featureCount() if all_values else -1
+    count = features_to_read(layer) if all_values else -1
     if isinstance(count, int) and count > MAX_STAT_FEATURES:
         raise ValueError(f"'{layer.name()}' shows more than {MAX_STAT_FEATURES} features and graduated classes read "
                          "every value: filter it first, or draw it with categories or one symbol")
