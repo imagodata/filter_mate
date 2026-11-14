@@ -267,6 +267,16 @@ Onaylıyor musunuz?</translation>
         <translation>Katman eklendi: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tablo eklendi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Tablolar okunuyor: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Altlık haritası eklendi: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Aracı, {} veritabanınızın şu tablosunu projeye eklemek istiyor:
+{}
+
+Satırları daha sonra aracının araçları tarafından herhangi bir katmanın satırları gibi okunur ve aracının sağlayıcısına gönderilebilir. Onaylıyor musunuz?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1491,6 +1512,11 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Yer arama</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS veritabanları</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

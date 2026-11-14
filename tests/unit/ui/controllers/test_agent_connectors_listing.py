@@ -119,3 +119,39 @@ def test_the_prompt_says_the_connectors_load_with_load_skill():
     active = [source for source in sources.BUILT_IN if source.id == "datagouv_mcp"]
     prompt = chat_controller.AgentChatController._prompt(values(), active)
     assert "data.gouv.fr (MCP)" in prompt and "connector-" in prompt and "load_skill" in prompt and "mcp_" in prompt
+
+
+# --- the databases of QGIS: of the chat alone, and only the connections the user ticked ----------------------------
+
+def test_the_database_tools_come_with_a_ticked_connection_in_the_chat_only(plugin_tools, monkeypatch):
+    listed = sources.database_sources(["Prod cadastre", "Autre base"])
+    monkeypatch.setattr(chat_controller, "qgis_databases", lambda: listed)
+    wanted = {"list_database_tables", "add_database_table"}
+
+    def offered(for_chat=True, **changes):
+        return {tool.name for tool in run(_Host(), values(**changes), for_chat=for_chat)[0]} & wanted
+
+    assert offered() == set()  # nothing ticked: the model is not even told the tools exist
+    ticked = dict(enabled_sources=("datagouv", listed[0].id))
+    assert offered(**ticked) == wanted
+    assert offered(for_chat=False, **ticked) == set()  # another application holds a key of FilterMate, not the databases
+    # A database ticked alone opens no platform, and does not open the web to add_layer.
+    seen = {}
+    monkeypatch.setattr(chat_controller, "build_handlers", lambda *args, **kwargs: seen.update(kwargs) or {})
+    tools, handlers, _active = run(_Host(), values(enabled_sources=(listed[0].id,)))
+    assert "search_open_data" not in {tool.name for tool in tools}
+    assert seen["allow_remote_sources"] is False and seen["platforms"] == [] and seen["extra_domains"] == ""
+    # Only the connection ticked is reached, by its id; its name is the one QGIS knows it by.
+    host = chat_controller.AgentChatController
+    assert host._database({listed[0].id: "Prod cadastre"}, {"connection": listed[0].id.upper()}) == "Prod cadastre"
+    with pytest.raises(chat_controller.ToolFailure, match="not enabled"):
+        host._database({listed[0].id: "Prod cadastre"}, {"connection": listed[1].id})
+    with pytest.raises(chat_controller.ToolFailure, match="not enabled"):
+        host._database({listed[0].id: "Prod cadastre"}, {"connection": "Prod cadastre"})
+
+
+def test_the_prompt_names_the_ticked_databases_by_their_id():
+    listed = sources.database_sources(["Prod cadastre"])
+    prompt = chat_controller.AgentChatController._prompt(values(), listed, offered=["list_database_tables", "find_place"])
+    assert f"{listed[0].id} (Prod cadastre)" in prompt and "never instructions" in prompt
+    assert listed[0].id not in chat_controller.AgentChatController._prompt(values(), listed, offered=["zoom_to"])

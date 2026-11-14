@@ -507,6 +507,14 @@ address, else its content type), its size, and whether the server gives parts of
   (IGN Géoplateforme for France, Photon for the world, any other of that shape the user adds). `find_place` is a
   read: the name the user wrote goes to the geocoder, nothing of the project does; each place comes with the extent
   `zoom_to` takes. A geocoder or a basemap ticked alone opens neither `search_open_data` nor the web to `add_layer`.
+- **Databases of QGIS** (`adapters/public_api/database_tables.py`): the PostgreSQL connections stored in QGIS show
+  in the Sources tab, read from QGIS each time, nothing ticked. For a ticked one, `list_database_tables` gives the
+  names of its tables (schema, table, geometry or not, comment: no row; the schemas of the database itself left out)
+  and `add_database_table` adds one as a layer, asked alone in its own words; the source is built by QGIS for a table
+  the connection lists, and the address and the credentials never leave QGIS (a model names a connection by an id).
+  Tools of the chat alone: the REST API and the MCP servers do not offer them, a caller there holds a key of
+  FilterMate, not the databases of the user. Limits: PostgreSQL only; a connection saved without its credentials
+  asks for them in a QGIS dialog, or fails; the list is read on the main thread.
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
   asset links, so they are left out for now.

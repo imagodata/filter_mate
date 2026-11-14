@@ -267,6 +267,16 @@ Se strinjate?</translation>
         <translation>Plast dodana: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabela dodana: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Branje tabel iz {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Podlaga dodana: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Se strinjate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent želi projektu dodati to tabelo iz vaše podatkovne zbirke {}:
+{}
+
+Njene vrstice nato orodja agenta berejo kot vrstice katere koli plasti in se lahko pošljejo ponudniku agenta. Se strinjate?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1491,6 +1512,11 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Iskanje krajev</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Podatkovne zbirke QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -267,6 +267,16 @@ Sind Sie einverstanden?</translation>
         <translation>Layer hinzugefügt: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabelle hinzugefügt: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Tabellen von {} werden gelesen</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Hintergrundkarte hinzugefügt: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Der Agent möchte diese Tabelle Ihrer Datenbank {} zum Projekt hinzufügen:
+{}
+
+Ihre Zeilen werden anschließend von den Werkzeugen des Agenten wie die eines beliebigen Layers gelesen und können an den Anbieter des Agenten gesendet werden. Sind Sie einverstanden?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1491,6 +1512,11 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Ortssuche</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Datenbanken von QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

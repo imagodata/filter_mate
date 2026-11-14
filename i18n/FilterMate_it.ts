@@ -267,6 +267,16 @@ Perché: {}
         <translation>Layer aggiunto: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabella aggiunta: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Lettura delle tabelle di {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Mappa di base aggiunta: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Acconsenti?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>L'agente vuole aggiungere al progetto questa tabella del tuo database {}:
+{}
+
+Le sue righe vengono poi lette dagli strumenti dell'agente come quelle di qualsiasi layer, e possono essere inviate al provider dell'agente. Acconsenti?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1491,6 +1512,11 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Ricerca di luoghi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Database di QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

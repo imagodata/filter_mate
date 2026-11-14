@@ -267,6 +267,16 @@ Rozimisiz?</translation>
         <translation>Qatlam qo'shildi: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Jadval qo'shildi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Jadvallar o'qilmoqda: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Asos xarita qo'shildi: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Rozimisiz?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent loyihaga ushbu jadvalni (ma'lumotlar bazangiz: {}) qo'shmoqchi:
+{}
+
+Uning qatorlarini keyin agent vositalari istalgan qatlamning qatorlari kabi o'qiydi va ular agent ta'minotchisiga yuborilishi mumkin. Rozimisiz?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1491,6 +1512,11 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Joylarni qidirish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS ma'lumotlar bazalari</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -71,10 +71,42 @@ SAVE_RECIPE = "save_recipe"
 REMOVE_RECIPE = "remove_recipe"
 SHOW_SETTINGS_LINK = "show_settings_link"
 ASK_USER = "ask_user"
+LIST_TABLES = "list_database_tables"
+ADD_TABLE = "add_database_table"
 # The tabs of the settings dialog of the agent a link may open (ui/widgets/agent_panel.AgentSettingsDialog).
 SETTINGS_TABS = ("provider", "sources", "autonomy", "tools", "other_applications")
 # Tools of the chat alone: the history of the agent lives in QGIS, not behind the REST API.
 CHAT_ONLY = (
+    # The PostgreSQL connections of QGIS the user ticked. Of the chat alone: another application (REST, MCP) holds
+    # a key of FilterMate, not the databases of the user.
+    ToolSpec(
+        name=LIST_TABLES, title="List the tables of a database",
+        description=("List the tables of a PostgreSQL connection of QGIS the user enabled: schema, table, whether it "
+                     "has a geometry, and its comment. Names only: no row is read. search keeps the tables whose "
+                     "schema, name or comment hold every word. Returns tables [{schema, table, geometry, comment}], "
+                     "count and truncated (50 at most: search to narrow). Then add_database_table."),
+        input_schema={"type": "object", "properties": {
+            "connection": {"type": "string", "minLength": 1, "maxLength": 100,
+                           "description": "A database the user enabled, by its id (db_...)"},
+            "search": {"type": "string", "maxLength": 200, "default": "",
+                       "description": "Words of the schema, the name or the comment of the tables wanted"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 50}},
+            "required": ["connection"], "additionalProperties": False},
+        read_only=True, chat_only=True),
+    ToolSpec(
+        name=ADD_TABLE, title="Add a table of a database",
+        description=("Add a table of a PostgreSQL connection of QGIS the user enabled to the project, as a layer: it "
+                     "is then read, filtered and styled like any other layer (filters run in the database). Only a "
+                     "table list_database_tables gives. Returns the layer summary. The user is asked first."),
+        input_schema={"type": "object", "properties": {
+            "connection": {"type": "string", "minLength": 1, "maxLength": 100,
+                           "description": "A database the user enabled, by its id (db_...)"},
+            "schema": {"type": "string", "minLength": 1, "maxLength": 200},
+            "table": {"type": "string", "minLength": 1, "maxLength": 200},
+            "name": {"type": "string", "maxLength": 200, "default": "",
+                     "description": "Name of the layer in the project (default: the name of the table)"}},
+            "required": ["connection", "schema", "table"], "additionalProperties": False},
+        open_world=True, chat_only=True),
     ToolSpec(
         name=UNDO_AGENT_STEP, title="Undo the last change of the agent",
         description=("Undo the last request the agent carried out in this project, as a whole: its filters, the layers "

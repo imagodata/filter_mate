@@ -267,6 +267,16 @@ Do you agree?</source>
         <translation>レイヤーを追加しました: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>テーブルを追加しました: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>{} のテーブルを読み込んでいます</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>背景地図を追加しました: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 許可しますか？</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>エージェントがあなたのデータベース {} の次のテーブルをプロジェクトに追加しようとしています:
+{}
+
+追加後、そのテーブルの行はエージェントのツールによって他のレイヤーと同様に読み取られ、エージェントのプロバイダーに送信される場合があります。許可しますか？</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1491,6 +1512,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>場所の検索</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS のデータベース</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
