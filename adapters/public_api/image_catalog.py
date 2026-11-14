@@ -8,24 +8,20 @@ from __future__ import annotations
 
 import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple
-from urllib.parse import urlsplit
 
 from qgis.core import QgsDataSourceUri, QgsRasterLayer
 from qgis.PyQt.QtCore import QByteArray, QXmlStreamReader
 
 from ...core.agent.open_data import KIND_WMTS
 from ..agent.bounded_http import HttpFailure, fetch
-from .wfs_catalog import MAX_CAPABILITIES, MAX_LAYERS, MAX_TEXT, TIMEOUT_MS, TTL_SECONDS, _plain
+from .wfs_catalog import (
+    MAX_CAPABILITIES, MAX_LAYERS, MAX_TEXT, TIMEOUT_MS, TTL_SECONDS, _local, _plain, foreign as _foreign, link as _href,
+)
 
-XLINK = "http://www.w3.org/1999/xlink"
 WEB_MERCATOR = ("EPSG:3857", "EPSG:900913")
 _FORMATS = ("image/png", "image/jpeg")
 MAX_CRS = 200_000  # codes read in one document: a server lists a few thousands, on its root layer
 _CACHE: Dict[Tuple[str, str], Any] = {}
-
-
-def _local(value) -> str:
-    return value.toString() if hasattr(value, "toString") else str(value)
 
 
 def _authid(text: str) -> str:
@@ -42,26 +38,6 @@ def _authid(text: str) -> str:
 def _text(reader) -> str:
     """The text of the element just started (its end is read with it)."""
     return " ".join(reader.readElementText(QXmlStreamReader.ReadElementTextBehaviour.SkipChildElements).split())
-
-
-def _foreign(address: str, base: str) -> bool:
-    """Whether an address of a capabilities document is elsewhere than the service: another host, port or scheme."""
-    try:
-        there, here = urlsplit(address), urlsplit(base)
-        return ((there.hostname or "").lower(), there.port, there.scheme.lower()) != (
-            (here.hostname or "").lower(), here.port, here.scheme.lower())
-    except ValueError:
-        return True
-
-
-def _href(reader) -> str:
-    """The link of an element, as QGIS reads it (the attribute written ``xlink:href``) and as XML does (the xlink
-    namespace under any prefix): a document where the two differ is refused, it shows one address and hides another."""
-    by_namespace = _local(reader.attributes().value(XLINK, "href"))
-    literal = _local(reader.attributes().value("xlink:href"))
-    if by_namespace != literal:
-        raise ValueError("the service answered with a document whose links cannot be trusted")
-    return literal
 
 
 def offered_crs(item: Dict[str, Any]) -> List[str]:
