@@ -84,7 +84,7 @@ def visibility(payload: VisibilityBody, request: Request) -> OperationResult:
 class AddLayerBody(BaseModel):
     source: str = Field(..., min_length=1, max_length=2000, description="Local data file or public https URL")
     name: str = Field(default="", max_length=200)
-    kind: Literal["vector", "raster"] = "vector"
+    kind: Literal["vector", "raster", "point_cloud"] = "vector"
 
 
 @router.post("/layers/add", response_model=LayerSummary)

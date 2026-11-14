@@ -695,6 +695,11 @@ Restano nel buffer di modifica finché non salvi le modifiche del layer, e annul
         <translation>Interrotto.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Questa richiesta: {} token letti (di cui {} dalla cache), {} scritti</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Impossibile avviare il server MCP: {}</translation>

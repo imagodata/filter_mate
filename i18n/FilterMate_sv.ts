@@ -695,6 +695,11 @@ De ligger kvar i redigeringsbufferten tills du sparar lagrets redigeringar, och 
         <translation>Stoppad.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Den här begäran: {} tokens lästa (varav {} från cachen), {} skrivna</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP-servern kunde inte startas: {}</translation>

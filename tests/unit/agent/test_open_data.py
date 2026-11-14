@@ -286,3 +286,20 @@ def test_a_redirect_to_a_name_that_is_not_plain_ascii_is_not_followed():
     from core.agent.open_data import follow_redirects
     with pytest.raises(ValueError, match="plain ASCII"):
         follow_redirects("https://data.example.org/a.gpkg", lambda url: (302, "https://faß.example.org/a.gpkg"))
+
+
+# --- point clouds and the formats added on 2026-11-14 ---------------------------------------------------------------
+
+@pytest.mark.parametrize("path", ["/data/cloud.las", "/data/cloud.laz", "/data/cloud.copc.laz", "C:/data/Tile.LAZ",
+                                  "/data/track.gpx", "/data/table.xlsx", "/data/roads.parquet"])
+def test_a_local_point_cloud_and_the_other_local_formats_are_accepted(path):
+    from core.agent.open_data import source_problem
+    assert source_problem(path, allow_remote=False) == ""
+
+
+def test_a_point_cloud_is_told_by_its_extension():
+    from core.agent.open_data import is_point_cloud
+    assert is_point_cloud("/data/cloud.copc.laz") and is_point_cloud("C:/data/Tile.LAS")
+    assert is_point_cloud("https://example.org/tiles/a.laz?download=1")
+    assert not is_point_cloud("/data/las.gpkg") and not is_point_cloud("https://example.org/laz/a.geojson")
+    assert not is_point_cloud("/data/a.gpkg|layername=cloud.laz")

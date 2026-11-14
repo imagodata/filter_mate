@@ -695,6 +695,11 @@ Qatlam tahrirlarini saqlamaguningizcha ular tahrir buferida qoladi, navbatni bek
         <translation>To'xtatildi.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Ushbu so'rov: {} token o'qildi (shundan {} tasi keshdan), {} yozildi</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP serverini ishga tushirib bo'lmadi: {}</translation>

@@ -200,6 +200,11 @@ Rules worth keeping:
   - on demand, `describe_layer`: place in the tree, extent, style (renderer, its field, how many classes, labels,
     opacity, scale range), joins and relations. No attribute value is in the style: class values and labels stay out,
     as `field_values` does when values are not shared. The extent of a web service is not read.
+- **What a request weighed** shows under the thread when it ends: the tokens read (the cache among them) and
+  written, as the provider counted them (`messages.request_usage`); nothing when it counted none. No price: prices
+  change, and a local model has none.
+- **A source that is not ticked**: the notes of the prompt tell the model to say so and to call `show_settings_link`
+  with `sources`, a button to the tab, instead of answering that it cannot.
 - **At most 16 model turns per request** (`max_model_turns`, `core/agent/session.py`). Two turns before the limit the
   model is told so, and a request that reaches it stops with a sentence that says why; what was done stays and can be
   undone.
@@ -416,7 +421,9 @@ files only. `add_layer` and `remove_layers` ask the user; a search stays in the 
 Two allowlists hold, on every path (chat, REST, MCP), because QGIS and GDAL interpret these strings:
 
 - `add_layer` (`open_data.source_problem`): a plain local data file, or a public https URL of one. No provider URI, no
-  `PG:`, `/vsi...`, UNC path, inline XML or `|subset=`. A service (WFS, WMS) cannot be added by a model.
+  `PG:`, `/vsi...`, UNC path, inline XML or `|subset=`. A service (WFS, WMS) cannot be added by a model. A local
+  `.las`, `.laz` or `.copc.laz` file is a point cloud whatever kind is asked (`project_control._add_point_cloud`:
+  the `copc` provider, else `pdal`, said missing when QGIS was built without it); never from an address.
 - `select_features` (`sql_guard.expression_problem`): plain conditions and a short list of functions. QGIS expressions
   can read the environment and the disk (`env`, `file_exists`, `aggregate`) and write to SQLite
   (`sqlite_fetch_and_increment`).

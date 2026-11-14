@@ -53,6 +53,7 @@ from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
 from ...core.agent.providers.base import HttpRequest, encode_json, error_from_response, without_key
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
+from ...core.agent.messages import request_usage
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT, platforms_note
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
@@ -90,10 +91,12 @@ SERVICE_TOOL = "add_service_layer"
 IMAGERY_TOOL = "search_imagery"
 BASEMAP_TOOL = "add_basemap"
 NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
-                     "only takes local files.")
+                     "only takes local files. When data from the web is asked, say so and call show_settings_link "
+                     "with target sources: the user gets a button to tick a platform, then asks again.")
 NO_BASEMAP_NOTE = ("\n\nThe user enabled no web basemap: add_basemap is not available. When a basemap is asked, say "
-                   "that one can be ticked in the settings of the agent, Sources tab, under Basemaps (OpenStreetMap, "
-                   "Carto, IGN...), or an XYZ address added there; do not try another way.")
+                   "that one can be ticked in the Sources tab of the settings of the agent, under Basemaps (OpenStreetMap, "
+                   "Carto, IGN...), or an XYZ address added there, and call show_settings_link with target sources: "
+                   "the user gets a button to that tab, then asks again. Do not try another way.")
 FIXED_IN_SETTINGS = (ERROR_AUTH, ERROR_QUOTA)
 MAX_DETAIL_CHARS = 200
 # The Test button of the provider tab: one short request, then the list of the models.
@@ -1737,6 +1740,7 @@ class AgentChatController(QObject):
         self.panel.set_working(True)
         self.panel.set_can_undo(False)
         summarized = self._engine.summarized
+        self._usage_before = self._engine.usage
         self._engine.send(text, self._project_context())
         self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
@@ -2386,7 +2390,17 @@ class AgentChatController(QObject):
             self._say("")
             self.panel.show_error(*self._stop_words(outcome.reason))
             return
-        self._say("")  # the cards of the turn say what changed (mockup)
+        self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
+
+    def _usage_words(self) -> str:
+        """What the request weighed, for the line under the thread: the user pays for it, or waits for it."""
+        if self._engine is None:
+            return ""
+        spent = request_usage(getattr(self, "_usage_before", None), self._engine.usage)
+        if spent is None:
+            return ""
+        return _tr("This request: {} tokens read ({} from the cache), {} written").format(
+            *(f"{count:,}".replace(",", "\u202f") for count in spent))
 
     @staticmethod
     def _stop_words(reason: str) -> Tuple[str, str]:

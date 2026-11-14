@@ -2151,7 +2151,7 @@
    "input_schema": {
     "properties": {
      "source": {
-      "description": "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, fgb, csv, tif; a GeoPackage table with |layername=name), or a public https URL of such a file (a resource url from search_open_data). Nothing else: no http, no provider URI, no database connection.",
+      "description": "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, gpx, fgb, csv, xlsx, parquet, tif, or a point cloud: las, laz, copc.laz; a GeoPackage table with |layername=name), or a public https URL of a vector or raster file (a resource url from search_open_data). Nothing else: no http, no provider URI, no database connection.",
       "maxLength": 2000,
       "minLength": 1,
       "type": "string"
@@ -2164,10 +2164,11 @@
      },
      "kind": {
       "default": "vector",
-      "description": "vector (default) or raster",
+      "description": "vector (default), raster, or point_cloud (a local las or laz file is one whatever is given here)",
       "enum": [
        "vector",
-       "raster"
+       "raster",
+       "point_cloud"
       ],
       "type": "string"
      }

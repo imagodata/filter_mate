@@ -507,3 +507,19 @@ class TestBench:
         finally:
             server.shutdown()
             server.server_close()
+
+
+class TestRequestUsage:
+    """What one request weighed, for the line under the thread."""
+
+    def test_the_cache_counts_in_what_was_read(self):
+        from core.agent.messages import Usage, request_usage
+        before = Usage(input_tokens=100, output_tokens=10, cache_read_tokens=1000, cache_write_tokens=500)
+        after = before + Usage(input_tokens=40, output_tokens=7, cache_read_tokens=15000, cache_write_tokens=200)
+        assert request_usage(before, after) == (15240, 15000, 7)
+        assert request_usage(None, Usage(input_tokens=12, output_tokens=3)) == (12, 0, 3)
+
+    def test_a_provider_that_counts_nothing_shows_nothing(self):
+        from core.agent.messages import Usage, request_usage
+        assert request_usage(Usage(5, 5), Usage(5, 5)) is None
+        assert request_usage(None, Usage()) is None

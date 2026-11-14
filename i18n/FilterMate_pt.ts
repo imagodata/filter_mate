@@ -695,6 +695,11 @@ Ficam no buffer de edição até guardar as edições da camada, e anular a rond
         <translation>Interrompido.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Este pedido: {} tokens lidos (dos quais {} da cache), {} escritos</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Não foi possível iniciar o servidor MCP: {}</translation>

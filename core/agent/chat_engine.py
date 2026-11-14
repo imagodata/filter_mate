@@ -107,6 +107,11 @@ class ChatEngine:
         self._executor.offer(tools, handlers)
 
     @property
+    def usage(self):
+        """Tokens of the conversation so far, as the providers counted them."""
+        return self._session.usage
+
+    @property
     def summarized(self) -> int:
         """Requests of this conversation summed up so far, to keep what is sent short."""
         return self._session.summarized
