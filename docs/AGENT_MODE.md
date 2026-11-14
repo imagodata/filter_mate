@@ -153,6 +153,13 @@ Rules worth keeping:
   refused, nothing in the table before the user saves, then the values and the point added there with their
   types and CRS) and on a WFS-T layer served by QGIS Server (`check_agent_edits_wfst.py`: the GeoPackage behind the
   server read directly, unchanged until the layer is saved, then holding every change).
+  QGIS filters no layer in editing mode, so a turn that filters and edits a layer is undone edits first
+  (`TurnCheckpoint._move`): a layer the turn itself put in editing mode, back at the start of its undo stack with
+  nothing else pending, leaves it (`turn_effects._closable`) and takes its filter back. Its undo stack goes with the
+  editing mode: applying that turn again brings the filters back and says the edits were left. A layer the user was
+  editing stays in editing mode with their edits. `remove_layers` refuses a layer with unsaved edits (undoing the
+  turn would bring it back without them); the joins of other layers to a layer removed, and the relations of the
+  project that cite it, come back with it at undo.
 - **Layouts** (`adapters/public_api/layouts.py`): `create_layout` adds a print layout to the project (A4, A3, A5
   or Letter, landscape or portrait): a map of the layers checked in the tree or of those given, framed on an
   extent, a layer, the map view or the layers shown, with a title, a legend, a scale bar and a north arrow. The

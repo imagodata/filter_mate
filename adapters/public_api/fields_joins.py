@@ -64,7 +64,11 @@ def add_field(layer: str, name: str, field_type: str = "text", length: int = 0, 
             computed = update_features(found.id(), formulas={text: formula}, expression="true")
         except ValueError as exc:
             # The field stays, empty: the model is told why its values are missing, and may try another formula.
-            answer['formula_error'] = str(exc)
+            reason = str(exc)
+            if 'narrow the expression' in reason:  # advice for update_features: add_field takes no expression
+                reason = (reason.split(':', 1)[0] + ": the field is added, empty. Fill it with update_features on "
+                          "parts of the layer (an expression each), or make the layer with a Processing algorithm")
+            answer['formula_error'] = reason
         else:
             answer['computed'] = computed.get('changed', 0)
     return answer

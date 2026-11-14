@@ -663,7 +663,7 @@ def build_server(client: FilterMateClient) -> Any:
             layer=layer, field=field, enabled=enabled, size=size, color=color, buffer=buffer, expression=expression,
             visible_from_scale=visible_from_scale))
 
-    @mcp.tool(annotations=_write("Edit attributes of features", idempotent=True))
+    @mcp.tool(annotations=_write("Edit attributes of features", idempotent=False))  # a formula such as "pop" * 2
     async def update_features(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
         values: Annotated[Optional[Dict[str, Any]], Field(description=(
@@ -702,7 +702,7 @@ def build_server(client: FilterMateClient) -> Any:
     async def add_features(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
         features: Annotated[List[Dict[str, Any]], Field(min_length=1, max_length=100, description=(
-            '[{"wkt": "POINT(1.44 43.6)", "attributes": {"nom": "Puits"}}]: geometries of the type of the layer'))],
+            '[{"wkt": "POINT(1.44 43.6)", "attributes": {"nom": "Puits"}}]: geometries of the type of the layer, coordinates in crs (the CRS of the layer by default; degrees only with EPSG:4326)'))],
         crs: Annotated[str, Field(max_length=200, description="CRS of the WKT, such as EPSG:4326; the layer's by default")] = "",
     ) -> Dict[str, Any]:
         """Add features to a vector layer from WKT geometries and attributes, in its edit buffer: nothing is saved.
@@ -737,7 +737,7 @@ def build_server(client: FilterMateClient) -> Any:
             name=name, title=title, page=page, orientation=orientation, layers=layers, extent=extent,
             extent_layer=extent_layer, legend=legend, scale_bar=scale_bar, north_arrow=north_arrow))
 
-    @mcp.tool(annotations=_write("Export a print layout", idempotent=True, destructive=True))
+    @mcp.tool(annotations=_write("Export a print layout", idempotent=False, destructive=True))
     async def export_layout(
         name: Annotated[str, Field(min_length=1, max_length=100, description="A layout of the project (map_context lists them)")],
         format: Annotated[Literal["pdf", "png"], Field(description="File format")] = "pdf",  # noqa: A002
@@ -747,8 +747,8 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root.
 
-        A file of the same name there is overwritten. The chat of FilterMate asks the user first. Returns path
-        (relative to the sub-folder) and bytes.
+        A file of the same name there is kept: the new one is named <name>_2, <name>_3... The chat of FilterMate
+        asks the user first. Returns path (relative to the sub-folder) and bytes.
         """
         return await call("POST", "/layouts/export", _body(name=name, format=format, dpi=dpi, subfolder=subfolder))
 
@@ -918,7 +918,7 @@ def build_server(client: FilterMateClient) -> Any:
             "The examples are the objects the user drew on this raster in the FilterMate dock (map_context lists "
             "them as drawn_objects): an object counts when it looks like any of them"))] = False,
         extent_wkt: Annotated[str, Field(max_length=100_000, description=(
-            "Area searched as WKT, e.g. map_context's extent_wkt; empty: the visible map"))] = "",
+            "Area searched as WKT, e.g. map_context's extent_wkt with its canvas_crs as extent_crs; empty: the visible map"))] = "",
         extent_crs: Annotated[str, Field(max_length=64, description=(
             "CRS of extent_wkt, e.g. EPSG:2154 (empty: the raster's)"))] = "",
         same_shape: Annotated[bool, Field(description=(

@@ -503,6 +503,45 @@ def check_edits(project, work):
     check("edit: after an edit of the user, the turn is left as it is", left == ["edits"] and layer.isModified(),
           (done, left))
     layer.rollBack()
+
+    # A turn that filters and edits the same layer: undone, the edits go first and the layer leaves the editing mode
+    # the turn put it in, or QGIS would refuse to give its filter back.
+    recorder = EffectsRecorder()
+    layer.setSubsetString('"pop" > 300')
+    recorder.before_call(ToolCallPart("f1", "update_features", {"layer": "edits"}))
+    edits.update_features("edits", values={"nom": "Grand"}, expression='"pop" > 5000')
+    effects = recorder.finish()
+    check("edit after a filter: the turn opened the editing mode", effects and effects[0][0] == "edits" and
+          effects[0][5] is True and not layer.setSubsetString(""), effects)
+    done, left = apply_effects(effects, undo=True, edits=True, close=frozenset({layer.id()}))
+    check("edit after a filter: undone, the layer leaves the editing mode", done == ["edits"] and not left and
+          not layer.isEditable(), (done, left, layer.isEditable()))
+    check("edit after a filter: its filter can change again", layer.setSubsetString("") and
+          sorted(f["pop"] for f in layer.getFeatures()) == before)
+    done, left = apply_effects(effects, undo=False, edits=True)
+    check("edit after a filter: applied again, the edits dropped with the editing mode are said left",
+          left == ["edits"] and not done, (done, left))
+
+    # The user was editing before the turn: their edit and the editing mode stay.
+    layer.startEditing()
+    layer.beginEditCommand("user")
+    layer.changeAttributeValue(next(layer.getFeatures()).id(), 2, 1)
+    layer.endEditCommand()
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("f2", "update_features", {"layer": "edits"}))
+    edits.update_features("edits", values={"nom": "Grand"}, expression='"pop" > 5000')
+    effects = recorder.finish()
+    done, left = apply_effects(effects, undo=True, edits=True, close=frozenset({layer.id()}))
+    check("edit while the user edits: undone, the layer stays in editing mode with the edit of the user",
+          done == ["edits"] and layer.isEditable() and layer.isModified() and effects[0][5] is False,
+          (done, left, effects))
+
+    # A layer with unsaved edits is not removed: undoing the turn would bring it back without them.
+    from filter_mate.adapters.public_api import project_control
+    kept = project_control.remove_layers(["edits"])
+    check("remove: a layer with unsaved edits is refused", not kept["done"] and "unsaved" in kept["failed"].get("edits", "")
+          and project.mapLayer(layer.id()) is not None, kept)
+    layer.rollBack()
     project.removeMapLayer(layer.id())
 
 
@@ -672,7 +711,7 @@ def check_tree_more(project):
     apply_effects(effects, undo=True)
 
 
-def check_fields_joins(project):
+def check_fields_joins(project, work):
     """add_field (in the edit buffer, filled by a formula) and join_layers, and what an undo of the turn takes back."""
     from filter_mate.adapters.public_api import fields_joins
     from filter_mate.adapters.agent.turn_effects import EffectsRecorder, apply_effects
@@ -720,6 +759,41 @@ def check_fields_joins(project):
     apply_effects(effects, undo=True)
     communes.rollBack()
     project.removeMapLayer(table.id())
+
+    # A layer removed takes with it the joins of the other layers to it and the relations that cite it: undoing the
+    # turn brings the layer back, then them.
+    from qgis.core import QgsRelation
+    from filter_mate.adapters.public_api import project_control
+    path = os.path.join(work, "reference.gpkg")
+    make_vector(path, "GPKG")
+    reference = QgsVectorLayer(path, "reference", "ogr")
+    project.addMapLayer(reference)
+    fields_joins.join_layers("communes", "reference", "nom", "nom", fields=["pop"])
+    relation = QgsRelation()
+    relation.setId("communes_reference")
+    relation.setName("communes de la référence")
+    relation.setReferencingLayer(communes.id())
+    relation.setReferencedLayer(reference.id())
+    relation.addFieldPair("nom", "nom")
+    project.relationManager().addRelation(relation)
+    check("removed layer: a join and a relation cite it", len(communes.vectorJoins()) == 1 and
+          "communes_reference" in project.relationManager().relations(), relation.isValid())
+    recorder = EffectsRecorder()
+    recorder.before_call(ToolCallPart("r1", "remove_layers", {"layers": ["reference"]}))
+    project_control.remove_layers(["reference"])
+    effects = recorder.finish()
+    check("removed layer: QGIS took the join and the relation away, and the turn kept them",
+          not communes.vectorJoins() and "communes_reference" not in project.relationManager().relations() and
+          sorted(effect[0] for effect in effects) == ["join", "relation", "removed"], [effect[0] for effect in effects])
+    done, left = apply_effects(effects, undo=True)
+    back = project.mapLayersByName("reference")
+    check("removed layer: undone, the layer, the join and the relation are back", len(back) == 1 and not left and
+          [join.joinLayerId() for join in communes.vectorJoins()] == [back[0].id()] and
+          project.relationManager().relation("communes_reference").isValid(), (done, left))
+    done, left = apply_effects(effects, undo=False)
+    check("removed layer: applied again, they go with it", not project.mapLayersByName("reference") and
+          not communes.vectorJoins() and "communes_reference" not in project.relationManager().relations(),
+          (done, left))
 
 
 def check_tree_same_names(project):
@@ -947,7 +1021,7 @@ def main(introspection):
     check_project_crs(project)
     check_tree_same_names(project)
     check_layer_tree(project)
-    check_fields_joins(project)
+    check_fields_joins(project, work)
     check_tree_more(project)
     check_favorite_layers(project)
 

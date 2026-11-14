@@ -212,9 +212,9 @@ def test_back_to_a_step_undoes_the_later_steps_and_their_settings_in_one_operati
         effects=(style, ("settings", "", json.dumps({"APP.B": 10}), json.dumps({"APP.B": 20}), 2))))
     calls = []
 
-    def apply_effects(effects, undo, keep=frozenset(), presence=None):
+    def apply_effects(effects, undo, keep=frozenset(), presence=None, edits=None, close=frozenset()):
         calls.append((effects, undo, presence))
-        return (["done"] if presence is False else []), []
+        return (["done"] if presence is False and edits is False else []), []
     monkeypatch.setattr(checkpoint_module, "apply_effects", apply_effects)
     done, _left = checkpoint_module.TurnCheckpoint().undo_to_step(1)
     effects = calls[0][0]
@@ -222,6 +222,7 @@ def test_back_to_a_step_undoes_the_later_steps_and_their_settings_in_one_operati
     assert effects[0] == style and len(settings) == 1
     # Undone (undo=True), it goes to what the setting held before the step.
     assert json.loads(settings[0][2]) == {"APP.B": 10} and json.loads(settings[0][3]) == {"APP.B": 20}
-    assert [(undo, presence) for _effects, undo, presence in calls] == [(True, True), (True, False)]
+    # The layers, then the edits (before the filters), then the rest.
+    assert [(undo, presence) for _effects, undo, presence in calls] == [(True, True), (True, False), (True, False)]
     pushed = history.undo_stack(checkpoint_module.HISTORY_KEY)[-1]
     assert done == ["done"] and pushed.effects_reversed and pushed.effects == effects

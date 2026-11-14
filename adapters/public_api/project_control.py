@@ -542,6 +542,13 @@ def add_basemap(platform: str, name: str = '', extra_domains: str = '') -> Dict[
     return _summary(layer, count_features=False)
 
 
+def _has_unsaved_edits(layer) -> bool:
+    try:
+        return bool(layer.isEditable() and layer.isModified())
+    except (AttributeError, RuntimeError):  # a raster, a layer going away
+        return False
+
+
 def remove_layers(layers: List[str]) -> Dict[str, Any]:
     """Remove layers from the project (their files stay)."""
     from qgis.core import QgsProject
@@ -551,6 +558,10 @@ def remove_layers(layers: List[str]) -> Dict[str, Any]:
         found = resolve_layer(reference)
         if found is None:
             failed[str(reference)] = 'layer not found'
+            continue
+        if _has_unsaved_edits(found):
+            # Removed, they would be lost for good: undoing the turn brings the layer back, not its edit buffer.
+            failed[found.name()] = 'has unsaved edits: the user saves or drops them in QGIS first'
             continue
         done.append(found.name())
         project.removeMapLayer(found.id())

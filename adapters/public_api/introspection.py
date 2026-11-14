@@ -713,6 +713,19 @@ def sample_features(reference: str, limit: int = 5, fields: Optional[List[str]] 
             'scope': 'the features the map shows' if shown_only else 'the layer'}
 
 
+def _distance_in(point_crs: Any, map_crs: Any, x: float, y: float, distance: float, project: Any) -> float:
+    """``distance`` of the map around the point (x, y), in the units of ``point_crs``; 0.0 when it cannot be told."""
+    from qgis.core import QgsCoordinateTransform, QgsPointXY
+    try:
+        here = QgsCoordinateTransform(point_crs, map_crs, project).transform(QgsPointXY(x, y))
+        aside = QgsCoordinateTransform(map_crs, point_crs, project).transform(
+            QgsPointXY(here.x() + distance, here.y()))
+    except Exception:  # QgsCsException: a point outside what the CRS covers
+        return 0.0
+    found = math.hypot(aside.x() - x, aside.y() - y)
+    return found if math.isfinite(found) else 0.0
+
+
 def _identify_layers(references: Optional[List[str]]) -> List[Any]:
     """The layers named, or the visible vector and raster layers of the tree, top first."""
     from qgis.core import QgsProject
@@ -760,8 +773,12 @@ def identify_at(x: float, y: float, crs: str = '', layers: Optional[List[str]] =
         raise ValueError(f"unknown CRS {crs!r}")
     if tolerance is None:
         tolerance = 0.0
-        if canvas is not None and map_crs is not None and map_crs == point_crs:
+        if canvas is not None and map_crs is not None:
             tolerance = IDENTIFY_PIXELS * (_safe(canvas.mapUnitsPerPixel, 0.0) or 0.0)
+            if map_crs != point_crs:
+                # Five pixels of the map, in the units of the point: a point given in degrees on a map in metres
+                # used to get no distance at all, and found neither points nor lines.
+                tolerance = _distance_in(point_crs, map_crs, x, y, tolerance, project)
     tolerance = max(0.0, min(float(tolerance), MAX_COORDINATE))
     limit = max(1, min(int(limit), MAX_SAMPLE))
     area = QgsRectangle(x - tolerance, y - tolerance, x + tolerance, y + tolerance)
