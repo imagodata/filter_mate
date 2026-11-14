@@ -65,14 +65,26 @@ class TestTools:
         assert not second.spec.read_only and second.spec.requires_confirmation  # unannotated counts as a change
         assert second.spec.input_schema["type"] == "object"
 
-    @pytest.mark.parametrize("level, verdict", [("advisor", "refuse"), ("careful", "ask"), ("standard", "ask"),
-                                                ("autonomous", "ask")])
-    def test_a_connector_that_says_it_only_reads_is_still_a_call_outside(self, level, verdict):
-        # readOnlyHint is the remote server's own claim, and the arguments may carry data of the project.
+    @pytest.mark.parametrize("level", ["advisor", "careful", "standard", "autonomous"])
+    def test_a_connector_that_says_it_only_reads_is_still_a_call_outside(self, level):
+        # readOnlyHint is the remote server's own claim, and the arguments may carry data of the project: asked at
+        # every level. The advisor level asks too since 2026-11-14 (it refused): the tool changes nothing in QGIS.
         from core.agent.permissions import OUTSIDE, PermissionPolicy, risk_of
         first = tools_from_listing("srv", "Server", self.LISTING)[0]
         assert not first.spec.read_only and risk_of(first.spec) == OUTSIDE
-        assert PermissionPolicy(level).verdict(first.spec) == verdict
+        assert PermissionPolicy(level).verdict(first.spec) == "ask"
+
+    @pytest.mark.parametrize("rule", [None, "allow", "ask"])
+    def test_at_the_advisor_level_a_connector_tool_is_asked_at_each_call(self, rule):
+        """Decided by the user on 2026-11-14. Neither the rule of the Tools tab nor a yes for the conversation makes
+        it run alone, and the question offers no "for the conversation"."""
+        from core.agent.permissions import PermissionPolicy
+        spec = tools_from_listing("srv", "Server", self.LISTING)[0].spec
+        policy = PermissionPolicy("advisor", rules={spec.name: rule} if rule else {})
+        policy.grant(spec.name)
+        assert policy.verdict(spec) == "ask" and not policy.grantable(spec)
+        assert PermissionPolicy("advisor", rules={spec.name: "never"}).verdict(spec) == "off"
+        assert PermissionPolicy("standard").grantable(spec)
 
     def test_a_server_cannot_flood_the_conversation(self):
         many = {"tools": [{"name": f"t{i}", "description": "d" * 5000, "inputSchema": {}} for i in range(200)]}

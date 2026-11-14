@@ -122,16 +122,20 @@ def test_a_no_is_kept_for_the_conversation_and_forgotten_with_it(chat, controlle
     assert controller._policy.declined == frozenset()
 
 
-def test_at_the_advisor_level_nothing_is_asked_nor_connected(chat, controller):  # noqa: F811
-    """The tools of a connector never run at that level: asking, then connecting, would be for nothing."""
+def test_at_the_advisor_level_the_connector_is_asked_then_each_call_of_its_tools(chat, controller):  # noqa: F811
+    """Decided by the user on 2026-11-14: a connector can be used at the advisor level, with a question each time."""
     engine, session, transport, source = chat
     controller._policy.set_level("advisor")
     asked = []
     controller._ask_user = lambda title, text: asked.append(text) or True
+    controller._ask_choice = lambda title, text: pytest.fail("no 'for the conversation' at the advisor level")
     engine.send("dis bonjour")
     transport.emit(tool_turn("load_skill", {"name": "connector-" + source.id}))
-    assert asked == [] and FakeConnection.made == []
-    assert "advise only" in session.messages[-1].parts[0].content
+    assert len(asked) == 1 and FakeConnection.made == [source.id]
+    hello = "mcp_" + source.id + "__hello"
+    transport.emit(tool_turn(hello, {}, "c2"))
+    transport.emit(tool_turn(hello, {}, "c3"))
+    assert len(asked) == 3 and "external connector" in asked[1] and "Bonjour" in session.messages[-1].parts[0].content
 
 
 def test_a_connector_loaded_is_not_asked_again_after_another_level(chat, controller):  # noqa: F811

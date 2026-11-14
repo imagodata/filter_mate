@@ -22,6 +22,8 @@ from typing import Any, Dict, Iterable, List, Optional, Protocol, Sequence, Set
 
 from .skills import CONNECTOR_PREFIX
 
+CONNECTOR_TOOL_PREFIX = "mcp_"  # the names of the tools of the external connectors (mcp_client.PREFIX)
+
 READ, VIEW, PROJECT, BUFFER, LOCAL, OUTSIDE = range(6)
 RISK_NAMES = ("read", "view", "project", "edit buffer", "irreversible", "outside")
 
@@ -115,20 +117,15 @@ TURNED_OFF_REFUSAL = ("Not done: the user turned the tool {} off for the agent. 
 CONNECTOR_DECLINED = ("Not loaded: the user declined the connector {}; do not ask again in this conversation. Go on "
                       "without it, and tell the user when the request needs it.")
 
-# The tools of a connector reach the outside, which the advisor level never runs: loading one there would ask the
-# user, connect, and leave tools that are all refused (review of 2026-11-14).
-CONNECTOR_ADVISOR = ("Not loaded: the user set the agent to advise only, and the tools of an external connector do not "
-                     "run at that level. Tell them the request needs the connector {}, and that another level can be "
-                     "chosen in the settings of the agent. Do not ask again at this level.")
-
 ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing that changes the project runs. "
                    "Tell them, step by step, what you would do and with which tools, so they can do it themselves or "
                    "choose another level in the settings of the agent. Do not try another tool to do it.")
 
 _LEVEL_NOTES = {
     ADVISOR: ("Level of autonomy chosen by the user: advisor. Only the tools that read run; every change is refused, "
-              "except change_settings, which the user reads and confirms. Answer the question, and for a change "
-              "describe the steps and the tools you would use."),
+              "except change_settings, which the user reads and confirms, and the tools of an external connector "
+              "(mcp_...), which change nothing in QGIS and are asked at each call. Answer the question, and for a "
+              "change describe the steps and the tools you would use."),
     CAREFUL: ("Level of autonomy chosen by the user: careful. Every change of the project, filters included, is shown "
               "to the user before it runs; a declined one is their choice: ask what they want instead."),
     AUTONOMOUS: ("Level of autonomy chosen by the user: autonomous. Exports, removals and deletions run without a "
@@ -266,8 +263,6 @@ class PermissionPolicy:
         off, the level."""
         if name in self._declined:
             return CONNECTOR_DECLINED.format(repr(name))
-        if name.startswith(CONNECTOR_PREFIX) and self.level == ADVISOR:
-            return CONNECTOR_ADVISOR.format(repr(name))
         return (self.protection_refusal(name, arguments)
                 or (TURNED_OFF_REFUSAL.format(repr(name)) if self.turned_off(name) else "")
                 or ADVISOR_REFUSAL)
@@ -318,6 +313,11 @@ class PermissionPolicy:
         if spec.name in SETTINGS_TOOLS:
             return self._settings_verdict(spec, rule, arguments)
         risk = risk_of(spec)
+        if self._advisor_connector_tool(spec.name):
+            # Decided by the user on 2026-11-14: at the advisor level a connector can be used, since its tools
+            # change nothing in QGIS; but what the agent sends leaves QGIS, so each call is asked, whatever the
+            # rule of the Tools tab or what was allowed for the conversation.
+            return ASK
         if rule == RULE_ASK:  # at every call, what was allowed for the conversation included
             return REFUSE if self.level == ADVISOR and risk > READ else ASK
         if rule == RULE_ALLOW and spec.name not in CODE_TOOLS and not (self.level == ADVISOR and risk > READ):
@@ -332,12 +332,16 @@ class PermissionPolicy:
 
     def _connector_verdict(self, name: str) -> str:
         """Loading a connector (``connector-<id>``, see tool_executor.connector_gate): data of QGIS may leave with
-        its tools, so it is asked at every level above advisor, once per conversation; at the advisor level its
-        tools would all be refused, so it is refused without a question nor a connection. The rules of the Tools tab
-        for load_skill do not reach it: "never" for a connector is unticking it in the Sources tab."""
-        if name in self._declined or self.level == ADVISOR:
+        its tools, so it is asked at every level, advisor included (where each call of its tools is asked too), once
+        per conversation. The rules of the Tools tab for load_skill do not reach it: "never" for a connector is
+        unticking it in the Sources tab."""
+        if name in self._declined:
             return REFUSE
         return RUN if name in self._granted else ASK
+
+    def _advisor_connector_tool(self, name: str) -> bool:
+        """A tool of an external connector (``mcp_...``) at the advisor level: asked at each call."""
+        return self.level == ADVISOR and name.startswith(CONNECTOR_TOOL_PREFIX)
 
     def _settings_verdict(self, spec, rule: Optional[str], arguments: Optional[Dict[str, Any]]) -> str:
         """A change of the settings of FilterMate: asked at every level (advisor too: the user reads it and says yes),
@@ -352,8 +356,10 @@ class PermissionPolicy:
         return ASK
 
     def grantable(self, spec) -> bool:
-        """Can the user allow this tool for the rest of the conversation? Never code, nor a tool always asked."""
-        return spec.name not in CODE_TOOLS and spec.name not in SETTINGS_TOOLS and self.rules.get(spec.name) != RULE_ASK
+        """Can the user allow this tool for the rest of the conversation? Never code, nor a tool always asked (a
+        tool of a connector at the advisor level among them)."""
+        return (spec.name not in CODE_TOOLS and spec.name not in SETTINGS_TOOLS
+                and self.rules.get(spec.name) != RULE_ASK and not self._advisor_connector_tool(spec.name))
 
     def grant(self, name: str) -> None:
         self._granted.add(name)

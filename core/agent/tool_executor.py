@@ -154,8 +154,7 @@ class ToolExecutor:
         if policy is None:
             return ToolResultPart(call.call_id, ADVISOR_REFUSAL, is_error=True)
         gate = connector_gate(call)
-        # A connector is refused once declined, or at the advisor level; load_skill itself may be turned off (Tools
-        # tab), and says so.
+        # A connector is refused only once declined; load_skill itself may be turned off (Tools tab), and says so.
         refused_as_connector = gate is not None and policy.verdict(gate, call.arguments) == REFUSE
         name = gate.name if refused_as_connector else call.name
         return ToolResultPart(call.call_id, policy.refusal_text(name, call.arguments), is_error=True)
