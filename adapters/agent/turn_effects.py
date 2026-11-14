@@ -319,6 +319,11 @@ class EffectsRecorder:
         # which alone takes what the agent applied (take_applied empties it).
         self._record_settings = settings
         self._ids_before: Optional[Set[str]] = None
+        # The layers that came during a call (``after_call``): a layer the user loads while the model thinks is not
+        # one the turn added. None while no call was closed; ``_call_ids``: the layers when the call under way began.
+        self._added_in_calls: Optional[Set[str]] = None
+        self._call_ids: Optional[Set[str]] = None
+        self._unclosed = False  # a call began before the one before it was closed: the whole turn is compared
         self._removed: Dict[str, Tuple[str, Place, str, str]] = {}
         # What QGIS takes away with a layer removed: the joins of other layers to it (removed id, layer, spec, name),
         # the relations of the project that cite it (by relation id: removed id, XML, name).
@@ -346,6 +351,9 @@ class EffectsRecorder:
         project = QgsProject.instance()
         if self._ids_before is None:
             self._ids_before = set(project.mapLayers())
+        if self._call_ids is not None:
+            self._unclosed = True
+        self._call_ids = set(project.mapLayers())
         name = getattr(call, "name", "")
         arguments = getattr(call, "arguments", {}) or {}
         try:
@@ -433,6 +441,21 @@ class EffectsRecorder:
         except RuntimeError:  # a layer went away meanwhile: nothing to keep for it
             logger.debug("Agent undo: a layer could not be read before a step", exc_info=True)
 
+    def after_call(self) -> None:
+        """The call under way ended: the layers that came during it are those the turn added."""
+        if self._call_ids is None:
+            return
+        came = set(QgsProject.instance().mapLayers()) - self._call_ids
+        self._added_in_calls = (self._added_in_calls or set()) | came
+        self._call_ids = None
+
+    def _added_ids(self, now: Set[str]) -> Set[str]:
+        """The layers the turn added: those that came during its calls when each was closed (``after_call``), else
+        every layer that came since its first call (who runs the calls does not say when they end)."""
+        if self._added_in_calls is None or self._unclosed or self._call_ids is not None:
+            return now - (self._ids_before or set())
+        return now & self._added_in_calls
+
     def _taken_with(self, project: QgsProject, layer_id: str) -> None:
         """What QGIS takes away when the layer ``layer_id`` is removed: the joins of the other layers to it and the
         relations of the project that cite it."""
@@ -467,7 +490,7 @@ class EffectsRecorder:
         for layer_id, (definition, place, provider, name) in self._removed.items():
             if layer_id not in now:
                 effects.append(("removed", layer_id, "" if provider == "memory" else definition, place, name))
-        for layer_id in sorted(now - self._ids_before):
+        for layer_id in sorted(self._added_ids(now)):
             layer = project.mapLayer(layer_id)
             if layer is not None:
                 # A layer kept in memory: its definition would bring it back empty.

@@ -286,7 +286,8 @@ class ChatEngine:
         if verdict == ASK and not (answered if answered is not None else self._confirmed(call)):
             return self._executor.declined(call, self._policy)
         spec = self._executor.spec(call.name)
-        if spec is not None and not spec.read_only and not spec.manages_history:
+        began = spec is not None and not spec.read_only and not spec.manages_history
+        if began:
             try:
                 self._checkpoint.begin(call)
             except Exception:
@@ -295,6 +296,12 @@ class ChatEngine:
         self._notify(self._listener.on_tool_start, call)
         generation = self._generation
         result = self._executor.execute(call)
+        end = getattr(self._checkpoint, "end", None)  # optional: what the user does next is not the turn's
+        if began and end is not None:
+            try:
+                end()
+            except Exception:
+                logger.exception("Agent undo point could not close its step")
         gate = connector_gate(call) if verdict == ASK else None
         if gate is not None and not result.is_error and generation == self._generation and not self._cancelled:
             # Granted once loaded only: a connector that did not answer keeps nothing, and is asked again. Nor when

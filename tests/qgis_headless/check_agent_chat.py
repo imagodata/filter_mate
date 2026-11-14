@@ -2627,6 +2627,22 @@ def check_effects(layer_id):
     check("effects: a layer in memory cannot come back, and says so", project.mapLayer(memory_id) is None
           and "scratch" in left, (restored, left))
 
+    # A layer the user loads while the model thinks, between two changes of the turn, is not one the turn added:
+    # undoing the turn leaves it (audit of 2026-11-14: it went with the turn, its unsaved edits with it).
+    turn.label = "add one, the user adds another"
+    turn.begin(ToolCallPart("e6", "add_layer", {"source": "x"}))
+    by_agent = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "de l'agent", "memory")
+    project.addMapLayer(by_agent)
+    turn.end()
+    by_user = QgsVectorLayer("Point?crs=EPSG:2154&field=a:integer", "de l'utilisateur", "memory")
+    project.addMapLayer(by_user)
+    agent_id, user_id = by_agent.id(), by_user.id()
+    turn.commit()
+    turn.undo()
+    check("effects: undo takes the layer the turn added, not the one the user loaded meanwhile",
+          project.mapLayer(agent_id) is None and project.mapLayer(user_id) is not None)
+    project.removeMapLayer(user_id)
+
 
 def check_thread_markup():
     """The bold of the cards: whole layer names only, everything else escaped."""
