@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>응답합니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>서비스는 응답하지만 Paris라는 장소를 찾지 못했습니다.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>타일을 제공합니다.</translation>
@@ -260,6 +265,16 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>레이어 추가됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>테이블 추가됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>{}의 테이블 읽는 중</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
@@ -660,6 +675,11 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <translation>{}에서 위성 영상 검색 중</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>{}에서 장소 검색 중: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>Image of the map sent</source>
         <translation>지도 이미지를 보냈습니다</translation>
@@ -729,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>에이전트가 사용자의 데이터베이스 {}의 이 테이블을 프로젝트에 추가하려고 합니다:
+{}
+
+추가된 테이블의 행은 이후 에이전트의 도구가 다른 레이어와 똑같이 읽으며, 에이전트의 제공자에게 전송될 수 있습니다. 허용하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1486,6 +1517,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>배경 지도</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>장소 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS 데이터베이스</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

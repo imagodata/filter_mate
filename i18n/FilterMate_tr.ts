@@ -236,6 +236,11 @@ Onaylıyor musunuz?</translation>
         <translation>Kaynak yanıt veriyor.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Hizmet yanıt veriyor ancak Paris adlı bir yer bulamadı.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Kaynak karolarını sunuyor.</translation>
@@ -260,6 +265,16 @@ Onaylıyor musunuz?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Katman eklendi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tablo eklendi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Tablolar okunuyor: {}</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
@@ -660,6 +675,11 @@ Katman düzenlemelerini kaydedene kadar düzenleme arabelleğinde kalırlar ve t
         <translation>{} üzerinde uydu görüntüsü aranıyor</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>{} üzerinde yer aranıyor: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>Image of the map sent</source>
         <translation>Harita görüntüsü gönderildi</translation>
@@ -729,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Aracı, {} veritabanınızın şu tablosunu projeye eklemek istiyor:
+{}
+
+Satırları daha sonra aracının araçları tarafından herhangi bir katmanın satırları gibi okunur ve aracının sağlayıcısına gönderilebilir. Onaylıyor musunuz?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1486,6 +1517,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Altlık haritaları</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Yer arama</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS veritabanları</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

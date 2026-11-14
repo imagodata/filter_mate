@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, ProjectCrs, SegmentResult, SelectionResult,
+    Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
 from .filters import LayerName
@@ -97,7 +97,7 @@ def add_layer(payload: AddLayerBody, request: Request) -> LayerSummary:
 
 
 class AddServiceLayerBody(BaseModel):
-    platform: str = Field(..., min_length=1, max_length=200, description="WFS platform, e.g. ign_wfs")
+    platform: str = Field(..., min_length=1, max_length=200, description="WFS, WMS or WMTS platform, e.g. ign_wfs")
     typename: str = Field(..., min_length=1, max_length=300, description="Layer id given by the search")
     name: str = Field(default="", max_length=200)
 
@@ -315,6 +315,21 @@ def search_open_data(payload: OpenDataBody, request: Request) -> OpenDataResult:
     """Datasets of an allowed open data platform. A POST: a web page must not be able to trigger it."""
     try:
         return _accessor(request).search_open_data(payload.query, platform=payload.platform, limit=payload.limit)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class PlaceBody(BaseModel):
+    query: str = Field(..., min_length=1, max_length=200, description="Name of a place, an address")
+    platform: str = Field(default="ign_geocoder", max_length=200)
+    limit: int = Field(default=5, ge=1, le=10)
+
+
+@router.post("/places/find", response_model=PlacesResult)
+def find_place(payload: PlaceBody, request: Request) -> PlacesResult:
+    """Places of an allowed geocoder. A POST: a web page must not be able to trigger it."""
+    try:
+        return _accessor(request).find_place(payload.query, platform=payload.platform, limit=payload.limit)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

@@ -236,6 +236,11 @@ Godkänner du?</translation>
         <translation>Källan svarar.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Tjänsten svarar, men hittade ingen plats som heter Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Källan levererar sina kartrutor.</translation>
@@ -260,6 +265,16 @@ Godkänner du?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Lager tillagt: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabell tillagd: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Läser tabellerna i {}</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
@@ -660,6 +675,11 @@ De ligger kvar i redigeringsbufferten tills du sparar lagrets redigeringar, och 
         <translation>Söker satellitbilder på {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Söker i {} efter platsen {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>Image of the map sent</source>
         <translation>Bild av kartan skickad</translation>
@@ -729,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Godkänner du?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agenten vill lägga till den här tabellen från din databas {} i projektet:
+{}
+
+Dess rader läses sedan av agentens verktyg som raderna i vilket lager som helst och kan skickas till agentens leverantör. Godkänner du?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1486,6 +1517,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Bakgrundskartor</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Platssökning</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS-databaser</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

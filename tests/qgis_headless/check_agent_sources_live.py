@@ -69,11 +69,54 @@ def main():
     typename = next(d["id"] for d in found["datasets"] if d["id"].lower().endswith(":commune"))
     summary = project_control.add_service_layer("ign_wfs", typename, name="communes_ign")
     check("IGN: a WFS layer opens", summary["provider_type"] == "WFS" and summary["name"] == "communes_ign", summary)
+    # A web service is read where the map shows it only: a few features, never the layer as a whole.
+    import qgis.utils
+    from types import SimpleNamespace
+    from qgis.core import QgsCoordinateReferenceSystem, QgsRectangle
+    from qgis.gui import QgsMapCanvas
+    from filter_mate.adapters.public_api import introspection
+    try:
+        introspection.sample_features("communes_ign")
+        check("IGN: a WFS layer is not sampled without a map", False)
+    except ValueError as exc:
+        check("IGN: a WFS layer is not sampled without a map", "no map here" in str(exc), exc)
+    canvas = QgsMapCanvas()
+    canvas.setDestinationCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
+    canvas.setExtent(QgsRectangle(150000, 5395000, 170000, 5410000))  # around Toulouse
+    before = qgis.utils.iface
+    qgis.utils.iface = SimpleNamespace(mapCanvas=lambda: canvas)
+    try:
+        sample = introspection.sample_features("communes_ign", limit=3, geometry=True)
+        check("IGN: a few features of what the map shows", 1 <= len(sample["features"]) <= 3
+              and sample["scope"] == "the features the map shows" and sample["features"][0]["attributes"], sample)
+        for options, label in (({"expression": '"population" > 1'}, "an expression"), ({"selected_only": True}, "the selection")):
+            try:
+                introspection.sample_features("communes_ign", **options)
+                check(f"IGN: a WFS sample refuses {label}", False)
+            except ValueError as exc:
+                check(f"IGN: a WFS sample refuses {label}", "web service" in str(exc), exc)
+        try:
+            introspection.layer_statistics("communes_ign")
+            check("IGN: statistics of a WFS layer stay refused", False)
+        except ValueError as exc:
+            check("IGN: statistics of a WFS layer stay refused", "web service" in str(exc), exc)
+    finally:
+        qgis.utils.iface = before
     try:
         project_control.add_service_layer("ign_wfs", "invented:layer' url='https://evil.example.org/wfs")
         check("IGN: a layer it does not list is refused", False)
     except ValueError:
         check("IGN: a layer it does not list is refused", True)
+
+    for platform, query, west, east in (("ign_geocoder", "Toulouse", 1.2, 1.7), ("photon", "Toulouse", 1.2, 1.7),
+                                        ("ign_geocoder", "8 place du Capitole Toulouse", 1.43, 1.46)):
+        try:
+            found = project_control.find_place(query, platform=platform, limit=3)
+            first = found["places"][0] if found["places"] else {}
+            check(f"{platform}: finds {query}", found["count"] > 0 and west < first["longitude"] < east
+                  and 43.4 < first["latitude"] < 43.8 and first["extent_wkt"].startswith("POLYGON(("), found)
+        except ValueError as exc:
+            check(f"{platform}: finds {query}", False, exc)
 
     for platform, query in (("ibge_br", "municipio"), ("prg_pl", "gmina")):
         listed = project_control.search_open_data(query, platform=platform, limit=3)

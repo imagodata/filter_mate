@@ -236,6 +236,11 @@ Sind Sie einverstanden?</translation>
         <translation>Die Quelle antwortet.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Der Dienst antwortet, hat aber keinen Ort namens Paris gefunden.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Die Quelle liefert ihre Kacheln.</translation>
@@ -260,6 +265,16 @@ Sind Sie einverstanden?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Layer hinzugefügt: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabelle hinzugefügt: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Tabellen von {} werden gelesen</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
@@ -660,6 +675,11 @@ Sie bleiben im Bearbeitungspuffer, bis Sie die Layer-Bearbeitungen speichern, un
         <translation>Satellitenbilder auf {} werden gesucht</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Suche auf {} nach dem Ort {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>Image of the map sent</source>
         <translation>Kartenbild gesendet</translation>
@@ -729,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Der Agent möchte diese Tabelle Ihrer Datenbank {} zum Projekt hinzufügen:
+{}
+
+Ihre Zeilen werden anschließend von den Werkzeugen des Agenten wie die eines beliebigen Layers gelesen und können an den Anbieter des Agenten gesendet werden. Sind Sie einverstanden?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1486,6 +1517,16 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Hintergrundkarten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Ortssuche</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Datenbanken von QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

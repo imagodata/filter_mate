@@ -84,11 +84,13 @@ total_count of apply_filter, kept per layer of cross_filter and geometry_filter)
 values, the direction of the predicate and the source selection before you report it.
 - apply_favorite applies a saved filter as it is: do not apply its expression again with apply_filter.
 - Only call export_layers when the user asks for an export; it writes files and the user is asked to confirm.
-- zoom_to, select_features and set_layers_visibility drive the map, the selection and the layer tree. \
+- zoom_to, select_features and set_layers_visibility drive the map, the selection and the layer tree. find_place \
+finds a place by its name or address on a geocoder the user enabled, for zoom_to. \
 select_features takes a QGIS expression (plain conditions, not SQL) and makes the source of a cross_filter.
 - search_open_data finds datasets on the platforms the user allowed; add_layer adds one of their resources (geojson \
-or gpkg first) or a local data file, and the user confirms. A WFS platform's layer goes \
-through add_service_layer. search_imagery finds satellite scenes; add_layer with kind raster shows one. add_basemap \
+or gpkg first) or a local data file, and the user confirms. A layer of a WFS platform (data) or of a WMS or WMTS \
+one (an image: an old map, the orthophotos of a year, the cadastre) goes through add_service_layer. search_imagery \
+finds satellite scenes; add_layer with kind raster shows one. add_basemap \
 puts a web basemap the user enabled under the layers (a background image: not filtered, not read). Nothing else \
 can be added. Only remove a layer when the user asks (confirmed too; undoing the turn brings it back, unless \
 it was held in memory).

@@ -61,6 +61,7 @@ from .accessor import (
     LayerSummary,
     MapContext,
     OpenDataResult,
+    PlacesResult,
     OperationResult,
     SegmentResult,
     SimilarResult,
@@ -493,9 +494,10 @@ class QGISFilterMateAccessor:
         return StyleResult(**self._style("set_layer_style", layer, mode, **options))
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
-                   color: str = "", buffer: bool = True) -> LabelsResult:
+                   color: str = "", buffer: bool = True, expression: str = "",
+                   visible_from_scale: Optional[float] = None) -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
-                                          buffer=buffer))
+                                          buffer=buffer, expression=expression, visible_from_scale=visible_from_scale))
 
     @staticmethod
     def _layouts(name: str, *args, **kwargs):
@@ -619,6 +621,11 @@ class QGISFilterMateAccessor:
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         extra = self.configured_domains() if extra_domains is None else extra_domains
         return LayerSummary(**self._control("add_basemap", platform, name=name, extra_domains=extra))
+
+    def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
+                   extra_domains: Optional[str] = None) -> PlacesResult:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return PlacesResult(**self._control("find_place", query, platform=platform, limit=limit, extra_domains=extra))
 
     def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
         extra = self.configured_domains() if extra_domains is None else extra_domains

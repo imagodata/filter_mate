@@ -14,8 +14,8 @@ from core.agent.open_data import (
     parse_stac_items, reads_in_place, remote_file, resolve_platform, stac_search_body, valid_day,
 )
 from core.agent.sources import (
-    BUILT_IN, KIND_MCP, all_sources, basemap_addresses, custom_from_json, custom_to_json, describe_enabled, enabled,
-    make_source, model_name, platform_domains, platform_name,
+    BUILT_IN, KIND_MCP, all_sources, custom_from_json, database_sources, custom_to_json, describe_enabled, enabled,
+    make_source, model_name, platform_aliases, platform_domains, platform_name,
 )
 
 pytestmark = pytest.mark.unit
@@ -190,19 +190,51 @@ class TestSources:
 
     def test_described_for_the_model(self):
         names = describe_enabled(enabled(all_sources([]), ("datagouv", "datagouv_mcp")))
-        assert names == {"platforms": ["datagouv"], "basemaps": [], "connectors": ["data.gouv.fr (MCP)"]}
+        assert names == {"platforms": ["datagouv"], "geocoders": [], "basemaps": [], "databases": [],
+                         "connectors": ["data.gouv.fr (MCP)"]}
 
     def test_a_basemap_is_named_apart_from_the_platforms(self):
         mine = make_source("https://tiles.example.org/{z}/{x}/{y}.png", "xyz")
         names = describe_enabled(enabled(all_sources([mine]), ("carto_light", mine.id)))
-        assert names == {"platforms": [], "basemaps": ["carto_light", f"{mine.id} (tiles.example.org)"], "connectors": []}
+        assert names == {"platforms": [], "geocoders": [], "basemaps": ["carto_light", f"{mine.id} (tiles.example.org)"],
+                         "databases": [], "connectors": []}
+
+    def test_a_database_of_qgis_is_a_source_named_by_an_id(self):
+        """Its name is the user's; its address and its credentials stay in QGIS."""
+        first, second = database_sources(["Prod Cadastre (Lyon)", "prod cadastre (lyon)"])
+        assert first.id != second.id and first.id.startswith("db_prod_cadastre_lyon_") and first.address == "Prod Cadastre (Lyon)"
+        assert first.kind == "database" and not first.is_connector and database_sources([]) == ()
+        here, there = database_sources([("prod", "a1b2"), ("prod", "c3d4")])  # made again, to another server
+        assert here.id != there.id and here.title == there.title == "prod"
+        names = describe_enabled([first])
+        assert names["databases"] == [f"{first.id} (Prod Cadastre (Lyon))"] and names["platforms"] == []
+        # Never among the platforms: the name of a connection is the user's text, a comma in it would add one.
+        assert platform_domains(database_sources(["a, evil.example.org:ckan"]) + (first,)) == ""
+        assert platform_aliases([first]) == {}
+
+    def test_image_services_are_platforms_and_geocoders_are_named_apart(self):
+        names = describe_enabled(enabled(all_sources([]), ("ign_wmts", "ign_wms", "ign_geocoder", "photon")))
+        assert names["platforms"] == ["ign_wmts", "ign_wms"] and names["geocoders"] == ["ign_geocoder", "photon"]
+        assert resolve_platform("ign_wmts") == ("wmts", "https://data.geopf.fr/wmts")
+        assert resolve_platform("photon") == ("geocoder", "https://photon.komoot.io/api")
+        mine = make_source("https://maps.example.org/geoserver/ows", "wms")
+        assert mine.address == "https://maps.example.org/geoserver/ows"
+        assert resolve_platform(platform_name(mine), platform_domains([mine])) == ("wms", mine.address)
 
     def test_the_address_of_a_basemap_the_user_added_never_goes_to_the_model(self):
         """It may hold the key of an account; the model names the basemap by its id, the plugin finds the address."""
         mine = make_source("https://tiles.example.org/{z}/{x}/{y}.png?apikey=abc123", "xyz")
         assert model_name(mine) == mine.id and "abc123" not in mine.id
         assert "abc123" not in json.dumps(describe_enabled([mine]))
-        assert basemap_addresses(all_sources([mine])) == {mine.id: platform_name(mine)}
+        assert platform_aliases(all_sources([mine])) == {mine.id: platform_name(mine)}
+        for address, kind in (("https://api.example.org/geocode/search?apiKey=abc123", "geocoder"),
+                              ("https://maps.example.org/wmts?apikey=abc123", "wmts"),
+                              ("https://maps.example.org/wms?map=/x&key=abc123", "wms"),
+                              ("https://geo.example.org/wfs?token=abc123", "wfs")):
+            service = make_source(address, kind)
+            assert model_name(service) == service.id and "abc123" not in json.dumps(describe_enabled([service])), kind
+            assert platform_aliases([service]) == {service.id: platform_name(service)}
+            assert resolve_platform(platform_aliases([service])[service.id], platform_domains([service])) == (kind, address)
         assert model_name(next(s for s in BUILT_IN if s.id == "carto_light")) == "carto_light"
         portal = make_source("data.example.org", "ckan")
         assert model_name(portal) == platform_name(portal)

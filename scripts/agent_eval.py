@@ -467,6 +467,9 @@ class SimulatedProject:
             "segment_objects": segment_objects, "similar_objects": similar_objects,
             "remove_layers": operation, "search_open_data": search_open_data,
             "add_service_layer": lambda args: {"layer_id": "wfs_1", "name": args.get("name") or args["typename"], "layer_kind": "vector"},
+            "find_place": lambda args: {"platform": args["platform"], "query": args["query"], "count": 1, "places": [{
+                "name": args["query"], "label": args["query"], "kind": "municipality", "longitude": 1.44, "latitude": 43.6,
+                "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))"}]},
             "add_basemap": lambda args: {"layer_id": "xyz_1", "name": args.get("name") or args["platform"], "layer_kind": "raster"},
             "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{
                 "id": "S2B_31TCJ_20261031_0_L2A", "title": "S2B_31TCJ_20261031_0_L2A", "publisher": "sentinel-2-l2a",
