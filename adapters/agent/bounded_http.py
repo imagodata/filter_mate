@@ -12,7 +12,7 @@ import re
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Callable, Dict, Iterator, Mapping, Optional, Tuple
+from typing import Any, Callable, Iterator, List, Mapping, Optional, Sequence, Tuple, Union
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QByteArray, QEventLoop, QTimer, QUrl
@@ -97,6 +97,169 @@ def on_abort(stop: Callable[[], object]) -> Callable[[], None]:
     return forget
 
 
+class _Wait:
+    """One request being waited for: bounded in size and in time, ended by Stop. ``settled`` is called once."""
+
+    def __init__(self, settled: Callable[[], object], url: str, body: Optional[bytes] = None,
+                 headers: Optional[Mapping[str, str]] = None, max_bytes: int = DEFAULT_MAX_BYTES,
+                 timeout_ms: int = DEFAULT_TIMEOUT_MS, done: Optional[Callable[[bytes], bool]] = None,
+                 headers_only: bool = False, sink: Optional[Callable[[bytes], object]] = None,
+                 decompress_freely: bool = False) -> None:
+        self._settled, self._max_bytes, self._done = settled, max_bytes, done
+        self._headers_only, self._sink = headers_only, sink
+        self._manager = QNetworkAccessManager()
+        self._manager.setProxy(QgsNetworkAccessManager.instance().fallbackProxy())
+        request = QNetworkRequest(QUrl(url))
+        request.setRawHeader(b"User-Agent", _USER_AGENT)
+        for name, value in (headers or {}).items():
+            request.setRawHeader(name.encode("ascii"), value.encode("utf-8"))
+        request.setAttribute(QNetworkRequest.Attribute.RedirectPolicyAttribute,
+                             QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
+        if decompress_freely and hasattr(request, "setDecompressedSafetyCheckThreshold"):  # Qt 6.2 and later
+            request.setDecompressedSafetyCheckThreshold(-1)
+        self._reply = self._manager.post(request, QByteArray(body)) if body is not None else self._manager.get(request)
+        self._buffer = bytearray()
+        self._received = 0
+        self._failure: Optional[str] = None
+        self._tail = b""  # the end of the chunk before, where a separator may begin
+        self._outcome: Union[BoundedReply, HttpFailure, None] = None
+        self._timer = QTimer()
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self._on_timeout)
+        self._reply.readyRead.connect(self._on_data)
+        self._reply.metaDataChanged.connect(self._on_headers)
+        self._reply.finished.connect(self._settle)
+        self._entry = (_OWNER[0], self._on_stop)
+        _ACTIVE.append(self._entry)
+        self._timer.start(timeout_ms)
+        if self._reply.isFinished():
+            self._settle()
+
+    @property
+    def settled(self) -> bool:
+        return self._outcome is not None
+
+    def _status(self) -> int:
+        status = self._reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
+        return int(status) if isinstance(status, int) else 0
+
+    def _fail(self, message: str) -> None:
+        if not self.settled:
+            self._failure = self._failure or message
+            self._settle()
+
+    def _on_timeout(self) -> None:
+        self._fail(TOO_LONG)
+
+    def _on_stop(self) -> None:
+        self._fail(STOPPED)
+
+    def _keep(self, chunk: bytes) -> None:
+        """Count and keep ``chunk``; what goes wrong is left in ``_failure`` for the caller to settle on."""
+        self._received += len(chunk)
+        if self._received > self._max_bytes:
+            self._failure = self._failure or TOO_LARGE
+        elif self._sink is None:
+            self._buffer.extend(chunk)
+        else:
+            try:
+                self._sink(chunk)
+            except OSError:  # raised from a Qt slot it would end QGIS
+                self._failure = self._failure or "what the server sent could not be written to disk"
+
+    def _on_data(self) -> None:
+        chunk = bytes(self._reply.readAll())
+        if self.settled:  # another request is still waited for: what keeps coming here is read and dropped
+            return
+        self._keep(chunk)
+        if self._failure:
+            self._settle()
+        if self.settled or self._done is None:
+            return
+        ended, self._tail = ends_an_event(self._tail, chunk)
+        if ended and self._done(bytes(self._buffer)):
+            self._settle()
+
+    def _on_headers(self) -> None:
+        if self._headers_only and self._status():
+            self._settle()
+
+    def _settle(self) -> None:
+        """What the request came to, read once: the reply is only aborted in ``close``, outside its own signals."""
+        if self.settled:
+            return
+        self._timer.stop()
+        try:
+            self._outcome = self._read_outcome()
+        except Exception as exc:  # a sink that raised: left unsettled, the wait would only end with Stop
+            self._outcome = HttpFailure(f"what the server sent could not be kept ({exc})")
+        self._settled()
+
+    def _read_outcome(self) -> Union[BoundedReply, HttpFailure]:
+        reply = self._reply
+        if self._failure:
+            return HttpFailure(self._failure)
+        if reply.isOpen():
+            self._keep(bytes(reply.readAll()))
+            if self._failure:
+                return HttpFailure(self._failure)
+        status = self._status()
+        pairs = {bytes(name).decode("latin-1").lower(): bytes(value).decode("latin-1")
+                 for name, value in reply.rawHeaderPairs()}
+        message = reply.errorString()
+        broken = reply.isFinished() and reply.error() != QNetworkReply.NetworkError.NoError
+        if not status and broken:
+            if reply.error() == QNetworkReply.NetworkError.SslHandshakeFailedError:
+                return HttpFailure("its security certificate is not valid for this address, so the connection was "
+                                   "refused (" + (message or "TLS error") + ")")
+            return HttpFailure(message or "network error")
+        if self._sink is not None and 200 <= status < 300 and (broken or not reply.isFinished()):
+            return HttpFailure("the connection was lost before the end of the file")
+        return BoundedReply(status, pairs, bytes(self._buffer))
+
+    def close(self) -> Union[BoundedReply, HttpFailure]:
+        """End the request, whatever its state, and give what it came to."""
+        if self._entry in _ACTIVE:
+            _ACTIVE.remove(self._entry)
+        self._entry = self._settled = None  # each held this wait in a cycle only the garbage collector would free
+        self._timer.stop()
+        outcome = self._outcome or HttpFailure(STOPPED)
+        self._outcome = outcome
+        self._reply.readyRead.disconnect(self._on_data)
+        self._reply.metaDataChanged.disconnect(self._on_headers)
+        self._reply.finished.disconnect(self._settle)
+        self._reply.abort()
+        self._reply.deleteLater()
+        self._manager.deleteLater()
+        return outcome
+
+
+def fetch_together(requests: Sequence[Mapping[str, Any]]) -> List[Union[BoundedReply, HttpFailure]]:
+    """Several requests waited for at once, each with the arguments of ``fetch`` and its own bounds.
+
+    The wait lasts as long as the slowest of them, not their sum: connectors asked one after the other made the user
+    wait for each one that did not answer.
+
+    Returns:
+        For each request, in order, its reply or the ``HttpFailure`` it ended with (returned, not raised).
+    """
+    loop = QEventLoop()
+    waits: List[_Wait] = []
+
+    def settled() -> None:
+        if all(wait.settled for wait in waits):
+            loop.quit()
+
+    try:
+        for request in requests:
+            waits.append(_Wait(settled, **request))
+        if not all(wait.settled for wait in waits):
+            loop.exec()
+    finally:
+        outcomes = [wait.close() for wait in waits]
+    return outcomes
+
+
 def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str, str]] = None,
           max_bytes: int = DEFAULT_MAX_BYTES, timeout_ms: int = DEFAULT_TIMEOUT_MS,
           done: Optional[Callable[[bytes], bool]] = None, headers_only: bool = False,
@@ -111,98 +274,9 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
     Raises:
         HttpFailure: No answer, too long, too large, cut, or stopped.
     """
-    manager = QNetworkAccessManager()
-    manager.setProxy(QgsNetworkAccessManager.instance().fallbackProxy())
-    request = QNetworkRequest(QUrl(url))
-    request.setRawHeader(b"User-Agent", _USER_AGENT)
-    for name, value in (headers or {}).items():
-        request.setRawHeader(name.encode("ascii"), value.encode("utf-8"))
-    request.setAttribute(QNetworkRequest.Attribute.RedirectPolicyAttribute,
-                         QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
-    if decompress_freely and hasattr(request, "setDecompressedSafetyCheckThreshold"):  # Qt 6.2 and later
-        request.setDecompressedSafetyCheckThreshold(-1)
-    reply = manager.post(request, QByteArray(body)) if body is not None else manager.get(request)
-    buffer = bytearray()
-    received = [0]
-    state: Dict[str, Optional[str]] = {"failure": None}
-    tail = [b""]  # the end of the chunk before, where a separator may begin
-    loop = QEventLoop()
-
-    def status_code() -> int:
-        status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
-        return int(status) if isinstance(status, int) else 0
-
-    def fail(message: str) -> None:
-        state["failure"] = state["failure"] or message
-        loop.quit()
-
-    def keep(chunk: bytes) -> None:
-        received[0] += len(chunk)
-        if received[0] > max_bytes:
-            fail(TOO_LARGE)
-        elif sink is None:
-            buffer.extend(chunk)
-        else:
-            try:
-                sink(chunk)
-            except OSError:  # raised from a Qt slot it would end QGIS
-                fail("what the server sent could not be written to disk")
-
-    def on_data() -> None:
-        if state["failure"]:
-            return
-        chunk = bytes(reply.readAll())
-        keep(chunk)
-        if state["failure"] or done is None:
-            return
-        ended, tail[0] = ends_an_event(tail[0], chunk)
-        if ended and done(bytes(buffer)):
-            loop.quit()
-
-    def on_headers() -> None:
-        if headers_only and status_code():
-            loop.quit()
-
-    def on_stop() -> None:
-        fail(STOPPED)
-
-    timer = QTimer()
-    timer.setSingleShot(True)
-    timer.timeout.connect(lambda: fail(TOO_LONG))
-    reply.readyRead.connect(on_data)
-    reply.metaDataChanged.connect(on_headers)
-    reply.finished.connect(loop.quit)
-    entry = (_OWNER[0], on_stop)
-    _ACTIVE.append(entry)
-    try:
-        timer.start(timeout_ms)
-        if not reply.isFinished():
-            loop.exec()
-        timer.stop()
-        if reply.isOpen() and not state["failure"]:
-            keep(bytes(reply.readAll()))
-        status = status_code()
-        pairs = {bytes(name).decode("latin-1").lower(): bytes(value).decode("latin-1")
-                 for name, value in reply.rawHeaderPairs()}
-        message = reply.errorString()
-        broken = reply.isFinished() and reply.error() != QNetworkReply.NetworkError.NoError
-        no_answer = not status and broken
-        tls_refused = no_answer and reply.error() == QNetworkReply.NetworkError.SslHandshakeFailedError
-        cut = sink is not None and 200 <= status < 300 and (broken or not reply.isFinished())
-    finally:
-        _ACTIVE.remove(entry)
-        reply.readyRead.disconnect(on_data)
-        reply.metaDataChanged.disconnect(on_headers)
-        reply.abort()
-        reply.deleteLater()
-        manager.deleteLater()
-    if state["failure"]:
-        raise HttpFailure(str(state["failure"]))
-    if no_answer:
-        if tls_refused:
-            raise HttpFailure("its security certificate is not valid for this address, so the connection was refused "
-                              "(" + (message or "TLS error") + ")")
-        raise HttpFailure(message or "network error")
-    if cut:
-        raise HttpFailure("the connection was lost before the end of the file")
-    return BoundedReply(status, pairs, bytes(buffer))
+    outcome = fetch_together([{
+        "url": url, "body": body, "headers": headers, "max_bytes": max_bytes, "timeout_ms": timeout_ms, "done": done,
+        "headers_only": headers_only, "sink": sink, "decompress_freely": decompress_freely}])[0]
+    if isinstance(outcome, HttpFailure):
+        raise outcome
+    return outcome

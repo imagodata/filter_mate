@@ -234,6 +234,11 @@ def check_transport(provider, pkg):
     check("a response that is no stream is a failure", finished and isinstance(events[-1], StreamFailure), events)
 
 
+def bounded_http_too_long():
+    from filter_mate.adapters.agent.bounded_http import TOO_LONG
+    return TOO_LONG
+
+
 def check_hostile_connector():
     """What a remote server should not be able to do to QGIS."""
     from filter_mate.adapters.agent.bounded_http import HttpFailure, fetch
@@ -268,9 +273,15 @@ def check_hostile_connector():
             if self.path == "/redirect":
                 self._send(307, b"", [("Location", "/target")])
                 return
+            if self.path == "/slow":
+                time.sleep(0.6)
+            if self.path == "/stall" and method == "initialize" and not plan.get("stalled"):
+                plan["stalled"] = True
+                time.sleep(1.5)
             if "id" not in body:
                 self._send(202)
                 return
+
             def rpc(result):
                 return ("data: " + json.dumps({"jsonrpc": "2.0", "id": body["id"], "result": result}) + "\n\n").encode()
             if method == "initialize":
@@ -369,6 +380,37 @@ def check_hostile_connector():
     started = time.time()
     connection("/open").list_tools()
     check("hostile: an answered stream that stays open does not hold QGIS", time.time() - started < 2, time.time() - started)
+
+    # 2026-11-14: one connector after the other, each that stalled or was down was waited for in turn.
+    from filter_mate.adapters.agent.bounded_http import BoundedReply, fetch_together
+    from filter_mate.adapters.agent.mcp_connection import list_tools_together
+    from filter_mate.core.agent.mcp_client import McpTimeout
+    down = McpConnection(make_source("http://127.0.0.1:9/mcp", "mcp", "Down"))
+    started = time.time()
+    found = list_tools_together([connection("/slow"), down, connection("/slow"), connection("/ok")])
+    took = time.time() - started
+    check("together: slow connectors are waited for at once, one that is down beside them",
+          [isinstance(item, McpError) for item in found] == [False, True, False, False] and 1.7 < took < 3.2
+          and all(len(item) == 2 for item in found if not isinstance(item, McpError)), (found, took))
+    plan.pop("stalled", None)
+    seen.clear()
+    started = time.time()
+    found = list_tools_together([connection("/stall")], timeouts_ms=(500, 5000))
+    took = time.time() - started
+    check("together: a connector that stalled once is tried again and answers",
+          not isinstance(found[0], McpError) and sum(item[1] == "initialize" for item in seen) == 2 and took < 3,
+          (found, seen, took))
+    found = list_tools_together([connection("/drip")], timeouts_ms=(300, 600))
+    check("together: one that never answers ends as too long, after two tries", isinstance(found[0], McpTimeout), found)
+    started = time.time()
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize"}).encode()
+    replies = fetch_together([{"url": base + "/slow", "body": body}, {"url": "http://127.0.0.1:9/x"},
+                              {"url": base + "/drip", "body": json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}).encode(), "timeout_ms": 400},
+                              {"url": base + "/get"}])
+    check("together: each request keeps its own outcome and its own bounds",
+          isinstance(replies[0], BoundedReply) and replies[0].status == 200 and isinstance(replies[1], HttpFailure)
+          and str(replies[2]) == bounded_http_too_long() and isinstance(replies[3], BoundedReply)
+          and replies[3].content == b"ok" and time.time() - started < 1.5, (replies, time.time() - started))
 
     from filter_mate.adapters.agent import bounded_http
     timer_hits = []

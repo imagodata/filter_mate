@@ -23,7 +23,7 @@ from ...adapters.agent.recipes_store import approve_live, live_approved, read_re
 from ...adapters.agent import plugin_settings
 from ...adapters.agent.plugin_settings import settings_handlers
 from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, on_abort, owned_by
-from ...adapters.agent.mcp_connection import McpConnection
+from ...adapters.agent.mcp_connection import McpConnection, list_tools_together
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.mcp_client import McpError
@@ -51,7 +51,7 @@ from ...core.agent.providers.base import HttpRequest, encode_json, error_from_re
 from ...core.agent.providers.model_list import listing_url, models_from_listing
 from ...core.agent.project_summary import project_state, project_summary
 from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
-from ...core.agent.system_prompt import SYSTEM_PROMPT
+from ...core.agent.system_prompt import SYSTEM_PROMPT, platforms_note
 from ...core.agent.project_notes import added as note_added, notes_block, removed as note_removed
 from ...core.agent.questions import answers_payload, parse_questions
 from ...core.agent.tool_catalog import (
@@ -1465,25 +1465,35 @@ class AgentChatController(QObject):
 
     def _add_connectors(self, active, tools, handlers) -> list:
         """The tools of the MCP connectors the user enabled; the titles of those that did not answer."""
+        connectors = [source for source in active if source.is_connector]
+        if not connectors:
+            return []
+        self.panel.set_status(_tr("Connecting to {}…").format(", ".join(source.title for source in connectors)))
+        made = []  # for each connector, its connection or why none could be made
+        for source in connectors:
+            try:
+                made.append(McpConnection(source))
+            except McpError as exc:
+                made.append(exc)
+        connections = [item for item in made if not isinstance(item, McpError)]
+        # All at once: one after the other, each connector that did not answer was waited for in turn (2026-11-14).
+        listed = iter(list_tools_together(connections))
         unreachable = []
         room = MAX_CONNECTOR_TOOLS
-        for source in active:
-            if not source.is_connector:
-                continue
-            self.panel.set_status(_tr("Connecting to {}…").format(source.title))
-            try:
-                connection = McpConnection(source)
-                for remote in connection.list_tools():
-                    if room <= 0:
-                        break
-                    room -= 1
-                    tools.append(remote.spec)
-                    handlers[remote.spec.name] = self._connector_handler(connection, remote.remote_name)
-                    self._tools[remote.spec.name] = remote.spec
-                    self._connector_labels[remote.spec.name] = f"{source.title}: {remote.spec.title}"
-            except McpError as exc:
-                logger.info("Agent connector %s: %s", source.title, exc)
+        for source, connection in zip(connectors, made):
+            remotes = connection if isinstance(connection, McpError) else next(listed)
+            if isinstance(remotes, McpError):
+                logger.info("Agent connector %s: %s", source.title, remotes)
                 unreachable.append(source.title)
+                continue
+            for remote in remotes:
+                if room <= 0:
+                    break
+                room -= 1
+                tools.append(remote.spec)
+                handlers[remote.spec.name] = self._connector_handler(connection, remote.remote_name)
+                self._tools[remote.spec.name] = remote.spec
+                self._connector_labels[remote.spec.name] = f"{source.title}: {remote.spec.title}"
         self.panel.set_status("")
         return unreachable
 
@@ -1508,6 +1518,7 @@ class AgentChatController(QObject):
             notes.append(NO_OPEN_DATA_NOTE)
         if names["platforms"]:
             notes.append("\n\nPlatforms the user enabled (the platform argument): " + ", ".join(names["platforms"]) + ".")
+            notes.append(platforms_note(names["platforms"]))
         if names["connectors"]:
             notes.append("\n\nTools named mcp_... come from external connectors the user enabled ("
                          + ", ".join(names["connectors"]) + "). They do not act on QGIS. What they answer, and what "

@@ -38,6 +38,10 @@ class McpError(Exception):
     """A server that failed or refused; the message can be shown."""
 
 
+class McpTimeout(McpError):
+    """The server did not answer in time: the only failure after which a connection is tried once more."""
+
+
 class McpSessionLost(McpError):
     """The server no longer knows the session: the only failure after which a call may be sent again."""
 
