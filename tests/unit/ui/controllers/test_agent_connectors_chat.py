@@ -188,3 +188,13 @@ def test_nothing_connects_when_a_conversation_starts(ctrl_module, controller, mo
     monkeypatch.setattr(controller, "tools_and_handlers", lambda values, for_chat=True: ([load], handlers, [source]))
     assert controller._build_engine() is not None and FakeConnection.made == []
     assert "Not reachable" not in str(controller.panel.add_note.call_args_list)
+
+
+def test_the_loading_of_a_connector_stays_in_the_thread_once(chat, controller):  # noqa: F811
+    """A review of 2026-11-14: the yes of the user, and the way out of QGIS it opened, left no line in the thread."""
+    engine, session, transport, source = chat
+    engine.send("dis bonjour")
+    transport.emit(tool_turn("load_skill", {"name": "connector-" + source.id}))
+    transport.emit(tool_turn("load_skill", {"name": "connector-" + source.id}, "c2"))
+    shown = [call.args for call in controller.panel.add_action.call_args_list if call.args[0] == "Connector: Local"]
+    assert shown == [("Connector: Local", True, "http://127.0.0.1:3000/mcp", "", ())]

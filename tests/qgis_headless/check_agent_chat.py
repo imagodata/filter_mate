@@ -1279,6 +1279,8 @@ def check_chat(provider, layer, authcfg, work):
     check("connector: loaded again, no question, no connection", len(loadings()) == 1 and initialized() == 1
           and not again.get("is_error"), (asked, again))
     check("connector: the call stays in the thread", "Local: hello" in panel.thread.toPlainText(), panel.thread.toPlainText())
+    check("connector: its loading stays in the thread, once", panel.thread.toPlainText().count("Connector: Local") == 1
+          and source.address in panel.thread.toPlainText(), panel.thread.toPlainText())
     asked.clear()
     chat._ask_user = lambda title, text: asked.append(text) or False
     provider.reset((200, {}, tool_turn(tool_name(source.id, "change"), {})), (200, {}, text_turn("ok")))

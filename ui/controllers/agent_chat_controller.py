@@ -186,6 +186,7 @@ class AgentChatController(QObject):
         self._tools = {tool.name: tool for tool in chat_tools()}
         self._connector_labels = {}
         self._connectors: Optional[ConnectorLoader] = None  # of the conversation: what it loaded, the room left
+        self._connectors_shown = set()  # the connectors whose loading is in the thread of this conversation
         self._building = False
         self._transcript = []
         self._seen = None  # project_state when the last answer ended
@@ -1665,6 +1666,7 @@ class AgentChatController(QObject):
             self._tools.pop(name, None)
         self._connector_labels = {}
         self._connectors = None
+        self._connectors_shown = set()
         self._seen = None  # another conversation has seen nothing yet
         self.panel.clear_thread()
         self._links, self._settings_cards, self._settings_outcomes = [], [], []
@@ -2017,6 +2019,20 @@ class AgentChatController(QObject):
                 self.panel.add_note(_tr("Undone: {}").format(one_line(undone, 200)))
                 if keep:
                     self._record("note", _tr("Undone: {}").format(one_line(undone, 200)))
+            return
+        gate = connector_gate(call)
+        if gate is not None:
+            # A connector loaded opens a way out of QGIS, and the user said yes to it: it stays in the thread, once
+            # (loaded again, it answers at once and nothing new happened). One that did not load is said each time.
+            if result.is_error or gate.name not in self._connectors_shown:
+                source = self._connector_source(gate.name)
+                detail = one_line(source.address if source is not None else "", MAX_DETAIL_CHARS)
+                self._flush_answer()
+                self.panel.add_action(label, not result.is_error, detail, "", ())
+                if keep:
+                    self._record("action", label, ok=not result.is_error, detail=detail, count="", strong=())
+                if not result.is_error:
+                    self._connectors_shown.add(gate.name)
             return
         if spec is not None and (not spec.read_only or spec.open_world):
             self._flush_answer()

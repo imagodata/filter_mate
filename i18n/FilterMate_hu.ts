@@ -262,11 +262,6 @@ Egyetért?</translation>
         <translation>Rétegek eltávolítva: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Ebben a beszélgetésben nem érhető el: {}</translation>
-    </message>
-    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Nothing to redo.</source>

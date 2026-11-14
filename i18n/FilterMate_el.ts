@@ -262,11 +262,6 @@ Do you agree?</source>
         <translation>Αφαιρέθηκαν επίπεδα: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Μη προσβάσιμο για αυτή τη συνομιλία: {}</translation>
-    </message>
-    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Nothing to redo.</source>

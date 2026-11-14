@@ -262,11 +262,6 @@ Oletteko samaa mieltä?</translation>
         <translation>Tasot poistettu: {}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Ei tavoitettavissa tälle keskustelulle: {}</translation>
-    </message>
-    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="229"/>
         <location filename="../ui/controllers/agent_chat_controller.py" line="269"/>
         <source>Nothing to redo.</source>
