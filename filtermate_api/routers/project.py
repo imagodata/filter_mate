@@ -157,6 +157,8 @@ class ContoursBody(BaseModel):
                                             description="Height between two index contours, a multiple of interval")
     band: int = Field(default=1, ge=1, le=1000)
     name: str = Field(default="", max_length=200)
+    min_length: Optional[float] = Field(default=None, ge=0, le=1e9,
+                                        description="Closed contours shorter than this are left out; 0 keeps all")
 
 
 @router.post("/layers/contours", response_model=ContourResult)
@@ -165,7 +167,7 @@ def contour_lines(payload: ContoursBody, request: Request) -> ContourResult:
     try:
         return _accessor(request).contour_lines(payload.layer, payload.interval,
                                                 index_interval=payload.index_interval, band=payload.band,
-                                                name=payload.name)
+                                                name=payload.name, min_length=payload.min_length)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

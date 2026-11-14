@@ -138,10 +138,12 @@ def check_contours(project, work):
     index = sorted(feature["elevation"] for feature in layer.getFeatures() if feature["is_index"] == 1)
     check("contours: a line layer in the CRS of the raster, one level every 25",
           layer.isValid() and layer.crs().authid() == "EPSG:32631" and made["crs_authid"] == "EPSG:32631"
-          and made["feature_count"] == layer.featureCount() == len(heights) and set(heights) == set(range(100, 501, 25))
-          and made["minimum"] == 100 and made["maximum"] == 500, (made, heights))
+          and made["feature_count"] == layer.featureCount() == len(heights) and set(heights) == set(range(100, 500, 25))
+          and made["minimum"] == 100 and made["maximum"] == 475, (made, heights))
+    # The cone ends in a ring of a few metres at 500: a bump smaller than ten pixels, left out and counted.
+    check("contours: a closed contour of a few pixels is left out, and said so", made["left_out"] == 1, made)
     check("contours: the index contours are the multiples of 100", index and all(height % 100 == 0 for height in index)
-          and made["index_count"] == len(index) and set(index) == {100, 200, 300, 400, 500}
+          and made["index_count"] == len(index) and set(index) == {100, 200, 300, 400}
           and made["fields"] == ["elevation", "is_index"], (made, index))
     rules = rules_of(layer)
     check("contours: drawn thin, the index contours thicker", len(rules) == 2
@@ -149,14 +151,14 @@ def check_contours(project, work):
           and rules[1][3], rules)
     order = [node.layerId() for node in project.layerTreeRoot().findLayers()]
     check("contours: on top of the project, named after the raster", order[0] == layer.id()
-          and made["name"] == "Contours 25 (dem)" and made["source_layer"] == "dem", (order, made))
+          and made["name"] == "Contours 25" and made["source_layer"] == "dem", (order, made))
     check("contours: drawn", colours([layer], dem.extent(), "EPSG:32631") > 1)
     json.dumps(made)
     effects = recorder.finish()
     apply_effects(effects, undo=True)
     check("contours: undoing the turn removes the layer", project.mapLayer(made["layer_id"]) is None)
     apply_effects(effects, undo=False)
-    again = [found for found in project.mapLayers().values() if found.name() == "Contours 25 (dem)"]
+    again = [found for found in project.mapLayers().values() if found.name() == "Contours 25"]
     check("contours: redoing brings it back with its lines", len(again) == 1 and again[0].featureCount() == len(heights),
           [found.name() for found in project.mapLayers().values()])
     project.removeMapLayer(again[0].id())
@@ -168,8 +170,17 @@ def check_contours(project, work):
           and plain["index_count"] == 0 and plain["index_interval"] is None
           and plain["name"] == "Courbes" and all(feature["is_index"] == 0 for feature in layer.getFeatures()), plain)
     project.removeMapLayer(layer.id())
+    every = terrain.contour_lines("dem", 25, index_interval=100, min_length=0)
+    check("contours: a minimum length of zero keeps every contour", every["left_out"] == 0
+          and every["maximum"] == 500 and every["feature_count"] == made["feature_count"] + 1, every)
+    project.removeMapLayer(every["layer_id"])
+    wide = terrain.contour_lines("dem", 25, min_length=3000)
+    check("contours: a minimum length asked leaves the smaller closed contours out, never the open ones",
+          wide["left_out"] > 1 and wide["minimum"] == 100 and wide["feature_count"] < made["feature_count"], wide)
+    project.removeMapLayer(wide["layer_id"])
     count = len(project.mapLayers())
     for label, call, needle in (
+            ("a minimum length below zero", lambda: terrain.contour_lines("dem", 25, min_length=-1), "min_length"),
             ("an interval of zero", lambda: terrain.contour_lines("dem", 0), "above zero"),
             ("an index interval that is no multiple", lambda: terrain.contour_lines("dem", 25, index_interval=60), "multiple"),
             ("too many levels", lambda: terrain.contour_lines("dem", 0.5), "more than 500 levels"),
@@ -203,6 +214,9 @@ def check_style(project, dem, points, work):
           and dem.blendMode() == modes.CompositionMode_Multiply and shaded["blend"] == "multiply"
           and abs(dem.opacity() - 0.4) < 1e-6 and (shaded["azimuth"], shaded["altitude"]) == (315.0, 45.0), shaded)
     check("style: the hillshade is drawn", colours([dem], dem.extent(), "EPSG:32631") > 8)
+    check("style: a hillshade is blended between its pixels when the map is closer than they are",
+          dem.resampleFilter().zoomedInResampler() is not None
+          and dem.resampleFilter().zoomedInResampler().type() == "cubic", dem.resampleFilter().zoomedInResampler())
     kept = style.set_layer_style("dem", "keep", blend="overlay")
     check("style: the blending alone changes with keep", dem.renderer().type() == "hillshade"
           and dem.blendMode() == modes.CompositionMode_Overlay and abs(dem.opacity() - 0.4) < 1e-6

@@ -3,7 +3,7 @@ name: workflows
 title: Chain the steps of a request
 description: a request that needs several steps - what lies within a distance or inside an area, a place found then the data around it, a count by category, several criteria at once, a thematic map ready to print, data fetched then filtered - done with the fewest calls, in the right order
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.0
   audience: chat, mcp
   tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, find_place, search_open_data, add_layer, add_service_layer, set_layer_style, set_labels, create_layout, export_layout, run_algorithm
@@ -81,6 +81,13 @@ layer, no field to add.
 3. set_labels when names are asked.
 4. create_layout once the map looks right, with a title that says what the map shows. export_layout only when the
    user asks for a file.
+
+## A relief map
+
+"A terrain map of Lyon with contour lines over a satellite basemap."
+
+Load the terrain skill: it gives the chain (the place, the basemap, the elevation, colors by height, the shaded
+relief, the contours, a look at the result) and the values to choose when the user gives none.
 
 ## Data that is not in the project
 

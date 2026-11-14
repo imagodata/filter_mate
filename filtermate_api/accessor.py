@@ -564,6 +564,8 @@ class ContourResult:
     interval: float = 0.0
     index_interval: Optional[float] = None
     index_count: int = 0
+    # Closed contours too short to be kept: bumps of the size of a building.
+    left_out: int = 0
     # The lowest and the highest level drawn.
     minimum: Optional[float] = None
     maximum: Optional[float] = None
@@ -774,7 +776,7 @@ class FilterMateAccessor(Protocol):
         ...
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                      name: str = "") -> ContourResult:
+                      name: str = "", min_length: Optional[float] = None) -> ContourResult:
         """Draw the contour lines of a raster as a new line layer; raises FilterRejected when refused."""
         ...
 
@@ -1183,7 +1185,7 @@ class InMemoryAccessor:
         return None
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                      name: str = "") -> ContourResult:
+                      name: str = "", min_length: Optional[float] = None) -> ContourResult:
         found = self._find(layer)
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
@@ -1192,7 +1194,8 @@ class InMemoryAccessor:
         self.layers.append(summary)
         return ContourResult(layer_id=summary.layer_id, name=summary.name, source_layer=found.name, feature_count=18,
                              interval=interval, index_interval=index_interval,
-                             index_count=4 if index_interval else 0, minimum=175.0, maximum=600.0,
+                             index_count=4 if index_interval else 0, left_out=0 if min_length == 0 else 7,
+                             minimum=175.0, maximum=600.0,
                              fields=["elevation", "is_index"])
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:

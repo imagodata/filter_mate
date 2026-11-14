@@ -2265,7 +2265,7 @@ class AgentChatController(QObject):
             "add_elevation": lambda: _tr("Layer added: {}").format(
                 args.get("name") or self._elevation_label(str(args.get("platform", "")), short=True)),
             "contour_lines": lambda: _tr("Layer added: {}").format(
-                args.get("name") or "Contours {:g} ({})".format(args.get("interval") or 0, layer)),
+                args.get("name") or "Contours {:g}".format(args.get("interval") or 0)),
             "duplicate_layer": lambda: _tr("Layer added: {}").format(args.get("name") or "{} (copy)".format(layer)),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),

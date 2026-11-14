@@ -656,10 +656,10 @@ class QGISFilterMateAccessor:
         self._control("check_elevation", platform, extra_domains=extra, module="adapters.public_api.terrain")
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                      name: str = "") -> ContourResult:
+                      name: str = "", min_length: Optional[float] = None) -> ContourResult:
         return ContourResult(**self._control(
             "contour_lines", layer, interval, index_interval=index_interval, band=band, name=name,
-            module="adapters.public_api.terrain"))
+            min_length=min_length, module="adapters.public_api.terrain"))
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
         return LayerSummary(**self._control("duplicate_layer", layer, name=name))

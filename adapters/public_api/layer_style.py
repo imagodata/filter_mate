@@ -36,8 +36,10 @@ LABEL_PLACEMENTS = ('auto', 'curved', 'horizontal')
 # Ramps of FilterMate, beside those of QGIS: the first color, stops (where, color), the last color. Terrain is the
 # hypsometric tints of a relief map, from the green of the low ground to the pale rock of the summits; the style of
 # QGIS holds none that reads as heights.
+# The summits are a pale rock, not white: stretched over the heights of one town, white reads as a haze over its
+# hills (seen on Lyon, 2026-11-15).
 OWN_RAMPS = {'terrain': ('Terrain', '#3f8f4f', ((0.2, '#a9cc7a'), (0.42, '#f3e7a9'), (0.64, '#d0a468'),
-                                              (0.84, '#9a6b4c')), '#f4f1ec')}
+                                              (0.84, '#9a6b4c')), '#e3d5c2')}
 _DEGREES_Z_FACTOR = 1.0 / 111_320.0  # heights in metres over a grid in degrees
 METHODS = ('quantile', 'equal_interval', 'jenks', 'pretty', 'stddev')
 DEFAULT_RAMPS = {'categorized': 'Spectral', 'graduated': 'Viridis', 'pseudocolor': 'Spectral'}
@@ -256,6 +258,22 @@ def _hillshade(layer, band: int, azimuth: float, altitude: float, z_factor: Opti
     return renderer, float(z_factor)
 
 
+def _smooth_zoom(layer) -> None:
+    """Draw a raster zoomed in by blending its pixels, not as squares.
+
+    A hillshade is shaded pixel by pixel: on the map of a town, where a pixel of 30 m covers several of the screen,
+    every slope showed as steps (seen on Lyon, 2026-11-15).
+    """
+    try:
+        from qgis.core import QgsBilinearRasterResampler, QgsCubicRasterResampler
+        resample = layer.resampleFilter()
+        if resample is not None:
+            resample.setZoomedInResampler(QgsCubicRasterResampler())
+            resample.setZoomedOutResampler(QgsBilinearRasterResampler())
+    except (ImportError, AttributeError, RuntimeError):
+        logger.debug("raster resampling not set", exc_info=True)  # drawn as squares, as before
+
+
 def _raster_renderer(layer, mode: str, band: int, ramp_name: str, invert: bool, minimum, maximum,
                      cut: Optional[float] = None, discrete: bool = False, classes: int = 5):
     from qgis.core import (
@@ -446,6 +464,7 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
         if mode == 'hillshade':
             renderer, factor = _hillshade(found, band, azimuth, altitude, z_factor, multidirectional)
             found.setRenderer(renderer)
+            _smooth_zoom(found)
             answer.update({'band': band, 'azimuth': float(azimuth), 'altitude': float(altitude), 'z_factor': factor})
         else:
             renderer, ramp_used, low, high = _raster_renderer(found, mode, band, ramp, invert, minimum, maximum,

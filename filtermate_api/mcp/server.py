@@ -1082,6 +1082,10 @@ def build_server(client: FilterMateClient) -> Any:
             "Height between two index contours, a multiple of interval: 100 marks the contours at 100, 200, 300..."))] = None,
         band: Annotated[int, Field(ge=1, le=1000, description="The band read")] = 1,
         name: Annotated[str, Field(max_length=200, description="Name of the layer made")] = "",
+        min_length: Annotated[Optional[float], Field(ge=0, le=1e9, description=(
+            "Closed contours shorter than this, in the units of the raster, are left out: the bumps of the size of "
+            "a building that speckle a town in a surface model. Left out: ten pixels of the raster; 0 keeps every "
+            "contour"))] = None,
     ) -> Dict[str, Any]:
         """Draw the contour lines of an elevation raster of the project as a new line layer, added on top.
 
@@ -1090,12 +1094,14 @@ def build_server(client: FilterMateClient) -> Any:
         rules on "is_index" = 1 changes it, and set_labels with placement curved writes the heights on the lines
         (filter the labels with an expression such as if("is_index" = 1, "elevation", '')). It is a temporary
         file: export_layers keeps it. Returns layer_id, name, feature_count, interval, index_interval,
-        index_count, minimum and maximum (the lowest and highest level drawn) and fields. A raster of more than 25
+        index_count, left_out (closed contours too short to be kept), minimum and maximum (the lowest and highest
+        level drawn) and fields. A raster of more than 25
         million pixels, or an interval that makes more than 500 levels, is refused. In the chat of FilterMate,
         undoing the turn removes the layer.
         """
         return await call("POST", "/layers/contours", _body(
-            layer=layer, interval=interval, index_interval=index_interval, band=band, name=name),
+            layer=layer, interval=interval, index_interval=index_interval, band=band, name=name,
+            min_length=min_length),
             timeout=ADD_LAYER_TIMEOUT)
 
     @mcp.tool(annotations=_write("Duplicate a layer", idempotent=False))

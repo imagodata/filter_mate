@@ -1,6 +1,6 @@
 ---
 name: filtermate-open-data
-description: "Bring data in, take layers out through the MCP server of the FilterMate QGIS plugin: find datasets on the open data platforms the user allowed, add a layer from a file, a URL, a WFS service or a satellite scene, add a web basemap, remove layers from the project. Use when the user asks for it in QGIS with FilterMate."
+description: "Bring data in, take layers out through the MCP server of the FilterMate QGIS plugin: find datasets on the open data platforms the user allowed, add a layer from a file, a URL, a WFS service or a satellite scene, add a web basemap or the elevation of an area, remove layers from the project. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/open-data/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->
@@ -42,8 +42,17 @@ one. Prefer few clouds when the user does not say.
 
 add_basemap puts a basemap the user enabled under every layer: osm_tiles for a street map, carto_light for a neutral
 background, carto_light_nolabels under layers that have their own labels, carto_dark under bright symbols,
-ign_plan or ign_ortho in France, opentopomap for relief. A basemap is an image: it is not filtered, read nor
-exported. When none is enabled, say that one can be ticked in the settings of the agent, Sources tab.
+google_satellite for photographs anywhere, ign_plan or ign_ortho in France, opentopomap for relief. A basemap is an
+image: it is not filtered, read nor exported. When none is enabled, say that one can be ticked in the settings of
+the agent, Sources tab.
+
+## Elevation
+
+add_elevation brings in the elevation of an area (a place found, or the visible map) from an elevation source the
+user enabled: copernicus_dem, worldwide at 30 m. It is data, not an image: a raster of heights in metres, which
+is then colored, shaded, cut into contours or read under polygons. A relief map is the terrain skill: load it.
+When no elevation source is enabled, say that Copernicus DEM can be ticked in the settings of the agent, Sources
+tab, under Satellite imagery.
 
 ## Removing layers
 

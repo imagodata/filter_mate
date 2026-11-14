@@ -469,7 +469,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def contour_lines(args: Dict[str, Any]) -> Dict[str, Any]:
         answer = asdict(accessor.contour_lines(args["layer"], args["interval"],
                                                index_interval=args.get("index_interval"), band=args["band"],
-                                               name=args["name"]))
+                                               name=args["name"], min_length=args.get("min_length")))
         if not share_values:  # the heights of a raster of the user are values of the project
             answer.pop("minimum", None)
             answer.pop("maximum", None)

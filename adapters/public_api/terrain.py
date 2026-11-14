@@ -42,6 +42,10 @@ _HTTP_OPTIONS = {
 }
 ELEVATION_FIELD = 'elevation'
 INDEX_FIELD = 'is_index'
+# A closed contour shorter than this many pixels is a bump or a pit of the size of a building: in a surface model
+# they speckle every flat town. Measured on Lyon (2026-11-15, every 25 m): three contours in four, an eighth of
+# their length.
+SPECK_PIXELS = 10
 CONTOUR_COLOR = '#7a5230'
 CONTOUR_WIDTH = 0.2
 INDEX_WIDTH = 0.5
@@ -395,8 +399,9 @@ def check_elevation(platform: str, extra_domains: str = '') -> Dict[str, Any]:
 
 
 def _contours(source: str, band_number: int, path: str, interval: float, index_interval: Optional[float],
-              remote: bool, ended: Callable[[], str]) -> Dict[str, Any]:
+              min_length: Optional[float], remote: bool, ended: Callable[[], str]) -> Dict[str, Any]:
     """Draw the contour lines of a band into a new GeoPackage at ``path``; how many, and between which heights.
+    ``min_length``: closed contours shorter than this are left out (None: ``SPECK_PIXELS`` pixels; 0: none).
     Worker thread."""
     with _Gdal(remote=remote) as gdal:
         from osgeo import ogr, osr
@@ -439,11 +444,19 @@ def _contours(source: str, band_number: int, path: str, interval: float, index_i
         if code:
             vector = None
             raise ValueError(f"the contours could not be drawn: {failure}")
+        if min_length is None:
+            transform = dataset.GetGeoTransform()
+            min_length = SPECK_PIXELS * max(abs(transform[1]), abs(transform[5]))
         count = index_count = 0
+        specks: List[int] = []  # removed once the reading is over: a layer is not changed under its own cursor
         lowest, highest = float('inf'), float('-inf')
         lines.StartTransaction()
         lines.ResetReading()
         for feature in lines:
+            shape = feature.GetGeometryRef()
+            if min_length > 0 and shape is not None and shape.Length() < min_length and shape.IsRing():
+                specks.append(feature.GetFID())
+                continue
             height = feature.GetField(ELEVATION_FIELD)
             flag = int(index_interval is not None and is_index(height, index_interval))
             feature.SetField(INDEX_FIELD, flag)
@@ -456,11 +469,13 @@ def _contours(source: str, band_number: int, path: str, interval: float, index_i
                 lines.RollbackTransaction()
                 vector = None
                 raise _ended_error(reason)
+        for fid in specks:
+            lines.DeleteFeature(fid)
         lines.CommitTransaction()
         vector = None  # closes the file before QGIS opens it
         dataset = None
-        return {'count': count, 'index_count': index_count, 'minimum': lowest if count else None,
-                'maximum': highest if count else None}
+        return {'count': count, 'index_count': index_count, 'left_out': len(specks),
+                'minimum': lowest if count else None, 'maximum': highest if count else None}
 
 
 def _contour_style(layer, with_index: bool) -> None:
@@ -479,12 +494,13 @@ def _contour_style(layer, with_index: bool) -> None:
 
 
 def contour_lines(layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                  name: str = '') -> Dict[str, Any]:
+                  name: str = '', min_length: Optional[float] = None) -> Dict[str, Any]:
     """Draw the contour lines of a raster of the project (an elevation model) as a new line layer.
 
     Each line has ``elevation`` (the height of its level) and ``is_index`` (1 for an index contour, a whole number
     of times ``index_interval``; 0 otherwise). The layer is a temporary GeoPackage added on top of the project,
-    drawn in thin brown lines with the index contours thicker.
+    drawn in thin brown lines with the index contours thicker. Closed contours shorter than ``min_length`` (ten
+    pixels of the raster by default; 0 keeps every line) are left out: the bumps of the size of a building.
 
     Raises:
         ValueError: Not a raster with values, a band it does not have, a raster too large, intervals that make no
@@ -505,6 +521,9 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
         raise ValueError(f"'{found.name()}' has bands 1 to {found.bandCount()}")
     interval = float(interval)
     index_interval = float(index_interval) if index_interval is not None else None
+    if min_length is not None and (not math.isfinite(float(min_length)) or float(min_length) < 0):
+        raise ValueError("min_length is a length in the units of the raster, 0 to keep every contour")
+    min_length = float(min_length) if min_length is not None else None
     if found.width() * found.height() > MAX_CONTOUR_PIXELS:
         raise ValueError(f"'{found.name()}' holds {found.width()} x {found.height()} pixels, more than the "
                          f"{MAX_CONTOUR_PIXELS // 1_000_000} million contours are drawn from: bring in a smaller "
@@ -524,11 +543,13 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
         raise ValueError(problem)
     path = QgsProcessingUtils.generateTempFilename('contours.gpkg')
     made = _in_background('contour_lines', lambda ended: _contours(source, band, path, interval, index_interval,
-                                                                   remote, ended))
+                                                                   min_length, remote, ended))
     if not made['count']:
         between = f" between {lowest:g} and {highest:g}" if math.isfinite(lowest) and math.isfinite(highest) else ''
-        raise ValueError(f"no contour every {interval:g}{between}: ask for a smaller interval")
-    title = (name or '').strip()[:200] or f"Contours {interval:g} ({found.name()})"[:200]
+        only_specks = (f" but {made['left_out']} closed ones too short to be kept (min_length 0 keeps them)"
+                       if made['left_out'] else '')
+        raise ValueError(f"no contour every {interval:g}{between}{only_specks}: ask for a smaller interval")
+    title = (name or '').strip()[:200] or f"Contours {interval:g}"
     contours = QgsVectorLayer(path + '|layername=contours', title, 'ogr')
     if not contours.isValid():
         del contours
@@ -537,5 +558,5 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
     QgsProject.instance().addMapLayer(contours)
     return {'layer_id': contours.id(), 'name': contours.name(), 'source_layer': found.name(),
             'crs_authid': contours.crs().authid(), 'feature_count': made['count'], 'interval': interval,
-            'index_interval': index_interval, 'index_count': made['index_count'],
+            'index_interval': index_interval, 'index_count': made['index_count'], 'left_out': made['left_out'],
             'minimum': made['minimum'], 'maximum': made['maximum'], 'fields': [ELEVATION_FIELD, INDEX_FIELD]}

@@ -1325,7 +1325,7 @@
      },
      "ramp": {
       "default": "",
-      "description": "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo...",
+      "description": "Color ramp of QGIS: Viridis, Spectral, Blues, Reds, Greens, RdYlGn, Magma, Turbo... or Terrain, the tints of a relief map (green low ground, brown heights, pale summits) for an elevation raster",
       "maxLength": 100,
       "type": "string"
      },
@@ -2476,7 +2476,7 @@
   {
    "name": "contour_lines",
    "title": "Draw contour lines",
-   "description": "Draw the contour lines of an elevation raster of the project as a new line layer, added on top. Each line has the fields elevation (the height of its level) and is_index (1 for an index contour, 0 for the others). The layer comes drawn in thin brown lines, the index contours thicker: set_layer_style with rules on \"is_index\" = 1 changes it, and set_labels with placement curved writes the heights on the lines (filter the labels with an expression such as if(\"is_index\" = 1, \"elevation\", '')). It is a temporary file: export_layers keeps it. Returns layer_id, name, feature_count, interval, index_interval, index_count, minimum and maximum (the lowest and highest level drawn) and fields. A raster of more than 25 million pixels, or an interval that makes more than 500 levels, is refused. In the chat of FilterMate, undoing the turn removes the layer.",
+   "description": "Draw the contour lines of an elevation raster of the project as a new line layer, added on top. Each line has the fields elevation (the height of its level) and is_index (1 for an index contour, 0 for the others). The layer comes drawn in thin brown lines, the index contours thicker: set_layer_style with rules on \"is_index\" = 1 changes it, and set_labels with placement curved writes the heights on the lines (filter the labels with an expression such as if(\"is_index\" = 1, \"elevation\", '')). It is a temporary file: export_layers keeps it. Returns layer_id, name, feature_count, interval, index_interval, index_count, left_out (closed contours too short to be kept), minimum and maximum (the lowest and highest level drawn) and fields. A raster of more than 25 million pixels, or an interval that makes more than 500 levels, is refused. In the chat of FilterMate, undoing the turn removes the layer.",
    "read_only": false,
    "destructive": false,
    "idempotent": false,
@@ -2521,6 +2521,20 @@
       "description": "Name of the layer made",
       "maxLength": 200,
       "type": "string"
+     },
+     "min_length": {
+      "anyOf": [
+       {
+        "maximum": 1000000000.0,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Closed contours shorter than this, in the units of the raster, are left out: the bumps of the size of a building that speckle a town in a surface model. Left out: ten pixels of the raster; 0 keeps every contour"
      }
     },
     "required": [
