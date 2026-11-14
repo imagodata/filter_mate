@@ -299,6 +299,11 @@ Sunteți de acord?</translation>
         <translation>Nimic de restaurat.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agentul lucrează: așteptați să termine.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Citirea filtrelor active</translation>
@@ -1104,6 +1109,26 @@ Sunteți de acord?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Cei {} pași dinainte rămân și pot fi anulați.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Furnizorul nu a putut fi contactat, nouă încercare peste {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Furnizorul este ocupat, nouă încercare peste {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Cererea s-a oprit pe parcurs. Pașii deja făcuți, care rămân pe loc (Anulează îi retrage): {}. Cereți agentului să continue când sunteți gata.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Oprit pe parcurs. Pașii deja făcuți, care rămân pe loc (Anulează îi retrage): {}. Cereți agentului să continue dacă doriți restul.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixează harta de dinaintea acestui pas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Înapoi la înainte de acest pas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Harta așa cum era înainte de acest pas: filtrele, stilurile și straturile modificate de atunci revin la starea anterioară. Un pas nou în istoric, pe care Anulează îl poate anula aici.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

@@ -299,6 +299,11 @@ Rozimisiz?</translation>
         <translation>Tiklanadigan narsa yo'q.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agent ishlayapti: tugashini kuting.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Faol filtrlar o'qilmoqda</translation>
@@ -1104,6 +1109,26 @@ Rozimisiz?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Oldingi {} qadam qoladi va bekor qilinishi mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ta'minotchiga ulanib bo'lmadi, {} soniyadan so'ng qayta uriniladi…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ta'minotchi band, {} soniyadan so'ng qayta uriniladi…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>So'rov yo'lda to'xtadi. Allaqachon bajarilgan qadamlar joyida qoladi (Bekor qilish ularni qaytaradi): {}. Tayyor bo'lganingizda agentdan davom etishni so'rang.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Yo'lda to'xtatildi. Allaqachon bajarilgan qadamlar joyida qoladi (Bekor qilish ularni qaytaradi): {}. Qolganini xohlasangiz, agentdan davom etishni so'rang.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Shu qadamdan oldingi xaritani mahkamlash</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Shu qadamdan oldingi holatga qaytish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Xarita shu qadamdan oldingi holatda: shundan beri o'zgargan filtrlar, uslublar va qatlamlar avvalgi holatiga qaytadi. Tarixning yangi qadami, uni shu yerda Bekor qilish orqali qaytarib olish mumkin.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

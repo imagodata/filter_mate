@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>没有可恢复的内容。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>智能体正在工作：请等待其完成。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>正在读取当前过滤器</translation>
@@ -1104,6 +1109,26 @@ Do you agree?</source>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>之前的 {} 个步骤保留，并且可以撤销。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>无法连接提供者，{} 秒后重试…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>提供者正忙，{} 秒后重试…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>请求在中途停止。已完成的步骤仍保留（撤销可将其还原）：{}。准备好后，请让智能体继续。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>已在中途停止。已完成的步骤仍保留（撤销可将其还原）：{}。如需其余部分，请让智能体继续。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>固定此步骤之前的地图</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>返回到此步骤之前</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>此步骤之前的地图：此后更改的过滤器、样式和图层会恢复原状。这是历史记录中的新步骤，可在此处用“撤销”取消。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

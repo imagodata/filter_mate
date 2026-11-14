@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>لا شيء لاستعادته.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>الوكيل قيد العمل: يرجى الانتظار حتى ينتهي.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>قراءة التصفيات النشطة</translation>
@@ -1104,6 +1109,26 @@ Do you agree?</source>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>تبقى الخطوات {} السابقة ويمكن التراجع عنها.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>تعذر الوصول إلى المزوّد، إعادة المحاولة خلال {} ث…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>المزوّد مشغول، إعادة المحاولة خلال {} ث…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>توقف الطلب في منتصف الطريق. الخطوات المنجزة بالفعل، وتبقى في مكانها (يعيدها «تراجع»): {}. اطلب من الوكيل المتابعة عندما تكون مستعدًا.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>توقف في منتصف الطريق. الخطوات المنجزة بالفعل، وتبقى في مكانها (يعيدها «تراجع»): {}. اطلب من الوكيل المتابعة إن أردت الباقي.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>تثبيت الخريطة قبل هذه الخطوة</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>العودة إلى ما قبل هذه الخطوة</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>الخريطة كما كانت قبل هذه الخطوة: تعود عوامل التصفية والأنماط والطبقات التي تغيّرت منذ ذلك الحين إلى ما كانت عليه. خطوة جديدة في السجل، يتراجع عنها «تراجع» هنا.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

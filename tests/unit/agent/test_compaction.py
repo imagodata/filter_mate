@@ -8,7 +8,7 @@ from core.agent.compaction import SUMMARY_HEADER, compact, is_request
 from core.agent.messages import ROLE_ASSISTANT, ROLE_USER, Message, TextPart, ToolCallPart, ToolResultPart
 from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
-from core.agent.session import AgentLimits, AgentSession
+from core.agent.session import CAUSE_FAILED, AgentLimits, AgentSession
 from core.agent.tool_catalog import chat_tools
 
 pytestmark = pytest.mark.unit
@@ -93,5 +93,5 @@ def test_the_session_sums_up_before_a_request():
     body = json.loads(session.next_request().body)
     assert body["messages"][0]["content"][0]["text"].startswith(SUMMARY_HEADER)
     assert body["messages"][-1]["content"][0]["text"] == "encore"
-    session.abandon_request()  # a failed request takes only itself back
+    session.interrupt_request(CAUSE_FAILED)  # a failed request that ran nothing takes only itself back
     assert session.messages[-1].parts[0].text == "réponse 10"

@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>Τίποτα για επαναφορά.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Ο πράκτορας εργάζεται: περιμένετε να ολοκληρώσει.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Ανάγνωση των ενεργών φίλτρων</translation>
@@ -1104,6 +1109,26 @@ Do you agree?</source>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Τα {} προηγούμενα βήματα παραμένουν και μπορούν να αναιρεθούν.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ο πάροχος δεν ήταν προσβάσιμος, νέα προσπάθεια σε {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ο πάροχος είναι απασχολημένος, νέα προσπάθεια σε {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Το αίτημα σταμάτησε στη μέση. Βήματα που έχουν ήδη γίνει και παραμένουν στη θέση τους (η Αναίρεση τα επαναφέρει): {}. Ζητήστε από τον πράκτορα να συνεχίσει όταν είστε έτοιμοι.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Διακόπηκε στη μέση. Βήματα που έχουν ήδη γίνει και παραμένουν στη θέση τους (η Αναίρεση τα επαναφέρει): {}. Ζητήστε από τον πράκτορα να συνεχίσει αν θέλετε τα υπόλοιπα.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Καρφίτσωμα του χάρτη πριν από αυτό το βήμα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Επιστροφή πριν από αυτό το βήμα</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Ο χάρτης όπως ήταν πριν από αυτό το βήμα: τα φίλτρα, τα στυλ και τα επίπεδα που άλλαξαν από τότε επανέρχονται. Ένα νέο βήμα του ιστορικού, που η «Αναίρεση» αναιρεί εδώ.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

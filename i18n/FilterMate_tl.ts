@@ -299,6 +299,11 @@ Sumasang-ayon po ba kayo?</translation>
         <translation>Walang ibabalik.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Gumagana ang agent: pakihintay hanggang matapos ito.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Binabasa ang mga aktibong filter</translation>
@@ -1104,6 +1109,26 @@ Sumasang-ayon ka ba?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Mananatili ang {} hakbang bago nito, at maaaring i-undo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Hindi maabot ang provider, susubukan muli sa loob ng {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Abala ang provider, susubukan muli sa loob ng {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Huminto sa kalagitnaan ang kahilingan. Mga hakbang na nagawa na, na nananatili sa lugar (ibinabalik ng I-undo ang mga ito): {}. Hilingin sa agent na magpatuloy kapag handa ka na.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Huminto sa kalagitnaan. Mga hakbang na nagawa na, na nananatili sa lugar (ibinabalik ng I-undo ang mga ito): {}. Hilingin sa agent na magpatuloy kung gusto mo ang natitira.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>I-pin ang mapa bago ang hakbang na ito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Bumalik sa bago ang hakbang na ito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Ang mapa gaya ng dati bago ang hakbang na ito: ang mga filter, style, at layer na binago mula noon ay ibabalik. Isang bagong hakbang sa history, na babawiin ng I-undo rito.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

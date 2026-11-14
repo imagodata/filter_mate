@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>復元するものはありません。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>エージェントが作業中です。完了するまでお待ちください。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>有効なフィルタを読み取り中</translation>
@@ -1104,6 +1109,26 @@ Do you agree?</source>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>それ以前の {} ステップは残り、元に戻せます。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>プロバイダーに接続できませんでした。{} 秒後に再試行します…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>プロバイダーがビジー状態です。{} 秒後に再試行します…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>リクエストは途中で停止しました。すでに実行されたステップはそのまま残ります（「元に戻す」で取り消せます）: {}。準備ができたら、エージェントに続行を依頼してください。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>途中で停止しました。すでに実行されたステップはそのまま残ります（「元に戻す」で取り消せます）: {}。残りが必要な場合は、エージェントに続行を依頼してください。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>このステップ前の地図を固定</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>このステップの前の状態に戻す</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>このステップの前の状態の地図です。それ以降に変更されたフィルタ、スタイル、レイヤーが元に戻ります。履歴に新しいステップとして追加され、ここで「元に戻す」と取り消せます。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

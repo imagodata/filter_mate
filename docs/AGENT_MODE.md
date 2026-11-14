@@ -120,6 +120,24 @@ Rules worth keeping:
   QGIS if the user turns that log on.
 - **Timeouts.** The network timeout of QGIS applies (60 s by default) and cannot be set per request: a local model slow
   to start may need more, and the message says so.
+- **A busy provider is asked again** (`core/agent/chat_engine.py`): after a 429, a 5xx or 529, an `overloaded_error`
+  or `rate_limit_error` in the stream, or a connection reset or timed out, the model turn is sent again, twice at most,
+  after the `Retry-After` of the server (30 s at most) or 2 s then 6 s. The wait is a `QTimer`, the status line says
+  it, and Stop during it ends the request. Never once text of the turn was shown (it would show twice), nor for a
+  refused key, a bad request (400, 404), a used-up quota or a refusal, nor when the server asks to come back in more
+  than 120 s (a quota of the day): the failure is shown at once.
+- **A request that breaks off keeps what it changed** (`AgentSession.interrupt_request`): after a failure, Stop or a
+  refusal, when a tool that changes something ran, the conversation is cut after the last tool results, so every
+  call kept has its result (a call that Stop left unrun in its turn is answered "not run"), and a note in that
+  message tells the model why the request stopped there, that what those steps changed is in place in QGIS, and not
+  to do them again without checking. The thread says how many steps stay (Undo takes them back) and the request does
+  not come back in the line: sent again whole, it would do them twice; the user asks the agent to go on. Steps are
+  the calls that changed something: readings do not count. A request that changed nothing (nothing ran, readings
+  only, calls refused or failed) is forgotten and comes back in the line, to be sent again. So is a request the
+  server refused for what it holds (400: too long for the model), which would fail again with every later one, and a
+  request stopped by a refused key or a used-up quota, since fixing the settings starts another conversation: the
+  thread then says which steps stay. The next request follows a message of tool results: each adapter sends two
+  messages of the user in a row as one.
 - **Redirections are not followed**, since the key is in the headers.
 - **Undo this turn** captures every layer before the first change of a request and pushes one `CrossOperation` in the
   automation history: rasters and point clouds get their source back, a layer changed since is left alone, and the
@@ -247,7 +265,10 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - The notes of the project and `undo_agent_step` run at every level: the user asks for them, and they change only
   what the agent keeps.
 - A question offers "Yes for this conversation": that tool then runs alone until a new conversation, another project or
-  another level. Never for `run_pyqgis`, asked at every run whatever the level.
+  another level. Never for `run_pyqgis`, asked at every run whatever the level. Two tools are allowed for what the
+  call reaches, not as a whole (`permissions.grant_key`): `add_layer` for the host of its address (local files are
+  another yes), `delete_features` for its layer. A text read on the web cannot ride a yes given to another address.
+  The question shows the address whole, up to 600 characters after the host, and says how many are not shown.
 - The level is read at each call (`ChatEngine(policy=...)`), and sent with each request, after the project summary,
   when it is not `standard` (the system prompt stays constant for the cache).
 - An invalid call is never asked nor refused: it runs to answer its mistake.
@@ -502,14 +523,23 @@ address, else its content type), its size, and whether the server gives parts of
   user adds). `search_open_data` searches their capabilities as it does for a WFS, `add_service_layer` builds the
   source of the `wms` provider for a layer the service lists (the CRS of the project when the layer has it, else Web
   Mercator; PNG first; its first style) and puts it under the layers. A service that says its requests go to another
-  host, port or scheme is refused, and so is a layer whose tiles, legend or feature information are elsewhere. QGIS
+  host or port is refused, and so is a layer whose tiles, legend or feature information are elsewhere. QGIS
   reads the capabilities again by itself, so that check alone would hold for the document the plugin was given, not
   for the one QGIS gets: the source also tells QGIS to send its requests to the address of the service
   (`IgnoreGetMapUrl`, `IgnoreGetFeatureInfoUrl`). What is left to the service: where the REST tiles of a WMTS and
-  the legends are, as QGIS reads them. `wfs_catalog` has the same limit, without such a switch (to do). A service
+  the legends are, as QGIS reads them. `wfs_catalog` reads its links the same way (a document that shows one address
+  to XML and another to QGIS is refused; host and port are compared, the same host by http for a service in https
+  being the same place, as servers behind a proxy say), but the WFS provider of QGIS has no
+  such switch: a service that answers QGIS another document than the one the plugin read is not caught. A service
   the user added by its address (WFS, WMS, WMTS, STAC, geocoder, basemap) goes to the model by its id
-  (`sources.model_name`, `platform_aliases`): the address may hold a key. An image service ticked alone does not
-  open the web to `add_layer`.
+  (`sources.model_name`, `platform_aliases`): the address may hold a key. The address is no longer a name, and
+  it is never answered: `agent_tools._asked` puts the id back in the `platform` of an answer and in the words of
+  a refusal. Not covered: the first 30
+  characters of host and path are in the id itself, and a platform of `open_data_domains` in the configuration file
+  goes by its address. An image service ticked alone does not open the web to `add_layer`.
+- A file added from the web is opened without the style it carries (`LayerOptions.loadDefaultStyle` False in
+  `project_control._add_layer`): its expressions would run at the first rendering. A local file keeps its style.
+  A path that starts with two slashes of either lean is a share of another machine, refused like `\\\\host`.
 - **Place search** (`open_data.geocode_url`, `parse_places`): geocoders that answer GeoJSON points to `q` and `limit`
   (IGN Géoplateforme for France, Photon for the world, any other of that shape the user adds). `find_place` is a
   read: the name the user wrote goes to the geocoder, nothing of the project does; each place comes with the extent
@@ -644,8 +674,9 @@ estimated:
 
 A web service is not read by any of them, but for `sample_features`: a few features of what the map shows (the
 extent of the map as the filter rectangle, 20 at most, no expression nor selection), which its server was already
-asked to draw it: a layer unchecked or out of its scale range is refused; never the layer as a whole. Not measured:
-whether the WFS provider passes the limit to the server or reads the whole extent into its cache first. The answer says so in `scope`.
+asked to draw it: a layer unchecked or out of its scale range is refused; never the layer as a whole. Measured
+with a WFS server that counts what it sends (`check_agent_wfs_sample.py`, QGIS 3.22, 3.44 and 4.3): one request,
+in the extent of the map, with COUNT of the limit plus one; the server sends four features for a sample of three. The answer says so in `scope`.
 
 Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
 

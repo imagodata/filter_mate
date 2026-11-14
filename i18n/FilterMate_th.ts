@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>ไม่มีสิ่งที่ต้องกู้คืน</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>เอเจนต์กำลังทำงาน: โปรดรอจนกว่าจะเสร็จ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>กำลังอ่านตัวกรองที่ใช้งานอยู่</translation>
@@ -1104,6 +1109,26 @@ Do you agree?</source>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>{} ขั้นตอนก่อนหน้ายังคงอยู่ และเลิกทำได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้ จะลองอีกครั้งใน {} วินาที…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>ผู้ให้บริการไม่ว่าง จะลองอีกครั้งใน {} วินาที…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>คำขอหยุดลงกลางคัน ขั้นตอนที่ทำไปแล้วซึ่งยังคงอยู่ (เลิกทำจะย้อนกลับให้): {} ขอให้เอเจนต์ดำเนินการต่อเมื่อคุณพร้อม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>หยุดกลางคัน ขั้นตอนที่ทำไปแล้วซึ่งยังคงอยู่ (เลิกทำจะย้อนกลับให้): {} ขอให้เอเจนต์ดำเนินการต่อหากต้องการส่วนที่เหลือ</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>ปักหมุดแผนที่ก่อนขั้นตอนนี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>กลับไปก่อนขั้นตอนนี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>แผนที่ตามที่เป็นก่อนขั้นตอนนี้: ตัวกรอง สไตล์ และเลเยอร์ที่เปลี่ยนไปนับแต่นั้นจะย้อนกลับ เป็นขั้นตอนใหม่ในประวัติ ซึ่ง «เลิกทำ» ที่นี่สามารถยกเลิกได้</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

@@ -299,6 +299,11 @@ Apakah Anda setuju?</translation>
         <translation>Tidak ada yang bisa dipulihkan.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agen sedang bekerja: harap tunggu hingga selesai.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Membaca filter yang aktif</translation>
@@ -1104,6 +1109,26 @@ Apakah Anda setuju?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>{} langkah sebelumnya tetap ada, dan dapat diurungkan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Penyedia tidak dapat dijangkau, mencoba lagi dalam {} detik…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Penyedia sedang sibuk, mencoba lagi dalam {} detik…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Permintaan berhenti di tengah jalan. Langkah yang sudah selesai, yang tetap di tempatnya (Urungkan mengembalikannya): {}. Minta agen untuk melanjutkan saat Anda siap.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Berhenti di tengah jalan. Langkah yang sudah selesai, yang tetap di tempatnya (Urungkan mengembalikannya): {}. Minta agen untuk melanjutkan jika Anda menginginkan sisanya.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Sematkan peta sebelum langkah ini</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Kembali ke sebelum langkah ini</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Peta seperti sebelum langkah ini: filter, gaya, dan lapisan yang diubah sejak itu dikembalikan. Langkah baru dalam riwayat, yang dibatalkan oleh Urungkan di sini.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

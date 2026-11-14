@@ -299,6 +299,11 @@ Quý vị có đồng ý không?</translation>
         <translation>Không có gì để khôi phục.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Tác tử đang làm việc: vui lòng chờ đến khi hoàn tất.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Đang đọc các bộ lọc đang hoạt động</translation>
@@ -1104,6 +1109,26 @@ Bạn có đồng ý không?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>{} bước trước đó được giữ lại và có thể hoàn tác.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Không thể kết nối với nhà cung cấp, sẽ thử lại sau {} giây…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Nhà cung cấp đang bận, sẽ thử lại sau {} giây…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Yêu cầu đã dừng giữa chừng. Các bước đã thực hiện, vẫn được giữ nguyên (Hoàn tác sẽ hoàn lại chúng): {}. Hãy yêu cầu tác tử tiếp tục khi bạn sẵn sàng.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Đã dừng giữa chừng. Các bước đã thực hiện, vẫn được giữ nguyên (Hoàn tác sẽ hoàn lại chúng): {}. Hãy yêu cầu tác tử tiếp tục nếu bạn muốn phần còn lại.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Ghim bản đồ trước bước này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Quay lại trước bước này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Bản đồ như trước bước này: các bộ lọc, kiểu và lớp đã thay đổi kể từ đó sẽ được hoàn lại. Một bước mới trong lịch sử, mà Hoàn tác tại đây có thể hoàn tác.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

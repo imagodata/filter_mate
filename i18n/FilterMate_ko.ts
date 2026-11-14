@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>복원할 항목이 없습니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>에이전트가 작업 중입니다. 끝날 때까지 기다려 주세요.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>활성 필터 읽는 중</translation>
@@ -1104,6 +1109,26 @@ Do you agree?</source>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>이전 {}단계는 유지되며 실행 취소할 수 있습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>제공자에 연결할 수 없습니다. {}초 후 다시 시도합니다…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>제공자가 바쁩니다. {}초 후 다시 시도합니다…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>요청이 도중에 중지되었습니다. 이미 완료된 단계는 그대로 유지됩니다(실행 취소로 되돌릴 수 있습니다): {}. 준비되면 에이전트에게 계속하도록 요청하세요.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>도중에 중지되었습니다. 이미 완료된 단계는 그대로 유지됩니다(실행 취소로 되돌릴 수 있습니다): {}. 나머지가 필요하면 에이전트에게 계속하도록 요청하세요.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>이 단계 이전의 지도 고정</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>이 단계 이전 상태로 되돌리기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>이 단계 이전의 지도입니다. 그 이후 변경된 필터, 스타일, 레이어가 되돌려집니다. 기록의 새 단계로 추가되며, 여기서 실행 취소로 다시 되돌릴 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

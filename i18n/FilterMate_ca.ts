@@ -299,6 +299,11 @@ Hi esteu d'acord?</translation>
         <translation>Res a restaurar.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>L'agent està treballant: espereu que acabi.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lectura dels filtres actius</translation>
@@ -1104,6 +1109,26 @@ Hi esteu d'acord?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Els {} passos anteriors es mantenen i es poden desfer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>No s'ha pogut accedir al proveïdor, nou intent d'aquí a {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>El proveïdor està ocupat, nou intent d'aquí a {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>La petició s'ha aturat a mig camí. Passos ja fets, que es mantenen (Desfés els desfà): {}. Demaneu a l'agent que continuï quan estigueu a punt.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Aturat a mig camí. Passos ja fets, que es mantenen (Desfés els desfà): {}. Demaneu a l'agent que continuï si voleu la resta.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixa el mapa d'abans d'aquest pas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Tornar a abans d'aquest pas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>El mapa tal com era abans d'aquest pas: els filtres, els estils i les capes canviats des d'aleshores tornen enrere. Un pas nou de l'historial, que Desfés pot desfer aquí.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

@@ -20,6 +20,16 @@ from ...core.agent.providers.base import HttpRequest, error_from_response
 logger = logging.getLogger("FilterMate.agent")
 MAX_ERROR_BODY = 64 * 1024
 IDLE_TIMEOUT_MS = 180_000
+# Failures of the network that may pass by themselves: the chat sends the request again (core/agent/chat_engine.py).
+# Not a refused connection (a local server not started), an unknown host or a TLS error: those wait for the user. By
+# name, so that one missing from a build of Qt is left out rather than breaking the import.
+_TRANSIENT_ERRORS = ("RemoteHostClosedError", "TimeoutError", "TemporaryNetworkFailureError",
+                     "NetworkSessionFailedError", "ProxyConnectionClosedError", "ProxyTimeoutError",
+                     "UnknownNetworkError")
+
+
+def _transient(error) -> bool:
+    return any(error == getattr(QNetworkReply.NetworkError, name, None) for name in _TRANSIENT_ERRORS)
 
 
 class QtStreamingRequest(QObject):
@@ -135,7 +145,8 @@ class QtStreamingRequest(QObject):
             self._fail(ProviderError(ERROR_NETWORK, "QGIS stopped waiting for the provider. A slow model may need a "
                                                     "longer network timeout in the options of QGIS."))
         elif self._reply.error() != QNetworkReply.NetworkError.NoError and status is None:
-            self._fail(ProviderError(ERROR_NETWORK, self._reply.errorString()))
+            self._fail(ProviderError(ERROR_NETWORK, self._reply.errorString(),
+                                     transient=_transient(self._reply.error())))
         else:
             self._feed(bytes(self._reply.readAll()), closing=True)
             self._fail(ProviderError(ERROR_STREAM, "The response ended without a complete turn."))

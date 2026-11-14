@@ -299,6 +299,11 @@ Se strinjate?</translation>
         <translation>Ni česa obnoviti.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agent dela: počakajte, da konča.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Branje aktivnih filtrov</translation>
@@ -1104,6 +1109,26 @@ Se strinjate?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Prejšnjih {} korakov ostane in jih je mogoče razveljaviti.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ponudnika ni bilo mogoče doseči, ponoven poskus čez {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ponudnik je zaseden, ponoven poskus čez {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Zahteva se je ustavila na pol poti. Že opravljeni koraki, ki ostanejo na mestu (Razveljavi jih vrne nazaj): {}. Agenta prosite, naj nadaljuje, ko boste pripravljeni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Ustavljeno na pol poti. Že opravljeni koraki, ki ostanejo na mestu (Razveljavi jih vrne nazaj): {}. Agenta prosite, naj nadaljuje, če želite preostanek.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Pripni zemljevid pred tem korakom</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Nazaj na stanje pred tem korakom</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Zemljevid, kakršen je bil pred tem korakom: filtri, slogi in plasti, spremenjeni od takrat, se povrnejo. Nov korak zgodovine, ki ga Razveljavi tukaj razveljavi.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

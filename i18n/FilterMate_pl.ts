@@ -299,6 +299,11 @@ Czy wyraża Pan/Pani zgodę?</translation>
         <translation>Nie ma czego przywrócić.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agent pracuje: poczekaj, aż skończy.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Odczyt aktywnych filtrów</translation>
@@ -1104,6 +1109,26 @@ Czy się zgadzasz?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Poprzednie {} kroków zostaje i można je cofnąć.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Nie udało się połączyć z dostawcą, ponowna próba za {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Dostawca jest zajęty, ponowna próba za {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Żądanie zatrzymało się w połowie. Kroki już wykonane, które pozostają na miejscu (Cofnij je wycofa): {}. Poproś agenta, aby kontynuował, gdy będziesz gotowy.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Zatrzymano w połowie. Kroki już wykonane, które pozostają na miejscu (Cofnij je wycofa): {}. Poproś agenta, aby kontynuował, jeśli chcesz resztę.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Przypnij mapę sprzed tego kroku</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Wróć do stanu sprzed tego kroku</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Mapa taka, jaka była przed tym krokiem: filtry, style i warstwy zmienione od tego czasu zostają przywrócone. Nowy krok historii, który Cofnij może tutaj cofnąć.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

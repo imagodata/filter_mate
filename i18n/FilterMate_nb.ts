@@ -299,6 +299,11 @@ Er du enig?</translation>
         <translation>Ingenting å gjenopprette.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agenten jobber: vent til den er ferdig.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Leser de aktive filtrene</translation>
@@ -1104,6 +1109,26 @@ Er du enig?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>De {} foregående trinnene blir stående, og kan angres.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Leverandøren kunne ikke nås, prøver på nytt om {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Leverandøren er opptatt, prøver på nytt om {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Forespørselen stoppet underveis. Trinn som allerede er utført, og som blir stående (Angre tar dem tilbake): {}. Be agenten om å fortsette når du er klar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Stoppet underveis. Trinn som allerede er utført, og som blir stående (Angre tar dem tilbake): {}. Be agenten om å fortsette hvis du vil ha resten.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fest kartet før dette trinnet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Gå tilbake til før dette trinnet</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Kartet slik det var før dette trinnet: filtrene, stilene og lagene som er endret siden, rulles tilbake. Et nytt trinn i historikken, som Angre tar tilbake her.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

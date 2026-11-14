@@ -299,6 +299,11 @@ Onaylıyor musunuz?</translation>
         <translation>Geri yüklenecek bir şey yok.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Aracı çalışıyor: bitmesini bekleyin.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Etkin filtreler okunuyor</translation>
@@ -1104,6 +1109,26 @@ Onaylıyor musunuz?</translation>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="651"/>
         <source>The {} steps before stay, and can be undone.</source>
         <translation>Önceki {} adım kalır ve geri alınabilir.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Sağlayıcıya ulaşılamadı, {} sn içinde yeniden denenecek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Sağlayıcı meşgul, {} sn içinde yeniden denenecek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>İstek yarıda durdu. Zaten yapılmış olan ve yerinde kalan adımlar (Geri al bunları geri alır): {}. Hazır olduğunuzda aracıdan devam etmesini isteyin.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Yarıda durdu. Zaten yapılmış olan ve yerinde kalan adımlar (Geri al bunları geri alır): {}. Geri kalanı isterseniz aracıdan devam etmesini isteyin.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
@@ -5023,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Bu adımdan önceki haritayı sabitle</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Bu adımdan önceye dön</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Bu adımdan önceki haliyle harita: o zamandan beri değişen filtreler, stiller ve katmanlar geri alınır. Geçmişte yeni bir adım olur; burada Geri al ile geri alınabilir.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

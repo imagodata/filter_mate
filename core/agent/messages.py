@@ -117,6 +117,8 @@ class ProviderError:
     message: str
     status: Optional[int] = None
     retry_after: Optional[float] = None
+    # A failure of the network that may pass by itself (a connection reset, a timeout): the chat tries again.
+    transient: bool = False
 
 
 @dataclass(frozen=True)
