@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from ...core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
+from ..qgis.feature_count import exact_feature_count, features_to_read
 from .operations import layer_kind, resolve_layer
 
 logger = logging.getLogger('FilterMate.Introspection')
@@ -256,8 +257,8 @@ def _vector_details(layer) -> Dict[str, Any]:
     fields = [{'name': item.name(), 'type': item.typeName(), 'alias': item.alias() or '',
                'filterable': item.name().lower() in stored}
               for item in list(layer.fields())[:MAX_FIELDS]]
-    count = _safe(layer.featureCount, -1)
-    return {'fields': fields, 'feature_count': max(count if isinstance(count, int) else -1, -1),
+    count = _safe(lambda: exact_feature_count(layer))  # featureCount() of a filtered GeoPackage can ignore the filter
+    return {'fields': fields, 'feature_count': -1 if count is None else count,
             'subset': _safe(layer.subsetString, '') or '', 'sql_dialect': sql_dialect(layer),
             'geometry_type': _safe(lambda: QgsWkbTypes.displayString(layer.wkbType()), '') or ''}
 
@@ -360,7 +361,9 @@ def preview_filter(reference: str, expression: str) -> Optional[Dict[str, Any]]:
     error = _provider_error(trial)
     if error or (count < 0 and not any(True for _ in trial.getFeatures(QgsFeatureRequest().setLimit(1)))):
         return {**answer, 'valid': False, 'error': error or 'the provider could not run this expression'}
-    return {**answer, 'valid': True, 'feature_count': count if count >= 0 else -1}
+    # featureCount() told whether it runs; of a filtered GeoPackage it can be the count of the whole table.
+    exact = exact_feature_count(trial)
+    return {**answer, 'valid': True, 'feature_count': -1 if exact is None else exact}
 
 
 def _unknown_names(layer, expression: str) -> List[str]:
@@ -567,7 +570,7 @@ def layer_statistics(reference: str, field_name: str = '', group_by: str = '', m
     if field_name and measure:
         raise ValueError('give a field or a measure, not both')
     _refuse_web_service(layer)
-    known = layer.selectedFeatureCount() if selected_only else (_safe(layer.featureCount, -1) or 0)
+    known = layer.selectedFeatureCount() if selected_only else (_safe(lambda: features_to_read(layer), -1) or 0)
     too_many = (f"'{layer.name()}' has more than {MAX_STAT_FEATURES} features to read: filter it or select "
                 "features first")
     if known > MAX_STAT_FEATURES:
@@ -629,6 +632,38 @@ def _attributes(feature, indexes: List[int], fields) -> Dict[str, Any]:
     return {fields.at(index).name(): _json_value(feature.attribute(index)) for index in indexes}
 
 
+def _shown_extent(layer):
+    """The extent of the map in the CRS of a web service layer: what its server was already asked to draw it.
+
+    A web service is never read as a whole: its server would send every feature, on the main thread and out of reach
+    of Stop. What the map shows is a request it has answered, a few features of it one more of the same size.
+
+    Raises:
+        ValueError: No map here, or a map that cannot be expressed in the CRS of the layer.
+    """
+    from qgis.core import QgsCoordinateTransform, QgsCsException, QgsProject
+    try:
+        from qgis.utils import iface
+        canvas = iface.mapCanvas() if iface is not None else None
+    except ImportError:
+        canvas = None
+    if canvas is None:
+        raise ValueError(f"'{layer.name()}' is a web service: it is read where the map shows it, and QGIS has no map here")
+    # Only what the map really drew was asked of the server: a layer unchecked, or out of its scale range, was not.
+    node = QgsProject.instance().layerTreeRoot().findLayer(layer.id())
+    if node is None or not node.isVisible() or not layer.isInScaleRange(canvas.scale()):
+        raise ValueError(f"'{layer.name()}' is a web service the map does not show now: check it in the layer tree "
+                         "and zoom to where its features are, then ask again")
+    try:
+        extent = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(),
+                                        QgsProject.instance()).transformBoundingBox(canvas.extent())
+    except QgsCsException:
+        raise ValueError(f"the map extent cannot be expressed in the CRS of '{layer.name()}'") from None
+    if not extent.isFinite() or extent.isEmpty():
+        raise ValueError(f"the map extent cannot be expressed in the CRS of '{layer.name()}'")
+    return extent
+
+
 def _field_indexes(layer, names: Optional[List[str]]) -> List[int]:
     """Indexes of ``names``, or of the first ``MAX_SAMPLE_FIELDS`` fields.
 
@@ -656,10 +691,17 @@ def sample_features(reference: str, limit: int = 5, fields: Optional[List[str]] 
     layer = _vector_layer(reference)
     if layer is None:
         return None
-    _refuse_web_service(layer)
     limit = max(1, min(int(limit), MAX_SAMPLE))
     indexes = _field_indexes(layer, fields)
-    request = _request(layer, indexes, geometry, selected_only, expression)
+    shown_only = _is_web_service(layer)
+    if shown_only:
+        if expression or selected_only:
+            raise ValueError(f"'{layer.name()}' is a web service: only a few of the features the map shows are read, "
+                             "without expression nor selection (filter the layer first, its server applies the filter)")
+        request = _request(layer, indexes, geometry, False)
+        request.setFilterRect(_shown_extent(layer))
+    else:
+        request = _request(layer, indexes, geometry, selected_only, expression)
     request.setLimit(limit + 1)  # one more tells whether there are others
     rows: List[Dict[str, Any]] = []
     for feature in layer.getFeatures(request):
@@ -670,7 +712,8 @@ def sample_features(reference: str, limit: int = 5, fields: Optional[List[str]] 
     crs = _safe(layer.crs)
     return {'layer_name': layer.name(), 'crs_authid': (_safe(crs.authid, '') if crs is not None else '') or '',
             'features': rows[:limit], 'truncated': len(rows) > limit,
-            'fields_truncated': not fields and layer.fields().count() > MAX_SAMPLE_FIELDS}
+            'fields_truncated': not fields and layer.fields().count() > MAX_SAMPLE_FIELDS,
+            'scope': 'the features the map shows' if shown_only else 'the layer'}
 
 
 def _identify_layers(references: Optional[List[str]]) -> List[Any]:

@@ -14,7 +14,10 @@ All of this changes how the project shows, never its data, and is undone with th
 ## Styles and labels
 
 - set_layer_style draws a layer anew: one color, a color per value, graduated classes (five by default), a raster
-  color ramp. set_labels writes a field on the map, or turns the labels off.
+  color ramp, or rules: a color per condition ("population" > 10000 in red, the others in grey with a rule whose
+  expression is empty), for what a single field does not say. set_labels writes a field on the map, or an expression
+  that joins or formats values ("nom" || ' (' || "population" || ')'), and turns the labels off. With
+  visible_from_scale the labels only show once the map is close enough (50000: from 1:50 000).
 - After a style the user will judge by eye, look with view_map when it is offered.
 
 ## A background under the map

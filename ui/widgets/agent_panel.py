@@ -25,7 +25,7 @@ from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
-    KIND_CKAN, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
 )
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
@@ -260,6 +260,7 @@ class AgentPanel(QFrame):
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
     compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
+    card_compare_requested = pyqtSignal(object)  # the compare_key of a card of the thread (the controller set it)
     recipe_save_requested = pyqtSignal()
     recipe_run_requested = pyqtSignal(str)
     recipe_remove_requested = pyqtSignal(str)
@@ -289,7 +290,8 @@ class AgentPanel(QFrame):
         welcome.setMinimumHeight(THREAD_MIN_HEIGHT)
         welcome.setWidget(self._build_welcome())
         self.stack.addWidget(welcome)
-        self.thread = AgentThread(lambda: tokens(self._dark()), self._dark, self.undo_requested.emit, self)
+        self.thread = AgentThread(lambda: tokens(self._dark()), self._dark, self.undo_requested.emit, self,
+                                  self.card_compare_requested.emit)
         self.thread.setMinimumHeight(THREAD_MIN_HEIGHT)
         self.stack.addWidget(self.thread)
         self.stack.addWidget(self._build_history())
@@ -564,9 +566,11 @@ class AgentPanel(QFrame):
         self.compare_button.setEnabled(rank is not None and not self._working)
 
     def set_can_compare(self, possible: bool) -> None:
-        """Offer Compare on the turns and steps: only when the dock has the history of the project."""
+        """Offer Compare on the turns and steps, and on the cards of the thread: only when the dock has the history of
+        the project."""
         self._can_compare = bool(possible)
         self._on_turn_selected()
+        self.thread.set_compare_possible(self._can_compare and not self._working)
 
     def _compare_selected(self) -> None:
         items = self.history_list.selectedItems()
@@ -821,6 +825,7 @@ class AgentPanel(QFrame):
         self.history_undo_button.setEnabled(self.history_undo_button.isEnabled() and not working)
         self.history_redo_button.setEnabled(self.history_redo_button.isEnabled() and not working)
         self._on_turn_selected()
+        self.thread.set_compare_possible(self._can_compare and not working)  # the map changes under the comparison
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
         self.send_button.setEnabled(self._ready or working)
         self.thread.set_hint(_tr("You can already type the next request.") if working else "")
@@ -887,14 +892,16 @@ class AgentPanel(QFrame):
         self._in_answer = False
 
     def add_action(self, text: str, succeeded: bool = True, detail: str = "", count: str = "",
-                   strong: Sequence[str] = ()) -> None:
-        """Something the agent changed, or failed to change, in a card; ``count`` is what it kept (``12 / 586``).
+                   strong: Sequence[str] = ()):
+        """Something the agent changed, or failed to change, in a card (returned); ``count`` is what it kept
+        (``12 / 586``).
 
         ``strong``: the layer names of ``text``, shown in bold.
         """
         self._show_conversation()
-        self.thread.add_card(text, succeeded, detail, count, strong)
+        card = self.thread.add_card(text, succeeded, detail, count, strong)
         self._in_answer = False
+        return card
 
     def show_error(self, title: str, detail: str = "", offer_settings: bool = False) -> None:
         """A request that failed, as a card in the thread (mockup: Error board)."""
@@ -954,8 +961,10 @@ class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
     def __init__(self, values, target_of, parent=None, tester=None, mcp_error="",
-                 project_layers=(), tools=(), provider_tester=None) -> None:
+                 project_layers=(), tools=(), provider_tester=None, databases=()) -> None:
         super().__init__(parent)
+        # The PostgreSQL connections of QGIS, as sources: read from QGIS, never added nor removed here.
+        self._databases = tuple(databases)
         # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
         self._tools = list(tools)
         # (layer id, name, protected) of the open project, for the protected layers of the Autonomy tab.
@@ -1464,10 +1473,11 @@ class AgentSettingsDialog(QDialog):
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
-        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC, KIND_XYZ, KIND_GEOCODER)),
+        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC, KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)),
                   (_tr("Satellite imagery"), lambda source: source.kind == KIND_STAC),
                   (_tr("Basemaps"), lambda source: source.kind == KIND_XYZ),
                   (_tr("Place search"), lambda source: source.kind == KIND_GEOCODER),
+                  (_tr("Databases of QGIS"), lambda source: source.kind == KIND_DATABASE),
                   (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
         for title, belongs in groups:
             group = QTreeWidgetItem(self.sources_tree, [title.upper()])
@@ -1477,7 +1487,11 @@ class AgentSettingsDialog(QDialog):
             font.setPointSizeF(max(font.pointSizeF() - 1, 7))
             group.setFont(0, font)
             group.setForeground(0, QColor(tokens(self.palette().window().color().lightness() < 128)["fm_text_muted"]))
-            for source in all_sources(self._custom):
+            members = [source for source in self._listed() if belongs(source)]
+            if not members and title == _tr("Databases of QGIS"):
+                self.sources_tree.takeTopLevelItem(self.sources_tree.indexOfTopLevelItem(group))
+                continue  # QGIS keeps no PostgreSQL connection: no empty group
+            for source in members:
                 if belongs(source):
                     self._source_item(group, source, source.id in enabled_ids)
         self.sources_tree.expandAll()
@@ -1496,7 +1510,11 @@ class AgentSettingsDialog(QDialog):
     def _selected_source(self):
         item = self.sources_tree.currentItem()
         identifier = item.data(0, _TURN_ROLE) if item is not None else None
-        return next((source for source in all_sources(self._custom) if source.id == identifier), None)
+        return next((source for source in self._listed() if source.id == identifier), None)
+
+    def _listed(self):
+        """Every source of the tab: those of the plugin, those the user added, the databases of QGIS."""
+        return all_sources(self._custom) + self._databases
 
     def _on_source_selected(self) -> None:
         source = self._selected_source()

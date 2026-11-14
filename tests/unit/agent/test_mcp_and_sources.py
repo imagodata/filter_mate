@@ -14,7 +14,7 @@ from core.agent.open_data import (
     parse_stac_items, reads_in_place, remote_file, resolve_platform, stac_search_body, valid_day,
 )
 from core.agent.sources import (
-    BUILT_IN, KIND_MCP, all_sources, custom_from_json, custom_to_json, describe_enabled, enabled,
+    BUILT_IN, KIND_MCP, all_sources, custom_from_json, database_sources, custom_to_json, describe_enabled, enabled,
     make_source, model_name, platform_aliases, platform_domains, platform_name,
 )
 
@@ -190,13 +190,27 @@ class TestSources:
 
     def test_described_for_the_model(self):
         names = describe_enabled(enabled(all_sources([]), ("datagouv", "datagouv_mcp")))
-        assert names == {"platforms": ["datagouv"], "geocoders": [], "basemaps": [], "connectors": ["data.gouv.fr (MCP)"]}
+        assert names == {"platforms": ["datagouv"], "geocoders": [], "basemaps": [], "databases": [],
+                         "connectors": ["data.gouv.fr (MCP)"]}
 
     def test_a_basemap_is_named_apart_from_the_platforms(self):
         mine = make_source("https://tiles.example.org/{z}/{x}/{y}.png", "xyz")
         names = describe_enabled(enabled(all_sources([mine]), ("carto_light", mine.id)))
         assert names == {"platforms": [], "geocoders": [], "basemaps": ["carto_light", f"{mine.id} (tiles.example.org)"],
-                         "connectors": []}
+                         "databases": [], "connectors": []}
+
+    def test_a_database_of_qgis_is_a_source_named_by_an_id(self):
+        """Its name is the user's; its address and its credentials stay in QGIS."""
+        first, second = database_sources(["Prod Cadastre (Lyon)", "prod cadastre (lyon)"])
+        assert first.id != second.id and first.id.startswith("db_prod_cadastre_lyon_") and first.address == "Prod Cadastre (Lyon)"
+        assert first.kind == "database" and not first.is_connector and database_sources([]) == ()
+        here, there = database_sources([("prod", "a1b2"), ("prod", "c3d4")])  # made again, to another server
+        assert here.id != there.id and here.title == there.title == "prod"
+        names = describe_enabled([first])
+        assert names["databases"] == [f"{first.id} (Prod Cadastre (Lyon))"] and names["platforms"] == []
+        # Never among the platforms: the name of a connection is the user's text, a comma in it would add one.
+        assert platform_domains(database_sources(["a, evil.example.org:ckan"]) + (first,)) == ""
+        assert platform_aliases([first]) == {}
 
     def test_image_services_are_platforms_and_geocoders_are_named_apart(self):
         names = describe_enabled(enabled(all_sources([]), ("ign_wmts", "ign_wms", "ign_geocoder", "photon")))

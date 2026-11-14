@@ -4,7 +4,7 @@
 Measured first (docs/internal/plans/COMPARE_MODE_SPIKE_2026-11-12.md): a clone of a layer, never added to the
 project, draws the state before (its former subset, the source a derived raster / point cloud replaced, its former
 style); the canvas keeps drawing the layers as they are; a canvas item paints the "before" image clipped left of the
-line. The before image draws the layers of the canvas, less those not on the map before (added since, or hidden
+line (above it, when the line goes across the map). The before image draws the layers of the canvas, less those not on the map before (added since, or hidden
 then), plus those hidden since, at their place in the layer tree (``core/domain/compare_states.BeforeMap``).
 The before image costs a render of the canvas layers (two seconds for a dense layer at the scale of a city), so it is
 rendered in the background, for the extent shown, again after each pan or zoom, the older render cancelled.
@@ -261,7 +261,11 @@ class MapWatch(QObject):
 class SwipeItem(QgsMapCanvasItem):
     """The "before" image over its map extent, left of the swipe line; the line itself, a sign while it renders, and
     what each side shows, written at the top on both sides of the line. A line fixed by a click is thicker, with a
-    knob under the labels, and the label on its right says so (``fixed_note``)."""
+    knob under the labels, and the label on its right says so (``fixed_note``).
+
+    ``horizontal``: the line across the map, the map before above it, the map now below it; the labels at the left of
+    the canvas, above and below the line, the knob of a line fixed right of them. ``fraction`` is then the height of
+    the line, not its abscissa."""
 
     def __init__(self, canvas) -> None:
         super().__init__(canvas)
@@ -274,6 +278,7 @@ class SwipeItem(QgsMapCanvasItem):
         self.labels: Tuple[str, str] = ("", "")
         self.frozen = False  # fixed by a click: the line no longer follows the mouse
         self.fixed_note = ""  # added to the label right of a line fixed
+        self.horizontal = False
         self._font = QFont(canvas.font())
         self._metrics = QFontMetricsF(self._font)
         self.setZValue(5)
@@ -302,40 +307,59 @@ class SwipeItem(QgsMapCanvasItem):
         self.frozen = bool(frozen)
         self.update()
 
+    def set_horizontal(self, horizontal: bool) -> None:
+        self.prepareGeometryChange()  # the line, the labels and the knob go elsewhere
+        self.horizontal = bool(horizontal)
+        self.update()
+
+    def line_position(self) -> float:
+        """Where the line is, in the coordinates of the item: its abscissa, or its ordinate when horizontal."""
+        return (self._size.height() if self.horizontal else self._size.width()) * self.fraction
+
     def shown_labels(self) -> Tuple[str, str]:
-        """The labels as drawn: the one on the right says when the line is fixed."""
+        """The labels as drawn: the one on the right (below a horizontal line) says when the line is fixed."""
         note = self.fixed_note if self.frozen else ""
         return self.labels[0], " · ".join(text for text in (self.labels[1], note) if text)
 
     def label_rects(self) -> Tuple[QRectF, QRectF]:
-        """Where the labels are drawn, in the coordinates of the item: left of the line, right of it (empty rectangle:
-        no label). At the top of the canvas, wherever the map moved the item since its image."""
+        """Where the labels are drawn, in the coordinates of the item: before the line (left of it, or above it when
+        horizontal), after it (empty rectangle: no label). At the top of the canvas (at its left when horizontal),
+        wherever the map moved the item since its image."""
         metrics = self._metrics
-        line = self._size.width() * self.fraction
-        top = LABEL_GAP - self.pos().y()
+        line = self.line_position()
         height = metrics.height() + LABEL_PADDING
         rects = []
-        for text, left in zip(self.shown_labels(), (True, False)):
+        for text, before in zip(self.shown_labels(), (True, False)):
             if not text:
                 rects.append(QRectF())
                 continue
             width = metrics.horizontalAdvance(text) + 2 * LABEL_PADDING
-            rects.append(QRectF(line - LABEL_GAP - width if left else line + LABEL_GAP, top, width, height))
+            if self.horizontal:
+                rects.append(QRectF(LABEL_GAP - self.pos().x(), line - LABEL_GAP - height if before
+                                    else line + LABEL_GAP, width, height))
+            else:
+                rects.append(QRectF(line - LABEL_GAP - width if before else line + LABEL_GAP,
+                                    LABEL_GAP - self.pos().y(), width, height))
         return rects[0], rects[1]
 
     def handle_rect(self) -> QRectF:
-        """The knob of a line fixed, under the labels (empty rectangle: the line follows the mouse)."""
+        """The knob of a line fixed, on the line past the labels: under them, or right of them when horizontal (empty
+        rectangle: the line follows the mouse)."""
         if not self.frozen:
             return QRectF()
+        line = self.line_position()
+        if self.horizontal:
+            labels = [rect.width() for rect in self.label_rects() if not rect.isEmpty()]
+            left = LABEL_GAP - self.pos().x() + max(labels, default=0.0) + LABEL_GAP
+            return QRectF(left, line - HANDLE_RADIUS, 2 * HANDLE_RADIUS, 2 * HANDLE_RADIUS)
         top = LABEL_GAP - self.pos().y() + self._metrics.height() + LABEL_PADDING + LABEL_GAP
-        line = self._size.width() * self.fraction
         return QRectF(line - HANDLE_RADIUS, top, 2 * HANDLE_RADIUS, 2 * HANDLE_RADIUS)
 
     def boundingRect(self):  # noqa: N802 - Qt override
         """The image, the line (its pen beyond the edges), the labels and the knob: nothing drawn outside, no trail
         left."""
         pen = 3.0 if self.frozen else 2.0  # half the width of the line, rounded up
-        bounds = self._size.adjusted(-pen, 0.0, pen, 0.0)
+        bounds = self._size.adjusted(0.0, -pen, 0.0, pen) if self.horizontal else self._size.adjusted(-pen, 0.0, pen, 0.0)
         for rect in self.label_rects():
             if not rect.isEmpty():
                 bounds = bounds.united(rect)
@@ -359,19 +383,23 @@ class SwipeItem(QgsMapCanvasItem):
 
     def paint(self, painter, *_args):
         width, height = self._size.width(), self._size.height()
-        line = width * self.fraction
+        line = self.line_position()
+        if self.horizontal:  # the map before above the line
+            before, ends = QRectF(0.0, 0.0, width, line), (QPointF(0.0, line), QPointF(width, line))
+        else:  # the map before left of the line
+            before, ends = QRectF(0.0, 0.0, line, height), (QPointF(line, 0.0), QPointF(line, height))
         if self._image is not None and not self.busy:
             painter.save()
-            painter.setClipRect(QRectF(0.0, 0.0, line, height))
+            painter.setClipRect(before)
             painter.drawImage(self._size, self._image)
             painter.restore()
         pen = QPen(QColor(255, 255, 255, 230), 5 if self.frozen else 3)
         painter.setPen(pen)
-        painter.drawLine(QPointF(line, 0.0), QPointF(line, height))
+        painter.drawLine(*ends)
         pen = QPen(QColor(40, 40, 40, 220), 2 if self.frozen else 1,
                    Qt.PenStyle.DashLine if self.busy else Qt.PenStyle.SolidLine)
         painter.setPen(pen)
-        painter.drawLine(QPointF(line, 0.0), QPointF(line, height))
+        painter.drawLine(*ends)
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         handle = self.handle_rect()
@@ -393,8 +421,9 @@ class SwipeItem(QgsMapCanvasItem):
 
 
 class SwipeTool(QgsMapTool):
-    """The swipe line follows the mouse over the map; a left click fixes it where it is, another frees it. The wheel
-    and the middle button still move the map: the canvas handles them whatever the tool."""
+    """The swipe line follows the mouse over the map (its abscissa, or its height for a horizontal line); a left click
+    fixes it where it is, another frees it. The wheel and the middle button still move the map: the canvas handles
+    them whatever the tool."""
 
     CLICK_SLACK = 4  # pixels the mouse may move between press and release and still be a click
 
@@ -404,9 +433,12 @@ class SwipeTool(QgsMapTool):
         self._pressed = None  # where the left button went down on the map; None: not down here
 
     def _follow(self, event) -> None:
-        width = self.canvas().width()
-        if width > 0 and self._item is not None:
-            self._item.set_fraction(event.pos().x() / width)
+        if self._item is None:
+            return
+        canvas = self.canvas()
+        size, at = (canvas.height(), event.pos().y()) if self._item.horizontal else (canvas.width(), event.pos().x())
+        if size > 0:
+            self._item.set_fraction(at / size)
 
     def canvasMoveEvent(self, event):  # noqa: N802 - Qt override
         if self._item is not None and not self._item.frozen:
@@ -452,12 +484,19 @@ class CompareSession(QObject):
         self.present: Tuple[str, ...] = ()  # layers hidden now, on the map before
         self.refused: List[str] = []  # names of the layers whose state before could not be drawn
         self.fixed_note = ""  # what the label right of the line adds once a click fixed it
+        self.horizontal = False  # the line across the map: before above it, now below it
         self._keep = False  # a pin: the comparison waits for a change instead of stopping
         self.renders = 0  # before images done, for the checks
 
     @property
     def active(self) -> bool:
         return self.item is not None
+
+    def set_horizontal(self, horizontal: bool) -> None:
+        """The line across the map or down it, at once for a comparison under way."""
+        self.horizontal = bool(horizontal)
+        if self.item is not None:
+            self.item.set_horizontal(self.horizontal)
 
     def start(self, before: Union[BeforeMap, Iterable[BeforeState]], layers: Dict[str, QgsMapLayer],
               keep: bool = False, labels: Sequence[str] = ("", "")) -> int:
@@ -489,6 +528,7 @@ class CompareSession(QObject):
         if self.item is None:
             self.item = SwipeItem(self.canvas)  # a new line: it follows the mouse again
             self.item.fixed_note = self.fixed_note
+            self.item.horizontal = self.horizontal
             self.tool = SwipeTool(self.canvas, self.item)
             self._previous_tool = self.canvas.mapTool()
             self.canvas.setMapTool(self.tool)

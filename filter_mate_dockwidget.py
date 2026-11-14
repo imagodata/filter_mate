@@ -7661,9 +7661,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         previous_task = app_tasks.get(task_name) if isinstance(app_tasks, dict) else None
         # Undo / Redo: the app may refuse the step too (nothing to undo, the last entry is another layer's).
         history = getattr(owner, 'history_manager', None) if owner is not None else None
-        step = None
+        step = other = None
         if task_name in ('undo', 'redo') and history is not None:
             step = history.peek_undo() if task_name == 'undo' else history.peek_redo()
+            other = history.peek_redo() if task_name == 'undo' else history.peek_undo()
         self.launchingTask.emit(task_name)
         if task_name in ('filter', 'unfilter', 'reset') and isinstance(app_tasks, dict) \
                 and app_tasks.get(task_name) is previous_task:
@@ -7671,11 +7672,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             return
         if task_name in ('undo', 'redo'):
             # The undo steps of the targets pair with the filters of this source: they follow a step the app
-            # took on an entry of this source only (a step taken moves the entry to the other stack).
+            # took on an entry of this source only (a step taken puts the entry on top of the other stack).
+            # 2026-11-14: without the layers to filter, the step of an entry of several layers is the part of the
+            # current layer alone, a new entry; the part of a target, or what is left of an entry whose source part
+            # was undone, is no run of that layer (ran_from).
             taken = None
             if history is not None:
                 taken = history.peek_redo() if task_name == 'undo' else history.peek_undo()
-            if step is None or taken is not step or not step.layer_ids or step.layer_ids[0] != source_layer.id():
+            if step is None or taken is None or taken is other or not taken.ran_from(source_layer.id()):
                 logger.info(f"launchTaskEvent: no vector {task_name} of this source, raster / point cloud targets left as they are")
                 return
         if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):

@@ -2,8 +2,9 @@
 """Compare mode (adapters/qgis/compare_swipe.py) in a real QGIS: before left of the swipe line, after on its right.
 
 The map before a filter, a style, a layer shown, hidden or added (a turn of the agent, a pin), the labels by the line,
-the line fixed by a click (the map still zoomed by the wheel and panned by the middle button), and the button of the
-action bar with its pin (ui/controllers/compare_controller.py) on a dock made for the check.
+the line fixed by a click (the map still zoomed by the wheel and panned by the middle button), the line across the map
+(before above it), and the button of the action bar with its pin (ui/controllers/compare_controller.py) on a dock made
+for the check, the pin taken by itself before a request of the agent included (timed on a hundred layers).
 
     docker run --rm --init --network none -v "$PWD:/src:ro" -e QT_QPA_PLATFORM=offscreen qgis/qgis:stable \\
         python3 /src/tests/qgis_headless/check_compare.py
@@ -144,6 +145,7 @@ def main():
                             Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier)
     session.tool.canvasMoveEvent(move)
     check("the line follows the mouse", abs(session.item.fraction - 0.75) < 0.01, session.item.fraction)
+    check_horizontal(canvas, session, before_everywhere, after_everywhere)
 
     renders = session.renders
     zoomed = QgsRectangle(full)
@@ -208,9 +210,90 @@ def main():
     check_map_before(project, canvas, fixtures, zones, session)
     check_reading(project, zones)
     check_button(project, canvas, fixtures, zones)
+    check_automatic_pin(project, canvas, fixtures)
 
     print(f"{'ALL PASSED' if not FAILURES else str(len(FAILURES)) + ' FAILED'}", flush=True)
     os._exit(1 if FAILURES else 0)
+
+
+def coloured_rows(image, y0, y1):
+    """Sampled pixels of a band of rows that are neither white nor the line (the fill of the squares)."""
+    count = 0
+    for y in range(y0, y1, 6):
+        for x in range(10, image.width() - 10, 6):
+            colour = image.pixelColor(x, y)
+            if colour.rgb() != QColor("white").rgb() and colour.red() > colour.blue() + 40:
+                count += 1
+    return count
+
+
+def check_horizontal(canvas, session, before_everywhere, after_everywhere):
+    """The line across the map: the map before above it, now below it; the mouse moves it up and down, a click fixes
+    it there; the labels at the left of the canvas, above and below the line, the knob right of them, all inside the
+    bounds of the item. Back down the map, it is the line it was."""
+    item, tool = session.item, session.tool
+    height = canvas.height()
+
+    def at(x, y, kind=QEvent.Type.MouseMove, button=Qt.MouseButton.NoButton):
+        return QgsMapMouseEvent(canvas, kind, QPoint(x, y), button, button, Qt.KeyboardModifier.NoModifier)
+    session.set_horizontal(True)
+    check("horizontal: the line of the comparison under way turns at once", item.horizontal and session.horizontal)
+    tool.canvasMoveEvent(at(100, int(height * 0.75)))
+    check("horizontal: the line follows the height of the mouse", abs(item.fraction - 0.75) < 0.01, item.fraction)
+    item.set_fraction(0.5)
+    QgsApplication.processEvents()
+    image = grab(canvas)
+    middle = int(height * 0.5)
+    top, bottom = coloured_rows(image, 10, middle - 10), coloured_rows(image, middle + 10, height - 10)
+    check("horizontal: the map before above the line, the map now below it",
+          abs(top - coloured_rows(before_everywhere, 10, middle - 10)) <= 2
+          and abs(bottom - coloured_rows(after_everywhere, middle + 10, height - 10)) <= 2,
+          (top, coloured_rows(before_everywhere, 10, middle - 10), bottom,
+           coloured_rows(after_everywhere, middle + 10, height - 10)))
+    probe = min((image.pixelColor(int(canvas.width() * 0.75), y) for y in range(middle - 2, middle + 3)),
+                key=lambda colour: colour.red())  # its dark middle, wherever the pen rounds it
+    check("horizontal: the line drawn across the map", probe.red() < 90 and probe.green() < 90, probe.name())
+    if os.environ.get("FM_COMPARE_OUT"):
+        image.save(os.path.join(os.environ["FM_COMPARE_OUT"], "horizontal.png"))
+    item.set_labels("Before", "Now")
+    rect_before, rect_now = item.label_rects()
+    line = item.line_position()
+    bounds = item.boundingRect()
+    check("horizontal: before above the line, now below it, at the left of the canvas",
+          rect_before.bottom() < line < rect_now.top() and abs(rect_before.left() + item.pos().x() - 8.0) < 0.5
+          and abs(rect_now.left() - rect_before.left()) < 0.01 and bounds.contains(rect_before)
+          and bounds.contains(rect_now) and bounds.top() < 0 <= bounds.left() + 0.01, (rect_before, rect_now, line, bounds))
+    position = item.pos()
+    item.setPos(position.x() + 120, position.y())  # the map panned right since the image
+    shifted = item.label_rects()[0]
+    check("horizontal: the labels at the left of the canvas when the item moved right",
+          abs(shifted.left() + item.pos().x() - 8.0) < 0.5 and item.boundingRect().contains(shifted), shifted)
+    item.setPos(position)
+    item.fixed_note = "line fixed"
+    tool.canvasPressEvent(at(300, int(height * 0.25), QEvent.Type.MouseButtonPress, Qt.MouseButton.LeftButton))
+    tool.canvasReleaseEvent(at(300, int(height * 0.25), QEvent.Type.MouseButtonRelease, Qt.MouseButton.LeftButton))
+    tool.canvasMoveEvent(at(300, int(height * 0.8)))
+    handle = item.handle_rect()
+    rects = item.label_rects()
+    check("horizontal: a click fixes the line at that height, the knob on it right of the labels, inside the bounds",
+          item.frozen and abs(item.fraction - 0.25) < 0.01 and abs(handle.center().y() - item.line_position()) < 0.01
+          and handle.left() > max(rect.right() for rect in rects) and item.boundingRect().contains(handle)
+          and item.shown_labels() == ("Before", "Now · line fixed"), (item.fraction, handle, rects))
+    QgsApplication.processEvents()
+    image = grab(canvas)
+    centre = handle.center() + item.pos()
+    probe = image.pixelColor(int(centre.x()), int(centre.y()))
+    check("horizontal: a dark knob drawn on the line", probe.red() < 90 and probe.green() < 90 and probe.blue() < 90,
+          probe.name())
+    item.set_frozen(False)
+    session.set_horizontal(False)
+    tool.canvasMoveEvent(at(200, 100))
+    check("vertical again: the line follows the abscissa of the mouse, its labels at the top",
+          not item.horizontal and abs(item.fraction - 0.25) < 0.01 and item.label_rects()[0].right() < item.line_position()
+          and abs(item.label_rects()[0].top() + item.pos().y() - 8.0) < 0.5, (item.fraction, item.label_rects()))
+    item.set_labels("", "")
+    item.fixed_note = ""
+    item.set_fraction(0.75)
 
 
 def check_fixed_line(canvas, session, full):
@@ -292,6 +375,7 @@ def check_fixed_line(canvas, session, full):
 
 
 RED, BLUE, GREEN, YELLOW = QColor(220, 40, 40), QColor(40, 40, 220), QColor(40, 200, 40), QColor(240, 220, 0)
+MENU = ["Pin the current state", "Remove the pin", "Pin the map before each request of the agent", "", "Horizontal line"]
 
 
 def count(image, colour):
@@ -556,8 +640,7 @@ def check_button(project, canvas, fixtures, zones):
     QApplication.sendEvent(button, QContextMenuEvent(QContextMenuEvent.Reason.Mouse, point, button.mapToGlobal(point)))
     QgsApplication.processEvents()
     check("button: right-click when disabled opens its menu", controller.menu.isVisible()
-          and [action.text() for action in controller.menu.actions()] == ["Pin the current state", "Remove the pin"]
-          and not controller.unpin_action.isEnabled())
+          and [action.text() for action in controller.menu.actions()] == MENU and not controller.unpin_action.isEnabled())
     controller.pin_action.trigger()
     controller.menu.close()
     check("pin: kept, the button available and marked, its tooltip says when",
@@ -742,6 +825,113 @@ def check_button(project, canvas, fixtures, zones):
           changes == [True, False, True, True, False], changes)
     check("compare_pin without a pin: nothing", controller.compare_pin() == 0 and not session.active)
     controller.teardown()
+
+
+def check_automatic_pin(project, canvas, fixtures):
+    """The pin taken by itself before a request of the agent: on by default and kept in the settings, silent, said by
+    the line and the controller, replaced by the next one, never in place of a pin of the user; the line across the map
+    chosen in the same menu. Timed on a project of a hundred layers."""
+    from qgis.core import QgsPalLayerSettings, QgsSettings, QgsVectorLayerSimpleLabeling
+    import filter_mate.ui.controllers.compare_controller as compare_module
+    from filter_mate.ui.controllers.compare_controller import AUTO_PIN_KEY, HORIZONTAL_KEY, CompareController
+
+    QgsSettings().remove(AUTO_PIN_KEY)
+    QgsSettings().remove(HORIZONTAL_KEY)
+    dock = Dock(canvas)
+    dock.pushButton_action_undo_filter.setEnabled(False)
+    dock.show()
+    controller = CompareController(dock)
+    said = []
+    controller._say = said.append
+    button = dock.pushButton_action_compare
+    check("auto pin: on by default, the line down the map, both in the menu",
+          controller.auto_pin and controller.auto_pin_action.isChecked() and controller.auto_pin_action.isCheckable()
+          and not controller.horizontal and not controller.horizontal_action.isChecked()
+          and [action.text() for action in controller.menu.actions()] == MENU)
+    layer = squares(fixtures, "zones", RED)
+    project.addMapLayer(layer)
+    drawn(canvas)
+    state = controller.read_automatic_pin()
+    pinned = state is not None and controller.pin_automatic(state)
+    check("auto pin: the map read and pinned, silently, said automatic", pinned and controller.pinned is state
+          and controller.pinned_automatically and not said and button.isEnabled()
+          and layer.id() in [kept.layer_id for kept in state.layers], said)
+    button.click()
+    session = controller.session
+    label = session.item.labels[0] if session is not None and session.item is not None else ""
+    check("auto pin: the label of the line says it was taken before the request of the agent",
+          label.startswith("Pinned ") and label.endswith("(before the agent's request)"), label)
+    button.click()
+    following = controller.read_automatic_pin()
+    check("auto pin: the next one replaces it", following is not None and controller.pin_automatic(following)
+          and controller.pinned is following and controller.pinned_automatically)
+    said.clear()
+    mine = controller.pin()
+    check("auto pin: a pin of the user is not automatic, and never read over nor replaced",
+          mine is not None and not controller.pinned_automatically and controller.read_automatic_pin() is None
+          and not controller.pin_automatic(following) and controller.pinned is mine)
+    controller.unpin()
+    controller.auto_pin_action.trigger()
+    other_dock = Dock(canvas)
+    other = CompareController(other_dock)
+    check("auto pin: turned off from the menu, kept for the next sessions", not controller.auto_pin
+          and controller.read_automatic_pin() is None and not controller.pin_automatic(following)
+          and controller.pinned is None and not other.auto_pin and not other.auto_pin_action.isChecked())
+    other.teardown()
+    controller.auto_pin_action.trigger()
+
+    def unreadable(*_args):
+        raise KeyError("unreadable")
+    said.clear()
+    compare_module.map_state, readable = unreadable, compare_module.map_state
+    check("auto pin: a map that cannot be read pins nothing and says nothing (a line in the log)",
+          controller.auto_pin and controller.read_automatic_pin() is None and not said, said)
+    compare_module.map_state = readable
+
+    # The line across the map, from the menu: at once for a comparison under way, kept for the next sessions.
+    controller.pin()
+    button.click()
+    session = controller.session
+    controller.horizontal_action.trigger()
+    other_dock = Dock(canvas)
+    other = CompareController(other_dock)
+    check("horizontal line: from the menu, at once on the comparison under way, kept",
+          controller.horizontal and session.horizontal and session.item.horizontal and other.horizontal
+          and other.horizontal_action.isChecked())
+    other.teardown()
+    button.click()
+    button.click()
+    check("horizontal line: the next comparison starts across the map", session.item is not None and session.item.horizontal)
+    controller.horizontal_action.trigger()
+    check("horizontal line: back down the map", not controller.horizontal and not session.item.horizontal)
+    button.click()
+    controller.unpin()
+
+    # What the pin before a request costs: every layer of a project of a hundred, their styles exported.
+    many = []
+    for index in range(100):
+        extra = squares(fixtures, f"layer {index}", QColor((index * 37) % 255, 120, 200), "\"name\" LIKE 'east%'"
+                        if index % 2 else "")
+        if index % 3 == 0:
+            labels = QgsPalLayerSettings()
+            labels.fieldName = "name"
+            extra.setLabeling(QgsVectorLayerSimpleLabeling(labels))
+            extra.setLabelsEnabled(True)
+        many.append(extra)
+    project.addMapLayers(many)
+    timings = []
+    for _ in range(3):
+        started = time.perf_counter()
+        state = controller.read_automatic_pin()
+        timings.append(time.perf_counter() - started)
+    print(f"INFO pin before a request of the agent, {len(state.layers) if state else 0} layers: "
+          + ", ".join(f"{seconds * 1000:.0f} ms" for seconds in timings), flush=True)
+    check("auto pin: a project of a hundred layers read whole", state is not None and len(state.layers) >= 101
+          and all(kept.style for kept in state.layers), len(state.layers) if state else None)
+    project.removeMapLayers([extra.id() for extra in many] + [layer.id()])
+    controller.teardown()
+    QgsSettings().remove(AUTO_PIN_KEY)
+    QgsSettings().remove(HORIZONTAL_KEY)
 
 
 main()

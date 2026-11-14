@@ -125,7 +125,10 @@ Rules worth keeping:
   automation history: rasters and point clouds get their source back, a layer changed since is left alone, and the
   derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
 - **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
-- A conversation does not survive a change of project or of provider.
+- A conversation does not survive a change of project or of provider, but the model is told what came before: with
+  the first request of a conversation that starts under a thread already shown (the project opened again, another
+  provider), a few lines say what the last six requests asked and which actions the panel showed for each
+  (`transcript.recap`). The answers are left out: they may hold values of the data, read under other settings.
 - **A long conversation is summed up** (`core/agent/compaction.py`): every request sends the whole conversation
   again, so past 120 000 characters (about 30 000 tokens) the oldest requests are dropped, whole, before a new
   one, and the first request kept starts with a few lines saying what each asked, which tools changed what, and
@@ -513,6 +516,18 @@ address, else its content type), its size, and whether the server gives parts of
   (IGN Géoplateforme for France, Photon for the world, any other of that shape the user adds). `find_place` is a
   read: the name the user wrote goes to the geocoder, nothing of the project does; each place comes with the extent
   `zoom_to` takes. A geocoder or a basemap ticked alone opens neither `search_open_data` nor the web to `add_layer`.
+- **Databases of QGIS** (`adapters/public_api/database_tables.py`): the PostgreSQL connections stored in QGIS show
+  in the Sources tab, read from QGIS each time, nothing ticked. For a ticked one, `list_database_tables` gives the
+  names of its tables (schema, table, geometry or not, comment: no row; the schemas of the database itself left out)
+  and `add_database_table` adds one as a layer, asked alone in its own words; the source is built by QGIS for a table
+  the connection lists, and the address and the credentials never leave QGIS (a model names a connection by an id).
+  Tools of the chat alone: the REST API and the MCP servers do not offer them, a caller there holds a key of
+  FilterMate, not the databases of the user. A view opens with the first key QGIS proposes, a column of several
+  kinds of geometries with the first kind, a table of several geometry columns by the one named. The id of a
+  connection follows its name and what it connects to: one made again elsewhere under the same name is not ticked.
+  The password QGIS keeps for the connection is in the source of the layer, as when the user adds the table from
+  the browser, so it is saved with the project; it never goes to the model. Limits: PostgreSQL only; a connection saved without its credentials
+  asks for them in a QGIS dialog, or fails; the list is read on the main thread.
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
   asset links, so they are left out for now.
@@ -629,7 +644,10 @@ estimated:
   vertices);
 - `identify_at`: the features and the raster values at a point, on the visible layers or the ones named.
 
-A web service is not read by any of them.
+A web service is not read by any of them, but for `sample_features`: a few features of what the map shows (the
+extent of the map as the filter rectangle, 20 at most, no expression nor selection), which its server was already
+asked to draw it: a layer unchecked or out of its scale range is refused; never the layer as a whole. Not measured:
+whether the WFS provider passes the limit to the server or reads the whole extent into its cache first. The answer says so in `scope`.
 
 Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
 
@@ -658,9 +676,14 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
 - without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.
 
 Style (`adapters/public_api/layer_style.py`): `set_layer_style` (vector: single, categorized on a field of 100 values
-at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation;
+at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation, or
+`rules`: 20 rules at most, each a condition held to the list of `select_features`, a color and a legend name, one
+of them with no condition for every other feature; a feature is drawn by the first rule it matches (QGIS draws it
+with every rule it matches: each rule is written to leave out what the rules before it took);
 raster: pseudocolor or gray stretch of a band, its range read from the statistics of the band or given, never read
-from a web service) and `set_labels` (a field, size, color, halo; or off), with a ramp of the style of QGIS and an
+from a web service) and `set_labels` (a field, or an expression held to the list of `update_features`; size, color, halo, the scale
+from which they show; or off; what is kept in a style is computed for every feature at every drawing, so `rpad`,
+`lpad`, `format_number`, `buffer` and numbers of ten digits are refused there), with a ramp of the style of QGIS and an
 opacity. The answer says how many classes were made, never their values. Before the first call of a turn on a layer,
 the turn checkpoint keeps its symbology, labels and rendering as XML (`exportNamedStyle`), and undoing the turn puts
 them back (`importNamedStyle`); redoing it applies the new style again.

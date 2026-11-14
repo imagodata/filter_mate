@@ -267,6 +267,16 @@ Rozimisiz?</translation>
         <translation>Qatlam qo'shildi: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Jadval qo'shildi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Jadvallar o'qilmoqda: {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Asos xarita qo'shildi: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Rozimisiz?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent loyihaga ushbu jadvalni (ma'lumotlar bazangiz: {}) qo'shmoqchi:
+{}
+
+Uning qatorlarini keyin agent vositalari istalgan qatlamning qatorlari kabi o'qiydi va ular agent ta'minotchisiga yuborilishi mumkin. Rozimisiz?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1179,6 +1200,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Shu so'rov yoki bosqichdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Shu bosqichdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Butun so'rovdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida: faqat oxirgi so'rov bosqichlari birma-bir solishtiriladi</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SINAB KORING</translation>
@@ -1501,6 +1532,11 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Joylarni qidirish</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS ma'lumotlar bazalari</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4774,6 +4810,16 @@ What would you like to do?</translation>
         <translation>Mahkamlashni olib tashlash</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Agentga har bir so'rovdan oldin xaritani mahkamlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Gorizontal chiziq</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Chiziqni qulflash uchun xaritani bosing, bo'shatish uchun yana bosing.</translation>
@@ -4812,6 +4858,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Mahkamlangan {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Mahkamlangan {} (agentga so'rovdan oldin)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>
