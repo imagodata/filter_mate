@@ -69,7 +69,7 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">Guide utilisateur de FilterMate 5.1</span>
+    <span class="section-label">Guide utilisateur de FilterMate 5.1.1</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
@@ -168,7 +168,7 @@
         <tr><td><strong>Badges de la barre de titre</strong></td><td>Les favoris, le détachement et la fermeture sont des badges de la barre de titre du panneau. Le bouton &#9733; ouvre le menu des favoris ; il passe à l'orange dès que des favoris sont enregistrés. Un bouton à côté replie EXPLORING. L'étiquette colorée de la source, dans la fiche de la couche, indique le type de la couche courante et ce qui la lit : le backend pour une couche vecteur (PostgreSQL, Spatialite, OGR, Memory), le fournisseur pour un raster ou un nuage de points. Par exemple <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
         <tr><td><strong>Pile du haut</strong></td><td><strong>Agent</strong>, puis la zone <strong>Exploring</strong>. AGENT est un tchat qui filtre à partir d'une phrase (<a href="#agent">section 14</a>). Exploring sélectionne sur la couche courante, décrite par la fiche en haut de la zone. Pour une couche vecteur : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation. Les rasters et les nuages de points ont leurs propres outils (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Pile du bas</strong></td><td>Trois sections repliables : <strong>Filtering</strong>, <strong>Exporting</strong> et <strong>Configuration</strong>.</td></tr>
-        <tr><td><strong>Barre d'actions</strong></td><td>Les six boutons qui agissent réellement : Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
+        <tr><td><strong>Barre d'actions</strong></td><td>Les sept boutons qui agissent réellement : Filter, Undo, Redo, Compare, Unfilter, Export, About.</td></tr>
     </table>
     </div>
 
@@ -192,8 +192,8 @@
                 <figcaption>En-tête : le bouton des favoris et la couche courante, une couche vecteur lue par le backend Spatialite.</figcaption>
             </figure>
             <figure>
-                <img src="img/guide/action-bar.png" alt="La barre d'actions avec Filter, Undo, Redo, Unfilter, Export et About" loading="lazy" width="614" height="119">
-                <figcaption>Barre d'actions après un filtre : Undo est actif, Redo pas encore.</figcaption>
+                <img src="img/guide/action-bar.png" alt="La barre d'actions avec Filter, Undo, Redo, Compare, Unfilter, Export et About" loading="lazy" width="357" height="49">
+                <figcaption>Barre d'actions après un filtre : Undo est actif, Redo pas encore, Compare est enclenché.</figcaption>
             </figure>
         </div>
     </div>
@@ -406,8 +406,8 @@ AND ST_Intersects("geom",
 <section id="actions">
     <h2><span class="num">7</span>Barre d'actions, annulation et historique</h2>
     <figure>
-        <img src="img/guide/action-bar.png" alt="Les six boutons d'action" loading="lazy" width="614" height="119">
-        <figcaption>De gauche à droite : Filter, Undo, Redo, Unfilter, Export, About.</figcaption>
+        <img src="img/guide/action-bar.png" alt="Les sept boutons d'action" loading="lazy" width="357" height="49">
+        <figcaption>De gauche à droite : Filter, Undo, Redo, Compare (actif ici), Unfilter, Export, About.</figcaption>
     </figure>
     <div class="table-wrap">
     <table>
@@ -415,6 +415,7 @@ AND ST_Intersects("geom",
         <tr><td><strong>Filter</strong></td><td>Construit et applique le filtre décrit par la zone Exploring et l'onglet Filtering.</td></tr>
         <tr><td><strong>Undo</strong></td><td>Restaure l'état de filtre précédent des couches concernées. L'historique est propre à chaque projet et survit à un redémarrage de QGIS. Tant qu'AGENT est ouvert, Undo et Redo parcourent plutôt les tours de l'agent (<a href="#agent">section 14</a>).</td></tr>
         <tr><td><strong>Redo</strong></td><td>Réapplique un filtre que vous venez d'annuler.</td></tr>
+        <tr><td><strong>Compare</strong> <small>(5.1.1)</small></td><td>Montre la carte telle qu'elle était avant le dernier filtre à gauche d'une ligne qui suit la souris, et la carte actuelle à sa droite : ce qu'Undo ramènerait. Disponible quand Undo l'est ; un second clic en sort. Choisir un autre outil de carte, Filter, Undo, Redo, Unfilter, une autre couche ou un autre projet met fin à la comparaison.</td></tr>
         <tr><td><strong>Unfilter</strong></td><td>Retire le filtre FilterMate de la couche source et de ses cibles, sans toucher aux autres couches. Contrairement à Undo, il ne remonte pas l'historique.</td></tr>
         <tr><td><strong>Export</strong></td><td>Lance l'export configuré dans l'onglet Exporting.</td></tr>
         <tr><td><strong>About</strong></td><td>Ouvre le site web de FilterMate dans votre navigateur.</td></tr>
@@ -534,7 +535,7 @@ AND ST_Intersects("geom",
         <tr><td><code>LANGUAGE</code></td><td>auto ou l'une des 34 langues</td><td><em>auto</em> suit la langue de QGIS. L'interface se retraduit sans redémarrage.</td></tr>
         <tr><td><code>UI_PROFILE</code></td><td>auto / compact / normal / hidpi</td><td>Taille des contrôles, appliquée aussitôt et au démarrage. <em>auto</em> se base sur l'écran de la fenêtre QGIS et sa mise à l'échelle : une hauteur utile sous 800 pixels logiques donne <em>compact</em>, quelle que soit l'échelle. Forcez <em>hidpi</em> sur un écran 4K si les contrôles paraissent petits.</td></tr>
         <tr><td><code>DOCK_POSITION</code></td><td>left / right / top / bottom</td><td>Côté où le panneau s'ancre à l'ouverture.</td></tr>
-        <tr><td><code>ACTION_BAR_POSITION</code></td><td>top / bottom / left / right</td><td>Position des six boutons d'action.</td></tr>
+        <tr><td><code>ACTION_BAR_POSITION</code></td><td>top / bottom / left / right</td><td>Position des boutons d'action.</td></tr>
         <tr><td><code>ACTIVE_THEME</code></td><td>auto / default / dark / light</td><td><em>auto</em> suit le thème de QGIS.</td></tr>
         <tr><td><code>feature_picker_limit</code></td><td>nombre, 1000 par défaut</td><td>Nombre maximal de lignes chargées dans la liste de sélection multiple.</td></tr>
         <tr><td><code>AGENT</code></td><td>true / false</td><td>Affiche la section AGENT (<code>enabled</code> sous <code>APP.OPTIONS.AGENT</code>). Active par défaut. L'activer affiche la section à la prochaine ouverture du panneau ; la désactiver la masque après un redémarrage de QGIS.</td></tr>
@@ -892,6 +893,35 @@ processing.run("filtermate:batch_filter", {
         <img src="img/guide/agent-chat-fr.png" alt="AGENT ouvert au-dessus de la section EXPLORING repliée : deux demandes, chacune avec une carte de filtre qui donne les entités gardées" loading="lazy" width="360" height="720">
         <figcaption>Deux demandes et leurs cartes : chaque filtre nomme ses couches et donne les entités gardées ; <em>Annuler</em> sur la dernière carte la reprend. AGENT partage la pile du haut avec EXPLORING, replié ici.</figcaption>
     </figure>
+
+    <h3>Il demande quand le choix vous revient <small>(5.1.1)</small></h3>
+    <p>
+        Quand une décision vous revient et que ses choix peuvent être nommés (quelle couche, quel rendu), l'agent ne devine pas et n'écrit pas une question à laquelle répondre au clavier.
+        Une carte montre une à quatre questions, chacune avec deux à quatre choix, le choix recommandé en premier, et toujours un <em>Autre</em> à remplir avec vos mots. <strong>Répondre</strong> renvoie vos choix et la demande continue dans le même tour.
+        Fermer la carte ne répond rien : l'agent dit alors ce qu'il aurait fait. Une réponse décide quoi faire, elle n'autorise rien : un changement qui suit est demandé comme le veut votre niveau d'autonomie.
+    </p>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-question-fr.png" alt="Une carte de questions dans le fil d'AGENT : laquelle de deux couches de routes mettre en valeur, puis quoi montrer, avec des choix à cocher et un champ Autre" loading="lazy" width="360" height="900">
+        <figcaption>Une demande avec deux couches possibles : l'agent demande laquelle, et quoi montrer, avant de changer quoi que ce soit.</figcaption>
+    </figure>
+
+    <h3>Configurer FilterMate avec l'agent <small>(5.1.1)</small></h3>
+    <p>
+        À la première ouverture d'une nouvelle version, AGENT propose une fois de configurer FilterMate. L'agent regarde ce que contient le projet, pose quelques questions (ce que vous en faites, votre écran, la langue et l'apparence, vos données), puis propose les réglages, chacun montré avant et après. Rien ne change avant votre clic sur <strong>Appliquer</strong>, et le changement s'annule comme toute autre étape.
+        Relancez-la quand vous voulez par le menu <em>Vecteur &gt; FilterMate &gt; Configurer FilterMate avec l'agent</em>, ou par le menu <strong>&#8943;</strong> du panneau. Vous pouvez aussi simplement demander : ce que fait un réglage, le thème sombre, pourquoi vos filtres sont lents.
+    </p>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-setup-fr.png" alt="La proposition de configurer FilterMate avec l'agent : ce qu'elle couvre, avec les boutons Démarrer et Plus tard" loading="lazy" width="360" height="640">
+        <figcaption>La proposition, montrée une fois par version : <em>Démarrer</em> lance les questions, <em>Plus tard</em> la laisse au menu.</figcaption>
+    </figure>
+
+    <h3>Vos propres skills <small>(5.1.1)</small></h3>
+    <p>
+        Une équipe peut écrire ses propres consignes pour l'agent (comment nommer les couches, quelles sources utiliser, les étapes d'une livraison) sous forme de skill : un dossier contenant un <code>SKILL.md</code>, dans <code>FilterMate/skills</code> de votre profil QGIS ou dans <code>filtermate_skills</code> à côté d'un projet.
+        Avant que l'agent en suive un pour la première fois, vous le lisez en entier et l'autorisez, et la question revient quand il change. Un skill ne donne aucun droit à l'agent : chaque changement reste demandé comme le veulent vos réglages.
+    </p>
 
     <h3>Les filtres s'appliquent aussitôt, chaque étape s'annule</h3>
     <ul>
