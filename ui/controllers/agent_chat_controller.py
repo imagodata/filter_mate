@@ -559,6 +559,16 @@ class AgentChatController(QObject):
             logger.debug("Agent: the state of the section could not be read", exc_info=True)
             return True
 
+    def _show_agent(self) -> None:
+        """Open the AGENT section when it is folded: the agent waits there for an answer of the user."""
+        if self._agent_shown():
+            return
+        sections = getattr(self._parent_widget, "_fm_sections", None)
+        try:
+            sections.open_top("agent")
+        except Exception:
+            logger.debug("Agent: the section could not be opened", exc_info=True)
+
     def _on_panel_shown(self) -> None:
         """The AGENT section opens: an offer that waited in it is in view."""
         if self._setup_card is not None:
@@ -859,6 +869,7 @@ class AgentChatController(QObject):
         texts = {"other": _tr("Other"), "answer": _tr("Answer"), "no_answer": _tr("No answer"),
                  "close": _tr("Close without answering")}
         try:
+            self._show_agent()  # a question nobody sees would hold the turn until Stop
             card = self.panel.add_question_card(texts, questions)
         except RuntimeError:  # the panel is gone: nobody to ask
             return {"declined": True}
@@ -2121,6 +2132,10 @@ class AgentChatController(QObject):
             detail = one_line(self._run_detail(call) or call.arguments.get("expression") or "", MAX_DETAIL_CHARS)
             if call.name in self._connector_labels:
                 detail = json.dumps(call.arguments, ensure_ascii=False, default=str)[:MAX_DETAIL_CHARS]
+            if result.is_error:
+                # Why it failed, as the model was told: the card used to show the expression alone, and the cause
+                # was only in the log.
+                detail = one_line(result.content, MAX_DETAIL_CHARS) or detail
             count = self._kept_count(result)
             strong = self._layer_names(call)
             self.panel.add_action(label, not result.is_error, detail, count, strong)
