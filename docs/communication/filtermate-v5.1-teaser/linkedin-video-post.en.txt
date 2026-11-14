@@ -1,23 +1,27 @@
-One question, one click: the 360,577 buildings of Toulouse Métropole, filtered across 12 layers, inside QGIS.
+🚀 360,577 buildings. 12 layers. ONE click. All inside QGIS.
 
-That is FilterMate 5.1 in 55 seconds (video below, sound on):
+That's FilterMate 5.1, and you can watch it happen in 55 seconds 👇 (sound on 🔊)
 
-→ Vector, raster and point cloud layers, each as a source or a target
-→ Filters written in the SQL of each source: PostGIS, GeoPackage, SpatiaLite, files
-→ Chained filters (AND, OR, AND NOT), on several targets at once
-→ LiDAR: the buildings over 7 m, read from the point cloud
-→ Undo, Redo, and a Compare line that shows the map before and after
-→ Favorites, an export of only the answer, Processing and an API to automate
+Stop exporting, clipping and re-importing. Ask your spatial question once:
 
-Two new sections, both experimental:
+🗺️ Vector, raster, point cloud: any layer can be the source or the target
+⚡ Filters run in the SQL of each source (PostGIS, GeoPackage, SpatiaLite, files): nothing is copied
+🔗 Chain them: AND, OR, AND NOT, on several targets at once
+🏢 LiDAR: every building over 7 m, straight from the point cloud
+↩️ Undo, Redo, and Compare: slide a line across the map to see before and after
+📦 Export only the answer, in one GeoPackage that keeps your project
+🤖 Automate it all: Processing, Python and REST API, MCP
 
-→ SAM: one click outlines an object on the orthophoto, on your CPU, and the object filters your other layers
-→ AGENT: ask in one sentence, check every step, undo in one click. With your own API key, or a local Ollama model: in the video the model runs on my laptop, and nothing leaves it.
+And two brand-new sections (experimental, and already fun):
 
-Everything in the video is the real plugin in QGIS 4.2, recorded on open data of the IGN.
+🎯 SAM: one click on the orthophoto outlines the object. On your CPU. No GPU, no account.
+💬 AGENT: ask in one sentence, check every step, undo in one click. Your own API key, or a local Ollama model: in the video it runs on my laptop and nothing leaves it.
 
-FilterMate is free and open source, for QGIS 3.22 to 4.x. Links in the first comment.
+No mock-up here: every second is the real plugin in QGIS 4.2, on open data of the IGN 🇫🇷
 
-Which of these would you try first on your own data?
+✅ Free ✅ Open source ✅ QGIS 3.22 to 4.x
+👉 Install it in two clicks: links in the first comment
 
-#QGIS #GIS #OpenSource #Geospatial #LiDAR
+Which one would you try first on your own data? Tell me below 👇
+
+#QGIS #GIS #OpenSource #Geospatial #LiDAR #GeoAI

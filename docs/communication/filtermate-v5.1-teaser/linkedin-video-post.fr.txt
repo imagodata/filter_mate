@@ -1,23 +1,27 @@
-Une question, un clic : les 360 577 bâtiments de Toulouse Métropole, filtrés sur 12 couches, dans QGIS.
+🚀 360 577 bâtiments. 12 couches. UN clic. Le tout dans QGIS.
 
-C'est FilterMate 5.1 en 55 secondes (vidéo ci-dessous, en anglais, avec le son) :
+C'est FilterMate 5.1, et ça se regarde en 55 secondes 👇 (vidéo en anglais, avec le son 🔊)
 
-→ Vecteur, raster et nuage de points, chacun en source ou en cible
-→ Des filtres écrits dans le SQL de chaque source : PostGIS, GeoPackage, SpatiaLite, fichiers
-→ Des filtres enchaînés (ET, OU, SAUF), sur plusieurs cibles à la fois
-→ LiDAR : les bâtiments de plus de 7 m, lus dans le nuage de points
-→ Annuler, Rétablir, et une ligne Comparer qui montre la carte avant et après
-→ Des favoris, un export de la seule réponse, Processing et une API pour automatiser
+Fini d'exporter, de découper et de réimporter. Posez votre question spatiale une seule fois :
 
-Deux nouvelles sections, toutes deux expérimentales :
+🗺️ Vecteur, raster, nuage de points : chaque couche peut être source ou cible
+⚡ Le filtre s'écrit dans le SQL de chaque source (PostGIS, GeoPackage, SpatiaLite, fichiers) : rien n'est copié
+🔗 Enchaînez : ET, OU, SAUF, sur plusieurs cibles à la fois
+🏢 LiDAR : tous les bâtiments de plus de 7 m, lus dans le nuage de points
+↩️ Annuler, Rétablir, et Comparer : une ligne glisse sur la carte et montre l'avant et l'après
+📦 Exportez seulement la réponse, dans un GeoPackage qui garde votre projet
+🤖 Automatisez le tout : Processing, API Python et REST, MCP
 
-→ SAM : un clic détoure un objet sur l'orthophoto, sur votre processeur, et l'objet filtre vos autres couches
-→ AGENT : demandez en une phrase, vérifiez chaque étape, annulez d'un clic. Avec votre propre clé d'API, ou un modèle local Ollama : dans la vidéo, le modèle tourne sur mon portable, et rien n'en sort.
+Et deux toutes nouvelles sections (expérimentales, et déjà bluffantes) :
 
-Tout ce que montre la vidéo est le vrai plugin dans QGIS 4.2, enregistré sur les données ouvertes de l'IGN.
+🎯 SAM : un clic sur l'orthophoto détoure l'objet. Sur votre processeur. Sans carte graphique, sans compte.
+💬 AGENT : demandez en une phrase, vérifiez chaque étape, annulez d'un clic. Votre propre clé d'API, ou un modèle local Ollama : dans la vidéo, il tourne sur mon portable et rien n'en sort.
 
-FilterMate est gratuit et open source, de QGIS 3.22 à 4.x. Les liens sont en premier commentaire.
+Aucune maquette : chaque seconde est le vrai plugin dans QGIS 4.2, sur les données ouvertes de l'IGN 🇫🇷
 
-Lequel essaieriez-vous en premier sur vos données ?
+✅ Gratuit ✅ Open source ✅ QGIS 3.22 à 4.x
+👉 Installation en deux clics : les liens sont en premier commentaire
 
-#QGIS #SIG #OpenSource #Géomatique #LiDAR
+Lequel essaieriez-vous en premier sur vos données ? Dites-le-moi en commentaire 👇
+
+#QGIS #SIG #OpenSource #Géomatique #LiDAR #GeoIA
