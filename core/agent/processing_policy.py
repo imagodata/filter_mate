@@ -33,9 +33,11 @@ MULTI_LAYER_INPUTS = frozenset({"multilayer"})
 # "::|::". QGIS opens each source from its text, a path or a URL included: FilterMate writes each row again, its source
 # a vector layer of the project given by its id, the rest integers.
 INTERPOLATION_DATA = "idw_interpolation_data"
+# QGIS 4.3 moved the interpolations to its own algorithms, their inputs under another type name, written the same.
+INTERPOLATION_TYPES = frozenset({INTERPOLATION_DATA, "interpolationdata"})
 # Read by FilterMate before QGIS sees them.
-CHECKED_TYPES = LAYER_INPUTS | MULTI_LAYER_INPUTS | frozenset({"extent", "point", "crs", "expression", "enum",
-                                                               INTERPOLATION_DATA})
+CHECKED_TYPES = LAYER_INPUTS | MULTI_LAYER_INPUTS | INTERPOLATION_TYPES | frozenset({"extent", "point", "crs",
+                                                                                    "expression", "enum"})
 # Plain values QGIS takes as they are: numbers, texts, field names, flags, tables of values, colours, dates, ranges,
 # a geometry as WKT, the bands or dataset groups of an input. Nothing that names a file, a URL or a layer.
 PLAIN_TYPES = frozenset({
@@ -43,6 +45,9 @@ PLAIN_TYPES = frozenset({
     "color", "datetime", "range", "geometry", "raster_calc_expression", "relief_colors", "meshdatasetgroups",
     "meshdatasettime",
     "attribute", "pointcloudattribute",  # an attribute of a point cloud input, by name
+    # The size of a pixel, a number: a type of its own for the heatmap since QGIS 4.2 and for the interpolations since
+    # 4.3 (2026-11-14: unknown here, these algorithms were refused there while the instructions name them).
+    "heatmappixelsize", "interpolationpixelsize",
 })
 # What a model may give; any other parameter is refused when required, left unset when optional.
 GIVEN_TYPES = CHECKED_TYPES | PLAIN_TYPES

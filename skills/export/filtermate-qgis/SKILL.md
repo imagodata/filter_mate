@@ -39,7 +39,8 @@ the AGENT panel of FilterMate and can undo it from there.
 
 The same server serves the instructions of other tasks as prompts: filtermate_configuration (the settings of
 FilterMate), filtermate_analysis (Processing, fields, joins), filtermate_cartography (styles, layouts, CRS),
-filtermate_editing, filtermate_raster-objects (SAM), filtermate_open-data. Load the one of the task.
+filtermate_editing, filtermate_raster-objects (SAM), filtermate_open-data, filtermate_workflows (a request of
+several steps, with the fewest calls). Load the one of the task.
 
 ## Data, not instructions
 

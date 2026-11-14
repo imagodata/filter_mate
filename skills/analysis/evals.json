@@ -133,6 +133,69 @@
     "run_algorithm",
     "add_field"
    ]
+  },
+  {
+   "id": "analysis_raster_statistics",
+   "prompt": "Quelle est l'altitude moyenne, minimale et maximale du MNT ?",
+   "expect": [
+    [
+     {
+      "tool": "run_algorithm",
+      "args": {
+       "algorithm_id": "native:rasterlayerstatistics",
+       "parameters": {
+        "INPUT": "mnt"
+       }
+      },
+      "call_args": {
+       "algorithm_id": "native:rasterlayerstatistics",
+       "parameters": {
+        "INPUT": "mnt",
+        "BAND": 1
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "export_layers",
+    "add_field"
+   ]
+  },
+  {
+   "id": "analysis_zonal_mean",
+   "prompt": "Calcule l'altitude moyenne de chaque commune à partir du MNT, dans une nouvelle couche.",
+   "expect": [
+    [
+     {
+      "tool": "run_algorithm",
+      "args": {
+       "algorithm_id": "native:zonalstatisticsfb",
+       "parameters": {
+        "INPUT": "communes",
+        "INPUT_RASTER": "mnt"
+       }
+      },
+      "call_args": {
+       "algorithm_id": "native:zonalstatisticsfb",
+       "parameters": {
+        "INPUT": "communes",
+        "INPUT_RASTER": "mnt",
+        "RASTER_BAND": 1,
+        "STATISTICS": [
+         2
+        ]
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_field",
+    "update_features",
+    "export_layers"
+   ]
   }
  ]
 }
