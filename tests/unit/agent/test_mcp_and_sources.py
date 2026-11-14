@@ -359,3 +359,17 @@ class TestArchiveMember:
 
     def test_nothing_to_open(self):
         assert archive_member(["notice.pdf", "data.xlsx"], "vector") == ""
+
+
+class TestPlatformsNote:
+    """2026-11-14: data.gouv.fr did not answer and the model kept asking it, the IGN layers enabled next to it."""
+
+    def test_another_platform_is_named_when_there_is_one(self):
+        from core.agent.system_prompt import platforms_note
+        assert platforms_note(["datagouv"]) == ""
+        assert "another one of this list" in platforms_note(["datagouv", "opendatasoft"])
+
+    def test_the_reference_layers_are_only_named_when_enabled(self):
+        from core.agent.system_prompt import platforms_note
+        assert "ign_wfs" not in platforms_note(["datagouv", "opendatasoft"])
+        assert "administrative boundaries" in platforms_note(["ign_wfs"])

@@ -31,6 +31,11 @@ logger = logging.getLogger('FilterMate.ProjectControl')
 
 MAX_COORDINATE = 1e9
 MAX_PAYLOAD = 5 * 1024 * 1024
+# 2026-11-14: data.gouv.fr answered the same search in 1 s, in 33 s or not at all, and once with a page that was not
+# JSON. A search is asked twice before it fails, a short wait first: a platform that only stalled answers the second.
+SEARCH_TIMEOUTS_MS = (20_000, 45_000)
+_OVERLOADED = (502, 503, 504)
+_ELSEWHERE = ". It was asked twice: search another platform of the list rather than this one again."
 # A file its server only gives whole is copied to the QGIS profile first: what a layer may cost in disk and in time.
 MAX_DOWNLOAD = 512 * 1024 * 1024
 DOWNLOAD_TIMEOUT_MS = 180_000
@@ -450,16 +455,25 @@ def _json_answer(platform: str, url: str, body: Optional[bytes] = None, accept: 
     headers = {'Accept': accept}
     if body is not None:
         headers['Content-Type'] = 'application/json'
-    try:
-        reply = fetch(url, body=body, headers=headers, max_bytes=MAX_PAYLOAD, timeout_ms=45_000)
-    except HttpFailure as exc:
-        raise ValueError(f"{platform} did not answer: {exc}") from None
-    if reply.status != 200:
-        raise ValueError(f"{platform} answered with an error ({reply.status})")
-    try:
-        return json.loads(reply.content.decode('utf-8'))
-    except (ValueError, RecursionError):
-        raise ValueError(f"{platform} answered with something that is not JSON") from None
+    problem = ''
+    for timeout_ms in SEARCH_TIMEOUTS_MS:
+        try:
+            reply = fetch(url, body=body, headers=headers, max_bytes=MAX_PAYLOAD, timeout_ms=timeout_ms)
+        except HttpFailure as exc:
+            problem = f"{platform} did not answer: {exc}"
+            if str(exc) != TOO_LONG:  # stopped, refused, too large: asking again would not change it
+                raise ValueError(problem) from None
+            continue
+        if reply.status in _OVERLOADED:
+            problem = f"{platform} answered with an error ({reply.status})"
+            continue
+        if reply.status != 200:
+            raise ValueError(f"{platform} answered with an error ({reply.status})")
+        try:
+            return json.loads(reply.content.decode('utf-8'))
+        except (ValueError, RecursionError):  # the error page of an overloaded platform comes with a 200 too
+            problem = f"{platform} answered with something that is not JSON"
+    raise ValueError(problem + _ELSEWHERE)
 
 
 def search_open_data(query: str, platform: str = 'datagouv', limit: int = 10, extra_domains: str = '') -> Dict[str, Any]:
