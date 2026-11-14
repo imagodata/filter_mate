@@ -150,8 +150,8 @@ def agent_enabled(config_data) -> bool:
 def qgis_databases():
     """The PostgreSQL connections of QGIS, as sources the user can tick; none when they cannot be read."""
     try:
-        from ...adapters.public_api.database_tables import connection_names
-        return database_sources(connection_names())
+        from ...adapters.public_api.database_tables import connections
+        return database_sources(connections())
     except Exception:
         logger.debug("Agent: database connections not read", exc_info=True)
         return ()
@@ -349,6 +349,7 @@ class AgentChatController(QObject):
         """Show again what this project's conversation looked like; the model does not remember it."""
         self._transcript_key = transcript_store.project_key()
         self._transcript = transcript_store.load(self._transcript_key)
+        self._recap_from = 0  # the thread shown again is what the next conversation is told of
         self._drop_engine()
         self.panel.input.forget()
         self.panel.clear_thread()
@@ -817,7 +818,8 @@ class AgentChatController(QObject):
         from ...adapters.public_api import database_tables
         try:
             return database_tables.list_tables(self._database(databases, arguments), arguments.get("search", ""),
-                                               arguments.get("limit", database_tables.MAX_TABLES))
+                                               arguments.get("limit", database_tables.MAX_TABLES),
+                                               arguments.get("schema", ""))
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
 
@@ -827,7 +829,8 @@ class AgentChatController(QObject):
         from ...adapters.public_api.project_control import _summary
         try:
             layer = database_tables.add_table(self._database(databases, arguments), arguments["schema"],
-                                              arguments["table"], arguments.get("name", ""))
+                                              arguments["table"], arguments.get("name", ""),
+                                              arguments.get("geometry_column", ""))
         except ValueError as exc:
             raise ToolFailure(str(exc)) from None
         return _summary(layer, count_features=False)
@@ -1662,7 +1665,7 @@ class AgentChatController(QObject):
             if source.kind == KIND_DATABASE:
                 from ...adapters.public_api import database_tables
                 try:
-                    database_tables.list_tables(source.address, limit=1)
+                    database_tables.schemas(source.address)
                 except ValueError as exc:
                     return str(exc)[:300]
                 return _tr("It answers.")
@@ -1787,6 +1790,8 @@ class AgentChatController(QObject):
         self._connectors = None
         self._connectors_shown = set()
         self._seen = None  # another conversation has seen nothing yet
+        # What came before was said to another provider, or under other settings: the next conversation is not told.
+        self._recap_from = len(self._transcript)
         self.panel.clear_thread()
         self._links, self._settings_cards, self._settings_outcomes = [], [], []
         self._setup_card = None  # it went with the thread
@@ -1796,6 +1801,7 @@ class AgentChatController(QObject):
         self._keep_setup_offered()  # an empty thread was asked for: the offer does not come back in it
         self._reset_view()
         self._transcript = []
+        self._recap_from = 0
         self.panel.input.forget()
         self._save_transcript()
 
@@ -1816,7 +1822,8 @@ class AgentChatController(QObject):
                 with owned_by(CHAT_WAITS):
                     self._engine = self._build_engine()
                 # A conversation that starts with a thread already shown: the model is told what it asked and did.
-                self._recap = transcript_recap(self._transcript) if self._engine is not None else ""
+                self._recap = "" if self._engine is None else transcript_recap(
+                    self._transcript[getattr(self, "_recap_from", 0):], with_actions=values.send_values)
             finally:
                 self._building = False
         if self._engine is None:
@@ -1833,7 +1840,10 @@ class AgentChatController(QObject):
         self.panel.set_can_undo(False)
         summarized = self._engine.summarized
         self._usage_before = self._engine.usage
-        recap, self._recap = getattr(self, "_recap", ""), ""  # with the first request of the conversation only
+        # With the first request of the conversation only; a request that goes nowhere takes it out of the
+        # conversation with itself, so it is kept for the next one (_recap_sent).
+        recap, self._recap = getattr(self, "_recap", ""), ""
+        self._recap_sent = recap
         self._engine.send(text, "\n\n".join(part for part in (self._project_context(), recap) if part))
         self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
@@ -2525,6 +2535,7 @@ class AgentChatController(QObject):
 
     def _give_back_request(self) -> None:
         """A request that went nowhere can be sent again without retyping it."""
+        self._recap = getattr(self, "_recap_sent", "") or getattr(self, "_recap", "")
         if not self.panel.input.text():
             self.panel.input.setText(self._last_request)
 

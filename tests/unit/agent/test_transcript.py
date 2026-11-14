@@ -60,3 +60,9 @@ def test_a_recap_keeps_the_last_requests_and_bounds_them():
     assert len(lines) == 1 + MAX_RECAP_REQUESTS and lines[1].startswith("- asked: request 14 ") and "request 19" in lines[-1]
     assert all(len(line) < 1200 for line in lines) and lines[1].count("card ") == 6
     assert recap([]) == "" and recap([entry("text", "an answer"), entry("action", "a card")]) == ""
+
+
+def test_a_recap_leaves_the_cards_out_for_a_user_who_does_not_share_values():
+    """A card holds names the model chose, which can come from the data."""
+    entries = [entry("user", "Cherche Dupont"), entry("action", "Layer added: Dupont Jean 0612345678"), entry("user", "Merci")]
+    assert recap(entries, with_actions=False).splitlines() == [RECAP_HEADER, "- asked: Cherche Dupont", "- asked: Merci"]

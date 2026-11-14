@@ -82,14 +82,17 @@ CHAT_ONLY = (
     ToolSpec(
         name=LIST_TABLES, title="List the tables of a database",
         description=("List the tables of a PostgreSQL connection of QGIS the user enabled: schema, table, whether it "
-                     "has a geometry, and its comment. Names only: no row is read. search keeps the tables whose "
-                     "schema, name or comment hold every word. Returns tables [{schema, table, geometry, comment}], "
-                     "count and truncated (50 at most: search to narrow). Then add_database_table."),
+                     "has a geometry (and in which column, of which types), whether it is a view, and its comment. "
+                     "Names only: no row is read. search keeps the tables whose schema, name or comment hold every "
+                     "word; schema reads one schema only, which is faster on a large database. Returns tables "
+                     "[{schema, table, kind, geometry, geometry_column, geometry_types, comment}], count and "
+                     "truncated (50 at most: search to narrow). Then add_database_table."),
         input_schema={"type": "object", "properties": {
             "connection": {"type": "string", "minLength": 1, "maxLength": 100,
                            "description": "A database the user enabled, by its id (db_...)"},
             "search": {"type": "string", "maxLength": 200, "default": "",
                        "description": "Words of the schema, the name or the comment of the tables wanted"},
+            "schema": {"type": "string", "maxLength": 200, "default": "", "description": "Only the tables of this schema"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 50}},
             "required": ["connection"], "additionalProperties": False},
         read_only=True, chat_only=True),
@@ -103,6 +106,8 @@ CHAT_ONLY = (
                            "description": "A database the user enabled, by its id (db_...)"},
             "schema": {"type": "string", "minLength": 1, "maxLength": 200},
             "table": {"type": "string", "minLength": 1, "maxLength": 200},
+            "geometry_column": {"type": "string", "maxLength": 200, "default": "",
+                                "description": "For a table with several geometry columns: the one to draw"},
             "name": {"type": "string", "maxLength": 200, "default": "",
                      "description": "Name of the layer in the project (default: the name of the table)"}},
             "required": ["connection", "schema", "table"], "additionalProperties": False},

@@ -117,16 +117,18 @@ def make_source(address: str, kind: str, title: str = "") -> Source:
     return Source(identifier, " ".join((title or "").split())[:60] or parts.netloc, kind, address, origin)
 
 
-def database_sources(names: Iterable[str]) -> Tuple[Source, ...]:
+def database_sources(names: Iterable[Any]) -> Tuple[Source, ...]:
     """The PostgreSQL connections of QGIS as sources the user can tick: not stored here, read from QGIS each time.
 
     A model names one by its id; the name of the connection is its title, and its address and its credentials stay
     in QGIS.
     """
     found = []
-    for name in names:
-        name = str(name)
-        digest = hashlib.blake2b(name.encode("utf-8"), digest_size=3).hexdigest()
+    for item in names:
+        # (name, what it connects to): a connection made again under the same name, to another server, is another
+        # source, not ticked.
+        name, target = (str(item[0]), str(item[1])) if isinstance(item, (tuple, list)) else (str(item), "")
+        digest = hashlib.blake2b(f"{name}|{target}".encode("utf-8"), digest_size=3).hexdigest()
         identifier = "db_" + _ID.sub("_", name.lower()).strip("_")[:24] + "_" + digest
         found.append(Source(identifier, " ".join(name.split())[:60] or identifier, KIND_DATABASE, name, ORIGIN_LOCAL,
                             "A PostgreSQL connection of QGIS: the agent can list its tables and add one as a layer"))

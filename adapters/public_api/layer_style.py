@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from typing import Any, Dict, List, Optional
 
 from ...core.agent.sql_guard import expression_problem, processing_expression_problem
@@ -204,6 +205,22 @@ def _refresh(layer) -> None:
         pass
 
 
+# A style is evaluated for every feature at every drawing, and kept in the project: what can make a text or a geometry
+# of any size (rpad("nom", 2000000000, 'x')) would freeze or crash QGIS each time the project opens.
+_HEAVY = re.compile(r"\b(rpad|lpad|repeat|format_number|buffer)\s*\(", re.IGNORECASE)
+_LONG_NUMBER = re.compile(r"\d{10,}")
+
+
+def _too_heavy(text: str) -> str:
+    """Why an expression is not kept in a style; "" when it can be."""
+    found = _HEAVY.search(text)
+    if found:
+        return f"{found.group(1).lower()} is not used in a style: it is computed for every feature at every drawing"
+    if _LONG_NUMBER.search(text):
+        return "a number of ten digits or more is not used in a style"
+    return ""
+
+
 def _expression(layer, text: str, problem) -> str:
     """An expression a model wrote, checked: a plain one of the list accepted, that QGIS parses, on fields of the layer.
 
@@ -212,7 +229,7 @@ def _expression(layer, text: str, problem) -> str:
     """
     from qgis.core import QgsExpression, QgsFeatureRequest
     text = (text or '').strip()
-    refused = problem(text)
+    refused = problem(text) or _too_heavy(text)
     if refused:
         raise ValueError(f"this expression is refused: {refused}")
     parsed = QgsExpression(text)
@@ -234,6 +251,7 @@ def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
         raise ValueError(f'{MAX_RULES} rules at most')
     root = QgsRuleBasedRenderer.Rule(None)
     others = 0
+    before: List[str] = []
     for number, rule in enumerate(rules, 1):
         if not isinstance(rule, dict) or not rule.get('color'):
             raise ValueError(f'rule {number} has no color')
@@ -241,7 +259,14 @@ def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
         condition = str(rule.get('expression') or '').strip()
         label = str(rule.get('label') or '')[:100]
         if condition:
-            child = QgsRuleBasedRenderer.Rule(symbol, 0, 0, _expression(layer, condition, expression_problem), label)
+            condition = _expression(layer, condition, expression_problem)
+            # QGIS draws a feature with every rule it matches, one symbol over the other. Thresholds written one
+            # after the other ("pop" > 1000, then "pop" > 10000) would stack: a feature is drawn by the first rule
+            # it matches, so each rule leaves out what the rules before it took.
+            taken = ''.join(f' AND NOT coalesce(({earlier}), false)' for earlier in before)
+            before.append(condition)
+            child = QgsRuleBasedRenderer.Rule(symbol, 0, 0, f'({condition}){taken}' if taken else condition,
+                                              label or condition[:100])
         else:
             others += 1
             child = QgsRuleBasedRenderer.Rule(symbol, 0, 0, 'ELSE', label or 'Others', '', True)

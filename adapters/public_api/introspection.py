@@ -646,11 +646,19 @@ def _shown_extent(layer):
         canvas = None
     if canvas is None:
         raise ValueError(f"'{layer.name()}' is a web service: it is read where the map shows it, and QGIS has no map here")
+    # Only what the map really drew was asked of the server: a layer unchecked, or out of its scale range, was not.
+    node = QgsProject.instance().layerTreeRoot().findLayer(layer.id())
+    if node is None or not node.isVisible() or not layer.isInScaleRange(canvas.scale()):
+        raise ValueError(f"'{layer.name()}' is a web service the map does not show now: check it in the layer tree "
+                         "and zoom to where its features are, then ask again")
     try:
-        return QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(),
-                                      QgsProject.instance()).transformBoundingBox(canvas.extent())
+        extent = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(),
+                                        QgsProject.instance()).transformBoundingBox(canvas.extent())
     except QgsCsException:
         raise ValueError(f"the map extent cannot be expressed in the CRS of '{layer.name()}'") from None
+    if not extent.isFinite() or extent.isEmpty():
+        raise ValueError(f"the map extent cannot be expressed in the CRS of '{layer.name()}'")
+    return extent
 
 
 def _field_indexes(layer, names: Optional[List[str]]) -> List[int]:

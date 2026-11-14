@@ -327,8 +327,23 @@ def check_style(project, gpkg, work):
     rule_renderer = gpkg.renderer()
     children = rule_renderer.rootRule().children() if rule_renderer.type() == "RuleRenderer" else []
     check("style: rules", ruled["classes"] == 3 and [child.filterExpression() for child in children[:2]]
-          == ['"pop" > 5000', '"nom" LIKE \'A%\''] and children[2].isElse() and children[2].label() == "Others"
+          == ['"pop" > 5000', '("nom" LIKE \'A%\') AND NOT coalesce(("pop" > 5000), false)'] and children[2].isElse()
+          and children[1].label() == '"nom" LIKE \'A%\'' and children[2].label() == "Others"
           and children[0].label() == "Towns" and children[0].symbol().color().name() == "#d7191c", ruled)
+    # Thresholds written one after the other: QGIS would draw a feature with every rule it matches, one over the other.
+    style.set_layer_style("communes", "rules", rules=[{"expression": '"pop" > 100', "color": "red"},
+                                                      {"expression": '"pop" > 5000', "color": "blue"}])
+    from qgis.core import QgsRenderContext
+    drawn_by = gpkg.renderer()
+    context = QgsRenderContext()
+    context.expressionContext().setFields(gpkg.fields())
+    drawn_by.startRender(context, gpkg.fields())
+    counts = set()
+    for feature in gpkg.getFeatures():
+        context.expressionContext().setFeature(feature)
+        counts.add(len(drawn_by.symbolsForFeature(feature, context)))
+    drawn_by.stopRender(context)
+    check("style: a feature is drawn by the first rule it matches, never by two", counts <= {0, 1} and 1 in counts, counts)
     for call, label in ((lambda: style.set_layer_style("communes", "rules"), "rules without rules"),
                         (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": '"absent" = 1', "color": "red"}]),
                          "a rule on an unknown field"),
@@ -349,6 +364,8 @@ def check_style(project, gpkg, work):
     for call, label in ((lambda: style.set_labels("communes", "nom", expression='"nom"'), "a field and an expression"),
                         (lambda: style.set_labels("communes", expression="file_exists('/etc/passwd')"), "an expression that reads the disk"),
                         (lambda: style.set_labels("communes", expression='"absent"'), "an expression on an unknown field"),
+                        (lambda: style.set_labels("communes", expression='rpad("nom", 2000000000, \'x\')'), "a text of any size"),
+                        (lambda: style.set_labels("communes", expression='"nom" || 12345678901'), "a number of eleven digits"),
                         (lambda: style.set_labels("communes", "nom", visible_from_scale=0), "a scale of zero")):
         check(f"labels refuse {label}", bool(refused(call)), label)
     labels = style.set_labels("communes", "nom", size=9, color="navy")

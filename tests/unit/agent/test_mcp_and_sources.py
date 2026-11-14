@@ -204,6 +204,8 @@ class TestSources:
         first, second = database_sources(["Prod Cadastre (Lyon)", "prod cadastre (lyon)"])
         assert first.id != second.id and first.id.startswith("db_prod_cadastre_lyon_") and first.address == "Prod Cadastre (Lyon)"
         assert first.kind == "database" and not first.is_connector and database_sources([]) == ()
+        here, there = database_sources([("prod", "a1b2"), ("prod", "c3d4")])  # made again, to another server
+        assert here.id != there.id and here.title == there.title == "prod"
         names = describe_enabled([first])
         assert names["databases"] == [f"{first.id} (Prod Cadastre (Lyon))"] and names["platforms"] == []
         # Never among the platforms: the name of a connection is the user's text, a comma in it would add one.

@@ -609,7 +609,7 @@ def build_server(client: FilterMateClient) -> Any:
             "a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band "
             "values), gray (a gray stretch)"))],
         rules: Annotated[Optional[List[StyleRule]], Field(max_length=20, description=(
-            'rules: one symbol per condition, the first that matches drawn first in the legend: [{"expression": '
+            'rules: one symbol per condition; a feature is drawn by the first rule it matches: [{"expression": '
             '"\\"population\\" > 10000", "color": "#d7191c", "label": "Towns"}, {"expression": "", "color": '
             '"#cccccc", "label": "Others"}]. An empty expression is every other feature; without one, the features '
             "no rule matches are not drawn"))] = None,
