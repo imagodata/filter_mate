@@ -125,7 +125,10 @@ Rules worth keeping:
   automation history: rasters and point clouds get their source back, a layer changed since is left alone, and the
   derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
 - **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
-- A conversation does not survive a change of project or of provider.
+- A conversation does not survive a change of project or of provider, but the model is told what came before: with
+  the first request of a conversation that starts under a thread already shown (the project opened again, another
+  provider), a few lines say what the last six requests asked and which actions the panel showed for each
+  (`transcript.recap`). The answers are left out: they may hold values of the data, read under other settings.
 - **A long conversation is summed up** (`core/agent/compaction.py`): every request sends the whole conversation
   again, so past 120 000 characters (about 30 000 tokens) the oldest requests are dropped, whole, before a new
   one, and the first request kept starts with a few lines saying what each asked, which tools changed what, and

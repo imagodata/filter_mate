@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from core.agent.transcript import MAX_CHARS, entry, from_json, to_json, trim
+from core.agent.transcript import MAX_CHARS, MAX_RECAP_REQUESTS, RECAP_HEADER, entry, from_json, recap, to_json, trim
 
 pytestmark = pytest.mark.unit
 
@@ -39,3 +39,24 @@ def test_the_layer_names_in_bold_are_kept_and_bounded():
     assert "strong" not in entry("action", "Filter on communes")  # the stored form stays as it was without them
     assert from_json(to_json([item]))[0]["strong"] == item["strong"]
     assert "strong" not in from_json('[{"kind": "action", "text": "t", "strong": "communes"}]')[0]
+
+
+def test_a_recap_says_what_was_asked_and_done_never_what_was_answered():
+    entries = [entry("user", "Les communes de plus\nde 10000 habitants"), entry("action", "Filter applied on communes"),
+               entry("text", "Voici: Toulouse 514819 habitants"), entry("note", "summed up"),
+               entry("user", "Exporte-les"), entry("action", "Export", ok=False), entry("user", "Merci")]
+    text = recap(entries)
+    assert text.splitlines() == [
+        RECAP_HEADER, "- asked: Les communes de plus de 10000 habitants | done: Filter applied on communes",
+        "- asked: Exporte-les | done: Export (failed)", "- asked: Merci | done: no change"]
+    assert "514819" not in text  # an answer may hold values of the data
+
+
+def test_a_recap_keeps_the_last_requests_and_bounds_them():
+    entries = [entry("action", "before any request")]
+    for number in range(20):
+        entries += [entry("user", f"request {number} " + "x" * 500)] + [entry("action", f"card {i}") for i in range(30)]
+    lines = recap(entries).splitlines()
+    assert len(lines) == 1 + MAX_RECAP_REQUESTS and lines[1].startswith("- asked: request 14 ") and "request 19" in lines[-1]
+    assert all(len(line) < 1200 for line in lines) and lines[1].count("card ") == 6
+    assert recap([]) == "" and recap([entry("text", "an answer"), entry("action", "a card")]) == ""

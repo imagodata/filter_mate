@@ -70,7 +70,7 @@ from ...core.agent.widgets import CHART, SHOWING, STAT, WidgetError, replaced as
 from ...core.domain.layer_kind import LayerKind
 from ...adapters.agent import agent_widgets
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure, connector_gate
-from ...core.agent.transcript import entry as transcript_entry
+from ...core.agent.transcript import entry as transcript_entry, recap as transcript_recap
 from ...filtermate_api.agent_tools import build_handlers
 from ...filtermate_api.accessor import FilterRejected
 from ...filtermate_api.config import _default_export_root
@@ -1759,6 +1759,8 @@ class AgentChatController(QObject):
             try:
                 with owned_by(CHAT_WAITS):
                     self._engine = self._build_engine()
+                # A conversation that starts with a thread already shown: the model is told what it asked and did.
+                self._recap = transcript_recap(self._transcript) if self._engine is not None else ""
             finally:
                 self._building = False
         if self._engine is None:
@@ -1775,7 +1777,8 @@ class AgentChatController(QObject):
         self.panel.set_can_undo(False)
         summarized = self._engine.summarized
         self._usage_before = self._engine.usage
-        self._engine.send(text, self._project_context())
+        recap, self._recap = getattr(self, "_recap", ""), ""  # with the first request of the conversation only
+        self._engine.send(text, "\n\n".join(part for part in (self._project_context(), recap) if part))
         self._show_undo_state()  # Undo of the action bar and Ctrl+Z wait for the end of the turn
         if self._engine.summarized > summarized:
             note = _tr("The oldest requests of this conversation are now summed up in a few lines, to keep it short.")
