@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>복원할 항목이 없습니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>에이전트가 작업 중입니다. 끝날 때까지 기다려 주세요.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>활성 필터 읽는 중</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>이 단계 이전의 지도 고정</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>이 단계 이전 상태로 되돌리기</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>이 단계 이전의 지도입니다. 그 이후 변경된 필터, 스타일, 레이어가 되돌려집니다. 기록의 새 단계로 추가되며, 여기서 실행 취소로 다시 되돌릴 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

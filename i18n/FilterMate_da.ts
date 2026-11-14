@@ -299,6 +299,11 @@ Er du enig?</translation>
         <translation>Intet at gendanne.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agenten arbejder: vent, til den er færdig.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Læser de aktive filtre</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fastgør kortet før dette trin</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Gå tilbage til før dette trin</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Kortet, som det var før dette trin: de filtre, stilarter og lag, der er ændret siden, rulles tilbage. Et nyt trin i historikken, som Fortryd tager tilbage her.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

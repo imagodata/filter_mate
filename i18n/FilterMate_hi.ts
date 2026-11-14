@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>पुनर्स्थापित करने के लिए कुछ नहीं।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>एजेंट काम कर रहा है: कृपया उसके पूरा होने तक प्रतीक्षा करें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>सक्रिय फ़िल्टर पढ़ना</translation>
@@ -5043,6 +5048,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>इस चरण से पहले का नक्शा पिन करें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>इस चरण से पहले की स्थिति पर लौटें</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>नक्शा वैसा ही जैसा इस चरण से पहले था: तब से बदले गए फ़िल्टर, शैलियाँ और परतें पहले जैसी हो जाती हैं। इतिहास का एक नया चरण, जिसे यहाँ «पूर्ववत करें» वापस ले लेता है।</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

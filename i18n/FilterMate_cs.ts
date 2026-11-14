@@ -299,6 +299,11 @@ Souhlasíte?</translation>
         <translation>Není co obnovit.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Agent pracuje: počkejte, až skončí.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Čtení aktivních filtrů</translation>
@@ -5031,6 +5036,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Připnout mapu před tímto krokem</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Vrátit se před tento krok</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Mapa tak, jak vypadala před tímto krokem: filtry, styly a vrstvy změněné od té doby se vrátí zpět. Nový krok historie, který zde lze vrátit pomocí Vrátit.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>
