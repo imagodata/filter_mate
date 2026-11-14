@@ -58,10 +58,10 @@ def tool_names(start):
 
 
 @pytest.mark.parametrize("level", LEVELS)
-def test_a_connector_load_is_asked_at_every_level_above_advisor(level):
+def test_a_connector_load_is_asked_at_every_level(level):
     executor = ToolExecutor([LOAD], {"load_skill": lambda arguments: {}})
     policy = PermissionPolicy(level, rules={"load_skill": "allow"})  # the rule of load_skill: not for connectors
-    assert executor.verdict(load_call("connector-a"), policy) == (REFUSE if level == "advisor" else ASK)
+    assert executor.verdict(load_call("connector-a"), policy) == ASK
     assert executor.verdict(load_call("configuration"), policy) == RUN
     assert connector_gate(load_call("configuration")) is None
 
@@ -170,14 +170,13 @@ def test_the_engine_offers_tools_with_their_handlers_after_the_others():
     assert session.messages[-1].parts[0].content == '"T"' and not session.messages[-1].parts[0].is_error
 
 
-def test_at_the_advisor_level_a_connector_is_not_loaded_and_the_model_is_told_why():
-    """A review of 2026-11-14: the user was asked, the connector connected, then each of its tools was refused."""
+def test_at_the_advisor_level_a_connector_is_asked_then_loaded():
+    """Decided by the user on 2026-11-14: the advisor level can use a connector, each call of its tools asked."""
     engine, session, transport, listener, policy, loads = engine_with(True, level="advisor")
     engine.send("go")
     transport.emit(turn(STOP_TOOL_USE, load_call("connector-a")))
-    answer = session.messages[-1].parts[0]
-    assert loads == [] and not [entry for entry in listener.log if entry[0] == "confirm"]
-    assert answer.is_error and "advise only" in answer.content and "connector-a" in answer.content
+    assert loads == ["connector-a"] and policy.granted == {"connector-a"}
+    assert [entry for entry in listener.log if entry[0] == "confirm"] == [("confirm", "load_skill")]
 
 
 def test_another_level_keeps_a_no_and_asks_a_yes_again():
