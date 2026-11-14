@@ -50,6 +50,9 @@ except ImportError:
 
 logger = get_logger(__name__)
 
+# Key of ``task_parameters["task"]``: what the source and the targets of a run held before it, by layer id.
+BEFORE_RUN = "before_run"
+
 
 def _restore_history_subset(layer, expression, errors=None):
     """Replay provider-accepted native syntax exactly, without QGIS parsing."""
@@ -797,6 +800,11 @@ class UndoRedoHandler:
             layer_count: Number of layers affected
         """
         filter_expression = source_layer.subsetString()
+        # What each layer held before this run, read by initialize_filter_history and carried by the parameters of
+        # the run itself: kept on the handler, the reading of a run refused after it was read (a server filter still
+        # pending) was taken by the run that ended next.
+        task = task_parameters.get("task") if isinstance(task_parameters, dict) else None
+        before_run = (task.pop(BEFORE_RUN, None) if isinstance(task, dict) else None) or {}
 
         logger.info(f"push_filter_to_history: source={source_layer.name()}, expr='{filter_expression[:40] if filter_expression else '(none)'}...', layer_count={layer_count}")
 
@@ -819,6 +827,12 @@ class UndoRedoHandler:
             previous_expressions = self._collect_previous_expressions(
                 source_layer.id(), list(remote_layers_info.keys())
             )
+            # 2026-11-14: what a layer held before the run is what Undo must give back. The last entry of
+            # the history said otherwise for a layer changed outside the dock since (a turn of the agent,
+            # a raster source, the query builder of QGIS): Undo then went past that change. Here the
+            # "Pre-filter state" entry of this run already holds the same reading: kept as a guard.
+            previous_expressions.update(
+                {layer_id: subset for layer_id, subset in before_run.items() if layer_id in previous_expressions})
 
             logger.info(f"push_filter_to_history: Creating GLOBAL entry with {len(remote_layers_info) + 1} layers")
             for lid, prev_expr in previous_expressions.items():
@@ -843,7 +857,8 @@ class UndoRedoHandler:
                 expression=filter_expression,
                 feature_count=feature_count,
                 description=description,
-                metadata={"backend": provider_type, "operation": "filter", "layer_count": layer_count}
+                metadata={"backend": provider_type, "operation": "filter", "layer_count": layer_count},
+                previous_expression=before_run.get(source_layer.id())
             )
 
             history_pos = history._current_index + 1 if hasattr(history, '_current_index') else '?'
@@ -968,6 +983,9 @@ class UndoRedoHandler:
         """
         project_layers = self._get_project_layers()
         project = self._get_project()
+        before_run = {current_layer.id(): current_layer.subsetString() or ""}
+        if isinstance(task_parameters.get("task"), dict):
+            task_parameters["task"][BEFORE_RUN] = before_run
 
         # Initialize per-layer history for source layer if needed
         history = self._history_manager.get_or_create_history(current_layer.id())
@@ -981,7 +999,10 @@ class UndoRedoHandler:
                 metadata={
                     "operation": "initial",
                     "backend": task_parameters["infos"].get("layer_provider_type", "unknown")
-                }
+                },
+                # A state, not a filter: undoing it leaves the layer as it is. Its previous filter was "",
+                # so a second Undo removed a filter the dock had never set.
+                previous_expression=current_filter
             )
             logger.info(f"FilterMate: Initialized history with current state for source layer {current_layer.id()}")
 
@@ -1004,12 +1025,14 @@ class UndoRedoHandler:
                             metadata={
                                 "operation": "initial",
                                 "backend": layer_info.get("layer_provider_type", "unknown")
-                            }
+                            },
+                            previous_expression=assoc_filter  # a state, not a filter: see the source above
                         )
                         logger.info(f"FilterMate: Initialized history for associated layer {assoc_layer.name()}")
 
                     # Collect CURRENT state for all remote layers (for global state)
                     remote_layers_info[assoc_layer.id()] = (assoc_layer.subsetString(), _history_count(assoc_layer))
+                    before_run[assoc_layer.id()] = assoc_layer.subsetString() or ""
 
         # ALWAYS push global state BEFORE filtering if we have remote layers
         if remote_layers_info:
@@ -1020,6 +1043,9 @@ class UndoRedoHandler:
                 source_expression=current_filter,
                 source_feature_count=current_count,
                 remote_layers=remote_layers_info,
+                # A state, not a filter: undoing it leaves every layer as it is. Taken from the history, its
+                # previous filters undid, at the second Undo, what was changed outside the dock.
+                previous_expressions=dict(before_run),
                 description=f"Pre-filter state ({len(remote_layers_info) + 1} layers)",
                 metadata={
                     "operation": "pre_filter",
