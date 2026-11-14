@@ -4,7 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
-## [5.1.1] - 2026-11-13
+## [5.1.1] - 2026-11-14
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with your own API key or a local Ollama model. New: the agent sets FilterMate up with you, asks its questions with choices to click and follows your own skills; the dock compares the map before and after the last filter; a filter reads the variables of QGIS, of the project and of the layer.
 
