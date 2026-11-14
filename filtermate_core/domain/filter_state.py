@@ -207,6 +207,11 @@ class CrossOperationHistory:
         self._undo.pop(source_layer_id, None)
         self._redo.pop(source_layer_id, None)
 
+    def sources(self) -> List[str]:
+        """The keys (source layer ids) with an operation still kept, to undo or to redo, first recorded first."""
+        keys = dict.fromkeys(list(self._undo) + list(self._redo))
+        return [key for key in keys if self._undo.get(key) or self._redo.get(key)]
+
     def operations(self) -> List[CrossOperation]:
         """Every operation still kept (undo and redo stacks)."""
         return [op for stacks in (self._undo, self._redo) for stack in stacks.values() for op in stack]

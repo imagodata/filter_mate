@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .compare_states import BeforeState, from_cross_operation, from_history_entry
+from .compare_states import BeforeMap, BeforeState, Effects, from_cross_operation, from_history_entry, map_with_effects
 
 KIND_VECTOR = "vector"
 KIND_COVERAGE = "coverage"
@@ -187,6 +187,83 @@ def _after(item: TimelineItem, target: TimelineItem) -> bool:
     if target.kind == KIND_STEP and item.key == target.key and item.kind == KIND_AGENT:
         return item.time > target.time
     return item.time >= target.time
+
+
+def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap:
+    """The map before ``target``, for Compare: each layer changed since as it was then (:func:`states_before`), and
+    what the turns of the agent did since beside the filters (a style, a layer shown, hidden, added or removed), as it
+    was before the first of them.
+
+    The turns counted are ``target`` itself (a step: the steps of its turn from that one, what "undo back to here"
+    undoes) and those done after it. Empty for an item undone: the map no longer holds it.
+    """
+    if not target.applied:
+        return BeforeMap(label=target.label)
+    effects = []
+    if target.kind == KIND_STEP:
+        step_effects = getattr(target.ref, "step_effects", ()) or ()
+        effects.append((tuple(effect for done in step_effects[target.position:] for effect in done), False))
+    elif target.kind == KIND_AGENT:
+        effects.append(_effects_of(target.ref))
+    later = [item for item in items if item.applied and item.kind == KIND_AGENT and item is not target
+             and not _same_operation(item, target) and _after(item, target)]
+    for item in sorted(later, key=lambda other: (other.time, other.position)):
+        effects.append(_effects_of(item.ref))
+    return map_with_effects(states_before(items, target), effects, target.label)
+
+
+def _effects_of(operation: Any) -> Effects:
+    return getattr(operation, "effects", ()) or (), bool(getattr(operation, "effects_reversed", False))
+
+
+@dataclass(frozen=True)
+class UndoFocus:
+    """The history Undo and Redo of the action bar walk now, and what they would take.
+
+    Attributes:
+        kind: ``KIND_VECTOR``, ``KIND_COVERAGE`` or ``KIND_AGENT``; "" when they walk none (another section is open).
+        undo: What Undo would undo now: an entry or an operation (a vector filter and the raster / point cloud step
+            it ran with), empty when nothing.
+        redo: What Redo would redo now.
+        undo_left: How many steps Undo can take one after the other from here.
+        redo_left: How many steps Redo can take.
+        source: The name of the layer whose raster / point cloud history they walk.
+    """
+
+    kind: str = ""
+    undo: Tuple[Any, ...] = ()
+    redo: Tuple[Any, ...] = ()
+    undo_left: int = 0
+    redo_left: int = 0
+    source: str = ""
+
+
+def walkable(stack: Sequence[Any], takes: Callable[[Any], bool]) -> int:
+    """How many entries of ``stack`` (the next one last) Undo or Redo takes one after the other: it stops at the first
+    one ``takes`` refuses (a vector filter out of the scope of the current layer)."""
+    count = 0
+    for entry in reversed(stack):
+        if not takes(entry):
+            break
+        count += 1
+    return count
+
+
+def mark(item: TimelineItem, focus: UndoFocus) -> str:
+    """``"undo"`` for what Undo would undo now, ``"redo"`` for what Redo would redo, "" otherwise (a step of a turn
+    is never taken alone by the action bar)."""
+    if item.kind == KIND_STEP or item.ref is None:
+        return ""
+    if item.applied and any(item.ref is ref for ref in focus.undo):
+        return "undo"
+    if not item.applied and any(item.ref is ref for ref in focus.redo):
+        return "redo"
+    return ""
+
+
+def label_of(ref: Any) -> str:
+    """What an entry or an operation did, in the words its history kept (as the label of its item)."""
+    return _label(getattr(ref, "description", "")) or _label(getattr(ref, "expression", ""))
 
 
 def counts(items: Iterable[TimelineItem]) -> Tuple[int, int]:
