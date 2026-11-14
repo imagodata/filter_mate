@@ -37,7 +37,8 @@ class LayerHistory:
         self._states = []  # Simulated per-layer states for compatibility
 
     def push_state(self, expression: str, feature_count: int,
-                   description: str = "", metadata: Optional[Dict] = None):
+                   description: str = "", metadata: Optional[Dict] = None,
+                   previous_expression: Optional[str] = None):
         """
         Push a filter state for this layer (compatibility method).
 
@@ -48,6 +49,8 @@ class LayerHistory:
             feature_count: Feature count (stored in metadata)
             description: Optional description
             metadata: Optional metadata
+            previous_expression: The subset the layer really held before this filter, when the
+                caller read it (None: taken from the last entry of this layer)
         """
         # Build metadata with feature count
         full_metadata = metadata or {}
@@ -55,12 +58,17 @@ class LayerHistory:
 
         # Get previous filter state for this layer (for undo functionality)
         # Look at the last history entry that affected this layer
-        previous_expression = ""
         previous_entries = self._parent.get_history_for_layer(self.layer_id)
-        if previous_entries:
+        if previous_expression is not None:
+            # Read from the layer before the filter ran: the history does not know what was
+            # changed outside it (a turn of the agent, a raster source, the query builder)
+            previous_expression = previous_expression or ""
+        elif previous_entries:
             # What the last entry gave this layer is what we're replacing: its
             # expression only when this layer was its source, not one of its targets
             previous_expression = previous_entries[-1].expression_for(self.layer_id) or ""
+        else:
+            previous_expression = ""
 
         # Create history entry with correct previous_filters for undo
         entry = HistoryEntry.create(
