@@ -21,17 +21,11 @@ root conftest already provides mocked qgis.*).
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
 
-from core.services.history_service import (
-    HistoryEntry,
-    HistoryService,
-    HistoryState,
-    LayerHistory,
-)
+from core.services.history_service import HistoryEntry, HistoryService
 
 
 def _make_entry(
@@ -842,3 +836,186 @@ class TestRemoveHistory:
             h.push(_make_entry(layer_ids=("A",)))
 
         assert h.undo_count == 3
+
+
+# ---------------------------------------------------------------------------
+# undo_layer / redo_layer (Undo / Redo of the current layer alone)
+# ---------------------------------------------------------------------------
+
+
+class TestUndoRedoLayer:
+    """2026-11-14: Undo without the layers to filter restored the current layer alone and popped the whole entry
+    of a filter of several layers: the other layers kept their filter and lost their step. Their part stays."""
+
+    def test_an_entry_of_the_layer_alone_moves_whole(self):
+        h = HistoryService()
+        h.push(_make_entry("a = 1", layer_ids=("A",), previous_filters=(("A", "a0"),)))
+        entry = h.peek_undo()
+
+        assert h.undo_layer("A") is entry
+        assert h.can_undo is False and h.peek_redo() is entry
+        assert h.redo_layer("A") is entry
+        assert h.peek_undo() is entry and h.can_redo is False
+
+    def test_the_part_of_the_source_leaves_the_rest_in_its_place(self):
+        h = HistoryService()
+        older = _make_entry("a = 0", layer_ids=("A",), previous_filters=(("A", ""),))
+        h.push(older)
+        original = _global_state(h)
+
+        part = h.undo_layer("A")
+
+        older_kept, rest = h.get_undo_stack()
+        assert older_kept is older
+        assert rest.entry_id == original.entry_id and rest.timestamp == original.timestamp
+        assert rest.layer_ids == ("B", "C")
+        assert {lid: rest.expression_for(lid) for lid in rest.layer_ids} == {"B": "b = 1", "C": "c = 1"}
+        assert dict(rest.previous_filters) == {"B": "b0", "C": "c0"}
+        assert not rest.ran_from("B")  # the filter ran from A: B's raster steps never pair with it
+        assert h.get_redo_stack() == [part]
+        assert part.layer_ids == ("A",) and part.expression == "a = 1" and part.expression_for("A") == "a = 1"
+        assert part.previous_filters == (("A", "a0"),)
+        assert part.ran_from("A") and part.get_metadata_value("source_feature_count") == 1
+        assert part.description == original.description and part.entry_id == original.entry_id
+
+    def test_the_part_of_a_target(self):
+        h = HistoryService()
+        _global_state(h)
+
+        part = h.undo_layer("B")
+
+        rest = h.peek_undo()
+        assert rest.layer_ids == ("A", "C") and rest.expression == "a = 1" and rest.ran_from("A")
+        assert rest.expression_for("C") == "c = 1" and set(rest.get_metadata_value("remote_layers")) == {"C"}
+        assert part.layer_ids == ("B",) and part.expression_for("B") == "b = 1"
+        assert part.previous_filters == (("B", "b0"),) and part.get_metadata_value("source_feature_count") == 2
+        assert not part.ran_from("B")
+
+    def test_parts_undone_one_by_one_leave_no_empty_entry(self):
+        h = HistoryService()
+        _global_state(h)
+
+        for layer_id in ("A", "C", "B"):
+            assert h.undo_layer(layer_id).layer_ids == (layer_id,)
+
+        assert h.undo_count == 0
+        assert [(e.layer_ids, e.expression) for e in h.get_redo_stack()] == [
+            (("A",), "a = 1"), (("C",), "c = 1"), (("B",), "b = 1")]
+        assert [e.get_previous_filter(e.layer_ids[0]) for e in h.get_redo_stack()] == ["a0", "c0", "b0"]
+
+    def test_a_layer_not_in_the_last_entry_changes_nothing(self):
+        callback = MagicMock()
+        h = HistoryService(on_change=callback)
+        h.push(_make_entry(layer_ids=("A",)))
+        _global_state(h, source="B", remotes={"C": ("c = 1", 3)}, previous={"B": "", "C": ""})
+        h.undo()
+        callback.reset_mock()
+        undo, redo = h.get_undo_stack(), h.get_redo_stack()
+
+        assert h.undo_layer("C") is None  # the last entry is A's
+        assert h.redo_layer("A") is None  # the next to redo is B's
+        assert h.get_undo_stack() == undo and h.get_redo_stack() == redo
+        callback.assert_not_called()
+
+    def test_the_part_redone_comes_back_alone_on_top_of_the_rest(self):
+        callback = MagicMock()
+        h = HistoryService(on_change=callback)
+        _global_state(h)
+        part = h.undo_layer("A")
+        assert callback.call_count == 2  # the push, then this part
+
+        assert h.redo_layer("A") is part
+
+        rest, redone = h.get_undo_stack()
+        assert redone is part and rest.layer_ids == ("B", "C") and h.can_redo is False
+        assert h.undo_layer("A") is part  # alone now: moved whole
+
+    def test_the_part_of_an_entry_undone_whole(self):
+        h = HistoryService()
+        original = _global_state(h)
+        h.undo()
+
+        part = h.redo_layer("C")
+
+        assert h.peek_undo() is part and part.layer_ids == ("C",) and part.expression == "c = 1"
+        assert part.previous_filters == (("C", "c0"),)
+        rest = h.peek_redo()
+        assert rest.layer_ids == ("A", "B") and rest.expression == "a = 1" and rest.ran_from("A")
+        assert original.layer_ids == ("A", "B", "C")  # frozen: the entry itself is never changed
+
+    def test_a_new_filter_after_a_part_undone_clears_the_redo_stack(self):
+        h = HistoryService()
+        _global_state(h)
+        h.undo_layer("A")
+
+        h.push(_make_entry("b = 2", layer_ids=("B",), previous_filters=(("B", "b = 1"),)))
+
+        assert h.can_redo is False
+        assert [e.layer_ids for e in h.get_undo_stack()] == [("B", "C"), ("B",)]
+
+    def test_a_part_undone_then_redone_drops_no_step_of_a_full_history(self):
+        """A review of 2026-11-14: the stacks are deques of max_depth; one step split in two made one entry more, and
+        the full deque dropped its oldest step, a step the user never left."""
+        h = HistoryService(max_depth=3)
+        h.push(_make_entry("x", layer_ids=("X",)))
+        h.push(_make_entry("y", layer_ids=("Y",)))
+        _global_state(h)
+
+        h.undo_layer("A")
+        h.redo_layer("A")
+
+        assert [e.layer_ids for e in h.get_undo_stack()] == [("X",), ("Y",), ("B", "C"), ("A",)]
+        for layer_id in ("A", "B", "C"):
+            h.undo_layer(layer_id)
+        h.undo()
+        h.undo()
+        assert h.undo_count == 0 and h.redo_count == 5  # every part and step still there to redo
+        for _ in range(5):
+            h.redo()
+        assert [e.layer_ids for e in h.get_undo_stack()] == [("X",), ("Y",), ("C",), ("B",), ("A",)]
+
+    def test_a_new_filter_brings_the_history_back_to_max_depth(self):
+        h = HistoryService(max_depth=2)
+        h.push(_make_entry("x", layer_ids=("X",)))
+        _global_state(h)
+        h.undo_layer("A")
+        h.redo_layer("A")
+        assert h.undo_count == 3
+
+        h.push(_make_entry("n", layer_ids=("N",)))
+
+        # The oldest steps leave, as a push into a full history always dropped them
+        assert [e.layer_ids for e in h.get_undo_stack()] == [("A",), ("N",)] and h.can_redo is False
+        for _ in range(3):
+            h.push(_make_entry("n", layer_ids=("N",)))
+        assert h.undo_count == 2
+
+    def test_a_removed_layer_keeps_what_a_grown_history_holds(self):
+        h = HistoryService(max_depth=2)
+        h.push(_make_entry("x", layer_ids=("X",)))
+        _global_state(h)
+        h.undo_layer("A")
+        h.redo_layer("A")
+
+        h.remove_history("Z")
+        h.remove_history("B")
+
+        assert [e.layer_ids for e in h.get_undo_stack()] == [("X",), ("C",), ("A",)]
+
+    def test_a_removed_source_leaves_no_run_of_the_layer_that_takes_its_place(self):
+        h = HistoryService()
+        _global_state(h)
+
+        h.remove_history("A")
+
+        assert h.peek_undo().layer_ids[0] == "B" and not h.peek_undo().ran_from("B")
+
+    def test_ran_from_survives_serialize(self):
+        h = HistoryService()
+        _global_state(h)
+        h.undo_layer("A")
+
+        restored = HistoryService()
+        restored.deserialize(h.serialize())
+
+        assert not restored.peek_undo().ran_from("B") and restored.peek_redo().ran_from("A")

@@ -34,7 +34,7 @@ from ...core.domain.history_timeline import (KIND_AGENT, KIND_COVERAGE, KIND_STE
                                              UndoFocus, agent_item, counts, cross_items, label_of, link, linked_pairs,
                                              map_before, mark, timeline, vector_items, walkable)
 from ..styles.mockup_design import plugin_is_dark, tokens
-from .compare_controller import PIN_COLOUR
+from .compare_controller import PIN_COLOUR, pin_label
 from .history_tips import button_tip, history_name
 
 logger = logging.getLogger("FilterMate.history")
@@ -105,6 +105,7 @@ class HistoryPanel(QFrame):
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.items: List[TimelineItem] = []
         self.pinned_at: Optional[float] = None  # when the pin listed first was taken; None: no pin
+        self.pin_automatic = False  # that pin was taken by itself, before a request of the agent
         self._dark: Optional[bool] = None  # the theme of the sheet set
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 8, 10, 10)
@@ -175,12 +176,12 @@ class HistoryPanel(QFrame):
         self.note.setVisible(item is not None and not item.applied)
 
     def set_timeline(self, items: List[TimelineItem], focus: UndoFocus, sources: dict,
-                     pinned_at: Optional[float] = None) -> None:
+                     pinned_at: Optional[float] = None, pin_automatic: bool = False) -> None:
         """List ``items`` (newest first, the steps of a turn after it), what Undo and Redo take marked; the pin first,
         apart, when there is one.
 
         ``sources``: the name of the layer of each raster / point cloud history, by key. ``pinned_at``: when the pin
-        was taken (0: not known), None without a pin.
+        was taken (0: not known), None without a pin; ``pin_automatic``: taken by itself before a request of the agent.
         """
         kept, kept_pin = self.selected(), self.pin_row_selected()
         dark = bool(plugin_is_dark(self.parentWidget() or self))
@@ -197,9 +198,10 @@ class HistoryPanel(QFrame):
         self.tree.clear()
         self.items = list(items)
         self.pinned_at = pinned_at
+        self.pin_automatic = pinned_at is not None and bool(pin_automatic)
         to_select, turn = None, None
         if pinned_at is not None:
-            pin = self._pin_row(pinned_at)
+            pin = self._pin_row(pinned_at, self.pin_automatic)
             self.tree.addTopLevelItem(pin)
             if kept_pin:
                 to_select = pin
@@ -245,13 +247,13 @@ class HistoryPanel(QFrame):
         self._sync_buttons()
 
     @staticmethod
-    def _pin_row(pinned_at: float) -> QTreeWidgetItem:
+    def _pin_row(pinned_at: float, automatic: bool = False) -> QTreeWidgetItem:
         """The line of the pin: what Compare shows, not a step of a history."""
         clock = _clock(pinned_at)
         row = QTreeWidgetItem()
         row.setData(COLUMN_ORIGIN, INDEX_ROLE, PIN_INDEX)
         row.setIcon(COLUMN_ORIGIN, origin_icon(PIN, PIN_COLOUR))
-        row.setText(COLUMN_WHAT, _tr("Pinned {}").format(clock) if clock else _tr("Pinned"))
+        row.setText(COLUMN_WHAT, pin_label(clock, automatic))
         tip = _tr("Map pinned at {}: Compare shows it left of the line.").format(clock) if clock else _tr("Pinned")
         for column in range(COLUMNS):
             row.setToolTip(column, tip)
@@ -448,8 +450,13 @@ class HistoryController(QObject):
 
         def takes(entry) -> bool:
             return _entry_in_scope(entry, current_id, targets)
+
+        def whole(entry) -> bool:
+            # Without layers to filter, the current layer's part alone (UndoRedoHandler._perform_layer_undo): the
+            # rest of the entry stays next, without this layer
+            return bool(targets) or set(entry.layer_ids) <= {current_id}
         undo_stack, redo_stack = history.get_undo_stack(), history.get_redo_stack()
-        undo_left, redo_left = walkable(undo_stack, takes), walkable(redo_stack, takes)
+        undo_left, redo_left = walkable(undo_stack, takes, whole), walkable(redo_stack, takes, whole)
         undo = tuple(undo_stack[-1:]) if undo_left else ()
         redo = tuple(redo_stack[-1:]) if redo_left else ()
         # The raster / point cloud targets of a vector source follow its Undo and Redo when the run they recorded is
@@ -459,11 +466,11 @@ class HistoryController(QObject):
                 cross = coverage.service.history
                 runs = (getattr(coverage, "_linked_runs", None) or {}).get(current_id) or []
                 done = (getattr(coverage, "_linked_redo", None) or {}).get(current_id) or []
-                if undo and undo[0].layer_ids and undo[0].layer_ids[0] == current_id and runs:
+                if undo and undo[0].ran_from(current_id) and runs:
                     operation = cross.peek_undo(current_id)
                     if coverage._run_is_next(runs[-1], operation):
                         undo += (operation,)
-                if redo and redo[0].layer_ids and redo[0].layer_ids[0] == current_id and done:
+                if redo and redo[0].ran_from(current_id) and done:
                     operation = cross.peek_redo(current_id)
                     if coverage._run_is_next(done[-1], operation):
                         redo += (operation,)
@@ -507,7 +514,8 @@ class HistoryController(QObject):
         items = self.read()
         sources = {item.key: self._name(item.key) for item in items if item.kind == KIND_COVERAGE}
         pin = getattr(self._compare, "pinned", None)
-        self.panel.set_timeline(items, focus, sources, pin.taken_at if pin is not None else None)
+        self.panel.set_timeline(items, focus, sources, pin.taken_at if pin is not None else None,
+                                bool(getattr(self._compare, "pinned_automatically", False)))
 
     def _make_panel(self) -> HistoryPanel:
         if self.panel is None:

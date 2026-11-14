@@ -2015,6 +2015,11 @@ class ControllerIntegration:
         """The history panel and the tooltips of Undo / Redo (``HistoryController``), None when not set up."""
         return getattr(self, "_history_controller", None)
 
+    @property
+    def compare_controller(self):
+        """The Compare button and its pin (``CompareController``), None when not set up."""
+        return getattr(self, "_compare_controller", None)
+
     def delegate_coverage_activate_awaited(self) -> bool:
         """Show the raster / point cloud layer picked before add_layers registered it; True when shown."""
         controller = self._point_cloud_ui_controller

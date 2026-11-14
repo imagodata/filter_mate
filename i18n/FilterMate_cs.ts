@@ -267,6 +267,16 @@ Souhlasíte?</translation>
         <translation>Vrstva přidána: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabulka přidána: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Čtení tabulek z {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Podkladová mapa přidána: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Souhlasíte?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent chce do projektu přidat tuto tabulku vaší databáze {}:
+{}
+
+Její řádky pak nástroje agenta čtou jako řádky jakékoli vrstvy a mohou být odeslány poskytovateli agenta. Souhlasíte?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1179,6 +1200,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Mapa před tímto požadavkem či krokem vlevo od čáry, současná mapa vpravo od ní</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Mapa před tímto krokem vlevo od čáry, současná mapa vpravo od ní</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Mapa před celým požadavkem vlevo od čáry, současná mapa vpravo od ní: jednotlivě se porovnávají jen kroky posledního požadavku</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ZKUSTE</translation>
@@ -1501,6 +1532,11 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Vyhledávání míst</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Databáze QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4762,6 +4798,16 @@ What would you like to do?</translation>
         <translation>Odebrat připnutí</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Připnout mapu před každým požadavkem na agenta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vodorovná čára</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Kliknutím do mapy čáru zamknete, dalším kliknutím ji uvolníte.</translation>
@@ -4800,6 +4846,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Připnuto {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Připnuto {} (před požadavkem na agenta)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

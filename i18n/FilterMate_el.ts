@@ -267,6 +267,16 @@ Do you agree?</source>
         <translation>Προστέθηκε επίπεδο: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Προστέθηκε πίνακας: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Ανάγνωση των πινάκων του {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Προστέθηκε χάρτης υποβάθρου: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Συμφωνείτε;</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να προσθέσει στο έργο αυτόν τον πίνακα της βάσης δεδομένων σας {}:
+{}
+
+Οι γραμμές του διαβάζονται στη συνέχεια από τα εργαλεία του πράκτορα όπως αυτές κάθε επιπέδου και μπορούν να σταλούν στον πάροχο του πράκτορα. Συμφωνείτε;</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1179,6 +1200,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Ο χάρτης πριν από αυτό το αίτημα ή βήμα αριστερά μιας γραμμής, ο τωρινός χάρτης δεξιά της</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Ο χάρτης πριν από αυτό το βήμα αριστερά μιας γραμμής, ο τωρινός χάρτης δεξιά της</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Ο χάρτης πριν από ολόκληρο το αίτημα αριστερά μιας γραμμής, ο τωρινός χάρτης δεξιά της: μόνο τα βήματα του τελευταίου αιτήματος συγκρίνονται ένα προς ένα</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ΔΟΚΙΜΑΣΤΕ</translation>
@@ -1501,6 +1532,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Αναζήτηση τόπων</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Βάσεις δεδομένων του QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4774,6 +4810,16 @@ What would you like to do?</translation>
         <translation>Αφαίρεση καρφιτσώματος</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Καρφίτσωμα του χάρτη πριν από κάθε αίτημα προς τον πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Οριζόντια γραμμή</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Κάντε κλικ στον χάρτη για να κλειδώσετε τη γραμμή, ξανά για να την αποδεσμεύσετε.</translation>
@@ -4812,6 +4858,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Καρφιτσώθηκε {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Καρφιτσώθηκε {} (πριν από το αίτημα προς τον πράκτορα)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

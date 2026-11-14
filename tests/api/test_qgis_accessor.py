@@ -65,6 +65,22 @@ def _restore_qgis_stubs(snapshot):
             sys.modules[key] = module
 
 
+_FEATURE_COUNT = {}
+
+
+def _feature_count_module():
+    """adapters/qgis/feature_count.py, loaded from its file once (standard library only; GDAL imported to read)."""
+    if "module" not in _FEATURE_COUNT:
+        import importlib.util
+        import pathlib
+        path = pathlib.Path(__file__).resolve().parents[2] / "adapters" / "qgis" / "feature_count.py"
+        spec = importlib.util.spec_from_file_location("fm_api_feature_count", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _FEATURE_COUNT["module"] = module
+    return _FEATURE_COUNT["module"]
+
+
 @pytest.fixture(autouse=True)
 def _qgis_isolation(monkeypatch):
     """Restore the global qgis mocks after each test so sibling test
@@ -77,6 +93,8 @@ def _qgis_isolation(monkeypatch):
     original_module = qgis_accessor._plugin_module
 
     def plugin_module(name):
+        if name == 'adapters.qgis.feature_count':
+            return _feature_count_module()
         if name == 'core.domain.source_capability':
             # These accessor doubles model local layers. Actual remote
             # classification/application is covered by check_stream_A.py.
@@ -99,11 +117,15 @@ class _MockLayer(_DefaultVectorLayer):
 
 
 def _make_layer(*, layer_id, name, subset="", provider="ogr",
-                feature_count=10, geom_type=2, crs_authid="EPSG:2154"):
+                feature_count=10, geom_type=2, crs_authid="EPSG:2154",
+                source="/data/layer.shp", storage="ESRI Shapefile"):
     layer = _MockLayer()
     layer.id = MagicMock(return_value=layer_id)
     layer.name = MagicMock(return_value=name)
     layer.providerType = MagicMock(return_value=provider)
+    layer.source = MagicMock(return_value=source)
+    layer.dataProvider = MagicMock(return_value=types.SimpleNamespace(storageType=lambda: storage))
+    layer.isModified = MagicMock(return_value=False)
     layer.featureCount = MagicMock(return_value=feature_count)
     layer.geometryType = MagicMock(return_value=geom_type)
     layer.subsetString = MagicMock(return_value=subset)
@@ -186,6 +208,46 @@ class TestListLayers:
         accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
         names = [layer.name for layer in accessor.list_layers()]
         assert names == ["ok"]
+
+    def test_feature_count_of_a_layer(self, accessor):
+        assert [layer.feature_count for layer in accessor.list_layers()] == [10, 10]
+
+    def test_a_filtered_geopackage_is_counted_with_its_filter(self, public_api, plugin, tmp_path, monkeypatch):
+        """2026-11-14: featureCount() of a GeoPackage without gpkg_ogr_contents leaves the filter out (930 for 7)."""
+        path = tmp_path / "bdtopo.gpkg"
+        path.write_bytes(b"")
+        counted = []
+        module = _feature_count_module()
+
+        def read_count(path, table, index, subset, budget):
+            counted.append((path, table, index, subset))
+            return 7
+
+        monkeypatch.setattr(module, "_read_count", read_count)
+        layer = _make_layer(layer_id="L1", name="commune", subset='"population" >= 923', feature_count=930,
+                            source=f"{path}|layername=commune", storage="GPKG")
+        project = MagicMock()
+        project.mapLayers.return_value = {"L1": layer}
+        _install_qgis_stubs(project, _DefaultVectorLayer)
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
+        assert accessor.list_layers()[0].feature_count == 7
+        assert counted == [(str(path), "commune", 0, '"population" >= 923')]
+
+    def test_without_the_count_module_featurecount_is_read(self, public_api, plugin, project_with_layers,
+                                                             monkeypatch):
+        from filtermate_api import qgis_accessor
+        wrapped = qgis_accessor._plugin_module
+
+        def plugin_module(name):
+            if name == "adapters.qgis.feature_count":
+                raise ImportError(name)
+            return wrapped(name)
+
+        monkeypatch.setattr(qgis_accessor, "_plugin_module", plugin_module)
+        project, _, _ = project_with_layers
+        _install_qgis_stubs(project, _DefaultVectorLayer)
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
+        assert [layer.feature_count for layer in accessor.list_layers()] == [10, 10]
 
     def test_active_filter_flag_reflects_subset_string(self, public_api, plugin):
         layer = _make_layer(layer_id="L1", name="communes", subset='"x" = 1')
