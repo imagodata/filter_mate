@@ -7,8 +7,8 @@ import pytest
 
 from core.domain.compare_states import BeforeMap, BeforeState
 from core.domain.history_timeline import (
-    KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, UndoFocus, agent_item, counts, cross_items, label_of, latest,
-    link, linked_pairs, map_before, mark, states_before, timeline, vector_items, walkable,
+    KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, UndoFocus, agent_item, card_target, changes_map, counts,
+    cross_items, label_of, latest, link, linked_pairs, map_before, mark, states_before, timeline, vector_items, walkable,
 )
 
 pytestmark = pytest.mark.unit
@@ -285,3 +285,45 @@ def test_the_map_before_a_filter_undoes_the_raster_operation_it_ran_with():
     # Not linked, the clock leaves the DEM clipped before the filter.
     unlinked = {item.label: item for item in items}
     assert {s.layer_id for s in map_before(items, unlinked["Roads and DEM"]).states} == {"roads"}
+
+
+def turn(op_id, pairs=(), steps=(), step_effects=(), effects=()):
+    return SimpleNamespace(op_id=op_id, changes=tuple(pairs), steps=tuple(steps), step_effects=tuple(step_effects),
+                           effects=tuple(effects))
+
+
+def test_the_card_of_a_step_of_the_last_turn_compares_with_the_map_before_that_step():
+    style = ("style", "roads", "<old/>", "<new/>", "roads")
+    note = ("notes", "", (), ("a note",))
+    old = turn(7, [(snap("roads", "a"), snap("roads", "b"))])
+    last = turn(9, [(snap("roads", "b"), snap("roads", "c"))],
+                steps=[("Filter", (snap("roads", "b"),)), ("Note", ()), ("Restyle", ())],
+                step_effects=[(), (note,), (style,)], effects=(note, style))
+    stack = (old, last)
+    assert card_target(stack, 9, 0) == (1, 0, True)
+    assert card_target(stack, 9, 2) == (1, 2, True)  # a style changed: the map is drawn otherwise
+    assert card_target(stack, 9, 1) is None  # a note: nothing of the map to compare
+    assert card_target(stack, 9, 3) is None  # no such step
+    assert card_target(stack, 7, None) == (0, None, True)  # a turn of a single step: the turn is the step
+
+
+def test_the_card_of_a_step_of_an_earlier_turn_compares_with_the_map_before_its_whole_request():
+    first = turn(3, [(snap("roads", "a"), snap("roads", "c"))],
+                 steps=[("A", (snap("roads", "a"),)), ("B", (snap("roads", "b"),))])
+    back = turn(4, [(snap("roads", "c"), snap("roads", "b"))])  # "undo back to here" on top
+    assert card_target((first, back), 3, 1) == (0, None, False)
+    assert card_target((first,), 3, 1) == (0, 1, True)
+
+
+def test_the_card_of_a_turn_undone_or_forgotten_compares_nothing():
+    kept = turn(5, [(snap("roads", "a"), snap("roads", "b"))])
+    assert card_target((kept,), 6, None) is None  # undone (in the redo stack) or dropped from the history
+    assert card_target((), 5, None) is None
+    assert card_target((turn(5, effects=(("selection", "roads", (), (1,)),)),), 5, None) is None
+
+
+def test_a_turn_changes_the_map_by_a_filter_or_an_effect_compare_draws_or_names():
+    assert changes_map(turn(1, [(snap("roads", "a"), snap("roads", "b"))]))
+    assert changes_map(turn(1, effects=(("visibility", "roads", True, False),)))
+    assert changes_map(turn(1, effects=(("layer_name", "roads", "a", "b", "roads"),)))
+    assert not changes_map(turn(1, effects=(("notes", "", (), ("n",)), ("settings", "", "{}", "{}", 0))))

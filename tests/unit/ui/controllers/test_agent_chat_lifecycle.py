@@ -81,11 +81,14 @@ class FakeCheckpoint:
     """The undo point of a turn: what was committed, and whether it was discarded."""
 
     def __init__(self):
-        self.label, self.describe = "", None
+        self.label, self.describe, self.on_open, self.recorded = "", None, None, None
         self.open, self.committed, self.discarded = False, 0, 0
 
     def begin(self, call=None):
         self.open = True
+
+    def step_of(self, call):
+        return None
 
     def commit(self):
         if self.open:
@@ -100,6 +103,7 @@ class FakeCheckpoint:
     can_undo = staticmethod(lambda: True)
     can_redo = staticmethod(lambda: False)
     turns = staticmethod(lambda: [])
+    applied = staticmethod(lambda: ())
     busy = staticmethod(lambda: "")
 
 

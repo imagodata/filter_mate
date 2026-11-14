@@ -154,6 +154,55 @@ def test_a_turn_keeps_when_it_and_its_steps_began(monkeypatch, checkpoint_module
     assert single.started == 400.0 and single.steps == () and single.step_times == ()
 
 
+def test_each_call_finds_its_step_and_the_commit_says_where_it_was_recorded(checkpoint_module):
+    """The cards of the thread compare their own step: by the call object (two calls may share an id), only the steps
+    recorded (one that changed nothing is not), by their rank among them; a turn of one step keeps no list."""
+    holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
+    roads, towns = Layer("roads"), Layer("towns")
+    holder.project = Project([roads, towns])
+    opened = []
+    checkpoint = checkpoint_module.TurnCheckpoint()
+    checkpoint.on_open = lambda: opened.append(roads.subset)
+    calls = [types.SimpleNamespace(name="apply_filter", arguments={}, call_id="same") for _ in range(3)]
+    for index, (call, (layer, subset)) in enumerate(zip(calls, ((roads, "a"), (None, None), (towns, "b")))):
+        checkpoint.begin(call)  # the second call changes nothing
+        assert checkpoint.step_of(call) == index  # equal calls (SimpleNamespace compares fields): told apart
+        if layer is not None:
+            layer.subset = subset
+    assert opened == [""]  # once, before the first change
+    assert checkpoint.step_of(types.SimpleNamespace(name="apply_filter", call_id="same")) is None
+    checkpoint.commit()
+    turn = history.peek_undo(checkpoint_module.HISTORY_KEY)
+    assert checkpoint.recorded == (turn.op_id, {0: 0, 2: 1}) and len(turn.steps) == 2
+    assert checkpoint.step_of(calls[0]) is None  # the turn is over
+    assert checkpoint_module.TurnCheckpoint.applied()[-1] is turn
+    single = types.SimpleNamespace(name="apply_filter", arguments={})
+    checkpoint.begin(single)
+    roads.subset = "c"
+    checkpoint.commit()
+    assert checkpoint.recorded == (history.peek_undo(checkpoint_module.HISTORY_KEY).op_id, {0: None})
+    assert opened == ["", "a"]  # a new turn opens again
+    checkpoint.begin(types.SimpleNamespace(name="apply_filter", arguments={}))
+    checkpoint.commit()  # no layer changed, a note kept (the stand-in of the effects): no step to compare
+    assert checkpoint.recorded[1] == {}
+    checkpoint.commit()  # no turn open: nothing recorded
+    assert checkpoint.recorded is None
+
+
+def test_a_failure_when_a_turn_opens_never_stops_its_change(checkpoint_module):
+    holder = checkpoint_module._test_holder
+    layer = Layer("roads")
+    holder.project = Project([layer])
+    checkpoint = checkpoint_module.TurnCheckpoint()
+
+    def broken():
+        raise RuntimeError("the map cannot be read")
+    checkpoint.on_open = broken
+    checkpoint.begin(types.SimpleNamespace(name="apply_filter", arguments={}))
+    layer.subset = "x"
+    assert list(checkpoint.commit()) == ["roads"]
+
+
 def test_settings_effects_are_placed_among_the_recorded_steps(checkpoint_module):
     """The call of a settings effect becomes the number of recorded steps up to it (calls that changed a layer)."""
     effects = (("notes", "", (), ("n",)), ("settings", "", "{}", "{}", 2), ("settings", "", "{}", "{}", 5))
