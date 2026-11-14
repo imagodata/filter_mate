@@ -11,6 +11,11 @@ A pin (right-click on the button) keeps the map as it is: while it is there, Com
 available without Undo, and follows the map through filters, undos and turns of the agent, compared again each time
 the map is drawn; a change of project forgets it. A click on the map fixes the line where it is, another frees it.
 ``adapters/qgis/compare_swipe.py`` draws.
+
+The map is also pinned by itself before each request of the agent that changes it (``read_automatic_pin`` then
+``pin_automatic``, from the chat): such a pin says so, gives way to the next one, and never replaces a pin of the
+user. The menu turns that off, and lays the line across the map (the map before above it); both are kept in the
+settings of QGIS.
 """
 from __future__ import annotations
 
@@ -19,7 +24,7 @@ import time
 from dataclasses import replace
 from typing import Optional, Tuple
 
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsSettings
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 from qgis.PyQt.QtWidgets import QMenu, QPushButton
@@ -37,15 +42,44 @@ ENDING_BUTTONS = ("pushButton_action_filter", "pushButton_action_undo_filter", "
 LABEL_LENGTH = 40  # the description of an operation, above the map
 FOLLOW_DELAY_MS = 200  # a pin is compared again once the map is drawn and stays so
 PIN_COLOUR = QColor(230, 120, 20)  # the mark of a pin, on the button and in the history panel
+# The choices of the menu, kept in the settings of QGIS (for every project).
+AUTO_PIN_KEY = "filter_mate/compare/auto_pin"  # pin the map before each request of the agent (on by default)
+HORIZONTAL_KEY = "filter_mate/compare/horizontal"  # the line across the map
 
 
 def _tr(text: str) -> str:
     return QCoreApplication.translate("FilterMateDockWidget", text)
 
 
+def read_flag(key: str, default: bool) -> bool:
+    """A yes / no of the settings of QGIS; ``default`` when it was never set or cannot be read."""
+    try:
+        value = QgsSettings().value(key, default)
+    except Exception:  # a settings file QGIS cannot read: the default, the dock goes on
+        return default
+    if isinstance(value, str):  # an INI file gives back text
+        return value.strip().lower() in ("true", "1", "yes")
+    return default if value is None else bool(value)
+
+
+def write_flag(key: str, on: bool) -> None:
+    try:
+        QgsSettings().setValue(key, bool(on))
+    except Exception:
+        logger.debug("Compare: %s not saved", key, exc_info=True)
+
+
 def _clock(timestamp: float) -> str:
     """HH:MM; "" for a time not known (0), never the hour of the epoch."""
     return time.strftime("%H:%M", time.localtime(timestamp)) if timestamp and timestamp > 0 else ""
+
+
+def pin_label(clock: str, automatic: bool = False) -> str:
+    """What names a pin, by the line and in the history panel: when it was taken, and that it was taken by itself
+    before a request of the agent."""
+    if not clock:
+        return _tr("Pinned")
+    return _tr("Pinned {} (before the agent's request)").format(clock) if automatic else _tr("Pinned {}").format(clock)
 
 
 def compare_icon(size: int = 32, colour: QColor = QColor(90, 90, 90), pinned: bool = False) -> QIcon:
@@ -89,7 +123,8 @@ def _layout_holding(layout, widget):
 
 
 class CompareController(QObject):
-    """One button, its menu (pin the map, remove the pin) and the comparison it starts and stops."""
+    """One button, its menu (pin the map, remove the pin, pin before each request of the agent, the line across the
+    map) and the comparison it starts and stops."""
 
     pinChanged = pyqtSignal()  # a pin taken, replaced or forgotten: the history panel lists it
 
@@ -99,6 +134,9 @@ class CompareController(QObject):
         self._integration = integration
         self.session: Optional[CompareSession] = None
         self._pin: Optional[MapState] = None
+        self._pin_auto = False  # the pin was taken by itself, before a request of the agent
+        self.auto_pin = read_flag(AUTO_PIN_KEY, True)
+        self.horizontal = read_flag(HORIZONTAL_KEY, False)
         self._given: Optional[BeforeMap] = None  # a step compared through compare_with, the pin aside
         self._watch = MapWatch(self)  # while a pin is compared: whether the map may have changed
         self._shown: Optional[BeforeMap] = None  # what the comparison draws, to draw again only what changed
@@ -108,12 +146,14 @@ class CompareController(QObject):
         self._follow_timer.setInterval(FOLLOW_DELAY_MS)
         self._follow_timer.timeout.connect(self._follow)
         self.menu: Optional[QMenu] = None
-        self.pin_action = self.unpin_action = None
+        self.pin_action = self.unpin_action = self.auto_pin_action = self.horizontal_action = None
         self.button = self._make_button()
         self._undo = getattr(dockwidget, "pushButton_action_undo_filter", None)
         self._connections = []
         if self.button is None:
             return
+        self._connect(self.auto_pin_action.toggled, self.set_auto_pin)
+        self._connect(self.horizontal_action.toggled, self.set_horizontal)
         self._sync_button()
         if self._undo is not None:  # available when Undo is
             self._undo.installEventFilter(self)
@@ -162,6 +202,13 @@ class CompareController(QObject):
         self.pin_action.triggered.connect(self.pin)
         self.unpin_action = menu.addAction(_tr("Remove the pin"))
         self.unpin_action.triggered.connect(self.unpin)
+        self.auto_pin_action = menu.addAction(_tr("Pin the map before each request of the agent"))
+        self.auto_pin_action.setCheckable(True)
+        self.auto_pin_action.setChecked(self.auto_pin)
+        menu.addSeparator()
+        self.horizontal_action = menu.addAction(_tr("Horizontal line"))
+        self.horizontal_action.setCheckable(True)
+        self.horizontal_action.setChecked(self.horizontal)
         self.menu = menu
         button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         button.customContextMenuRequested.connect(self._show_menu)
@@ -285,6 +332,11 @@ class CompareController(QObject):
         return self._pin
 
     @property
+    def pinned_automatically(self) -> bool:
+        """The pin was taken by itself before a request of the agent (False without a pin)."""
+        return self._pin is not None and self._pin_auto
+
+    @property
     def named(self) -> Tuple[str, ...]:
         """What the last comparison said it could not draw as it was (a layer removed since...)."""
         return self._said
@@ -305,9 +357,11 @@ class CompareController(QObject):
         self._say(_tr("Map pinned at {}: Compare shows it left of the line.").format(_clock(state.taken_at)))
         return state
 
-    def pin_state(self, state: MapState) -> None:
-        """Pin ``state`` (``map_state()`` of the map now, or of a step kept elsewhere): Compare shows it from now on."""
-        self._pin = state
+    def pin_state(self, state: MapState, automatic: bool = False) -> None:
+        """Pin ``state`` (``map_state()`` of the map now, or of a step kept elsewhere): Compare shows it from now on.
+
+        ``automatic``: taken by itself before a request of the agent (``pin_automatic``), labelled so."""
+        self._pin, self._pin_auto = state, bool(automatic)
         self._sync_button()
         if self.session is not None and self.session.active and self._given is None:
             self._watch.start(self._canvas())
@@ -322,13 +376,67 @@ class CompareController(QObject):
         """Forget the pin: Compare shows the map before the last operation again (when there is one)."""
         if self._pin is None:
             return
-        self._pin = None
+        self._pin, self._pin_auto = None, False
         self._follow_timer.stop()
         self._watch.stop()
         self._sync_button()
         if self.session is not None and self.session.active and self._given is None:
             self.start()
         self.pinChanged.emit()  # last: a listener finds the comparison as the pin left it
+
+    # --- the pin before each request of the agent ---------------------------------
+
+    def read_automatic_pin(self) -> Optional[MapState]:
+        """The map now, to be pinned once the request of the agent beginning to change it is recorded
+        (``pin_automatic``); None when the menu turned that off, a pin of the user is there, or the map cannot be read
+        (a line in the log: the request goes on all the same)."""
+        if not self.auto_pin or self.button is None or (self._pin is not None and not self._pin_auto):
+            return None
+        started = time.perf_counter()
+        try:
+            # The styles a pinned comparison keeps: read again only for the layers that changed since.
+            state = map_state(self._canvas(), self._watch.style if self._watch.watching else None)
+        except Exception:  # whatever a layer raises: no pin, never a request held back
+            logger.info("Compare: the map was not pinned before the request of the agent", exc_info=True)
+            return None
+        logger.debug("Compare: map read for the pin before the request in %.0f ms (%d layers)",
+                     (time.perf_counter() - started) * 1000, len(state.layers))
+        return state
+
+    def pin_automatic(self, state: MapState) -> bool:
+        """Pin ``state``, read before a request of the agent, silently: it replaces a pin taken so, never one of the
+        user (pinned meanwhile included). True when pinned."""
+        if not self.auto_pin or self.button is None or (self._pin is not None and not self._pin_auto):
+            return False
+        self.pin_state(state, automatic=True)
+        return True
+
+    def set_auto_pin(self, on: bool) -> None:
+        """Pin the map before each request of the agent, or not (kept for the next sessions). A pin already taken
+        stays."""
+        self.auto_pin = bool(on)
+        write_flag(AUTO_PIN_KEY, self.auto_pin)
+        self._check(self.auto_pin_action, self.auto_pin)
+
+    def set_horizontal(self, on: bool) -> None:
+        """The line across the map (the map before above it) or down it, at once for a comparison under way; kept for
+        the next sessions."""
+        self.horizontal = bool(on)
+        write_flag(HORIZONTAL_KEY, self.horizontal)
+        self._check(self.horizontal_action, self.horizontal)
+        if self.session is not None:
+            self.session.set_horizontal(self.horizontal)
+
+    @staticmethod
+    def _check(action, on: bool) -> None:
+        """The menu says the choice made elsewhere (a check, another dock), without running it again."""
+        try:
+            if action is not None and action.isChecked() != on:
+                action.blockSignals(True)
+                action.setChecked(on)
+                action.blockSignals(False)
+        except RuntimeError:  # the menu went with the dock
+            pass
 
     def compare_pin(self, *_args) -> int:
         """Compare with the pin, as a click on the button does (a step compared gives way to it); the number of layers
@@ -347,7 +455,7 @@ class CompareController(QObject):
 
     def _on_project_cleared(self, *_args) -> None:
         self.stop()
-        pinned, self._pin = self._pin is not None, None
+        pinned, self._pin, self._pin_auto = self._pin is not None, None, False
         self._sync_button()
         if pinned:
             self.pinChanged.emit()
@@ -364,7 +472,7 @@ class CompareController(QObject):
     def _labels(self, before: BeforeMap) -> Tuple[str, str]:
         if before.pinned_at is not None:
             clock = _clock(before.pinned_at)
-            left = _tr("Pinned {}").format(clock) if clock else _tr("Pinned")
+            left = pin_label(clock, self.pinned_automatically)
         else:
             text = " ".join((before.label or "").split())
             if len(text) > LABEL_LENGTH:
@@ -376,6 +484,7 @@ class CompareController(QObject):
         if self.session is None:
             self.session = CompareSession(canvas, self)
             self.session.fixed_note = _tr("line fixed: click to free it")
+            self.session.horizontal = self.horizontal
             self.session.ended.connect(self.stop)
             self._connect(canvas.mapCanvasRefreshed, self._on_map_drawn)
         return self.session
@@ -532,7 +641,7 @@ class CompareController(QObject):
                 pass
         if self.session is not None:
             self.session.close()
-        self._pin = None
+        self._pin, self._pin_auto = None, False
         self._given = None
         self._set_checked(False)
 
