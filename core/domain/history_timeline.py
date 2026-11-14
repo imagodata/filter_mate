@@ -267,6 +267,18 @@ def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap
     return map_with_effects(states_before(items, target), effects, target.label)
 
 
+def agent_item(items: Iterable[TimelineItem], key: str, turn: int, step: Optional[int] = None) -> Optional[TimelineItem]:
+    """The turn of the agent applied at rank ``turn`` of its history ``key`` (oldest first, as the history page of the
+    agent lists it), or its step ``step``; None when ``items`` hold neither (undone since, or a step of an earlier
+    turn: only those of the last turn applied are listed)."""
+    found = next((item for item in items if item.kind == KIND_AGENT and item.key == key and item.applied
+                  and item.position == turn), None)
+    if found is None or step is None:
+        return found
+    return next((item for item in items if item.kind == KIND_STEP and item.key == key and item.ref is found.ref
+                 and item.position == step), None)
+
+
 def _effects_of(operation: Any) -> Effects:
     return getattr(operation, "effects", ()) or (), bool(getattr(operation, "effects_reversed", False))
 
