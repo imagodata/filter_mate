@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.basemaps import DEFAULT_ZMAX, default_title, is_image, known, sample_tiles, template_problem, xyz_uri
 from ...core.agent.open_data import (
-    KIND_STAC, KIND_WFS, KIND_XYZ, RemoteFile, archive_member, follow_redirects, gdal_source, is_point_cloud, is_web_page,
-    megabytes,
+    KIND_GEOCODER, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ, RemoteFile, archive_member, follow_redirects, gdal_source, is_point_cloud, is_web_page,
+    megabytes, geocode_url, parse_places,
     parse_results, parse_stac_items, reads_in_place, remote_file, resolve_platform, resolved_problem, search_url,
     source_problem, stac_search_body, valid_day,
 )
@@ -443,12 +443,22 @@ def search_imagery(bbox: Optional[List[float]] = None, start: str = '', end: str
 
 
 def add_service_layer(platform: str, typename: str, name: str = '', extra_domains: str = '') -> Dict[str, Any]:
-    """Add a layer of a WFS platform the user allowed: the plugin builds the source, for a name the service lists."""
+    """Add a layer of a WFS, WMS or WMTS platform the user allowed: the plugin builds the source, for a name the
+    service lists. A WFS layer is data; a WMS or WMTS layer is an image, put under the layers of the project."""
     from qgis.core import QgsProject
     from . import wfs_catalog
     kind, base = resolve_platform(platform, extra_domains)
+    if kind in (KIND_WMS, KIND_WMTS):
+        from . import image_catalog
+        project = QgsProject.instance()
+        layer = image_catalog.open_layer(kind, base, typename, name, project.crs().authid())
+        if not layer.isValid():
+            raise ValueError(f"{typename} could not be opened")
+        project.addMapLayer(layer, False)
+        project.layerTreeRoot().addLayer(layer)  # an image drawn by its server: under the data, as a basemap
+        return _summary(layer, count_features=False)
     if kind != KIND_WFS:
-        raise ValueError(f"{platform} is not a WFS service: use add_layer with one of its resources")
+        raise ValueError(f"{platform} is not a WFS, WMS or WMTS service: use add_layer with one of its resources")
     layer = wfs_catalog.open_layer(base, typename, name)
     if not layer.isValid():
         raise ValueError(f"{typename} could not be opened")  # nothing more is read from an invalid layer
@@ -577,14 +587,32 @@ def _json_answer(platform: str, url: str, body: Optional[bytes] = None, accept: 
     raise ValueError(problem + _ELSEWHERE)
 
 
+def find_place(query: str, platform: str = 'ign_geocoder', limit: int = 5, extra_domains: str = '') -> Dict[str, Any]:
+    """Ask a geocoder the user allowed where a place is; each answer comes with the extent to zoom to (EPSG:4326)."""
+    try:
+        kind, base = resolve_platform(platform, extra_domains)
+    except ValueError:
+        raise ValueError(f"{platform!r} is not a geocoder of the list") from None
+    if kind != KIND_GEOCODER:
+        raise ValueError(f"{platform} does not find places")
+    places = parse_places(_json_answer(platform, geocode_url(base, query, limit)))
+    return {'platform': platform, 'query': query, 'places': places, 'count': len(places)}
+
+
 def search_open_data(query: str, platform: str = 'datagouv', limit: int = 10, extra_domains: str = '') -> Dict[str, Any]:
     """Ask an allowed open data platform for datasets; the answer is reduced to titles and geo resources."""
     kind, base = resolve_platform(platform, extra_domains)
     if kind == KIND_XYZ:
         raise ValueError(f"{platform} is a basemap, there is nothing to search in it: add it with add_basemap")
+    if kind == KIND_GEOCODER:
+        raise ValueError(f"{platform} finds places, not datasets: ask it with find_place")
     if kind == KIND_WFS:
         from . import wfs_catalog
         datasets = wfs_catalog.search(base, query, max(1, min(int(limit), 20)))
+        return {'platform': platform, 'query': query, 'datasets': datasets, 'count': len(datasets)}
+    if kind in (KIND_WMS, KIND_WMTS):
+        from . import image_catalog
+        datasets = image_catalog.search(kind, base, query, max(1, min(int(limit), 20)))
         return {'platform': platform, 'query': query, 'datasets': datasets, 'count': len(datasets)}
     url = search_url(kind, base, query, limit)
     payload = _json_answer(platform, url)

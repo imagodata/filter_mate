@@ -31,10 +31,13 @@ from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader
 from ...core.agent.mcp_client import McpError
 from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
 from ...core.agent.basemaps import shown as basemap_shown
-from ...core.agent.open_data import KIND_STAC, KIND_WFS, KIND_XYZ, display_source, parse_extra_domains
+from ...core.agent.open_data import (
+    KIND_GEOCODER, KIND_STAC, KIND_XYZ, NO_DATA_KINDS, NO_FILE_KINDS, SERVICE_KINDS, display_source,
+    parse_extra_domains,
+)
 from ...core.agent.sources import (
     KIND_MCP, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, all_sources, custom_from_json, describe_enabled, enabled,
-    basemap_addresses, model_name, platform_domains, platform_name,
+    model_name, platform_aliases, platform_domains, platform_name,
 )
 from ...core.agent.permissions import (
     ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, RULE_NEVER, RUN, STANDARD, TURNED_OFF, PermissionPolicy,
@@ -92,6 +95,7 @@ OPEN_DATA_TOOL = "search_open_data"
 SERVICE_TOOL = "add_service_layer"
 IMAGERY_TOOL = "search_imagery"
 BASEMAP_TOOL = "add_basemap"
+PLACE_TOOL = "find_place"
 NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
                      "only takes local files. When data from the web is asked, say so and call show_settings_link "
                      "with target sources: the user gets a button to tick a platform, then asks again.")
@@ -99,6 +103,10 @@ NO_BASEMAP_NOTE = ("\n\nThe user enabled no web basemap: add_basemap is not avai
                    "that one can be ticked in the Sources tab of the settings of the agent, under Basemaps (OpenStreetMap, "
                    "Carto, IGN...), or an XYZ address added there, and call show_settings_link with target sources: "
                    "the user gets a button to that tab, then asks again. Do not try another way.")
+NO_GEOCODER_NOTE = ("\n\nThe user enabled no geocoder: find_place is not available. A place a layer of the project "
+                    "holds is found with select_features and zoom_to. For any other place, say that a place search "
+                    "can be ticked in the Sources tab of the settings of the agent and call show_settings_link with "
+                    "target sources; never guess coordinates.")
 FIXED_IN_SETTINGS = (ERROR_AUTH, ERROR_QUOTA)
 MAX_DETAIL_CHARS = 200
 # The Test button of the provider tab: one short request, then the list of the models.
@@ -724,7 +732,7 @@ class AgentChatController(QObject):
         configured = accessor.configured_domains()  # portals allowed in the configuration file count as ticked
         configured_kinds = {name: kind for name, (kind, _) in parse_extra_domains(configured).items()}
         configured_names = list(configured_kinds)
-        searched = [name for name, kind in configured_kinds.items() if kind not in (KIND_STAC, KIND_XYZ)]
+        searched = [name for name, kind in configured_kinds.items() if kind not in (KIND_STAC,) + NO_DATA_KINDS]
         data_sources = [source for source in active if not source.is_connector]
         left_out = {name for name, rule in values.rules.items() if rule == "never"}  # turned off in the Tools tab
         if not values.send_values:
@@ -733,14 +741,16 @@ class AgentChatController(QObject):
             left_out.add(RUN_PYTHON)
         if not values.send_values:
             left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
-        if not kinds - {KIND_MCP, KIND_STAC, KIND_XYZ} and not searched:
+        if not kinds - {KIND_MCP, KIND_STAC, *NO_DATA_KINDS} and not searched:
             left_out.add(OPEN_DATA_TOOL)
-        if KIND_WFS not in kinds:
+        if not kinds & set(SERVICE_KINDS) and not set(configured_kinds.values()) & set(SERVICE_KINDS):
             left_out.add(SERVICE_TOOL)
         if KIND_STAC not in kinds:
             left_out.add(IMAGERY_TOOL)
         if KIND_XYZ not in kinds and KIND_XYZ not in configured_kinds.values():
             left_out.add(BASEMAP_TOOL)
+        if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
+            left_out.add(PLACE_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
         offered = {tool.name for tool in tools}
         skill_approved = skill_declined = None
@@ -768,12 +778,14 @@ class AgentChatController(QObject):
                 tools = list(tools) + [skill_tool(set(), None, connectors=rows, with_skills=False)]
         # A connector alone does not open the web to add_layer, nor does a basemap: only a data source the user
         # ticked does.
-        opens_web = (any(source.kind != KIND_XYZ for source in data_sources)
-                     or any(kind != KIND_XYZ for kind in configured_kinds.values()))
+        opens_web = (any(source.kind not in NO_FILE_KINDS for source in data_sources)
+                     or any(kind not in NO_FILE_KINDS for kind in configured_kinds.values()))
         handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
                                   allow_remote_sources=opens_web,
+                                  # By the names a model knows them by, only: the address of a service the user
+                                  # added would come back in the words of a refusal ("Enabled: ...").
                                   platforms=[model_name(source) for source in data_sources] + configured_names,
-                                  basemap_addresses=basemap_addresses(data_sources),
+                                  platform_aliases=platform_aliases(data_sources),
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers.update(settings_handlers(offered, self._approve_skill))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
@@ -1500,12 +1512,13 @@ class AgentChatController(QObject):
             self._say(str(exc), error=True, offer_settings=True)
             return None
         tools, handlers, active = self.tools_and_handlers(values)
+        offered = [tool.name for tool in tools]  # before the families: a tool a skill brings later is offered too
         # Nothing connects here: a connector the user ticked is an entry of load_skill, connected when the model
         # loads it (2026-11-14: each conversation waited for every connector, one that stalled among them).
         tools, handlers, held = self._families(values, tools, handlers, active)
         configured = parse_extra_domains(self._accessor().configured_domains())
         session = AgentSession(provider, tools, self._prompt(
-            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ]))
+            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ], offered))
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
@@ -1556,24 +1569,36 @@ class AgentChatController(QObject):
                    "conversation?").format(one_line(title, 100), origin, one_line(address, 200))
 
     @staticmethod
-    def _prompt(values: AgentSettings, active, configured_basemaps: Sequence[str] = ()) -> str:
+    def _prompt(values: AgentSettings, active, configured_basemaps: Sequence[str] = (),
+                offered: Optional[Sequence[str]] = None) -> str:
+        """``offered``: the tools of the conversation, those a skill brings later among them; None when not known.
+        A note that says a tool is missing must be true: a geocoder of the configuration file offers find_place with
+        nothing ticked, and a tool turned off in the Tools tab is missing with its source ticked."""
         names = describe_enabled(active)
         notes = [SYSTEM_PROMPT]
         if not values.send_values:
             notes.append(NO_VALUES_NOTE)
         if AgentChatController.local_filtering(values):
             notes.append(FILTERING_NOTE)
-        if all(source.kind == KIND_XYZ for source in active):  # a basemap alone opens no platform
+        if all(source.kind in NO_DATA_KINDS for source in active):  # a basemap or a geocoder opens no platform
             notes.append(NO_OPEN_DATA_NOTE)
         if names["platforms"]:
             notes.append("\n\nPlatforms the user enabled (the platform argument): " + ", ".join(names["platforms"]) + ".")
             notes.append(platforms_note(names["platforms"]))
-        if names["basemaps"]:
+        has_places = PLACE_TOOL in offered if offered is not None else bool(names["geocoders"])
+        has_basemaps = BASEMAP_TOOL in offered if offered is not None else bool(names["basemaps"] or configured_basemaps)
+        if not has_places:
+            notes.append(NO_GEOCODER_NOTE)
+        elif names["geocoders"]:
+            notes.append("\n\nGeocoders the user enabled (the platform argument of find_place): "
+                         + ", ".join(names["geocoders"]) + ". For a place named by the user (a town, an address) that "
+                         "no layer of the project holds, find_place then zoom_to with its extent_wkt and crs EPSG:4326.")
+        if not has_basemaps:
+            notes.append(NO_BASEMAP_NOTE)
+        elif names["basemaps"]:
             notes.append("\n\nBasemaps the user enabled (the platform argument of add_basemap): "
                          + ", ".join(names["basemaps"]) + ".")
-        elif not configured_basemaps:
-            notes.append(NO_BASEMAP_NOTE)
-        if configured_basemaps:
+        if configured_basemaps and has_basemaps:
             notes.append("\n\nBasemaps of the configuration file (the platform argument of add_basemap): "
                          + ", ".join(configured_basemaps) + ".")
         if names["connectors"]:
@@ -1599,6 +1624,9 @@ class AgentChatController(QObject):
             if source.kind == KIND_XYZ:
                 self._accessor().check_basemap(platform_name(source), extra_domains=domains)
                 return _tr("It serves its tiles.")
+            if source.kind == KIND_GEOCODER:
+                found = self._accessor().find_place("Paris", platform=platform_name(source), limit=1, extra_domains=domains)
+                return _tr("It answers.") if found.count else _tr("It answers, but found no place named Paris.")
             if source.kind == KIND_STAC:
                 self._accessor().search_imagery(bbox=[1.3, 43.5, 1.5, 43.7], limit=1, platform=platform_name(source),
                                                 extra_domains=domains)
@@ -1987,6 +2015,8 @@ class AgentChatController(QObject):
             "remove_layers": lambda: _tr("Layers removed: {}").format(self._names(args.get("layers"))),
             "search_open_data": lambda: _tr("Searching {} for {}").format(args.get("platform", ""), args.get("query", "")),
             "search_imagery": lambda: _tr("Searching satellite imagery on {}").format(args.get("platform", "")),
+            "find_place": lambda: _tr("Searching {} for the place {}").format(
+                args.get("platform", "ign_geocoder"), args.get("query", "")),
             # The MCP server alone serves them: the images go to the application that asked.
             "map_image": lambda: _tr("Image of the map sent"),
             "contact_sheet": lambda: _tr("Contact sheet of {} sent").format(args.get("layer", "")),

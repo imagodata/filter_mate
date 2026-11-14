@@ -236,6 +236,11 @@ Hi esteu d'acord?</translation>
         <translation>La font respon.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>El servei respon, però no ha trobat cap lloc anomenat Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>La font serveix les seves tessel·les.</translation>
@@ -658,6 +663,11 @@ Es queden a la memòria d'edició fins que deseu les edicions de la capa, i desf
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Cerca d'imatges de satèl·lit a {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Cerca a {} del lloc {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Mapes base</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Cerca de llocs</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

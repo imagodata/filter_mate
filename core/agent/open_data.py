@@ -22,13 +22,28 @@ KIND_CKAN = "ckan"
 KIND_WFS = "wfs"
 KIND_STAC = "stac"
 KIND_XYZ = "xyz"  # a web basemap: tiles drawn by a server, never searched nor read as data
-KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ)
+# Image services: their layers are searched as those of a WFS, and shown as a basemap is (drawn by the server).
+KIND_WMS = "wms"
+KIND_WMTS = "wmts"
+SERVICE_KINDS = (KIND_WFS, KIND_WMS, KIND_WMTS)
+# A geocoder: the name of a place for where it is. It answers GeoJSON points, as the Géoplateforme, the Base
+# Adresse Nationale and Photon do; it holds no layer.
+KIND_GEOCODER = "geocoder"
+# What holds no data to search nor to read: ticked alone, these open neither search_open_data nor the web to add_layer.
+NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER)
+# What only shows images or places: ticked alone, these do not open the web to add_layer (a WMS is searched, though).
+NO_FILE_KINDS = NO_DATA_KINDS + (KIND_WMS, KIND_WMTS)
+KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ, KIND_WMS, KIND_WMTS, KIND_GEOCODER)
 
 # Built in: name -> (kind, host). The user adds others in the configuration (APP.OPTIONS.AGENT.open_data_domains).
 PLATFORMS: Dict[str, Tuple[str, str]] = {
     "datagouv": (KIND_DATAGOUV, "www.data.gouv.fr"),
     "opendatasoft": (KIND_OPENDATASOFT, "data.opendatasoft.com"),
     "ign_wfs": (KIND_WFS, "data.geopf.fr/wfs/ows"),
+    "ign_wmts": (KIND_WMTS, "data.geopf.fr/wmts"),
+    "ign_wms": (KIND_WMS, "data.geopf.fr/wms-r"),
+    "ign_geocoder": (KIND_GEOCODER, "data.geopf.fr/geocodage/search"),
+    "photon": (KIND_GEOCODER, "photon.komoot.io/api"),
     "earth_search": (KIND_STAC, "earth-search.aws.element84.com/v1"),
     "ibge_br": (KIND_WFS, "geoservicos.ibge.gov.br/geoserver/wfs"),
     "prg_pl": (KIND_WFS, "mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WFS/AdministrativeBoundaries"),
@@ -142,7 +157,7 @@ def resolve_platform(name: str, extra: str = "") -> Tuple[str, str]:
         if candidate in platforms:
             kind, host = platforms[candidate]
             return kind, base_url(host)
-    listed = sorted(key for key, (kind, _) in platforms.items() if kind != KIND_XYZ)  # a basemap holds no data
+    listed = sorted(key for key, (kind, _) in platforms.items() if kind not in NO_DATA_KINDS)
     raise ValueError(f"{name!r} is not an allowed open data platform. Allowed: {', '.join(listed)}. "
                      "The user can add one in the FilterMate configuration (AGENT > open_data_domains).")
 
@@ -441,6 +456,75 @@ def remote_file(url: str, status: int, headers: Mapping[str, str]) -> RemoteFile
         told = str(headers.get("content-length") or "").strip() if status != 416 else ""
     return RemoteFile(stem + ("." + extension if extension else ""), by_parts,
                       int(told) if _BYTE_COUNT.fullmatch(told) else -1)
+
+
+MAX_PLACES = 10
+# How wide a place found as a point is shown, in degrees, by what it is: a house, a street, a town, a region.
+_PLACE_HALF_WIDTH = {"housenumber": 0.002, "house": 0.002, "street": 0.005, "locality": 0.01, "district": 0.02,
+                     "municipality": 0.05, "city": 0.05, "town": 0.03, "village": 0.02, "county": 0.5, "state": 1.5,
+                     "country": 5.0}
+
+
+def geocode_url(base: str, query: str, limit: int) -> str:
+    """Where a geocoder is asked: ``q`` and ``limit``, as the Géoplateforme, the BAN and Photon read them."""
+    base = base.split("#", 1)[0]  # what follows a # is never sent: the question would be lost in it
+    separator = "&" if "?" in base else "?"
+    return f"{base}{separator}q={quote(query, safe='')}&limit={max(1, min(int(limit), MAX_PLACES))}"
+
+
+def _box_wkt(west: float, south: float, east: float, north: float) -> str:
+    return (f"POLYGON(({west:.6f} {south:.6f}, {east:.6f} {south:.6f}, {east:.6f} {north:.6f}, "
+            f"{west:.6f} {north:.6f}, {west:.6f} {south:.6f}))")
+
+
+def parse_places(payload: Any) -> List[Dict[str, Any]]:
+    """Places of the GeoJSON a geocoder answers: name, what it is, where, and the extent to zoom to (EPSG:4326).
+
+    A place its geocoder gives an extent for (Photon: west, north, east, south) keeps it; a point gets a box whose
+    width follows what the place is. What is not a point in degrees is left out.
+    """
+    places: List[Dict[str, Any]] = []
+    features = payload.get("features") if isinstance(payload, dict) else None
+    for feature in features if isinstance(features, list) else []:
+        if not isinstance(feature, dict):
+            continue
+        properties = feature.get("properties") if isinstance(feature.get("properties"), dict) else {}
+        geometry = feature.get("geometry") if isinstance(feature.get("geometry"), dict) else {}
+        point = geometry.get("coordinates")
+        if geometry.get("type") != "Point" or not isinstance(point, list) or len(point) < 2:
+            continue
+        try:
+            longitude, latitude = float(point[0]), float(point[1])
+        except (TypeError, ValueError, OverflowError):  # a number of 400 digits is no coordinate
+            continue
+        if not (-180.0 <= longitude <= 180.0 and -90.0 <= latitude <= 90.0):  # NaN is in no range
+            continue
+        texts = {key: " ".join(str(value).split()) for key, value in properties.items()
+                 if isinstance(value, (str, int)) and not isinstance(value, bool) and str(value).strip()}
+        what = texts.get("type", texts.get("osm_value", ""))[:40]
+        around = [texts[key] for key in ("postcode", "city", "county", "state", "country")
+                  if key in texts and texts[key] != texts.get("name")]
+        label = texts.get("label") or ", ".join(([texts["name"]] if "name" in texts else []) + around)
+        if not label:
+            continue  # a point with no name tells the user nothing
+        if "context" in texts and "label" in texts:
+            label = f"{label} ({texts['context']})"
+        extent = properties.get("extent")
+        try:
+            west, north, east, south = (float(value) for value in extent) if isinstance(extent, list) else ()
+            west, east, south, north = min(west, east), max(west, east), min(south, north), max(south, north)
+            # The extent of the place itself: around its point, on the globe (NaN fails every comparison).
+            if not (-180.0 <= west <= longitude <= east <= 180.0 and -90.0 <= south <= latitude <= north <= 90.0):
+                raise ValueError("not the extent of this point")
+            box = _box_wkt(west, south, east, north)
+        except (TypeError, ValueError, OverflowError):
+            half = _PLACE_HALF_WIDTH.get(what, 0.01)
+            box = _box_wkt(longitude - half, latitude - half, longitude + half, latitude + half)
+        places.append({"name": (texts.get("name") or label)[:120], "label": label[:200], "kind": what,
+                       "longitude": round(longitude, 6), "latitude": round(latitude, 6), "extent_wkt": box})
+        if len(places) >= MAX_PLACES:
+            break
+    return places
 
 
 def is_point_cloud(source: str) -> bool:

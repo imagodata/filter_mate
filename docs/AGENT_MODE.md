@@ -488,6 +488,22 @@ address, else its content type), its size, and whether the server gives parts of
 `core/agent/sources.py` is one list, in the Sources tab of the settings, nothing ticked by default:
 
 - **Open data platforms**: data.gouv.fr, Opendatasoft, national CKAN portals, WFS services (IGN Géoplateforme, IBGE, PRG).
+- **Image services** (`adapters/public_api/image_catalog.py`): WMS and WMTS (IGN Géoplateforme built in, any other the
+  user adds). `search_open_data` searches their capabilities as it does for a WFS, `add_service_layer` builds the
+  source of the `wms` provider for a layer the service lists (the CRS of the project when the layer has it, else Web
+  Mercator; PNG first; its first style) and puts it under the layers. A service that says its requests go to another
+  host, port or scheme is refused, and so is a layer whose tiles, legend or feature information are elsewhere. QGIS
+  reads the capabilities again by itself, so that check alone would hold for the document the plugin was given, not
+  for the one QGIS gets: the source also tells QGIS to send its requests to the address of the service
+  (`IgnoreGetMapUrl`, `IgnoreGetFeatureInfoUrl`). What is left to the service: where the REST tiles of a WMTS and
+  the legends are, as QGIS reads them. `wfs_catalog` has the same limit, without such a switch (to do). A service
+  the user added by its address (WFS, WMS, WMTS, STAC, geocoder, basemap) goes to the model by its id
+  (`sources.model_name`, `platform_aliases`): the address may hold a key. An image service ticked alone does not
+  open the web to `add_layer`.
+- **Place search** (`open_data.geocode_url`, `parse_places`): geocoders that answer GeoJSON points to `q` and `limit`
+  (IGN Géoplateforme for France, Photon for the world, any other of that shape the user adds). `find_place` is a
+  read: the name the user wrote goes to the geocoder, nothing of the project does; each place comes with the extent
+  `zoom_to` takes. A geocoder or a basemap ticked alone opens neither `search_open_data` nor the web to `add_layer`.
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
   asset links, so they are left out for now.

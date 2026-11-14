@@ -236,6 +236,11 @@ Perché: {}
         <translation>La fonte risponde.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Il servizio risponde, ma non ha trovato nessun luogo di nome Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>La fonte fornisce le sue tessere.</translation>
@@ -658,6 +663,11 @@ Restano nel buffer di modifica finché non salvi le modifiche del layer, e annul
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Ricerca di immagini satellitari su {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Ricerca su {} del luogo {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Sei d'accordo con tutte? No non ne esegue nessuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Mappe di base</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Ricerca di luoghi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Rozimisiz?</translation>
         <translation>U javob beradi.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Xizmat javob beradi, lekin Paris nomli joy topilmadi.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>U o'z plitkalarini taqdim etadi.</translation>
@@ -658,6 +663,11 @@ Qatlam tahrirlarini saqlamaguningizcha ular tahrir buferida qoladi, navbatni bek
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>{} da sun'iy yo'ldosh tasvirlari qidirilmoqda</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>{} da {} joyi qidirilmoqda</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Asos xaritalar</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Joylarni qidirish</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

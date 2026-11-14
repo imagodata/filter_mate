@@ -236,6 +236,11 @@ Oletteko samaa mieltä?</translation>
         <translation>Lähde vastaa.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Palvelu vastaa, mutta ei löytänyt paikkaa nimeltä Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Lähde tarjoaa karttalaattansa.</translation>
@@ -658,6 +663,11 @@ Ne pysyvät muokkauspuskurissa, kunnes tallennat tason muokkaukset, ja kierrokse
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Haetaan satelliittikuvia: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Haetaan lähteestä {} paikkaa {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Taustakartat</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Paikkahaku</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

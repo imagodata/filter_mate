@@ -236,6 +236,11 @@ Sumasang-ayon po ba kayo?</translation>
         <translation>Sumasagot ito.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Sumasagot ang serbisyo, pero walang nahanap na lugar na pinangalanang Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Ibinibigay nito ang mga tile nito.</translation>
@@ -658,6 +663,11 @@ Mananatili sila sa edit buffer hanggang i-save mo ang mga edit ng layer, at ibab
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Naghahanap ng satellite imagery sa {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Hinahanap sa {} ang lugar na {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Mga basemap</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Paghahanap ng lugar</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

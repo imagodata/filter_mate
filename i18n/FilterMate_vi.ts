@@ -236,6 +236,11 @@ Quý vị có đồng ý không?</translation>
         <translation>Nguồn có phản hồi.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Dịch vụ có phản hồi nhưng không tìm thấy địa điểm nào tên Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Nguồn cung cấp các ô bản đồ của mình.</translation>
@@ -658,6 +663,11 @@ Chúng vẫn ở trong bộ đệm chỉnh sửa cho đến khi bạn lưu các 
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Đang tìm ảnh vệ tinh trên {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Đang tìm kiếm trên {}: địa điểm {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Bản đồ nền</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Tìm kiếm địa điểm</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Czy wyraża Pan/Pani zgodę?</translation>
         <translation>Źródło odpowiada.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Usługa odpowiada, ale nie znalazła miejsca o nazwie Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Źródło udostępnia swoje kafelki.</translation>
@@ -658,6 +663,11 @@ Pozostają w buforze edycji, dopóki nie zapiszesz edycji warstwy, a cofnięcie 
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Wyszukiwanie zobrazowań satelitarnych w {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Wyszukiwanie w {}: miejsce {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Mapy podkładowe</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Wyszukiwanie miejsc</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

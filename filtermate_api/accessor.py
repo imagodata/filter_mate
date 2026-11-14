@@ -519,6 +519,15 @@ class OpenDataResult:
     count: int = 0
 
 
+@dataclass
+class PlacesResult:
+    """Places a geocoder answered with; each has name, label, kind, longitude, latitude, extent_wkt (EPSG:4326)."""
+    platform: str
+    query: str
+    places: List[Dict[str, Any]] = field(default_factory=list)
+    count: int = 0
+
+
 @runtime_checkable
 class FilterMateAccessor(Protocol):
     """The contract REST routes use to talk to the running FilterMate plugin."""
@@ -696,6 +705,11 @@ class FilterMateAccessor(Protocol):
 
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         """Add a web basemap under the layers; raises FilterRejected when its server gives no tile."""
+        ...
+
+    def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
+                   extra_domains: Optional[str] = None) -> PlacesResult:
+        """Places of an allowed geocoder; raises FilterRejected on one not allowed or unreachable."""
         ...
 
     def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
@@ -1071,6 +1085,10 @@ class InMemoryAccessor:
 
     def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
         return None
+
+    def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
+                   extra_domains: Optional[str] = None) -> PlacesResult:
+        return PlacesResult(platform, query, [], 0)
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
         found = self._find(layer_name)  # an id or a name

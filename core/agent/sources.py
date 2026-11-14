@@ -11,10 +11,13 @@ from urllib.parse import urlsplit
 
 from .basemaps import BASEMAPS, template_problem
 from .mcp_client import server_url_problem
-from .open_data import KIND_CKAN, KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_XYZ, base_url
+from .open_data import (
+    KIND_CKAN, KIND_DATAGOUV, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    NO_DATA_KINDS, base_url,
+)
 
 KIND_MCP = "mcp"
-USER_KINDS = (KIND_MCP, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ)
+USER_KINDS = (KIND_MCP, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_STAC, KIND_XYZ, KIND_GEOCODER)
 ORIGIN_OFFICIAL = "official"
 ORIGIN_COMMUNITY = "community"
 ORIGIN_LOCAL = "local"
@@ -47,6 +50,14 @@ BUILT_IN: Tuple[Source, ...] = (
            "Public hub of the Opendatasoft portals"),
     Source("ign_wfs", "IGN Géoplateforme (WFS)", KIND_WFS, "https://data.geopf.fr/wfs/ows", ORIGIN_OFFICIAL,
            "France, vector reference data"),
+    Source("ign_wmts", "IGN Géoplateforme (WMTS)", KIND_WMTS, "https://data.geopf.fr/wmts", ORIGIN_OFFICIAL,
+           "France, maps and imagery as tiles: orthophotos by year, old maps, cadastre, relief, land cover"),
+    Source("ign_wms", "IGN Géoplateforme (WMS)", KIND_WMS, "https://data.geopf.fr/wms-r", ORIGIN_OFFICIAL,
+           "France, maps and imagery drawn on request, in the CRS of the project"),
+    Source("ign_geocoder", "IGN Géoplateforme (places, France)", KIND_GEOCODER, "https://data.geopf.fr/geocodage/search",
+           ORIGIN_OFFICIAL, "France: addresses, streets and communes, for where they are"),
+    Source("photon", "Photon (places, worldwide)", KIND_GEOCODER, "https://photon.komoot.io/api", ORIGIN_COMMUNITY,
+           "Worldwide, from OpenStreetMap: towns, streets, places. Run by komoot: no heavy use"),
     Source("earth_search", "Earth Search (Sentinel-2, Landsat)", KIND_STAC, "https://earth-search.aws.element84.com/v1",
            ORIGIN_COMMUNITY, "Worldwide satellite imagery, free on AWS"),
     Source("ibge_br", "IBGE (Brasil, WFS)", KIND_WFS, "https://geoservicos.ibge.gov.br/geoserver/wfs", ORIGIN_OFFICIAL,
@@ -99,7 +110,7 @@ def make_source(address: str, kind: str, title: str = "") -> Source:
         raise ValueError(problem)
     parts = urlsplit(address)
     origin = ORIGIN_LOCAL if parts.scheme == "http" else ORIGIN_USER
-    if kind not in (KIND_MCP, KIND_WFS, KIND_STAC, KIND_XYZ):
+    if kind not in (KIND_MCP, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_STAC, KIND_XYZ, KIND_GEOCODER):
         address = parts.netloc if parts.scheme == "https" and not parts.path else address
     digest = hashlib.blake2b(f"{kind}|{address}".encode("utf-8"), digest_size=3).hexdigest()
     identifier = _ID.sub("_", f"{kind}_{parts.netloc}{parts.path}".lower()).strip("_")[:30] + "_" + digest
@@ -148,25 +159,34 @@ def platform_name(source: Source) -> str:
     return source.id if source.id in _BUILT_IN_IDS else source.address.lower()
 
 
+# Sources the user adds by the address of a service, a path and a query with it: a basemap, a geocoder, a WMS, a
+# WMTS, a WFS, a STAC catalog. A portal (CKAN, Opendatasoft) is a host name.
+_ADDRESSED = (KIND_XYZ, KIND_GEOCODER, KIND_WMS, KIND_WMTS, KIND_WFS, KIND_STAC)
+
+
 def model_name(source: Source) -> str:
-    """What a model passes for a source of the chat: a basemap the user added goes by its id.
+    """What a model passes for a source of the chat: a service the user added by its address goes by its id.
 
-    Its address may hold the key of an account (``?apikey=...``), which the provider of the model, the thread and a
-    recipe kept in the project must never see; and a model would have to copy a long template without a slip.
+    The address may hold the key of an account (``?apikey=...``), which the provider of the model, the thread and a
+    recipe kept in the project must never see; and a model would have to copy a long address without a slip.
     """
-    return source.id if source.kind == KIND_XYZ else platform_name(source)
+    return source.id if source.kind in _ADDRESSED and source.id not in _BUILT_IN_IDS else platform_name(source)
 
 
-def basemap_addresses(sources: Iterable[Source]) -> Dict[str, str]:
-    """For each basemap the user added: the name a model gives it, and the platform the plugin knows it by."""
-    return {source.id: platform_name(source) for source in sources
-            if source.kind == KIND_XYZ and source.id not in _BUILT_IN_IDS}
+def platform_aliases(sources: Iterable[Source]) -> Dict[str, str]:
+    """For each source a model names otherwise than the plugin: the name of the model, and the platform it is."""
+    return {model_name(source): platform_name(source) for source in sources
+            if not source.is_connector and model_name(source) != platform_name(source)}
 
 
 def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
     """Names for the instructions of the conversation."""
-    return {"platforms": [platform_name(source) for source in sources
-                          if not source.is_connector and source.kind != KIND_XYZ],
-            "basemaps": [f"{source.id} ({source.title})" if source.id not in _BUILT_IN_IDS else source.id
-                         for source in sources if source.kind == KIND_XYZ],
+    def named(source: Source) -> str:
+        name = model_name(source)
+        return name if name == platform_name(source) else f"{name} ({source.title})"
+
+    return {"platforms": [named(source) for source in sources
+                          if not source.is_connector and source.kind not in NO_DATA_KINDS],
+            "geocoders": [named(source) for source in sources if source.kind == KIND_GEOCODER],
+            "basemaps": [named(source) for source in sources if source.kind == KIND_XYZ],
             "connectors": [source.title for source in sources if source.is_connector]}

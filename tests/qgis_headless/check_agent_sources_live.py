@@ -75,6 +75,16 @@ def main():
     except ValueError:
         check("IGN: a layer it does not list is refused", True)
 
+    for platform, query, west, east in (("ign_geocoder", "Toulouse", 1.2, 1.7), ("photon", "Toulouse", 1.2, 1.7),
+                                        ("ign_geocoder", "8 place du Capitole Toulouse", 1.43, 1.46)):
+        try:
+            found = project_control.find_place(query, platform=platform, limit=3)
+            first = found["places"][0] if found["places"] else {}
+            check(f"{platform}: finds {query}", found["count"] > 0 and west < first["longitude"] < east
+                  and 43.4 < first["latitude"] < 43.8 and first["extent_wkt"].startswith("POLYGON(("), found)
+        except ValueError as exc:
+            check(f"{platform}: finds {query}", False, exc)
+
     for platform, query in (("ibge_br", "municipio"), ("prg_pl", "gmina")):
         listed = project_control.search_open_data(query, platform=platform, limit=3)
         check(f"{platform}: its capabilities are accepted", isinstance(listed.get("datasets"), list), listed)

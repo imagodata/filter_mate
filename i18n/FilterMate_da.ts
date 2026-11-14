@@ -236,6 +236,11 @@ Er du enig?</translation>
         <translation>Kilden svarer.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>Tjenesten svarer, men fandt intet sted ved navn Paris.</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>Kilden leverer sine fliser.</translation>
@@ -658,6 +663,11 @@ De bliver i redigeringsbufferen, indtil du gemmer lagets redigeringer, og fortry
         <location filename="../ui/controllers/agent_chat_controller.py" line="610"/>
         <source>Searching satellite imagery on {}</source>
         <translation>Søger efter satellitbilleder på {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>Søger i {} efter stedet {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
@@ -1486,6 +1496,11 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>Baggrundskort</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>Stedsøgning</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
