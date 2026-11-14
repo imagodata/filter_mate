@@ -495,11 +495,14 @@ address, else its content type), its size, and whether the server gives parts of
   user adds). `search_open_data` searches their capabilities as it does for a WFS, `add_service_layer` builds the
   source of the `wms` provider for a layer the service lists (the CRS of the project when the layer has it, else Web
   Mercator; PNG first; its first style) and puts it under the layers. A service that says its requests go to another
-  host, port or scheme is refused, and so is a layer whose tiles, legend or feature information are elsewhere. QGIS
+  host or port is refused, and so is a layer whose tiles, legend or feature information are elsewhere. QGIS
   reads the capabilities again by itself, so that check alone would hold for the document the plugin was given, not
   for the one QGIS gets: the source also tells QGIS to send its requests to the address of the service
   (`IgnoreGetMapUrl`, `IgnoreGetFeatureInfoUrl`). What is left to the service: where the REST tiles of a WMTS and
-  the legends are, as QGIS reads them. `wfs_catalog` has the same limit, without such a switch (to do). A service
+  the legends are, as QGIS reads them. `wfs_catalog` reads its links the same way (a document that shows one address
+  to XML and another to QGIS is refused; host and port are compared, the same host by http for a service in https
+  being the same place, as servers behind a proxy say), but the WFS provider of QGIS has no
+  such switch: a service that answers QGIS another document than the one the plugin read is not caught. A service
   the user added by its address (WFS, WMS, WMTS, STAC, geocoder, basemap) goes to the model by its id
   (`sources.model_name`, `platform_aliases`): the address may hold a key. An image service ticked alone does not
   open the web to `add_layer`.
@@ -637,8 +640,9 @@ estimated:
 
 A web service is not read by any of them, but for `sample_features`: a few features of what the map shows (the
 extent of the map as the filter rectangle, 20 at most, no expression nor selection), which its server was already
-asked to draw it: a layer unchecked or out of its scale range is refused; never the layer as a whole. Not measured:
-whether the WFS provider passes the limit to the server or reads the whole extent into its cache first. The answer says so in `scope`.
+asked to draw it: a layer unchecked or out of its scale range is refused; never the layer as a whole. Measured
+with a WFS server that counts what it sends (`check_agent_wfs_sample.py`, QGIS 3.22, 3.44 and 4.3): one request,
+in the extent of the map, with COUNT of the limit plus one; the server sends four features for a sample of three. The answer says so in `scope`.
 
 Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
 
