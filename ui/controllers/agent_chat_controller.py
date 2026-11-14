@@ -372,10 +372,12 @@ class AgentChatController(QObject):
         can_undo, can_redo = TurnCheckpoint.can_undo() and not busy, TurnCheckpoint.can_redo() and not busy
         last = (applied[-1].get("request") or "") if applied and can_undo else ""
         following = (undone[0].get("request") or "") if undone and can_redo else ""
-        # Said as Undo and Redo say the other histories (history_tips): the step, the history, how far.
+        # Said as Undo and Redo say the other histories (history_tips): the step, the history, how far. The history
+        # panel, when set up, says it itself, with its right-click (HistoryController).
         return {"can_undo": can_undo, "can_redo": can_redo,
-                "undo_tip": button_tip(True, last, KIND_AGENT, len(applied)),
-                "redo_tip": button_tip(False, following, KIND_AGENT, len(undone))}
+                "undo_tip": button_tip(True, last, KIND_AGENT, len(applied), available=can_undo, right_click=False),
+                "redo_tip": button_tip(False, following, KIND_AGENT, len(undone), available=can_redo,
+                                       right_click=False)}
 
     def describe_call(self, call: ToolCallPart) -> str:
         """A step of a turn, in the words of the thread, on one line."""

@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>Comparar: o mapa fixado às {} à esquerda da linha, como está agora à direita; a linha segue o mouse</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Comparar: o mapa fixado à esquerda da linha, como está agora à direita; a linha segue o mouse</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Clique direito para fixar de novo ou remover a fixação.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fixado {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Fixado</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

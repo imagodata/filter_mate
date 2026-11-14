@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>مقارنة: الخريطة المثبتة عند {} على يسار الخط، وكما هي الآن على يمينه؛ يتبع الخط مؤشر الفأرة</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>مقارنة: الخريطة المثبتة على يسار الخط، وكما هي الآن على يمينه؛ يتبع الخط مؤشر الفأرة</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>انقر بزر الفأرة الأيمن للتثبيت من جديد أو لإزالة التثبيت.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>مثبتة {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>مثبتة</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>비교: 선 왼쪽은 {}에 고정한 지도, 오른쪽은 현재 지도이며 선은 마우스를 따라갑니다</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>비교: 선 왼쪽은 고정한 지도, 오른쪽은 현재 지도이며 선은 마우스를 따라갑니다</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>오른쪽 클릭으로 다시 고정하거나 고정을 해제합니다.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>고정 {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>고정</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

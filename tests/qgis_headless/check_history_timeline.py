@@ -222,7 +222,7 @@ def main():
         HISTORY_KEY, ((east_snapshot, LayerSnapshot(zones.id(), "vector", subset=EAST_A)),),
         description="Blue squares, east_a alone", timestamp=base + 1200,
         steps=(("Paint the squares blue", ()), ("Keep east_a", (east_snapshot,))),
-        step_effects=((style,), ()), effects=(style,)))
+        step_effects=((style,), ()), effects=(style,), started=base + 1100, step_times=(base + 1100, base + 1150)))
     # 10:30 a vector filter undone: never on the map.
     history.push(entry(base + 1800, "\"name\" = 'west_a'", EAST_A, "West square"))
     history.undo()
@@ -235,6 +235,8 @@ def main():
           and grey(now, west) == 0, (count(now, BLUE), count(now, RED), grey(now, west)))
 
     dock = Dock(canvas, history, zones)
+    dock.pushButton_action_undo_filter.setToolTip("Undo the last filter")  # what the .ui says
+    dock.pushButton_action_redo_filter.setToolTip("Redo the last filter")
     dock.show()
     integration = SimpleNamespace(coverage_controller=SimpleNamespace(
         active_layer=None, service=get_cross_filter_service(), _linked_runs={}, _linked_redo={},
@@ -368,6 +370,16 @@ def main():
                                                              session.item.labels))
     compare.button.click()
     compare.unpin()
+    controller.open(undo)
+    turn_row = controller.panel.tree.topLevelItem(1)
+    controller.panel.tree.setCurrentItem(turn_row.child(1))  # Keep east_a
+    state = controller.pin_selected()
+    check("pin the map before a step of the agent: pinned when that step began", state is not None
+          and abs(state.taken_at - (base + 1150)) < 1, state.taken_at if state is not None else None)
+    compare.unpin()
+    from filter_mate.core.domain.compare_states import BeforeMap
+    check("a pin of no known time: no hour shown, never 01:00", compare._labels(BeforeMap(pinned_at=0.0))
+          == ("Pinned", "Now"))
 
     # The tooltips of Undo and Redo say what they would do, in which history.
     undo.setEnabled(True)
@@ -388,11 +400,18 @@ def main():
     check("AGENT open: Undo names the turn", undo.toolTip().startswith(
         "Undo: Blue squares, east_a alone\nHistory: turns of the agent"), undo.toolTip())
     dock.agent_open = False
-    redo.setEnabled(False)
+    dock.setEnabled(False)  # the dock off for a moment (a task): the buttons with it, their next step all the same
     controller.refresh()
-    check("a button disabled: nothing to do, its history named", redo.toolTip().split("\n") == [
-        "Nothing to redo.", "History: vector filters of the dock", "Right-click: the history of the project"],
-        redo.toolTip())
+    dock.setEnabled(True)
+    check("the dock off for a moment: Undo and Redo still say what they would do",
+          undo.toolTip().startswith("Undo: East squares\n") and redo.toolTip().startswith("Redo: West square\n"),
+          (undo.toolTip(), redo.toolTip()))
+    dock.tabTools_current_index = 1  # another section open: Undo and Redo walk nothing
+    controller.refresh()
+    dock.tabTools_current_index = 0
+    check("another section open: nothing to do", redo.toolTip().split("\n") == [
+        "Nothing to redo.", "Right-click: the history of the project"], redo.toolTip())
+    controller.refresh()
 
     # Open, the list follows the history: a filter done, the dock asks for the state of Undo / Redo.
     controller.open(redo)
@@ -414,6 +433,32 @@ def main():
           == "Take a note" and controller.compare_selected() == 0 and not compare.button.isChecked()
           and said == ["Nothing to compare: nothing this step changed can be drawn."], said)
 
+    # A vector filter and the raster operation it ran with (recorded first: its task ended first): one step.
+    clip_with = CrossOperation(zones.id(), ((dem_before, dem_after),), description="cross filter from zones",
+                               timestamp=time.time())
+    coverage.push(clip_with)
+    history.push(entry(time.time() + 5, "\"name\" = 'east_a'", "\"name\" = 'east_b'", "East a again"))
+    integration.coverage_controller._linked_runs = {zones.id(): [SimpleNamespace(op_id=clip_with.op_id)]}
+    items = controller.read()
+    by_label = {item.label: item for item in items}
+    from filter_mate.core.domain.history_timeline import map_before
+    before = map_before(items, by_label["East a again"])
+    check("a vector filter and its raster operation: one step, the map before undoes both",
+          by_label["cross filter from zones"].time == by_label["East a again"].time
+          and {state.layer_id: (state.subset, state.source) for state in before.states}
+          == {zones.id(): ("\"name\" = 'east_b'", ""), dem.id(): ("", fixtures["dem"])},
+          [(state.layer_id, state.subset, state.source) for state in before.states])
+    integration.coverage_controller._linked_runs = {}
+
+    # Open, a refill keeps the look and the place of the list.
+    controller.open(undo)
+    restyled = []
+    controller.panel.setStyleSheet = lambda sheet: restyled.append(sheet)
+    controller.refresh()
+    check("a refill while open does not set the look again", not restyled and controller.panel.isVisible())
+    del controller.panel.setStyleSheet
+    controller.close_panel()
+
     # From the menu of Compare.
     texts = [action.text() for action in compare.menu.actions()]
     check("Compare: History… in its menu", texts == ["Pin the current state", "Remove the pin", "", "History…"], texts)
@@ -428,6 +473,30 @@ def main():
     QgsApplication.processEvents()
     check("torn down: no panel, no entry left in the menu of Compare", not controller.panel.isVisible()
           and [action.text() for action in compare.menu.actions()] == ["Pin the current state", "Remove the pin"])
+    check("torn down: the tooltips of the .ui again", undo.toolTip() == "Undo the last filter"
+          and redo.toolTip() == "Redo the last filter", (undo.toolTip(), redo.toolTip()))
+
+    # A setup that fails half way leaves nothing behind: no event filter on the buttons, no entry in the menu.
+    class Refusing:
+        def connect(self, slot):
+            raise RuntimeError("refused")
+    broken = Dock(canvas, history, zones)
+    broken_compare = CompareController(broken, integration)
+    broken.currentLayerChanged = Refusing()  # connected after the event filters and the menu entry
+    try:
+        HistoryController(broken, integration, broken_compare)
+        raised = False
+    except RuntimeError:
+        raised = True
+    button = broken.pushButton_action_undo_filter
+    QApplication.sendEvent(button, QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(4, 4),
+                                                     button.mapToGlobal(QPoint(4, 4))))
+    QgsApplication.processEvents()
+    check("a setup failed half way is undone", raised and [action.text() for action in broken_compare.menu.actions()]
+          == ["Pin the current state", "Remove the pin"] and not any(
+              isinstance(child, QWidget) and child.objectName() == "frame_fm_history" and child.isVisible()
+              for child in broken.findChildren(QWidget)))
+    broken_compare.teardown()
     compare.teardown()
     QgsApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 

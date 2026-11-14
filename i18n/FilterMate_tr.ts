@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>Karşılaştır: {} saatinde sabitlenen harita çizginin solunda, şimdiki hâli sağında; çizgi fareyi izler</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Karşılaştır: sabitlenen harita çizginin solunda, şimdiki hâli sağında; çizgi fareyi izler</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Yeniden sabitlemek ya da sabitlemeyi kaldırmak için sağ tıklayın.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Sabitlendi {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Sabitlendi</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

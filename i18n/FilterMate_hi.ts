@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>तुलना: {} बजे पिन किया गया नक्शा रेखा के बाईं ओर, अभी का दाईं ओर; रेखा माउस के साथ चलती है</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>तुलना: पिन किया गया नक्शा रेखा के बाईं ओर, अभी का दाईं ओर; रेखा माउस के साथ चलती है</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>फिर से पिन करने या पिन हटाने के लिए राइट-क्लिक करें।</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>पिन किया गया {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>पिन किया गया</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

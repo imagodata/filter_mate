@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>Ihambing: ang mapang na-pin noong {} sa kaliwa ng linya, ang kasalukuyan sa kanan; sumusunod ang linya sa mouse</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Ihambing: ang mapang na-pin sa kaliwa ng linya, ang kasalukuyan sa kanan; sumusunod ang linya sa mouse</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>I-right-click para mag-pin muli o alisin ang pin.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Na-pin {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Na-pin</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

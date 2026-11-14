@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>Σύγκριση: ο χάρτης που καρφιτσώθηκε στις {} αριστερά της γραμμής, ο τωρινός δεξιά· η γραμμή ακολουθεί το ποντίκι</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Σύγκριση: ο καρφιτσωμένος χάρτης αριστερά της γραμμής, ο τωρινός δεξιά· η γραμμή ακολουθεί το ποντίκι</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Δεξί κλικ για νέο καρφίτσωμα ή αφαίρεση του καρφιτσώματος.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Καρφιτσώθηκε {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Καρφιτσώθηκε</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

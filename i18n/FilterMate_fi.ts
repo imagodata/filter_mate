@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>Vertaa: klo {} kiinnitetty kartta viivan vasemmalla puolella, nykyinen oikealla; viiva seuraa hiirtä</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Vertaa: kiinnitetty kartta viivan vasemmalla puolella, nykyinen oikealla; viiva seuraa hiirtä</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Kiinnitä uudelleen tai poista kiinnitys napsauttamalla hiiren oikealla painikkeella.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Kiinnitetty {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Kiinnitetty</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

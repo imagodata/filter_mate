@@ -8,6 +8,8 @@ ui/controllers/agent_chat_controller.py).
 """
 from __future__ import annotations
 
+from typing import Optional
+
 from qgis.PyQt.QtCore import QCoreApplication
 
 from ...core.domain.history_timeline import KIND_AGENT, KIND_COVERAGE, KIND_VECTOR
@@ -35,24 +37,31 @@ def history_name(kind: str, source: str = "") -> str:
     return ""
 
 
-def button_tip(undo: bool, label: str = "", kind: str = "", left: int = 0, source: str = "") -> str:
+def button_tip(undo: bool, label: str = "", kind: str = "", left: int = 0, source: str = "",
+               available: Optional[bool] = None, right_click: bool = True) -> str:
     """The tooltip of Undo (``undo``) or Redo.
 
     Args:
         undo: Undo, or Redo.
-        label: What the click would undo or redo; "" when it can do nothing.
+        label: What the click would undo or redo, "" when its history has no words for it.
         kind: The history it walks (``KIND_VECTOR``, ``KIND_COVERAGE``, ``KIND_AGENT``), "" for none.
         left: How many steps it can take one after the other from here.
         source: The layer of a raster / point cloud history.
+        available: Whether the click would do something (default: a ``label`` is given).
+        right_click: A right-click opens the history of the project (the history panel is set up).
     """
-    if label:
+    available = bool(label) if available is None else available
+    if available and label:
         lines = [(_tr("Undo: {}") if undo else _tr("Redo: {}")).format(_short(label))]
+    elif available:
+        lines = [_tr("Undo") if undo else _tr("Redo")]
     else:
         lines = [_tr("Nothing to undo.") if undo else _tr("Nothing to redo.")]
     name = history_name(kind, source)
     if name:
         lines.append(_tr("History: {}").format(name))
-    if label and left > 0:
+    if available and left > 0:
         lines.append((_tr("Steps to undo: {}") if undo else _tr("Steps to redo: {}")).format(left))
-    lines.append(_tr("Right-click: the history of the project"))
+    if right_click:
+        lines.append(_tr("Right-click: the history of the project"))
     return "\n".join(lines)

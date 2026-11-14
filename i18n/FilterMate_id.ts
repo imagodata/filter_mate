@@ -4754,6 +4754,11 @@ What would you like to do?</translation>
         <translation>Bandingkan: peta yang disematkan pukul {} di kiri garis, kondisi saat ini di kanan; garis mengikuti tetikus</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Bandingkan: peta yang disematkan di kiri garis, kondisi saat ini di kanan; garis mengikuti tetikus</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Klik kanan untuk menyematkan lagi atau menghapus sematan.</translation>
@@ -4767,6 +4772,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Disematkan {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Disematkan</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

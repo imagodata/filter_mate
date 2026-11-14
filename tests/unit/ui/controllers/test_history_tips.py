@@ -52,3 +52,15 @@ def test_nothing_to_do_still_names_the_history_and_the_right_click(tips):
 def test_a_long_request_is_cut_on_one_line(tips):
     first = tips.button_tip(True, "keep\n  the " + "x" * 200, KIND_AGENT, 1).split("\n")[0]
     assert first.startswith("Undo: keep the x") and first.endswith("…") and len(first) == len("Undo: ") + 80
+
+
+def test_a_step_without_words_is_still_said_to_be_undoable(tips):
+    """A button that would do something never says there is nothing to do, even when its step has no label."""
+    assert tips.button_tip(True, "", KIND_VECTOR, 2, available=True).split("\n") == [
+        "Undo", "History: vector filters of the dock", "Steps to undo: 2", "Right-click: the history of the project"]
+    assert tips.button_tip(False, "Clip", KIND_COVERAGE, 1, "DEM", available=False).split("\n")[0] == "Nothing to redo."
+
+
+def test_no_right_click_line_without_the_history_panel(tips):
+    assert tips.button_tip(True, "Turn", KIND_AGENT, 1, right_click=False).split("\n") == [
+        "Undo: Turn", "History: turns of the agent", "Steps to undo: 1"]

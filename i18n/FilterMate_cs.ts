@@ -4742,6 +4742,11 @@ What would you like to do?</translation>
         <translation>Porovnat: mapa připnutá v {} vlevo od čáry, současná vpravo; čára sleduje myš</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Porovnat: připnutá mapa vlevo od čáry, současná vpravo; čára sleduje myš</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Pravým kliknutím připnete znovu nebo odeberete připnutí.</translation>
@@ -4755,6 +4760,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Připnuto {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Připnuto</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>

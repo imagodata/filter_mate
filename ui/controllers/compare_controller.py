@@ -42,7 +42,8 @@ def _tr(text: str) -> str:
 
 
 def _clock(timestamp: float) -> str:
-    return time.strftime("%H:%M", time.localtime(timestamp))
+    """HH:MM; "" for a time not known (0), never the hour of the epoch."""
+    return time.strftime("%H:%M", time.localtime(timestamp)) if timestamp and timestamp > 0 else ""
 
 
 def compare_icon(size: int = 32, colour: QColor = QColor(90, 90, 90), pinned: bool = False) -> QIcon:
@@ -183,9 +184,12 @@ class CompareController(QObject):
             if self._pin is None:
                 tip = (_tr("Compare: the map before the last filter left of the line, as it is on its right; "
                            "the line follows the mouse") + "\n" + _tr("Right-click to pin the current state."))
-            else:
+            elif _clock(self._pin.taken_at):
                 tip = (_tr("Compare: the map pinned at {} left of the line, as it is on its right; "
                            "the line follows the mouse").format(_clock(self._pin.taken_at))
+                       + "\n" + _tr("Right-click to pin again or remove the pin."))
+            else:
+                tip = (_tr("Compare: the map pinned left of the line, as it is on its right; the line follows the mouse")
                        + "\n" + _tr("Right-click to pin again or remove the pin."))
             self.button.setToolTip(tip)
         except RuntimeError:  # the dock is being deleted
@@ -335,7 +339,8 @@ class CompareController(QObject):
 
     def _labels(self, before: BeforeMap) -> Tuple[str, str]:
         if before.pinned_at is not None:
-            left = _tr("Pinned {}").format(_clock(before.pinned_at))
+            clock = _clock(before.pinned_at)
+            left = _tr("Pinned {}").format(clock) if clock else _tr("Pinned")
         else:
             text = " ".join((before.label or "").split())
             if len(text) > LABEL_LENGTH:

@@ -28,8 +28,8 @@ from qgis.PyQt.QtWidgets import (QAbstractItemView, QFrame, QHBoxLayout, QHeader
 
 from ...core.domain.compare_states import pin_before
 from ...core.domain.history_timeline import (KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, TimelineItem,
-                                             UndoFocus, counts, cross_items, label_of, map_before, mark, timeline,
-                                             vector_items, walkable)
+                                             UndoFocus, counts, cross_items, label_of, link, linked_pairs, map_before,
+                                             mark, timeline, vector_items, walkable)
 from ..styles.mockup_design import plugin_is_dark, tokens
 from .history_tips import button_tip, history_name
 
@@ -93,6 +93,7 @@ class HistoryPanel(QFrame):
         self.setObjectName(PANEL_NAME)
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.items: List[TimelineItem] = []
+        self._dark: Optional[bool] = None  # the theme of the sheet set
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 8, 10, 10)
         layout.setSpacing(6)
@@ -157,7 +158,11 @@ class HistoryPanel(QFrame):
         kept = self.selected()
         dark = bool(plugin_is_dark(self.parentWidget() or self))
         palette = tokens(dark)
-        self._style(palette)
+        if dark != self._dark:  # the sheet again only when the theme changed: a refill must not restyle the panel
+            self._dark = dark
+            self._style(palette)
+        scroll = self.tree.verticalScrollBar()
+        position = scroll.value() if self.isVisible() else 0  # open, the list stays where the user scrolled it
         colours = {KIND_VECTOR: palette["fm_strip_vector_text"], KIND_COVERAGE: palette["fm_strip_raster_text"],
                    KIND_AGENT: palette["fm_accent"], KIND_STEP: palette["fm_accent"]}
         muted, accent = QColor(palette["fm_text_muted"]), QColor(palette["fm_accent"])
@@ -201,6 +206,7 @@ class HistoryPanel(QFrame):
         if to_select is not None:
             self.tree.setCurrentItem(to_select)
             to_select.setSelected(True)
+        scroll.setValue(position)
         to_undo, to_redo = counts(self.items)
         self.counts.setText(_tr("{} to undo · {} to redo").format(to_undo, to_redo))
         self._sync_buttons()
@@ -248,19 +254,33 @@ class HistoryController(QObject):
         self._timer.setSingleShot(True)
         self._timer.setInterval(0)
         self._timer.timeout.connect(self.refresh)
-        self.buttons = [button for button in (getattr(dockwidget, UNDO_BUTTON, None),
-                                              getattr(dockwidget, REDO_BUTTON, None)) if button is not None]
-        for button in self.buttons:
-            # A disabled button swallows its right-click (QAbstractButton): the panel opens from here, enabled or not.
-            button.installEventFilter(self)
+        self.buttons = []
         self.history_action = self._separator = None
-        menu = getattr(compare, "menu", None)
+        try:
+            self._install()
+        except Exception:
+            self.teardown()  # nothing left half installed: the dock goes on without the history
+            raise
+
+    def _install(self) -> None:
+        dock = self._dock
+        undo, redo = getattr(dock, UNDO_BUTTON, None), getattr(dock, REDO_BUTTON, None)
+        if undo is not None and redo is not None and getattr(dock, "_fm_undo_tooltips", None) is None:
+            # The tooltips of the .ui, before this controller says anything in them: put back at its teardown.
+            dock._fm_undo_tooltips = (undo.toolTip(), redo.toolTip())
+        for button in (undo, redo):
+            if button is not None:
+                # A disabled button swallows its right-click (QAbstractButton): the panel opens from here, enabled
+                # or not.
+                button.installEventFilter(self)
+                self.buttons.append(button)
+        menu = getattr(self._compare, "menu", None)
         if menu is not None:
             self._separator = menu.addSeparator()
             self.history_action = menu.addAction(_tr("History…"))
             self.history_action.triggered.connect(self._open_from_compare)
-        self._connect(getattr(dockwidget, "undoRedoStateRequested", None), self.schedule_refresh)
-        self._connect(getattr(dockwidget, "currentLayerChanged", None), self.schedule_refresh)
+        self._connect(getattr(dock, "undoRedoStateRequested", None), self.schedule_refresh)
+        self._connect(getattr(dock, "currentLayerChanged", None), self.schedule_refresh)
         self._connect(QgsProject.instance().cleared, self.close_panel)
 
     def _connect(self, signal, slot) -> None:
@@ -310,7 +330,22 @@ class HistoryController(QObject):
         agent = _api_service().history
         groups.append(cross_items(HISTORY_KEY, agent.undo_stack(HISTORY_KEY), agent.redo_stack(HISTORY_KEY),
                                   self._name, agent=True))
-        return timeline(*groups)
+        items = [item for group in groups for item in group]
+        return timeline(link(items, self._linked(vector, history)) if vector is not None else items)
+
+    def _linked(self, vector, cross) -> list:
+        """Each vector filter of the dock with the raster / point cloud operation it ran with, as Undo pairs them (the
+        runs of the source the raster / point cloud mode keeps)."""
+        coverage = self._coverage()
+        runs = (getattr(coverage, "_linked_runs", None) or {}) if coverage is not None else {}
+        undone = (getattr(coverage, "_linked_redo", None) or {}) if coverage is not None else {}
+        pairs = []
+        for source_id in set(runs) | set(undone):
+            pairs += linked_pairs(vector.get_undo_stack(), source_id,
+                                  [run.op_id for run in runs.get(source_id) or ()], cross.undo_stack(source_id))
+            pairs += linked_pairs(vector.get_redo_stack(), source_id,
+                                  [run.op_id for run in undone.get(source_id) or ()], cross.redo_stack(source_id))
+        return pairs
 
     def focus(self) -> UndoFocus:
         """What Undo and Redo take now, chosen as ``FilterMateApp.update_undo_redo_buttons`` chooses: the agent while
@@ -407,15 +442,17 @@ class HistoryController(QObject):
             self._fill(focus)
 
     def _show_tips(self, focus: UndoFocus) -> None:
+        """What each button would do, from ``focus`` alone: the state of a button says nothing more (it is also off
+        while the action bar or the dock is, for a moment)."""
         for button, undo in zip((getattr(self._dock, UNDO_BUTTON, None), getattr(self._dock, REDO_BUTTON, None)),
                                 (True, False)):
             if button is None:
                 continue
             refs = focus.undo if undo else focus.redo
             try:
-                label = label_of(refs[0]) if refs and button.isEnabled() else ""
-                button.setToolTip(button_tip(undo, label, focus.kind, focus.undo_left if undo else focus.redo_left,
-                                             focus.source))
+                button.setToolTip(button_tip(undo, label_of(refs[0]) if refs else "", focus.kind,
+                                             focus.undo_left if undo else focus.redo_left, focus.source,
+                                             available=bool(refs)))
             except RuntimeError:  # the dock is being deleted
                 return
 
@@ -496,7 +533,7 @@ class HistoryController(QObject):
         self.close_panel()
         from ...adapters.qgis.compare_swipe import map_state
         try:
-            state = pin_before(map_state(self._canvas()), before, item.time)
+            state = pin_before(map_state(self._canvas()), before, item.begun)  # when it began (a turn, a step)
         except Exception:  # whatever a layer raises: nothing is pinned, and the user is told
             logger.warning("History: map not pinned", exc_info=True)
             self._say(_tr("The map could not be pinned."))
@@ -532,14 +569,25 @@ class HistoryController(QObject):
             except RuntimeError:
                 pass
         self.buttons = []
+        menu = getattr(self._compare, "menu", None)
         if self.history_action is not None:
             try:
                 self.history_action.triggered.disconnect(self._open_from_compare)
-                menu = getattr(self._compare, "menu", None)
-                if menu is not None:
-                    menu.removeAction(self.history_action)
-                    menu.removeAction(self._separator)
-            except (TypeError, RuntimeError):
+            except (TypeError, RuntimeError):  # never connected (a setup stopped half way), or deleted
                 pass
-            self.history_action = self._separator = None
+        for action in (self.history_action, self._separator):
+            try:
+                if action is not None and menu is not None:
+                    menu.removeAction(action)
+            except RuntimeError:
+                pass
+        self.history_action = self._separator = None
+        saved = getattr(self._dock, "_fm_undo_tooltips", None)
+        try:
+            for name, tip in zip((UNDO_BUTTON, REDO_BUTTON), saved or ()):
+                button = getattr(self._dock, name, None)
+                if button is not None:
+                    button.setToolTip(tip)  # without the history, the tooltips of the .ui
+        except RuntimeError:  # the dock is being deleted
+            pass
         self.close_panel()

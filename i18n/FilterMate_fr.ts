@@ -4769,6 +4769,11 @@ What would you like to do?</translation>
         <translation>Comparer : la carte épinglée à {} à gauche du trait, telle qu'elle est à droite ; le trait suit la souris</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Comparer : la carte épinglée à gauche du trait, telle qu'elle est à droite ; le trait suit la souris</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Clic droit pour épingler à nouveau ou retirer l'épingle.</translation>
@@ -4782,6 +4787,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Épinglée à {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Épinglée</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>
