@@ -1111,6 +1111,26 @@ Do you agree?</source>
         <translation>{} ขั้นตอนก่อนหน้ายังคงอยู่ และเลิกทำได้</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้ จะลองอีกครั้งใน {} วินาที…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>ผู้ให้บริการไม่ว่าง จะลองอีกครั้งใน {} วินาที…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>คำขอหยุดลงกลางคัน ขั้นตอนที่ทำไปแล้วซึ่งยังคงอยู่ (เลิกทำจะย้อนกลับให้): {} ขอให้เอเจนต์ดำเนินการต่อเมื่อคุณพร้อม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>หยุดกลางคัน ขั้นตอนที่ทำไปแล้วซึ่งยังคงอยู่ (เลิกทำจะย้อนกลับให้): {} ขอให้เอเจนต์ดำเนินการต่อหากต้องการส่วนที่เหลือ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>วิดเจ็ต: {}</translation>

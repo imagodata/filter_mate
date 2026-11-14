@@ -1111,6 +1111,26 @@ Sei d'accordo?</translation>
         <translation>I {} passaggi precedenti restano e possono essere annullati.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Impossibile raggiungere il provider, nuovo tentativo tra {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Il provider è occupato, nuovo tentativo tra {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>La richiesta si è interrotta a metà. Passaggi già eseguiti, che restano al loro posto (Annulla li riporta indietro): {}. Chiedi all'agente di proseguire quando sei pronto.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Interrotto a metà. Passaggi già eseguiti, che restano al loro posto (Annulla li riporta indietro): {}. Chiedi all'agente di proseguire se vuoi il resto.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

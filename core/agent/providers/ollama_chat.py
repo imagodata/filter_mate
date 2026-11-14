@@ -62,7 +62,13 @@ def _wire_messages(system: str, messages: Sequence[Message]) -> List[Dict[str, A
             if images:  # a tool message holds text only: its images follow, in a message of the user
                 wire.append({"role": "user", "content": "Images answered by the tool calls above.", "images": images})
             if text:
-                wire.append({"role": "user", "content": text})
+                last = wire[-1]
+                if last["role"] == "user" and isinstance(last["content"], str) and "images" not in last:
+                    # Two messages of the user in a row (a request after one that broke off, after the turn
+                    # limit) go as one: some chat templates refuse roles that do not alternate.
+                    last["content"] += "\n\n" + text
+                else:
+                    wire.append({"role": "user", "content": text})
             continue
         entry: Dict[str, Any] = {"role": "assistant", "content": message.text}
         calls = []

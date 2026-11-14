@@ -232,7 +232,8 @@ class QuestionCard(QFrame):
             group.setExclusive(not question.multi_select)
             buttons = []
             for option in question.options:
-                button = QCheckBox(option.label, self) if question.multi_select else QRadioButton(option.label, self)
+                shown = option.label.replace("&", "&&")  # a lone & would make a shortcut and vanish ("R&D")
+                button = QCheckBox(shown, self) if question.multi_select else QRadioButton(shown, self)
                 button.setCursor(Qt.CursorShape.PointingHandCursor)
                 group.addButton(button)
                 self._choices.append(button)

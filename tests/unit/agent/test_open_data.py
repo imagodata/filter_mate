@@ -144,8 +144,17 @@ class TestSources:
 
     def test_what_the_user_reads_starts_with_the_host(self):
         shown = display_source("https://static.example.org/" + "p" * 200 + "?secret=1")
-        assert shown.startswith("static.example.org\n") and len(shown) < 200
-        assert "?secret=1" in shown  # what would leave with the request is shown
+        assert shown.startswith("static.example.org\n")
+        assert shown.endswith("p" * 200 + "?secret=1")  # what would leave with the request is shown, whole
+
+    def test_what_is_not_shown_is_said(self):
+        shown = display_source("https://static.example.org/a.gpkg?d=" + "x" * 2000 + "&leak=clients")
+        assert "leak=clients" not in shown and "more characters are not shown" in shown
+
+    @pytest.mark.parametrize("source", ["/\\evil.example\\share\\a.gpkg", "\\/evil.example/share/a.gpkg",
+                                        "\\\\evil.example\\share\\a.gpkg", "//evil.example/share/a.gpkg"])
+    def test_a_share_of_another_machine_is_refused_however_it_is_written(self, source):
+        assert source_problem(source, False) and source_problem(source, True)
 
 
 class TestOddAnswers:

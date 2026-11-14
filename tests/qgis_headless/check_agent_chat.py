@@ -190,6 +190,11 @@ def check_transport(provider, pkg):
     check("stream: one final event", sum(isinstance(e, (TurnComplete, StreamFailure)) for e in events) == 1, events)
     check("stream: key sent in its header", provider.requests[0]["headers"].get("x-api-key") == SECRET)
     check("stream: valid body", provider.requests[0]["body"]["model"] == "m" and provider.requests[0]["path"] == "/v1/messages")
+    from qgis.PyQt.QtNetwork import QNetworkReply
+    from filter_mate.adapters.agent.qt_transport import _transient
+    check("transport: a reset connection is tried again, a refused one is not",
+          _transient(QNetworkReply.NetworkError.RemoteHostClosedError)
+          and not _transient(QNetworkReply.NetworkError.ConnectionRefusedError))
     wait(lambda: False, 0.1)
     from qgis.PyQt.QtCore import QObject
     parent = QObject()
@@ -579,6 +584,27 @@ def check_ask_user(panel, provider, ask):
     check("ask_user: the free text of Other comes back as other",
           '"other": "les pistes forestières"' in given, given)
 
+    # A question asked while the history page is shown, with an & in a choice: the thread comes back in view (the
+    # turn waits for the answer), and the choice reads whole.
+    odd = {"questions": [{"question": "Quel service ?", "header": "Service",
+                          "options": [{"label": "R&D"}, {"label": "Voirie"}]}]}
+    provider.reset((200, {}, tool_turn("ask_user", odd)), (200, {}, text_turn("Entendu.")))
+    seen = {}
+
+    def answer_odd(card):
+        seen["page"] = panel.history_shown
+        seen["text"] = card._groups[0][0][0][0].text()
+        card._groups[0][0][0][0].click()
+        card.answer_button.click()
+
+    QTimer.singleShot(0, panel.show_history)  # once the request left: the user looks at the history meanwhile
+    when_card(answer_odd)
+    ask("et pour quel service ?")
+    given = result_of() if len(provider.requests) > 1 else ""
+    check("ask_user: the thread is shown when a question comes during the history", seen.get("page") is False, seen)
+    check("ask_user: an & of a choice is shown and answered whole",
+          seen.get("text") == "R&&D" and "R&D" in given and "R&&D" not in given, (seen, given))
+
     provider.reset((200, {}, tool_turn("ask_user", {"questions": questions["questions"][:1]})),
                    (200, {}, text_turn("Comme vous voulez.")))
     when_card(lambda card: card.close_button.click())
@@ -965,6 +991,8 @@ def check_chat(provider, layer, authcfg, work):
     result = provider.requests[1]["body"]["messages"][2]["content"][0]
     check("an invalid filter is refused and explained", result.get("is_error") is True and "invalid" in result["content"], result)
     check("the layer stays as it was", layer.subsetString() == "", layer.subsetString())
+    check("the card of a failed step says why", "invalid" in panel.thread.toPlainText()[-400:],
+          panel.thread.toPlainText()[-400:])
 
     settings(send_values=False)
     provider.reset((200, {}, text_turn("ok")))

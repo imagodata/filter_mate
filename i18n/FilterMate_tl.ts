@@ -1111,6 +1111,26 @@ Sumasang-ayon ka ba?</translation>
         <translation>Mananatili ang {} hakbang bago nito, at maaaring i-undo.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Hindi maabot ang provider, susubukan muli sa loob ng {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Abala ang provider, susubukan muli sa loob ng {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Huminto sa kalagitnaan ang kahilingan. Mga hakbang na nagawa na, na nananatili sa lugar (ibinabalik ng I-undo ang mga ito): {}. Hilingin sa agent na magpatuloy kapag handa ka na.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Huminto sa kalagitnaan. Mga hakbang na nagawa na, na nananatili sa lugar (ibinabalik ng I-undo ang mga ito): {}. Hilingin sa agent na magpatuloy kung gusto mo ang natitira.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
