@@ -695,6 +695,11 @@ Rămân în memoria de editare până când salvați editările stratului, iar a
         <translation>Oprit.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Această cerere: {} tokeni citiți (dintre care {} din memoria cache), {} scriși</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Serverul MCP nu a putut porni: {}</translation>

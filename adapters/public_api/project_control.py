@@ -19,7 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.basemaps import DEFAULT_ZMAX, default_title, is_image, known, sample_tiles, template_problem, xyz_uri
 from ...core.agent.open_data import (
-    KIND_STAC, KIND_WFS, KIND_XYZ, RemoteFile, archive_member, follow_redirects, gdal_source, is_web_page, megabytes,
+    KIND_STAC, KIND_WFS, KIND_XYZ, RemoteFile, archive_member, follow_redirects, gdal_source, is_point_cloud, is_web_page,
+    megabytes,
     parse_results, parse_stac_items, reads_in_place, remote_file, resolve_platform, resolved_problem, search_url,
     source_problem, stac_search_body, valid_day,
 )
@@ -357,11 +358,13 @@ def _add_layer(source: str, name: str, kind: str) -> Dict[str, Any]:
     problem = source_problem(source, allow_remote=True)
     if problem:
         raise ValueError(problem)
-    if kind not in ('vector', 'raster'):
-        raise ValueError("kind is vector or raster")
+    if kind not in ('vector', 'raster', 'point_cloud'):
+        raise ValueError("kind is vector, raster or point_cloud")
     remote = source.lower().startswith('https://')
     if not remote and not os.path.isfile(source.split('|', 1)[0]):
         raise ValueError("this file does not exist")
+    if is_point_cloud(source) or kind == 'point_cloud':
+        return _add_point_cloud(source, name, remote)
     title = (name or '').strip()
     opened, copy = source, ''
     if remote:
@@ -388,6 +391,25 @@ def _add_layer(source: str, name: str, kind: str) -> Dict[str, Any]:
         if remote:
             raise ValueError(f"its server answers, but the file could not be opened as a {kind} layer where it is")
         raise ValueError(f"the source could not be opened as a {kind} layer")
+    QgsProject.instance().addMapLayer(layer)
+    return _summary(layer)
+
+
+def _add_point_cloud(source: str, name: str, remote: bool) -> Dict[str, Any]:
+    """A local LAS or LAZ file as a point cloud layer, whatever kind was asked: its extension says what it is."""
+    from qgis.core import QgsPointCloudLayer, QgsProject, QgsProviderRegistry
+    if remote:
+        raise ValueError("a point cloud is added from a local file (.las, .laz, .copc.laz), not from an address")
+    if not is_point_cloud(source):
+        raise ValueError("a point cloud is a .las, .laz or .copc.laz file")
+    provider = 'copc' if source.lower().endswith('.copc.laz') else 'pdal'
+    if QgsProviderRegistry.instance().providerMetadata(provider) is None:
+        raise ValueError("this QGIS reads .copc.laz files only (it was built without PDAL)" if provider == 'pdal'
+                         else "this QGIS does not read point clouds")
+    title = (name or '').strip() or os.path.basename(source)[:80]
+    layer = QgsPointCloudLayer(source, title, provider)
+    if not layer.isValid():
+        raise ValueError("the file could not be opened as a point cloud layer")  # nothing more is read from it
     QgsProject.instance().addMapLayer(layer)
     return _summary(layer)
 

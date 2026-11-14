@@ -25,6 +25,7 @@ named mcp_..., from the next turn on.
 1. search_open_data finds datasets on the platforms the user allowed (data.gouv.fr, the Opendatasoft hub, and those
    they added).
 2. add_layer adds one of their resources (GeoJSON or GeoPackage first) or a local data file; the user confirms.
+   A local las, laz or copc.laz file is added as a point cloud.
 3. A layer of a WFS platform goes through add_service_layer: it is read from the service as the map moves.
 4. A platform that does not answer, or finds nothing after two searches: search another one the user allowed
    instead of asking it again in other words. For the French reference layers (communes, departments, cadastre,

@@ -695,6 +695,11 @@ Mananatili sila sa edit buffer hanggang i-save mo ang mga edit ng layer, at ibab
         <translation>Itinigil.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Ang kahilingang ito: {} token ang nabasa ({} mula sa cache), {} ang naisulat</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Hindi masimulan ang MCP server: {}</translation>

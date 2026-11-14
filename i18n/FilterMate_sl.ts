@@ -695,6 +695,11 @@ Ostanejo v medpomnilniku urejanja, dokler ne shranite urejanj plasti, razveljavi
         <translation>Ustavljeno.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Ta zahteva: prebranih {} žetonov (od tega {} iz predpomnilnika), zapisanih {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Strežnika MCP ni bilo mogoče zagnati: {}</translation>

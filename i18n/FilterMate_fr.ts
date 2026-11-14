@@ -871,6 +871,11 @@ Acceptez-vous ?</translation>
         <translation>Arrêté.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Cette demande : {} jetons lus (dont {} depuis le cache), {} écrits</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="780"/>
         <source>The provider refused the API key: check it in the agent settings.</source>
         <translation>Le fournisseur a refusé la clé API : vérifiez-la dans les réglages de l'agent.</translation>

@@ -1034,7 +1034,7 @@ class InMemoryAccessor:
 
     def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
         summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or source.rsplit("/", 1)[-1],
-                               provider_type="ogr" if kind == "vector" else "gdal", layer_kind=kind)
+                               provider_type={"vector": "ogr", "raster": "gdal"}.get(kind, "pdal"), layer_kind=kind)
         self.layers.append(summary)
         return summary
 

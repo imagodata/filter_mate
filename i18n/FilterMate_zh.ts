@@ -695,6 +695,11 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <translation>已停止。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>本次请求：读取 {} 个令牌（其中 {} 个来自缓存），写入 {} 个</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP 服务器无法启动：{}</translation>

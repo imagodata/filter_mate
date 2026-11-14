@@ -695,6 +695,11 @@ Pozostają w buforze edycji, dopóki nie zapiszesz edycji warstwy, a cofnięcie 
         <translation>Zatrzymano.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>To żądanie: odczytano {} tokenów (w tym {} z pamięci podręcznej), zapisano {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Nie udało się uruchomić serwera MCP: {}</translation>
