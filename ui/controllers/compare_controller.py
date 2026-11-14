@@ -9,7 +9,8 @@ bring back now.
 
 A pin (right-click on the button) keeps the map as it is: while it is there, Compare shows that state instead, is
 available without Undo, and follows the map through filters, undos and turns of the agent, compared again each time
-the map is drawn; a change of project forgets it. ``adapters/qgis/compare_swipe.py`` draws.
+the map is drawn; a change of project forgets it. A click on the map fixes the line where it is, another frees it.
+``adapters/qgis/compare_swipe.py`` draws.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ from dataclasses import replace
 from typing import Optional, Tuple
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF, QSize, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 from qgis.PyQt.QtWidgets import QMenu, QPushButton
 
@@ -35,6 +36,7 @@ ENDING_BUTTONS = ("pushButton_action_filter", "pushButton_action_undo_filter", "
                   "pushButton_action_unfilter")
 LABEL_LENGTH = 40  # the description of an operation, above the map
 FOLLOW_DELAY_MS = 200  # a pin is compared again once the map is drawn and stays so
+PIN_COLOUR = QColor(230, 120, 20)  # the mark of a pin, on the button and in the history panel
 
 
 def _tr(text: str) -> str:
@@ -66,7 +68,7 @@ def compare_icon(size: int = 32, colour: QColor = QColor(90, 90, 90), pinned: bo
     if pinned:
         radius = size * 0.17
         painter.setPen(QPen(QColor(255, 255, 255), max(1.0, size / 22)))
-        painter.setBrush(QColor(230, 120, 20))
+        painter.setBrush(PIN_COLOUR)
         painter.drawEllipse(QPointF(size - radius - 1.0, radius + 1.0), radius, radius)
     painter.end()
     return QIcon(pixmap)
@@ -88,6 +90,8 @@ def _layout_holding(layout, widget):
 
 class CompareController(QObject):
     """One button, its menu (pin the map, remove the pin) and the comparison it starts and stops."""
+
+    pinChanged = pyqtSignal()  # a pin taken, replaced or forgotten: the history panel lists it
 
     def __init__(self, dockwidget, integration=None) -> None:
         super().__init__(dockwidget)
@@ -182,16 +186,17 @@ class CompareController(QObject):
             if self.unpin_action is not None:
                 self.unpin_action.setEnabled(self._pin is not None)
             if self._pin is None:
-                tip = (_tr("Compare: the map before the last filter left of the line, as it is on its right; "
-                           "the line follows the mouse") + "\n" + _tr("Right-click to pin the current state."))
+                lines = (_tr("Compare: the map before the last filter left of the line, as it is on its right; "
+                             "the line follows the mouse"), _tr("Right-click to pin the current state."))
             elif _clock(self._pin.taken_at):
-                tip = (_tr("Compare: the map pinned at {} left of the line, as it is on its right; "
-                           "the line follows the mouse").format(_clock(self._pin.taken_at))
-                       + "\n" + _tr("Right-click to pin again or remove the pin."))
+                lines = (_tr("Compare: the map pinned at {} left of the line, as it is on its right; "
+                             "the line follows the mouse").format(_clock(self._pin.taken_at)),
+                         _tr("Right-click to pin again or remove the pin."))
             else:
-                tip = (_tr("Compare: the map pinned left of the line, as it is on its right; the line follows the mouse")
-                       + "\n" + _tr("Right-click to pin again or remove the pin."))
-            self.button.setToolTip(tip)
+                lines = (_tr("Compare: the map pinned left of the line, as it is on its right; the line follows the mouse"),
+                         _tr("Right-click to pin again or remove the pin."))
+            self.button.setToolTip("\n".join((lines[0], _tr("Click on the map to fix the line, click again to free it."),
+                                              lines[1])))
         except RuntimeError:  # the dock is being deleted
             return
         if not enabled:
@@ -311,6 +316,7 @@ class CompareController(QObject):
             except Exception:
                 logger.warning("Compare: map not read", exc_info=True)
                 self._fail()
+        self.pinChanged.emit()  # last: a listener finds the comparison as the pin left it
 
     def unpin(self, *_args) -> None:
         """Forget the pin: Compare shows the map before the last operation again (when there is one)."""
@@ -322,11 +328,29 @@ class CompareController(QObject):
         self._sync_button()
         if self.session is not None and self.session.active and self._given is None:
             self.start()
+        self.pinChanged.emit()  # last: a listener finds the comparison as the pin left it
+
+    def compare_pin(self, *_args) -> int:
+        """Compare with the pin, as a click on the button does (a step compared gives way to it); the number of layers
+        drawn otherwise than now, 0 without a pin."""
+        if self._pin is None:
+            return 0
+        self._said = ()  # a comparison asked again says again what it cannot draw
+        self._free_line()
+        return self.start()
+
+    def _free_line(self) -> None:
+        """Another comparison begins on the same line: it follows the mouse again, wherever it was fixed."""
+        item = getattr(self.session, "item", None) if self.session is not None else None
+        if item is not None and item.frozen:
+            item.set_frozen(False)
 
     def _on_project_cleared(self, *_args) -> None:
         self.stop()
-        self._pin = None
+        pinned, self._pin = self._pin is not None, None
         self._sync_button()
+        if pinned:
+            self.pinChanged.emit()
 
     # --- the comparison ----------------------------------------------------------
 
@@ -351,6 +375,7 @@ class CompareController(QObject):
     def _session(self, canvas) -> CompareSession:
         if self.session is None:
             self.session = CompareSession(canvas, self)
+            self.session.fixed_note = _tr("line fixed: click to free it")
             self.session.ended.connect(self.stop)
             self._connect(canvas.mapCanvasRefreshed, self._on_map_drawn)
         return self.session
@@ -398,6 +423,7 @@ class CompareController(QObject):
         self._watch.stop()
         self._given = before
         self._said = ()
+        self._free_line()
         self._sync_button()  # available while it compares, Undo or not
         count = self._show(before, labels=labels)
         if count:
