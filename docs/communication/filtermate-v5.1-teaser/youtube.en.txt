@@ -1,0 +1,34 @@
+TITLE
+FilterMate 5.1 for QGIS in 55 seconds: spatial filters, LiDAR, SAM and an agent
+
+DESCRIPTION
+One spatial question, one answer inside QGIS. FilterMate carries a selection from one layer to the others: vector, raster and point cloud layers can each be the source or the target.
+
+In this video, on the open data of the IGN around Toulouse:
+- one click filters 12 layers: the 360,577 buildings of Toulouse Métropole
+- the filter runs in the SQL of each source: PostGIS, GeoPackage, SpatiaLite, files
+- chained filters: AND, OR, AND NOT, several targets at once
+- LiDAR: the buildings over 7 m, read from the point cloud; the terrain model and the cloud clipped around a selection
+- Undo, Redo, and Compare before and after
+- favorites, an export of only the answer as a GeoPackage, Processing and an API
+- SAM (experimental): one click outlines an object on the orthophoto, on your CPU
+- AGENT (experimental): ask in one sentence, check every step, undo in one click, with your own API key or a local Ollama model
+
+Everything shown is the real plugin in QGIS 4.2. The counts are those of this recording.
+
+Install: in QGIS, Plugins > Manage and Install Plugins > FilterMate
+Site and guide: https://imagodata.github.io/filter_mate/
+Plugin page: https://plugins.qgis.org/plugins/filter_mate/
+Source: https://github.com/imagodata/filter_mate
+
+FilterMate is free and open source (GPLv3), for QGIS 3.22 to 4.x.
+Data: BD TOPO®, BD ORTHO® and LiDAR HD © IGN, Licence Ouverte 2.0. Voice: text to speech.
+
+CHAPTERS
+0:00 One click, 12 layers, every format
+0:16 LiDAR, raster, Compare before and after
+0:27 Favorites, export, automation, SAM
+0:43 AGENT
+
+TAGS
+QGIS, FilterMate, GIS, spatial filter, PostGIS, GeoPackage, LiDAR, point cloud, SAM, segment anything, open source, QGIS plugin

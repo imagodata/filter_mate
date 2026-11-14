@@ -1,0 +1,8 @@
+FilterMate 5.1 for #QGIS in 55 seconds: one click filters 12 layers (the 360,577 buildings of Toulouse Métropole), across vector, raster and point cloud layers, in the SQL of each source.
+
+New and experimental: SAM outlines an object in one click on your CPU, and an agent filters from a sentence, with your own key or a local model.
+
+Free, open source, QGIS 3.22 to 4.x.
+https://imagodata.github.io/filter_mate/
+
+#GIS #FOSS4G #LiDAR #OpenSource

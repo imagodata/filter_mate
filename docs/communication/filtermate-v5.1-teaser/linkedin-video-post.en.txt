@@ -1,0 +1,23 @@
+One question, one click: the 360,577 buildings of Toulouse Métropole, filtered across 12 layers, inside QGIS.
+
+That is FilterMate 5.1 in 55 seconds (video below, sound on):
+
+→ Vector, raster and point cloud layers, each as a source or a target
+→ Filters written in the SQL of each source: PostGIS, GeoPackage, SpatiaLite, files
+→ Chained filters (AND, OR, AND NOT), on several targets at once
+→ LiDAR: the buildings over 7 m, read from the point cloud
+→ Undo, Redo, and a Compare line that shows the map before and after
+→ Favorites, an export of only the answer, Processing and an API to automate
+
+Two new sections, both experimental:
+
+→ SAM: one click outlines an object on the orthophoto, on your CPU, and the object filters your other layers
+→ AGENT: ask in one sentence, check every step, undo in one click. With your own API key, or a local Ollama model: in the video the model runs on my laptop, and nothing leaves it.
+
+Everything in the video is the real plugin in QGIS 4.2, recorded on open data of the IGN.
+
+FilterMate is free and open source, for QGIS 3.22 to 4.x. Links in the first comment.
+
+Which of these would you try first on your own data?
+
+#QGIS #GIS #OpenSource #Geospatial #LiDAR

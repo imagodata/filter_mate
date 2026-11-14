@@ -1,0 +1,23 @@
+Une question, un clic : les 360 577 bâtiments de Toulouse Métropole, filtrés sur 12 couches, dans QGIS.
+
+C'est FilterMate 5.1 en 55 secondes (vidéo ci-dessous, en anglais, avec le son) :
+
+→ Vecteur, raster et nuage de points, chacun en source ou en cible
+→ Des filtres écrits dans le SQL de chaque source : PostGIS, GeoPackage, SpatiaLite, fichiers
+→ Des filtres enchaînés (ET, OU, SAUF), sur plusieurs cibles à la fois
+→ LiDAR : les bâtiments de plus de 7 m, lus dans le nuage de points
+→ Annuler, Rétablir, et une ligne Comparer qui montre la carte avant et après
+→ Des favoris, un export de la seule réponse, Processing et une API pour automatiser
+
+Deux nouvelles sections, toutes deux expérimentales :
+
+→ SAM : un clic détoure un objet sur l'orthophoto, sur votre processeur, et l'objet filtre vos autres couches
+→ AGENT : demandez en une phrase, vérifiez chaque étape, annulez d'un clic. Avec votre propre clé d'API, ou un modèle local Ollama : dans la vidéo, le modèle tourne sur mon portable, et rien n'en sort.
+
+Tout ce que montre la vidéo est le vrai plugin dans QGIS 4.2, enregistré sur les données ouvertes de l'IGN.
+
+FilterMate est gratuit et open source, de QGIS 3.22 à 4.x. Les liens sont en premier commentaire.
+
+Lequel essaieriez-vous en premier sur vos données ?
+
+#QGIS #SIG #OpenSource #Géomatique #LiDAR
