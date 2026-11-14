@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>ምላሽ ይሰጣል።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>የካርታ ሰቆችን ያቀርባል።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>መጀመሪያ API ቁልፍዎን ያስገቡ።</translation>
@@ -255,6 +260,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>ንብርብር ተጨምሯል: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>መሠረት ካርታ ተጨምሯል: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>ወኪሉ ይህን የድር መሠረት ካርታ ከፕሮጀክቱ ንብርብሮች በታች ማከል ይፈልጋል:
+{}
+
+አገልጋዩ ካርታውን በሚያንቀሳቅሱት መጠን ይሳላል፤ የሚመለከቷቸውን አካባቢዎች ያያል፣ ከንብርብሮችዎ ግን ምንም አያይም። ይስማማሉ?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>MCP አገናኝ</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>መሠረት ካርታ (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP አገናኞች</translation>
@@ -1440,6 +1466,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>የሳተላይት ምስሎች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>መሠረት ካርታዎች</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4701,6 +4732,81 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="160"/>
         <source>Nothing to compare: no filter to undo here.</source>
         <translation>የሚነጻጸር የለም፦ እዚህ የሚቀለበስ ማጣሪያ የለም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="154"/>
+        <source>Pin the current state</source>
+        <translation>የአሁኑን ሁኔታ ሰካ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="156"/>
+        <source>Remove the pin</source>
+        <translation>ሰኪውን አስወግድ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="182"/>
+        <source>Right-click to pin the current state.</source>
+        <translation>የአሁኑን ሁኔታ ለመሰካት በቀኝ ጠቅ ያድርጉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="184"/>
+        <source>Compare: the map pinned at {} left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>ማነጻጸር፦ በ{} የተሰካው ካርታ ከመስመሩ በግራ፣ የአሁኑ በቀኝ፤ መስመሩ አይጡን ይከተላል</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="186"/>
+        <source>Right-click to pin again or remove the pin.</source>
+        <translation>እንደገና ለመሰካት ወይም ሰኪውን ለማስወገድ በቀኝ ጠቅ ያድርጉ።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="283"/>
+        <source>Map pinned at {}: Compare shows it left of the line.</source>
+        <translation>ካርታው በ{} ተሰክቷል፦ ማነጻጸር ከመስመሩ በግራ ያሳየዋል።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="311"/>
+        <source>Pinned {}</source>
+        <translation>የተሰካ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="316"/>
+        <source>Before: {}</source>
+        <translation>በፊት፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="317"/>
+        <source>Now</source>
+        <translation>አሁን</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="356"/>
+        <source>Nothing changed since the pin.</source>
+        <translation>ከተሰካ ወዲህ ምንም አልተለወጠም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>እንደነበረ አልተሳለም፦ {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>የንብርብር ዛፍ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>የፕሮጀክት CRS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>ካርታውን መሰካት አልተቻለም።</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>ማነጻጸር ቆሟል፦ ካርታውን ማንበብ አልተቻለም።</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

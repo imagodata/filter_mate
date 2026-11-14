@@ -363,9 +363,9 @@ def test_raster_targets_stay_when_undo_takes_the_step_of_a_checked_layer(env):
 
 def test_compare_shows_the_raster_targets_undo_restores(env):
     """Compare shows the state Undo brings back: the raster target of POP and of MRO, clipped by their last runs,
-    only with an entry of that source (CompareController.before_states)."""
-    import typing
-    from core.domain.compare_states import from_cross_operation, from_history_entry
+    only with an entry of that source (CompareController.last_operation)."""
+    import dataclasses
+    from core.domain.compare_states import BeforeMap, from_cross_operation, map_from_history_entry, map_from_operation
     handler, history, layers, applied = env
     history.get_or_create_history("pop").push_state(POP_ALONE, 3)
     clip = types.SimpleNamespace(op_id=7, changes=((types.SimpleNamespace(layer_id="raster", subset="", source="dem.tif",
@@ -374,9 +374,10 @@ def test_compare_shows_the_raster_targets_undo_restores(env):
     coverage = types.SimpleNamespace(active_layer=None, _linked_runs={"pop": [object()], "mro": [object()]},
                                      service=types.SimpleNamespace(history=types.SimpleNamespace(peek_undo=lambda i: clip)),
                                      _run_is_next=lambda run, operation: True)
-    before_states = _compiled("ui/controllers/compare_controller.py", "CompareController", "before_states",
-                              List=typing.List, BeforeState=object, from_history_entry=from_history_entry,
-                              from_cross_operation=from_cross_operation)
+    last_operation = _compiled("ui/controllers/compare_controller.py", "CompareController", "last_operation",
+                               BeforeMap=BeforeMap, map_from_history_entry=map_from_history_entry,
+                               map_from_operation=map_from_operation, from_cross_operation=from_cross_operation,
+                               replace=dataclasses.replace)
 
     def compared(layer, layers_to_filter):
         targets_button = MagicMock()
@@ -386,7 +387,7 @@ def test_compare_shows_the_raster_targets_undo_restores(env):
                                      pushButton_checkable_filtering_layers_to_filter=targets_button,
                                      get_layers_to_filter=lambda: list(layers_to_filter))
         controller = types.SimpleNamespace(_dock=dock, _integration=types.SimpleNamespace(coverage_controller=coverage))
-        return sorted(state.layer_id for state in before_states(controller))
+        return sorted(state.layer_id for state in last_operation(controller).states)
 
     assert compared(layers["pop"], []) == ["pop", "raster"]
     assert compared(layers["mro"], ["pop"]) == ["pop"]  # Undo takes POP's entry: MRO's raster target stays

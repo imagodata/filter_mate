@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>มีการตอบกลับ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>ให้บริการไทล์ของตัวเอง</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>ป้อนคีย์ API ของคุณก่อน</translation>
@@ -255,6 +260,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>เพิ่มเลเยอร์แล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>เพิ่มแผนที่ฐานแล้ว: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>เอเจนต์ต้องการเพิ่มแผนที่ฐานเว็บนี้ไว้ใต้เลเยอร์ของโปรเจกต์:
+{}
+
+เซิร์ฟเวอร์ของแผนที่จะวาดแผนที่ตามที่คุณเลื่อนดู โดยเห็นเพียงว่าคุณดูพื้นที่ใดอยู่ และไม่เห็นอะไรจากเลเยอร์ของคุณเลย คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>คอนเนคเตอร์ MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>แผนที่ฐาน (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>คอนเนคเตอร์ MCP</translation>
@@ -1440,6 +1466,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>ภาพถ่ายดาวเทียม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>แผนที่ฐาน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4701,6 +4732,81 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="160"/>
         <source>Nothing to compare: no filter to undo here.</source>
         <translation>ไม่มีอะไรให้เปรียบเทียบ: ไม่มีตัวกรองให้ยกเลิกที่นี่</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="154"/>
+        <source>Pin the current state</source>
+        <translation>ปักหมุดสถานะปัจจุบัน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="156"/>
+        <source>Remove the pin</source>
+        <translation>เลิกปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="182"/>
+        <source>Right-click to pin the current state.</source>
+        <translation>คลิกขวาเพื่อปักหมุดสถานะปัจจุบัน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="184"/>
+        <source>Compare: the map pinned at {} left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>เปรียบเทียบ: แผนที่ที่ปักหมุดเมื่อ {} อยู่ทางซ้ายของเส้น แผนที่ปัจจุบันอยู่ทางขวา เส้นจะเลื่อนตามเมาส์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="186"/>
+        <source>Right-click to pin again or remove the pin.</source>
+        <translation>คลิกขวาเพื่อปักหมุดใหม่หรือเลิกปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="283"/>
+        <source>Map pinned at {}: Compare shows it left of the line.</source>
+        <translation>ปักหมุดแผนที่เมื่อ {}: เปรียบเทียบจะแสดงแผนที่นั้นทางซ้ายของเส้น</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="311"/>
+        <source>Pinned {}</source>
+        <translation>ปักหมุด {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="316"/>
+        <source>Before: {}</source>
+        <translation>ก่อน: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="317"/>
+        <source>Now</source>
+        <translation>ตอนนี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="356"/>
+        <source>Nothing changed since the pin.</source>
+        <translation>ไม่มีอะไรเปลี่ยนแปลงตั้งแต่ปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>ไม่ได้วาดให้เหมือนเดิม: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>แผนผังเลเยอร์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>CRS ของโครงการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>ไม่สามารถปักหมุดแผนที่ได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>หยุดการเปรียบเทียบ: ไม่สามารถอ่านแผนที่ได้</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

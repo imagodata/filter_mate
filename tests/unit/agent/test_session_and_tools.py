@@ -367,7 +367,8 @@ class TestCatalog:
 
     def test_what_needs_confirmation(self):
         assert {tool.name for tool in load_catalog() if tool.requires_confirmation} == {
-            "export_layers", "remove_layers", "add_layer", "add_service_layer", "delete_features", "export_layout"}
+            "export_layers", "remove_layers", "add_layer", "add_service_layer", "add_basemap", "delete_features",
+            "export_layout"}
         assert not next(tool for tool in load_catalog() if tool.name == "search_open_data").requires_confirmation
 
     def test_read_only_flags(self):

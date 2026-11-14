@@ -111,6 +111,20 @@ def add_service_layer(payload: AddServiceLayerBody, request: Request) -> LayerSu
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
 
+class AddBasemapBody(BaseModel):
+    platform: str = Field(..., min_length=1, max_length=2000, description="Basemap, e.g. carto_light")
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/layers/add-basemap", response_model=LayerSummary)
+def add_basemap(payload: AddBasemapBody, request: Request) -> LayerSummary:
+    """Add a web basemap the user allowed, under the layers of the project."""
+    try:
+        return _accessor(request).add_basemap(payload.platform, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
 class FieldBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

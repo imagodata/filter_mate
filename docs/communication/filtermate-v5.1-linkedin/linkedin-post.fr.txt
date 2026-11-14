@@ -6,10 +6,12 @@ La nouvelle section AGENT (expérimentale) filtre, sélectionne, lance Processin
 • Chaque filtre annonce combien d'entités il garde ; exports et suppressions sont confirmés.
 • Quatre niveaux d'autonomie, une règle par outil, des couches qu'il ne touche jamais.
 • Chaque demande est un tour que vous pouvez annuler.
-• Claude, Mistral, OpenAI ou un modèle local Ollama, votre propre clé, sans compte. Quelques requêtes gratuites par mois pour essayer.
+• Claude, Mistral, OpenAI ou un modèle local Ollama, votre propre clé, sans compte : les réglages vous guident vers une clé ou un modèle local.
 • Les recettes rejouent une demande sans aucun modèle : rien d'envoyé, rien de payé.
 
 Expérimental aussi : des objets dessinés par SAM sur votre processeur, qui filtrent ensuite vos autres couches.
+
+Et dans le panneau : Comparer montre la carte avant et après le dernier filtre, de part et d'autre d'une ligne qui suit la souris.
 
 Gratuit et open source, de QGIS 3.22 à 4.x. L'article détaille tout :
 https://imagodata.github.io/filter_mate/index.fr.html#agent

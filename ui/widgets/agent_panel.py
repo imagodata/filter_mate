@@ -24,7 +24,7 @@ from qgis.PyQt.QtWidgets import (
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
-from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
+from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS, KIND_XYZ
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
 from ...core.agent.providers.base import check_base_url, without_credentials, without_key
@@ -1394,7 +1394,7 @@ class AgentSettingsDialog(QDialog):
         self.new_address.setPlaceholderText(_tr("https://... or a portal address"))
         self.new_kind = QComboBox(page)
         for kind, label in ((KIND_MCP, _tr("MCP connector")), (KIND_OPENDATASOFT, "Opendatasoft"), (KIND_CKAN, "CKAN"),
-                            (KIND_WFS, "WFS"), (KIND_STAC, "STAC")):
+                            (KIND_WFS, "WFS"), (KIND_STAC, "STAC"), (KIND_XYZ, _tr("Basemap (XYZ)"))):
             self.new_kind.addItem(label, kind)
         self.add_button = QPushButton(_tr("Add"), page)
         self.add_button.setObjectName("pushButton_agent_add_source")
@@ -1431,8 +1431,9 @@ class AgentSettingsDialog(QDialog):
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
-        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC)),
+        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC, KIND_XYZ)),
                   (_tr("Satellite imagery"), lambda source: source.kind == KIND_STAC),
+                  (_tr("Basemaps"), lambda source: source.kind == KIND_XYZ),
                   (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
         for title, belongs in groups:
             group = QTreeWidgetItem(self.sources_tree, [title.upper()])

@@ -14,12 +14,15 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple, Union
 from urllib.parse import parse_qs, quote, unquote, urljoin, urlsplit
 
+from .basemaps import BASEMAPS
+
 KIND_DATAGOUV = "datagouv"
 KIND_OPENDATASOFT = "opendatasoft"
 KIND_CKAN = "ckan"
 KIND_WFS = "wfs"
 KIND_STAC = "stac"
-KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC)
+KIND_XYZ = "xyz"  # a web basemap: tiles drawn by a server, never searched nor read as data
+KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ)
 
 # Built in: name -> (kind, host). The user adds others in the configuration (APP.OPTIONS.AGENT.open_data_domains).
 PLATFORMS: Dict[str, Tuple[str, str]] = {
@@ -38,6 +41,7 @@ PLATFORMS: Dict[str, Tuple[str, str]] = {
     "data_gov_ie": (KIND_CKAN, "data.gov.ie"),
     "geospatial_jp": (KIND_CKAN, "www.geospatial.jp/ckan"),
 }
+PLATFORMS.update({basemap.id: (KIND_XYZ, basemap.url) for basemap in BASEMAPS})
 # What add_layer can open from a URL (a service needs a provider URI, which a model does not get to write).
 GEO_FORMATS = frozenset({
     "geojson", "gpkg", "geopackage", "shp", "shapefile", "zip", "kml", "gml", "csv", "fgb", "flatgeobuf",
@@ -134,7 +138,8 @@ def resolve_platform(name: str, extra: str = "") -> Tuple[str, str]:
         if candidate in platforms:
             kind, host = platforms[candidate]
             return kind, base_url(host)
-    raise ValueError(f"{name!r} is not an allowed open data platform. Allowed: {', '.join(sorted(platforms))}. "
+    listed = sorted(key for key, (kind, _) in platforms.items() if kind != KIND_XYZ)  # a basemap holds no data
+    raise ValueError(f"{name!r} is not an allowed open data platform. Allowed: {', '.join(listed)}. "
                      "The user can add one in the FilterMate configuration (AGENT > open_data_domains).")
 
 

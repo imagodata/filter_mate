@@ -694,6 +694,14 @@ class FilterMateAccessor(Protocol):
         """Add a layer of a WFS platform; raises FilterRejected when it does not offer it."""
         ...
 
+    def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
+        """Add a web basemap under the layers; raises FilterRejected when its server gives no tile."""
+        ...
+
+    def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        """Ask a basemap for one tile; raises FilterRejected when its server gives none."""
+        ...
+
     def search_imagery(self, bbox: Optional[List[float]] = None, start: str = "", end: str = "", max_cloud: float = 20.0,
                        collections: Optional[List[str]] = None, limit: int = 5, platform: str = "earth_search",
                        extra_domains: Optional[str] = None) -> OpenDataResult:
@@ -1055,6 +1063,14 @@ class InMemoryAccessor:
         summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or typename, provider_type="WFS")
         self.layers.append(summary)
         return summary
+
+    def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or platform, provider_type="wms")
+        self.layers.append(summary)
+        return summary
+
+    def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        return None
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
         found = self._find(layer_name)  # an id or a name
