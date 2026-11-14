@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from .basemaps import BASEMAPS, template_problem
 from .mcp_client import server_url_problem
 from .open_data import (
-    KIND_CKAN, KIND_DATAGOUV, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
     NO_DATA_KINDS, base_url,
 )
 
@@ -117,6 +117,24 @@ def make_source(address: str, kind: str, title: str = "") -> Source:
     return Source(identifier, " ".join((title or "").split())[:60] or parts.netloc, kind, address, origin)
 
 
+def database_sources(names: Iterable[Any]) -> Tuple[Source, ...]:
+    """The PostgreSQL connections of QGIS as sources the user can tick: not stored here, read from QGIS each time.
+
+    A model names one by its id; the name of the connection is its title, and its address and its credentials stay
+    in QGIS.
+    """
+    found = []
+    for item in names:
+        # (name, what it connects to): a connection made again under the same name, to another server, is another
+        # source, not ticked.
+        name, target = (str(item[0]), str(item[1])) if isinstance(item, (tuple, list)) else (str(item), "")
+        digest = hashlib.blake2b(f"{name}|{target}".encode("utf-8"), digest_size=3).hexdigest()
+        identifier = "db_" + _ID.sub("_", name.lower()).strip("_")[:24] + "_" + digest
+        found.append(Source(identifier, " ".join(name.split())[:60] or identifier, KIND_DATABASE, name, ORIGIN_LOCAL,
+                            "A PostgreSQL connection of QGIS: the agent can list its tables and add one as a layer"))
+    return tuple(found)
+
+
 def custom_to_json(sources: Iterable[Source]) -> str:
     return json.dumps([asdict(source) for source in sources], ensure_ascii=False)
 
@@ -151,7 +169,7 @@ def enabled(sources: Iterable[Source], enabled_ids: Sequence[str]) -> Tuple[Sour
 def platform_domains(sources: Iterable[Source]) -> str:
     """The user's portals, in the form ``open_data.parse_extra_domains`` reads."""
     return ",".join(f"{source.address}:{source.kind}" for source in sources
-                    if not source.is_connector and source.id not in _BUILT_IN_IDS)
+                    if not source.is_connector and source.id not in _BUILT_IN_IDS and source.kind != KIND_DATABASE)
 
 
 def platform_name(source: Source) -> str:
@@ -189,4 +207,5 @@ def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
                           if not source.is_connector and source.kind not in NO_DATA_KINDS],
             "geocoders": [named(source) for source in sources if source.kind == KIND_GEOCODER],
             "basemaps": [named(source) for source in sources if source.kind == KIND_XYZ],
+            "databases": [f"{source.id} ({source.title})" for source in sources if source.kind == KIND_DATABASE],
             "connectors": [source.title for source in sources if source.is_connector]}

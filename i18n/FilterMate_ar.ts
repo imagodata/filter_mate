@@ -267,6 +267,16 @@ Do you agree?</source>
         <translation>تمت إضافة الطبقة: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>تمت إضافة الجدول: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>قراءة جداول {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>تمت إضافة خريطة الأساس: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 هل توافق؟</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>يريد الوكيل إضافة هذا الجدول من قاعدة بياناتك {} إلى المشروع:
+{}
+
+تُقرأ صفوفه بعد ذلك بواسطة أدوات الوكيل كما تُقرأ صفوف أي طبقة، وقد تُرسَل إلى مزوّد الوكيل. هل توافق؟</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1501,6 +1522,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>البحث عن الأماكن</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>قواعد بيانات QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

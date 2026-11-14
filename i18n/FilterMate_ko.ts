@@ -267,6 +267,16 @@ Do you agree?</source>
         <translation>레이어 추가됨: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>테이블 추가됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>{}의 테이블 읽는 중</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>배경 지도 추가됨: {}</translation>
@@ -739,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>에이전트가 사용자의 데이터베이스 {}의 이 테이블을 프로젝트에 추가하려고 합니다:
+{}
+
+추가된 테이블의 행은 이후 에이전트의 도구가 다른 레이어와 똑같이 읽으며, 에이전트의 제공자에게 전송될 수 있습니다. 허용하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1501,6 +1522,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>장소 검색</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS 데이터베이스</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

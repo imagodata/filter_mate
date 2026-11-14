@@ -183,6 +183,17 @@ class TestHandlers:
         error, answer = run(accessor, root, "set_labels", layer="communes", enabled=False)
         assert not error and answer["labels"] is False
         assert run(accessor, root, "set_layer_style", layer="x", mode="single")[0] is True
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="rules", rules=[
+            {"expression": '"pop" > 5000', "color": "red", "label": "Towns"}, {"color": "#cccccc"}])
+        assert not error and answer["mode"] == "rules" and answer["classes"] == 2
+        assert run(accessor, root, "set_layer_style", layer="communes", mode="rules",
+                   rules=[{"expression": '"pop" > 1'}])[0] is True  # a rule has a color: refused by the schema
+        assert run(accessor, root, "set_layer_style", layer="communes", mode="rules",
+                   rules=[{"color": "red", "symbol": "x"}])[0] is True  # and nothing else than its three keys
+        error, answer = run(accessor, root, "set_labels", layer="communes", expression='upper("nom")',
+                            visible_from_scale=50000)
+        assert not error and answer["expression"] == 'upper("nom")' and answer["visible_from_scale"] == 50000
+        assert run(accessor, root, "set_labels", layer="communes", field="nom", visible_from_scale=0)[0] is True
 
     @pytest.mark.parametrize("arguments", [
         {"layer": "communes", "mode": "heatmap"}, {"layer": "communes", "mode": "graduated", "classes": 13},

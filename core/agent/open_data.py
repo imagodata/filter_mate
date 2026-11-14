@@ -30,7 +30,9 @@ SERVICE_KINDS = (KIND_WFS, KIND_WMS, KIND_WMTS)
 # Adresse Nationale and Photon do; it holds no layer.
 KIND_GEOCODER = "geocoder"
 # What holds no data to search nor to read: ticked alone, these open neither search_open_data nor the web to add_layer.
-NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER)
+# A database connection kept by QGIS: no platform of the web, its tables are listed and added by tools of their own.
+KIND_DATABASE = "database"
+NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)
 # What only shows images or places: ticked alone, these do not open the web to add_layer (a WMS is searched, though).
 NO_FILE_KINDS = NO_DATA_KINDS + (KIND_WMS, KIND_WMTS)
 KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ, KIND_WMS, KIND_WMTS, KIND_GEOCODER)
