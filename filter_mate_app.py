@@ -2798,9 +2798,10 @@ class FilterMateApp:
     def _show_task_completion_message(self, task_name, source_layer, provider_type, layer_count, is_fallback=False):
         """Show success message with backend info and feature counts."""
         from .config.feedback_config import should_show_message
-        from .adapters.qgis.source_capability_probe import feature_count_or_none
+        from .adapters.qgis.source_capability_probe import shown_feature_count_or_none
         # 2026-10-17: a web service is counted by a server request: not on the main thread ("?").
-        feature_count = feature_count_or_none(source_layer)
+        # 2026-11-14: a filtered GeoPackage is counted exactly, or not told (QGIS may ignore the subset).
+        feature_count = shown_feature_count_or_none(source_layer)
         count_text = "?" if feature_count is None or feature_count < 0 else "{:,}".format(feature_count)
         show_success_with_backend(provider_type, task_name, layer_count, is_fallback=is_fallback)
         if should_show_message('filter_count'):

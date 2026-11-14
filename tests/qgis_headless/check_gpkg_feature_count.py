@@ -108,6 +108,11 @@ def main(work):
     check("apply_filter: 7 kept out of 930", not error and (answer.get("feature_count"), answer.get("total_count"))
           == (7, 930), answer)
     check("describe_layer: 7", introspection.describe_layer(commune.id())["feature_count"] == 7)
+    from filter_mate.adapters.qgis import source_capability_probe as probe
+    # the number the dock tells after a filter (message bar, history of the source layer)
+    check("the dock tells 7, its limits keep the count of QGIS",
+          probe.shown_feature_count_or_none(commune) == 7 and probe.feature_count_or_none(commune) == commune.featureCount(),
+          f"shown {probe.shown_feature_count_or_none(commune)}, limit {probe.feature_count_or_none(commune)}")
     check("list_layers: 7", listed("commune") == 7, listed("commune"))
     preview = introspection.preview_filter(commune.id(), '"population" <= 1000')
     check("preview_filter: 10", preview["valid"] and preview["feature_count"] == 10, preview)

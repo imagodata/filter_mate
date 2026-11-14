@@ -49,6 +49,15 @@ class _Layer:
         self.counted += 1
         return self._count
 
+    def dataProvider(self):
+        return self
+
+    def storageType(self):
+        return "ESRI Shapefile"
+
+    def subsetString(self):
+        return ""
+
 
 WFS = ("WFS", "typename='ADMINEXPRESS-COG.LATEST:commune' url='https://data.geopf.fr/wfs/ows'")
 OAPIF = ("OAPIF", "url='https://example.org/ogcapi' typename='communes'")

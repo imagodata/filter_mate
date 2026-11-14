@@ -65,7 +65,7 @@ def _feature_count_or_none(layer) -> Optional[int]:
     server: this runs on the main thread after every filter.
     """
     try:
-        from .qgis.source_capability_probe import feature_count_or_none
+        from .qgis.source_capability_probe import shown_feature_count_or_none as feature_count_or_none
     except ImportError:
         return layer.featureCount() if layer is not None else None
     return feature_count_or_none(layer)
