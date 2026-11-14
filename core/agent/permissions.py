@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Protocol, Sequence, Set
 
+from .skills import CONNECTOR_PREFIX
+
 READ, VIEW, PROJECT, BUFFER, LOCAL, OUTSIDE = range(6)
 RISK_NAMES = ("read", "view", "project", "edit buffer", "irreversible", "outside")
 
@@ -108,6 +110,10 @@ PROTECTION_UNREADABLE = ("Not done: the layers the user protected from the agent
 
 TURNED_OFF_REFUSAL = ("Not done: the user turned the tool {} off for the agent. Tell them; do not try another tool to "
                       "do the same thing.")
+
+# A connector the user said no to, in this conversation: the next loads are refused without a question.
+CONNECTOR_DECLINED = ("Not loaded: the user declined the connector {}; do not ask again in this conversation. Go on "
+                      "without it, and tell the user when the request needs it.")
 
 ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing that changes the project runs. "
                    "Tell them, step by step, what you would do and with which tools, so they can do it themselves or "
@@ -242,6 +248,7 @@ class PermissionPolicy:
                  protector: Optional[Protection] = None, rules: Optional[Dict[str, str]] = None) -> None:
         self.level = level_or_default(level)
         self._granted: Set[str] = set(granted)
+        self._declined: Set[str] = set()
         self.protector = protector
         self.rules = clean_rules(rules or {})
 
@@ -249,7 +256,10 @@ class PermissionPolicy:
         return self.rules.get(name) == RULE_NEVER
 
     def refusal_text(self, name: str, arguments: Dict[str, Any]) -> str:
-        """What the model is told of a call that is not run: a protected layer, a tool turned off, the level."""
+        """What the model is told of a call that is not run: a connector declined, a protected layer, a tool turned
+        off, the level."""
+        if name in self._declined:
+            return CONNECTOR_DECLINED.format(repr(name))
         return (self.protection_refusal(name, arguments)
                 or (TURNED_OFF_REFUSAL.format(repr(name)) if self.turned_off(name) else "")
                 or ADVISOR_REFUSAL)
@@ -290,6 +300,8 @@ class PermissionPolicy:
 
     def verdict(self, spec, arguments: Optional[Dict[str, Any]] = None) -> str:
         """``RUN``, ``ASK`` or ``REFUSE`` for a call of the tool ``spec`` with ``arguments``."""
+        if spec.name.startswith(CONNECTOR_PREFIX):
+            return self._connector_verdict(spec.name)
         if spec.name in AGENT_OWN:
             return RUN
         rule = self.rules.get(spec.name)
@@ -309,6 +321,14 @@ class PermissionPolicy:
         if spec.name in self._granted and self.grantable(spec):
             return RUN
         return ASK
+
+    def _connector_verdict(self, name: str) -> str:
+        """Loading a connector (``connector-<id>``, see tool_executor.connector_gate): data of QGIS may leave with
+        its tools, so it is asked at every level, advisor included, once per conversation. The rules of the Tools tab
+        for load_skill do not reach it: "never" for a connector is unticking it in the Sources tab."""
+        if name in self._declined:
+            return REFUSE
+        return RUN if name in self._granted else ASK
 
     def _settings_verdict(self, spec, rule: Optional[str], arguments: Optional[Dict[str, Any]]) -> str:
         """A change of the settings of FilterMate: asked at every level (advisor too: the user reads it and says yes),
@@ -333,9 +353,19 @@ class PermissionPolicy:
     def granted(self) -> frozenset:
         return frozenset(self._granted)
 
+    def decline(self, name: str) -> None:
+        """The user said no to loading the connector ``name``: refused without a question until the conversation
+        ends."""
+        self._declined.add(name)
+
+    @property
+    def declined(self) -> frozenset:
+        return frozenset(self._declined)
+
     def forget(self) -> None:
-        """A new conversation, another project, another level: what was allowed is asked again."""
+        """A new conversation, another project, another level: what was allowed, or declined, is asked again."""
         self._granted.clear()
+        self._declined.clear()
 
     def set_level(self, level: str) -> None:
         level = level_or_default(level)

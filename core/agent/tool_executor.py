@@ -8,9 +8,11 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 from .json_schema import validate
+from .mcp_client import PREFIX as CONNECTOR_TOOL_PREFIX
 from .messages import ToolCallPart, ToolResultPart
-from .permissions import ADVISOR_REFUSAL, ASK, PROTECTED, RUN, TURNED_OFF, PermissionPolicy
-from .tool_catalog import ToolSpec
+from .permissions import ADVISOR_REFUSAL, ASK, CONNECTOR_DECLINED, PROTECTED, RUN, TURNED_OFF, PermissionPolicy
+from .skills import CONNECTOR_PREFIX
+from .tool_catalog import LOAD_SKILL, ToolSpec
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -18,6 +20,9 @@ Handler = Callable[[Dict[str, Any]], Any]
 
 MAX_RESULT_CHARS = 20_000
 DECLINED = "The user declined this action. Nothing was done; do not try again unless they ask."
+# A tool of a connector the conversation has not loaded (the model remembers it from an earlier one, or guesses).
+NOT_LOADED = ("{} is a tool of an external connector that is not loaded in this conversation: call load_skill with "
+              "its connector-… entry first (its list says which), then call it again.")
 
 
 class ToolFailure(Exception):
@@ -79,6 +84,15 @@ def bounded_json(value: Any, limit: int = MAX_RESULT_CHARS) -> str:
                       ensure_ascii=False)
 
 
+def connector_gate(call: ToolCallPart) -> Optional[ToolSpec]:
+    """What the policy judges for a call of load_skill that loads a connector: the connector itself, under its own
+    name, so a yes or a no holds for that connector alone. None for any other call."""
+    name = call.arguments.get("name") if call.name == LOAD_SKILL and isinstance(call.arguments, dict) else None
+    if not isinstance(name, str) or not name.startswith(CONNECTOR_PREFIX):
+        return None
+    return ToolSpec(name=name, description="Connect an external connector and offer its tools.", open_world=True)
+
+
 class ToolExecutor:
     """Calls the handler of each tool, whatever the model sent."""
 
@@ -87,8 +101,11 @@ class ToolExecutor:
         self._handlers = dict(handlers)
         self._held: Dict[str, Tuple[str, ...]] = {}
 
-    def offer(self, tools: Sequence[ToolSpec]) -> None:
-        """Tools run from now on (a family of tools, once its skill is loaded); their handlers were given already."""
+    def offer(self, tools: Sequence[ToolSpec], handlers: Optional[Mapping[str, Handler]] = None) -> None:
+        """Tools run from now on: a family of tools once its skill is loaded (its handlers were given already), or
+        the tools of a connector once loaded, with ``handlers``. A handler given already is never replaced."""
+        for name, handler in (handlers or {}).items():
+            self._handlers.setdefault(name, handler)
         for tool in tools:
             self._tools.setdefault(tool.name, tool)
             self._held.pop(tool.name, None)
@@ -112,20 +129,34 @@ class ToolExecutor:
         if tool is None and policy.turned_off(call.name):
             return TURNED_OFF  # left out of the tools offered, and still called: say why, not "unknown"
         if tool is None or call.parse_error or validate(call.arguments, tool.input_schema):
-            return RUN
+            return RUN  # a connector out of the list of load_skill too: it answers its mistake
+        gate = connector_gate(call)
+        if gate is not None:
+            return policy.verdict(gate, call.arguments)
         if policy.protection_refusal(call.name, call.arguments):
             return PROTECTED
         return policy.verdict(tool, call.arguments)
 
     @staticmethod
-    def declined(call: ToolCallPart) -> ToolResultPart:
-        return ToolResultPart(call.call_id, DECLINED, is_error=True)
+    def declined(call: ToolCallPart, policy: Optional[PermissionPolicy] = None) -> ToolResultPart:
+        """The user said no. To a connector, with ``policy``: it is refused without a question for the rest of the
+        conversation, and the model is told not to ask again."""
+        gate = connector_gate(call) if policy is not None else None
+        if gate is None:
+            return ToolResultPart(call.call_id, DECLINED, is_error=True)
+        policy.decline(gate.name)
+        return ToolResultPart(call.call_id, CONNECTOR_DECLINED.format(repr(gate.name)), is_error=True)
 
     @staticmethod
     def refused(call: ToolCallPart, policy: Optional[PermissionPolicy] = None) -> ToolResultPart:
-        """Not run, because of a layer the user protected, a tool turned off, or the level of autonomy."""
-        text = policy.refusal_text(call.name, call.arguments) if policy is not None else ADVISOR_REFUSAL
-        return ToolResultPart(call.call_id, text, is_error=True)
+        """Not run, because of a connector declined, a layer the user protected, a tool turned off, or the level of
+        autonomy."""
+        if policy is None:
+            return ToolResultPart(call.call_id, ADVISOR_REFUSAL, is_error=True)
+        gate = connector_gate(call)
+        # A connector is refused only once declined; load_skill itself may be turned off (Tools tab), and says so.
+        name = gate.name if gate is not None and gate.name in policy.declined else call.name
+        return ToolResultPart(call.call_id, policy.refusal_text(name, call.arguments), is_error=True)
 
     def execute(self, call: ToolCallPart) -> ToolResultPart:
         """Result of ``call``; never raises, a model reads its mistakes and corrects them."""
@@ -139,6 +170,8 @@ class ToolExecutor:
             skills = " or ".join(f'"{name}"' for name in self._held[call.name]) or "the skill of that task"
             return failure(f"{call.name} comes with the instructions of its task: call load_skill with {skills} "
                            f"first, then call {call.name} again.")
+        if tool is None and call.name.startswith(CONNECTOR_TOOL_PREFIX):
+            return failure(NOT_LOADED.format(call.name))
         if tool is None or handler is None:
             return failure(f"Unknown tool {call.name!r}.")
         if call.parse_error:
