@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>응답합니다.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>타일을 제공합니다.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>먼저 API 키를 입력하세요.</translation>
@@ -255,6 +260,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>레이어 추가됨: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>배경 지도 추가됨: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>에이전트가 이 웹 배경 지도를 프로젝트 레이어 아래에 추가하려고 합니다:
+{}
+
+해당 서버는 지도를 움직일 때마다 지도를 그립니다. 서버는 사용자가 보는 영역은 알 수 있지만 레이어의 내용은 전혀 알 수 없습니다. 허용하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>MCP 커넥터</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>배경 지도(XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP 커넥터</translation>
@@ -1440,6 +1466,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>위성 영상</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>배경 지도</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

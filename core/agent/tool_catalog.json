@@ -2215,6 +2215,35 @@
    }
   },
   {
+   "name": "add_basemap",
+   "title": "Add a web basemap",
+   "description": "Add a web basemap (XYZ tiles) to the project, under every other layer. A basemap is an image drawn by its server as the map moves: a background, which cannot be filtered, read nor exported. Only a basemap of the list can be added, and in the chat of FilterMate only one the user ticked; an address is never written here. Returns the layer summary. The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "platform": {
+      "description": "A basemap the user allowed: osm_tiles (OpenStreetMap), carto_light (neutral light grey), carto_light_nolabels (the same with no place names, under layers that have labels), carto_dark, carto_voyager, ign_plan and ign_ortho (France: map and aerial photographs), opentopomap (relief), or one the user added, by the name the chat lists it under",
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer in the project (default: its title)",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "platform"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "search_imagery",
    "title": "Search satellite imagery",
    "description": "Find satellite scenes over an area, newest first, with the GeoTIFF of each one. Returns datasets [{id, publisher (collection), description (date and cloud cover), resources: [{format, url}]}]; format visual is the natural colour image. Then add_layer with its url and kind raster.",

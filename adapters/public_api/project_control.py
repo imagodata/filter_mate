@@ -17,8 +17,9 @@ import zipfile
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple
 
+from ...core.agent.basemaps import DEFAULT_ZMAX, default_title, is_image, known, sample_tiles, template_problem, xyz_uri
 from ...core.agent.open_data import (
-    KIND_STAC, KIND_WFS, RemoteFile, archive_member, follow_redirects, gdal_source, is_web_page, megabytes,
+    KIND_STAC, KIND_WFS, KIND_XYZ, RemoteFile, archive_member, follow_redirects, gdal_source, is_web_page, megabytes,
     parse_results, parse_stac_items, reads_in_place, remote_file, resolve_platform, resolved_problem, search_url,
     source_problem, stac_search_body, valid_day,
 )
@@ -35,6 +36,8 @@ MAX_PAYLOAD = 5 * 1024 * 1024
 # JSON. A search is asked twice before it fails, a short wait first: a platform that only stalled answers the second.
 SEARCH_TIMEOUTS_MS = (20_000, 45_000)
 _OVERLOADED = (502, 503, 504)
+BASEMAP_TIMEOUT_MS = 15_000
+_TILE_ELSEWHERE = (204, 301, 302, 303, 307, 308)  # nothing to draw there, or sent to another address
 _ELSEWHERE = ". It was asked twice: search another platform of the list rather than this one again."
 # A file its server only gives whole is copied to the QGIS profile first: what a layer may cost in disk and in time.
 MAX_DOWNLOAD = 512 * 1024 * 1024
@@ -431,6 +434,82 @@ def add_service_layer(platform: str, typename: str, name: str = '', extra_domain
     return _summary(layer, count_features=False)
 
 
+def _basemap_template(platform: str, extra_domains: str) -> str:
+    try:
+        kind, template = resolve_platform(platform, extra_domains)
+    except ValueError:
+        raise ValueError(f"{platform!r} is not a basemap of the list") from None
+    if kind != KIND_XYZ:
+        raise ValueError(f"{platform} is not a basemap: it is searched with search_open_data")
+    problem = template_problem(template)
+    if problem:
+        raise ValueError(problem)
+    return template
+
+
+def _map_place() -> Optional[Tuple[float, float]]:
+    """Longitude and latitude of the middle of the map, when QGIS has a map here."""
+    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsCsException, QgsProject
+    try:
+        canvas = _canvas()
+        to_degrees = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(),
+                                            QgsCoordinateReferenceSystem('EPSG:4326'), QgsProject.instance())
+        point = to_degrees.transform(canvas.extent().center())
+    except (ValueError, QgsCsException):
+        return None
+    if not (-180.0 <= point.x() <= 180.0 and -90.0 <= point.y() <= 90.0):
+        return None
+    return point.x(), point.y()
+
+
+def check_basemap(platform: str, extra_domains: str = '') -> Dict[str, Any]:
+    """Ask the server of a basemap the user allowed for a tile: QGIS opens an XYZ layer without asking anything.
+
+    The tile where the map is, then a quarter of the world: the first one that comes is enough. A server that
+    sends elsewhere or has nothing to draw there is taken as answering: QGIS follows it, and only an image tells more.
+
+    Raises:
+        ValueError: The server gave no tile; the message says what it answered.
+    """
+    template = _basemap_template(platform, extra_domains)
+    listed = known(template)
+    problem = ''
+    for url in sample_tiles(template, _map_place(), listed.zmax if listed is not None else DEFAULT_ZMAX):
+        try:
+            reply = fetch(url, max_bytes=MAX_PAYLOAD, timeout_ms=BASEMAP_TIMEOUT_MS)
+        except HttpFailure as exc:
+            raise ValueError(f"the server of this basemap did not answer: {exc}") from None
+        if reply.status in _TILE_ELSEWHERE or (reply.status == 200 and is_image(reply.content)):
+            return {'platform': platform, 'status': reply.status}
+        problem = (f"the server of this basemap answered with an error ({reply.status})" if reply.status != 200
+                   else "the server of this basemap answers, but not with an image")
+    raise ValueError(problem + ": check its address, or move the map over the area it covers")
+
+
+def add_basemap(platform: str, name: str = '', extra_domains: str = '') -> Dict[str, Any]:
+    """Add a web basemap the user allowed, under every layer of the project: the plugin builds the source.
+
+    One tile is asked first, so that a server that is down or an address that serves no image is said here
+    instead of showing as an empty map.
+    """
+    from qgis.core import QgsProject, QgsRasterLayer
+    template = _basemap_template(platform, extra_domains)
+    check_basemap(platform, extra_domains)
+    listed = known(template)
+    title = (name or '').strip() or (listed.title if listed is not None else default_title(template))
+    layer = QgsRasterLayer(xyz_uri(template, listed.zmax if listed is not None else DEFAULT_ZMAX), title, 'wms')
+    if not layer.isValid():
+        raise ValueError(f"{platform} could not be opened as a basemap")  # nothing more is read from an invalid layer
+    if listed is not None:
+        metadata = layer.metadata()
+        metadata.setRights([listed.attribution])
+        layer.setMetadata(metadata)
+    project = QgsProject.instance()
+    project.addMapLayer(layer, False)
+    project.layerTreeRoot().addLayer(layer)  # at the bottom of the tree: a background, never over the data
+    return _summary(layer, count_features=False)
+
+
 def remove_layers(layers: List[str]) -> Dict[str, Any]:
     """Remove layers from the project (their files stay)."""
     from qgis.core import QgsProject
@@ -479,6 +558,8 @@ def _json_answer(platform: str, url: str, body: Optional[bytes] = None, accept: 
 def search_open_data(query: str, platform: str = 'datagouv', limit: int = 10, extra_domains: str = '') -> Dict[str, Any]:
     """Ask an allowed open data platform for datasets; the answer is reduced to titles and geo resources."""
     kind, base = resolve_platform(platform, extra_domains)
+    if kind == KIND_XYZ:
+        raise ValueError(f"{platform} is a basemap, there is nothing to search in it: add it with add_basemap")
     if kind == KIND_WFS:
         from . import wfs_catalog
         datasets = wfs_catalog.search(base, query, max(1, min(int(limit), 20)))

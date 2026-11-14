@@ -236,6 +236,11 @@ Sunteți de acord?</translation>
         <translation>Sursa răspunde.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Sursa își furnizează dalele.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Introduceți mai întâi cheia API.</translation>
@@ -255,6 +260,11 @@ Sunteți de acord?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Strat adăugat: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Hartă de bază adăugată: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Sunteți de acord?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>Agentul dorește să adauge această hartă de bază web sub straturile proiectului:
+{}
+
+Serverul ei desenează harta pe măsură ce o deplasați: vede ce zone priviți și nimic din straturile dumneavoastră. Sunteți de acord?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Conector MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Hartă de bază (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>Conectori MCP</translation>
@@ -1440,6 +1466,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Imagini satelitare</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Hărți de bază</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

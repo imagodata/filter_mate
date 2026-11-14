@@ -271,6 +271,40 @@
     "run_algorithm",
     "export_layers"
    ]
+  },
+  {
+   "id": "basemap_neutral",
+   "prompt": "Ajoute un fond de carte neutre sous les communes.",
+   "expect": [
+    [
+     {
+      "tool": "add_basemap",
+      "args": {
+       "platform": "carto_light"
+      },
+      "call_args": {
+       "platform": "carto_light"
+      }
+     }
+    ],
+    [
+     {
+      "tool": "add_basemap",
+      "args": {
+       "platform": "carto_light_nolabels"
+      },
+      "call_args": {
+       "platform": "carto_light_nolabels"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_layer",
+    "run_algorithm",
+    "apply_filter",
+    "export_layers"
+   ]
   }
  ]
 }

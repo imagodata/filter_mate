@@ -236,6 +236,11 @@ Sumasang-ayon po ba kayo?</translation>
         <translation>Sumasagot ito.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Ibinibigay nito ang mga tile nito.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Ilagay muna ang iyong API key.</translation>
@@ -255,6 +260,11 @@ Sumasang-ayon po ba kayo?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Naidagdag ang layer: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Naidagdag ang basemap: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Sumasang-ayon ka ba?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>Gustong idagdag ng agent ang web basemap na ito sa ilalim ng mga layer ng project:
+{}
+
+Iginuguhit ng server nito ang mapa habang ginagalaw mo ito: nakikita nito kung aling mga lugar ang tinitingnan mo, at walang anuman sa iyong mga layer. Sumasang-ayon ka ba?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>MCP connector</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Basemap (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>Mga MCP connector</translation>
@@ -1440,6 +1466,11 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Satellite imagery</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Mga basemap</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Concorda?</translation>
         <translation>A fonte responde.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>A fonte fornece os seus mosaicos.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Introduza primeiro a sua chave de API.</translation>
@@ -255,6 +260,11 @@ Concorda?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Camada adicionada: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Mapa base adicionado: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Concorda?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>O agente quer adicionar este mapa base web por baixo das camadas do projeto:
+{}
+
+O seu servidor desenha o mapa à medida que o desloca: vê as zonas que está a observar, e nada das suas camadas. Concorda?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Conector MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Mapa base (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>Conectores MCP</translation>
@@ -1440,6 +1466,11 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Imagens de satélite</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Mapas base</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -6,7 +6,7 @@ import json
 import logging
 import time
 from dataclasses import asdict, replace
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QObject, QTimer
@@ -29,10 +29,11 @@ from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME
 from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader, connector_entries, shown_title
 from ...core.agent.mcp_client import McpError
 from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
-from ...core.agent.open_data import KIND_STAC, KIND_WFS, display_source, parse_extra_domains
+from ...core.agent.basemaps import shown as basemap_shown
+from ...core.agent.open_data import KIND_STAC, KIND_WFS, KIND_XYZ, display_source, parse_extra_domains
 from ...core.agent.sources import (
     KIND_MCP, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, all_sources, custom_from_json, describe_enabled, enabled,
-    platform_domains, platform_name,
+    basemap_addresses, model_name, platform_domains, platform_name,
 )
 from ...core.agent.permissions import (
     ADVISOR, AGENT_OWN, ASK, AUTONOMOUS, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, RULE_NEVER, RUN, STANDARD, TURNED_OFF, PermissionPolicy,
@@ -87,8 +88,12 @@ VALUES_TOOLS = ("field_values", "layer_statistics", "sample_features", "identify
 OPEN_DATA_TOOL = "search_open_data"
 SERVICE_TOOL = "add_service_layer"
 IMAGERY_TOOL = "search_imagery"
+BASEMAP_TOOL = "add_basemap"
 NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
                      "only takes local files.")
+NO_BASEMAP_NOTE = ("\n\nThe user enabled no web basemap: add_basemap is not available. When a basemap is asked, say "
+                   "that one can be ticked in the settings of the agent, Sources tab, under Basemaps (OpenStreetMap, "
+                   "Carto, IGN...), or an XYZ address added there; do not try another way.")
 FIXED_IN_SETTINGS = (ERROR_AUTH, ERROR_QUOTA)
 MAX_DETAIL_CHARS = 200
 # The Test button of the provider tab: one short request, then the list of the models.
@@ -694,7 +699,9 @@ class AgentChatController(QObject):
         kinds = {source.kind for source in active}
         accessor = self._accessor()
         configured = accessor.configured_domains()  # portals allowed in the configuration file count as ticked
-        configured_names = list(parse_extra_domains(configured))
+        configured_kinds = {name: kind for name, (kind, _) in parse_extra_domains(configured).items()}
+        configured_names = list(configured_kinds)
+        searched = [name for name, kind in configured_kinds.items() if kind not in (KIND_STAC, KIND_XYZ)]
         data_sources = [source for source in active if not source.is_connector]
         left_out = {name for name, rule in values.rules.items() if rule == "never"}  # turned off in the Tools tab
         if not values.send_values:
@@ -703,12 +710,14 @@ class AgentChatController(QObject):
             left_out.add(RUN_PYTHON)
         if not values.send_values:
             left_out.add(VIEW_MAP)  # an image of the map shows its labels and symbols: a value as much as a field
-        if not kinds - {KIND_MCP, KIND_STAC} and not configured_names:
+        if not kinds - {KIND_MCP, KIND_STAC, KIND_XYZ} and not searched:
             left_out.add(OPEN_DATA_TOOL)
         if KIND_WFS not in kinds:
             left_out.add(SERVICE_TOOL)
         if KIND_STAC not in kinds:
             left_out.add(IMAGERY_TOOL)
+        if KIND_XYZ not in kinds and KIND_XYZ not in configured_kinds.values():
+            left_out.add(BASEMAP_TOOL)
         tools = [tool for tool in chat_tools() if tool.name not in left_out]
         offered = {tool.name for tool in tools}
         skill_approved = skill_declined = None
@@ -734,10 +743,14 @@ class AgentChatController(QObject):
                 tools = [listed if tool.name == LOAD_SKILL else tool for tool in tools]
             else:
                 tools = list(tools) + [skill_tool(set(), None, connectors=rows, with_skills=False)]
-        # A connector alone does not open the web to add_layer: only a data source the user ticked does.
+        # A connector alone does not open the web to add_layer, nor does a basemap: only a data source the user
+        # ticked does.
+        opens_web = (any(source.kind != KIND_XYZ for source in data_sources)
+                     or any(kind != KIND_XYZ for kind in configured_kinds.values()))
         handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
-                                  allow_remote_sources=bool(data_sources or configured_names),
-                                  platforms=[platform_name(source) for source in data_sources] + configured_names,
+                                  allow_remote_sources=opens_web,
+                                  platforms=[model_name(source) for source in data_sources] + configured_names,
+                                  basemap_addresses=basemap_addresses(data_sources),
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers.update(settings_handlers(offered, self._approve_skill))
         handlers[UNDO_AGENT_STEP] = self._undo_tool
@@ -1467,7 +1480,9 @@ class AgentChatController(QObject):
         # Nothing connects here: a connector the user ticked is an entry of load_skill, connected when the model
         # loads it (2026-11-14: each conversation waited for every connector, one that stalled among them).
         tools, handlers, held = self._families(values, tools, handlers, active)
-        session = AgentSession(provider, tools, self._prompt(values, active))
+        configured = parse_extra_domains(self._accessor().configured_domains())
+        session = AgentSession(provider, tools, self._prompt(
+            values, active, [name for name, (kind, _) in configured.items() if kind == KIND_XYZ]))
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
@@ -1518,18 +1533,26 @@ class AgentChatController(QObject):
                    "conversation?").format(one_line(title, 100), origin, one_line(address, 200))
 
     @staticmethod
-    def _prompt(values: AgentSettings, active) -> str:
+    def _prompt(values: AgentSettings, active, configured_basemaps: Sequence[str] = ()) -> str:
         names = describe_enabled(active)
         notes = [SYSTEM_PROMPT]
         if not values.send_values:
             notes.append(NO_VALUES_NOTE)
         if AgentChatController.local_filtering(values):
             notes.append(FILTERING_NOTE)
-        if not active:
+        if all(source.kind == KIND_XYZ for source in active):  # a basemap alone opens no platform
             notes.append(NO_OPEN_DATA_NOTE)
         if names["platforms"]:
             notes.append("\n\nPlatforms the user enabled (the platform argument): " + ", ".join(names["platforms"]) + ".")
             notes.append(platforms_note(names["platforms"]))
+        if names["basemaps"]:
+            notes.append("\n\nBasemaps the user enabled (the platform argument of add_basemap): "
+                         + ", ".join(names["basemaps"]) + ".")
+        elif not configured_basemaps:
+            notes.append(NO_BASEMAP_NOTE)
+        if configured_basemaps:
+            notes.append("\n\nBasemaps of the configuration file (the platform argument of add_basemap): "
+                         + ", ".join(configured_basemaps) + ".")
         if names["connectors"]:
             notes.append("\n\nExternal connectors the user enabled (" + ", ".join(names["connectors"])
                          + ") are entries connector-... of load_skill: load one when the request needs its data; its "
@@ -1550,6 +1573,9 @@ class AgentChatController(QObject):
             if source.is_connector:
                 return _tr("{} tools available").format(len(McpConnection(source).list_tools()))
             domains = platform_domains([source])
+            if source.kind == KIND_XYZ:
+                self._accessor().check_basemap(platform_name(source), extra_domains=domains)
+                return _tr("It serves its tiles.")
             if source.kind == KIND_STAC:
                 self._accessor().search_imagery(bbox=[1.3, 43.5, 1.5, 43.7], limit=1, platform=platform_name(source),
                                                 extra_domains=domains)
@@ -1941,6 +1967,8 @@ class AgentChatController(QObject):
             "map_image": lambda: _tr("Image of the map sent"),
             "contact_sheet": lambda: _tr("Contact sheet of {} sent").format(args.get("layer", "")),
             "add_service_layer": lambda: _tr("Layer added: {}").format(args.get("name") or args.get("typename", "")),
+            "add_basemap": lambda: _tr("Basemap added: {}").format(
+                args.get("name") or self._basemap_label(str(args.get("platform", "")), short=True)),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
@@ -2183,6 +2211,13 @@ class AgentChatController(QObject):
             return bool(self._ask_code(title, text, str(call.arguments.get("code", ""))))
         return self._ask_user(title, self._confirm_text(call))
 
+    def _basemap_label(self, platform: str, short: bool = False) -> str:
+        """What the user reads of the basemap a model named: one of their own by its title and its server."""
+        for source in custom_from_json(load_settings().custom_sources):
+            if source.id == platform.strip().lower():
+                return one_line(source.title if short else f"{source.title} · {display_source(source.address)}", 300)
+        return one_line(basemap_shown(platform, short), 300)
+
     def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
@@ -2193,6 +2228,10 @@ class AgentChatController(QObject):
         elif call.name == "add_service_layer":
             text = _tr("The agent wants to add this layer of a web service to the project:\n{} · {}\n\nDo you agree?").format(
                 one_line(call.arguments.get("platform", ""), 100), one_line(call.arguments.get("typename", ""), 200))
+        elif call.name == "add_basemap":
+            text = _tr("The agent wants to add this web basemap under the layers of the project:\n{}\n\nIts server "
+                       "draws the map as you move it: it sees which areas you look at, and nothing of your layers. "
+                       "Do you agree?").format(self._basemap_label(str(call.arguments.get("platform", ""))))
         elif call.name == "add_layer":
             text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
                        "server by QGIS, and what the layer holds can be sent to the provider of the agent. "

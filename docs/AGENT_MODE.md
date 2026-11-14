@@ -484,6 +484,12 @@ address, else its content type), its size, and whether the server gives parts of
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
   asset links, so they are left out for now.
+- **Basemaps** (`core/agent/basemaps.py`): XYZ tiles (OpenStreetMap, Carto, IGN Plan and aerial photographs through
+  the WMTS of the Géoplateforme, OpenTopoMap) and any XYZ address the user adds. `add_basemap` puts one under every
+  layer after asking its server for a tile (where the map is, then a quarter of the world: a server of one country
+  has none for the world). A model names a basemap of the list, never an address: one the user added goes by its id
+  (`sources.model_name`), since its address may hold the key of an account. A basemap ticked alone does not open the
+  web to `add_layer`. Limits: an address the user adds is https on port 443, without a comma, and gets zoom 19 at most.
 - **MCP connectors** (`core/agent/mcp_client.py`, `adapters/agent/mcp_connection.py`): any Streamable HTTP server, public
   https or on this machine. Their tools join the conversation as `mcp_<server>__<tool>`, bounded in number and size.
   A plugin starts no process: a stdio-only server has to be run in HTTP mode by the user, as IGN's geocontext can be.

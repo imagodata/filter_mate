@@ -10,12 +10,12 @@ from core.agent.mcp_client import (
 )
 from core.agent.json_schema import validate
 from core.agent.open_data import (
-    RemoteFile, archive_member, follow_redirects, gdal_source, megabytes, parse_results, parse_stac_items, reads_in_place,
-    remote_file, resolve_platform, stac_search_body, valid_day,
+    RemoteFile, archive_member, follow_redirects, gdal_source, megabytes, parse_extra_domains, parse_results,
+    parse_stac_items, reads_in_place, remote_file, resolve_platform, stac_search_body, valid_day,
 )
 from core.agent.sources import (
-    BUILT_IN, KIND_MCP, all_sources, custom_from_json, custom_to_json, describe_enabled, enabled, make_source,
-    platform_domains, platform_name,
+    BUILT_IN, KIND_MCP, all_sources, basemap_addresses, custom_from_json, custom_to_json, describe_enabled, enabled,
+    make_source, model_name, platform_domains, platform_name,
 )
 
 pytestmark = pytest.mark.unit
@@ -190,7 +190,35 @@ class TestSources:
 
     def test_described_for_the_model(self):
         names = describe_enabled(enabled(all_sources([]), ("datagouv", "datagouv_mcp")))
-        assert names == {"platforms": ["datagouv"], "connectors": ["data.gouv.fr (MCP)"]}
+        assert names == {"platforms": ["datagouv"], "basemaps": [], "connectors": ["data.gouv.fr (MCP)"]}
+
+    def test_a_basemap_is_named_apart_from_the_platforms(self):
+        mine = make_source("https://tiles.example.org/{z}/{x}/{y}.png", "xyz")
+        names = describe_enabled(enabled(all_sources([mine]), ("carto_light", mine.id)))
+        assert names == {"platforms": [], "basemaps": ["carto_light", f"{mine.id} (tiles.example.org)"], "connectors": []}
+
+    def test_the_address_of_a_basemap_the_user_added_never_goes_to_the_model(self):
+        """It may hold the key of an account; the model names the basemap by its id, the plugin finds the address."""
+        mine = make_source("https://tiles.example.org/{z}/{x}/{y}.png?apikey=abc123", "xyz")
+        assert model_name(mine) == mine.id and "abc123" not in mine.id
+        assert "abc123" not in json.dumps(describe_enabled([mine]))
+        assert basemap_addresses(all_sources([mine])) == {mine.id: platform_name(mine)}
+        assert model_name(next(s for s in BUILT_IN if s.id == "carto_light")) == "carto_light"
+        portal = make_source("data.example.org", "ckan")
+        assert model_name(portal) == platform_name(portal)
+
+    def test_a_basemap_the_user_adds_is_a_template_kept_as_written(self):
+        mine = make_source("https://Tiles.example.org/wmts?LAYER=Plan&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}", "xyz")
+        assert mine.address == "https://Tiles.example.org/wmts?LAYER=Plan&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}"
+        assert custom_from_json(custom_to_json([mine])) == [mine]
+        # what the handlers read back: the platform a model names, and where it is
+        assert parse_extra_domains(platform_domains([mine])) == {platform_name(mine): ("xyz", mine.address)}
+
+    @pytest.mark.parametrize("address", ["https://tiles.example.org/map.png", "http://tiles.example.org/{z}/{x}/{y}.png",
+                                         "https://{s}.tiles.example.org/{z}/{x}/{y}.png", "https://tiles.example.org/{z}/{x}"])
+    def test_an_address_that_is_no_tile_template_is_refused_as_a_basemap(self, address):
+        with pytest.raises(ValueError):
+            make_source(address, "xyz")
 
 
 class TestFormats:

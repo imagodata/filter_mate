@@ -236,6 +236,11 @@ Er du enig?</translation>
         <translation>Kilden svarer.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Kilden leverer sine fliser.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Angiv først din API-nøgle.</translation>
@@ -255,6 +260,11 @@ Er du enig?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Lag tilføjet: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Baggrundskort tilføjet: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Accepterer du?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>Agenten vil tilføje dette webbaggrundskort under projektets lag:
+{}
+
+Dets server tegner kortet, mens du flytter det: den ser, hvilke områder du kigger på, og intet af dine lag. Accepterer du?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <translation>MCP-forbindelse</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Baggrundskort (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP-forbindelser</translation>
@@ -1440,6 +1466,11 @@ Accepterer du dem alle? Nej udfører ingen af dem.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Satellitbilleder</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Baggrundskort</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
