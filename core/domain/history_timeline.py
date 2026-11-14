@@ -16,7 +16,7 @@ be drawn as it was before any of them, whatever history it comes from (:func:`st
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from .compare_states import BeforeMap, BeforeState, Effects, from_cross_operation, from_history_entry, map_with_effects
@@ -37,7 +37,8 @@ class TimelineItem:
 
     Attributes:
         kind: One of ``KINDS``.
-        time: When, in seconds since the epoch (a step has the time of its turn).
+        time: When it was done (a turn: when it ended), in seconds since the epoch; a step has the time of its turn,
+            to be listed under it.
         label: What was done, in the words its history kept (a request, an expression).
         layers: Names of the layers it changed.
         applied: False once undone: it can be redone, and the map no longer holds it.
@@ -46,6 +47,7 @@ class TimelineItem:
         position: Its rank in that history, oldest first; for a step, its rank in the turn.
         befores: The state before it of each layer it changed (empty for an item undone).
         ref: The entry or operation itself, for the host.
+        started: When it began, when known and not ``time``: a turn of the agent, a step of a turn (0: ``time``).
     """
 
     kind: str
@@ -58,6 +60,12 @@ class TimelineItem:
     position: int = 0
     befores: Tuple[BeforeState, ...] = field(default=(), compare=False, repr=False)
     ref: Any = field(default=None, compare=False, repr=False)
+    started: float = 0.0
+
+    @property
+    def begun(self) -> float:
+        """When it began: an operation done after that came after it, or during it."""
+        return self.started or self.time
 
 
 def _label(text: Any) -> str:
@@ -133,15 +141,17 @@ def cross_items(key: str, undo_stack: Sequence[Any], redo_stack: Sequence[Any], 
                 if len(effect) > 4 and isinstance(effect[4], str) and effect[4] and effect[4] not in names:
                     names.append(effect[4])
             when = _seconds(getattr(operation, "timestamp", 0))
+            started = _seconds(getattr(operation, "started", 0)) if agent else 0.0
             items.append(TimelineItem(
                 kind, when, _label(getattr(operation, "description", "")), tuple(names), applied, "", key, position,
-                tuple(from_cross_operation(operation)) if applied else (), operation))
+                tuple(from_cross_operation(operation)) if applied else (), operation, started))
             steps = getattr(operation, "steps", ()) or ()
+            times = _step_times(operation)
             if agent and applied and position == len(undo_stack) - 1:
                 for index, (label, befores) in enumerate(steps):
                     items.append(TimelineItem(
                         KIND_STEP, when, _label(label), _names([before.layer_id for before in befores], name_of), True,
-                        "", key, index, _step_befores(steps, index), operation))
+                        "", key, index, _step_befores(steps, index), operation, times[index] if times else started))
     return items
 
 
@@ -155,9 +165,57 @@ def timeline(*groups: Iterable[TimelineItem]) -> List[TimelineItem]:
     return sorted((item for group in groups for item in group), key=_order)
 
 
+def _step_times(operation: Any) -> Tuple[float, ...]:
+    """When each step of a turn began, when its record says so for every step; () otherwise."""
+    steps = getattr(operation, "steps", ()) or ()
+    times = tuple(getattr(operation, "step_times", ()) or ())
+    return times if steps and len(times) == len(steps) else ()
+
+
+def _done_since(item: TimelineItem, target: TimelineItem) -> Optional[Tuple[Tuple[BeforeState, ...], List[Effects]]]:
+    """What of ``item`` was done after ``target`` began: the state before it of the layers it changed then, and what it
+    did beside the filters; None for nothing (``item`` came before, is undone, or is ``target`` itself).
+
+    A turn of the agent is recorded when it ends (its ``time``) but began earlier (``started``): an operation of
+    another history done meanwhile (a raster filtered through the API by the turn, a filter of the dock) finds it under
+    way. Of a turn under way when ``target`` began, only the steps begun after that count, when the turn says when
+    each began; when it does not (a turn of one step, a record of an earlier version), nothing of it counts: what it
+    did before ``target`` was on the map then, and what it did after cannot be told apart.
+    """
+    if not item.applied or item.kind == KIND_STEP or item is target or _same_operation(item, target):
+        return None
+    if item.kind == KIND_AGENT and not (target.kind in (KIND_AGENT, KIND_STEP) and item.key == target.key):
+        since = target.begun
+        if item.time < since:
+            return None
+        if item.begun < since:  # under way when target began
+            steps, times = getattr(item.ref, "steps", ()) or (), _step_times(item.ref)
+            first = next((index for index, begun in enumerate(times) if begun >= since), None)
+            if first is None:
+                return None
+            step_effects = getattr(item.ref, "step_effects", ()) or ()
+            return (_step_befores(steps, first),
+                    [(tuple(effect for done in step_effects[first:] for effect in done), False)])
+        return item.befores, [_effects_of(item.ref)]
+    if not _after(item, target):
+        return None
+    return item.befores, [_effects_of(item.ref)] if item.kind == KIND_AGENT else []
+
+
+def _since(items: Iterable[TimelineItem], target: TimelineItem) -> List[Tuple[Tuple[BeforeState, ...], List[Effects]]]:
+    """What each item did after ``target`` began, oldest first."""
+    found = []
+    for item in sorted(items, key=lambda other: (other.time, other.position)):
+        done = _done_since(item, target)
+        if done is not None:
+            found.append(done)
+    return found
+
+
 def states_before(items: Iterable[TimelineItem], target: TimelineItem) -> List[BeforeState]:
     """The layers as they were before ``target``, among those changed since: for each, its state before the first
-    item applied, at or after ``target``, that changed it, whatever history that item comes from.
+    item applied, at or after ``target``, that changed it, whatever history that item comes from (of a turn of the
+    agent under way at ``target``, the steps begun after it: see :func:`_done_since`).
 
     A step counts for its turn: what follows the turn is looked at, never its other steps twice. Nothing for an item
     undone: the map no longer holds it.
@@ -167,10 +225,8 @@ def states_before(items: Iterable[TimelineItem], target: TimelineItem) -> List[B
     states: Dict[str, BeforeState] = {}
     for state in target.befores:
         states.setdefault(state.layer_id, state)
-    later = [item for item in items if item.applied and item.kind != KIND_STEP and item is not target
-             and not _same_operation(item, target) and _after(item, target)]
-    for item in sorted(later, key=lambda other: (other.time, other.position)):
-        for state in item.befores:
+    for befores, _effects in _since(items, target):
+        for state in befores:
             states.setdefault(state.layer_id, state)
     return list(states.values())
 
@@ -181,12 +237,12 @@ def _same_operation(item: TimelineItem, target: TimelineItem) -> bool:
 
 
 def _after(item: TimelineItem, target: TimelineItem) -> bool:
-    """Was ``item`` done after ``target``? In one history its rank says so; across two, the clock."""
+    """Was ``item`` done after ``target`` began? In one history its rank says so; across two, the clock."""
     if item.key == target.key and item.kind == target.kind:
         return item.position > target.position
     if target.kind == KIND_STEP and item.key == target.key and item.kind == KIND_AGENT:
         return item.time > target.time
-    return item.time >= target.time
+    return item.time >= target.begun
 
 
 def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap:
@@ -195,7 +251,8 @@ def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap
     was before the first of them.
 
     The turns counted are ``target`` itself (a step: the steps of its turn from that one, what "undo back to here"
-    undoes) and those done after it. Empty for an item undone: the map no longer holds it.
+    undoes) and those done after it (of a turn under way at ``target``, its steps begun after it). Empty for an item
+    undone: the map no longer holds it.
     """
     if not target.applied:
         return BeforeMap(label=target.label)
@@ -205,15 +262,50 @@ def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap
         effects.append((tuple(effect for done in step_effects[target.position:] for effect in done), False))
     elif target.kind == KIND_AGENT:
         effects.append(_effects_of(target.ref))
-    later = [item for item in items if item.applied and item.kind == KIND_AGENT and item is not target
-             and not _same_operation(item, target) and _after(item, target)]
-    for item in sorted(later, key=lambda other: (other.time, other.position)):
-        effects.append(_effects_of(item.ref))
+    for _befores, done in _since(items, target):
+        effects.extend(done)
     return map_with_effects(states_before(items, target), effects, target.label)
 
 
 def _effects_of(operation: Any) -> Effects:
     return getattr(operation, "effects", ()) or (), bool(getattr(operation, "effects_reversed", False))
+
+
+def linked_pairs(entries: Sequence[Any], source_id: str, run_ids: Sequence[Optional[int]],
+                 operations: Sequence[Any]) -> List[Tuple[Any, Any]]:
+    """The raster / point cloud operation each vector filter of the dock of ``source_id`` ran with, as Undo (or Redo)
+    takes them together (CoverageModeController.run_vector_source_task): ``(entry, operation)`` pairs.
+
+    ``entries``: the stack of the vector filters, the next taken last; ``run_ids``: the ``op_id`` each run of the
+    source recorded (None: nothing clipped), the next taken last; ``operations``: the cross stack of the source, the
+    next taken last. Each entry of the source taken takes a run, and the operation on top of the cross stack with it
+    when the run recorded that one. The clock cannot pair them: each is recorded when its own task ends.
+    """
+    mine = [entry for entry in entries if tuple(getattr(entry, "layer_ids", ()) or ())[:1] == (source_id,)]
+    stack = list(operations)
+    pairs = []
+    for entry, op_id in zip(reversed(mine), reversed(list(run_ids))):
+        if stack and op_id is not None and getattr(stack[-1], "op_id", None) == op_id:
+            pairs.append((entry, stack.pop()))
+    return pairs
+
+
+def link(items: Sequence[TimelineItem], pairs: Iterable[Tuple[Any, Any]]) -> List[TimelineItem]:
+    """``items`` with each vector filter of ``pairs`` and the raster / point cloud operation it ran with made one step:
+    the filter holds the state before of the layers of the operation too, and the operation takes the time of the
+    filter. The map before either is the map before both, as Undo undoes both; each keeps its line."""
+    by_ref = {id(item.ref): index for index, item in enumerate(items) if item.ref is not None}
+    linked = list(items)
+    for entry, operation in pairs:
+        at, other = by_ref.get(id(entry)), by_ref.get(id(operation))
+        if at is None or other is None:
+            continue
+        vector, cross = linked[at], linked[other]
+        known = {state.layer_id for state in vector.befores}
+        linked[at] = replace(vector, befores=vector.befores + tuple(
+            state for state in cross.befores if state.layer_id not in known))
+        linked[other] = replace(cross, time=vector.time, started=0.0)
+    return linked
 
 
 @dataclass(frozen=True)

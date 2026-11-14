@@ -7,8 +7,8 @@ import pytest
 
 from core.domain.compare_states import BeforeMap, BeforeState
 from core.domain.history_timeline import (
-    KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, UndoFocus, counts, cross_items, label_of, latest, map_before, mark,
-    states_before, timeline, vector_items, walkable,
+    KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, UndoFocus, counts, cross_items, label_of, latest, link,
+    linked_pairs, map_before, mark, states_before, timeline, vector_items, walkable,
 )
 
 pytestmark = pytest.mark.unit
@@ -178,3 +178,90 @@ def test_a_step_is_never_marked_alone():
     turn = next(item for item in listed if item.label == "A2")
     focus = UndoFocus(KIND_AGENT, undo=(turn.ref,))
     assert [item.label for item in listed if mark(item, focus)] == ["A2"]  # not its steps "Style", "Hide towns"
+
+
+# --- an operation done while a turn of the agent was under way --------------------------------------------------
+
+
+def _turn_under_way(step_times=(100, 140, 160), started=100):
+    """A turn begun at 100 and recorded at 200: step 1 filters V and restyles A, step 2 filters the raster R through
+    the API (its own operation, at 150), step 3 filters V again."""
+    turn = operation(200, [(snap("V", ""), snap("V", "b")), (snap("R", source="/d/r.tif"), snap("R", source="/t/r.vrt"))],
+                     "Turn", steps=[("S1", (snap("V", ""),)), ("S2", (snap("R", source="/d/r.tif"),)),
+                                    ("S3", (snap("V", "a"),))],
+                     effects=[("style", "A", "<old/>", "<new/>", "A")])
+    turn.step_effects = ((("style", "A", "<old/>", "<new/>", "A"),), (), ())
+    turn.started, turn.step_times = started, tuple(step_times)
+    raster = cross_items("R", [operation(150, [(snap("R", source="/d/r.tif"), snap("R", source="/t/r.vrt"))],
+                                         "Clip R")], [], name_of)
+    return timeline(raster, cross_items("agent", [turn], [], name_of, agent=True))
+
+
+def test_a_turn_under_way_counts_only_its_steps_begun_after_the_operation():
+    listed = _turn_under_way()
+    clip = next(item for item in listed if item.label == "Clip R")
+    before = map_before(listed, clip)
+    # V as step 3 found it (step 1 had filtered it already), A keeps the style step 1 gave it, R before the clip.
+    assert {state.layer_id: (state.source or state.subset) for state in before.states} == {"R": "/d/r.tif", "V": "a"}
+    assert all(state.style is None for state in before.states)
+
+
+def test_a_turn_under_way_whose_steps_began_before_counts_for_nothing():
+    listed = _turn_under_way(step_times=(100, 140, 145))
+    clip = next(item for item in listed if item.label == "Clip R")
+    assert {state.layer_id for state in map_before(listed, clip).states} == {"R"}
+    # Without the times of its steps (an earlier record, a turn of one step), the turn under way is not counted.
+    listed = _turn_under_way(step_times=())
+    assert {state.layer_id for state in map_before(listed, next(i for i in listed if i.label == "Clip R")).states} == {"R"}
+
+
+def test_a_turn_begun_after_the_operation_counts_whole():
+    listed = _turn_under_way(started=150)
+    clip = next(item for item in listed if item.label == "Clip R")
+    before = map_before(listed, clip)
+    assert {state.layer_id: state.subset for state in before.states if state.layer_id == "V"} == {"V": ""}
+    assert any(state.layer_id == "A" and state.style == "<old/>" for state in before.states)
+
+
+def test_a_turn_and_its_steps_begin_when_they_began():
+    listed = _turn_under_way()
+    by_label = {item.label: item for item in listed}
+    assert by_label["Turn"].begun == 100 and by_label["Turn"].time == 200
+    assert [by_label[name].begun for name in ("S1", "S2", "S3")] == [100, 140, 160]
+    assert by_label["Clip R"].begun == 150  # no start of its own: when it was done
+    # Listed under their turn all the same.
+    assert [item.label for item in listed] == ["Turn", "S1", "S2", "S3", "Clip R"]
+
+
+# --- a vector filter and the raster operation it ran with ------------------------------------------------------
+
+
+def test_a_vector_filter_and_its_raster_operation_pair_as_undo_takes_them():
+    first = entry(1, ["roads"], [("roads", "")], description="F1")
+    other = entry(2, ["towns"], [("towns", "")], description="Other source")
+    second = entry(3, ["roads"], [("roads", "a")], description="F2")
+    third = entry(4, ["roads"], [("roads", "b")], description="F3, nothing clipped")
+    ops = [SimpleNamespace(op_id=11), SimpleNamespace(op_id=12)]
+    pairs = linked_pairs([first, other, second, third], "roads", [11, 12, None], ops)
+    assert [(found.description, op.op_id) for found, op in pairs] == [("F2", 12), ("F1", 11)]
+    # An operation forgotten since (a removed layer, the cache): its run pairs with nothing, the older one still does.
+    assert [(found.description, op.op_id) for found, op in linked_pairs([first, second], "roads", [11, 12], ops[:1])] \
+        == [("F1", 11)]
+    assert linked_pairs([first], "roads", [], ops) == []
+
+
+def test_the_map_before_a_filter_undoes_the_raster_operation_it_ran_with():
+    """The raster task may end before the vector one: its operation is older on the clock, yet one step with it."""
+    vector_entry = entry(100, ["roads"], [("roads", "")], description="Roads and DEM")
+    clip = operation(90, [(snap("dem", source="/d/dem.tif"), snap("dem", source="/t/clip.vrt"))], "cross filter")
+    clip.op_id = 7
+    items = timeline(vector_items([vector_entry], [], name_of), cross_items("roads", [clip], [], name_of))
+    linked = timeline(link(items, linked_pairs([vector_entry], "roads", [7], [clip])))
+    by_label = {item.label: item for item in linked}
+    expected = {"roads": "", "dem": "/d/dem.tif"}
+    assert {s.layer_id: s.source or s.subset for s in map_before(linked, by_label["Roads and DEM"]).states} == expected
+    assert {s.layer_id: s.source or s.subset for s in map_before(linked, by_label["cross filter"]).states} == expected
+    assert by_label["cross filter"].time == by_label["Roads and DEM"].time
+    # Not linked, the clock leaves the DEM clipped before the filter.
+    unlinked = {item.label: item for item in items}
+    assert {s.layer_id for s in map_before(items, unlinked["Roads and DEM"]).states} == {"roads"}

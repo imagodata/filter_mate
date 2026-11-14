@@ -174,14 +174,23 @@ def test_a_pin_of_the_map_before_a_step_differs_by_the_layers_changed_since():
     assert compared.missing == ("Parcels",) and compared.pinned_at == 100.0
 
 
-def test_a_pin_before_a_step_keeps_a_filter_kept_and_skips_a_layer_not_read():
+def test_a_pin_before_a_step_keeps_a_filter_kept_and_names_a_layer_not_read():
     from core.domain.filter_state import LayerSnapshot
     roads = LayerSnapshot("roads", "vector", "/d/v.gpkg", "ogr", subset="x")
-    now = MapState((LayerState("roads", "Roads", roads, "<blue/>", True), LayerState("unread", "U", None, None, True)))
-    pinned = pin_before(now, BeforeMap((BeforeState("roads", None, style="<red/>"), BeforeState("unread", "y"))), 1.0)
+    now = MapState((LayerState("roads", "Roads", roads, "<blue/>", True), LayerState("unread", "U", None, None, True),
+                    LayerState("gone_later", "G", None, None, True)))
+    before = BeforeMap((BeforeState("roads", None, style="<red/>"), BeforeState("unread", "y")),
+                       unshown=(("tree", "", ""), ("edits", "gone_later", "G")))
+    pinned = pin_before(now, before, 1.0)
     assert pinned.layers[0].snapshot is roads and pinned.layers[0].style == "<red/>"
-    assert pinned.layers[1].snapshot is None and map_from_pin(pinned, now).states == (
-        BeforeState("roads", None, style="<red/>"),)
+    # The filter of then cannot be kept on a layer not read: named, not dropped in silence; what the step changed
+    # and a pin cannot hold is named too.
+    assert pinned.layers[1].snapshot is None
+    assert pinned.unshown == (("tree", "", ""), ("edits", "gone_later", "G"), ("filter", "unread", "U"))
+    compared = map_from_pin(pinned, now)
+    assert compared.states == (BeforeState("roads", None, style="<red/>"),) and compared.unshown == pinned.unshown
+    # A layer removed since is named as missing, not twice.
+    assert map_from_pin(pinned, MapState(now.layers[:2])).unshown == (("tree", "", ""), ("filter", "unread", "U"))
 
 
 # --- a pin ------------------------------------------------------------------------------

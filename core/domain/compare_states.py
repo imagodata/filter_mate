@@ -95,10 +95,15 @@ class LayerState:
 
 @dataclass(frozen=True)
 class MapState:
-    """Every layer of the project at one moment (``taken_at``, a ``time.time()``), in the order of the layer tree."""
+    """Every layer of the project at one moment (``taken_at``, a ``time.time()``), in the order of the layer tree.
+
+    ``unshown``: what the state cannot draw as it was, named when it is compared (``BeforeMap.unshown``): a pin of the
+    map before a step keeps there what that step changed and a pin cannot hold.
+    """
 
     layers: Tuple[LayerState, ...] = ()
     taken_at: float = 0.0
+    unshown: Tuple[Tuple[str, str, str], ...] = ()
 
 
 def _unique(states: Iterable[BeforeState]) -> List[BeforeState]:
@@ -241,7 +246,10 @@ def map_from_pin(pinned: MapState, now: MapState) -> BeforeMap:
                 was.style if styled else None))
     pinned_ids = {layer.layer_id for layer in pinned.layers}
     absent.update(layer.layer_id for layer in now.layers if layer.visible and layer.layer_id not in pinned_ids)
-    return BeforeMap(tuple(states), frozenset(absent), tuple(present), tuple(missing), pinned_at=pinned.taken_at)
+    current_ids = set(current)
+    unshown = tuple(item for item in pinned.unshown if not item[1] or item[1] in current_ids)  # a layer gone: missing
+    return BeforeMap(tuple(states), frozenset(absent), tuple(present), tuple(missing), pinned_at=pinned.taken_at,
+                     unshown=unshown)
 
 
 # Id of a layer a pin names only (removed since the state pinned): never the id of a layer of QGIS.
@@ -269,10 +277,11 @@ def pin_before(now: MapState, before: BeforeMap, taken_at: float) -> MapState:
 
     A layer drawn otherwise takes back its filter and style; a layer not on the map before is hidden, one hidden since
     is shown; one removed since is kept by its name only (named when compared, as a layer removed since a pin is).
-    What ``before`` does not draw (``unshown``) is not kept.
+    What ``before`` does not draw (``unshown``) is kept to be named, and so is a layer whose filter of then cannot be
+    kept (its filter of now not read): it is compared as it is now, never silently.
     """
     states = {state.layer_id: state for state in before.states}
-    layers = []
+    layers, unshown = [], list(before.unshown)
     for layer in now.layers:
         if layer.layer_id in before.absent:
             layers.append(replace(layer, visible=False))
@@ -281,11 +290,13 @@ def pin_before(now: MapState, before: BeforeMap, taken_at: float) -> MapState:
             layer = replace(layer, visible=True)
         state = states.get(layer.layer_id)
         if state is not None:
-            layer = replace(layer, snapshot=_snapshot_before(layer.snapshot, state),
-                            style=state.style if state.style is not None else layer.style)
+            snapshot = _snapshot_before(layer.snapshot, state)
+            if snapshot is None and (state.subset is not None or state.other_source):
+                unshown.append(("filter", layer.layer_id, layer.name))
+            layer = replace(layer, snapshot=snapshot, style=state.style if state.style is not None else layer.style)
         layers.append(layer)
     layers += [LayerState(f"{REMOVED_PREFIX}{index}", name, visible=True) for index, name in enumerate(before.missing)]
-    return MapState(tuple(layers), taken_at)
+    return MapState(tuple(layers), taken_at, tuple(unshown))
 
 
 def before_layer_order(drawn: Sequence[str], order: Sequence[str], absent: Collection[str],
