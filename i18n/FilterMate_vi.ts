@@ -1106,6 +1106,26 @@ Bạn có đồng ý không?</translation>
         <translation>{} bước trước đó được giữ lại và có thể hoàn tác.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Không thể kết nối với nhà cung cấp, sẽ thử lại sau {} giây…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Nhà cung cấp đang bận, sẽ thử lại sau {} giây…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Yêu cầu đã dừng giữa chừng. Các bước đã thực hiện, vẫn được giữ nguyên (Hoàn tác sẽ hoàn lại chúng): {}. Hãy yêu cầu tác tử tiếp tục khi bạn sẵn sàng.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Đã dừng giữa chừng. Các bước đã thực hiện, vẫn được giữ nguyên (Hoàn tác sẽ hoàn lại chúng): {}. Hãy yêu cầu tác tử tiếp tục nếu bạn muốn phần còn lại.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Tiện ích: {}</translation>

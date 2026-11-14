@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>Τα {} προηγούμενα βήματα παραμένουν και μπορούν να αναιρεθούν.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ο πάροχος δεν ήταν προσβάσιμος, νέα προσπάθεια σε {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ο πάροχος είναι απασχολημένος, νέα προσπάθεια σε {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Το αίτημα σταμάτησε στη μέση. Βήματα που έχουν ήδη γίνει και παραμένουν στη θέση τους (η Αναίρεση τα επαναφέρει): {}. Ζητήστε από τον πράκτορα να συνεχίσει όταν είστε έτοιμοι.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Διακόπηκε στη μέση. Βήματα που έχουν ήδη γίνει και παραμένουν στη θέση τους (η Αναίρεση τα επαναφέρει): {}. Ζητήστε από τον πράκτορα να συνεχίσει αν θέλετε τα υπόλοιπα.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Γραφικό στοιχείο: {}</translation>

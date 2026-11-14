@@ -1106,6 +1106,26 @@ Se strinjate?</translation>
         <translation>Prejšnjih {} korakov ostane in jih je mogoče razveljaviti.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ponudnika ni bilo mogoče doseči, ponoven poskus čez {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ponudnik je zaseden, ponoven poskus čez {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Zahteva se je ustavila na pol poti. Že opravljeni koraki, ki ostanejo na mestu (Razveljavi jih vrne nazaj): {}. Agenta prosite, naj nadaljuje, ko boste pripravljeni.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Ustavljeno na pol poti. Že opravljeni koraki, ki ostanejo na mestu (Razveljavi jih vrne nazaj): {}. Agenta prosite, naj nadaljuje, če želite preostanek.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Gradnik: {}</translation>

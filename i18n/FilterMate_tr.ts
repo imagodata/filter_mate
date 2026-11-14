@@ -1106,6 +1106,26 @@ Onaylıyor musunuz?</translation>
         <translation>Önceki {} adım kalır ve geri alınabilir.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Sağlayıcıya ulaşılamadı, {} sn içinde yeniden denenecek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Sağlayıcı meşgul, {} sn içinde yeniden denenecek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>İstek yarıda durdu. Zaten yapılmış olan ve yerinde kalan adımlar (Geri al bunları geri alır): {}. Hazır olduğunuzda aracıdan devam etmesini isteyin.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Yarıda durdu. Zaten yapılmış olan ve yerinde kalan adımlar (Geri al bunları geri alır): {}. Geri kalanı isterseniz aracıdan devam etmesini isteyin.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

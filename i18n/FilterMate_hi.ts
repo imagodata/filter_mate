@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>पहले के {} चरण बने रहते हैं, और उन्हें पूर्ववत किया जा सकता है।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>प्रदाता तक नहीं पहुँचा जा सका, {} सेकंड में दोबारा प्रयास किया जा रहा है…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>प्रदाता व्यस्त है, {} सेकंड में दोबारा प्रयास किया जा रहा है…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>अनुरोध बीच में ही रुक गया। पहले से पूरे हो चुके चरण, जो यथावत रहते हैं (पूर्ववत करें उन्हें वापस ले लेता है): {}। जब आप तैयार हों, एजेंट से जारी रखने को कहें।</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>बीच में ही रोक दिया गया। पहले से पूरे हो चुके चरण, जो यथावत रहते हैं (पूर्ववत करें उन्हें वापस ले लेता है): {}। यदि आप शेष चाहते हैं, तो एजेंट से जारी रखने को कहें।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>विजेट: {}</translation>

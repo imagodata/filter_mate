@@ -1106,6 +1106,26 @@ Er du enig?</translation>
         <translation>De {} foregående trinnene blir stående, og kan angres.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Leverandøren kunne ikke nås, prøver på nytt om {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Leverandøren er opptatt, prøver på nytt om {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Forespørselen stoppet underveis. Trinn som allerede er utført, og som blir stående (Angre tar dem tilbake): {}. Be agenten om å fortsette når du er klar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Stoppet underveis. Trinn som allerede er utført, og som blir stående (Angre tar dem tilbake): {}. Be agenten om å fortsette hvis du vil ha resten.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

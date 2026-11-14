@@ -1106,6 +1106,26 @@ Er du enig?</translation>
         <translation>De {} foregående trin bliver, og kan fortrydes.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Udbyderen kunne ikke nås, prøver igen om {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Udbyderen er optaget, prøver igen om {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Anmodningen stoppede undervejs. Trin, der allerede er udført, og som bliver stående (Fortryd tager dem tilbage): {}. Bed agenten om at fortsætte, når du er klar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Stoppet undervejs. Trin, der allerede er udført, og som bliver stående (Fortryd tager dem tilbage): {}. Bed agenten om at fortsætte, hvis du vil have resten.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

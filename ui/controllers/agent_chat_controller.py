@@ -50,7 +50,7 @@ from ...core.agent.recipes import (
     stale_reference, steps_of as recipe_steps, summary as recipe_summary, with_live, without as recipe_without,
 )
 from ...core.agent.messages import (
-    ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
+    ERROR_AUTH, ERROR_BAD_REQUEST, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
@@ -1673,7 +1673,8 @@ class AgentChatController(QObject):
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
-                          self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
+                          self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy,
+                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)))
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -2104,6 +2105,22 @@ class AgentChatController(QObject):
             return
         self.panel.add_text(text)
         self._answer.append(text)
+
+    def _again(self, step):
+        """``step`` (a new try of the model turn), once the status no longer says a new try is coming."""
+        def run():
+            if not self._abandoned and self.chat_busy():
+                self.panel.set_status(_tr("Thinking…"))
+            step()
+        return run
+
+    def on_retry(self, seconds: float, error: ProviderError) -> None:
+        """The provider failed for a moment: the engine asks it again by itself after ``seconds``."""
+        if self._abandoned:
+            return
+        words = (_tr("The provider could not be reached, trying again in {} s…") if error.kind == ERROR_NETWORK
+                 else _tr("The provider is busy, trying again in {} s…"))
+        self.panel.set_status(words.format(max(1, round(seconds))))
 
     def _flush_answer(self) -> None:
         """What the screen showed of the answer so far goes in the transcript, in its place."""
@@ -2616,23 +2633,39 @@ class AgentChatController(QObject):
         self._flush_journal()
         self._save_transcript()
         self._refresh_history()
+        # What a request that broke off did is in the conversation, with a note saying it stopped there
+        # (AgentSession.interrupt_request): the project as it is now is no news to the model.
         self._remember_project()
+        kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
-            self._give_back_request()
             message = self._error_message(outcome.error)
             fix = outcome.error.kind in FIXED_IN_SETTINGS
             self._say("")
-            self.panel.show_error(message, _tr("The request is back in the line below: fix the settings, then send it "
-                                               "again.") if fix else _tr("The request is back in the line below: send it "
-                                                                         "again when you are ready."), fix)
+            # Fixing the settings starts another conversation, and a request the server refused for what it holds
+            # was forgotten whole (ChatEngine._interrupt): either way the agent will not know what was done.
+            known = kept and not fix and outcome.error.kind != ERROR_BAD_REQUEST
+            if known:  # sent again whole, the request would do those steps twice: the agent knows where it stopped
+                detail = _tr("The request stopped midway. Steps already done, which stay in place (Undo takes "
+                             "them back): {}. Ask the agent to go on when you are ready.").format(kept)
+            else:
+                self._give_back_request()
+                detail = _tr("The request is back in the line below: fix the settings, then send it again.") if fix \
+                    else _tr("The request is back in the line below: send it again when you are ready.")
+                if kept:
+                    detail = _tr("The {} steps before stay, and can be undone.").format(kept) + " " + detail
+            self.panel.show_error(message, detail, fix)
             return
         if outcome.status == OUTCOME_CANCELLED:
+            if kept:
+                self._say(_tr("Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. "
+                              "Ask the agent to go on if you want the rest.").format(kept))
+                return
             self._give_back_request()
             self._say(_tr("Stopped."))
             return
         if outcome.status == OUTCOME_STOPPED:
             self._say("")
-            self.panel.show_error(*self._stop_words(outcome.reason))
+            self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
 
@@ -2647,8 +2680,9 @@ class AgentChatController(QObject):
             *(f"{count:,}".replace(",", "\u202f") for count in spent))
 
     @staticmethod
-    def _stop_words(reason: str) -> Tuple[str, str]:
-        """Why the agent stopped before its answer, and what the user can do, in plain words."""
+    def _stop_words(reason: str, kept: int = 0) -> Tuple[str, str]:
+        """Why the agent stopped before its answer, and what the user can do, in plain words; ``kept``, the steps
+        done before a refusal, which stay."""
         if reason == REASON_TURN_LIMIT:
             return (_tr("The request took too many steps: the agent stopped."),
                     _tr("What it changed stays and can be undone. Ask for less at once, or say what is left."))
@@ -2656,7 +2690,8 @@ class AgentChatController(QObject):
             return (_tr("The answer of the model was cut: it was too long."),
                     _tr("What it changed stays and can be undone. Ask again, in smaller steps."))
         if reason == REASON_REFUSED:
-            return _tr("The model declined this request."), _tr("Nothing more was done. Ask it differently.")
+            done = _tr("The {} steps before stay, and can be undone.").format(kept) + " " if kept else ""
+            return _tr("The model declined this request."), done + _tr("Nothing more was done. Ask it differently.")
         return _tr("The agent stopped before the end ({}).").format(reason), ""
 
     def _give_back_request(self) -> None:

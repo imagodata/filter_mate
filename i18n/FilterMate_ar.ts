@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>تبقى الخطوات {} السابقة ويمكن التراجع عنها.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>تعذر الوصول إلى المزوّد، إعادة المحاولة خلال {} ث…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>المزوّد مشغول، إعادة المحاولة خلال {} ث…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>توقف الطلب في منتصف الطريق. الخطوات المنجزة بالفعل، وتبقى في مكانها (يعيدها «تراجع»): {}. اطلب من الوكيل المتابعة عندما تكون مستعدًا.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>توقف في منتصف الطريق. الخطوات المنجزة بالفعل، وتبقى في مكانها (يعيدها «تراجع»): {}. اطلب من الوكيل المتابعة إن أردت الباقي.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>الودجت: {}</translation>

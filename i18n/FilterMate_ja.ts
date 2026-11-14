@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>それ以前の {} ステップは残り、元に戻せます。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>プロバイダーに接続できませんでした。{} 秒後に再試行します…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>プロバイダーがビジー状態です。{} 秒後に再試行します…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>リクエストは途中で停止しました。すでに実行されたステップはそのまま残ります（「元に戻す」で取り消せます）: {}。準備ができたら、エージェントに続行を依頼してください。</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>途中で停止しました。すでに実行されたステップはそのまま残ります（「元に戻す」で取り消せます）: {}。残りが必要な場合は、エージェントに続行を依頼してください。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>ウィジェット: {}</translation>

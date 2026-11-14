@@ -1106,6 +1106,26 @@ Apakah Anda setuju?</translation>
         <translation>{} langkah sebelumnya tetap ada, dan dapat diurungkan.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Penyedia tidak dapat dijangkau, mencoba lagi dalam {} detik…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Penyedia sedang sibuk, mencoba lagi dalam {} detik…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Permintaan berhenti di tengah jalan. Langkah yang sudah selesai, yang tetap di tempatnya (Urungkan mengembalikannya): {}. Minta agen untuk melanjutkan saat Anda siap.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Berhenti di tengah jalan. Langkah yang sudah selesai, yang tetap di tempatnya (Urungkan mengembalikannya): {}. Minta agen untuk melanjutkan jika Anda menginginkan sisanya.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

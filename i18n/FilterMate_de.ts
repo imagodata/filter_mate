@@ -1106,6 +1106,26 @@ Sind Sie einverstanden?</translation>
         <translation>Die {} Schritte davor bleiben und können rückgängig gemacht werden.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Der Anbieter war nicht erreichbar, neuer Versuch in {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Der Anbieter ist ausgelastet, neuer Versuch in {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Die Anfrage wurde unterwegs angehalten. Bereits ausgeführte Schritte, die bestehen bleiben (Rückgängig nimmt sie zurück): {}. Bitten Sie den Agenten, fortzufahren, wenn Sie bereit sind.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Unterwegs angehalten. Bereits ausgeführte Schritte, die bestehen bleiben (Rückgängig nimmt sie zurück): {}. Bitten Sie den Agenten, fortzufahren, wenn Sie den Rest möchten.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

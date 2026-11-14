@@ -1106,6 +1106,26 @@ Rozimisiz?</translation>
         <translation>Oldingi {} qadam qoladi va bekor qilinishi mumkin.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ta'minotchiga ulanib bo'lmadi, {} soniyadan so'ng qayta uriniladi…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ta'minotchi band, {} soniyadan so'ng qayta uriniladi…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>So'rov yo'lda to'xtadi. Allaqachon bajarilgan qadamlar joyida qoladi (Bekor qilish ularni qaytaradi): {}. Tayyor bo'lganingizda agentdan davom etishni so'rang.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Yo'lda to'xtatildi. Allaqachon bajarilgan qadamlar joyida qoladi (Bekor qilish ularni qaytaradi): {}. Qolganini xohlasangiz, agentdan davom etishni so'rang.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Vidjet: {}</translation>
