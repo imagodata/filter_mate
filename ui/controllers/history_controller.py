@@ -700,6 +700,14 @@ class HistoryController(QObject):
                 chat._refresh_history()
         except Exception:
             logger.debug("History: page of the agent not refreshed", exc_info=True)
+        # What follows the state of Undo follows this too: the buttons of the action bar, and a comparison under
+        # way, which showed the map before an operation that is no longer the last (CompareController.refresh).
+        request = getattr(self._dock, "undoRedoStateRequested", None)
+        try:
+            if request is not None:
+                request.emit()
+        except Exception:
+            logger.debug("History: state of Undo not asked again", exc_info=True)
         self.schedule_refresh()
 
     def go_back_selected(self, *_args):
