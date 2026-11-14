@@ -1169,6 +1169,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Shu so'rov yoki bosqichdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Shu bosqichdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Butun so'rovdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida: faqat oxirgi so'rov bosqichlari birma-bir solishtiriladi</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SINAB KORING</translation>
@@ -4759,6 +4769,16 @@ What would you like to do?</translation>
         <translation>Mahkamlashni olib tashlash</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Agentga har bir so'rovdan oldin xaritani mahkamlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Gorizontal chiziq</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Chiziqni qulflash uchun xaritani bosing, bo'shatish uchun yana bosing.</translation>
@@ -4797,6 +4817,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Mahkamlangan {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Mahkamlangan {} (agentga so'rovdan oldin)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

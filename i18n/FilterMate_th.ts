@@ -1169,6 +1169,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>แผนที่ก่อนคำขอหรือขั้นตอนนี้อยู่ทางซ้ายของเส้น แผนที่ปัจจุบันอยู่ทางขวา</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>แผนที่ก่อนขั้นตอนนี้อยู่ทางซ้ายของเส้น แผนที่ปัจจุบันอยู่ทางขวา</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>แผนที่ก่อนคำขอทั้งหมดอยู่ทางซ้ายของเส้น แผนที่ปัจจุบันอยู่ทางขวา: เปรียบเทียบทีละขั้นตอนได้เฉพาะคำขอล่าสุด</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ลองดู</translation>
@@ -4759,6 +4769,16 @@ What would you like to do?</translation>
         <translation>เลิกปักหมุด</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>ปักหมุดแผนที่ก่อนคำขอแต่ละครั้งถึงเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>เส้นแนวนอน</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>คลิกบนแผนที่เพื่อล็อกเส้น คลิกอีกครั้งเพื่อปลดล็อก</translation>
@@ -4797,6 +4817,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>ปักหมุด {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>ปักหมุด {} (ก่อนคำขอถึงเอเจนต์)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

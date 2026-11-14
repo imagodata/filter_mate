@@ -1169,6 +1169,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Zemljevid pred to zahtevo ali korakom levo od črte, sedanji zemljevid desno od nje</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Zemljevid pred tem korakom levo od črte, sedanji zemljevid desno od nje</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Zemljevid pred celotno zahtevo levo od črte, sedanji zemljevid desno od nje: posamično se primerjajo le koraki zadnje zahteve</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>POSKUSITE</translation>
@@ -4759,6 +4769,16 @@ What would you like to do?</translation>
         <translation>Odstrani pripenjanje</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Pripni zemljevid pred vsako zahtevo agentu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vodoravna črta</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Kliknite na zemljevid, da zaklenete črto, in znova, da jo sprostite.</translation>
@@ -4797,6 +4817,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Pripeto {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Pripeto {} (pred zahtevo agentu)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>
