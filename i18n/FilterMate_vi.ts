@@ -267,6 +267,16 @@ Quý vị có đồng ý không?</translation>
         <translation>Đã thêm lớp: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Đã thêm bảng: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Đang đọc các bảng của {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Đã thêm bản đồ nền: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Bạn có đồng ý không?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Tác tử muốn thêm bảng này của cơ sở dữ liệu {} của bạn vào dự án:
+{}
+
+Các hàng của bảng sau đó được công cụ của tác tử đọc như hàng của bất kỳ lớp nào, và có thể được gửi đến nhà cung cấp của tác tử. Bạn có đồng ý không?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1199,6 +1220,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Bản đồ trước yêu cầu hoặc bước này ở bên trái một đường, bản đồ hiện tại ở bên phải</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Bản đồ trước bước này ở bên trái một đường, bản đồ hiện tại ở bên phải</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Bản đồ trước toàn bộ yêu cầu ở bên trái một đường, bản đồ hiện tại ở bên phải: chỉ các bước của yêu cầu cuối cùng được so sánh từng bước một</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>THỬ</translation>
@@ -1521,6 +1552,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Tìm kiếm địa điểm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Cơ sở dữ liệu của QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4794,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Bỏ ghim</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Ghim bản đồ trước mỗi yêu cầu gửi tác tử</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Đường ngang</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Nhấp vào bản đồ để khóa đường, nhấp lần nữa để mở khóa.</translation>
@@ -4832,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Đã ghim {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Đã ghim {} (trước yêu cầu gửi tác tử)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

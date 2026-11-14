@@ -267,6 +267,16 @@ Sunteți de acord?</translation>
         <translation>Strat adăugat: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabel adăugat: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Citirea tabelelor din {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Hartă de bază adăugată: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Sunteți de acord?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agentul dorește să adauge la proiect acest tabel din baza dvs. de date {}:
+{}
+
+Rândurile lui sunt apoi citite de instrumentele agentului ca cele ale oricărui strat și pot fi trimise furnizorului agentului. Sunteți de acord?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1199,6 +1220,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Harta dinaintea acestei cereri sau a acestui pas în stânga unei linii, harta actuală în dreapta ei</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Harta dinaintea acestui pas în stânga unei linii, harta actuală în dreapta ei</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Harta dinaintea întregii cereri în stânga unei linii, harta actuală în dreapta ei: doar pașii ultimei cereri se compară unul câte unul</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ÎNCERCAȚI</translation>
@@ -1521,6 +1552,11 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Căutare de locuri</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Bazele de date ale QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4794,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Elimină fixarea</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Fixează harta înaintea fiecărei cereri către agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Linie orizontală</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Clic pe hartă pentru a bloca linia, din nou pentru a o elibera.</translation>
@@ -4832,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fixată {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Fixată {} (înaintea cererii către agent)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

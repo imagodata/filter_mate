@@ -232,8 +232,8 @@ class TestVectorFilterWithCoverageTargets:
     @pytest.mark.parametrize("task_name", ["undo", "redo"])
     def test_step_without_layers_leaves_the_coverage_targets(self, task_name):
         """An entry restored without layers (HistoryService.deserialize) is left alone, not read at [0]."""
-        from types import SimpleNamespace
-        entry = SimpleNamespace(layer_ids=())
+        from core.services.history_service import HistoryEntry
+        entry = HistoryEntry(entry_id="restored", expression="", layer_ids=(), previous_filters=())
         stacks = {"undo": [entry] if task_name == "undo" else [],
                   "redo": [] if task_name == "undo" else [entry]}
 

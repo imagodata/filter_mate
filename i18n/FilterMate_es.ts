@@ -267,6 +267,16 @@ Por qué: {}
         <translation>Capa añadida: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabla añadida: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Leyendo las tablas de {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Mapa base añadido: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 ¿Está de acuerdo?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>El agente quiere añadir al proyecto esta tabla de su base de datos {}:
+{}
+
+Sus filas son leídas después por las herramientas del agente como las de cualquier capa, y pueden enviarse al proveedor del agente. ¿Está de acuerdo?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1199,6 +1220,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>El mapa anterior a esta petición o paso a la izquierda de una línea, el mapa actual a su derecha</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>El mapa anterior a este paso a la izquierda de una línea, el mapa actual a su derecha</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>El mapa anterior a toda la petición a la izquierda de una línea, el mapa actual a su derecha: solo los pasos de la última petición se comparan uno a uno</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PRUEBE</translation>
@@ -1521,6 +1552,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Búsqueda de lugares</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>Bases de datos de QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4794,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Quitar la fijación</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Fijar el mapa antes de cada petición al agente</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Línea horizontal</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Clic en el mapa para bloquear la línea; otro clic para liberarla.</translation>
@@ -4832,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fijado {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Fijado {} (antes de la petición al agente)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

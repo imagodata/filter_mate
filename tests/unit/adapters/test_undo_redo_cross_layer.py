@@ -100,15 +100,17 @@ def test_previous_expression_of_a_target_that_was_the_source(env):
     assert handler._collect_previous_expressions("pop", ["mro"])["mro"] == MRO_EXPR
 
 
-def test_global_redo_with_another_current_layer(env):
-    """Filter from Zones MRO with targets, Undo, Zones POP current, Redo: every layer gets its own filter back."""
+def test_redo_from_each_layer_gives_it_its_own_filter(env):
+    """Filter from Zones MRO with targets, Undo, Redo from Zones POP, then MRO, then the feeders, without the layers
+    to filter: each gets its own filter back (2026-11-14: its own part only, the scope of Undo)."""
     handler, history, layers, applied = env
     history.undo()
     applied.clear()
 
-    assert handler.handle_redo(layers["pop"], [], False)
+    for layer_id in ("pop", "mro", "feed"):
+        assert handler.handle_redo(layers[layer_id], [], False)
 
-    assert sorted(applied) == [("feed", FEED_EXPR), ("mro", MRO_EXPR), ("pop", POP_EXPR)]
+    assert applied == [("pop", POP_EXPR), ("mro", MRO_EXPR), ("feed", FEED_EXPR)]
     assert history.can_redo is False
 
 
@@ -392,6 +394,10 @@ def test_compare_shows_the_raster_targets_undo_restores(env):
     assert compared(layers["pop"], []) == ["pop", "raster"]
     assert compared(layers["mro"], ["pop"]) == ["pop"]  # Undo takes POP's entry: MRO's raster target stays
 
+    # 2026-11-14: POP's entry undone, then MRO's part of its filter: what is left is headed by POP, yet no run of POP
+    assert handler.handle_undo(layers["pop"], [], False) and handler.handle_undo(layers["mro"], [], False)
+    assert compared(layers["pop"], []) == ["pop"]
+
 
 def test_undo_gives_back_what_the_layer_held_before_the_filter_not_what_the_history_last_said(env):
     """2026-11-14: a layer changed outside the dock (a turn of the agent, a raster source, the query builder of
@@ -481,3 +487,206 @@ def test_the_reading_of_a_run_goes_with_its_parameters_not_with_the_handler(env)
     handler.push_filter_to_history(pop, first, 5, "ogr", 1)
     assert history.peek_undo().previous_filters == (("pop", POP_EXPR),)
     assert "before_run" not in first["task"]
+
+
+# 2026-11-14: Undo without the layers to filter restores the current layer alone. Of the filter from Zones MRO it
+# popped the whole entry: Zones POP and the feeders kept their filter and lost their step. Their part stays to undo.
+
+def _stacks(history):
+    return ([entry.layer_ids for entry in history.get_undo_stack()], [entry.layer_ids for entry in history.get_redo_stack()])
+
+
+def test_the_part_of_the_source_undone_then_the_rest_from_the_other_layers(env):
+    handler, history, layers, applied = env
+
+    assert handler.handle_undo(layers["mro"], [], False)
+
+    assert applied == [("mro", "")]
+    assert layers["pop"].subsetString() == POP_EXPR and layers["feed"].subsetString() == FEED_EXPR
+    assert _stacks(history) == ([("pop", "feed")], [("mro",)])
+    assert _buttons(handler, layers["mro"], []) == (False, True)  # the rest is not MRO's: its Undo waits
+    assert _buttons(handler, layers["pop"], []) == (True, False)
+    assert _buttons(handler, layers["feed"], []) == (True, False)
+
+    assert handler.handle_undo(layers["pop"], [], False)
+    assert handler.handle_undo(layers["feed"], [], False)
+
+    assert applied == [("mro", ""), ("pop", ""), ("feed", "")]
+    assert _stacks(history) == ([], [("mro",), ("pop",), ("feed",)])
+
+
+def test_the_part_of_a_target_undone_then_the_source(env):
+    handler, history, layers, applied = env
+
+    assert handler.handle_undo(layers["pop"], [], False)
+
+    assert applied == [("pop", "")] and layers["mro"].subsetString() == MRO_EXPR
+    rest = history.peek_undo()
+    assert rest.layer_ids == ("mro", "feed") and rest.expression_for("mro") == MRO_EXPR
+    assert rest.expression_for("feed") == FEED_EXPR
+
+    assert handler.handle_undo(layers["mro"], [], False)
+    assert handler.handle_undo(layers["feed"], [], False)
+
+    assert applied == [("pop", ""), ("mro", ""), ("feed", "")]
+    # Redo walks back the other way, each layer its own part, each with its own filter
+    assert not handler.handle_redo(layers["pop"], [], False)  # the feeders' part is next
+    for layer_id in ("feed", "mro", "pop"):
+        assert handler.handle_redo(layers[layer_id], [], False)
+    assert applied[3:] == [("feed", FEED_EXPR), ("mro", MRO_EXPR), ("pop", POP_EXPR)]
+    assert _stacks(history) == ([("feed",), ("mro",), ("pop",)], [])
+
+
+def test_the_part_undone_then_redone(env):
+    handler, history, layers, applied = env
+
+    assert handler.handle_undo(layers["mro"], [], False)
+    assert handler.handle_redo(layers["mro"], [], False)
+
+    assert applied == [("mro", ""), ("mro", MRO_EXPR)]
+    assert _stacks(history) == ([("pop", "feed"), ("mro",)], [])  # alone, on top of the rest of its step
+    assert _buttons(handler, layers["pop"], []) == (False, False)  # MRO's part goes first again
+
+    assert handler.handle_undo(layers["mro"], [], False)
+    assert handler.handle_undo(layers["pop"], [], False)
+    assert applied[2:] == [("mro", ""), ("pop", "")]
+
+
+def test_the_part_undone_redone_then_undone_with_every_layer(env):
+    """MRO's part undone and redone, then Undo with the layers to filter on, every layer checked: the part redone is
+    a step of its own (not joined again to the rest), the next Undo takes the rest of the filter, Redo the same."""
+    handler, history, layers, applied = env
+    handler.handle_undo(layers["mro"], [], False)
+    handler.handle_redo(layers["mro"], [], False)
+    del applied[:]
+
+    assert handler.handle_undo(layers["mro"], ["pop", "feed"], True)
+    assert applied == [("mro", "")]
+    assert handler.handle_undo(layers["mro"], ["pop", "feed"], True)
+    assert sorted(applied[1:]) == [("feed", ""), ("pop", "")]
+    assert history.can_undo is False
+
+    assert handler.handle_redo(layers["mro"], ["pop", "feed"], True)
+    assert sorted(applied[3:]) == [("feed", FEED_EXPR), ("pop", POP_EXPR)]
+    assert handler.handle_redo(layers["mro"], ["pop", "feed"], True)
+    assert applied[5:] == [("mro", MRO_EXPR)]
+    assert history.can_redo is False
+
+
+def test_a_new_filter_after_a_part_undone_clears_the_redo_stack(env):
+    handler, history, layers, applied = env
+    handler.handle_undo(layers["mro"], [], False)
+
+    history.get_or_create_history("mro").push_state('"zone_mro"."id" IN (\'9b\')', 1)
+
+    assert history.can_redo is False
+    assert _stacks(history) == ([("pop", "feed"), ("mro",)], [])
+    assert handler.handle_undo(layers["mro"], [], False) and applied[-1] == ("mro", "")
+
+
+def test_a_part_whose_layer_refuses_its_filter_stays(env, monkeypatch):
+    handler, history, layers, applied = env
+    entry = history.peek_undo()
+    monkeypatch.setattr(_load(), "_restore_history_subset", lambda *args, **kwargs: False)
+
+    assert not handler.handle_undo(layers["pop"], [], False)
+
+    assert history.peek_undo() is entry and history.can_redo is False
+
+
+def test_raster_targets_follow_the_part_of_their_source_only(env):
+    """MRO filtered Zones POP, the feeders and a raster target: its undo steps pair with MRO's runs. MRO's part undone
+    takes them along; what is left of the entry, now headed by POP, is no run of POP (whose own raster steps stay)."""
+    handler, history, layers, applied = env
+    launch = _launch_task_event()
+
+    dock, integration = _dock(handler, history, layers["mro"])
+    launch(dock, None, "undo")
+    assert applied == [("mro", "")]
+    integration.delegate_vector_source_coverage_task.assert_called_once_with("undo", layers["mro"], ["raster"])
+
+    dock, integration = _dock(handler, history, layers["pop"])
+    launch(dock, None, "undo")
+    assert applied[-1] == ("pop", "")
+    integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    dock, integration = _dock(handler, history, layers["mro"])
+    launch(dock, None, "redo")  # POP's part is next: nothing
+    assert applied[-1] == ("pop", "")
+    integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    dock, integration = _dock(handler, history, layers["pop"])
+    launch(dock, None, "redo")
+    assert applied[-1] == ("pop", POP_EXPR)
+    integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    dock, integration = _dock(handler, history, layers["mro"])
+    launch(dock, None, "redo")
+    assert applied[-1] == ("mro", MRO_EXPR)
+    integration.delegate_vector_source_coverage_task.assert_called_once_with("redo", layers["mro"], ["raster"])
+
+
+def test_raster_targets_stay_when_a_target_part_is_undone_first(env):
+    handler, history, layers, applied = env
+    launch = _launch_task_event()
+
+    dock, integration = _dock(handler, history, layers["pop"])
+    launch(dock, None, "undo")
+    assert applied == [("pop", "")]
+    integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    dock, integration = _dock(handler, history, layers["mro"])
+    launch(dock, None, "undo")
+    assert applied[-1] == ("mro", "")
+    integration.delegate_vector_source_coverage_task.assert_called_once_with("undo", layers["mro"], ["raster"])
+
+
+def test_the_history_panel_reads_the_rest_and_the_part_undone(env):
+    """The panel lists what is left of the filter (applied, POP and the feeders, the states before them) and MRO's
+    part (undone); the raster step of MRO's run pairs with that part, never with the rest headed by POP."""
+    from core.domain.history_timeline import UndoFocus, linked_pairs, mark, vector_items
+    handler, history, layers, applied = env
+    original = history.peek_undo()
+    handler.handle_undo(layers["mro"], [], False)
+
+    items = vector_items(history.get_undo_stack(), history.get_redo_stack(), lambda layer_id: layer_id.upper())
+    assert [(item.label, item.layers, item.applied, item.count) for item in items] == [
+        (original.description, ("POP", "FEED"), True, "9"), (original.description, ("MRO",), False, "1")]
+    assert {state.layer_id for state in items[0].befores} == {"pop", "feed"} and items[1].befores == ()
+    assert items[0].time == items[1].time  # one step
+    focus = UndoFocus("vector", undo=(history.peek_undo(),), redo=(history.peek_redo(),))
+    assert [mark(item, focus) for item in items] == ["undo", "redo"]
+
+    clip = types.SimpleNamespace(op_id=7)
+    assert linked_pairs(history.get_undo_stack(), "pop", [7], [clip]) == []
+    assert linked_pairs(history.get_redo_stack(), "mro", [7], [clip]) == [(history.peek_redo(), clip)]
+
+
+def test_the_steps_left_to_undo_stop_at_an_entry_of_several_layers(env):
+    """POP filtered alone before the filter from MRO: Undo from POP, without the layers to filter, takes POP's part
+    of MRO's filter, then stops (the rest stays next, without POP); the history says one step left, not two."""
+    handler, history, layers, applied = env
+    mro_filter = history.peek_undo()
+    history.clear()
+    history.get_or_create_history("pop").push_state(POP_ALONE, 3)
+    history.push(mro_filter)
+    from core.domain.history_timeline import KIND_VECTOR, UndoFocus, walkable
+    # Its relative import of _entry_in_scope resolves in the package _load() made
+    focus = _compiled("ui/controllers/history_controller.py", "HistoryController", "_vector_focus",
+                      UndoFocus=UndoFocus, walkable=walkable, KIND_VECTOR=KIND_VECTOR,
+                      __package__=f"{_PKG}.ui.controllers")
+
+    def undo_left(layer_id, targets):
+        button = MagicMock()
+        button.isChecked.return_value = bool(targets)
+        dock = types.SimpleNamespace(current_layer=layers[layer_id], PROJECT_LAYERS=dict.fromkeys(layers),
+                                     pushButton_checkable_filtering_layers_to_filter=button,
+                                     get_layers_to_filter=lambda: list(targets))
+        controller = types.SimpleNamespace(
+            _dock=dock, _app=lambda: types.SimpleNamespace(history_manager=history, _undo_redo_handler=handler))
+        return focus(controller, None).undo_left
+
+    assert undo_left("pop", []) == 1
+    assert undo_left("pop", ["mro", "feed"]) == 2
+    assert handler.handle_undo(layers["pop"], [], False) and not handler.handle_undo(layers["pop"], [], False)
+    assert applied == [("pop", "")]

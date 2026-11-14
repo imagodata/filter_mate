@@ -106,12 +106,21 @@ def sample_features(payload: SampleRequest, request: Request) -> FeatureSample:
     return sample
 
 
+class StyleRule(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expression: str = Field("", max_length=2000, description="QGIS condition; empty for every other feature")
+    color: str = Field(..., min_length=1, max_length=50)
+    label: str = Field("", max_length=100)
+
+
 class StyleRequest(BaseModel):
     # 2026-11-12: NaN and Infinity refused (422), as the filter routes do
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
-    mode: Literal["single", "categorized", "graduated", "pseudocolor", "gray"]
+    mode: Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray"]
+    rules: Optional[List[StyleRule]] = Field(None, max_length=20)
     field: str = Field("", max_length=_MAX_NAME)
     color: str = Field("", max_length=50)
     ramp: str = Field("", max_length=100)
@@ -138,7 +147,7 @@ def set_layer_style(payload: StyleRequest, request: Request) -> StyleResult:
 
 
 class LabelsRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
     field: str = Field("", max_length=_MAX_NAME)
@@ -146,13 +155,16 @@ class LabelsRequest(BaseModel):
     size: Optional[float] = Field(None, ge=4, le=72)
     color: str = Field("", max_length=50)
     buffer: bool = True
+    expression: str = Field("", max_length=2000)
+    visible_from_scale: Optional[float] = Field(None, ge=1, le=1e9)
 
 
 @router.post("/labels", response_model=LabelsResult)
 def set_labels(payload: LabelsRequest, request: Request) -> LabelsResult:
     """Label a vector layer with a field, or turn its labels off."""
     return _accessor(request).set_labels(payload.layer, field=payload.field, enabled=payload.enabled,
-                                         size=payload.size, color=payload.color, buffer=payload.buffer)
+                                         size=payload.size, color=payload.color, buffer=payload.buffer,
+                                         expression=payload.expression, visible_from_scale=payload.visible_from_scale)
 
 
 class UpdateFeaturesRequest(BaseModel):

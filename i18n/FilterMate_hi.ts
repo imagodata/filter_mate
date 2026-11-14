@@ -267,6 +267,16 @@ Do you agree?</source>
         <translation>परत जोड़ी गई: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>तालिका जोड़ी गई: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>{} की तालिकाएँ पढ़ी जा रही हैं</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>आधार मानचित्र जोड़ा गया: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 क्या आप सहमत हैं?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>एजेंट आपके डेटाबेस {} की इस तालिका को प्रोजेक्ट में जोड़ना चाहता है:
+{}
+
+इसके बाद एजेंट के टूल इसकी पंक्तियों को किसी भी परत की पंक्तियों की तरह पढ़ते हैं, और उन्हें एजेंट के प्रदाता को भेजा जा सकता है। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1199,6 +1220,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>इस अनुरोध या चरण से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>इस चरण से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>पूरे अनुरोध से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर: केवल अंतिम अनुरोध के चरणों की एक-एक करके तुलना होती है</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>आज़माएँ</translation>
@@ -1521,6 +1552,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>स्थान खोज</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS के डेटाबेस</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4794,6 +4830,16 @@ What would you like to do?</translation>
         <translation>पिन हटाएँ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>एजेंट के हर अनुरोध से पहले नक्शा पिन करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>क्षैतिज रेखा</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>रेखा लॉक करने के लिए नक्शे पर क्लिक करें, छोड़ने के लिए फिर से क्लिक करें।</translation>
@@ -4832,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>पिन किया गया {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>पिन किया गया {} (एजेंट के अनुरोध से पहले)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

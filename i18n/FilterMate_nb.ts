@@ -267,6 +267,16 @@ Er du enig?</translation>
         <translation>Lag lagt til: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Tabell lagt til: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Leser tabellene i {}</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Bakgrunnskart lagt til: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Godtar du?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agenten vil legge til denne tabellen fra databasen din {} i prosjektet:
+{}
+
+Radene leses deretter av agentens verktøy som radene i et hvilket som helst lag, og kan sendes til agentens leverandør. Godtar du?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1199,6 +1220,16 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <translation>Kartet før denne forespørselen eller dette trinnet til venstre for en linje, kartet nå til høyre for den</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Kartet før dette trinnet til venstre for en linje, kartet nå til høyre for den</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Kartet før hele forespørselen til venstre for en linje, kartet nå til høyre for den: bare trinnene i den siste forespørselen sammenlignes ett og ett</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PRØV</translation>
@@ -1521,6 +1552,11 @@ Godtar du alle? Nei utfører ingen av dem.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Stedssøk</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGIS-databaser</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4794,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Fjern festingen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Fest kartet før hver forespørsel til agenten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vannrett linje</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Klikk på kartet for å låse linjen, klikk igjen for å frigjøre den.</translation>
@@ -4832,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Festet {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Festet {} (før forespørselen til agenten)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

@@ -267,6 +267,16 @@ Oletteko samaa mieltä?</translation>
         <translation>Taso lisätty: {}</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>Taulu lisätty: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>Luetaan kohteen {} taulut</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
         <source>Basemap added: {}</source>
         <translation>Taustakartta lisätty: {}</translation>
@@ -741,6 +751,17 @@ Do you agree?</source>
 Hyväksytkö?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agentti haluaa lisätä projektiin tämän tietokantasi {} taulun:
+{}
+
+Agentin työkalut lukevat sen rivit sen jälkeen kuten minkä tahansa tason rivit, ja ne voidaan lähettää agentin palveluntarjoajalle. Hyväksytkö?</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
         <source>The agent wants to add this web basemap under the layers of the project:
 {}
@@ -1199,6 +1220,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Kartta ennen tätä pyyntöä tai vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Kartta ennen tätä vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Kartta ennen koko pyyntöä viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella: vain viimeisimmän pyynnön vaiheita verrataan yksitellen</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>KOKEILE</translation>
@@ -1521,6 +1552,11 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
         <source>Place search</source>
         <translation>Paikkahaku</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>QGISin tietokannat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
@@ -4794,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Poista kiinnitys</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Kiinnitä kartta ennen jokaista agentille tehtyä pyyntöä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vaakasuora viiva</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Lukitse viiva napsauttamalla karttaa, vapauta se napsauttamalla uudelleen.</translation>
@@ -4832,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Kiinnitetty {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Kiinnitetty {} (ennen agentille tehtyä pyyntöä)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

@@ -217,7 +217,7 @@
   {
    "name": "sample_features",
    "title": "Sample of features",
-   "description": "A few features of a vector layer with their attributes, to see what its rows look like. Among the features the layer shows now (its filter applies). Returns crs_authid, features [{fid, attributes {field: value}, geometry {type, centroid, bbox}}], truncated (more features match) and fields_truncated. Long text is cut at 200 characters. Refused on web services.",
+   "description": "A few features of a vector layer with their attributes, to see what its rows look like. Among the features the layer shows now (its filter applies). Returns crs_authid, features [{fid, attributes {field: value}, geometry {type, centroid, bbox}}], truncated (more features match), fields_truncated and scope. Long text is cut at 200 characters. A web service (WFS) is read only where the map shows it, without expression nor selection (scope: the features the map shows): zoom to the area first.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -1243,15 +1243,57 @@
       "type": "string"
      },
      "mode": {
-      "description": "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of a numeric field). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch)",
+      "description": "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch)",
       "enum": [
        "single",
        "categorized",
        "graduated",
+       "rules",
        "pseudocolor",
        "gray"
       ],
       "type": "string"
+     },
+     "rules": {
+      "anyOf": [
+       {
+        "items": {
+         "additionalProperties": false,
+         "description": "One rule of a rule-based style: the features a condition keeps, and their color.",
+         "properties": {
+          "expression": {
+           "default": "",
+           "description": "QGIS condition (NOT SQL), as for select_features: \"population\" > 10000. Empty: every other feature",
+           "maxLength": 2000,
+           "type": "string"
+          },
+          "color": {
+           "description": "#rrggbb or a color name",
+           "maxLength": 50,
+           "minLength": 1,
+           "type": "string"
+          },
+          "label": {
+           "default": "",
+           "description": "Its name in the legend",
+           "maxLength": 100,
+           "type": "string"
+          }
+         },
+         "required": [
+          "color"
+         ],
+         "type": "object"
+        },
+        "maxItems": 20,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "rules: one symbol per condition; a feature is drawn by the first rule it matches: [{\"expression\": \"\\\"population\\\" > 10000\", \"color\": \"#d7191c\", \"label\": \"Towns\"}, {\"expression\": \"\", \"color\": \"#cccccc\", \"label\": \"Others\"}]. An empty expression is every other feature; without one, the features no rule matches are not drawn"
      },
      "field": {
       "default": "",
@@ -1351,7 +1393,7 @@
   {
    "name": "set_labels",
    "title": "Label a layer",
-   "description": "Write the values of a field next to the features of a vector layer on the map, or turn the labels off. Returns labels (on or off) and field. In the chat of FilterMate, undoing the turn brings the previous labels back.",
+   "description": "Write the values of a field, or of an expression, next to the features of a vector layer on the map, or turn the labels off. Returns labels (on or off), field or expression, and visible_from_scale. In the chat of FilterMate, undoing the turn brings the previous labels back.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -1399,6 +1441,26 @@
       "default": true,
       "description": "A light halo around the text, to read it on any background",
       "type": "boolean"
+     },
+     "expression": {
+      "default": "",
+      "description": "Instead of field: a QGIS expression (NOT SQL) written on the map, to join or format values: \"nom\" || ' (' || \"population\" || ')', upper(\"nom\"), round(\"area\" / 10000, 1) || ' ha'",
+      "maxLength": 2000,
+      "type": "string"
+     },
+     "visible_from_scale": {
+      "anyOf": [
+       {
+        "maximum": 1000000000.0,
+        "minimum": 1,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Show the labels only when the map is at least this close: 50000 for 1:50 000 and closer. At every scale by default"
      }
     },
     "required": [

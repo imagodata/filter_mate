@@ -144,8 +144,9 @@ def stat_value(widget: Dict[str, Any]) -> Optional[float]:
         return None
     if widget.get("aggregate") == "count":
         # featureCount() of a web service can ask its server, on the main thread, at each refresh: not read.
-        from ..qgis.source_capability_probe import feature_count_or_none
-        count = feature_count_or_none(layer)
+        from ..qgis.feature_count import exact_feature_count
+        from ..qgis.source_capability_probe import counts_cheaply
+        count = exact_feature_count(layer) if counts_cheaply(layer) else None
         return float(count) if isinstance(count, int) and count >= 0 else None
     from ..public_api.introspection import layer_statistics
     try:
@@ -162,6 +163,7 @@ def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
     gone, a web service, too many features)."""
     from qgis.core import QgsFeatureRequest
     from ..public_api.introspection import MAX_STAT_FEATURES, _refuse_web_service
+    from ..qgis.feature_count import features_to_read
     layer = widget_layer(widget)
     if layer is None:
         return None
@@ -172,7 +174,7 @@ def chart_bars(widget: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
         _refuse_web_service(layer)
     except ValueError:
         return None
-    count = layer.featureCount()
+    count = features_to_read(layer)
     if not isinstance(count, int) or count > MAX_STAT_FEATURES:
         return None
     # A count the provider does not know (-1, or -2 before counting) is read up to the limit, and refused beyond.
