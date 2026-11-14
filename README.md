@@ -24,6 +24,15 @@ exports from a request, with the model you choose.
 </p>
 <p align="center"><em>The panel follows the current layer: several vector features ticked, a raster with its histogram, a LiDAR point cloud.</em></p>
 
+<p align="center">
+  <img src="website/img/guide/agent-chat.png?v=5" alt="AGENT: two requests in a sentence, each with a filter card that gives the features kept" width="260">
+  &nbsp;
+  <img src="website/img/guide/agent-question.png?v=5" alt="AGENT asks which of two road layers is meant and what to show, with choices to click" width="260">
+  &nbsp;
+  <img src="website/img/guide/agent-setup.png?v=5" alt="AGENT offers to set FilterMate up: look, data, what the agent may do alone" width="260">
+</p>
+<p align="center"><em>AGENT (experimental): a request in a sentence and its filters, a question with choices when the decision is yours, and the offer to set FilterMate up.</em></p>
+
 🌐 [Website](https://imagodata.github.io/filter_mate) ·
 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) ·
 🇫🇷 [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) ·
@@ -66,7 +75,9 @@ the original source back, and project files are always saved with the original s
   OpenAI or any compatible server, a local Ollama model (the settings help to install it and to download a model). Filters apply at once
   and each step can be undone; exports and added or removed layers are confirmed. You choose how far it goes alone
   (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
-  it again without any model, or by themselves each time the edits of their source are saved. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: open data portals,
+  it again without any model, or by themselves each time the edits of their source are saved. When a choice is yours
+  it asks with choices to click; it sets FilterMate up with you (offered once per version, and from the menu
+  Vector > FilterMate); a team can give it its own skills, a `SKILL.md` you read and allow first. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: open data portals,
   WFS services, Sentinel-2 scenes, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
   your computer use the same tools ([docs/AGENT_MODE.md](docs/AGENT_MODE.md)).
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
@@ -76,7 +87,8 @@ the original source back, and project files are always saved with the original s
   polygon layer, or are drawn from a layer of points or footprints in Processing ([docs/SEGMENTATION.md](docs/SEGMENTATION.md)).
 - ✏️ **Zone on the map**: draw a rectangle, polygon, freehand shape or circle; on a vector layer it selects the features it touches, on a raster it keeps the pixels inside it, on a point cloud it cuts the targets.
 - 🎨 **Raster bands**: tick the bands that drive the pipette and the value range, and display one in grey or up to three as a colour composite (false colour included).
-- ↩️ **Undo / Redo** of every filter, per layer, and a global history.
+- ↩️ **Undo / Redo** of every filter, per layer, and a global history. **Compare** shows the map before and after the
+  last filter, on each side of a line that follows the mouse.
 - ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
 - ⚙️ **Automation**: ten Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
