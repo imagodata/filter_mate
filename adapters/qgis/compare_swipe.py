@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Compare mode: the map before a filter operation left of a swipe line, the map as it is on its right.
+"""Compare mode: the map before a step (or as it was pinned) left of a swipe line, the map as it is on its right.
 
 Measured first (docs/internal/plans/COMPARE_MODE_SPIKE_2026-11-12.md): a clone of a layer, never added to the
-project, draws the state before (its former subset, or the source a derived raster / point cloud replaced); the
-canvas keeps drawing the layers as they are; a canvas item paints the "before" image clipped left of the line.
+project, draws the state before (its former subset, the source a derived raster / point cloud replaced, its former
+style); the canvas keeps drawing the layers as they are; a canvas item paints the "before" image clipped left of the
+line. The before image draws the layers of the canvas, less those not on the map before (added since, or hidden
+then), plus those hidden since, at their place in the layer tree (``core/domain/compare_states.BeforeMap``).
 The before image costs a render of the canvas layers (two seconds for a dense layer at the scale of a city), so it is
 rendered in the background, for the extent shown, again after each pan or zoom, the older render cancelled.
 
@@ -14,19 +16,22 @@ does. The comparison ends by itself when the map is given to another tool: the l
 from __future__ import annotations
 
 import logging
-from typing import Dict, Iterable, List, Optional, Tuple
+import time
+from typing import Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple, Union
 
 from qgis.core import QgsMapLayer, QgsMapRendererParallelJob, QgsMapSettings, QgsPointXY, QgsProject, QgsRectangle
 from qgis.gui import QgsMapCanvasItem, QgsMapTool
 from qgis.PyQt.QtCore import QObject, QPointF, QRectF, Qt, QTimer, pyqtSignal
-from qgis.PyQt.QtGui import QColor, QImage, QPen
+from qgis.PyQt.QtGui import QColor, QFont, QFontMetricsF, QImage, QPainter, QPen
 
-from ...core.domain.compare_states import BeforeState
-from .coverage_layers.snapshots import DerivedSourceRegistry, registry, restore_snapshot
+from ...core.domain.compare_states import BeforeMap, BeforeState, LayerState, MapState, before_layer_order
+from .coverage_layers.snapshots import DerivedSourceRegistry, registry, restore_snapshot, take_snapshot
 
 logger = logging.getLogger("FilterMate.compare")
 
 RENDER_DELAY_MS = 250  # a pan or a zoom in progress renders once it stops
+LABEL_GAP = 8.0  # between the line and its labels
+LABEL_PADDING = 5.0
 
 # A clone of a web feature service asks the server again, on the main thread: left out of the before image.
 WEB_FEATURE_PROVIDERS = frozenset({"wfs", "oapif", "arcgisfeatureserver"})
@@ -60,7 +65,7 @@ def before_clone(layer: QgsMapLayer, state: BeforeState) -> Optional[QgsMapLayer
         return None
     if clone is None:
         return None
-    if state.snapshot is not None:  # a cross operation: restored the way Undo restores it
+    if state.snapshot is not None:  # a cross operation or a pin: restored the way Undo restores it
         try:
             restore_snapshot(clone, state.snapshot, _CloneRegistry(registry().original_alpha_band(layer.id())))
         except Exception:  # a former source removed since: that layer is left out of the before image
@@ -68,19 +73,52 @@ def before_clone(layer: QgsMapLayer, state: BeforeState) -> Optional[QgsMapLayer
             return None
         if hasattr(clone, "subsetString") and clone.subsetString() != (state.snapshot.subset or ""):
             return None  # the former subset refused
-        return clone
-    if state.other_source:
-        clone.setDataSource(state.source, layer.name(), state.provider or layer.providerType())
-        if not clone.isValid():
-            return None
-    if hasattr(clone, "setSubsetString") and clone.subsetString() != state.subset:
-        if not clone.setSubsetString(state.subset):
+    else:
+        if state.other_source:
+            clone.setDataSource(state.source, layer.name(), state.provider or layer.providerType())
+            if not clone.isValid():
+                return None
+        if state.subset is not None and hasattr(clone, "setSubsetString") and clone.subsetString() != state.subset:
+            if not clone.setSubsetString(state.subset):
+                return None
+    if state.style is not None:  # after the source: a raster renderer follows its source
+        from ..agent.turn_effects import _set_style
+        try:
+            if not _set_style(clone, state.style):
+                return None
+        except (RuntimeError, TypeError):
+            logger.debug("Compare: style of %s not restored", layer.name(), exc_info=True)
             return None
     return clone
 
 
+def map_state(canvas=None) -> MapState:
+    """Every layer of the project now, for a pin: its filter, its style, drawn or not (checked with its groups in
+    the layer tree; on ``canvas`` for a layer the tree does not hold)."""
+    from ..agent.turn_effects import _style
+    from ..public_api.operations import layer_kind
+    project = QgsProject.instance()
+    root = project.layerTreeRoot()
+    drawn = {layer.id() for layer in canvas.layers()} if canvas is not None else set()
+    layers = list(root.layerOrder())
+    seen = {layer.id() for layer in layers}
+    layers += [layer for layer in project.mapLayers().values() if layer.id() not in seen]
+    states = []
+    for layer in layers:
+        node = root.findLayer(layer.id())
+        try:
+            snapshot = take_snapshot(layer, layer_kind(layer))
+        except (RuntimeError, ValueError, AttributeError):  # one odd layer must not lose the pin
+            logger.debug("Compare: %s not read", layer.name(), exc_info=True)
+            snapshot = None
+        visible = node.isVisible() if node is not None else layer.id() in drawn
+        states.append(LayerState(layer.id(), layer.name(), snapshot, _style(layer), bool(visible)))
+    return MapState(tuple(states), time.time())
+
+
 class SwipeItem(QgsMapCanvasItem):
-    """The "before" image over its map extent, left of the swipe line; the line itself, and a sign while it renders."""
+    """The "before" image over its map extent, left of the swipe line; the line itself, a sign while it renders, and
+    what each side shows, written at the top on both sides of the line."""
 
     def __init__(self, canvas) -> None:
         super().__init__(canvas)
@@ -90,19 +128,42 @@ class SwipeItem(QgsMapCanvasItem):
         self._size = QRectF()
         self.fraction = 0.5
         self.busy = True
+        self.labels: Tuple[str, str] = ("", "")
+        self._font = QFont(canvas.font())
         self.setZValue(5)
 
-    def set_image(self, image: Optional[QImage], extent: QgsRectangle) -> None:
-        """``extent`` empty: the image covers the canvas as it is (a rotated map, drawn again after each move)."""
+    def set_image(self, image: Optional[QImage], extent: QgsRectangle, busy: Optional[bool] = None) -> None:
+        """``extent`` empty: the image covers the canvas as it is (a rotated map, drawn again after each move).
+        No image and not ``busy``: the map before is the map now, the line alone is drawn."""
         self._image = QImage(image) if image is not None else None
         self._extent = QgsRectangle(extent)
-        self.busy = image is None
+        self.busy = image is None if busy is None else busy
         self.updatePosition()
         self.update()
 
     def set_fraction(self, fraction: float) -> None:
         self.fraction = min(max(float(fraction), 0.0), 1.0)
         self.update()
+
+    def set_labels(self, before: str, now: str) -> None:
+        self.labels = (before or "", now or "")
+        self.update()
+
+    def label_rects(self) -> Tuple[QRectF, QRectF]:
+        """Where the labels are drawn, in the coordinates of the item: left of the line, right of it (empty rectangle:
+        no label). At the top of the canvas, even when the item was moved with the map since its image."""
+        metrics = QFontMetricsF(self._font)
+        line = self._size.width() * self.fraction
+        top = max(0.0, -self.pos().y()) + LABEL_GAP
+        height = metrics.height() + LABEL_PADDING
+        rects = []
+        for text, left in ((self.labels[0], True), (self.labels[1], False)):
+            if not text:
+                rects.append(QRectF())
+                continue
+            width = metrics.horizontalAdvance(text) + 2 * LABEL_PADDING
+            rects.append(QRectF(line - LABEL_GAP - width if left else line + LABEL_GAP, top, width, height))
+        return rects[0], rects[1]
 
     def boundingRect(self):  # noqa: N802 - Qt override
         return self._size
@@ -134,6 +195,19 @@ class SwipeItem(QgsMapCanvasItem):
         pen = QPen(QColor(40, 40, 40, 220), 1, Qt.PenStyle.DashLine if self.busy else Qt.PenStyle.SolidLine)
         painter.setPen(pen)
         painter.drawLine(QPointF(line, 0.0), QPointF(line, height))
+        # Light text on a dark pill: readable on any map.
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setFont(self._font)
+        for text, rect in zip(self.labels, self.label_rects()):
+            if not text:
+                continue
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(20, 20, 20, 170))
+            painter.drawRoundedRect(rect, 4.0, 4.0)
+            painter.setPen(QColor(255, 255, 255))
+            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
+        painter.restore()
 
 
 class SwipeTool(QgsMapTool):
@@ -169,26 +243,43 @@ class CompareSession(QObject):
         self._timer.setSingleShot(True)
         self._timer.setInterval(RENDER_DELAY_MS)
         self._timer.timeout.connect(self.render)
+        self.absent: FrozenSet[str] = frozenset()  # layers of the canvas not on the map before
+        self.present: Tuple[str, ...] = ()  # layers hidden now, on the map before
+        self.refused: List[str] = []  # names of the layers whose state before could not be drawn
+        self._keep = False  # a pin: the comparison waits for a change instead of stopping
         self.renders = 0  # before images done, for the checks
 
     @property
     def active(self) -> bool:
         return self.item is not None
 
-    def start(self, states: Iterable[BeforeState], layers: Dict[str, QgsMapLayer]) -> int:
-        """Compare against ``states`` (again, while on: the tool and the line stay); the number of layers drawn as
-        they were (0: nothing to compare, the comparison stops)."""
-        clones = {}
-        for state in states:
+    def start(self, before: Union[BeforeMap, Iterable[BeforeState]], layers: Dict[str, QgsMapLayer],
+              keep: bool = False, labels: Sequence[str] = ("", "")) -> int:
+        """Compare against the map ``before`` (again, while on: the tool and the line stay); the number of layers drawn
+        otherwise than now (0: nothing to compare, the comparison stops, unless ``keep``: a pin waits for a change).
+
+        ``layers``: the layers of the project by id. The layers whose state before cannot be drawn are named in
+        ``refused`` and drawn as they are now.
+        """
+        if not isinstance(before, BeforeMap):
+            before = BeforeMap(tuple(before))
+        clones, refused = {}, []
+        for state in before.states:
             layer = layers.get(state.layer_id)
             clone = before_clone(layer, state) if layer is not None else None
             if clone is not None:
                 clones[state.layer_id] = clone
-        if not clones:
+            elif layer is not None:
+                refused.append(layer.name())
+        absent = frozenset(layer_id for layer_id in before.absent if layer_id in layers)
+        present = tuple(layer_id for layer_id in before.present if layer_id in layers)
+        count = len(set(clones) | absent | set(present))
+        if not count and not keep:
             self.stop()
+            self.refused = refused
             return 0
         self._retire_job()
-        self.clones = clones
+        self.clones, self.absent, self.present, self.refused, self._keep = clones, absent, present, refused, keep
         if self.item is None:
             self.item = SwipeItem(self.canvas)
             self.tool = SwipeTool(self.canvas, self.item)
@@ -197,8 +288,29 @@ class CompareSession(QObject):
             self.canvas.extentsChanged.connect(self._on_extents_changed)
             self.canvas.mapToolSet.connect(self._on_tool_set)
             QgsProject.instance().layersWillBeRemoved.connect(self._on_layers_removed)
+        self.item.set_labels(*labels)
         self.render()
-        return len(clones)
+        return count
+
+    def _differs(self) -> bool:
+        return bool(self.clones or self.absent or self.present)
+
+    def _before_layers(self) -> List[QgsMapLayer]:
+        """The layers of the map before, top first: clones for the layers drawn as they were."""
+        drawn = {layer.id(): layer for layer in self.canvas.layers()}
+        root = QgsProject.instance().layerTreeRoot()
+        order = [layer.id() for layer in root.layerOrder()]
+        layers = []
+        for layer_id in before_layer_order(list(drawn), order, self.absent, self.present):
+            # Not ``or``: a layer may be false (a vector layer of no feature has a length of 0).
+            layer = self.clones.get(layer_id)
+            if layer is None:
+                layer = drawn.get(layer_id)
+            if layer is None:
+                layer = QgsProject.instance().mapLayer(layer_id)
+            if layer is not None:  # a layer hidden now and removed since
+                layers.append(layer)
+        return layers
 
     # --- the before image ----------------------------------------------------------
 
@@ -209,9 +321,12 @@ class CompareSession(QObject):
         self._timer.stop()
         self._retire_job()
         self._done = []  # finished renders: deleted here, not inside their own signal
+        if not self._differs():  # a pin with nothing changed since: the map before is the map now
+            self.item.set_image(None, QgsRectangle(), busy=False)
+            return
         self.item.set_image(None, QgsRectangle())
         settings = QgsMapSettings(self.canvas.mapSettings())
-        settings.setLayers([self.clones.get(layer.id(), layer) for layer in self.canvas.layers()])
+        settings.setLayers(self._before_layers())
         job = QgsMapRendererParallelJob(settings)
         job.finished.connect(self._on_finished)
         self._job = job
@@ -276,10 +391,13 @@ class CompareSession(QObject):
         if self.item is None:
             return
         self._cancel_all()  # the renders read the layers going
-        gone = [layer_id for layer_id in layer_ids if layer_id in self.clones]
+        going = set(layer_ids)
+        gone = going & (set(self.clones) | self.absent | set(self.present))
         for layer_id in gone:
             self.clones.pop(layer_id, None)
-        if gone and not self.clones:
+        self.absent = self.absent - going
+        self.present = tuple(layer_id for layer_id in self.present if layer_id not in going)
+        if gone and not self._differs() and not self._keep:
             self.stop()
             self.ended.emit()
             return
@@ -298,7 +416,7 @@ class CompareSession(QObject):
                 pass
         tool, item, previous = self.tool, self.item, self._previous_tool
         self.item, self.tool, self._previous_tool = None, None, None
-        self.clones = {}
+        self.clones, self.absent, self.present, self._keep = {}, frozenset(), (), False
         if tool is not None:
             try:
                 if self.canvas.mapTool() is tool:
