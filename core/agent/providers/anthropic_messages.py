@@ -51,6 +51,18 @@ def _content(message: Message) -> List[Dict[str, Any]]:
     return blocks
 
 
+def _wire_messages(messages: Sequence[Message]) -> List[Dict[str, Any]]:
+    """Messages of one role in a row go as one: a request that follows a request cut short (turn limit, failure,
+    Stop) comes after a message of tool results. The API combines them by itself; a stricter server would refuse."""
+    wire: List[Dict[str, Any]] = []
+    for message in messages:
+        if wire and wire[-1]["role"] == message.role:
+            wire[-1]["content"].extend(_content(message))
+        else:
+            wire.append({"role": message.role, "content": _content(message)})
+    return wire
+
+
 class AnthropicProvider:
     """Requests and streamed responses of ``POST /v1/messages``."""
 
@@ -73,7 +85,7 @@ class AnthropicProvider:
             "system": [{"type": "text", "text": system}],
             **({"tools": [{"name": tool.name, "description": tool.description, "input_schema": tool.input_schema}
                           for tool in tools]} if tools else {}),  # an empty list is refused by some servers
-            "messages": [{"role": message.role, "content": _content(message)} for message in messages],
+            "messages": _wire_messages(messages),
         }
         if config.effort:
             body["output_config"] = {"effort": config.effort}

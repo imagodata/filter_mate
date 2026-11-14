@@ -1106,6 +1106,26 @@ Onaylıyor musunuz?</translation>
         <translation>Önceki {} adım kalır ve geri alınabilir.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Sağlayıcıya ulaşılamadı, {} sn içinde yeniden denenecek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Sağlayıcı meşgul, {} sn içinde yeniden denenecek…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>İstek yarıda durdu. Zaten yapılmış olan ve yerinde kalan adımlar (Geri al bunları geri alır): {}. Hazır olduğunuzda aracıdan devam etmesini isteyin.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Yarıda durdu. Zaten yapılmış olan ve yerinde kalan adımlar (Geri al bunları geri alır): {}. Geri kalanı isterseniz aracıdan devam etmesini isteyin.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
@@ -1198,6 +1218,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="438"/>
         <source>The map before this request or step left of a line, the map now on its right</source>
         <translation>Bu istekten veya adımdan önceki harita bir çizginin solunda, şimdiki harita sağında</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Bu adımdan önceki harita bir çizginin solunda, şimdiki harita sağında</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Tüm istekten önceki harita bir çizginin solunda, şimdiki harita sağında: yalnızca son isteğin adımları tek tek karşılaştırılır</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
@@ -4800,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Sabitlemeyi kaldır</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Aracıya yapılan her istekten önce haritayı sabitle</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Yatay çizgi</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Çizgiyi kilitlemek için haritaya tıklayın, serbest bırakmak için yeniden tıklayın.</translation>
@@ -4838,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Sabitlendi {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Sabitlendi {} (Aracıya yapılan istekten önce)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

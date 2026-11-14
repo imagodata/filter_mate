@@ -26,6 +26,11 @@ REASON_TURN_LIMIT = "turn_limit"
 REASON_TRUNCATED = "truncated"
 REASON_REFUSED = "refused"
 
+# Why a request broke off before its end, as the note left in the conversation says it.
+CAUSE_FAILED = "failed"
+CAUSE_STOPPED = "stopped"
+CAUSE_REFUSED = "refused"
+
 
 @dataclass(frozen=True)
 class AgentLimits:
@@ -51,7 +56,16 @@ class TurnDecision:
     text: str = ""
     calls: Tuple[ToolCallPart, ...] = ()
     reason: str = ""
+    # A refused request: the steps it had done that stay in the conversation (``AgentSession.interrupt_request``).
+    kept: int = 0
 
+
+INTERRUPTED_NOTE = ("This request broke off here: {}. The tool calls above ran, and what they changed is in place in "
+                    "QGIS (the user can undo it). Do not run them again without checking the project first: when the "
+                    "user asks to go on, continue from this point.")
+_CAUSES = {CAUSE_FAILED: "the request to the model failed", CAUSE_STOPPED: "the user clicked Stop",
+           CAUSE_REFUSED: "the model declined to go on"}
+NOT_RUN = "Not run: the request was stopped before this call."
 
 IMAGE_GONE = " (An image of the map came with this answer; it is no longer sent: call the tool again to see it.)"
 
@@ -63,6 +77,10 @@ def _without_images(message: Message) -> Message:
     return Message(message.role, tuple(
         ToolResultPart(part.call_id, part.content + IMAGE_GONE, part.is_error)
         if isinstance(part, ToolResultPart) and part.images else part for part in message.parts))
+
+
+def _holds_results(message: Message) -> bool:
+    return message.role == ROLE_USER and any(isinstance(part, ToolResultPart) for part in message.parts)
 
 
 class AgentSession:
@@ -109,9 +127,62 @@ class AgentSession:
     def tool_names(self) -> Tuple[str, ...]:
         return tuple(tool.name for tool in self._tools)
 
-    def abandon_request(self) -> None:
-        """Forget the current request, after a failure or a refusal: it would be replayed with every later one."""
-        del self._messages[self._request_start:]
+    def interrupt_request(self, cause: str, ran: Sequence[ToolResultPart] = (), forget: bool = False) -> int:
+        """End the current request where it broke off (a failure, Stop, a refusal), keeping the changes it made.
+
+        What its tools changed stays in QGIS: forgotten, the request sent again would do it twice. So when a tool
+        that changes something ran, the conversation is cut after the last message of tool results (every call kept
+        has its result, no turn of the model is left without its answer) and that message ends with a note saying
+        why the request stopped there (``cause``, one of the ``CAUSE_*`` constants). It stays a message of results:
+        the next request follows it as a message of its own, as after the turn limit.
+
+        When nothing was changed (nothing ran, only readings, only refused or failed calls), the request is
+        forgotten, as if never sent: the user sends it again whole. So it is with ``forget``, whatever ran: a
+        request the server refuses for what it holds (too long for the model) would fail again with every later one.
+
+        Args:
+            cause: Why the request stopped.
+            ran: The results of the first calls of the last turn, run before Stop came in the middle of the turn:
+                the other calls are answered as not run. Without any, that turn is dropped.
+            forget: Forget the request even when it changed something.
+
+        Returns:
+            How many calls of tools that change something ran without an error, kept or not.
+        """
+        last = self._messages[-1] if len(self._messages) > self._request_start else None
+        if ran and last is not None and last.role == ROLE_ASSISTANT and len(ran) <= len(last.tool_calls):
+            # By position, like the answers of the engine: a server may give two calls the same id.
+            not_run = tuple(ToolResultPart(call.call_id, NOT_RUN, is_error=True)
+                            for call in last.tool_calls[len(ran):])
+            self._messages.append(Message(ROLE_USER, tuple(ran) + not_run))
+        end = self._request_start
+        for index in range(len(self._messages) - 1, self._request_start, -1):
+            if _holds_results(self._messages[index]):
+                end = index + 1
+                break
+        del self._messages[end:]
+        changes = self._changes_done()
+        if forget or not changes:
+            del self._messages[self._request_start:]
+            return changes
+        # The note of the turns left, if any, is no longer true.
+        results = tuple(part for part in self._messages[-1].parts if not isinstance(part, TextPart))
+        self._messages[-1] = Message(ROLE_USER, results + (TextPart(INTERRUPTED_NOTE.format(_CAUSES[cause])),))
+        return changes
+
+    def _changes_done(self) -> int:
+        """Calls of the current request that ran without an error, of tools that change something."""
+        reads = {tool.name for tool in self._tools if tool.read_only}
+        changes, calls = 0, ()
+        for message in self._messages[self._request_start:]:
+            if message.role == ROLE_ASSISTANT:
+                calls = message.tool_calls
+                continue
+            results = [part for part in message.parts if isinstance(part, ToolResultPart)]
+            # By position: a result answers the call of the same rank in the turn before it.
+            changes += sum(1 for call, result in zip(calls, results) if not result.is_error and call.name not in reads)
+            calls = ()
+        return changes
 
     def next_request(self) -> HttpRequest:
         return self._provider.build_request(self._system, self._messages, self._tools)
@@ -130,8 +201,7 @@ class AgentSession:
         self._turns += 1
         calls = turn.message.tool_calls
         if turn.stop_reason == STOP_REFUSAL:
-            self.abandon_request()
-            return TurnDecision(STATUS_STOPPED, reason=REASON_REFUSED)
+            return TurnDecision(STATUS_STOPPED, reason=REASON_REFUSED, kept=self.interrupt_request(CAUSE_REFUSED))
         if calls and turn.stop_reason != STOP_TOOL_USE:
             return TurnDecision(STATUS_STOPPED, text=turn.message.text, reason=REASON_TRUNCATED)
         if calls:
@@ -187,13 +257,13 @@ def run_exchange(session: AgentSession, text: str, transport: Transport, executo
         for event in transport.send(session.next_request(), session):
             if isinstance(event, StreamFailure):
                 result.error = event.error
-                session.abandon_request()
+                session.interrupt_request(CAUSE_FAILED)
                 return result
             if isinstance(event, TurnComplete):
                 turn = event
         if turn is None:
             result.error = ProviderError("stream", "The response ended without a complete turn.")
-            session.abandon_request()
+            session.interrupt_request(CAUSE_FAILED)
             return result
         decision = session.accept_turn(turn)
         result.decision = decision

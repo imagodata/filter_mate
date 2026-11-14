@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>Попередні кроки ({}) залишаються й можуть бути скасовані.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Не вдалося зв'язатися з провайдером, повторна спроба через {} с…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Провайдер зайнятий, повторна спроба через {} с…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Запит зупинився на півдорозі. Уже виконані кроки, які залишаються на місці («Скасувати» повертає їх назад): {}. Попросіть агента продовжити, коли будете готові.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Зупинено на півдорозі. Уже виконані кроки, які залишаються на місці («Скасувати» повертає їх назад): {}. Попросіть агента продовжити, якщо потрібна решта.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Віджет: {}</translation>
@@ -1198,6 +1218,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="438"/>
         <source>The map before this request or step left of a line, the map now on its right</source>
         <translation>Мапа до цього запиту чи кроку ліворуч від лінії, поточна мапа праворуч від неї</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Мапа до цього кроку ліворуч від лінії, поточна мапа праворуч від неї</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Мапа до всього запиту ліворуч від лінії, поточна мапа праворуч від неї: по одному порівнюються лише кроки останнього запиту</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
@@ -4800,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Відкріпити</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Закріплювати мапу перед кожним запитом до агента</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Горизонтальна лінія</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Клацніть на мапі, щоб зафіксувати лінію, клацніть ще раз, щоб звільнити її.</translation>
@@ -4838,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Закріплено {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Закріплено {} (перед запитом до агента)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

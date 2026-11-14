@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import html
 import re
-from typing import Callable, List, Optional, Sequence
+from typing import Any, Callable, List, Optional, Sequence
 
 from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QFont, QFontMetrics
@@ -232,7 +232,8 @@ class QuestionCard(QFrame):
             group.setExclusive(not question.multi_select)
             buttons = []
             for option in question.options:
-                button = QCheckBox(option.label, self) if question.multi_select else QRadioButton(option.label, self)
+                shown = option.label.replace("&", "&&")  # a lone & would make a shortcut and vanish ("R&D")
+                button = QCheckBox(shown, self) if question.multi_select else QRadioButton(shown, self)
                 button.setCursor(Qt.CursorShape.PointingHandCursor)
                 group.addButton(button)
                 self._choices.append(button)
@@ -381,13 +382,18 @@ class QuestionCard(QFrame):
 
 
 class ChangeCard(QFrame):
-    """A change: ✓ or ✗, what, the expression, what was kept, and Undo while it is the last step."""
+    """A change: ✓ or ✗, what, the expression, what was kept, Undo while it is the last step, and Compare once the
+    controller tells it which step of the history it is (``compare_key``) and that this step is on the map."""
 
     def __init__(self, text: str, succeeded: bool, detail: str, count: str, palette: dict, dark: bool,
-                 on_undo: Callable[[], None], parent: QWidget, strong: Sequence[str] = ()) -> None:
+                 on_undo: Callable[[], None], parent: QWidget, strong: Sequence[str] = (),
+                 on_compare: Optional[Callable[[Any], None]] = None) -> None:
         super().__init__(parent)
         self.setObjectName("frame_agent_card")
         self._succeeded = succeeded
+        self._on_compare = on_compare
+        self.compare_key: Any = None  # the step of the history the card shows (the controller sets it); None: none
+        self.compare_available = False
         self._mark = mark = _plain_label("✓" if succeeded else "✗", self, wrap=False)
         mark.setAlignment(Qt.AlignmentFlag.AlignTop)
         self._title = title = _plain_label(text, self)
@@ -415,6 +421,13 @@ class ChangeCard(QFrame):
             kept = _plain_label(count, self, wrap=False)
             self._muted.append(kept)
             row.addWidget(kept, 0, Qt.AlignmentFlag.AlignTop)
+        self.compare_button = QPushButton(_tr("Compare"), self)
+        self.compare_button.setObjectName("pushButton_agent_card_compare")
+        self.compare_button.setFlat(True)
+        self.compare_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.compare_button.clicked.connect(self._compare)
+        self.compare_button.setVisible(False)
+        row.addWidget(self.compare_button, 0, Qt.AlignmentFlag.AlignTop)
         self.undo_button = QPushButton(_tr("Undo"), self)
         self.undo_button.setObjectName("pushButton_agent_card_undo")
         self.undo_button.setFlat(True)
@@ -423,6 +436,20 @@ class ChangeCard(QFrame):
         self.undo_button.setVisible(False)
         row.addWidget(self.undo_button, 0, Qt.AlignmentFlag.AlignTop)
         self.restyle(palette, dark)
+
+    def set_compare(self, available: bool, exact: bool = True) -> None:
+        """Whether its step can be compared now (applied, the map changed by it); ``exact``: with the map before this
+        step, otherwise before its whole request (a step of an earlier request). Shown by the thread
+        (``AgentThread.set_compare_possible``)."""
+        self.compare_available = bool(available) and self.compare_key is not None
+        self.compare_button.setToolTip(plain_tooltip(
+            _tr("The map before this step left of a line, the map now on its right") if exact else
+            _tr("The map before the whole request left of a line, the map now on its right: only the steps of the "
+                "last request are compared one by one")))
+
+    def _compare(self) -> None:
+        if self._on_compare is not None and self.compare_key is not None and self.compare_available:
+            self._on_compare(self.compare_key)
 
     def restyle(self, palette: dict, dark: bool) -> None:
         """The colors of the theme; every text has its own, so none falls back on a palette of the other theme."""
@@ -434,16 +461,17 @@ class ChangeCard(QFrame):
         _sheet(self._title, f"font-size: 12px; color: {palette['fm_text'] if self._succeeded else palette['fm_danger']};")
         for label in self._muted:
             _sheet(label, f"font-size: 11px; color: {palette['fm_text_muted']};")
-        _sheet(self.undo_button, f"QPushButton {{ color: {palette['fm_accent']}; background: none; border: none;"
-                                 " padding: 0; font-size: 11px; min-height: 0; } QPushButton:hover"
-                                 " { text-decoration: underline; }")
+        for button in (self.compare_button, self.undo_button):
+            _sheet(button, f"QPushButton {{ color: {palette['fm_accent']}; background: none; border: none;"
+                           " padding: 0; font-size: 11px; min-height: 0; } QPushButton:hover"
+                           " { text-decoration: underline; }")
 
 
 class AgentThread(QScrollArea):
     """The thread: bubbles, cards, steps and text, oldest first; it follows the end while the reader is there."""
 
     def __init__(self, palette_of: Callable[[], dict], is_dark: Callable[[], bool], on_undo: Callable[[], None],
-                 parent: Optional[QWidget] = None) -> None:
+                 parent: Optional[QWidget] = None, on_compare: Optional[Callable[[Any], None]] = None) -> None:
         super().__init__(parent)
         self.setObjectName("scrollArea_agent_thread")
         self.setWidgetResizable(True)
@@ -451,11 +479,13 @@ class AgentThread(QScrollArea):
         self._palette_of = palette_of
         self._is_dark = is_dark
         self._on_undo = on_undo
+        self._on_compare = on_compare  # given the compare_key of a card whose Compare was clicked
         self._items: List[_Item] = []
         self._answer: Optional[_Item] = None
         self._answer_raw = ""
         self._step_cards: List[ChangeCard] = []  # the cards of the last step of the history
         self._undo_possible = False
+        self._compare_possible = False  # Compare on the cards: the dock can compare, and the agent does not work
         self._content = QWidget(self)
         self._content.setObjectName("widget_agent_thread")
         self._layout = QVBoxLayout(self._content)
@@ -556,9 +586,9 @@ class AgentThread(QScrollArea):
         self._step_cards = []
         self._refresh_undo()
 
-    def add_card(self, text: str, succeeded: bool, detail: str, count: str, strong: Sequence[str] = ()) -> None:
+    def add_card(self, text: str, succeeded: bool, detail: str, count: str, strong: Sequence[str] = ()) -> ChangeCard:
         card = ChangeCard(text, succeeded, detail, count, self._palette_of(), self._is_dark(), self._on_undo,
-                          self._content, strong)
+                          self._content, strong, self._on_compare)
         if succeeded:
             self._step_cards.append(card)
         mark = "✓" if succeeded else "✗"
@@ -566,6 +596,7 @@ class AgentThread(QScrollArea):
         self._append(_Item(card, plain, "card", card.restyle))
         self._refresh_undo()
         self.end_answer()
+        return card
 
     def add_note(self, text: str) -> None:
         label = _plain_label(text, self._content)
@@ -735,6 +766,23 @@ class AgentThread(QScrollArea):
         self._undo_possible = possible
         self._refresh_undo()
         return bool(possible and self._step_cards)
+
+    def compare_cards(self) -> List[ChangeCard]:
+        """The cards that know their step of the history (``ChangeCard.compare_key``)."""
+        return [item.widget for item in self._items
+                if isinstance(item.widget, ChangeCard) and item.widget.compare_key is not None]
+
+    def set_compare_possible(self, possible: bool) -> None:
+        """Compare on the cards whose step is on the map (``ChangeCard.set_compare``), or on none of them."""
+        self._compare_possible = bool(possible)
+        self.refresh_compare()
+
+    def refresh_compare(self) -> None:
+        for card in self.compare_cards():
+            try:
+                card.compare_button.setVisible(self._compare_possible and card.compare_available)
+            except RuntimeError:  # cleared meanwhile
+                pass
 
     # --- inside ------------------------------------------------------------------
 

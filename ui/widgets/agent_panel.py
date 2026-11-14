@@ -260,6 +260,7 @@ class AgentPanel(QFrame):
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
     compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
+    card_compare_requested = pyqtSignal(object)  # the compare_key of a card of the thread (the controller set it)
     recipe_save_requested = pyqtSignal()
     recipe_run_requested = pyqtSignal(str)
     recipe_remove_requested = pyqtSignal(str)
@@ -289,7 +290,8 @@ class AgentPanel(QFrame):
         welcome.setMinimumHeight(THREAD_MIN_HEIGHT)
         welcome.setWidget(self._build_welcome())
         self.stack.addWidget(welcome)
-        self.thread = AgentThread(lambda: tokens(self._dark()), self._dark, self.undo_requested.emit, self)
+        self.thread = AgentThread(lambda: tokens(self._dark()), self._dark, self.undo_requested.emit, self,
+                                  self.card_compare_requested.emit)
         self.thread.setMinimumHeight(THREAD_MIN_HEIGHT)
         self.stack.addWidget(self.thread)
         self.stack.addWidget(self._build_history())
@@ -564,9 +566,11 @@ class AgentPanel(QFrame):
         self.compare_button.setEnabled(rank is not None and not self._working)
 
     def set_can_compare(self, possible: bool) -> None:
-        """Offer Compare on the turns and steps: only when the dock has the history of the project."""
+        """Offer Compare on the turns and steps, and on the cards of the thread: only when the dock has the history of
+        the project."""
         self._can_compare = bool(possible)
         self._on_turn_selected()
+        self.thread.set_compare_possible(self._can_compare and not self._working)
 
     def _compare_selected(self) -> None:
         items = self.history_list.selectedItems()
@@ -821,6 +825,7 @@ class AgentPanel(QFrame):
         self.history_undo_button.setEnabled(self.history_undo_button.isEnabled() and not working)
         self.history_redo_button.setEnabled(self.history_redo_button.isEnabled() and not working)
         self._on_turn_selected()
+        self.thread.set_compare_possible(self._can_compare and not working)  # the map changes under the comparison
         self.send_button.setToolTip(_tr("Stop (Esc)") if working else _tr("Send (Enter)"))
         self.send_button.setEnabled(self._ready or working)
         self.thread.set_hint(_tr("You can already type the next request.") if working else "")
@@ -887,14 +892,16 @@ class AgentPanel(QFrame):
         self._in_answer = False
 
     def add_action(self, text: str, succeeded: bool = True, detail: str = "", count: str = "",
-                   strong: Sequence[str] = ()) -> None:
-        """Something the agent changed, or failed to change, in a card; ``count`` is what it kept (``12 / 586``).
+                   strong: Sequence[str] = ()):
+        """Something the agent changed, or failed to change, in a card (returned); ``count`` is what it kept
+        (``12 / 586``).
 
         ``strong``: the layer names of ``text``, shown in bold.
         """
         self._show_conversation()
-        self.thread.add_card(text, succeeded, detail, count, strong)
+        card = self.thread.add_card(text, succeeded, detail, count, strong)
         self._in_answer = False
+        return card
 
     def show_error(self, title: str, detail: str = "", offer_settings: bool = False) -> None:
         """A request that failed, as a card in the thread (mockup: Error board)."""
@@ -914,8 +921,11 @@ class AgentPanel(QFrame):
         return card
 
     def add_question_card(self, texts: dict, questions):
-        """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread)."""
-        self._show_conversation()
+        """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread).
+
+        The thread is shown even from the history page: the turn waits for the answer.
+        """
+        self.stack.setCurrentIndex(_THREAD_PAGE)
         card = self.thread.add_question_card(texts, questions)
         self._in_answer = False
         return card

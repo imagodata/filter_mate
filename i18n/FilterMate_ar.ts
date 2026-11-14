@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>تبقى الخطوات {} السابقة ويمكن التراجع عنها.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>تعذر الوصول إلى المزوّد، إعادة المحاولة خلال {} ث…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>المزوّد مشغول، إعادة المحاولة خلال {} ث…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>توقف الطلب في منتصف الطريق. الخطوات المنجزة بالفعل، وتبقى في مكانها (يعيدها «تراجع»): {}. اطلب من الوكيل المتابعة عندما تكون مستعدًا.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>توقف في منتصف الطريق. الخطوات المنجزة بالفعل، وتبقى في مكانها (يعيدها «تراجع»): {}. اطلب من الوكيل المتابعة إن أردت الباقي.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>الودجت: {}</translation>
@@ -1198,6 +1218,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="438"/>
         <source>The map before this request or step left of a line, the map now on its right</source>
         <translation>الخريطة قبل هذا الطلب أو هذه الخطوة على يسار خط، والخريطة الآن على يمينه</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>الخريطة قبل هذه الخطوة على يسار خط، والخريطة الآن على يمينه</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>الخريطة قبل الطلب بأكمله على يسار خط، والخريطة الآن على يمينه: لا تُقارن خطوة بخطوة إلا خطوات الطلب الأخير</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
@@ -4800,6 +4830,16 @@ What would you like to do?</translation>
         <translation>إزالة التثبيت</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>تثبيت الخريطة قبل كل طلب للوكيل</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>خط أفقي</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>انقر على الخريطة لقفل الخط، وانقر مرة أخرى لتحريره.</translation>
@@ -4838,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>مثبتة {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>مثبتة {} (قبل طلب الوكيل)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

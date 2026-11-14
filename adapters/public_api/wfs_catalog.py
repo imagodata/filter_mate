@@ -23,6 +23,52 @@ TTL_SECONDS = 6 * 3600
 _CACHE: Dict[str, Any] = {}
 
 
+XLINK = "http://www.w3.org/1999/xlink"
+
+
+def _local(value) -> str:
+    return value.toString() if hasattr(value, "toString") else str(value)
+
+
+_DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
+def _place(address: str):
+    """Host and port of an address; the port of its scheme, written or not, is no port of its own."""
+    parts = urlsplit(address)
+    scheme = parts.scheme.lower()
+    if scheme not in _DEFAULT_PORTS or not parts.hostname:
+        raise ValueError(address)
+    port = parts.port
+    return parts.hostname.lower(), None if port in (None, _DEFAULT_PORTS[scheme]) else port
+
+
+def foreign(address: str, base: str) -> bool:
+    """Whether an address of a capabilities document is elsewhere than the service: another host or another port.
+
+    The same host in http for a service in https is not elsewhere: servers behind a proxy say so (the PRG of
+    Poland, in the list), and it is the same machine. Another port is another program.
+    """
+    try:
+        return _place(address) != _place(base)
+    except ValueError:
+        return True
+
+
+def link(reader) -> str:
+    """The link of an element, as QGIS reads it (the attribute written ``xlink:href``) and as XML does (the xlink
+    namespace under any prefix): a document where the two differ is refused, it shows one address and hides another.
+
+    Raises:
+        ValueError: The two readings differ.
+    """
+    by_namespace = _local(reader.attributes().value(XLINK, "href"))
+    literal = _local(reader.attributes().value("xlink:href"))
+    if by_namespace != literal:
+        raise ValueError("the service answered with a document whose links cannot be trusted")
+    return literal
+
+
 def _plain(text: str) -> str:
     """Lower case without accents: a search must not depend on them."""
     return "".join(char for char in unicodedata.normalize("NFKD", text or "") if not unicodedata.combining(char)).lower()
@@ -42,8 +88,7 @@ def parse_capabilities(data: bytes) -> Tuple[List[Dict[str, str]], List[str]]:
     current: Optional[Dict[str, str]] = None
     depth = feature_depth = 0
 
-    def local(value) -> str:
-        return value.toString() if hasattr(value, "toString") else str(value)
+    local = _local
 
     while not reader.atEnd() and len(types) < MAX_LAYERS:
         reader.readNext()
@@ -51,7 +96,7 @@ def parse_capabilities(data: bytes) -> Tuple[List[Dict[str, str]], List[str]]:
             depth += 1
             name = local(reader.name())
             if name in ("Get", "Post"):
-                href = local(reader.attributes().value("http://www.w3.org/1999/xlink", "href"))
+                href = link(reader)
                 if href:
                     endpoints.append(href)
             if name == "FeatureType":
@@ -92,9 +137,11 @@ def catalog(base: str) -> List[Dict[str, str]]:
     types, endpoints = parse_capabilities(reply.content)
     if not types:
         raise ValueError("this address is not a WFS service, or it offers no layer")
-    # QGIS sends its requests where the capabilities say: not to another machine than the one the user allowed.
-    host = urlsplit(base).hostname
-    if any(urlsplit(address).hostname != host for address in endpoints):
+    # QGIS sends its requests where the capabilities say: not to another machine or port than the one the
+    # user allowed. This reads the document the plugin was given: QGIS asks for the capabilities again by itself,
+    # and its WFS provider has no switch to hold its requests to the address of the service, as the WMS one has
+    # (image_catalog.source_parameters). A service that answers QGIS another document than this one is not caught.
+    if any(foreign(address, base) for address in endpoints):
         raise ValueError("this service sends its requests to another host, which is not followed")
     _CACHE[base] = (time.time(), types)
     return types

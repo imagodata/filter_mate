@@ -81,11 +81,14 @@ class FakeCheckpoint:
     """The undo point of a turn: what was committed, and whether it was discarded."""
 
     def __init__(self):
-        self.label, self.describe = "", None
+        self.label, self.describe, self.on_open, self.recorded = "", None, None, None
         self.open, self.committed, self.discarded = False, 0, 0
 
     def begin(self, call=None):
         self.open = True
+
+    def step_of(self, call):
+        return None
 
     def commit(self):
         if self.open:
@@ -100,6 +103,7 @@ class FakeCheckpoint:
     can_undo = staticmethod(lambda: True)
     can_redo = staticmethod(lambda: False)
     turns = staticmethod(lambda: [])
+    applied = staticmethod(lambda: ())
     busy = staticmethod(lambda: "")
 
 
@@ -433,6 +437,93 @@ def test_the_action_bar_follows_the_turn(ctrl_module, controller, dock):
     assert states[-1] is False  # Undo and Ctrl+Z are off while the agent works
     transport.starts[0](_end_turn(ctrl_module))
     assert states[-1] is True
+
+
+# --- 6b: a request that breaks off after steps keeps them, and does not come back whole ---------------------------
+
+
+def _failure(ctrl_module, kind="stream"):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    return messages.StreamFailure(messages.ProviderError(kind, "The response was cut before its end."))
+
+
+def test_a_failure_after_steps_says_they_stay_and_keeps_the_request_out_of_the_line(ctrl_module, controller):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_tool_turn(ctrl_module))
+    transport.starts[1](_failure(ctrl_module))
+    detail = controller.panel.show_error.call_args[0][1]
+    assert "stopped midway. Steps already done" in detail and "): 1." in detail and "go on" in detail
+    controller.panel.input.setText.assert_not_called()
+
+
+@pytest.mark.parametrize("kind", ["auth", "quota", "bad_request"])
+def test_a_failure_after_steps_that_settings_or_a_refusal_make_vain_gives_the_request_back(ctrl_module, controller, kind):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_tool_turn(ctrl_module))
+    transport.starts[1](_failure(ctrl_module, kind))
+    detail = controller.panel.show_error.call_args[0][1]
+    assert detail.startswith("The 1 steps before stay, and can be undone. The request is back in the line below")
+    assert "stopped midway" not in detail and "ask for what is left" not in detail
+    assert ("fix the settings" in detail) is (kind != "bad_request")
+    assert controller.panel.show_error.call_args[0][2] is (kind != "bad_request")
+    controller.panel.input.setText.assert_called_with("add the parks")
+
+
+def test_a_failure_before_any_step_gives_the_request_back(ctrl_module, controller):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_failure(ctrl_module))
+    assert "back in the line below" in controller.panel.show_error.call_args[0][1]
+    controller.panel.input.setText.assert_called_with("add the parks")
+
+
+def test_stop_after_steps_says_they_stay(ctrl_module, controller):
+    engine, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller.panel.input.text.return_value = ""
+    controller._on_send("add the parks")
+    transport.starts[0](_tool_turn(ctrl_module))
+    engine.cancel()
+    said = controller.panel.set_status.call_args[0][0]
+    assert said.startswith("Stopped midway. Steps already done") and "): 1." in said
+    controller.panel.input.setText.assert_not_called()
+
+
+def test_a_busy_provider_is_said_while_the_agent_waits(ctrl_module, controller):
+    messages = sys.modules[f"{_PKG}.core.agent.messages"]
+    controller.on_retry(5.6, messages.ProviderError("server", "Overloaded", status=529))
+    assert controller.panel.set_status.call_args[0][0] == "The provider is busy, trying again in 6 s…"
+
+
+def test_a_new_try_says_thinking_again_before_it_starts(ctrl_module, controller):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._on_send("add the parks")  # the chat is busy: the engine waits for the model
+    log = []
+    controller.panel.set_status.side_effect = lambda text: log.append(("status", text))
+    controller._again(lambda: log.append(("step",)))()
+    assert log == [("status", "Thinking…"), ("step",)]
+
+
+def test_a_new_try_after_the_end_of_the_chat_only_runs_the_step(ctrl_module, controller):
+    log = []
+    controller.panel.set_status.side_effect = lambda text: log.append(("status", text))
+    assert not controller.chat_busy()
+    controller._again(lambda: log.append(("step",)))()
+    assert log == [("step",)]
+
+
+def test_a_new_try_of_an_abandoned_request_says_nothing(ctrl_module, controller):
+    _engine_, transport = _engine(ctrl_module, controller, lambda arguments: {})
+    controller._on_send("add the parks")
+    controller._abandoned = True
+    log = []
+    controller.panel.set_status.side_effect = lambda text: log.append(("status", text))
+    controller._again(lambda: log.append(("step",)))()
+    assert log == [("step",)]
 
 
 # --- 7: Stop ends the waits of the chat, not those of another application ------------------------------------

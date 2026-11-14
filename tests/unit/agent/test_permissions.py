@@ -129,6 +129,22 @@ class TestAllowedForTheConversation:
         assert policy.verdict(export) == RUN
         assert policy.verdict(tools_by_name()["remove_layers"]) == ASK  # only that tool
 
+    def test_a_yes_to_one_address_is_not_a_yes_to_another(self):
+        policy, add = PermissionPolicy(STANDARD), tools_by_name()["add_layer"]
+        first = {"source": "https://data.example.org/a.gpkg"}
+        assert policy.verdict(add, first) == ASK
+        policy.grant("add_layer", first)
+        assert policy.verdict(add, {"source": "https://DATA.example.org/b.geojson?x=1"}) == RUN  # the same host
+        assert policy.verdict(add, {"source": "https://evil.example.net/?d=secret"}) == ASK
+        assert policy.verdict(add, {"source": "/data/a.gpkg"}) == ASK  # a local file is another yes
+        assert policy.verdict(add, {"source": "https://[bad/a.gpkg"}) == ASK and policy.verdict(add) == ASK
+
+    def test_a_yes_to_deleting_in_a_layer_is_for_that_layer(self):
+        policy, delete = PermissionPolicy(STANDARD), tools_by_name()["delete_features"]
+        policy.grant("delete_features", {"layer": "roads", "expression": "id = 1"})
+        assert policy.verdict(delete, {"layer": "roads", "expression": "id = 2"}) == RUN
+        assert policy.verdict(delete, {"layer": "parcels", "expression": "true"}) == ASK
+
     def test_code_is_never_allowed_for_a_conversation(self):
         policy = PermissionPolicy(AUTONOMOUS)
         code = spec("run_pyqgis", destructive=True)

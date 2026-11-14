@@ -164,10 +164,12 @@ def main():
         image_catalog._CACHE.clear()
         check(f"{kind}: a service that sends its requests to another host is refused",
               *refused(lambda: image_catalog.catalog(kind, "https://other.example.org/" + kind), "another host"))
-        for elsewhere, label in ((there.replace("https://", "http://"), "in clear"), (there.replace(".org/", ".org:8443/"), "another port")):
-            image_catalog._CACHE.clear()
-            check(f"{kind}: a service that sends its requests {label} is refused",
-                  *refused(lambda: image_catalog.catalog(kind, elsewhere), "another host"))
+        image_catalog._CACHE.clear()
+        check(f"{kind}: a service that sends its requests to another port is refused",
+              *refused(lambda: image_catalog.catalog(kind, there.replace(".org/", ".org:8443/")), "another host"))
+        image_catalog._CACHE.clear()  # behind a proxy, a service in https says its requests go by http: the same place
+        check(f"{kind}: the same host by http is the same place",
+              len(image_catalog.catalog(kind, there.replace("https://", "http://"))) >= 1)
         image_catalog.fetch = lambda url, **options: BoundedReply(200, {}, b"<html>no</html>")
         check(f"{kind}: a page that is no capabilities document is refused",
               *refused(lambda: image_catalog.catalog(kind, "https://page.example.org/" + kind), "offers no layer"))

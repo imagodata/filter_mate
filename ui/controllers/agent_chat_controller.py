@@ -25,7 +25,7 @@ from ...adapters.agent.plugin_settings import settings_handlers
 from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, on_abort, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
-from ...core.domain.history_timeline import KIND_AGENT
+from ...core.domain.history_timeline import KIND_AGENT, card_target, changes_map
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader, connector_entries, shown_title
 from ...core.agent.mcp_client import McpError
@@ -50,7 +50,7 @@ from ...core.agent.recipes import (
     stale_reference, steps_of as recipe_steps, summary as recipe_summary, with_live, without as recipe_without,
 )
 from ...core.agent.messages import (
-    ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
+    ERROR_AUTH, ERROR_BAD_REQUEST, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
@@ -214,6 +214,9 @@ class AgentChatController(QObject):
         self._settings_applier = manager.apply_settings if manager is not None else None
         plugin_settings.set_applier(self._settings_applier)
         self._checkpoint.describe = self.describe_call
+        self._checkpoint.on_open = self._read_auto_pin
+        self._auto_pin = None  # the map read when the turn under way began to change it, pinned at its end
+        self._turn_cards = []  # (card, step of the turn under way): Compare on them once the turn is recorded
         self._last_request = ""
         self._tools = {tool.name: tool for tool in chat_tools()}
         self._connector_labels = {}
@@ -234,6 +237,7 @@ class AgentChatController(QObject):
         self.panel.resend_requested.connect(self._on_resend)
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
         self.panel.compare_requested.connect(self._on_compare)
+        self.panel.card_compare_requested.connect(self._on_card_compare)
         self.panel.settings_requested.connect(self.open_settings)
         self.panel.setup_requested.connect(self.start_setup)
         self.panel.shown.connect(self._on_panel_shown)
@@ -381,6 +385,7 @@ class AgentChatController(QObject):
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
         history = self._history_panel()
         self.panel.set_can_compare(history is not None and history.can_compare)
+        self._show_card_compare()
         self._show_undo_state()
 
     def _history_panel(self):
@@ -389,11 +394,87 @@ class AgentChatController(QObject):
         integration = getattr(self._parent_widget, "_controller_integration", None)
         return getattr(integration, "history_controller", None) if integration is not None else None
 
+    def _compare_controller(self):
+        """The Compare button of the dock and its pin (``CompareController``), None when the dock has none."""
+        integration = getattr(self._parent_widget, "_controller_integration", None)
+        return getattr(integration, "compare_controller", None) if integration is not None else None
+
     def _on_compare(self, turn: int, step: int) -> None:
         """The map before a turn (or one of its steps) left of a line, composed as the history of the project does."""
         history = self._history_panel()
         if history is not None:
             history.compare_agent_turn(turn, step if step >= 0 else None)
+
+    # --- Compare on the cards, and the pin before each request ---------------------
+
+    def _follow_card(self, card, call: ToolCallPart) -> None:
+        """A card of the turn under way, for the step begun for its call: it offers Compare once the turn is recorded
+        (``_bind_cards``). A card no step was begun for (a read, another application) never does."""
+        step = self._checkpoint.step_of(call)
+        if card is not None and step is not None:
+            self._turn_cards.append((card, step))
+
+    def _bind_cards(self) -> None:
+        """The turn was just recorded (``TurnCheckpoint.commit``): each of its cards learns its step in the history.
+        A step that changed nothing was not recorded: its card offers no Compare rather than another step's."""
+        cards, self._turn_cards = self._turn_cards, []
+        recorded = self._checkpoint.recorded
+        if recorded is None:
+            return
+        op_id, ranks = recorded
+        for card, step in cards:
+            if step in ranks:
+                try:
+                    card.compare_key = (op_id, ranks[step])
+                except RuntimeError:  # the thread was cleared meanwhile
+                    pass
+
+    def _show_card_compare(self) -> None:
+        """Compare on each card whose step is still on the map (``card_target``): before that step for the last
+        request, before the whole request for an earlier one; none for a request undone. The panel hides them all
+        while the agent works, or when the dock cannot compare."""
+        cards = self.panel.thread.compare_cards()
+        if not cards:
+            return
+        stack = TurnCheckpoint.applied()
+        for card in cards:
+            target = card_target(stack, *card.compare_key)
+            card.set_compare(target is not None, target is None or target[2])
+        self.panel.thread.refresh_compare()
+
+    def _on_card_compare(self, key) -> None:
+        """Compare on a card: the map before its step, by the path of the history page (``compare_agent_turn``)."""
+        history = self._history_panel()
+        if history is None or self.chat_busy():
+            return
+        target = card_target(TurnCheckpoint.applied(), *key)
+        if target is None:  # undone meanwhile: the card says so by losing its button
+            self._show_card_compare()
+            return
+        history.compare_agent_turn(target[0], target[1])
+
+    def _read_auto_pin(self) -> None:
+        """A turn begins to change the project (``TurnCheckpoint.on_open``): the map as it is, pinned once the turn is
+        recorded (``_settle_auto_pin``). Read now, before its first change; costs nothing when Compare would not pin
+        it (turned off, a pin of the user)."""
+        compare = self._compare_controller()
+        self._auto_pin = compare.read_automatic_pin() if compare is not None else None
+
+    def _settle_auto_pin(self) -> None:
+        """The turn was recorded: the map read when it began is the pin of Compare, in place of the one taken so
+        before. A turn that changed nothing of the map leaves that one in place."""
+        state, self._auto_pin = self._auto_pin, None
+        compare = self._compare_controller()
+        recorded = self._checkpoint.recorded
+        if state is None or compare is None or recorded is None:
+            return
+        operation = next((done for done in TurnCheckpoint.applied() if done.op_id == recorded[0]), None)
+        if operation is None or not changes_map(operation):
+            return
+        try:
+            compare.pin_automatic(state)
+        except Exception:  # the turn is over and recorded all the same
+            logger.info("Agent: the map was not pinned before the request", exc_info=True)
 
     def _show_undo_state(self) -> None:
         """The action bar follows the history of the agent while AGENT is open: nothing to undo while it works."""
@@ -475,6 +556,7 @@ class AgentChatController(QObject):
         # The turn under way, ended below, must not be recorded against the closed project, nor the change another
         # application is making (its layers compared with the next project's, an Undo would remove them all).
         self._checkpoint.discard()
+        self._turn_cards, self._auto_pin = [], None  # the map read for the pin was the closed project's
         self._mcp.forget_change()
         self._replay_stop = True  # a recipe stops before its next step
         if self._replaying:
@@ -573,6 +655,16 @@ class AgentChatController(QObject):
         except Exception:
             logger.debug("Agent: the state of the section could not be read", exc_info=True)
             return True
+
+    def _show_agent(self) -> None:
+        """Open the AGENT section when it is folded: the agent waits there for an answer of the user."""
+        if self._agent_shown():
+            return
+        sections = getattr(self._parent_widget, "_fm_sections", None)
+        try:
+            sections.open_top("agent")
+        except Exception:
+            logger.debug("Agent: the section could not be opened", exc_info=True)
 
     def _on_panel_shown(self) -> None:
         """The AGENT section opens: an offer that waited in it is in view."""
@@ -911,6 +1003,7 @@ class AgentChatController(QObject):
         texts = {"other": _tr("Other"), "answer": _tr("Answer"), "no_answer": _tr("No answer"),
                  "close": _tr("Close without answering")}
         try:
+            self._show_agent()  # a question nobody sees would hold the turn until Stop
             card = self.panel.add_question_card(texts, questions)
         except RuntimeError:  # the panel is gone: nobody to ask
             return {"declined": True}
@@ -1399,6 +1492,11 @@ class AgentChatController(QObject):
                 self._checkpoint.commit()
             except Exception:
                 logger.exception("Recipe undo point could not be closed")
+            if abandoned:  # its cards went with the thread, the map read for the pin with the project
+                self._turn_cards, self._auto_pin = [], None
+            else:
+                self._bind_cards()
+                self._settle_auto_pin()
             self.panel.set_working(False)
             self.panel.clear_steps()
             if not abandoned:  # its project closed meanwhile: nothing of it goes in the thread of the next one
@@ -1586,7 +1684,8 @@ class AgentChatController(QObject):
         executor = ToolExecutor(tools, self._chat_owned(handlers))
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
-                          self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy)
+                          self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy,
+                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)))
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -2018,6 +2117,22 @@ class AgentChatController(QObject):
         self.panel.add_text(text)
         self._answer.append(text)
 
+    def _again(self, step):
+        """``step`` (a new try of the model turn), once the status no longer says a new try is coming."""
+        def run():
+            if not self._abandoned and self.chat_busy():
+                self.panel.set_status(_tr("Thinking…"))
+            step()
+        return run
+
+    def on_retry(self, seconds: float, error: ProviderError) -> None:
+        """The provider failed for a moment: the engine asks it again by itself after ``seconds``."""
+        if self._abandoned:
+            return
+        words = (_tr("The provider could not be reached, trying again in {} s…") if error.kind == ERROR_NETWORK
+                 else _tr("The provider is busy, trying again in {} s…"))
+        self.panel.set_status(words.format(max(1, round(seconds))))
+
     def _flush_answer(self) -> None:
         """What the screen showed of the answer so far goes in the transcript, in its place."""
         if self._answer:
@@ -2214,9 +2329,13 @@ class AgentChatController(QObject):
             detail = one_line(self._run_detail(call) or call.arguments.get("expression") or "", MAX_DETAIL_CHARS)
             if call.name in self._connector_labels:
                 detail = json.dumps(call.arguments, ensure_ascii=False, default=str)[:MAX_DETAIL_CHARS]
+            if result.is_error:
+                # Why it failed, as the model was told: the card used to show the expression alone, and the cause
+                # was only in the log.
+                detail = one_line(result.content, MAX_DETAIL_CHARS) or detail
             count = self._kept_count(result)
             strong = self._layer_names(call)
-            self.panel.add_action(label, not result.is_error, detail, count, strong)
+            self._follow_card(self.panel.add_action(label, not result.is_error, detail, count, strong), call)
             if keep:
                 self._record("action", label, ok=not result.is_error, detail=detail, count=count, strong=strong)
 
@@ -2342,7 +2461,7 @@ class AgentChatController(QObject):
         text = self._confirm_text(call)
         answer = self._ask_choice(title, text)
         if answer == ANSWER_CONVERSATION:
-            self._policy.grant(call.name)
+            self._policy.grant(call.name, call.arguments)  # add_layer: for that host; delete_features: that layer
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:
@@ -2510,6 +2629,7 @@ class AgentChatController(QObject):
         if self._abandoned:  # the end of a request left while its tool ran (_drop_engine): only let it go
             self._abandoned, self._engine = False, None
             self._request_calls, self._answer = [], []
+            self._turn_cards, self._auto_pin = [], None  # its cards went with the thread
             self.panel.set_working(False)
             self.panel.clear_steps()
             self._flush_journal()
@@ -2519,6 +2639,8 @@ class AgentChatController(QObject):
         if steps:  # what "Save the last request as a recipe" keeps
             self._last_steps, self._last_steps_request = steps, self._last_request
         self._request_calls = []
+        self._bind_cards()  # the engine recorded the turn before telling its end
+        self._settle_auto_pin()
         self.panel.set_working(False)
         self.panel.clear_steps()
         self._flush_answer()
@@ -2526,23 +2648,39 @@ class AgentChatController(QObject):
         self._flush_journal()
         self._save_transcript()
         self._refresh_history()
+        # What a request that broke off did is in the conversation, with a note saying it stopped there
+        # (AgentSession.interrupt_request): the project as it is now is no news to the model.
         self._remember_project()
+        kept = outcome.kept_steps
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
-            self._give_back_request()
             message = self._error_message(outcome.error)
             fix = outcome.error.kind in FIXED_IN_SETTINGS
             self._say("")
-            self.panel.show_error(message, _tr("The request is back in the line below: fix the settings, then send it "
-                                               "again.") if fix else _tr("The request is back in the line below: send it "
-                                                                         "again when you are ready."), fix)
+            # Fixing the settings starts another conversation, and a request the server refused for what it holds
+            # was forgotten whole (ChatEngine._interrupt): either way the agent will not know what was done.
+            known = kept and not fix and outcome.error.kind != ERROR_BAD_REQUEST
+            if known:  # sent again whole, the request would do those steps twice: the agent knows where it stopped
+                detail = _tr("The request stopped midway. Steps already done, which stay in place (Undo takes "
+                             "them back): {}. Ask the agent to go on when you are ready.").format(kept)
+            else:
+                self._give_back_request()
+                detail = _tr("The request is back in the line below: fix the settings, then send it again.") if fix \
+                    else _tr("The request is back in the line below: send it again when you are ready.")
+                if kept:
+                    detail = _tr("The {} steps before stay, and can be undone.").format(kept) + " " + detail
+            self.panel.show_error(message, detail, fix)
             return
         if outcome.status == OUTCOME_CANCELLED:
+            if kept:
+                self._say(_tr("Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. "
+                              "Ask the agent to go on if you want the rest.").format(kept))
+                return
             self._give_back_request()
             self._say(_tr("Stopped."))
             return
         if outcome.status == OUTCOME_STOPPED:
             self._say("")
-            self.panel.show_error(*self._stop_words(outcome.reason))
+            self.panel.show_error(*self._stop_words(outcome.reason, kept))
             return
         self._say(self._usage_words())  # the cards of the turn say what changed (mockup)
 
@@ -2557,8 +2695,9 @@ class AgentChatController(QObject):
             *(f"{count:,}".replace(",", "\u202f") for count in spent))
 
     @staticmethod
-    def _stop_words(reason: str) -> Tuple[str, str]:
-        """Why the agent stopped before its answer, and what the user can do, in plain words."""
+    def _stop_words(reason: str, kept: int = 0) -> Tuple[str, str]:
+        """Why the agent stopped before its answer, and what the user can do, in plain words; ``kept``, the steps
+        done before a refusal, which stay."""
         if reason == REASON_TURN_LIMIT:
             return (_tr("The request took too many steps: the agent stopped."),
                     _tr("What it changed stays and can be undone. Ask for less at once, or say what is left."))
@@ -2566,7 +2705,8 @@ class AgentChatController(QObject):
             return (_tr("The answer of the model was cut: it was too long."),
                     _tr("What it changed stays and can be undone. Ask again, in smaller steps."))
         if reason == REASON_REFUSED:
-            return _tr("The model declined this request."), _tr("Nothing more was done. Ask it differently.")
+            done = _tr("The {} steps before stay, and can be undone.").format(kept) + " " if kept else ""
+            return _tr("The model declined this request."), done + _tr("Nothing more was done. Ask it differently.")
         return _tr("The agent stopped before the end ({}).").format(reason), ""
 
     def _give_back_request(self) -> None:

@@ -1106,6 +1106,26 @@ Apakah Anda setuju?</translation>
         <translation>{} langkah sebelumnya tetap ada, dan dapat diurungkan.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Penyedia tidak dapat dijangkau, mencoba lagi dalam {} detik…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Penyedia sedang sibuk, mencoba lagi dalam {} detik…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Permintaan berhenti di tengah jalan. Langkah yang sudah selesai, yang tetap di tempatnya (Urungkan mengembalikannya): {}. Minta agen untuk melanjutkan saat Anda siap.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Berhenti di tengah jalan. Langkah yang sudah selesai, yang tetap di tempatnya (Urungkan mengembalikannya): {}. Minta agen untuk melanjutkan jika Anda menginginkan sisanya.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>
@@ -1198,6 +1218,16 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <location filename="../ui/widgets/agent_panel.py" line="438"/>
         <source>The map before this request or step left of a line, the map now on its right</source>
         <translation>Peta sebelum permintaan atau langkah ini di kiri sebuah garis, peta saat ini di kanannya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Peta sebelum langkah ini di kiri sebuah garis, peta saat ini di kanannya</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Peta sebelum seluruh permintaan di kiri sebuah garis, peta saat ini di kanannya: hanya langkah-langkah permintaan terakhir yang dibandingkan satu per satu</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
@@ -4800,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Hapus sematan</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Sematkan peta sebelum setiap permintaan ke agen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Garis horizontal</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Klik peta untuk mengunci garis, klik lagi untuk melepaskannya.</translation>
@@ -4838,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Disematkan {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Disematkan {} (sebelum permintaan ke agen)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

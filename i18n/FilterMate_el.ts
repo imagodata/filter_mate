@@ -1106,6 +1106,26 @@ Do you agree?</source>
         <translation>Τα {} προηγούμενα βήματα παραμένουν και μπορούν να αναιρεθούν.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Ο πάροχος δεν ήταν προσβάσιμος, νέα προσπάθεια σε {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Ο πάροχος είναι απασχολημένος, νέα προσπάθεια σε {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Το αίτημα σταμάτησε στη μέση. Βήματα που έχουν ήδη γίνει και παραμένουν στη θέση τους (η Αναίρεση τα επαναφέρει): {}. Ζητήστε από τον πράκτορα να συνεχίσει όταν είστε έτοιμοι.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Διακόπηκε στη μέση. Βήματα που έχουν ήδη γίνει και παραμένουν στη θέση τους (η Αναίρεση τα επαναφέρει): {}. Ζητήστε από τον πράκτορα να συνεχίσει αν θέλετε τα υπόλοιπα.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Γραφικό στοιχείο: {}</translation>
@@ -1198,6 +1218,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="438"/>
         <source>The map before this request or step left of a line, the map now on its right</source>
         <translation>Ο χάρτης πριν από αυτό το αίτημα ή βήμα αριστερά μιας γραμμής, ο τωρινός χάρτης δεξιά της</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Ο χάρτης πριν από αυτό το βήμα αριστερά μιας γραμμής, ο τωρινός χάρτης δεξιά της</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Ο χάρτης πριν από ολόκληρο το αίτημα αριστερά μιας γραμμής, ο τωρινός χάρτης δεξιά της: μόνο τα βήματα του τελευταίου αιτήματος συγκρίνονται ένα προς ένα</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
@@ -4800,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Αφαίρεση καρφιτσώματος</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Καρφίτσωμα του χάρτη πριν από κάθε αίτημα προς τον πράκτορα</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Οριζόντια γραμμή</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Κάντε κλικ στον χάρτη για να κλειδώσετε τη γραμμή, ξανά για να την αποδεσμεύσετε.</translation>
@@ -4838,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Καρφιτσώθηκε {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Καρφιτσώθηκε {} (πριν από το αίτημα προς τον πράκτορα)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

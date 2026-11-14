@@ -1106,6 +1106,26 @@ Hyväksytkö?</translation>
         <translation>Aiemmat {} vaihetta säilyvät, ja ne voi kumota.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Palveluntarjoajaan ei saatu yhteyttä, yritetään uudelleen {} s kuluttua…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Palveluntarjoaja on varattu, yritetään uudelleen {} s kuluttua…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Pyyntö keskeytyi kesken. Jo tehdyt vaiheet, jotka säilyvät (Kumoa palauttaa ne): {}. Pyydä agenttia jatkamaan, kun olet valmis.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Keskeytyi kesken. Jo tehdyt vaiheet, jotka säilyvät (Kumoa palauttaa ne): {}. Pyydä agenttia jatkamaan, jos haluat loput.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Vimpain: {}</translation>
@@ -1198,6 +1218,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="438"/>
         <source>The map before this request or step left of a line, the map now on its right</source>
         <translation>Kartta ennen tätä pyyntöä tai vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Kartta ennen tätä vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Kartta ennen koko pyyntöä viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella: vain viimeisimmän pyynnön vaiheita verrataan yksitellen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
@@ -4800,6 +4830,16 @@ What would you like to do?</translation>
         <translation>Poista kiinnitys</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Kiinnitä kartta ennen jokaista agentille tehtyä pyyntöä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vaakasuora viiva</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Lukitse viiva napsauttamalla karttaa, vapauta se napsauttamalla uudelleen.</translation>
@@ -4838,6 +4878,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Kiinnitetty {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Kiinnitetty {} (ennen agentille tehtyä pyyntöä)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

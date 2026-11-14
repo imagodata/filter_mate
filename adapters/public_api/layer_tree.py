@@ -110,11 +110,10 @@ def group_layers(layers: List[str], group: str = "", at_top: bool = True, above:
         if anchor is not None:
             if layer.id() == anchor.layerId():
                 continue
-            # Just above the anchor, in the order given: where it is now, then one further down for the next.
+            # Just above the anchor, in the order given: at the place of the anchor, which goes one down. A layer
+            # that was above it in the same group needs no other index: move_layer puts the copy in before it takes
+            # the layer out, so the copy ends just above the anchor either way.
             index = target.children().index(anchor)
-            node = _root().findLayer(layer.id())
-            if node.parent() is target and target.children().index(node) < index:
-                index -= 1  # the layer leaves a place above the anchor
             if move_layer(layer.id(), target, index):
                 moved.append(layer.name())
             continue
