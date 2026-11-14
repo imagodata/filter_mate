@@ -180,3 +180,117 @@ def test_a_search_that_failed_for_good_is_asked_once(monkeypatch, answer, messag
     with pytest.raises(ValueError, match=message) as failure:
         project_control.search_open_data("communes")
     assert len(timeouts) == 1 and "asked twice" not in str(failure.value)
+
+
+# --- a web basemap: one of the list, checked by one tile, added under the layers ------------------------------------
+
+_PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 20
+
+
+class _Tiles:
+    def __init__(self, source, name, provider):
+        self.source, self.title, self.provider, self.rights = source, name, provider, None
+
+    def isValid(self):
+        return True
+
+    def metadata(self):
+        return SimpleNamespace(setRights=lambda rights: setattr(self, "rights", rights))
+
+    def setMetadata(self, metadata):
+        pass
+
+
+@pytest.fixture
+def basemap_project(monkeypatch):
+    """What add_basemap needs of QGIS: a raster layer that opens, a project and its layer tree."""
+    core = sys.modules["qgis.core"]
+    registered, tree = [], []
+    project = SimpleNamespace(addMapLayer=lambda layer, in_tree: registered.append((layer, in_tree)),
+                              layerTreeRoot=lambda: SimpleNamespace(addLayer=tree.append))
+    monkeypatch.setattr(core, "QgsRasterLayer", _Tiles, raising=False)
+    monkeypatch.setattr(core, "QgsProject", SimpleNamespace(instance=lambda: project), raising=False)
+    monkeypatch.setattr(project_control, "_summary", lambda layer, count_features=True: {"name": layer.title})
+    monkeypatch.setattr(project_control, "_map_place", lambda: None)
+    return SimpleNamespace(registered=registered, tree=tree)
+
+
+def _tiles(monkeypatch, status=200, content=_PNG):
+    asked = []
+
+    def fetch(url, **options):
+        asked.append(url)
+        return SimpleNamespace(status=status, headers={}, content=content)
+    monkeypatch.setattr(project_control, "fetch", fetch)
+    return asked
+
+
+def test_a_basemap_of_the_list_goes_under_the_layers_with_its_attribution(basemap_project, monkeypatch):
+    asked = _tiles(monkeypatch)
+    assert project_control.add_basemap("carto_light_nolabels") == {"name": "Carto Light (neutral, no names)"}
+    assert asked == ["https://basemaps.cartocdn.com/light_nolabels/1/0/0.png"]
+    (layer, in_tree), = basemap_project.registered
+    assert in_tree is False and basemap_project.tree == [layer]  # appended to the tree: below every other layer
+    assert layer.provider == "wms" and layer.source == (
+        "type=xyz&url=https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png&zmax=20&zmin=0")
+    assert layer.rights == ["© OpenStreetMap contributors © CARTO"]
+
+
+def test_a_basemap_the_user_added_is_named_after_its_server(basemap_project, monkeypatch):
+    _tiles(monkeypatch)
+    address = "https://Tiles.example.org/{z}/{x}/{y}.png"
+    summary = project_control.add_basemap(address.lower(), extra_domains=f"{address}:xyz")
+    assert summary == {"name": "tiles.example.org"}
+    assert basemap_project.registered[0][0].source == f"type=xyz&url={address}&zmax=19&zmin=0"
+    assert project_control.add_basemap(address.lower(), name="Fond", extra_domains=f"{address}:xyz") == {"name": "Fond"}
+
+
+@pytest.mark.parametrize("status, content, said", [
+    (404, b"", "answered with an error \\(404\\)"), (200, b"<html>blocked</html>", "not with an image"),
+])
+def test_a_server_that_gives_no_tile_is_said_and_nothing_is_added(basemap_project, monkeypatch, status, content, said):
+    _tiles(monkeypatch, status, content)
+    with pytest.raises(ValueError, match=said):
+        project_control.add_basemap("osm_tiles")
+    assert basemap_project.registered == [] and basemap_project.tree == []
+
+
+def test_only_a_basemap_is_added_as_a_basemap_and_an_address_is_never_taken(basemap_project, monkeypatch):
+    monkeypatch.setattr(project_control, "fetch", MagicMock(side_effect=AssertionError("nothing is asked")))
+    with pytest.raises(ValueError, match="is not a basemap"):
+        project_control.add_basemap("ign_wfs")
+    with pytest.raises(ValueError, match="not a basemap of the list"):
+        project_control.add_basemap("https://evil.example.org/{z}/{x}/{y}.png")  # not in the user's list
+    with pytest.raises(ValueError) as refused:
+        project_control.search_open_data("communes", platform="nowhere")
+    assert "datagouv" in str(refused.value) and "carto_light" not in str(refused.value)  # basemaps hold no data
+    with pytest.raises(ValueError, match="holds"):  # a line of the configuration file that is no template
+        project_control.add_basemap("tiles.example.org", extra_domains="tiles.example.org:xyz")
+    with pytest.raises(ValueError, match="is a basemap"):
+        project_control.search_open_data("communes", platform="osm_tiles")
+    assert basemap_project.registered == []
+
+
+def test_a_server_of_one_country_is_asked_where_the_map_is(basemap_project, monkeypatch):
+    """2026-11-14: swisstopo, GSI and basemap.at have no tile for a quarter of the world; QGIS draws them well."""
+    asked = []
+
+    def fetch(url, **options):
+        asked.append(url)
+        return SimpleNamespace(status=200 if url.endswith("/10/516/373.png") else 404, headers={}, content=_PNG)
+    monkeypatch.setattr(project_control, "fetch", fetch)
+    monkeypatch.setattr(project_control, "_map_place", lambda: (1.444, 43.604))
+    address = "https://tiles.example.org/{z}/{x}/{y}.png"
+    project_control.add_basemap(address, extra_domains=f"{address}:xyz")
+    assert asked == ["https://tiles.example.org/10/516/373.png"] and len(basemap_project.registered) == 1
+    monkeypatch.setattr(project_control, "_map_place", lambda: (140.0, 36.0))  # the map is elsewhere
+    with pytest.raises(ValueError, match="move the map over the area it covers"):
+        project_control.add_basemap(address, extra_domains=f"{address}:xyz")
+    assert asked[-1] == "https://tiles.example.org/1/0/0.png"
+
+
+@pytest.mark.parametrize("status", [204, 302])
+def test_a_server_that_sends_elsewhere_or_has_nothing_there_is_taken_as_answering(basemap_project, monkeypatch, status):
+    _tiles(monkeypatch, status, b"")
+    project_control.add_basemap("osm_tiles")
+    assert len(basemap_project.registered) == 1

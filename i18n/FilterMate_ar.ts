@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>يستجيب.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>يوفّر بلاطات الخريطة.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>أدخل مفتاح API أولاً.</translation>
@@ -255,6 +260,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>تمت إضافة الطبقة: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>تمت إضافة خريطة الأساس: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 هل توافق؟</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>يريد الوكيل إضافة خريطة الأساس هذه من الويب أسفل طبقات المشروع:
+{}
+
+يرسم خادمها الخريطة أثناء تحريكك لها: فهو يرى المناطق التي تنظر إليها، ولا يرى شيئًا من طبقاتك. هل توافق؟</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>موصّل MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>خريطة أساس (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>موصّلات MCP</translation>
@@ -1440,6 +1466,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>صور الأقمار الصناعية</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>خرائط الأساس</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>มีการตอบกลับ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>ให้บริการไทล์ของตัวเอง</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>ป้อนคีย์ API ของคุณก่อน</translation>
@@ -255,6 +260,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>เพิ่มเลเยอร์แล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>เพิ่มแผนที่ฐานแล้ว: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>เอเจนต์ต้องการเพิ่มแผนที่ฐานเว็บนี้ไว้ใต้เลเยอร์ของโปรเจกต์:
+{}
+
+เซิร์ฟเวอร์ของแผนที่จะวาดแผนที่ตามที่คุณเลื่อนดู โดยเห็นเพียงว่าคุณดูพื้นที่ใดอยู่ และไม่เห็นอะไรจากเลเยอร์ของคุณเลย คุณยินยอมหรือไม่?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>คอนเนคเตอร์ MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>แผนที่ฐาน (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>คอนเนคเตอร์ MCP</translation>
@@ -1440,6 +1466,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>ภาพถ่ายดาวเทียม</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>แผนที่ฐาน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

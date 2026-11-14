@@ -195,6 +195,11 @@ Pourquoi : {}
         <translation>La source répond.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Le serveur fournit ses tuiles.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Saisissez d'abord votre clé API.</translation>
@@ -285,6 +290,17 @@ Do you agree?</source>
 Acceptez-vous ?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>L'agent veut ajouter ce fond de carte web sous les couches du projet :
+{}
+
+Son serveur dessine la carte à mesure que vous la déplacez : il voit les zones que vous regardez, et rien de vos couches. Êtes-vous d'accord ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="206"/>
         <source>Earlier conversation: the agent starts afresh from here.</source>
         <translation>Conversation précédente : l'agent repart de zéro à partir d'ici.</translation>
@@ -362,6 +378,11 @@ Acceptez-vous ?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Couche ajoutée : {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Fond de carte ajouté : {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -1404,6 +1425,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Connecteur MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Fond de carte (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="961"/>
         <source>official</source>
         <translation>officiel</translation>
@@ -1432,6 +1458,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Imagerie satellite</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Fonds de carte</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>

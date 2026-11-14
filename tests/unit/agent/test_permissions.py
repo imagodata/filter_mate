@@ -43,7 +43,7 @@ class TestRiskClasses:
         ("create_layout", PROJECT), ("set_project_crs", PROJECT),
         ("update_features", BUFFER), ("add_features", BUFFER), ("add_field", BUFFER), ("join_layers", PROJECT),
         ("delete_features", LOCAL), ("export_layers", LOCAL), ("export_layout", LOCAL), ("remove_layers", LOCAL),
-        ("add_layer", OUTSIDE), ("add_service_layer", OUTSIDE),
+        ("add_layer", OUTSIDE), ("add_service_layer", OUTSIDE), ("add_basemap", OUTSIDE),
     ])
     def test_class_of_the_tools_of_the_catalog(self, name, risk):
         assert risk_of(tools_by_name()[name]) == risk
@@ -547,7 +547,7 @@ class TestAskedAlone:
 
     def test_the_tools_asked_alone(self):
         tools = tools_by_name()
-        for name in ("add_layer", "add_service_layer", "delete_features", "export_layout", "change_settings",
+        for name in ("add_layer", "add_service_layer", "add_basemap", "delete_features", "export_layout", "change_settings",
                      "apply_settings_profile"):
             assert asked_alone(name, tools[name]), name  # in the catalog, and asked alone
         assert asked_alone("run_pyqgis", spec("run_pyqgis", destructive=True))

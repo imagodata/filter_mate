@@ -955,6 +955,24 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layers/add-service", _body(platform=platform, typename=typename, name=name))
 
+    @mcp.tool(annotations=ToolAnnotations(title="Add a web basemap", readOnlyHint=False, destructiveHint=False,
+                                          idempotentHint=False, openWorldHint=True))
+    async def add_basemap(
+        platform: Annotated[str, Field(min_length=1, max_length=2000, description=(
+            "A basemap the user allowed: osm_tiles (OpenStreetMap), carto_light (neutral light grey), "
+            "carto_light_nolabels (the same with no place names, under layers that have labels), carto_dark, "
+            "carto_voyager, ign_plan and ign_ortho (France: map and aerial photographs), opentopomap (relief), or one "
+            "the user added, by the name the chat lists it under"))],
+        name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: its title)")] = "",
+    ) -> Dict[str, Any]:
+        """Add a web basemap (XYZ tiles) to the project, under every other layer.
+
+        A basemap is an image drawn by its server as the map moves: a background, which cannot be filtered, read
+        nor exported. Only a basemap of the list can be added, and in the chat of FilterMate only one the user ticked;
+        an address is never written here. Returns the layer summary. The chat of FilterMate asks the user first.
+        """
+        return await call("POST", "/layers/add-basemap", _body(platform=platform, name=name))
+
     @mcp.tool(annotations=ToolAnnotations(title="Search satellite imagery", readOnlyHint=True, openWorldHint=True))
     async def search_imagery(
         bbox: Annotated[Optional[List[float]], Field(min_length=4, max_length=4, description=(

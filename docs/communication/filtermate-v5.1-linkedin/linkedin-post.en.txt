@@ -6,10 +6,12 @@ The new AGENT section (experimental) filters, selects, runs Processing, styles l
 • Each filter says how many features it keeps; exports and removals are confirmed.
 • Four levels of autonomy, a rule per tool, layers it must never touch.
 • Every request is one turn you can undo.
-• Claude, Mistral, OpenAI or a local Ollama model, your own key, no account. A few free requests a month to try it.
+• Claude, Mistral, OpenAI or a local Ollama model, your own key, no account: the settings guide you to a key or to a local model.
 • Recipes replay a request without any model: nothing sent, nothing paid.
 
 Also experimental: objects drawn by SAM on your CPU, which then filter your other layers.
+
+And in the panel: Compare shows the map before and after the last filter, on each side of a line that follows the mouse.
 
 Free and open source, QGIS 3.22 to 4.x. The article walks through it:
 https://imagodata.github.io/filter_mate/#agent

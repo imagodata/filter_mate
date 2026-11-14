@@ -236,6 +236,11 @@ Sind Sie einverstanden?</translation>
         <translation>Die Quelle antwortet.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Die Quelle liefert ihre Kacheln.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Geben Sie zuerst Ihren API-Schlüssel ein.</translation>
@@ -255,6 +260,11 @@ Sind Sie einverstanden?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Layer hinzugefügt: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Hintergrundkarte hinzugefügt: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>Der Agent möchte diese Web-Hintergrundkarte unter den Layern des Projekts einfügen:
+{}
+
+Ihr Server zeichnet die Karte, während Sie sie verschieben: Er sieht, welche Bereiche Sie betrachten, aber nichts von Ihren Layern. Sind Sie einverstanden?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>MCP-Konnektor</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Hintergrundkarte (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP-Konnektoren</translation>
@@ -1440,6 +1466,11 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Satellitenbilder</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Hintergrundkarten</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

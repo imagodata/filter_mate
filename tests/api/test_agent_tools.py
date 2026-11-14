@@ -428,6 +428,22 @@ class TestHandlers:
         assert run(accessor, root, "search_imagery")[1]["platform"] == "earth_search"
         assert run(accessor, root, "add_service_layer", platform="ign_wfs", typename="A:b")[1]["name"] == "A:b"
         assert run(accessor, root, "add_service_layer", platform="prg_pl", typename="A:b")[0] is True
+        failed, message = run(accessor, root, "add_basemap", platform="carto_light")
+        assert failed and "not enabled" in message  # a basemap is added only when the user ticked it
+
+    def test_a_basemap_the_user_added_is_named_by_its_id(self, tmp_path):
+        accessor, asked = Accessor(), []
+        accessor.add_basemap = lambda platform, name="", extra_domains=None: asked.append((platform, extra_domains)) \
+            or InMemoryAccessor.add_basemap(accessor, platform, name, extra_domains)
+        address = "https://tiles.example.org/{z}/{x}/{y}.png?apikey=abc"
+        handlers = build_handlers(accessor, tmp_path, platforms=("xyz_mine_1a2b3c", "carto_light"),
+                                  extra_domains=f"{address}:xyz", basemap_addresses={"xyz_mine_1a2b3c": address})
+        executor = ToolExecutor(chat_tools(), handlers)
+        assert not executor.execute(ToolCallPart("c", "add_basemap", {"platform": "xyz_mine_1a2b3c"})).is_error
+        assert not executor.execute(ToolCallPart("c", "add_basemap", {"platform": "carto_light"})).is_error
+        assert [platform for platform, _ in asked] == [address, "carto_light"]
+        refused = executor.execute(ToolCallPart("c", "add_basemap", {"platform": address}))
+        assert refused.is_error and "abc" not in refused.content.replace(address, "")  # the address is not a name
 
     def test_export_stays_below_the_root(self, api):
         accessor, root = api
