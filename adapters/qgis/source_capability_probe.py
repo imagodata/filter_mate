@@ -197,6 +197,25 @@ def feature_count_or_none(layer: Any) -> Optional[int]:
         return None
 
 
+def shown_feature_count_or_none(layer: Any) -> Optional[int]:
+    """The number of features to tell the user; None when it is a network request or cannot be made exact.
+
+    ``featureCount()`` of a GeoPackage may ignore its subset (see ``feature_count``): a number shown after a
+    filter is counted exactly there, or not shown. Limits and thresholds keep ``feature_count_or_none``:
+    the count of the provider is never under the real one.
+    """
+    if layer is None or not counts_cheaply(layer):
+        return None
+    try:
+        from .feature_count import exact_feature_count
+    except ImportError:
+        return feature_count_or_none(layer)
+    try:
+        return exact_feature_count(layer)
+    except (RuntimeError, AttributeError):
+        return None
+
+
 _MAIN_NETWORK_MANAGER = None
 
 
