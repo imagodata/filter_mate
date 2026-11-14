@@ -208,6 +208,51 @@ def main(work):
         check("layer_statistics reads a filtered layer of a big table", False, exc)
     finally:
         introspection.MAX_STAT_FEATURES = limit
+    # A plain condition is read by batches where GDAL has them (feature_count.ARROW_FROM), ten times as fast as
+    # feature after feature from Python: the same number either way, the number QGIS reads. What is more than a
+    # condition (LIMIT, ORDER BY, GROUP BY: by batches GDAL leaves them out) goes feature after feature.
+    try:
+        from filter_mate.adapters.qgis import feature_count as counts
+    except ImportError:
+        counts = None
+    if counts is not None and hasattr(counts, "ARROW_FROM"):
+        batched = int(gdal.VersionInfo("VERSION_NUM")) >= counts.ARROW_FROM and hasattr(ogr.Layer, "GetArrowStream")
+        print(f"INFO GDAL {gdal.__version__}: plain filters read by batches: {batched}")
+        path, table, index = counts.source_parts(big.source())
+        asked = []
+        stream = getattr(ogr.Layer, "GetArrowStream", None)
+        if stream is not None:
+            ogr.Layer.GetArrowStream = lambda layer, *args, **kwargs: asked.append(1) or stream(layer, *args, **kwargs)
+        try:
+            for subset in ("\"usage\" = 'Industriel'", '"population" > 6000000', '"population" BETWEEN 1000 AND 500000',
+                           "\"usage\" IN ('Industriel', 'Agricole')", "\"nom\" LIKE 'é%'", "lower(\"nom\") = 'école'",
+                           '"usage" IS NULL', 'NOT ("population" < 100000) OR "usage" = \'x\'', "fid % 7 = 0",
+                           "m.fid < 500", 'ST_MinX("geom") > 600500', "1 = 1", "0", '"population" > 1e12',
+                           "(fid > 10 AND (fid < 2000 OR \"usage\" = 'Industriel'))", "\"nom\" = 'Ecole' AND fid <= 99999",
+                           "fid < 10 LIMIT 3", "fid < 10 ORDER BY fid DESC LIMIT 2", "fid < 100 GROUP BY \"nom\"",
+                           "\"usage\" = 'limit 3'"):
+                plain = not counts._NOT_PLAIN.search(subset)
+                big.setSubsetString(subset)
+                read = sum(1 for _ in big.getFeatures())
+                del asked[:]
+                fast = counts._read_count(path, table, index, subset, 30.0)
+                by_batches = bool(asked)
+                original, counts.ARROW_FROM = counts.ARROW_FROM, 10 ** 9
+                try:
+                    slow = counts._read_count(path, table, index, subset, 30.0)
+                finally:
+                    counts.ARROW_FROM = original
+                check(f"{subset}: by batches as feature after feature, as QGIS reads", fast == slow == read
+                      and by_batches == (batched and plain), (fast, slow, read, by_batches, plain))
+        finally:
+            if stream is not None:
+                ogr.Layer.GetArrowStream = stream
+        started = time.perf_counter()
+        big.setSubsetString('"population" > 100')
+        counts._CACHE.clear()
+        count = counts.exact_feature_count(big)
+        print(f"INFO {count} features counted in {time.perf_counter() - started:.3f} s")
+        check("nearly every feature of 120 000 is counted", count == 119_999, count)
     # A filter slow on each feature: the clock stops the reading, the main thread waits about the budget (the count
     # alone: describe_layer asks QGIS for the extent too, which reads every feature).
     try:

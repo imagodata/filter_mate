@@ -269,3 +269,131 @@ def test_features_to_read_never_says_fewer(counts, gpkg, fake_gdal):
     # Not counted: what QGIS says, the count of the whole table.
     assert counts.features_to_read(_Layer(f"{gpkg}|layername=commune", "fid < 5")) == 930
     assert counts.features_to_read(_Layer("/data/x.shp", count=-1, storage="ESRI Shapefile")) == -1
+
+
+class _Batches:
+    """An Arrow stream of the fake layer: batches of ``size`` features, None at the end."""
+
+    def __init__(self, gdal, size):
+        self.gdal, self.size = gdal, size
+
+    def GetNextRecordBatch(self):
+        if self.gdal.raises:
+            raise RuntimeError("failed to prepare SQL")
+        if self.gdal.left == 0:
+            if self.gdal.fails:
+                self.gdal.error = self.gdal.CE_Failure
+            return None
+        length = min(self.size, self.gdal.left)
+        self.gdal.left -= length
+        self.gdal.batches += 1
+        return types.SimpleNamespace(GetLength=lambda: length)
+
+
+@pytest.fixture
+def arrow_gdal(fake_gdal, monkeypatch):
+    """The fake GDAL, of a version that reads by batches."""
+    fake_gdal.batches, fake_gdal.features_read = 0, 0
+    fake_gdal.VersionInfo = lambda name: "3120200"
+    fake_gdal.ResetReading = lambda: setattr(fake_gdal, "left", fake_gdal.features)
+    fake_gdal.GetArrowStream = lambda options: (fake_gdal.stream_options.append(options) or
+                                                _Batches(fake_gdal, int(options[0].split("=")[1])))
+    fake_gdal.stream_options = []
+    read = fake_gdal.GetNextFeature
+
+    def counted():
+        fake_gdal.features_read += 1
+        return read()
+    fake_gdal.GetNextFeature = counted
+    return fake_gdal
+
+
+def test_a_plain_filter_is_read_by_batches(counts, gpkg, arrow_gdal):
+    """2026-11-14: 270 000 features took 0.31 s feature after feature from Python, 0.03 s by batches."""
+    arrow_gdal.features = 10_000
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", '"population" > 100')) == 10_000
+    assert arrow_gdal.batches == 5 and arrow_gdal.features_read == 0
+    assert arrow_gdal.stream_options == [[f"MAX_FEATURES_IN_BATCH={counts.ARROW_BATCH}"]]
+    assert arrow_gdal.ignored  # the fields and the geometry are still left out of the reading
+
+
+@pytest.mark.parametrize("subset", [
+    "fid < 10 LIMIT 3", "fid < 10 ORDER BY fid LIMIT 2", "1 GROUP BY nom", "fid < 10 group by fid",
+    '(SELECT COUNT(*) FROM "t" a WHERE a.fid = m.fid) > 0', "fid < 5 offset 2", "fid = 1; ", "fid = 1 -- x",
+    "fid = 1 /* x */", "\"nom\" = 'limit 3'", "fid IN (1, 2) HAVING 1", "fid < 5 WINDOW w AS ()",
+])
+def test_more_than_a_condition_is_read_feature_after_feature(counts, gpkg, arrow_gdal, subset):
+    """By batches GDAL leaves LIMIT, ORDER BY and GROUP BY out, and counts more than QGIS reads."""
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", subset)) == 7
+    assert arrow_gdal.batches == 0 and arrow_gdal.features_read == 8  # the seven, and the end
+
+
+def test_an_older_gdal_reads_feature_after_feature(counts, gpkg, arrow_gdal):
+    arrow_gdal.VersionInfo = lambda name: "3080400"  # it has batches, never compared with the features here
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", "fid < 8")) == 7
+    assert arrow_gdal.batches == 0 and arrow_gdal.features_read == 8
+    arrow_gdal.VersionInfo = lambda name: "not a number"
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", "fid < 9")) == 7 and arrow_gdal.batches == 0
+
+
+def test_no_batches_for_this_layer_falls_back_on_the_features(counts, gpkg, arrow_gdal):
+    arrow_gdal.GetArrowStream = lambda options: None
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", "fid < 8")) == 7
+    assert arrow_gdal.features_read == 8
+
+
+def test_batches_keep_the_budget_and_the_failures(counts, gpkg, arrow_gdal, monkeypatch):
+    arrow_gdal.features = 10_000
+    monkeypatch.setattr(counts, "_clock", _Clock(0.3))  # 0.3 s at each look: past the budget at the fourth
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", "fid > 0")) is None
+    assert arrow_gdal.batches == 4  # stopped there, of five: not read to the end
+    monkeypatch.setattr(counts, "_clock", _Clock(0.0))
+    arrow_gdal.fails = True
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", "fid > 1")) is None
+    arrow_gdal.fails, arrow_gdal.raises = False, True  # GDAL exceptions turned on elsewhere
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=t", "fid > 2")) is None
+    assert arrow_gdal.option_log[-1] is None  # the setting of the thread is given back
+
+
+def test_a_count_made_on_a_trial_copy_is_kept_for_the_layer_once_filtered(counts, gpkg, fake_gdal):
+    """Setting a filter makes QGIS rewrite the header of the file (3.28 and later): the count of the copy, made
+    for the file as it was, was read again, and again by who asked next."""
+    trial = _Layer(f"{gpkg}|layername=commune", "fid < 8")
+    assert counts.exact_feature_count(trial) == 7
+    counts.note_trial(trial, 7)
+    os.utime(gpkg, ns=(1, 1))  # what setting the filter does to the file
+    layer = _Layer(f"{gpkg}|layername=commune", "fid < 8")
+    counts.adopt_trial(layer)
+    fake_gdal.features = 99  # read again, it would say so
+    assert counts.exact_feature_count(layer) == 7 and len(fake_gdal.opened) == 1
+    # Once only: the next change of the file is read.
+    os.utime(gpkg, ns=(2, 2))
+    counts.adopt_trial(layer)
+    assert counts.exact_feature_count(layer) == 99
+
+
+def test_a_trial_is_adopted_for_its_own_filter_and_table_and_not_for_long(counts, gpkg, fake_gdal, monkeypatch):
+    clock = _Clock(0.0)
+    monkeypatch.setattr(counts, "_clock", clock)
+    counts.note_trial(_Layer(f"{gpkg}|layername=commune", "fid < 8"), 7)
+    fake_gdal.features = 3
+    os.utime(gpkg, ns=(1, 1))
+    counts.adopt_trial(_Layer(f"{gpkg}|layername=commune", "fid < 9"))  # another filter
+    counts.adopt_trial(_Layer(f"{gpkg}|layername=troncon", "fid < 8"))  # another table
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=commune", "fid < 9")) == 3
+    clock.now += counts.TRIAL_WINDOW + 1  # too long ago: anything may have changed the file since
+    os.utime(gpkg, ns=(2, 2))
+    counts.adopt_trial(_Layer(f"{gpkg}|layername=commune", "fid < 8"))
+    assert counts.exact_feature_count(_Layer(f"{gpkg}|layername=commune", "fid < 8")) == 3
+
+
+def test_nothing_is_noted_for_what_is_not_counted_here(counts, gpkg, fake_gdal):
+    counts.note_trial(_Layer("/data/communes.shp", '"x" = 1', 12, storage="ESRI Shapefile"), 12)
+    counts.note_trial(_Layer(f"{gpkg}|layername=commune"), 930)  # no filter
+    counts.note_trial(_Layer(f"{gpkg}|layername=commune", "fid < 8", modified=True), 7)
+    counts.note_trial(_Layer(f"{gpkg}|layername=commune", "fid < 8"), -1)
+    counts.note_trial(_Layer(f"{gpkg}|layername=commune", "SELECT * FROM commune"), 7)
+    assert not counts._TRIALS
+    for number in range(counts.TRIALS_KEPT + 5):
+        counts.note_trial(_Layer(f"{gpkg}|layername=commune", f"fid < {number + 2}"), number)
+    assert len(counts._TRIALS) == counts.TRIALS_KEPT

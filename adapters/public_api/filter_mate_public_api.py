@@ -135,6 +135,11 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
             success = self._safe_set_subset(layer, filter_expr)
 
             if success:
+                try:  # a count just made on a trial copy under this filter is not read again
+                    from ..qgis.feature_count import adopt_trial
+                    adopt_trial(layer)
+                except ImportError:  # lightweight local-provider test adapters
+                    pass
                 logger.info(
                     f"PublicAPI: Filter applied on {layer_name!r} "
                     f"by {source_plugin!r}"
