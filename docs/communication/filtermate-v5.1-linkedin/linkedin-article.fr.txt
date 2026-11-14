@@ -30,7 +30,7 @@ Chaque demande est un tour. Annuler et Rétablir parcourent les tours : filtres,
 
 Votre modèle, sans compte
 
-Claude, Mistral, OpenAI, tout serveur compatible OpenAI, ou un modèle local avec Ollama. Votre clé reste dans la base d'authentification de QGIS. Pour essayer sans clé, quelques requêtes gratuites par mois passent par un relais de FilterMate vers Claude Haiku 5.5.
+Claude, Mistral, OpenAI, tout serveur compatible OpenAI, ou un modèle local avec Ollama. Votre clé reste dans la base d'authentification de QGIS. Les réglages de l'agent guident les deux voies : un lien pour créer une clé chez le fournisseur, un bouton Tester qui dit s'il répond et liste ses modèles, et pour Ollama la liste des modèles installés et le téléchargement d'un nouveau.
 
 Pour être précis sur les données : l'agent lit des valeurs de champs et des échantillons d'entités, qui partent chez le fournisseur choisi. Avec un modèle local Ollama, rien ne quitte votre ordinateur. Rien n'est envoyé avant que vous ayez choisi un modèle et donné votre accord.
 
@@ -49,6 +49,8 @@ Un serveur MCP intégré, désactivé par défaut, permet à Claude Code ou à u
 Et le filtrage lui-même
 
 Les couches PostgreSQL, SpatiaLite, GeoPackage et fichiers gardent au plus près ce que QGIS garde : un filtre géométrique se combine désormais avec le précédent en OU et en ET, une expression que PostgreSQL ne sait pas exécuter est évaluée par QGIS, et un filtre sur un texte dans un Shapefile respecte la casse.
+
+Dans le panneau, un nouveau bouton Comparer montre la carte avant et après le dernier filtre, de part et d'autre d'une ligne qui suit la souris. Et à la première ouverture, l'agent propose de régler FilterMate avec vous : il regarde le projet, pose quelques questions à choix, puis montre chaque réglage avant et après.
 
 FilterMate 5.1 fonctionne de QGIS 3.22 à 4.x, en Qt5 et Qt6, dans 34 langues. Les nouveaux textes ont été traduits automatiquement : les corrections de locuteurs natifs sont bienvenues.
 
