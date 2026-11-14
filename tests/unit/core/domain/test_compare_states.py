@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """States before a filter operation for the Compare mode (core/domain/compare_states.py)."""
+from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
 
 from core.domain.compare_states import (BeforeMap, BeforeState, LayerState, MapState, before_layer_order,
                                         from_cross_operation, from_history_entry, map_from_history_entry,
-                                        map_from_operation, map_from_pin)
+                                        map_from_operation, map_from_pin, map_with_effects, pin_before)
 
 pytestmark = pytest.mark.unit
 
@@ -130,6 +131,66 @@ def test_an_operation_with_nothing_drawable_is_empty():
     assert map_from_operation(SimpleNamespace(changes=(), effects=(("notes", "", [], ["x"]),))).empty
     only_removed = map_from_operation(SimpleNamespace(changes=(), effects=(("removed", "old", "", ((), 0), "p"),)))
     assert only_removed.empty and only_removed.missing == ("p",)
+
+
+def test_several_operations_keep_the_state_before_the_first_effect_on_each_layer():
+    """The map before a step of the history: what the turns done since changed, before the first of them."""
+    first = (("style", "v", "<red/>", "<blue/>", "roads"), ("visibility", "h", True, False))
+    second = (("style", "v", "<blue/>", "<green/>", "roads"), ("visibility", "h", False, True),
+              ("added", "new", "<qlr/>", ((), 0), "buffer"), ("visibility", "w", False, True))
+    # An "undo back to here" that hid w again after the second turn showed it: reversed, it brings it back.
+    third = (("visibility", "w", True, False),)
+    before = map_with_effects([BeforeState("v", "a")], [(first, False), (second, False), (third, True)], "Step")
+    assert before.states == (BeforeState("v", "a", style="<red/>"),)
+    assert before.present == ("h",) and before.absent == frozenset({"new", "w"}) and before.label == "Step"
+    assert map_with_effects([BeforeState("x", "a"), BeforeState("x", "b")], []).states == (BeforeState("x", "a"),)
+
+
+# --- a pin of the map before a step ------------------------------------------------------
+
+
+def test_a_pin_of_the_map_before_a_step_differs_by_the_layers_changed_since():
+    from core.domain.filter_state import LayerSnapshot
+    roads = LayerSnapshot("roads", "vector", "/d/v.gpkg|layername=roads", "ogr", subset='"type" = 2')
+    dem = LayerSnapshot("dem", "raster", "/tmp/fm/dem_clip.vrt", "gdal", derived=True, original_source="/d/dem.tif")
+    dem_then = LayerSnapshot("dem", "raster", "/d/dem.tif", "gdal")
+    now = MapState((LayerState("roads", "Roads", roads, "<blue/>", True), LayerState("dem", "DEM", dem, "<r/>", True),
+                    LayerState("added", "Buffer", None, "<s/>", True), LayerState("hidden", "Rivers", None, "<s/>", False),
+                    LayerState("same", "Same", None, "<s/>", True)), 500.0)
+    before = BeforeMap((BeforeState("roads", '"type" = 1', style="<red/>"),
+                        BeforeState("dem", "", "/d/dem.tif", "gdal", dem_then)),
+                       frozenset({"added"}), ("hidden",), ("Parcels",))
+    pinned = pin_before(now, before, 100.0)
+    assert pinned.taken_at == 100.0
+    kept = {layer.layer_id: layer for layer in pinned.layers}
+    assert kept["roads"].snapshot == replace(roads, subset='"type" = 1') and kept["roads"].style == "<red/>"
+    assert kept["dem"].snapshot is dem_then and kept["dem"].style == "<r/>"
+    assert not kept["added"].visible and kept["hidden"].visible and kept["same"] == now.layers[4]
+    # Compared with the map now, the pin draws what the map before the step draws.
+    compared = map_from_pin(pinned, now)
+    assert {state.layer_id: (state.subset, state.source, state.style) for state in compared.states} == {
+        "roads": ('"type" = 1', "", "<red/>"), "dem": ("", "/d/dem.tif", None)}
+    assert compared.absent == frozenset({"added"}) and compared.present == ("hidden",)
+    assert compared.missing == ("Parcels",) and compared.pinned_at == 100.0
+
+
+def test_a_pin_before_a_step_keeps_a_filter_kept_and_names_a_layer_not_read():
+    from core.domain.filter_state import LayerSnapshot
+    roads = LayerSnapshot("roads", "vector", "/d/v.gpkg", "ogr", subset="x")
+    now = MapState((LayerState("roads", "Roads", roads, "<blue/>", True), LayerState("unread", "U", None, None, True),
+                    LayerState("gone_later", "G", None, None, True)))
+    before = BeforeMap((BeforeState("roads", None, style="<red/>"), BeforeState("unread", "y")),
+                       unshown=(("tree", "", ""), ("edits", "gone_later", "G")))
+    pinned = pin_before(now, before, 1.0)
+    assert pinned.layers[0].snapshot is roads and pinned.layers[0].style == "<red/>"
+    # The filter of then cannot be kept on a layer not read: named, not dropped in silence; what the step changed
+    # and a pin cannot hold is named too.
+    assert pinned.layers[1].snapshot is None
+    assert pinned.unshown == (("tree", "", ""), ("edits", "gone_later", "G"), ("filter", "unread", "U"))
+    compared = map_from_pin(pinned, now)
+    assert compared.states == (BeforeState("roads", None, style="<red/>"),) and compared.unshown == pinned.unshown
+    # A layer removed since is named as missing, not twice.
+    assert map_from_pin(pinned, MapState(now.layers[:2])).unshown == (("tree", "", ""), ("filter", "unread", "U"))
 
 
 # --- a pin ------------------------------------------------------------------------------

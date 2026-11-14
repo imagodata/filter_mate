@@ -194,6 +194,7 @@ def ctrl_module(monkeypatch):
             ANSWER_ONCE="once", AgentPanel=lambda parent: MagicMock(), level_short=str, preset_label=str)
     _module(monkeypatch, ".ui.widgets.agent_widgets_strip", number_text=str)
     bounded_http = _load(monkeypatch, "adapters.agent.bounded_http", "adapters/agent/bounded_http.py")
+    _load(monkeypatch, "ui.controllers.history_tips", "ui/controllers/history_tips.py")
     module = _load(monkeypatch, "ui.controllers.agent_chat_controller", "ui/controllers/agent_chat_controller.py")
     module._test_bounded_http = bounded_http
     module._test_store = store

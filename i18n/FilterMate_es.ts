@@ -4759,6 +4759,11 @@ What would you like to do?</translation>
         <translation>Comparar: el mapa fijado a las {} a la izquierda de la línea, tal como está a la derecha; la línea sigue al ratón</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Comparar: el mapa fijado a la izquierda de la línea, tal como está a la derecha; la línea sigue al ratón</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Clic derecho para fijar de nuevo o quitar la fijación.</translation>
@@ -4772,6 +4777,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Fijado {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Fijado</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>
@@ -4812,6 +4822,136 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="431"/>
         <source>Compare stopped: the map could not be read.</source>
         <translation>Comparación detenida: no se pudo leer el mapa.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="30"/>
+        <source>turns of the agent</source>
+        <translation>turnos del agente</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters of {}</source>
+        <translation>filtros ráster / de nube de puntos de {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters</source>
+        <translation>filtros ráster / de nube de puntos</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="34"/>
+        <source>vector filters of the dock</source>
+        <translation>filtros vectoriales del panel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Undo: {}</source>
+        <translation>Deshacer: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Redo: {}</source>
+        <translation>Rehacer: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to undo.</source>
+        <translation>Nada que deshacer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to redo.</source>
+        <translation>Nada que rehacer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="54"/>
+        <source>History: {}</source>
+        <translation>Historial: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to undo: {}</source>
+        <translation>Pasos por deshacer: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to redo: {}</source>
+        <translation>Pasos por rehacer: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="57"/>
+        <source>Right-click: the history of the project</source>
+        <translation>Clic derecho: el historial del proyecto</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="100"/>
+        <source>History of the project</source>
+        <translation>Historial del proyecto</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="205"/>
+        <source>{} to undo · {} to redo</source>
+        <translation>{} por deshacer · {} por rehacer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="124"/>
+        <source>Nothing done in this project yet.</source>
+        <translation>Aún no se ha hecho nada en este proyecto.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="175"/>
+        <source>{} features kept</source>
+        <translation>{} entidades conservadas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Undo</source>
+        <translation>Deshacer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Redo</source>
+        <translation>Rehacer</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="218"/>
+        <source>Undo would undo this step now.</source>
+        <translation>Deshacer deshará este paso ahora.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="219"/>
+        <source>Redo would redo this step now.</source>
+        <translation>Rehacer rehará este paso ahora.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="128"/>
+        <source>Undone: the map no longer holds it.</source>
+        <translation>Deshecho: el mapa ya no lo contiene.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="132"/>
+        <source>Compare with the map before this step</source>
+        <translation>Comparar con el mapa anterior a este paso</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="133"/>
+        <source>Pin the map before this step</source>
+        <translation>Fijar el mapa anterior a este paso</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="260"/>
+        <source>History…</source>
+        <translation>Historial…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="487"/>
+        <source>Nothing to compare: nothing this step changed can be drawn.</source>
+        <translation>Nada que comparar: nada de lo que cambió este paso se puede dibujar.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="505"/>
+        <source>The map before this step is pinned: Compare shows it left of the line.</source>
+        <translation>El mapa anterior a este paso está fijado: Comparar lo muestra a la izquierda de la línea.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

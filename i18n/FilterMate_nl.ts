@@ -4759,6 +4759,11 @@ What would you like to do?</translation>
         <translation>Vergelijken: de kaart vastgezet om {} links van de lijn, zoals hij nu is rechts; de lijn volgt de muis</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Vergelijken: de vastgezette kaart links van de lijn, zoals hij nu is rechts; de lijn volgt de muis</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Rechtsklik om opnieuw vast te zetten of de vastzetting te verwijderen.</translation>
@@ -4772,6 +4777,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Vastgezet {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Vastgezet</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>
@@ -4812,6 +4822,136 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="431"/>
         <source>Compare stopped: the map could not be read.</source>
         <translation>Vergelijken gestopt: de kaart kon niet worden gelezen.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="30"/>
+        <source>turns of the agent</source>
+        <translation>beurten van de agent</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters of {}</source>
+        <translation>raster-/puntenwolkfilters van {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters</source>
+        <translation>raster-/puntenwolkfilters</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="34"/>
+        <source>vector filters of the dock</source>
+        <translation>vectorfilters van het paneel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Undo: {}</source>
+        <translation>Ongedaan maken: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Redo: {}</source>
+        <translation>Opnieuw: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to undo.</source>
+        <translation>Niets om ongedaan te maken.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to redo.</source>
+        <translation>Niets om opnieuw uit te voeren.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="54"/>
+        <source>History: {}</source>
+        <translation>Geschiedenis: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to undo: {}</source>
+        <translation>Stappen om ongedaan te maken: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to redo: {}</source>
+        <translation>Stappen om opnieuw uit te voeren: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="57"/>
+        <source>Right-click: the history of the project</source>
+        <translation>Rechtsklik: de geschiedenis van het project</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="100"/>
+        <source>History of the project</source>
+        <translation>Geschiedenis van het project</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="205"/>
+        <source>{} to undo · {} to redo</source>
+        <translation>{} ongedaan te maken · {} opnieuw uit te voeren</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="124"/>
+        <source>Nothing done in this project yet.</source>
+        <translation>In dit project is nog niets gedaan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="175"/>
+        <source>{} features kept</source>
+        <translation>{} objecten behouden</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Undo</source>
+        <translation>Ongedaan maken</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Redo</source>
+        <translation>Opnieuw</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="218"/>
+        <source>Undo would undo this step now.</source>
+        <translation>Ongedaan maken maakt deze stap nu ongedaan.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="219"/>
+        <source>Redo would redo this step now.</source>
+        <translation>Opnieuw voert deze stap nu opnieuw uit.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="128"/>
+        <source>Undone: the map no longer holds it.</source>
+        <translation>Ongedaan gemaakt: de kaart bevat het niet meer.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="132"/>
+        <source>Compare with the map before this step</source>
+        <translation>Vergelijken met de kaart vóór deze stap</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="133"/>
+        <source>Pin the map before this step</source>
+        <translation>De kaart vóór deze stap vastzetten</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="260"/>
+        <source>History…</source>
+        <translation>Geschiedenis…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="487"/>
+        <source>Nothing to compare: nothing this step changed can be drawn.</source>
+        <translation>Niets te vergelijken: niets wat deze stap heeft gewijzigd kan worden getekend.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="505"/>
+        <source>The map before this step is pinned: Compare shows it left of the line.</source>
+        <translation>De kaart vóór deze stap is vastgezet: Vergelijken toont hem links van de lijn.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

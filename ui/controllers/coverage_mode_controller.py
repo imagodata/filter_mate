@@ -3710,8 +3710,10 @@ class CoverageModeController(BaseController):
             return
         # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
         on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
-        self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', on_filtering and self.can_undo())
-        self._call(getattr(dw, 'pushButton_action_redo_filter', None), 'setEnabled', on_filtering and self.can_redo())
+        undo, redo = getattr(dw, 'pushButton_action_undo_filter', None), getattr(dw, 'pushButton_action_redo_filter', None)
+        self._call(undo, 'setEnabled', on_filtering and self.can_undo())
+        self._call(redo, 'setEnabled', on_filtering and self.can_redo())
+        self._call(dw, 'refresh_undo_tips', undo, redo)  # what they would undo or redo, in their tooltips
 
     # === Height above ground ===
 

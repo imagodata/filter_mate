@@ -4759,6 +4759,11 @@ What would you like to do?</translation>
         <translation>Karşılaştır: {} saatinde sabitlenen harita çizginin solunda, şimdiki hâli sağında; çizgi fareyi izler</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>Karşılaştır: sabitlenen harita çizginin solunda, şimdiki hâli sağında; çizgi fareyi izler</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Yeniden sabitlemek ya da sabitlemeyi kaldırmak için sağ tıklayın.</translation>
@@ -4772,6 +4777,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Sabitlendi {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Sabitlendi</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>
@@ -4812,6 +4822,136 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="431"/>
         <source>Compare stopped: the map could not be read.</source>
         <translation>Karşılaştırma durdu: harita okunamadı.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="30"/>
+        <source>turns of the agent</source>
+        <translation>aracının turları</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters of {}</source>
+        <translation>{} katmanının raster / nokta bulutu filtreleri</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters</source>
+        <translation>raster / nokta bulutu filtreleri</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="34"/>
+        <source>vector filters of the dock</source>
+        <translation>panelin vektör filtreleri</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Undo: {}</source>
+        <translation>Geri al: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Redo: {}</source>
+        <translation>Yinele: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to undo.</source>
+        <translation>Geri alınacak bir şey yok.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to redo.</source>
+        <translation>Yinelenecek bir şey yok.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="54"/>
+        <source>History: {}</source>
+        <translation>Geçmiş: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to undo: {}</source>
+        <translation>Geri alınacak adımlar: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to redo: {}</source>
+        <translation>Yinelenecek adımlar: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="57"/>
+        <source>Right-click: the history of the project</source>
+        <translation>Sağ tık: projenin geçmişi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="100"/>
+        <source>History of the project</source>
+        <translation>Projenin geçmişi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="205"/>
+        <source>{} to undo · {} to redo</source>
+        <translation>{} geri alınacak · {} yinelenecek</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="124"/>
+        <source>Nothing done in this project yet.</source>
+        <translation>Bu projede henüz hiçbir şey yapılmadı.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="175"/>
+        <source>{} features kept</source>
+        <translation>{} detay korundu</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Undo</source>
+        <translation>Geri al</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Redo</source>
+        <translation>Yinele</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="218"/>
+        <source>Undo would undo this step now.</source>
+        <translation>Geri al şimdi bu adımı geri alacak.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="219"/>
+        <source>Redo would redo this step now.</source>
+        <translation>Yinele şimdi bu adımı yineleyecek.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="128"/>
+        <source>Undone: the map no longer holds it.</source>
+        <translation>Geri alındı: harita artık bunu içermiyor.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="132"/>
+        <source>Compare with the map before this step</source>
+        <translation>Bu adımdan önceki haritayla karşılaştır</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="133"/>
+        <source>Pin the map before this step</source>
+        <translation>Bu adımdan önceki haritayı sabitle</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="260"/>
+        <source>History…</source>
+        <translation>Geçmiş…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="487"/>
+        <source>Nothing to compare: nothing this step changed can be drawn.</source>
+        <translation>Karşılaştırılacak bir şey yok: bu adımın değiştirdiği hiçbir şey çizilemez.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="505"/>
+        <source>The map before this step is pinned: Compare shows it left of the line.</source>
+        <translation>Bu adımdan önceki harita sabitlendi: Karşılaştır onu çizginin solunda gösterir.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

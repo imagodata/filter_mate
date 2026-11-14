@@ -4759,6 +4759,11 @@ What would you like to do?</translation>
         <translation>So sánh: bản đồ đã ghim lúc {} ở bên trái đường, bản đồ hiện tại ở bên phải; đường di chuyển theo chuột</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>So sánh: bản đồ đã ghim ở bên trái đường, bản đồ hiện tại ở bên phải; đường di chuyển theo chuột</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>Nhấp chuột phải để ghim lại hoặc bỏ ghim.</translation>
@@ -4772,6 +4777,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Đã ghim {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>Đã ghim</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>
@@ -4812,6 +4822,136 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="431"/>
         <source>Compare stopped: the map could not be read.</source>
         <translation>Đã dừng so sánh: không đọc được bản đồ.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="30"/>
+        <source>turns of the agent</source>
+        <translation>các lượt của tác tử</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters of {}</source>
+        <translation>bộ lọc raster / đám mây điểm của {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters</source>
+        <translation>bộ lọc raster / đám mây điểm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="34"/>
+        <source>vector filters of the dock</source>
+        <translation>bộ lọc vector của bảng điều khiển</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Undo: {}</source>
+        <translation>Hoàn tác: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Redo: {}</source>
+        <translation>Làm lại: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to undo.</source>
+        <translation>Không có gì để hoàn tác.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to redo.</source>
+        <translation>Không có gì để làm lại.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="54"/>
+        <source>History: {}</source>
+        <translation>Lịch sử: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to undo: {}</source>
+        <translation>Số bước để hoàn tác: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to redo: {}</source>
+        <translation>Số bước để làm lại: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="57"/>
+        <source>Right-click: the history of the project</source>
+        <translation>Nhấp chuột phải: lịch sử của dự án</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="100"/>
+        <source>History of the project</source>
+        <translation>Lịch sử của dự án</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="205"/>
+        <source>{} to undo · {} to redo</source>
+        <translation>{} để hoàn tác · {} để làm lại</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="124"/>
+        <source>Nothing done in this project yet.</source>
+        <translation>Chưa có gì được thực hiện trong dự án này.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="175"/>
+        <source>{} features kept</source>
+        <translation>{} đối tượng được giữ lại</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Undo</source>
+        <translation>Hoàn tác</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Redo</source>
+        <translation>Làm lại</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="218"/>
+        <source>Undo would undo this step now.</source>
+        <translation>Hoàn tác sẽ hoàn tác bước này ngay bây giờ.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="219"/>
+        <source>Redo would redo this step now.</source>
+        <translation>Làm lại sẽ làm lại bước này ngay bây giờ.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="128"/>
+        <source>Undone: the map no longer holds it.</source>
+        <translation>Đã hoàn tác: bản đồ không còn chứa nó.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="132"/>
+        <source>Compare with the map before this step</source>
+        <translation>So sánh với bản đồ trước bước này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="133"/>
+        <source>Pin the map before this step</source>
+        <translation>Ghim bản đồ trước bước này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="260"/>
+        <source>History…</source>
+        <translation>Lịch sử…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="487"/>
+        <source>Nothing to compare: nothing this step changed can be drawn.</source>
+        <translation>Không có gì để so sánh: không có gì mà bước này thay đổi có thể được vẽ.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="505"/>
+        <source>The map before this step is pinned: Compare shows it left of the line.</source>
+        <translation>Bản đồ trước bước này đã được ghim: So sánh hiển thị nó ở bên trái đường.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

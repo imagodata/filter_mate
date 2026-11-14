@@ -4759,6 +4759,11 @@ What would you like to do?</translation>
         <translation>비교: 선 왼쪽은 {}에 고정한 지도, 오른쪽은 현재 지도이며 선은 마우스를 따라갑니다</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="192"/>
+        <source>Compare: the map pinned left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>비교: 선 왼쪽은 고정한 지도, 오른쪽은 현재 지도이며 선은 마우스를 따라갑니다</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="186"/>
         <source>Right-click to pin again or remove the pin.</source>
         <translation>오른쪽 클릭으로 다시 고정하거나 고정을 해제합니다.</translation>
@@ -4772,6 +4777,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>고정 {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="343"/>
+        <source>Pinned</source>
+        <translation>고정</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="316"/>
@@ -4812,6 +4822,136 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="431"/>
         <source>Compare stopped: the map could not be read.</source>
         <translation>비교 중지: 지도를 읽을 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="30"/>
+        <source>turns of the agent</source>
+        <translation>에이전트의 턴</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters of {}</source>
+        <translation>{}의 래스터 / 포인트 클라우드 필터</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="32"/>
+        <source>raster / point cloud filters</source>
+        <translation>래스터 / 포인트 클라우드 필터</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="34"/>
+        <source>vector filters of the dock</source>
+        <translation>패널의 벡터 필터</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Undo: {}</source>
+        <translation>실행 취소: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="49"/>
+        <source>Redo: {}</source>
+        <translation>다시 실행: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to undo.</source>
+        <translation>실행 취소할 항목이 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="51"/>
+        <source>Nothing to redo.</source>
+        <translation>다시 실행할 항목이 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="54"/>
+        <source>History: {}</source>
+        <translation>기록: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to undo: {}</source>
+        <translation>실행 취소할 단계: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="56"/>
+        <source>Steps to redo: {}</source>
+        <translation>다시 실행할 단계: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_tips.py" line="57"/>
+        <source>Right-click: the history of the project</source>
+        <translation>오른쪽 클릭: 프로젝트 기록</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="100"/>
+        <source>History of the project</source>
+        <translation>프로젝트 기록</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="205"/>
+        <source>{} to undo · {} to redo</source>
+        <translation>실행 취소 {} · 다시 실행 {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="124"/>
+        <source>Nothing done in this project yet.</source>
+        <translation>이 프로젝트에서는 아직 한 작업이 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="175"/>
+        <source>{} features kept</source>
+        <translation>피처 {}개 유지</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Undo</source>
+        <translation>실행 취소</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="178"/>
+        <source>Redo</source>
+        <translation>다시 실행</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="218"/>
+        <source>Undo would undo this step now.</source>
+        <translation>실행 취소는 지금 이 단계를 되돌립니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="219"/>
+        <source>Redo would redo this step now.</source>
+        <translation>다시 실행은 지금 이 단계를 다시 실행합니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="128"/>
+        <source>Undone: the map no longer holds it.</source>
+        <translation>되돌림: 지도에 더 이상 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="132"/>
+        <source>Compare with the map before this step</source>
+        <translation>이 단계 이전의 지도와 비교</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="133"/>
+        <source>Pin the map before this step</source>
+        <translation>이 단계 이전의 지도 고정</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="260"/>
+        <source>History…</source>
+        <translation>기록…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="487"/>
+        <source>Nothing to compare: nothing this step changed can be drawn.</source>
+        <translation>비교할 것이 없습니다. 이 단계에서 바뀐 것은 그릴 수 없습니다.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="505"/>
+        <source>The map before this step is pinned: Compare shows it left of the line.</source>
+        <translation>이 단계 이전의 지도를 고정했습니다: 비교는 선 왼쪽에 이 지도를 보여 줍니다.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

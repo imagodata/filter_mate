@@ -8,6 +8,7 @@ files of the turn alive.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any, Callable, Dict, FrozenSet, List, Optional, Sequence, Tuple
 
 from qgis.core import QgsProject
@@ -39,6 +40,10 @@ class TurnCheckpoint:
         # What each step did beside the filters (one per step of ``_steps``), and the recorder of the step under way.
         self._step_effects: List[Tuple[Tuple[Any, ...], ...]] = []
         self._step_recorder: Optional[EffectsRecorder] = None
+        # When the turn and each of its steps began: an operation done meanwhile (a raster filtered through the API,
+        # a filter of the dock) is placed among them in the history of the project (core/domain/history_timeline.py).
+        self._started = 0.0
+        self._step_times: List[float] = []
         self._open = False
         # The request of the turn being run, kept as the description of its operation.
         self.label = ""
@@ -69,6 +74,9 @@ class TurnCheckpoint:
         here" restores, step by step.
         """
         self._close_step()
+        now = time.time()
+        if not self._open or not self._started:
+            self._started = now
         self._open = True
         states: Dict[str, LayerSnapshot] = {}
         for layer in QgsProject.instance().mapLayers().values():
@@ -82,6 +90,7 @@ class TurnCheckpoint:
             if layer.id() not in self._before:
                 self._before[layer.id()] = (snapshot, kind)
         self._steps.append((self._label(call), states))
+        self._step_times.append(now)
         self._step_recorder = EffectsRecorder(settings=False)
         if call is not None:
             self._effects.before_call(call, len(self._steps) - 1)
@@ -145,6 +154,7 @@ class TurnCheckpoint:
         self._steps = []
         self._effects = EffectsRecorder()
         self._step_effects, self._step_recorder = [], None
+        self._started, self._step_times = 0.0, []
         try:
             from .plugin_settings import take_applied
             take_applied()  # what the agent applied in that turn is not an effect of the next one
@@ -174,13 +184,19 @@ class TurnCheckpoint:
         steps, step_effects = self._step_record(final, calls, frozenset(
             effect[4] for effect in effects if effect[0] == "settings" and len(effect) > 4))
         effects = self._settings_at_steps(effects, calls)
+        step_times = tuple(self._step_times[index] for index in calls if index < len(self._step_times))
+        started = self._started
         self._before = {}
         self._steps = []
         self._step_effects = []
+        self._started, self._step_times = 0.0, []
         several = len(steps) > 1
         _api_service().history.push(CrossOperation(HISTORY_KEY, tuple(changes), description=self.label[:MAX_LABEL],
                                                    steps=steps if several else (),
-                                                   step_effects=step_effects if several else (), effects=effects))
+                                                   step_effects=step_effects if several else (), effects=effects,
+                                                   started=started,
+                                                   step_times=step_times if several and len(step_times) == len(steps)
+                                                   else ()))
         for effect in effects:
             if effect[0] in ("added", "removed", "style", "edits", "layout", "join") and len(effect) > 4 \
                     and effect[4] not in names:
