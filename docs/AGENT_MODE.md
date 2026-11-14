@@ -501,9 +501,9 @@ address, else its content type), its size, and whether the server gives parts of
   (`IgnoreGetMapUrl`, `IgnoreGetFeatureInfoUrl`). What is left to the service: where the REST tiles of a WMTS and
   the legends are, as QGIS reads them. `wfs_catalog` has the same limit, without such a switch (to do). A service
   the user added by its address (WFS, WMS, WMTS, STAC, geocoder, basemap) goes to the model by its id
-  (`sources.model_name`, `platform_aliases`): the address may hold a key. The address is still accepted as a name
-  (the recipes kept before the id), but it is never listed in a refusal nor answered: `agent_tools._on_platform`
-  puts the id back in the `platform` of an answer and in the message of an error. Not covered: the first 30
+  (`sources.model_name`, `platform_aliases`): the address may hold a key. The address is no longer a name, and
+  it is never answered: `agent_tools._asked` puts the id back in the `platform` of an answer and in the words of
+  a refusal. Not covered: the first 30
   characters of host and path are in the id itself, and a platform of `open_data_domains` in the configuration file
   goes by its address. An image service ticked alone does not open the web to `add_layer`.
 - A file added from the web is opened without the style it carries (`LayerOptions.loadDefaultStyle` False in

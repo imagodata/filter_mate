@@ -90,6 +90,13 @@ def _guarded(handler: Handler) -> Handler:
     return run
 
 
+def _renamed(text: str, address: str, name: str) -> str:
+    """``text`` with the address of a platform replaced by the name a model knows it by, whatever its case."""
+    if not address or address.lower() == name.lower():
+        return text
+    return re.sub(re.escape(address), lambda _match: name, text, flags=re.IGNORECASE)
+
+
 def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False,
                    platforms: Sequence[str] = (), extra_domains: str = "", share_values: bool = True,
                    platform_aliases: Optional[Mapping[str, str]] = None) -> Dict[str, Handler]:
@@ -100,38 +107,28 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     ``share_values`` False: what an algorithm answers besides its layers (statistics) is not sent.
     """
     enabled_platforms = {name.lower() for name in platforms}
-    aliases = {name.lower(): address for name, address in (platform_aliases or {}).items()}
-    # The address of a service the user added may hold the key of an account: it is accepted as a name (the recipes
-    # kept before it had an id), never listed, never answered.
-    hidden = sorted({address for address in aliases.values()}, key=len, reverse=True)
-    listed = sorted(enabled_platforms - {address.lower() for address in hidden})
 
     def _allowed_platform(name: str) -> str:
         if name.lower() not in enabled_platforms:
-            raise ToolFailure(f"{_named(name)!r} is not enabled in the agent sources. Enabled: "
-                              f"{', '.join(listed) or 'none'}.")
+            raise ToolFailure(f"{name!r} is not enabled in the agent sources. Enabled: "
+                              f"{', '.join(sorted(enabled_platforms)) or 'none'}.")
         # A service the user added is named by its id: its address, which may hold a key, never goes to the model.
-        return aliases.get(name.lower(), name)
+        return (platform_aliases or {}).get(name.lower(), name)
 
-    def _named(text: str) -> str:
-        """``text`` with the address of each service the user added replaced by the id the model knows it by."""
-        for address in hidden:
-            name = next(name for name, target in aliases.items() if target == address)
-            for form in (address, address.split("://", 1)[-1]):
-                text = re.sub(re.escape(form), lambda _: name, text, flags=re.IGNORECASE)
-        return text
+    def _asked(args: Dict[str, Any], call: Callable[[str], Any]) -> Any:
+        """``call`` on the platform a model named; what it answers or refuses names the platform as the model did.
 
-    def _on_platform(args: Dict[str, Any], call: Callable[[str], Any]) -> Dict[str, Any]:
-        """The answer of ``call`` on the platform the model named, which stays named as the model named it."""
-        platform = _allowed_platform(args["platform"])
+        2026-11-14: the id went in, and the address came back, in ``platform`` of the answer and in the words of a
+        refusal ("https://api.example.org/search?apiKey=... did not answer").
+        """
+        named = args["platform"]
+        resolved = _allowed_platform(named)
         try:
-            answer = asdict(call(platform))
-        except QGISBusy:
-            raise
-        except ValueError as exc:  # FilterRejected among them: its message names the platform it was given
-            raise ToolFailure(_named(str(exc))) from None
-        if "platform" in answer:
-            answer["platform"] = _named(str(answer["platform"]))
+            answer = call(resolved)
+        except FilterRejected as exc:
+            raise FilterRejected(_renamed(str(exc), resolved, named)) from None
+        if isinstance(answer, dict) and "platform" in answer:
+            answer["platform"] = named
         return answer
 
     def list_layers(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -400,25 +397,26 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return _report("Remove", accessor.remove_layers(args["layers"]))
 
     def search_open_data(args: Dict[str, Any]) -> Dict[str, Any]:
-        return _on_platform(args, lambda platform: accessor.search_open_data(
-            args["query"], platform=platform, limit=args["limit"], extra_domains=extra_domains))
+        return _asked(args, lambda platform: asdict(accessor.search_open_data(
+            args["query"], platform=platform, limit=args["limit"], extra_domains=extra_domains)))
 
     def search_imagery(args: Dict[str, Any]) -> Dict[str, Any]:
-        return _on_platform(args, lambda platform: accessor.search_imagery(
+        return _asked(args, lambda platform: asdict(accessor.search_imagery(
             bbox=args.get("bbox"), start=args["start"], end=args["end"], max_cloud=args["max_cloud"],
-            collections=args.get("collections"), limit=args["limit"], platform=platform, extra_domains=extra_domains))
+            collections=args.get("collections"), limit=args["limit"], platform=platform,
+            extra_domains=extra_domains)))
 
     def add_service_layer(args: Dict[str, Any]) -> Dict[str, Any]:
-        return _on_platform(args, lambda platform: accessor.add_service_layer(
-            platform, args["typename"], name=args["name"], extra_domains=extra_domains))
+        return _asked(args, lambda platform: asdict(accessor.add_service_layer(
+            platform, args["typename"], name=args["name"], extra_domains=extra_domains)))
 
     def find_place(args: Dict[str, Any]) -> Dict[str, Any]:
-        return _on_platform(args, lambda platform: accessor.find_place(
-            args["query"], platform=platform, limit=args["limit"], extra_domains=extra_domains))
+        return _asked(args, lambda platform: asdict(accessor.find_place(
+            args["query"], platform=platform, limit=args["limit"], extra_domains=extra_domains)))
 
     def add_basemap(args: Dict[str, Any]) -> Dict[str, Any]:
-        return _on_platform(args, lambda platform: accessor.add_basemap(
-            platform, name=args["name"], extra_domains=extra_domains))
+        return _asked(args, lambda platform: asdict(accessor.add_basemap(
+            platform, name=args["name"], extra_domains=extra_domains)))
 
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         try:
