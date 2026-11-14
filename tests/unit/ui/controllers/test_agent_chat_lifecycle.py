@@ -496,12 +496,15 @@ def test_the_summary_does_not_count_a_web_service(ctrl_module, controller, monke
             tree_places=lambda: {"local": (0, "", True), "wfs": (1, "Base", False)})
     _module(monkeypatch, ".adapters.public_api.operations", layer_kind=lambda layer: kinds.VECTOR)
     _module(monkeypatch, ".adapters.qgis.coverage_layers.snapshots", registry=lambda: {})
-    _module(monkeypatch, ".adapters.qgis.source_capability_probe",
-            feature_count_or_none=lambda layer: None if layer.remote else layer.featureCount())
+    _module(monkeypatch, ".adapters.qgis.source_capability_probe", counts_cheaply=lambda layer: not layer.remote)
+    _module(monkeypatch, ".adapters.qgis.feature_count", COUNT_BUDGET=1.0,
+            exact_feature_count=lambda layer, budget: 7 if budget > 0 else None)
     rows = controller._layer_rows()
     assert wfs.counted == 0  # featureCount() of a web service can be a request to its server
+    # The count of a filtered GeoPackage can be the count of its whole table (feature_count.py): not read.
+    assert local.counted == 0
     assert [(row["name"], row["feature_count"], row["active_filter_expression"], row["group"], row["visible"])
-            for row in rows] == [("LOCAL", 12, "a > 1", "", True), ("WFS", -1, "", "Base", False)]
+            for row in rows] == [("LOCAL", 7, "a > 1", "", True), ("WFS", -1, "", "Base", False)]
 
 
 # --- 9: a controller half built, a shutdown that goes on -------------------------------------------------------

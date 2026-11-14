@@ -327,3 +327,25 @@ def test_a_turn_changes_the_map_by_a_filter_or_an_effect_compare_draws_or_names(
     assert changes_map(turn(1, effects=(("visibility", "roads", True, False),)))
     assert changes_map(turn(1, effects=(("layer_name", "roads", "a", "b", "roads"),)))
     assert not changes_map(turn(1, effects=(("notes", "", (), ("n",)), ("settings", "", "{}", "{}", 0))))
+
+
+def test_the_walk_ends_after_an_entry_taken_in_part():
+    """2026-11-14: Undo of the current layer alone takes its part of a filter of several layers; the rest of that
+    filter stays next, out of the scope of the layer: the walk counts the entry, then stops."""
+    older, shared, top = (entry(seconds, layers, [], description=f"E{seconds}")
+                          for seconds, layers in ((1, ["roads"]), (2, ["roads", "towns"]), (3, ["roads"])))
+
+    def alone(found):
+        return found.layer_ids == ("roads",)
+    assert walkable([older, shared, top], lambda found: True, alone) == 2
+    assert walkable([older, shared, top], lambda found: True) == 3
+
+
+def test_an_entry_left_without_its_source_pairs_with_no_run():
+    """What is left of a filter from roads once its part was undone alone is headed by towns, but ran from roads."""
+    rest = entry(1, ["towns"], [("towns", "")], description="Rest")
+    rest.ran_from = lambda layer_id: False
+    alone = entry(2, ["towns"], [("towns", "")], description="Towns")
+    op = SimpleNamespace(op_id=5)
+    assert linked_pairs([rest], "towns", [5], [op]) == []
+    assert linked_pairs([rest, alone], "towns", [5], [op]) == [(alone, op)]

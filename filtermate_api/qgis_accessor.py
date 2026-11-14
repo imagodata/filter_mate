@@ -25,6 +25,7 @@ try/except so a misconfigured plugin doesn't bring the API down.
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -278,6 +279,9 @@ class QGISFilterMateAccessor:
 
         project = QgsProject.instance()
         active_filters = self._active_filters_main_thread()
+        count_module = _safe(lambda: _plugin_module("adapters.qgis.feature_count"), None)
+        # One budget for every count of the list: filtered GeoPackages are read by GDAL (feature_count.py).
+        deadline = time.monotonic() + (count_module.COUNT_BUDGET if count_module is not None else 0)
         # {layer id: (rank in the tree, groups, visible)}; a layer outside the tree comes last.
         places = _safe(lambda: _plugin_module("adapters.public_api.introspection").tree_places(), {}) or {}
         layers = sorted(project.mapLayers().values(),
@@ -296,7 +300,11 @@ class QGISFilterMateAccessor:
             crs_obj = _safe(layer.crs, None)
             crs_authid = _safe(crs_obj.authid, "") if crs_obj else ""
             if kind == "vector":
-                count = _safe(layer.featureCount, -1)
+                if count_module is not None:
+                    count = _safe(lambda: count_module.exact_feature_count(layer, deadline - time.monotonic()), None)
+                    count = -1 if count is None else count
+                else:  # the plugin modules are not there: what QGIS says
+                    count = _safe(layer.featureCount, -1)
                 geometry = _geometry_type_name(_safe(layer.geometryType, -1))
             elif kind == "point_cloud":
                 count = _safe(layer.pointCount, -1)

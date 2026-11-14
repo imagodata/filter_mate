@@ -1991,16 +1991,20 @@ class AgentChatController(QObject):
         from ...adapters.public_api.introspection import tree_places
         from ...adapters.public_api.operations import layer_kind
         from ...adapters.qgis.coverage_layers.snapshots import registry
-        from ...adapters.qgis.source_capability_probe import feature_count_or_none
+        from ...adapters.qgis.feature_count import COUNT_BUDGET, exact_feature_count
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
         places, derived = tree_places() or {}, registry()
         rows = []
+        deadline = time.monotonic() + COUNT_BUDGET  # one budget for the filtered GeoPackages GDAL reads
         for layer in QgsProject.instance().mapLayers().values():
             try:
                 kind = layer_kind(layer)
                 if kind not in (LayerKind.VECTOR, LayerKind.RASTER, LayerKind.POINT_CLOUD) or not layer.isValid():
                     continue
-                count = (feature_count_or_none(layer) if kind is LayerKind.VECTOR
-                         else layer.pointCount() if kind is LayerKind.POINT_CLOUD else None)
+                if kind is LayerKind.VECTOR:
+                    count = exact_feature_count(layer, deadline - time.monotonic()) if counts_cheaply(layer) else None
+                else:
+                    count = layer.pointCount() if kind is LayerKind.POINT_CLOUD else None
                 subset = (layer.subsetString() or "") if hasattr(layer, "subsetString") else ""
                 snapshot = derived.get(layer.id())
                 clip = "" if snapshot is None else ("filtermate:clip" if snapshot.geometry_wkt else "filtermate:selection")
