@@ -24,7 +24,9 @@ from qgis.PyQt.QtWidgets import (
 from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
-from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS, KIND_XYZ
+from ...core.agent.open_data import (
+    KIND_CKAN, KIND_DATABASE, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+)
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
 from ...core.agent.providers.base import check_base_url, without_credentials, without_key
@@ -959,8 +961,10 @@ class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
     def __init__(self, values, target_of, parent=None, tester=None, mcp_error="",
-                 project_layers=(), tools=(), provider_tester=None) -> None:
+                 project_layers=(), tools=(), provider_tester=None, databases=()) -> None:
         super().__init__(parent)
+        # The PostgreSQL connections of QGIS, as sources: read from QGIS, never added nor removed here.
+        self._databases = tuple(databases)
         # (name, title, risk class) of the tools of the chat, for the exceptions of the Tools tab.
         self._tools = list(tools)
         # (layer id, name, protected) of the open project, for the protected layers of the Autonomy tab.
@@ -1431,7 +1435,8 @@ class AgentSettingsDialog(QDialog):
         self.new_address.setPlaceholderText(_tr("https://... or a portal address"))
         self.new_kind = QComboBox(page)
         for kind, label in ((KIND_MCP, _tr("MCP connector")), (KIND_OPENDATASOFT, "Opendatasoft"), (KIND_CKAN, "CKAN"),
-                            (KIND_WFS, "WFS"), (KIND_STAC, "STAC"), (KIND_XYZ, _tr("Basemap (XYZ)"))):
+                            (KIND_WFS, "WFS"), (KIND_WMS, "WMS"), (KIND_WMTS, "WMTS"), (KIND_STAC, "STAC"), (KIND_XYZ, _tr("Basemap (XYZ)")),
+                            (KIND_GEOCODER, _tr("Place search"))):
             self.new_kind.addItem(label, kind)
         self.add_button = QPushButton(_tr("Add"), page)
         self.add_button.setObjectName("pushButton_agent_add_source")
@@ -1468,9 +1473,11 @@ class AgentSettingsDialog(QDialog):
 
     def _fill_sources(self, enabled_ids) -> None:
         self.sources_tree.clear()
-        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC, KIND_XYZ)),
+        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC, KIND_XYZ, KIND_GEOCODER, KIND_DATABASE)),
                   (_tr("Satellite imagery"), lambda source: source.kind == KIND_STAC),
                   (_tr("Basemaps"), lambda source: source.kind == KIND_XYZ),
+                  (_tr("Place search"), lambda source: source.kind == KIND_GEOCODER),
+                  (_tr("Databases of QGIS"), lambda source: source.kind == KIND_DATABASE),
                   (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
         for title, belongs in groups:
             group = QTreeWidgetItem(self.sources_tree, [title.upper()])
@@ -1480,7 +1487,11 @@ class AgentSettingsDialog(QDialog):
             font.setPointSizeF(max(font.pointSizeF() - 1, 7))
             group.setFont(0, font)
             group.setForeground(0, QColor(tokens(self.palette().window().color().lightness() < 128)["fm_text_muted"]))
-            for source in all_sources(self._custom):
+            members = [source for source in self._listed() if belongs(source)]
+            if not members and title == _tr("Databases of QGIS"):
+                self.sources_tree.takeTopLevelItem(self.sources_tree.indexOfTopLevelItem(group))
+                continue  # QGIS keeps no PostgreSQL connection: no empty group
+            for source in members:
                 if belongs(source):
                     self._source_item(group, source, source.id in enabled_ids)
         self.sources_tree.expandAll()
@@ -1499,7 +1510,11 @@ class AgentSettingsDialog(QDialog):
     def _selected_source(self):
         item = self.sources_tree.currentItem()
         identifier = item.data(0, _TURN_ROLE) if item is not None else None
-        return next((source for source in all_sources(self._custom) if source.id == identifier), None)
+        return next((source for source in self._listed() if source.id == identifier), None)
+
+    def _listed(self):
+        """Every source of the tab: those of the plugin, those the user added, the databases of QGIS."""
+        return all_sources(self._custom) + self._databases
 
     def _on_source_selected(self) -> None:
         source = self._selected_source()

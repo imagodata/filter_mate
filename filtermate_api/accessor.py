@@ -239,6 +239,8 @@ class FeatureSample:
     truncated: bool = False
     # The layer has more fields than a row holds.
     fields_truncated: bool = False
+    # "the layer", or "the features the map shows" for a web service, never read as a whole.
+    scope: str = "the layer"
 
 
 @dataclass(frozen=True)
@@ -317,6 +319,10 @@ class LabelsResult:
     layer_name: str
     labels: bool = False
     field: str = ""
+    # The expression written on the map, when the labels are not the values of one field.
+    expression: str = ""
+    # The labels show when the map is at least this close (1:visible_from_scale); None at every scale.
+    visible_from_scale: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -519,6 +525,15 @@ class OpenDataResult:
     count: int = 0
 
 
+@dataclass
+class PlacesResult:
+    """Places a geocoder answered with; each has name, label, kind, longitude, latitude, extent_wkt (EPSG:4326)."""
+    platform: str
+    query: str
+    places: List[Dict[str, Any]] = field(default_factory=list)
+    count: int = 0
+
+
 @runtime_checkable
 class FilterMateAccessor(Protocol):
     """The contract REST routes use to talk to the running FilterMate plugin."""
@@ -577,8 +592,9 @@ class FilterMateAccessor(Protocol):
         ...
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
-                   color: str = "", buffer: bool = True) -> LabelsResult:
-        """Label a vector layer with a field, or turn its labels off; raises FilterRejected when refused."""
+                   color: str = "", buffer: bool = True, expression: str = "",
+                   visible_from_scale: Optional[float] = None) -> LabelsResult:
+        """Label a vector layer with a field or an expression, or turn its labels off; raises FilterRejected when refused."""
         ...
 
     def update_features(self, layer: str, values: Optional[Dict[str, Any]] = None,
@@ -696,6 +712,11 @@ class FilterMateAccessor(Protocol):
 
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         """Add a web basemap under the layers; raises FilterRejected when its server gives no tile."""
+        ...
+
+    def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
+                   extra_domains: Optional[str] = None) -> PlacesResult:
+        """Places of an allowed geocoder; raises FilterRejected on one not allowed or unreachable."""
         ...
 
     def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
@@ -869,14 +890,17 @@ class InMemoryAccessor:
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
         return StyleResult(layer_name=found.name, mode=mode, field=options.get("field") or "",
-                           classes=options.get("classes", 5) if mode in ("categorized", "graduated") else 0)
+                           classes=(len(options.get("rules") or []) if mode == "rules" else
+                                    options.get("classes", 5) if mode in ("categorized", "graduated") else 0))
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
-                   color: str = "", buffer: bool = True) -> LabelsResult:
+                   color: str = "", buffer: bool = True, expression: str = "",
+                   visible_from_scale: Optional[float] = None) -> LabelsResult:
         found = self._find(layer)
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
-        return LabelsResult(layer_name=found.name, labels=enabled, field=field if enabled else "")
+        return LabelsResult(layer_name=found.name, labels=enabled, field=field if enabled else "",
+                            expression=expression if enabled else "", visible_from_scale=visible_from_scale)
 
     def create_layout(self, name: str, **options: Any) -> LayoutResult:
         if not name.strip():
@@ -1071,6 +1095,10 @@ class InMemoryAccessor:
 
     def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
         return None
+
+    def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
+                   extra_domains: Optional[str] = None) -> PlacesResult:
+        return PlacesResult(platform, query, [], 0)
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
         found = self._find(layer_name)  # an id or a name

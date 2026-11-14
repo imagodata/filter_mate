@@ -700,9 +700,10 @@ def check_chat(provider, layer, authcfg, work):
     check("the question is shown", "garde les communes" in panel.thread.toPlainText())
     # The line under the thread says what the request weighed (#461), never the change again: its card says it.
     check("the change is reported in its card, not twice", "Filter on communes" in panel.thread.toPlainText()
-          and "communes" not in panel.status.text() and "50" not in panel.status.text()
-          and (panel.status.text() == "" or panel.status.text().startswith("This request:")),
-          (panel.status.text(), panel.thread.toPlainText()[-200:]))
+          and panel.thread.toPlainText().count("Filter on communes") == 1
+          and "Filter" not in panel.status.text(), (panel.status.text(), panel.thread.toPlainText()[-200:]))
+    check("the line under the thread says what the request weighed",
+          panel.status.text() == "This request: 15 tokens read (0 from the cache), 9 written", panel.status.text())
     check("the input was emptied", panel.input.text() == "")
     check("undo is offered", panel.undo_offered())
     from qgis.PyQt.QtWidgets import QPushButton as _Button

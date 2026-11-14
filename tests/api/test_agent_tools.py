@@ -13,7 +13,7 @@ from core.agent.tool_catalog import CHAT_ONLY, SETTINGS_TOOLS, SKILL_TOOLS, chat
 from core.agent.tool_executor import ToolExecutor
 from filtermate_api.accessor import (
     CrossFilterResult, FavoritesUnavailable, FieldValues, FilteredLayer, FilterPreview, FilterRejected,
-    InMemoryAccessor, LayerDetails, LayerSummary, MapContext, OperationResult,
+    InMemoryAccessor, LayerDetails, LayerSummary, MapContext, OperationResult, PlacesResult,
 )
 from filtermate_api.agent_tools import build_handlers
 from filtermate_api.main_thread import QGISBusy
@@ -183,6 +183,17 @@ class TestHandlers:
         error, answer = run(accessor, root, "set_labels", layer="communes", enabled=False)
         assert not error and answer["labels"] is False
         assert run(accessor, root, "set_layer_style", layer="x", mode="single")[0] is True
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="rules", rules=[
+            {"expression": '"pop" > 5000', "color": "red", "label": "Towns"}, {"color": "#cccccc"}])
+        assert not error and answer["mode"] == "rules" and answer["classes"] == 2
+        assert run(accessor, root, "set_layer_style", layer="communes", mode="rules",
+                   rules=[{"expression": '"pop" > 1'}])[0] is True  # a rule has a color: refused by the schema
+        assert run(accessor, root, "set_layer_style", layer="communes", mode="rules",
+                   rules=[{"color": "red", "symbol": "x"}])[0] is True  # and nothing else than its three keys
+        error, answer = run(accessor, root, "set_labels", layer="communes", expression='upper("nom")',
+                            visible_from_scale=50000)
+        assert not error and answer["expression"] == 'upper("nom")' and answer["visible_from_scale"] == 50000
+        assert run(accessor, root, "set_labels", layer="communes", field="nom", visible_from_scale=0)[0] is True
 
     @pytest.mark.parametrize("arguments", [
         {"layer": "communes", "mode": "heatmap"}, {"layer": "communes", "mode": "graduated", "classes": 13},
@@ -428,6 +439,8 @@ class TestHandlers:
         assert run(accessor, root, "search_imagery")[1]["platform"] == "earth_search"
         assert run(accessor, root, "add_service_layer", platform="ign_wfs", typename="A:b")[1]["name"] == "A:b"
         assert run(accessor, root, "add_service_layer", platform="prg_pl", typename="A:b")[0] is True
+        failed, message = run(accessor, root, "find_place", query="Toulouse", platform="photon")
+        assert failed and "not enabled" in message  # a geocoder is asked only when the user ticked it
         failed, message = run(accessor, root, "add_basemap", platform="carto_light")
         assert failed and "not enabled" in message  # a basemap is added only when the user ticked it
 
@@ -437,13 +450,36 @@ class TestHandlers:
             or InMemoryAccessor.add_basemap(accessor, platform, name, extra_domains)
         address = "https://tiles.example.org/{z}/{x}/{y}.png?apikey=abc"
         handlers = build_handlers(accessor, tmp_path, platforms=("xyz_mine_1a2b3c", "carto_light"),
-                                  extra_domains=f"{address}:xyz", basemap_addresses={"xyz_mine_1a2b3c": address})
+                                  extra_domains=f"{address}:xyz", platform_aliases={"xyz_mine_1a2b3c": address})
         executor = ToolExecutor(chat_tools(), handlers)
         assert not executor.execute(ToolCallPart("c", "add_basemap", {"platform": "xyz_mine_1a2b3c"})).is_error
         assert not executor.execute(ToolCallPart("c", "add_basemap", {"platform": "carto_light"})).is_error
         assert [platform for platform, _ in asked] == [address, "carto_light"]
         refused = executor.execute(ToolCallPart("c", "add_basemap", {"platform": address}))
         assert refused.is_error and "abc" not in refused.content.replace(address, "")  # the address is not a name
+
+    def test_the_address_of_a_service_never_comes_back_to_the_model(self, tmp_path):
+        """2026-11-14: the id went in; the address came back in the answer, in a refusal, in the list of a refusal."""
+        address = "https://api.example.org/geocode/search?apiKey=SECRET"
+        accessor = Accessor()
+
+        def find_place(query, platform="", limit=5, extra_domains=None):
+            if query == "down":
+                raise FilterRejected(f"{platform.upper()} did not answer: {platform}&q=down timed out")
+            return PlacesResult(platform, query, [], 0)
+        accessor.find_place = find_place
+        handlers = build_handlers(accessor, tmp_path, platforms=("geocoder_mine_1a2b3c",), extra_domains=f"{address}:geocoder",
+                                  platform_aliases={"geocoder_mine_1a2b3c": address.lower()})
+        executor = ToolExecutor(chat_tools(), handlers)
+        found = executor.execute(ToolCallPart("c", "find_place", {"query": "Albi", "platform": "geocoder_mine_1a2b3c"}))
+        assert not found.is_error and json.loads(found.content)["platform"] == "geocoder_mine_1a2b3c"
+        down = executor.execute(ToolCallPart("c", "find_place", {"query": "down", "platform": "geocoder_mine_1a2b3c"}))
+        other = executor.execute(ToolCallPart("c", "find_place", {"query": "Albi", "platform": "photon"}))
+        by_address = executor.execute(ToolCallPart("c", "find_place", {"query": "Albi", "platform": address}))
+        for refused in (down, other, by_address):
+            assert refused.is_error and "secret" not in refused.content.lower().replace(address.lower(), ""), refused.content
+        assert "geocoder_mine_1a2b3c did not answer" in down.content and "api.example.org" not in down.content
+        assert "Enabled: geocoder_mine_1a2b3c." in other.content
 
     def test_export_stays_below_the_root(self, api):
         accessor, root = api

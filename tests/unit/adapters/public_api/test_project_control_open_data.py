@@ -332,3 +332,23 @@ def test_what_is_no_local_point_cloud_file_is_refused_as_one(cloud_project, monk
         project_control.add_layer(str(cloud_project.folder / "tile.laz"))
     assert project_control.add_layer(str(cloud_project.folder / "tile.copc.laz"))["provider"] == "copc"
     assert len(cloud_project.added) == 1
+
+
+# --- a place: asked to a geocoder of the list, never to a platform of another kind ----------------------------------
+
+def test_a_place_is_asked_to_a_geocoder_of_the_list(monkeypatch):
+    asked = []
+
+    def fetch(url, **options):
+        asked.append(url)
+        return SimpleNamespace(status=200, headers={}, content=(
+            b'{"features": [{"geometry": {"type": "Point", "coordinates": [1.44, 43.6]}, "properties": {"name": "Toulouse"}}]}'))
+    monkeypatch.setattr(project_control, "fetch", fetch)
+    found = project_control.find_place("Toulouse", platform="photon", limit=2)
+    assert asked == ["https://photon.komoot.io/api?q=Toulouse&limit=2"]
+    assert found["count"] == 1 and found["places"][0]["name"] == "Toulouse" and found["platform"] == "photon"
+    with pytest.raises(ValueError, match="does not find places"):
+        project_control.find_place("Toulouse", platform="datagouv")
+    with pytest.raises(ValueError, match="finds places, not datasets"):
+        project_control.search_open_data("communes", platform="ign_geocoder")
+    assert len(asked) == 1

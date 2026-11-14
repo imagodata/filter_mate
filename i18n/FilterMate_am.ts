@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>ምላሽ ይሰጣል።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1590"/>
+        <source>It answers, but found no place named Paris.</source>
+        <translation>አገልግሎቱ ምላሽ ይሰጣል፣ ግን Paris የሚባል ቦታ አላገኘም።</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
         <source>It serves its tiles.</source>
         <translation>የካርታ ሰቆችን ያቀርባል።</translation>
@@ -260,6 +265,16 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>ንብርብር ተጨምሯል: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2056"/>
+        <source>Table added: {}</source>
+        <translation>ሰንጠረዥ ተጨምሯል: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2055"/>
+        <source>Reading the tables of {}</source>
+        <translation>የ{} ሰንጠረዦችን በማንበብ ላይ</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
@@ -660,6 +675,11 @@ They stay in the edit buffer until you save the layer edits, and undoing the tur
         <translation>በ{} ላይ የሳተላይት ምስሎችን በመፈለግ ላይ</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1985"/>
+        <source>Searching {} for the place {}</source>
+        <translation>በ{} ላይ ቦታውን {} በመፈለግ ላይ</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="682"/>
         <source>Image of the map sent</source>
         <translation>የካርታው ምስል ተልኳል</translation>
@@ -729,6 +749,17 @@ Do you agree?</source>
 {} · {}
 
 ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2307"/>
+        <source>The agent wants to add this table of your database {} to the project:
+{}
+
+Its rows are then read by the tools of the agent as those of any layer, and can be sent to the provider of the agent. Do you agree?</source>
+        <translation>ወኪሉ ከመረጃ ቋትዎ {} ውስጥ ያለውን ይህን ሰንጠረዥ ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+{}
+
+ረድፎቹ ከዚያ በኋላ በወኪሉ መሣሪያዎች እንደ ማንኛውም ንብርብር ይነበባሉ፣ ለወኪሉ አቅራቢም ሊላኩ ይችላሉ። ይስማማሉ?</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
@@ -1496,6 +1527,16 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
         <source>Basemaps</source>
         <translation>መሠረት ካርታዎች</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1440"/>
+        <source>Place search</source>
+        <translation>የቦታ ፍለጋ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1447"/>
+        <source>Databases of QGIS</source>
+        <translation>የQGIS የመረጃ ቋቶች</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>
