@@ -294,3 +294,41 @@ def test_a_server_that_sends_elsewhere_or_has_nothing_there_is_taken_as_answerin
     _tiles(monkeypatch, status, b"")
     project_control.add_basemap("osm_tiles")
     assert len(basemap_project.registered) == 1
+
+
+# --- a point cloud: a local LAS or LAZ file, opened by its own provider ---------------------------------------------
+
+@pytest.fixture
+def cloud_project(monkeypatch, tmp_path):
+    core = sys.modules["qgis.core"]
+    added, providers = [], {"copc", "pdal"}
+    monkeypatch.setattr(core, "QgsPointCloudLayer", _Tiles, raising=False)
+    monkeypatch.setattr(core, "QgsProviderRegistry", SimpleNamespace(instance=lambda: SimpleNamespace(
+        providerMetadata=lambda name: object() if name in providers else None)), raising=False)
+    monkeypatch.setattr(core, "QgsProject", SimpleNamespace(instance=lambda: SimpleNamespace(addMapLayer=added.append)),
+                        raising=False)
+    monkeypatch.setattr(project_control, "_summary", lambda layer: {"name": layer.title, "provider": layer.provider})
+    for name in ("tile.laz", "tile.copc.laz", "communes.gpkg"):
+        (tmp_path / name).write_bytes(b"x")
+    return SimpleNamespace(added=added, providers=providers, folder=tmp_path)
+
+
+def test_a_las_file_is_a_point_cloud_whatever_kind_is_asked(cloud_project):
+    folder = cloud_project.folder
+    assert project_control.add_layer(str(folder / "tile.laz")) == {"name": "tile.laz", "provider": "pdal"}
+    assert project_control.add_layer(str(folder / "tile.copc.laz"), name="sol", kind="raster") == {
+        "name": "sol", "provider": "copc"}
+    assert len(cloud_project.added) == 2
+
+
+def test_what_is_no_local_point_cloud_file_is_refused_as_one(cloud_project, monkeypatch):
+    monkeypatch.setattr(project_control, "fetch", MagicMock(side_effect=AssertionError("nothing is asked")))
+    with pytest.raises(ValueError, match="from a local file"):
+        project_control.add_layer("https://data.example.org/tile.laz")
+    with pytest.raises(ValueError, match="is a .las, .laz or .copc.laz file"):
+        project_control.add_layer(str(cloud_project.folder / "communes.gpkg"), kind="point_cloud")
+    cloud_project.providers.discard("pdal")
+    with pytest.raises(ValueError, match="built without PDAL"):
+        project_control.add_layer(str(cloud_project.folder / "tile.laz"))
+    assert project_control.add_layer(str(cloud_project.folder / "tile.copc.laz"))["provider"] == "copc"
+    assert len(cloud_project.added) == 1

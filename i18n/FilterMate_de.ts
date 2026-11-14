@@ -695,6 +695,11 @@ Sie bleiben im Bearbeitungspuffer, bis Sie die Layer-Bearbeitungen speichern, un
         <translation>Angehalten.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Diese Anfrage: {} Tokens gelesen (davon {} aus dem Cache), {} geschrieben</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Der MCP-Server konnte nicht gestartet werden: {}</translation>

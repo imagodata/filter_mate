@@ -695,6 +695,11 @@ A szerkesztési pufferben maradnak, amíg nem menti a réteg szerkesztéseit, é
         <translation>Leállítva.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Ez a kérés: {} token olvasva (ebből {} a gyorsítótárból), {} írva</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Az MCP-kiszolgálót nem sikerült elindítani: {}</translation>

@@ -695,6 +695,11 @@ Katman düzenlemelerini kaydedene kadar düzenleme arabelleğinde kalırlar ve t
         <translation>Durduruldu.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Bu istek: {} token okundu (bunun {} tanesi önbellekten), {} yazıldı</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>MCP sunucusu başlatılamadı: {}</translation>

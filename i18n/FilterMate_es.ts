@@ -695,6 +695,11 @@ Permanecen en el búfer de edición hasta que guarde las ediciones de la capa, y
         <translation>Detenido.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Esta petición: {} tokens leídos ({} de ellos desde la caché), {} escritos</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>No se pudo iniciar el servidor MCP: {}</translation>

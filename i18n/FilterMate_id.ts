@@ -695,6 +695,11 @@ Fitur tetap di penyangga suntingan sampai Anda menyimpan suntingan lapisan, dan 
         <translation>Dihentikan.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Permintaan ini: {} token dibaca ({} dari cache), {} ditulis</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Server MCP tidak dapat dimulai: {}</translation>

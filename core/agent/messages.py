@@ -94,6 +94,21 @@ class Usage:
                      self.cache_write_tokens + other.cache_write_tokens)
 
 
+def request_usage(before: Optional["Usage"], after: "Usage") -> Optional[Tuple[int, int, int]]:
+    """Tokens one request added to a conversation: read (the cache included), read from the cache, written.
+
+    None when the provider counted nothing (a local server that does not say), so nothing is shown rather than zeros.
+    ``input_tokens`` leaves the cache out with every adapter (the OpenAI one takes it off what the server counts).
+    """
+    before = before or Usage()
+    cached = after.cache_read_tokens - before.cache_read_tokens
+    read = (after.input_tokens - before.input_tokens) + cached + (after.cache_write_tokens - before.cache_write_tokens)
+    written = after.output_tokens - before.output_tokens
+    if read <= 0 and written <= 0:
+        return None
+    return max(read, 0), max(cached, 0), max(written, 0)
+
+
 @dataclass(frozen=True)
 class ProviderError:
     """A failure a user can act on: ``kind`` is one of the ``ERROR_*`` constants."""
