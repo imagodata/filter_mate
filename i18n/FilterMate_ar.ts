@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>لا شيء لاستعادته.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>الوكيل قيد العمل: يرجى الانتظار حتى ينتهي.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>قراءة التصفيات النشطة</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>تثبيت الخريطة قبل هذه الخطوة</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>العودة إلى ما قبل هذه الخطوة</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>الخريطة كما كانت قبل هذه الخطوة: تعود عوامل التصفية والأنماط والطبقات التي تغيّرت منذ ذلك الحين إلى ما كانت عليه. خطوة جديدة في السجل، يتراجع عنها «تراجع» هنا.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

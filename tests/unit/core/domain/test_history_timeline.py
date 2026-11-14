@@ -307,3 +307,38 @@ def test_an_entry_left_without_its_source_pairs_with_no_run():
     op = SimpleNamespace(op_id=5)
     assert linked_pairs([rest], "towns", [5], [op]) == []
     assert linked_pairs([rest, alone], "towns", [5], [op]) == [(alone, op)]
+
+
+# --- going back to before a step (2026-11-14) ------------------------------------------------------------------------
+
+def test_what_is_undone_beside_the_filters_is_what_makes_the_map_oldest_first():
+    from core.domain.history_timeline import effects_before
+    first = operation(100, [(snap("roads", "a"), snap("roads", "b"))], "First", effects=[
+        ("style", "roads", "<old/>", "<new/>", "Roads"), ("notes", "", ("n",), ("n", "m")),
+        ("selection", "roads", (1,), (2,)), ("settings", "", "{}", "{}", 0)])
+    second = operation(200, [], "Second", effects=[
+        ("added", "new1", "<qlr/>", (), "Parks"), ("visibility", "towns", True, False), ("edits", "roads", 0, 3, "Roads")])
+    items = timeline(cross_items("agent", [first, second], [], name_of, agent=True))
+    by_label = {item.label: item for item in items}
+    assert [effect[0] for effect in effects_before(items, by_label["First"])] == ["style", "added", "visibility"]
+    assert [effect[0] for effect in effects_before(items, by_label["Second"])] == ["added", "visibility"]
+
+
+def test_an_operation_that_went_back_is_undone_as_what_it_did():
+    """A "back to before" holds the effects it undid, as they were done: what it did is each turned round, the last
+    first. Going back to before it does them again."""
+    from core.domain.history_timeline import effects_before
+    back = operation(300, [], "Back to before: First", effects=[
+        ("style", "roads", "<old/>", "<new/>", "Roads"), ("added", "new1", "<qlr/>", (), "Parks"),
+        ("join", "roads", "spec", "", "Roads")])
+    back.effects_reversed = True
+    items = timeline(cross_items("agent", [back], [], name_of, agent=True))
+    assert effects_before(items, items[0]) == (
+        ("removed", "new1", "<qlr/>", (), "Parks"), ("style", "roads", "<new/>", "<old/>", "Roads"))
+
+
+def test_nothing_is_undone_for_an_item_undone():
+    from core.domain.history_timeline import effects_before
+    undone = operation(300, [], "Undone", effects=[("visibility", "towns", True, False)])
+    items = timeline(cross_items("agent", [], [undone], name_of, agent=True))
+    assert effects_before(items, items[0]) == ()

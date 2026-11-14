@@ -256,7 +256,13 @@ def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap
     """
     if not target.applied:
         return BeforeMap(label=target.label)
-    effects = []
+    return map_with_effects(states_before(items, target), _effects_since(items, target), target.label)
+
+
+def _effects_since(items: Sequence[TimelineItem], target: TimelineItem) -> List[Effects]:
+    """What the turns of the agent did beside the filters from ``target`` on, oldest first: ``target`` itself (a
+    step: the steps of its turn from that one), then those done after it."""
+    effects: List[Effects] = []
     if target.kind == KIND_STEP:
         step_effects = getattr(target.ref, "step_effects", ()) or ()
         effects.append((tuple(effect for done in step_effects[target.position:] for effect in done), False))
@@ -264,7 +270,40 @@ def map_before(items: Sequence[TimelineItem], target: TimelineItem) -> BeforeMap
         effects.append(_effects_of(target.ref))
     for _befores, done in _since(items, target):
         effects.extend(done)
-    return map_with_effects(states_before(items, target), effects, target.label)
+    return effects
+
+
+# What going back to before a step undoes beside the filters: what makes the map (a layer added, removed, shown,
+# hidden, restyled, renamed, moved in the tree, the CRS of the project). Not the data (edits), nor what is the
+# agent's own or the user's elsewhere (notes, widgets, recipes, settings, bookmarks, themes, a selection, a layout).
+BACK_EFFECTS = frozenset({"added", "removed", "visibility", "style", "current_style", "tree", "layer_name",
+                          "project_crs"})
+
+
+def _as_done(effects: Sequence[Tuple[Any, ...]], reversed_: bool) -> List[Tuple[Any, ...]]:
+    """``effects`` as a turn records what it did, oldest first. An operation that undid effects ("undo back to
+    here", going back to a step) holds them as they were done: what it did itself is each of them turned round, the
+    last first."""
+    if not reversed_:
+        return list(effects)
+    turned = []
+    for effect in reversed(effects):
+        kind = effect[0] if effect else ""
+        if kind in ("added", "removed"):
+            turned.append(("removed" if kind == "added" else "added",) + tuple(effect[1:]))
+        elif len(effect) > 3:  # (kind, layer, before, after, ...)
+            turned.append((kind, effect[1], effect[3], effect[2]) + tuple(effect[4:]))
+    return turned
+
+
+def effects_before(items: Sequence[TimelineItem], target: TimelineItem) -> Tuple[Tuple[Any, ...], ...]:
+    """What was done to the map beside the filters from ``target`` on (``BACK_EFFECTS``), as the turns recorded it,
+    oldest first: undone, with the layers of :func:`states_before` given their state of then, the map is as it was
+    before ``target``. Empty for an item undone."""
+    if not target.applied:
+        return ()
+    return tuple(effect for effects, reversed_ in _effects_since(items, target)
+                 for effect in _as_done(effects, reversed_) if effect and effect[0] in BACK_EFFECTS)
 
 
 def agent_item(items: Iterable[TimelineItem], key: str, turn: int, step: Optional[int] = None) -> Optional[TimelineItem]:

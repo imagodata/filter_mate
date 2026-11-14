@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>Няма какво да се възстанови.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Агентът работи: изчакайте да приключи.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Четене на активните филтри</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Закачване на картата преди тази стъпка</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Назад към състоянието преди тази стъпка</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>Картата такава, каквато беше преди тази стъпка: филтрите, стиловете и слоевете, променени оттогава, се връщат назад. Нова стъпка в историята, която „Отмяна“ тук отменя.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

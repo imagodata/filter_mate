@@ -299,6 +299,11 @@ Por qué: {}
         <translation>Nada que restaurar.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>El agente está trabajando: espere a que termine.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Leyendo los filtros activos</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fijar el mapa anterior a este paso</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Volver a antes de este paso</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>El mapa tal como estaba antes de este paso: los filtros, los estilos y las capas cambiados desde entonces vuelven atrás. Un paso nuevo del historial, que Deshacer revierte aquí.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

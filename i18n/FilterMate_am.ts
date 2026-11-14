@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>የሚመለስ ምንም የለም።</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>ወኪሉ እየሰራ ነው፦ እስኪጨርስ ይጠብቁ።</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>ንቁ ማጣሪያዎችን በማንበብ ላይ</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>ከዚህ ደረጃ በፊት ያለውን ካርታ ሰካ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>ከዚህ ደረጃ በፊት ወደነበረው ተመለስ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>ካርታው ከዚህ ደረጃ በፊት እንደነበረው፦ ከዚያ ወዲህ የተቀየሩት ማጣሪያዎች፣ ቅጦች እና ንብርብሮች ወደ ኋላ ይመለሳሉ። የታሪክ አዲስ ደረጃ ሲሆን እዚህ «ቀልብስ» ይቀለብሰዋል።</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

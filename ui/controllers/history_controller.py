@@ -31,6 +31,7 @@ from qgis.PyQt.QtWidgets import (QAbstractItemView, QFrame, QHBoxLayout, QHeader
 
 from ...core.domain.compare_states import pin_before
 from ...core.domain.history_timeline import (KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, TimelineItem,
+                                             effects_before, states_before,
                                              UndoFocus, agent_item, counts, cross_items, label_of, link, linked_pairs,
                                              map_before, mark, timeline, vector_items, walkable)
 from ..styles.mockup_design import plugin_is_dark, tokens
@@ -52,6 +53,11 @@ LABEL_LENGTH = 40  # the label of the step, above the map compared
 
 def _tr(text: str) -> str:
     return QCoreApplication.translate("FilterMateDockWidget", text)
+
+
+def _agent_tr(text: str) -> str:
+    """A message the chat of the agent already says (context ``AgentChat``): the same words, translated there."""
+    return QCoreApplication.translate("AgentChat", text)
 
 
 def _clock(seconds: float) -> str:
@@ -151,6 +157,20 @@ class HistoryPanel(QFrame):
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             buttons.addWidget(button)
         layout.addLayout(buttons)
+        # A line of their own: these change the project, the two above only show it.
+        changes = QHBoxLayout()
+        self.back_button = QPushButton(_tr("Go back to before this step"), self)
+        self.back_button.setObjectName("pushButton_fm_history_back")
+        self.back_button.setToolTip(_tr("The map as it was before this step: the filters, styles and layers changed "
+                                        "since go back. A new step of the history, that Undo here takes back."))
+        self.undo_back_button = QPushButton(_tr("Undo"), self)
+        self.undo_back_button.setObjectName("pushButton_fm_history_undo")
+        self.latest_agent: Optional[int] = None  # index of the last step of the agent's history applied
+        for button in (self.back_button, self.undo_back_button):
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            changes.addWidget(button)
+        changes.addStretch(1)
+        layout.addLayout(changes)
         self.tree.itemSelectionChanged.connect(self._sync_buttons)
 
     def selected(self) -> Optional[TimelineItem]:
@@ -172,6 +192,13 @@ class HistoryPanel(QFrame):
             button.setEnabled(item is not None and item.applied)
         for button in (self.compare_pin_button, self.unpin_button):
             button.setVisible(pin)
+        self.back_button.setVisible(not pin)
+        self.back_button.setEnabled(item is not None and item.applied)
+        # Going back is a step of the history of the agent (its turns are restored the same way): the last one
+        # applied there is undone from here, whatever section of the dock is open.
+        rows = self.tree.selectedItems()
+        index = rows[0].data(COLUMN_ORIGIN, INDEX_ROLE) if rows else None
+        self.undo_back_button.setVisible(not pin and self.latest_agent is not None and index == self.latest_agent)
         self.note.setVisible(item is not None and not item.applied)
 
     def set_timeline(self, items: List[TimelineItem], focus: UndoFocus, sources: dict,
@@ -197,6 +224,9 @@ class HistoryPanel(QFrame):
         self.tree.clear()
         self.items = list(items)
         self.pinned_at = pinned_at
+        turns = [(item.position, index) for index, item in enumerate(self.items)
+                 if item.kind == KIND_AGENT and item.applied]
+        self.latest_agent = max(turns)[1] if turns else None
         to_select, turn = None, None
         if pinned_at is not None:
             pin = self._pin_row(pinned_at)
@@ -521,6 +551,8 @@ class HistoryController(QObject):
             self.panel.pin_button.clicked.connect(self.pin_selected)
             self.panel.compare_pin_button.clicked.connect(self.compare_pin)
             self.panel.unpin_button.clicked.connect(self.remove_pin)
+            self.panel.back_button.clicked.connect(self.go_back_selected)
+            self.panel.undo_back_button.clicked.connect(self.undo_latest_agent)
         return self.panel
 
     def _open_from_compare(self, *_args) -> None:
@@ -639,6 +671,101 @@ class HistoryController(QObject):
         self._compare.pin_state(state)
         self._say(_tr("The map before this step is pinned: Compare shows it left of the line."))
         return state
+
+    # --- back to before an item ------------------------------------------------------------
+
+    def _chat(self):
+        """The chat of the AGENT section (it shows the history of the agent), None without it."""
+        return getattr(self._dock, "_agent_chat", None)
+
+    def _busy(self) -> str:
+        """Why the project cannot be changed now ("" when it can): the agent at work, a filter running."""
+        chat = self._chat()
+        try:
+            if chat is not None and (chat.chat_busy() or chat._mcp.busy):
+                return _agent_tr("The agent is working: wait until it is done.")
+        except Exception:  # a chat half set up: the filters below still say whether one runs
+            logger.debug("History: state of the chat not read", exc_info=True)
+        from ...adapters.agent.turn_checkpoint import TurnCheckpoint
+        return TurnCheckpoint.busy() or ""
+
+    def _after_change(self) -> None:
+        """The history changed from here: the page of the agent, the buttons and this panel follow."""
+        chat = self._chat()
+        try:
+            if chat is not None:
+                chat._refresh_history()
+        except Exception:
+            logger.debug("History: page of the agent not refreshed", exc_info=True)
+        self.schedule_refresh()
+
+    def go_back_selected(self, *_args):
+        """The map as it was before the selected item: each layer changed since given its filter and source of then,
+        and what the turns of the agent did since beside the filters undone (``effects_before``).
+
+        2026-11-14, asked by the user: not a chain of undos across three histories with three scopes, but one new
+        step that sets the map back, as "undo back to here" of the agent does, undone from this panel. Returns
+        ``(changed, left as they are)``, None when nothing was tried.
+        """
+        item = self._selected()
+        if item is None:
+            return None
+        busy = self._busy()
+        if busy:
+            self._say(busy)
+            return None
+        from ...adapters.agent.turn_checkpoint import TurnCheckpoint
+        from ...adapters.public_api.operations import layer_kind
+        from ...core.domain.filter_state import LayerSnapshot
+        items = self.panel.items
+        project = QgsProject.instance()
+        targets = {}
+        for state in states_before(items, item):
+            snapshot = state.snapshot
+            if snapshot is None and state.subset is not None:  # a vector filter of the dock: its subset of then
+                layer = project.mapLayer(state.layer_id)
+                if layer is None:
+                    continue
+                snapshot = LayerSnapshot(state.layer_id, layer_kind(layer).value, subset=state.subset)
+            if snapshot is not None:
+                targets[state.layer_id] = snapshot
+        label = _agent_tr("Back to before: {}").format(_short(item.label))
+        try:
+            changed, left = TurnCheckpoint().back_to(targets, effects_before(items, item), label)
+        except Exception:  # whatever a layer raises: said, the panel stays usable
+            logger.warning("History: not gone back", exc_info=True)
+            self._say(_agent_tr("Nothing to restore."))
+            return None
+        message = label if changed else _agent_tr("Nothing to restore.")
+        if left:
+            message += " " + _agent_tr("Changed since, left as is: {}.").format(", ".join(left))
+        self._say(message)
+        self._after_change()
+        return changed, left
+
+    def undo_latest_agent(self, *_args):
+        """Undo the last step of the history of the agent (a turn, or a "back to before"), from this panel: going
+        back must be taken back whatever section of the dock is open. Through the chat when there is one, which keeps
+        its thread in step."""
+        busy = self._busy()
+        if busy:
+            self._say(busy)
+            return None
+        chat = self._chat()
+        undo = getattr(chat, "_on_undo", None) if chat is not None else None
+        if callable(undo):
+            undo()
+            self._after_change()
+            return True
+        from ...adapters.agent.turn_checkpoint import TurnCheckpoint
+        restored, left = TurnCheckpoint().undo()
+        message = (_agent_tr("Restored: {}.").format(", ".join(restored)) if restored
+                   else _agent_tr("Nothing to restore."))
+        if left:
+            message += " " + _agent_tr("Changed since, left as is: {}.").format(", ".join(left))
+        self._say(message)
+        self._after_change()
+        return bool(restored)
 
     def _canvas(self):
         iface = getattr(self._dock, "iface", None)

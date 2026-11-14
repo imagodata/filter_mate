@@ -299,6 +299,11 @@ Concorda?</translation>
         <translation>Nada para restaurar.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>O agente está a trabalhar: aguarde até ele terminar.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>A ler os filtros ativos</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixar o mapa antes deste passo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Voltar a antes deste passo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>O mapa tal como estava antes deste passo: os filtros, os estilos e as camadas alterados desde então voltam atrás. Um novo passo do histórico, que Anular desfaz aqui.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

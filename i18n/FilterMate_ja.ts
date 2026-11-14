@@ -299,6 +299,11 @@ Do you agree?</source>
         <translation>復元するものはありません。</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>エージェントが作業中です。完了するまでお待ちください。</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>有効なフィルタを読み取り中</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>このステップ前の地図を固定</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>このステップの前の状態に戻す</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>このステップの前の状態の地図です。それ以降に変更されたフィルタ、スタイル、レイヤーが元に戻ります。履歴に新しいステップとして追加され、ここで「元に戻す」と取り消せます。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>

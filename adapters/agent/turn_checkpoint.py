@@ -312,6 +312,19 @@ class TurnCheckpoint:
         for _label, befores in steps[step:]:
             for before in befores:
                 targets.setdefault(before.layer_id, before)  # the state before the first change at or after it
+        return self.back_to(targets, effects, description or steps[step][0])
+
+    def back_to(self, targets: Dict[str, LayerSnapshot], effects: Tuple[Tuple[Any, ...], ...],
+                description: str = "") -> Tuple[List[str], List[str]]:
+        """The layers of ``targets`` as their snapshots say, and ``effects`` undone: a new step of the history,
+        undoable as a turn is.
+
+        What "undo back to here" does for the steps of the last turn, and the history panel of the dock for the map
+        before any step of the three histories (2026-11-14, "go back to before this step"). ``effects``: what was
+        done beside the filters since, as the turns recorded it, oldest first; what the user changed since is left as
+        it is. Names of what changed, and of what was left as it is (changed since, or refused).
+        """
+        history = _api_service().history
         project = QgsProject.instance()
 
         def pairs_of(skip) -> List[Tuple[LayerSnapshot, LayerSnapshot]]:
@@ -332,7 +345,7 @@ class TurnCheckpoint:
         done, not_done = apply_effects(effects, undo=True, presence=True)
         pairs += pairs_of({now.layer_id for now, _target in pairs})
         # Its effects are those of the steps, undone: undoing this operation applies them again.
-        operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=(description or steps[step][0])[:MAX_LABEL],
+        operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=description[:MAX_LABEL],
                                    effects=effects, effects_reversed=True)
         names, left, refused = self._apply(operation, use_before=False) if pairs else ([], [], False)
         if refused:  # a layer refused (being edited): the layers go back, it can be tried again

@@ -534,6 +534,50 @@ def main():
     del controller.panel.setStyleSheet
     controller.close_panel()
 
+    # Go back to before a step (2026-11-14): the layers changed since as they were then, what the agent did since
+    # beside the filters undone; one new step of the history, undone from the panel.
+    compare.stop()
+    controller.open(undo)
+    panel, tree = controller.panel, controller.panel.tree
+
+    def row_of(label):
+        found = [tree.topLevelItem(index) for index in range(tree.topLevelItemCount())
+                 if tree.topLevelItem(index).text(COLUMN_WHAT) == label]
+        return found[0] if found else None
+    tree.setCurrentItem(row_of("West square"))
+    check("a step undone: no going back to before it", panel.back_button.isVisible() and not panel.back_button.isEnabled())
+    tree.setCurrentItem(row_of("Clip the DEM"))
+    check("a step on the map: going back to before it is offered, Undo of the agent's last step is not on that line",
+          panel.back_button.isEnabled() and not panel.undo_back_button.isVisible())
+    subset_now, source_now, style_now = zones.subsetString(), dem.source(), _style(zones)
+    said.clear()
+    agent_steps = len(_api_service().history.undo_stack(HISTORY_KEY))
+    done = controller.go_back_selected()
+    QgsApplication.processEvents()
+    drawn(canvas)
+    back = grab(canvas)
+    check("back to before the raster operation: the DEM on its whole source, the squares of the east, red again",
+          done is not None and dem.source() == fixtures["dem"] and zones.subsetString() == EAST and count(back, RED) > 0
+          and count(back, BLUE) == 0 and grey(back, west) > 0, (done, dem.source(), zones.subsetString(), said))
+    check("going back is said, and is one new step of the history",
+          said and said[0].startswith("Back to before: Clip the DEM")
+          and len(_api_service().history.undo_stack(HISTORY_KEY)) == agent_steps + 1, said)
+    controller.refresh()
+    listed = [tree.topLevelItem(index) for index in range(tree.topLevelItemCount())
+              if tree.topLevelItem(index).text(COLUMN_WHAT).startswith("Back to before: Clip the DEM")]
+    tree.setCurrentItem(listed[0] if listed else tree.topLevelItem(0))
+    check("the new step is listed, and can be undone from the panel", len(listed) == 1
+          and panel.undo_back_button.isVisible() and panel.back_button.isEnabled(),
+          [tree.topLevelItem(index).text(COLUMN_WHAT) for index in range(tree.topLevelItemCount())])
+    said.clear()
+    controller.undo_latest_agent()
+    QgsApplication.processEvents()
+    check("undone from the panel: the map as it was before going back", zones.subsetString() == subset_now
+          and dem.source() == source_now and _style(zones) == style_now
+          and len(_api_service().history.undo_stack(HISTORY_KEY)) == agent_steps,
+          (zones.subsetString(), dem.source(), said))
+    controller.close_panel()
+
     # From the menu of Compare.
     texts = [action.text() for action in compare.menu.actions()]
     check("Compare: History… in its menu", texts == ["Pin the current state", "Remove the pin", "", "History…"], texts)

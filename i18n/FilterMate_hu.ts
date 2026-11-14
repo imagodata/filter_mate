@@ -299,6 +299,11 @@ Egyetért?</translation>
         <translation>Nincs mit visszaállítani.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/history_controller.py" line="660"/>
+        <source>The agent is working: wait until it is done.</source>
+        <translation>Az ügynök dolgozik: várja meg, amíg végez.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Az aktív szűrők beolvasása</translation>
@@ -4998,6 +5003,16 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>A lépés előtti térkép rögzítése</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="149"/>
+        <source>Go back to before this step</source>
+        <translation>Vissza a lépés előtti állapotra</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/history_controller.py" line="151"/>
+        <source>The map as it was before this step: the filters, styles and layers changed since go back. A new step of the history, that Undo here takes back.</source>
+        <translation>A térkép olyan, amilyen e lépés előtt volt: az azóta módosított szűrők, stílusok és rétegek visszaállnak. Az előzmények új lépése, amelyet a Visszavonás itt visszavon.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/history_controller.py" line="148"/>
