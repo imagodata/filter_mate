@@ -4748,14 +4748,34 @@ What would you like to do?</translation>
         <translation>Şimdi</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
-        <source>Compare cannot draw these layers as they were: {}</source>
-        <translation>Karşılaştır bu katmanları önceki hâlleriyle çizemiyor: {}</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="356"/>
         <source>Nothing changed since the pin.</source>
         <translation>Sabitlemeden bu yana hiçbir şey değişmedi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>Önceki hâliyle çizilmedi: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>katman ağacı</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>proje KRS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>Harita sabitlenemedi.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>Karşılaştırma durdu: harita okunamadı.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

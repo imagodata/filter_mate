@@ -4748,14 +4748,34 @@ What would you like to do?</translation>
         <translation>Nu</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
-        <source>Compare cannot draw these layers as they were: {}</source>
-        <translation>Vergelijken kan deze lagen niet tekenen zoals ze waren: {}</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="356"/>
         <source>Nothing changed since the pin.</source>
         <translation>Niets veranderd sinds het vastzetten.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>Niet getekend zoals het was: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>lagenboom</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>project-CRS</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>De kaart kon niet worden vastgezet.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>Vergelijken gestopt: de kaart kon niet worden gelezen.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

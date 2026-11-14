@@ -4748,14 +4748,34 @@ What would you like to do?</translation>
         <translation>Acum</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
-        <source>Compare cannot draw these layers as they were: {}</source>
-        <translation>Compară nu poate desena aceste straturi așa cum erau: {}</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="356"/>
         <source>Nothing changed since the pin.</source>
         <translation>Nimic nu s-a schimbat de la fixare.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>Nedesenat așa cum era: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>arborele de straturi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>SRC al proiectului</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>Harta nu a putut fi fixată.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>Comparare oprită: harta nu a putut fi citită.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

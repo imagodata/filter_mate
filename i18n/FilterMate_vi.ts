@@ -4748,14 +4748,34 @@ What would you like to do?</translation>
         <translation>Bây giờ</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
-        <source>Compare cannot draw these layers as they were: {}</source>
-        <translation>So sánh không thể vẽ các lớp này như trước: {}</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="356"/>
         <source>Nothing changed since the pin.</source>
         <translation>Không có gì thay đổi kể từ khi ghim.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>Không vẽ như trước: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>cây lớp</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>hệ tọa độ dự án</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>Không thể ghim bản đồ.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>Đã dừng so sánh: không đọc được bản đồ.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

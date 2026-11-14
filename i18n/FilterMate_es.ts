@@ -4748,14 +4748,34 @@ What would you like to do?</translation>
         <translation>Ahora</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
-        <source>Compare cannot draw these layers as they were: {}</source>
-        <translation>Comparar no puede dibujar estas capas como estaban: {}</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="356"/>
         <source>Nothing changed since the pin.</source>
         <translation>Nada ha cambiado desde la fijación.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>No dibujado como estaba: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>árbol de capas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>SRC del proyecto</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>No se pudo fijar el mapa.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>Comparación detenida: no se pudo leer el mapa.</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>

@@ -4748,14 +4748,34 @@ What would you like to do?</translation>
         <translation>ตอนนี้</translation>
     </message>
     <message>
-        <location filename="../../ui/controllers/compare_controller.py" line="353"/>
-        <source>Compare cannot draw these layers as they were: {}</source>
-        <translation>เปรียบเทียบไม่สามารถวาดเลเยอร์เหล่านี้ให้เหมือนเดิมได้: {}</translation>
-    </message>
-    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="356"/>
         <source>Nothing changed since the pin.</source>
         <translation>ไม่มีอะไรเปลี่ยนแปลงตั้งแต่ปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>ไม่ได้วาดให้เหมือนเดิม: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>แผนผังเลเยอร์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>CRS ของโครงการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>ไม่สามารถปักหมุดแผนที่ได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>หยุดการเปรียบเทียบ: ไม่สามารถอ่านแผนที่ได้</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
