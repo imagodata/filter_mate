@@ -142,6 +142,13 @@ Rules worth keeping:
 - **Undo this turn** captures every layer before the first change of a request and pushes one `CrossOperation` in the
   automation history: rasters and point clouds get their source back, a layer changed since is left alone, and the
   derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
+  A layer counts as added by the turn when it came during one of its tool calls (`TurnCheckpoint.end`, called by the
+  engine once the tool ran): a layer the user loads while the model thinks stays at undo. Who runs changes without
+  saying when they end (the MCP server of the plugin, a recipe) is compared over the whole turn, as before.
+- **Saving the settings** starts another conversation only when the provider changed (preset, model, address, key,
+  consent): the thread is then cleared. Other sources, tools or the sending of values under the same provider drop
+  the engine alone (`_restart_engine`): the thread and what was allowed for the conversation stay, and the next
+  request tells the model what the thread holds (the recap).
 - **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
 - A conversation does not survive a change of project or of provider, but the model is told what came before: with
   the first request of a conversation that starts under a thread already shown (the project opened again, another

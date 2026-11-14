@@ -75,6 +75,9 @@ class _Layer:
     def id(self):
         return "communes"
 
+    def featureCount(self):
+        return 3
+
     def name(self):
         return "communes"
 
@@ -283,3 +286,22 @@ def test_a_local_vector_source_is_read_as_before(remote, monkeypatch):
     layer.getFeatures = MagicMock(return_value=iter([_Feature(1)]))
     job = _source_job(layer)
     assert type(job) is source_jobs.VectorSourceJob and layer.getFeatures.called
+
+
+def test_a_local_source_too_large_is_refused_before_any_read(monkeypatch):
+    """The whole source used to be read in memory on the main thread, with no bound (audit of 2026-11-14)."""
+    probe = types.ModuleType(f"{operations.__name__.rsplit('.public_api', 1)[0]}.qgis.source_capability_probe")
+    probe.capability_for_layer = lambda layer: None
+    monkeypatch.setitem(sys.modules, probe.__name__, probe)
+    read = []
+    layer = SimpleNamespace(name=lambda: "parcelles", featureCount=lambda: operations.MAX_SOURCE_FEATURES + 1,
+                            selectedFeatureCount=lambda: 2, getFeatures=lambda: read.append("all") or [],
+                            getSelectedFeatures=lambda: read.append("selected") or ["a", "b"])
+    report = operations.OperationReport()
+    job = operations._source_job(layer, LayerKind.VECTOR, report, False, None, None, None, False, None, None)
+    assert job is None and "select some of them or filter it first" in report.error and not read
+    # Its selection is what is asked for: read, however large the layer.
+    monkeypatch.setattr(source_jobs, "VectorSourceJob", lambda layer, features: ("job", features))
+    report = operations.OperationReport()
+    assert operations._source_job(layer, LayerKind.VECTOR, report, True, None, None, None, False, None, None) == (
+        "job", ["a", "b"]) and read == ["selected"] and not report.error

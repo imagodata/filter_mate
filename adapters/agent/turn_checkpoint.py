@@ -113,6 +113,16 @@ class TurnCheckpoint:
             except Exception:  # noqa: BLE001
                 logger.debug("Agent undo: a step not recorded", exc_info=True)
 
+    def end(self) -> None:
+        """Called once the change ``begin`` announced was made: what comes to the project from now until the next
+        change (a layer the user loads while the model thinks) is not the turn's."""
+        for recorder in (self._effects, self._step_recorder):
+            if recorder is not None:
+                try:
+                    recorder.after_call()
+                except Exception:  # noqa: BLE001 - the turn is then compared whole, as before
+                    logger.debug("Agent undo: the end of a step not recorded", exc_info=True)
+
     def _close_step(self) -> None:
         """The step under way ends (the next one begins, or the turn ends): what it did beside the filters."""
         if self._step_recorder is not None:

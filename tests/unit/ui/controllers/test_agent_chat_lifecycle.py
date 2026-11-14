@@ -901,3 +901,20 @@ def test_a_new_conversation_does_not_bring_the_offer_back(controller, offer):
     FakeQgsProject.project.cleared.emit()
     FakeQgsProject.project.readProject.emit()
     assert len(offer.cards) == shown
+
+
+def test_other_tools_under_the_same_provider_keep_the_thread(controller):
+    """A source ticked on the advice of the agent used to clear the thread, its advice with it (audit of 14/11)."""
+    controller._engine = types.SimpleNamespace(busy=False)
+    controller._transcript = [{"kind": "user", "text": "ajoute un fond"}]
+    controller._recap_from = 0
+    controller._policy.grant("export_layers")
+    controller.panel.clear_thread = MagicMock()
+    controller._restart_engine()
+    assert controller._engine is None and not controller.panel.clear_thread.called
+    assert controller._policy.granted == {"export_layers"}  # what was allowed for the conversation stays
+    assert controller._recap_from == 0  # the next conversation with the model is told what the thread holds
+    controller._engine = types.SimpleNamespace(busy=False)
+    controller._reset_view()  # another provider: nothing of it goes on
+    assert controller.panel.clear_thread.called and not controller._policy.granted
+    assert controller._recap_from == len(controller._transcript)

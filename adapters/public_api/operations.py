@@ -572,6 +572,9 @@ def _restore_point_cloud_source(layer, before) -> None:
         pass
 
 
+MAX_SOURCE_FEATURES = 500_000  # as introspection.MAX_STAT_FEATURES: one pass on the main thread
+
+
 def _option(key: str, default):
     try:
         from ...core.services.cross_filter_service import _config_option
@@ -591,8 +594,13 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
             # 2026-10-20: never the whole service on the main thread: selected or
             # filtered, read bounded in the task, as the dock does (ValueError otherwise).
             return source_jobs.RemoteVectorSourceJob(layer, selected_only)
-        features = list(layer.getSelectedFeatures() if selected_only and layer.selectedFeatureCount()
-                        else layer.getFeatures())
+        selected = bool(selected_only and layer.selectedFeatureCount())
+        if not selected and layer.featureCount() > MAX_SOURCE_FEATURES:
+            # Read whole in memory on the main thread, geometries and attributes: QGIS would freeze, then swap.
+            report.error = (f"'{layer.name()}' has more than {MAX_SOURCE_FEATURES} features to use as a source: "
+                            f"select some of them or filter it first")
+            return None
+        features = list(layer.getSelectedFeatures() if selected else layer.getFeatures())
         if not features:
             report.error = f"'{layer.name()}' has no feature to use"
             return None

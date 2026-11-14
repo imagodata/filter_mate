@@ -788,14 +788,17 @@ class AgentChatController(QObject):
             except KeyStoreError as exc:
                 self._say(str(exc), error=True)
                 return False
-            chosen = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(), dialog.consent.isChecked(),
-                      dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(), authcfg, target,
-                      key_target, dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked(),
-                      dialog.tool_families.isChecked())
-            same_chat = chosen == (values.preset, values.model, values.base_url, values.consent, values.send_values,
-                                   values.enabled_sources, values.custom_sources, values.authcfg, values.consent_target,
-                                   values.key_target, values.expert_python, values.local_filtering_only,
-                                   values.tool_families) and not key
+            # Who the conversation is with: another one cannot continue it.
+            provider = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(),
+                        dialog.consent.isChecked(), authcfg, target, key_target)
+            same_provider = provider == (values.preset, values.model, values.base_url, values.consent, values.authcfg,
+                                         values.consent_target, values.key_target) and not key
+            # What it is offered: other tools need another conversation with the model, under the same thread.
+            offered = (dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(),
+                       dialog.expert_python.isChecked(), dialog.local_filtering_only.isChecked(),
+                       dialog.tool_families.isChecked())
+            same_tools = offered == (values.send_values, values.enabled_sources, values.custom_sources,
+                                     values.expert_python, values.local_filtering_only, values.tool_families)
             save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
                                         base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
                                         send_values=dialog.send_values.isChecked(), enabled_sources=dialog.chosen_sources(),
@@ -816,8 +819,10 @@ class AgentChatController(QObject):
         finally:
             dialog.key.clear()
             dialog.deleteLater()
-        if not same_chat:
+        if not same_provider:
             self._reset_view()  # another provider cannot continue this conversation
+        elif not same_tools:
+            self._restart_engine()  # the thread stays: a source ticked on the advice of the agent is asked again
         self._sync_mcp()
         self._refresh_ready()
         return True
@@ -1912,15 +1917,21 @@ class AgentChatController(QObject):
                 return
         self._engine = None
 
-    def _reset_view(self) -> None:
+    def _restart_engine(self) -> None:
+        """Other sources or tools under the same provider: the next request starts another conversation with the
+        model, which is told what the thread holds (the recap of ``_on_send``). The thread and what the user allowed
+        for the conversation stay."""
         self._drop_engine()
-        self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         for name in self._connector_labels:  # the tools of the connectors it loaded went with it
             self._tools.pop(name, None)
         self._connector_labels = {}
         self._connectors = None
         self._connectors_shown = set()
         self._seen = None  # another conversation has seen nothing yet
+
+    def _reset_view(self) -> None:
+        self._restart_engine()
+        self._policy.forget()  # another conversation, or another project: what was allowed is asked again
         # What came before was said to another provider, or under other settings: the next conversation is not told.
         self._recap_from = len(self._transcript)
         self.panel.clear_thread()
