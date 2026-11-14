@@ -1243,14 +1243,15 @@
       "type": "string"
      },
      "mode": {
-      "description": "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch)",
+      "description": "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch). Any of them replaces the style of the layer. keep: the style stays as it is and only opacity changes (the only mode for a WMS, WMTS or basemap image)",
       "enum": [
        "single",
        "categorized",
        "graduated",
        "rules",
        "pseudocolor",
-       "gray"
+       "gray",
+       "keep"
       ],
       "type": "string"
      },

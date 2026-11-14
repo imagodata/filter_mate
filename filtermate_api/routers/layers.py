@@ -119,7 +119,7 @@ class StyleRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
-    mode: Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray"]
+    mode: Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "keep"]
     rules: Optional[List[StyleRule]] = Field(None, max_length=20)
     field: str = Field("", max_length=_MAX_NAME)
     color: str = Field("", max_length=50)

@@ -24,6 +24,7 @@ MAX_RAMPS_LISTED = 40
 VECTOR_MODES = ('single', 'categorized', 'graduated', 'rules')
 MAX_RULES = 20
 RASTER_MODES = ('pseudocolor', 'gray')
+KEEP = 'keep'  # the drawing as it is: the opacity alone changes
 METHODS = ('quantile', 'equal_interval', 'jenks', 'pretty', 'stddev')
 DEFAULT_RAMPS = {'categorized': 'Spectral', 'graduated': 'Viridis', 'pseudocolor': 'Spectral'}
 
@@ -277,6 +278,16 @@ def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
     return QgsRuleBasedRenderer(root), len(rules)
 
 
+def _drawn_by_its_service(layer) -> bool:
+    """Whether a raster is an image its service draws (WMS, WMTS, XYZ): no band value to read."""
+    try:
+        from ..qgis.source_capability_probe import capability_for_layer
+        capability = capability_for_layer(layer)
+    except Exception:  # noqa: BLE001 - a layer that cannot say is styled as before
+        return False
+    return capability is not None and not capability.has_raw_values
+
+
 def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ramp: str = '', classes: int = 5,
                     method: str = 'quantile', invert: bool = False, opacity: Optional[float] = None, band: int = 1,
                     minimum: Optional[float] = None, maximum: Optional[float] = None,
@@ -292,9 +303,15 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
     if opacity is not None and not 0 <= float(opacity) <= 1:
         raise ValueError('opacity goes from 0 (invisible) to 1 (opaque)')
     answer: Dict[str, Any] = {'layer_name': found.name(), 'mode': mode}
-    if kind is LayerKind.VECTOR:
+    if mode == KEEP:
+        # Only the opacity: the way the layer is drawn (its categories, the colors of an orthophoto) stays.
+        if opacity is None:
+            raise ValueError("the mode keep changes the opacity alone: give opacity")
+        if kind not in (LayerKind.VECTOR, LayerKind.RASTER):
+            raise ValueError(f"'{found.name()}' is a {kind.value} layer: only vector and raster layers are styled here")
+    elif kind is LayerKind.VECTOR:
         if mode not in VECTOR_MODES:
-            raise ValueError(f"a vector layer takes the modes {', '.join(VECTOR_MODES)}")
+            raise ValueError(f"a vector layer takes the modes {', '.join(VECTOR_MODES + (KEEP,))}")
         from qgis.core import QgsSingleSymbolRenderer
         if mode == 'single':
             renderer = QgsSingleSymbolRenderer(_symbol(found, _color(color) if color else None))
@@ -314,7 +331,12 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
         found.setRenderer(renderer)
     elif kind is LayerKind.RASTER:
         if mode not in RASTER_MODES:
-            raise ValueError(f"a raster layer takes the modes {', '.join(RASTER_MODES)}")
+            raise ValueError(f"a raster layer takes the modes {', '.join(RASTER_MODES + (KEEP,))}")
+        if _drawn_by_its_service(found):
+            # A WMS, a WMTS, tiles: an image already in colors, with no value to stretch (bounds given used to be
+            # applied to it, and the image went wrong).
+            raise ValueError(f"'{found.name()}' is an image drawn by its service: only its opacity can change "
+                             f"(mode keep)")
         renderer, ramp_used, low, high = _raster_renderer(found, mode, int(band), ramp, invert, minimum, maximum)
         found.setRenderer(renderer)
         answer.update({'band': int(band), 'minimum': low, 'maximum': high})

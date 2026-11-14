@@ -97,6 +97,37 @@ def _renamed(text: str, address: str, name: str) -> str:
     return re.sub(re.escape(address), lambda _match: name, text, flags=re.IGNORECASE)
 
 
+# The arguments of the tools that name a layer, by an id or a name.
+LAYER_ARGUMENTS = ("layer", "layers", "layer_name", "source_layer", "target_layers", "extent_layer", "join_layer",
+                   "raster", "guide_layer", "example_layer", "above")
+
+
+def _one_layer_per_name(accessor: FilterMateAccessor, handler: Handler) -> Handler:
+    """Refuse a call that names a layer by a name several layers have: each tool picked one its own way, without a
+    word (the first vector one, the first of the kind wanted, the first of any kind), and a call could reach another
+    layer than the one before it. An id names one layer; list_layers gives it."""
+    def run(arguments: Dict[str, Any]) -> Any:
+        named = [str(value) for key in LAYER_ARGUMENTS
+                 for value in (arguments.get(key) if isinstance(arguments.get(key), list) else [arguments.get(key)])
+                 if isinstance(value, str) and value]
+        if arguments.get("group") is True:  # rename_layer on a group: its "layer" is the name of a group
+            named = []
+        names = getattr(accessor, "layer_names", None)
+        if named and names is not None:
+            try:
+                known = names()
+            except QGISBusy:
+                known = {}  # the tool itself says QGIS is busy
+            for reference in dict.fromkeys(named):
+                same = [layer_id for layer_id, name in known.items() if name == reference]
+                if reference not in known and len(same) > 1:
+                    raise ToolFailure(f"{len(same)} layers are named {reference!r}: name the one meant by its "
+                                      f"layer_id ({', '.join(same[:6])}); list_layers and describe_layer tell them "
+                                      "apart.")
+        return handler(arguments)
+    return run
+
+
 def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False,
                    platforms: Sequence[str] = (), extra_domains: str = "", share_values: bool = True,
                    platform_aliases: Optional[Mapping[str, str]] = None) -> Dict[str, Handler]:
@@ -454,4 +485,4 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
     }
-    return {name: _guarded(handler) for name, handler in handlers.items()}
+    return {name: _guarded(_one_layer_per_name(accessor, handler)) for name, handler in handlers.items()}

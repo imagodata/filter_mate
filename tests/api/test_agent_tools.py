@@ -79,6 +79,40 @@ def run(accessor, root, tool_name, **arguments):
     return result.is_error, (result.content if result.is_error else json.loads(result.content))
 
 
+class TestLayersOfTheSameName:
+    """Each tool picked one of them its own way, without a word (audit of 2026-11-14)."""
+
+    def _accessor(self):
+        accessor = Accessor()
+        accessor.layers.append(LayerSummary("L2", "communes", "ogr", feature_count=3, crs_authid="EPSG:2154"))
+        accessor.layers.append(LayerSummary("L3", "routes", "ogr", feature_count=5, crs_authid="EPSG:2154"))
+        return accessor
+
+    @pytest.mark.parametrize("tool, arguments", [
+        ("describe_layer", {"layer": "communes"}),
+        ("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1'}),
+        ("remove_layers", {"layers": ["routes", "communes"]}),
+        ("cross_filter", {"source_layer": "routes", "target_layers": ["communes"], "predicates": ["Intersect"]}),
+        ("group_layers", {"layers": ["routes"], "above": "communes"}),
+    ])
+    def test_a_name_several_layers_have_is_refused_with_their_ids(self, tmp_path, tool, arguments):
+        accessor = self._accessor()
+        failed, message = run(accessor, tmp_path, tool, **arguments)
+        assert failed and "2 layers are named 'communes'" in message and "L1, L2" in message
+        assert not accessor.calls  # nothing ran
+
+    def test_an_id_or_a_name_alone_passes(self, tmp_path):
+        accessor = self._accessor()
+        assert run(accessor, tmp_path, "describe_layer", layer="L2")[0] is False
+        assert run(accessor, tmp_path, "describe_layer", layer="routes")[0] is False
+        failed, message = run(accessor, tmp_path, "describe_layer", layer="absente")
+        assert failed and "named" not in message  # not found, as before
+
+    def test_the_name_of_a_group_is_not_the_name_of_a_layer(self, tmp_path):
+        failed, message = run(self._accessor(), tmp_path, "rename_layer", layer="communes", name="Admin", group=True)
+        assert "layers are named" not in str(message)
+
+
 class TestHandlers:
     def test_one_handler_per_chat_tool(self, tmp_path):
         # The tools of the chat alone (its own history) and those of the settings of FilterMate (they need the plugin)

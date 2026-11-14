@@ -542,6 +542,10 @@ class FilterMateAccessor(Protocol):
         """Return all vector layers visible to the current FilterMate session."""
         ...
 
+    def layer_names(self) -> Dict[str, str]:
+        """``{layer id: name}`` of every layer of the project, read without counting anything."""
+        ...
+
     def describe_layer(self, layer: str) -> Optional[LayerDetails]:
         """Fields, bands or attributes of a layer (id or name), ``None`` when it does not resolve."""
         ...
@@ -823,6 +827,9 @@ class InMemoryAccessor:
 
     def list_layers(self) -> List[LayerSummary]:
         return [self._with_active(layer) for layer in self.layers]
+
+    def layer_names(self) -> Dict[str, str]:
+        return {layer.layer_id: layer.name for layer in self.layers}
 
     def _find(self, reference: str) -> Optional[LayerSummary]:
         """By id, then by name (the first of that name), as the plugin resolves a layer."""

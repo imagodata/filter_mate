@@ -357,6 +357,25 @@ def check_style(project, gpkg, work):
                          "two rules for the other features"),
                         (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": '"pop" > 1'}]), "a rule with no color")):
         check(f"style refuses {label}", bool(refused(call)), label)
+    # keep: the opacity alone; the rules made above stay (audit of 2026-11-14: "50 % opacity" replaced the style).
+    kept = style.set_layer_style("communes", "keep", opacity=0.5)
+    check("style: keep changes the opacity and leaves the drawing", kept["opacity"] == 0.5 and gpkg.opacity() == 0.5
+          and gpkg.renderer().type() == "RuleRenderer", (kept, gpkg.renderer().type()))
+    gpkg.setOpacity(1.0)
+    check("style refuses keep without an opacity", bool(refused(lambda: style.set_layer_style("communes", "keep"))))
+    tiles = QgsRasterLayer("type=xyz&url=http://127.0.0.1:9/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0", "tuiles", "wms")
+    if tiles.isValid():
+        project.addMapLayer(tiles)
+        before_type = tiles.renderer().type()
+        check("style refuses a ramp on an image drawn by its service, bounds given or not", bool(refused(
+            lambda: style.set_layer_style("tuiles", "pseudocolor", minimum=0, maximum=255))) and bool(refused(
+                lambda: style.set_layer_style("tuiles", "gray"))) and tiles.renderer().type() == before_type)
+        faded = style.set_layer_style("tuiles", "keep", opacity=0.4)
+        check("style: keep on an image drawn by its service", faded["opacity"] == 0.4 and
+              tiles.renderer().type() == before_type, faded)
+        project.removeMapLayer(tiles.id())
+    else:
+        check("style: a layer of tiles opens without its server (needed by the checks of keep)", False)
     style.set_layer_style("communes", "single", color="#00ff00")  # what the turn ends with, for the redo below
     written = style.set_labels("communes", expression='"nom" || \' (\' || "pop" || \')\'', visible_from_scale=50000)
     pal = gpkg.labeling().settings()
