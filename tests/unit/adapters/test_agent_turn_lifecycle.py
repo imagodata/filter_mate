@@ -129,6 +129,31 @@ def test_a_turn_kept_open_is_recorded(checkpoint_module):
     assert history.can_undo(checkpoint_module.HISTORY_KEY)
 
 
+def test_a_turn_keeps_when_it_and_its_steps_began(monkeypatch, checkpoint_module):
+    """The history of the project places an operation done during a turn among its steps (history_timeline)."""
+    holder, history = checkpoint_module._test_holder, checkpoint_module._test_service.history
+    roads, towns = Layer("roads"), Layer("towns")
+    holder.project = Project([roads, towns])
+    clock = iter([100.0, 140.0, 160.0, 300.0])
+    monkeypatch.setattr(checkpoint_module.time, "time", lambda: next(clock))
+    checkpoint = checkpoint_module.TurnCheckpoint()
+    for layer, subset in ((roads, "a"), (None, None), (towns, "b")):  # the second call changes nothing
+        checkpoint.begin(types.SimpleNamespace(name="apply_filter", arguments={}))
+        if layer is not None:
+            layer.subset = subset
+    checkpoint.commit()
+    turn = history.peek_undo(checkpoint_module.HISTORY_KEY)
+    assert turn.started == 100.0 and turn.step_times == (100.0, 160.0)  # the steps recorded: those that changed
+    assert [label for label, _states in turn.steps] == ["apply_filter", "apply_filter"]
+    # The next turn begins afresh.
+    clock = iter([400.0])
+    checkpoint.begin(types.SimpleNamespace(name="apply_filter", arguments={}))
+    roads.subset = "c"
+    checkpoint.commit()
+    single = history.peek_undo(checkpoint_module.HISTORY_KEY)
+    assert single.started == 400.0 and single.steps == () and single.step_times == ()
+
+
 def test_settings_effects_are_placed_among_the_recorded_steps(checkpoint_module):
     """The call of a settings effect becomes the number of recorded steps up to it (calls that changed a layer)."""
     effects = (("notes", "", (), ("n",)), ("settings", "", "{}", "{}", 2), ("settings", "", "{}", "{}", 5))

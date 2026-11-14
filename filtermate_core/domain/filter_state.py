@@ -127,6 +127,10 @@ class CrossOperation:
     step_effects: Tuple[Tuple[Tuple[Any, ...], ...], ...] = ()
     # The effects go the other way: an operation that undid them ("undo back to here") applies them again when undone.
     effects_reversed: bool = False
+    # When a turn of the agent began (``timestamp`` is when it ended), 0 when not known; and when each of ``steps``
+    # began, in the same order (empty when not known): an operation done during the turn is placed among its steps.
+    started: float = 0.0
+    step_times: Tuple[float, ...] = ()
 
     @property
     def layer_ids(self) -> Tuple[str, ...]:
@@ -206,6 +210,11 @@ class CrossOperationHistory:
         """Drop the history of one source (vector Reset clears its own history too)."""
         self._undo.pop(source_layer_id, None)
         self._redo.pop(source_layer_id, None)
+
+    def sources(self) -> List[str]:
+        """The keys (source layer ids) with an operation still kept, to undo or to redo, first recorded first."""
+        keys = dict.fromkeys(list(self._undo) + list(self._redo))
+        return [key for key in keys if self._undo.get(key) or self._redo.get(key)]
 
     def operations(self) -> List[CrossOperation]:
         """Every operation still kept (undo and redo stacks)."""

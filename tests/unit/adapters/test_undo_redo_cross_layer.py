@@ -265,7 +265,7 @@ def test_buttons_follow_the_layers_to_filter_button(env):
     targets_button = MagicMock()
     dock = types.SimpleNamespace(
         pushButton_action_undo_filter=MagicMock(), pushButton_action_redo_filter=MagicMock(),
-        agent_has_focus=lambda: False, restore_undo_tooltips=lambda *a: None, tabTools_current_index=0,
+        agent_has_focus=lambda: False, refresh_undo_tips=lambda *a: None, tabTools_current_index=0,
         _controller_integration=None, current_layer=layers["mro"],
         PROJECT_LAYERS={"mro": {"filtering": {"layers_to_filter": []}}}, get_layers_to_filter=lambda: ["pop"],
         pushButton_checkable_filtering_layers_to_filter=targets_button)

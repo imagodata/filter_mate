@@ -150,6 +150,26 @@ class TestSnapshotsAndHistory:
         history.push(CrossOperation("src", ((after, before),)))
         assert not history.can_redo("src")
 
+    def test_sources_with_a_history(self):
+        """The history of the project lists every source: those with an operation to undo or to redo only."""
+        history = CrossOperationHistory()
+        assert history.sources() == []
+        change = ((self._snap("r", "a"), self._snap("r", "b")),)
+        for key in ("first", "second", "third"):
+            history.push(CrossOperation(key, change))
+        history.undo("second")  # to redo: listed
+        history.undo("third")
+        history.redo("third")
+        history.clear_source("first")
+        history.undo("third")
+        history.redo("third")
+        assert history.sources() == ["second", "third"]
+        history.push(CrossOperation("emptied", change))
+        history.undo("emptied")
+        history.push(CrossOperation("emptied", ()))  # ignored: its redo stays
+        history.forget_layer("r")  # nothing left anywhere
+        assert history.sources() == []
+
     def test_empty_operation_ignored(self):
         history = CrossOperationHistory()
         history.push(CrossOperation("src", ()))

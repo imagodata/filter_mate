@@ -7307,8 +7307,22 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         return (getattr(self, '_agent_chat', None) is not None and sections is not None
                 and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
 
-    def restore_undo_tooltips(self, undo_button, redo_button) -> None:
-        """Back to the dock history: the tooltips the buttons had before AGENT named its steps."""
+    def _history_controller(self):
+        integration = getattr(self, '_controller_integration', None)
+        return getattr(integration, 'history_controller', None) if integration is not None else None
+
+    def _keep_undo_tooltips(self, undo_button, redo_button) -> None:
+        """The tooltips of Undo and Redo of the .ui, kept the first time anything else is said in them."""
+        if getattr(self, '_fm_undo_tooltips', None) is None:
+            self._fm_undo_tooltips = (undo_button.toolTip(), redo_button.toolTip())
+
+    def refresh_undo_tips(self, undo_button, redo_button) -> None:
+        """The tooltips of Undo and Redo say what they would undo or redo, from the history they walk now, once their
+        state is set (HistoryController); without it, the tooltips of the .ui."""
+        history = self._history_controller()
+        if history is not None:
+            history.schedule_refresh()
+            return
         saved = getattr(self, '_fm_undo_tooltips', None)
         if saved:
             undo_button.setToolTip(saved[0])
@@ -7316,18 +7330,21 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def show_agent_undo_state(self, undo_button, redo_button) -> None:
         """The buttons of the action bar as the history of the agent allows, the step named in their tooltip."""
-        if getattr(self, '_fm_undo_tooltips', None) is None:
-            self._fm_undo_tooltips = (undo_button.toolTip(), redo_button.toolTip())
+        self._keep_undo_tooltips(undo_button, redo_button)
         chat = getattr(self, '_agent_chat', None)
         state = chat.undo_state() if chat is not None else None
         if state is None:
             undo_button.setEnabled(False)
             redo_button.setEnabled(False)
-            return
-        undo_button.setEnabled(state['can_undo'])
-        redo_button.setEnabled(state['can_redo'])
-        undo_button.setToolTip(state['undo_tip'])
-        redo_button.setToolTip(state['redo_tip'])
+        else:
+            undo_button.setEnabled(state['can_undo'])
+            redo_button.setEnabled(state['can_redo'])
+        history = self._history_controller()
+        if history is not None:  # it names the step, with the right-click on the buttons
+            history.schedule_refresh()
+        elif state is not None:
+            undo_button.setToolTip(state['undo_tip'])
+            redo_button.setToolTip(state['redo_tip'])
 
     def launchTaskEvent(self, state: str, task_name: str) -> None:
         """Emit signal to launch a FilterMate task.
