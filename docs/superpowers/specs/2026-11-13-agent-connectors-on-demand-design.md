@@ -114,6 +114,12 @@ Choix de l'utilisateur (13/11) :
 - Uniquement dans le chat. Le serveur MCP du plugin (`tools_and_handlers(for_chat=False)`, audience `mcp`) ne liste
   aucune entrée `connector-…` et ne se connecte à rien.
 
+- Écart constaté à l'implémentation (14/11) : au niveau conseil, les outils d'un connecteur ne tournent jamais
+  (`mcp_client` ne marque aucun outil MCP en lecture seule, donc leur risque est « OUTSIDE », refusé à ce niveau). Poser
+  la question puis se connecter n'aurait servi à rien : à ce niveau, le chargement est refusé sans question ni
+  connexion, avec un message qui dit de choisir un autre niveau. Autoriser ces outils au niveau conseil reste une
+  décision de l'utilisateur, non prise.
+
 ### 3. Familles activées par défaut
 
 - Le réglage change de clé QSettings, `FilterMate/agent/offer_tools_by_task`, et passe à `True` par défaut. L'ancienne

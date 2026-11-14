@@ -251,3 +251,12 @@ def test_an_export_left_by_a_skill_gone_fails_the_check_and_is_removed(tmp_path,
     assert script.main(["--check"]) == 1 and (tmp_path / "export" / "filtermate-gone").exists()
     assert script.main([]) == 0 and not (tmp_path / "export" / "filtermate-gone").exists()
     assert script.main(["--check"]) == 0
+
+
+def test_the_skills_name_the_connectors_and_recommend_the_sources():
+    """Lot A (2026-11-14): the connectors are entries of load_skill, and the first setup recommends the sources."""
+    assert "connector-" in SKILLS["open-data"].body and "load_skill" in SKILLS["open-data"].body
+    setup = SKILLS["configuration"].body.split("## First setup", 1)[1].split("## What you never change", 1)[0]
+    assert "show_settings_link with sources" in setup
+    for need in ("France", "statistics", "OpenStreetMap", "portals", "local data only"):
+        assert need in setup, need

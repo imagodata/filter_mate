@@ -347,15 +347,18 @@ def skill_tool(offered: Optional[set] = None, approved: Optional[Approved] = Non
     ``connectors``: pairs ``(entry name, line)`` of the MCP connectors the user enabled (core/agent/connectors.py),
     listed after the skills. ``with_skills`` False: the connectors alone."""
     names = list(skill_names(offered, audience)) if with_skills else []
-    description = ("Load the instructions for one kind of task, before doing it: they say how to work and where to "
-                   "look. Call it once per conversation and task, then follow them.")
+    listed = "; ".join(f"{name}: {line}" for name, line in connectors)
     if with_skills:
-        description += " Skills: " + skill_list(offered, approved, audience, declined) + "."
-    if connectors:
-        names += [name for name, _ in connectors]
-        description += (" Connectors the user enabled, loaded the same way when the request needs their data (the user "
-                        "is asked the first time; their tools come from the next turn on): "
-                        + "; ".join(f"{name}: {line}" for name, line in connectors) + ".")
+        description = ("Load the instructions for one kind of task, before doing it: they say how to work and where to "
+                       "look. Call it once per conversation and task, then follow them. Skills: "
+                       + skill_list(offered, approved, audience, declined) + ".")
+        if connectors:
+            description += (" Connectors the user enabled, loaded the same way when the request needs their data (the "
+                            "user is asked the first time; their tools come from the next turn on): " + listed + ".")
+    else:  # no skill can be loaded here: a description that promised some had the model try their names
+        description = ("Load an external connector the user enabled, when the request needs its data: the user is asked "
+                       "the first time, and its tools come from the next turn on. Connectors: " + listed + ".")
+    names += [name for name, _ in connectors]
     return ToolSpec(
         name=LOAD_SKILL, title="Load the instructions of a task", description=description,
         input_schema={"type": "object", "properties": {"name": {"type": "string", "enum": names}},

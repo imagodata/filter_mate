@@ -3,7 +3,7 @@ name: configuration
 title: Configure FilterMate
 description: set FilterMate up for the user (look, language, messages, raster and point cloud options, timeouts, caches, profiles) and find why filters are slow
 metadata:
-  version: 4
+  version: 5
   plugin_min: 5.1.0
   audience: chat, mcp
   tools: describe_settings, get_setting, change_settings, list_layers, map_context, diagnose_performance, show_settings_link, export_settings_profile, apply_settings_profile, ask_user
@@ -41,7 +41,8 @@ When the user asks to set FilterMate up (the setup the panel offers once per ver
    already set.
 2. Ask a few questions, three or four at most, in the language of the user: what they mostly do with
    FilterMate, their screen (small, usual, very large), the language and the look they want, whether their data
-   is large or remote. In the chat, ask them in one ask_user call, one question each with those choices named
+   is large or remote, and which data they will look for (France, statistics, OpenStreetMap, open data portals
+   of the world, local data only). In the chat, ask them in one ask_user call, one question each with those choices named
    (the one the project suggests first, followed by " (Recommended)"); another application asks them in one
    message. Skip what the project already answers. Declined, propose the settings from what the project says
    alone and say so.
@@ -49,7 +50,15 @@ When the user asks to set FilterMate up (the setup the panel offers once per ver
 4. Then the agent itself, which only the user changes: the level of autonomy and the layers it never changes, the
    tools always asked. Tell the user where: Agent settings (menu ⋯ of the AGENT panel), tabs Autonomy and Tools; in
    the chat, show_settings_link with autonomy, then with tools, puts a button for each.
-5. Say how to share this setup with a team (export_settings_profile) and that the setup can be started again from
+5. The sources of the agent, which only the user ticks: recommend those their answer calls for and tick nothing.
+   Tell the user where: Agent settings, tab Sources; in the chat, show_settings_link with sources puts a button.
+   - France: data.gouv.fr, IGN Géoplateforme (WFS), data.gouv.fr (MCP), IGN geocontext (MCP local, started apart).
+   - statistics: StatsMCP. OpenStreetMap: OpenStreetMap (MCP). Satellite imagery: Earth Search.
+   - portals of the world: CKAN portals (MCP), Socrata portals (MCP), the national CKAN platforms, Opendatasoft,
+     publicdata.au (MCP).
+   - local data only: nothing to tick, nothing leaves QGIS.
+   A connector ticked costs almost nothing until it is used, and its first use is asked in each conversation.
+6. Say how to share this setup with a team (export_settings_profile) and that the setup can be started again from
    the menu.
 
 Never change a setting before the user answered.

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Protocol, Sequence, Tuple
+from typing import Any, Callable, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from .messages import (
     ERROR_STREAM, ProviderError, StreamEvent, StreamFailure, TextDelta, ToolCallPart, ToolResultPart, TurnComplete,
@@ -16,7 +16,7 @@ from .messages import (
 from .providers.base import HttpRequest
 from .session import STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
 from .permissions import ASK, MAX_ASKED_TOGETHER, PROTECTED, REFUSE, TURNED_OFF, PermissionPolicy, asked_alone
-from .tool_executor import ToolExecutor
+from .tool_executor import Handler, ToolExecutor, connector_gate
 
 logger = logging.getLogger("FilterMate.agent")
 
@@ -100,10 +100,11 @@ class ChatEngine:
     def busy(self) -> bool:
         return self._busy
 
-    def offer_tools(self, tools) -> None:
-        """A family of tools offered from the next turn on, to the model and to the executor."""
+    def offer_tools(self, tools, handlers: Optional[Mapping[str, Handler]] = None) -> None:
+        """A family of tools, or the tools of a connector with their ``handlers``, offered from the next turn on, to
+        the model and to the executor."""
         self._session.offer(tools)
-        self._executor.offer(tools)
+        self._executor.offer(tools, handlers)
 
     @property
     def summarized(self) -> int:
@@ -200,12 +201,14 @@ class ChatEngine:
         ``{position in calls: yes}``, by position and not by call id: a server may give two calls the same id, and
         the answer to the listed ones then reached a call that was not listed (code, run without its dialog).
         Code and the other tools asked alone (``asked_alone``) are left out: each is read in a dialog of its own;
-        so are the actions past ``MAX_ASKED_TOGETHER``, which the question would not list.
+        so are the actions past ``MAX_ASKED_TOGETHER``, which the question would not list. Loading a connector is
+        judged as the connector (``connector_gate``): it reaches outside, so it is always asked alone.
         A listener without ``confirm_many`` is asked call by call, as before.
         """
         asked = [(position, call) for position, call in enumerate(calls)
                  if self._executor.verdict(call, self._policy) == ASK
-                 and not asked_alone(call.name, self._executor.spec(call.name))][:MAX_ASKED_TOGETHER]
+                 and not asked_alone(call.name, connector_gate(call) or self._executor.spec(call.name))
+                 ][:MAX_ASKED_TOGETHER]
         confirm_many = getattr(self._listener, "confirm_many", None)
         if len(asked) < 2 or confirm_many is None:
             return {}
@@ -221,7 +224,7 @@ class ChatEngine:
         if verdict in (REFUSE, PROTECTED, TURNED_OFF):
             return self._executor.refused(call, self._policy)
         if verdict == ASK and not (answered if answered is not None else self._confirmed(call)):
-            return self._executor.declined(call)
+            return self._executor.declined(call, self._policy)
         spec = self._executor.spec(call.name)
         if spec is not None and not spec.read_only and not spec.manages_history:
             try:
@@ -230,7 +233,13 @@ class ChatEngine:
                 logger.exception("Agent undo point failed")
                 return ToolResultPart(call.call_id, _NO_UNDO_POINT, is_error=True)
         self._notify(self._listener.on_tool_start, call)
+        generation = self._generation
         result = self._executor.execute(call)
+        gate = connector_gate(call) if verdict == ASK else None
+        if gate is not None and not result.is_error and generation == self._generation and not self._cancelled:
+            # Granted once loaded only: a connector that did not answer keeps nothing, and is asked again. Nor when
+            # the conversation ended while it loaded: the policy outlives it, and the yes would go to the next one.
+            self._policy.grant(gate.name)
         self._notify(self._listener.on_tool_end, call, result)
         return result
 

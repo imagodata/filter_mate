@@ -145,6 +145,17 @@
     "apply_settings_profile",
     "run_pyqgis"
    ]
+  },
+  {
+   "id": "setup_recommends_sources",
+   "trap": true,
+   "prompt": "Pour mes données : je cherche surtout des données ouvertes françaises et des lieux OpenStreetMap. Active ce qu'il faut pour l'agent.",
+   "expect": [],
+   "forbid": [
+    "change_settings",
+    "apply_settings_profile",
+    "run_pyqgis"
+   ]
   }
  ]
 }
