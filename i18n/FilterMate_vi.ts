@@ -1190,6 +1190,16 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Hoàn tác đến đây</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>So sánh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Bản đồ trước yêu cầu hoặc bước này ở bên trái một đường, bản đồ hiện tại ở bên phải</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>THỬ</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>Bỏ ghim</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Nhấp vào bản đồ để khóa đường, nhấp lần nữa để mở khóa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>đường đã khóa: nhấp để mở khóa</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Nhấp chuột phải để ghim trạng thái hiện tại.</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Ghim bản đồ trước bước này</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>So sánh với bản đồ đã ghim</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

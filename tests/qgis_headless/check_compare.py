@@ -2,7 +2,8 @@
 """Compare mode (adapters/qgis/compare_swipe.py) in a real QGIS: before left of the swipe line, after on its right.
 
 The map before a filter, a style, a layer shown, hidden or added (a turn of the agent, a pin), the labels by the line,
-and the button of the action bar with its pin (ui/controllers/compare_controller.py) on a dock made for the check.
+the line fixed by a click (the map still zoomed by the wheel and panned by the middle button), and the button of the
+action bar with its pin (ui/controllers/compare_controller.py) on a dock made for the check.
 
     docker run --rm --init --network none -v "$PWD:/src:ro" -e QT_QPA_PLATFORM=offscreen qgis/qgis:stable \\
         python3 /src/tests/qgis_headless/check_compare.py
@@ -20,9 +21,9 @@ APP = QgsApplication([], True)
 APP.initQgis()
 
 from qgis.gui import QgsMapCanvas, QgsMapMouseEvent, QgsMapToolPan, QgsMapToolZoom  # noqa: E402
-from qgis.PyQt.QtCore import QEvent, QPoint, QSize, Qt  # noqa: E402
-from qgis.PyQt.QtGui import QColor, QImage, QPainter  # noqa: E402
-from qgis.PyQt.QtWidgets import QHBoxLayout, QPushButton, QWidget  # noqa: E402
+from qgis.PyQt.QtCore import QEvent, QPoint, QPointF, QSize, Qt  # noqa: E402
+from qgis.PyQt.QtGui import QColor, QImage, QMouseEvent, QPainter, QWheelEvent  # noqa: E402
+from qgis.PyQt.QtWidgets import QApplication, QHBoxLayout, QPushButton, QWidget  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 ROOT = Path(os.environ.get("FM_REPO") or HERE.parents[1])
@@ -152,15 +153,20 @@ def main():
     check("a pan or a zoom renders the before image again", wait(lambda: session.renders > renders, 10),
           session.renders)
 
+    check_fixed_line(canvas, session, full)
+
     tool = session.tool
     count = session.start([BeforeState(zones.id(), "\"name\" LIKE 'west%'")], {zones.id(): zones})
-    check("compared again while on: the same tool, the tool before kept", count == 1 and session.tool is tool
-          and canvas.mapTool() is tool)
+    check("compared again while on: the same tool, the tool before kept, the line still fixed", count == 1
+          and session.tool is tool and canvas.mapTool() is tool and session.item.frozen)
 
     session.stop()
     check("stopped: the tool there before, no item, no clone", canvas.mapTool() is pan and session.item is None
           and not session.clones and not any(isinstance(i, SwipeItem) for i in canvas.scene().items()))
     check("stopped: the project as it was", set(project.mapLayers()) == layers_before)
+    session.start([BeforeState(zones.id(), "\"name\" LIKE 'west%'")], {zones.id(): zones})
+    check("compared again after a stop: the line follows the mouse again", session.active and not session.item.frozen)
+    session.stop()
 
     # Another tool chosen while comparing: the comparison ends by itself and leaves that tool.
     ended = []
@@ -205,6 +211,84 @@ def main():
 
     print(f"{'ALL PASSED' if not FAILURES else str(len(FAILURES)) + ' FAILED'}", flush=True)
     os._exit(1 if FAILURES else 0)
+
+
+def check_fixed_line(canvas, session, full):
+    """A left click fixes the line where it is, another frees it; fixed, the wheel and the middle button still move the
+    map, and the line stays where it was fixed."""
+    item, tool = session.item, session.tool
+    item.fixed_note = "line fixed"
+    item.set_labels("Before", "Now")
+
+    def release(x, button=Qt.MouseButton.LeftButton, pressed_at=-1):
+        """A click at ``x`` (pressed there, or at ``pressed_at``: a drag); ``pressed_at`` None: a release alone."""
+        if pressed_at is not None:
+            tool.canvasPressEvent(QgsMapMouseEvent(
+                canvas, QEvent.Type.MouseButtonPress, QPoint(x if pressed_at < 0 else pressed_at, 300), button,
+                button, Qt.KeyboardModifier.NoModifier))
+        tool.canvasReleaseEvent(QgsMapMouseEvent(canvas, QEvent.Type.MouseButtonRelease, QPoint(x, 300), button,
+                                                 Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
+
+    def move(x):
+        tool.canvasMoveEvent(QgsMapMouseEvent(canvas, QEvent.Type.MouseMove, QPoint(x, 300), Qt.MouseButton.NoButton,
+                                              Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
+    check("a free line: no knob, the labels as given", not item.frozen and item.handle_rect().isEmpty()
+          and item.shown_labels() == ("Before", "Now"))
+    # A review of 2026-11-14: a release alone (a menu closed over the map, the second half of a double click) and the
+    # end of a drag fixed or freed the line without the user meaning it.
+    release(200, pressed_at=None)
+    alone = item.frozen
+    release(200, pressed_at=420)
+    check("only a click made on the map fixes the line: not a release alone, not a drag", not alone and not item.frozen,
+          (alone, item.frozen))
+    release(200)
+    check("a click fixes the line where it is", item.frozen and abs(item.fraction - 0.25) < 0.01, item.fraction)
+    move(600)
+    check("fixed: the line no longer follows the mouse", abs(item.fraction - 0.25) < 0.01, item.fraction)
+    handle = item.handle_rect()
+    check("fixed: the label on the right says so, the knob under the labels, inside the bounds",
+          item.shown_labels() == ("Before", "Now · line fixed") and not handle.isEmpty()
+          and handle.top() > item.label_rects()[1].bottom() and item.boundingRect().contains(handle),
+          (item.shown_labels(), handle, item.label_rects()))
+    QgsApplication.processEvents()
+    image = grab(canvas)
+    centre = handle.center() + item.pos()
+    probe = image.pixelColor(int(centre.x()), int(centre.y()))
+    check("fixed: a dark knob drawn on the line", probe.red() < 90 and probe.green() < 90 and probe.blue() < 90,
+          probe.name())
+    release(500, Qt.MouseButton.RightButton)
+    check("fixed: a right click leaves it fixed", item.frozen and abs(item.fraction - 0.25) < 0.01)
+
+    # The wheel zooms, the middle button pans: the canvas handles them before the tool.
+    extent, renders = canvas.extent(), session.renders
+    QApplication.sendEvent(canvas.viewport(), QWheelEvent(
+        QPointF(400, 300), QPointF(canvas.viewport().mapToGlobal(QPoint(400, 300))), QPoint(0, 0), QPoint(0, 120),
+        Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False))
+    zoomed = canvas.extent()
+    check("fixed: the wheel still zooms, the line stays", zoomed.width() < extent.width() * 0.99 and item.frozen
+          and abs(item.fraction - 0.25) < 0.01, (extent.toString(), zoomed.toString()))
+    check("fixed: the before image follows the zoom", wait(lambda: session.renders > renders and not item.busy, 10))
+    viewport = canvas.viewport()
+    for kind, x, button, buttons in ((QEvent.Type.MouseButtonPress, 400, Qt.MouseButton.MiddleButton,
+                                      Qt.MouseButton.MiddleButton),
+                                     (QEvent.Type.MouseMove, 460, Qt.MouseButton.NoButton, Qt.MouseButton.MiddleButton),
+                                     (QEvent.Type.MouseButtonRelease, 460, Qt.MouseButton.MiddleButton,
+                                      Qt.MouseButton.NoButton)):
+        QApplication.sendEvent(viewport, QMouseEvent(kind, QPointF(x, 300), button, buttons,
+                                                     Qt.KeyboardModifier.NoModifier))
+        QgsApplication.processEvents()
+    panned = canvas.extent()
+    check("fixed: the middle button still pans, the line stays", abs(panned.center().x() - zoomed.center().x()) > 0
+          and item.frozen and abs(item.fraction - 0.25) < 0.01, (zoomed.toString(), panned.toString()))
+    canvas.setExtent(full)
+    canvas.refresh()
+
+    release(400)
+    check("a second click frees the line, under the mouse", not item.frozen and abs(item.fraction - 0.5) < 0.01
+          and item.handle_rect().isEmpty() and item.shown_labels() == ("Before", "Now"), item.fraction)
+    move(600)
+    check("freed: the line follows the mouse again", abs(item.fraction - 0.75) < 0.01, item.fraction)
+    release(200)  # fixed again: a new comparison while on keeps it, a stop forgets it (main)
 
 
 RED, BLUE, GREEN, YELLOW = QColor(220, 40, 40), QColor(40, 40, 220), QColor(40, 200, 40), QColor(240, 220, 0)
@@ -458,10 +542,14 @@ def check_button(project, canvas, fixtures, zones):
     controller = CompareController(dock)
     said = []
     controller._say = said.append
+    changes = []  # pinChanged: whether a pin is there each time
+    controller.pinChanged.connect(lambda: changes.append(controller.pinned is not None))
     button = dock.pushButton_action_compare
     unpinned_icon = button.icon().pixmap(32, 32).toImage()
     check("button: beside Redo, off without Undo nor pin", button.parentWidget() is dock and not button.isEnabled()
           and "Right-click" in button.toolTip(), button.toolTip())
+    check("button: its tooltip says a click fixes the line",
+          "Click on the map to fix the line, click again to free it." in button.toolTip().split("\n"), button.toolTip())
 
     # Right-click on the disabled button: its menu all the same (the bar opens it), never modal.
     point = QPoint(4, 4)
@@ -486,6 +574,8 @@ def check_button(project, canvas, fixtures, zones):
           and not session.item.busy and said == ["Nothing changed since the pin."], said)
     check("pin: labels pinned and now", session.item.labels[0].startswith("Pinned ") and session.item.labels[1] == "Now",
           session.item.labels)
+    check("pin: a line fixed would say so on its right", session.item.fixed_note == "line fixed: click to free it",
+          session.item.fixed_note)
 
     # A filter since: the comparison follows it, Filter does not end it.
     renders = session.renders
@@ -618,6 +708,12 @@ def check_button(project, canvas, fixtures, zones):
     state = map_state(canvas)
     controller.pin_state(state)
     check("pin_state: the state given is the pin", controller.pinned is state and button.isEnabled())
+    controller.compare_with(BeforeMap((BeforeState(zones.id(), west),)), labels=("Before: step 3", "Now"))
+    compared = controller.compare_pin()
+    check("compare_pin: the pin compared instead of the step, as a click on the button", button.isChecked()
+          and session.active and controller._given is None and session.item.labels[0].startswith("Pinned "),
+          (compared, session.item.labels))
+    controller.stop()
     said.clear()
     controller.before_map = unreadable
     button.click()
@@ -642,6 +738,9 @@ def check_button(project, canvas, fixtures, zones):
     QgsApplication.processEvents()
     check("a new project forgets the pin and ends the comparison", controller.pinned is None and not session.active
           and not button.isChecked() and not button.isEnabled())
+    check("pinChanged: pinned, removed, pinned twice, forgotten with the project",
+          changes == [True, False, True, True, False], changes)
+    check("compare_pin without a pin: nothing", controller.compare_pin() == 0 and not session.active)
     controller.teardown()
 
 

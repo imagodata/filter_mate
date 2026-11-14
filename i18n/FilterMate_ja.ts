@@ -1190,6 +1190,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>ここまで元に戻す</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>比較</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>このリクエストまたはステップより前の地図を線の左に、現在の地図を右に表示</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>試してみる</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>固定を解除</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>地図をクリックすると線をロックし、もう一度クリックすると解除します。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>線をロック中: クリックで解除</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>右クリックで現在の状態を固定します。</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>このステップ前の地図を固定</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>固定した地図と比較</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

@@ -1190,6 +1190,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Отменить до этого места</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Сравнить</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Карта до этого запроса или шага слева от линии, текущая карта справа от неё</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ПОПРОБУЙТЕ</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>Открепить</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Щёлкните по карте, чтобы зафиксировать линию, щёлкните ещё раз, чтобы освободить её.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>линия зафиксирована: щёлкните, чтобы освободить</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Щёлкните правой кнопкой, чтобы закрепить текущее состояние.</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Закрепить карту до этого шага</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Сравнить с закреплённой картой</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

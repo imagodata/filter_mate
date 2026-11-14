@@ -53,6 +53,7 @@ WELCOME_ICON_SIZE = 36
 _WELCOME_PAGE, _THREAD_PAGE, _HISTORY_PAGE = 0, 1, 2
 _TURN_ROLE = Qt.ItemDataRole.UserRole
 _STEP_ROLE = Qt.ItemDataRole.UserRole + 1
+_RANK_ROLE = Qt.ItemDataRole.UserRole + 2  # the rank of the turn applied in the history of the agent (a step: its turn)
 
 PRESET_LABELS = {"anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
@@ -258,6 +259,7 @@ class AgentPanel(QFrame):
     history_requested = pyqtSignal()
     resend_requested = pyqtSignal(str)
     step_undo_requested = pyqtSignal(int)
+    compare_requested = pyqtSignal(int, int)  # the rank of a turn applied, its step (-1: the whole turn)
     recipe_save_requested = pyqtSignal()
     recipe_run_requested = pyqtSignal(str)
     recipe_remove_requested = pyqtSignal(str)
@@ -267,6 +269,7 @@ class AgentPanel(QFrame):
         super().__init__(parent)
         self.setObjectName(PANEL_NAME)
         self._working = False
+        self._can_compare = False  # the dock has Compare and the history of the project
         self._in_answer = False
         self._ready = False
         self.setStyleSheet(
@@ -432,6 +435,13 @@ class AgentPanel(QFrame):
         self.step_button.setToolTip(_tr("The layers as they were before this step of the last request"))
         self.step_button.setEnabled(False)
         self.step_button.clicked.connect(self._undo_to_selected_step)
+        self.compare_button = QPushButton(_tr("Compare"), page)
+        self.compare_button.setObjectName("pushButton_agent_history_compare")
+        self.compare_button.setToolTip(_tr("The map before this request or step left of a line, the map now on its "
+                                           "right"))
+        self.compare_button.setEnabled(False)
+        self.compare_button.setVisible(False)  # until the dock says it can compare (set_can_compare)
+        self.compare_button.clicked.connect(self._compare_selected)
         self.resend_button = QPushButton(_tr("Send again"), page)
         self.resend_button.setObjectName("pushButton_agent_resend")
         self.resend_button.setFlat(True)
@@ -446,6 +456,7 @@ class AgentPanel(QFrame):
         buttons.addWidget(self.history_undo_button)
         buttons.addWidget(self.history_redo_button)
         buttons.addStretch(1)
+        buttons.addWidget(self.compare_button)
         buttons.addWidget(self.step_button)
         buttons.addWidget(self.resend_button)
 
@@ -482,6 +493,8 @@ class AgentPanel(QFrame):
             state = "" if not layers else (_tr("applied") if turn.get("applied") else _tr("undone"))
             item = QListWidgetItem()
             item.setData(_TURN_ROLE, turn.get("request") or "")
+            if turn.get("applied"):  # the turns applied come first, oldest first: the rank is the place in the list
+                item.setData(_RANK_ROLE, position)
             item.setToolTip(plain_tooltip(f"{when}  {request}\n{layers or _tr('no change')}"
                                           + (f" · {state}" if state else "")))
             self._history_row(item, when, request, layers or _tr("no change"), state, bool(turn.get("applied")),
@@ -491,6 +504,7 @@ class AgentPanel(QFrame):
                     step = QListWidgetItem()
                     step.setData(_TURN_ROLE, "")
                     step.setData(_STEP_ROLE, number)
+                    step.setData(_RANK_ROLE, position)
                     step.setToolTip(plain_tooltip(label))
                     self._history_row(step, "", f"{number + 1}. {label}", "", "", True, palette, dark, step=True)
         self.history_list.scrollToBottom()
@@ -544,6 +558,22 @@ class AgentPanel(QFrame):
         self.resend_button.setEnabled(typed_here and not self._working)
         self.step_button.setEnabled(step is not None and not self._working)
         self.step_button.setVisible(step is not None)  # only on a step: the footer is the mockup's otherwise
+        # A turn undone is no longer on the map; while the agent works, the map is changing under the comparison.
+        rank = items[0].data(_RANK_ROLE) if items else None
+        self.compare_button.setVisible(self._can_compare)
+        self.compare_button.setEnabled(rank is not None and not self._working)
+
+    def set_can_compare(self, possible: bool) -> None:
+        """Offer Compare on the turns and steps: only when the dock has the history of the project."""
+        self._can_compare = bool(possible)
+        self._on_turn_selected()
+
+    def _compare_selected(self) -> None:
+        items = self.history_list.selectedItems()
+        rank = items[0].data(_RANK_ROLE) if items else None
+        step = items[0].data(_STEP_ROLE) if items else None
+        if rank is not None and not self._working:
+            self.compare_requested.emit(int(rank), int(step) if step is not None else -1)
 
     def _undo_to_selected_step(self) -> None:
         items = self.history_list.selectedItems()

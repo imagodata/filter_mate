@@ -1190,6 +1190,16 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Razveljavi do tu</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Primerjaj</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Zemljevid pred to zahtevo ali korakom levo od črte, sedanji zemljevid desno od nje</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>POSKUSITE</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>Odstrani pripenjanje</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Kliknite na zemljevid, da zaklenete črto, in znova, da jo sprostite.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>črta zaklenjena: kliknite, da jo sprostite</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Desni klik, da pripnete trenutno stanje.</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Pripni zemljevid pred tem korakom</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Primerjaj s pripetim zemljevidom</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

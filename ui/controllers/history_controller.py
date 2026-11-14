@@ -8,7 +8,10 @@ dock in the scope of the current layer. Nothing showed which, nor what they held
 - a right-click on Undo or Redo (enabled or not), or "History…" in the menu of Compare, opens a panel that lists
   everything the three histories hold, newest first (``core/domain/history_timeline.py``): what Undo and Redo would
   take now is marked, an item undone is dimmed, the steps of the last turn of the agent are under it. The map before
-  the selected item can be compared or pinned (``CompareController``);
+  the selected item can be compared or pinned (``CompareController``); a pin, when there is one, heads the list, to
+  be compared or removed;
+- the history page of the agent compares the map before one of its turns or steps the same way
+  (``compare_agent_turn``);
 - the tooltips of Undo and Redo say what they would undo or redo, from which history, and how far they can go
   (``history_tips.button_tip``).
 
@@ -21,16 +24,17 @@ import time
 from typing import List, Optional
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPoint, QPointF, QRect, QSize, Qt, QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPoint, QPointF, QRect, QRectF, QSize, Qt, QTimer
 from qgis.PyQt.QtGui import QBrush, QColor, QFont, QGuiApplication, QIcon, QPainter, QPixmap, QPolygonF
 from qgis.PyQt.QtWidgets import (QAbstractItemView, QFrame, QHBoxLayout, QHeaderView, QLabel, QPushButton,
                                  QTreeWidget, QTreeWidgetItem, QVBoxLayout)
 
 from ...core.domain.compare_states import pin_before
 from ...core.domain.history_timeline import (KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, TimelineItem,
-                                             UndoFocus, counts, cross_items, label_of, link, linked_pairs, map_before,
-                                             mark, timeline, vector_items, walkable)
+                                             UndoFocus, agent_item, counts, cross_items, label_of, link, linked_pairs,
+                                             map_before, mark, timeline, vector_items, walkable)
 from ..styles.mockup_design import plugin_is_dark, tokens
+from .compare_controller import PIN_COLOUR
 from .history_tips import button_tip, history_name
 
 logger = logging.getLogger("FilterMate.history")
@@ -40,6 +44,8 @@ PANEL_NAME = "frame_fm_history"
 COLUMNS = 6  # origin, time, what, layers, features kept, mark
 COLUMN_ORIGIN, COLUMN_TIME, COLUMN_WHAT, COLUMN_LAYERS, COLUMN_KEPT, COLUMN_MARK = range(COLUMNS)
 INDEX_ROLE = Qt.ItemDataRole.UserRole
+PIN_INDEX = -1  # the INDEX_ROLE of the line of the pin, which is no item of the history
+PIN = "pin"  # its pictogram
 PANEL_WIDTH, PANEL_HEIGHT = 520, 420  # at most; a smaller screen or dock gives less
 LABEL_LENGTH = 40  # the label of the step, above the map compared
 
@@ -59,7 +65,7 @@ def _short(label: str) -> str:
 
 def origin_icon(kind: str, colour: QColor, size: int = 16) -> QIcon:
     """Where an item comes from, drawn: a funnel for a filter of the dock, a grid for a raster / point cloud filter,
-    a speech bubble for a turn of the agent, a dot for one of its steps."""
+    a speech bubble for a turn of the agent, a dot for one of its steps, a push pin for the pin."""
     pixmap = QPixmap(size, size)
     pixmap.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pixmap)
@@ -79,6 +85,11 @@ def origin_icon(kind: str, colour: QColor, size: int = 16) -> QIcon:
                                 2.5 * unit, 2.5 * unit)
         painter.drawPolygon(QPolygonF([QPointF(4.5 * unit, 10 * unit), QPointF(4.5 * unit, 14 * unit),
                                        QPointF(8.5 * unit, 10 * unit)]))
+    elif kind == PIN:  # a round head, a collar, a needle
+        painter.drawEllipse(QPointF(8 * unit, 4.5 * unit), 3.5 * unit, 3.5 * unit)
+        painter.drawPolygon(QPolygonF([QPointF(x * unit, y * unit) for x, y in
+                                       ((5.5, 7), (10.5, 7), (12.5, 10.5), (3.5, 10.5))]))
+        painter.drawRect(QRectF(7.25 * unit, 10.5 * unit, 1.5 * unit, 4.5 * unit))
     else:
         painter.drawEllipse(QPointF(8 * unit, 8 * unit), 2.5 * unit, 2.5 * unit)
     painter.end()
@@ -93,6 +104,7 @@ class HistoryPanel(QFrame):
         self.setObjectName(PANEL_NAME)
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.items: List[TimelineItem] = []
+        self.pinned_at: Optional[float] = None  # when the pin listed first was taken; None: no pin
         self._dark: Optional[bool] = None  # the theme of the sheet set
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 8, 10, 10)
@@ -132,7 +144,10 @@ class HistoryPanel(QFrame):
         buttons = QHBoxLayout()
         self.compare_button = QPushButton(_tr("Compare with the map before this step"), self)
         self.pin_button = QPushButton(_tr("Pin the map before this step"), self)
-        for button in (self.compare_button, self.pin_button):
+        # The line of the pin selected: these two instead.
+        self.compare_pin_button = QPushButton(_tr("Compare with the pin"), self)
+        self.unpin_button = QPushButton(_tr("Remove the pin"), self)
+        for button in (self.compare_button, self.pin_button, self.compare_pin_button, self.unpin_button):
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             buttons.addWidget(button)
         layout.addLayout(buttons)
@@ -143,19 +158,31 @@ class HistoryPanel(QFrame):
         index = rows[0].data(COLUMN_ORIGIN, INDEX_ROLE) if rows else None
         return self.items[index] if isinstance(index, int) and 0 <= index < len(self.items) else None
 
+    def pin_row_selected(self) -> bool:
+        """The line of the pin is selected."""
+        rows = self.tree.selectedItems()
+        return bool(rows) and rows[0].data(COLUMN_ORIGIN, INDEX_ROLE) == PIN_INDEX
+
     def _sync_buttons(self) -> None:
-        """Compare and pin the map before an item the map still holds; nothing for an item undone."""
-        item = self.selected()
+        """Compare and pin the map before an item the map still holds; nothing for an item undone. The pin: compare
+        with it, or remove it."""
+        item, pin = self.selected(), self.pin_row_selected()
         for button in (self.compare_button, self.pin_button):
+            button.setVisible(not pin)
             button.setEnabled(item is not None and item.applied)
+        for button in (self.compare_pin_button, self.unpin_button):
+            button.setVisible(pin)
         self.note.setVisible(item is not None and not item.applied)
 
-    def set_timeline(self, items: List[TimelineItem], focus: UndoFocus, sources: dict) -> None:
-        """List ``items`` (newest first, the steps of a turn after it), what Undo and Redo take marked.
+    def set_timeline(self, items: List[TimelineItem], focus: UndoFocus, sources: dict,
+                     pinned_at: Optional[float] = None) -> None:
+        """List ``items`` (newest first, the steps of a turn after it), what Undo and Redo take marked; the pin first,
+        apart, when there is one.
 
-        ``sources``: the name of the layer of each raster / point cloud history, by key.
+        ``sources``: the name of the layer of each raster / point cloud history, by key. ``pinned_at``: when the pin
+        was taken (0: not known), None without a pin.
         """
-        kept = self.selected()
+        kept, kept_pin = self.selected(), self.pin_row_selected()
         dark = bool(plugin_is_dark(self.parentWidget() or self))
         palette = tokens(dark)
         if dark != self._dark:  # the sheet again only when the theme changed: a refill must not restyle the panel
@@ -169,7 +196,13 @@ class HistoryPanel(QFrame):
         icons = {kind: origin_icon(kind, QColor(colour)) for kind, colour in colours.items()}
         self.tree.clear()
         self.items = list(items)
+        self.pinned_at = pinned_at
         to_select, turn = None, None
+        if pinned_at is not None:
+            pin = self._pin_row(pinned_at)
+            self.tree.addTopLevelItem(pin)
+            if kept_pin:
+                to_select = pin
         for index, item in enumerate(self.items):
             row = QTreeWidgetItem()
             row.setData(COLUMN_ORIGIN, INDEX_ROLE, index)
@@ -201,8 +234,8 @@ class HistoryPanel(QFrame):
             elif to_select is None and kept is None and marked == "undo":
                 to_select = row  # what Undo would undo: the step most likely compared
         self.tree.expandAll()
-        self.tree.setVisible(bool(self.items))
-        self.empty.setVisible(not self.items)
+        self.tree.setVisible(bool(self.items) or pinned_at is not None)
+        self.empty.setVisible(not self.items and pinned_at is None)
         if to_select is not None:
             self.tree.setCurrentItem(to_select)
             to_select.setSelected(True)
@@ -210,6 +243,19 @@ class HistoryPanel(QFrame):
         to_undo, to_redo = counts(self.items)
         self.counts.setText(_tr("{} to undo · {} to redo").format(to_undo, to_redo))
         self._sync_buttons()
+
+    @staticmethod
+    def _pin_row(pinned_at: float) -> QTreeWidgetItem:
+        """The line of the pin: what Compare shows, not a step of a history."""
+        clock = _clock(pinned_at)
+        row = QTreeWidgetItem()
+        row.setData(COLUMN_ORIGIN, INDEX_ROLE, PIN_INDEX)
+        row.setIcon(COLUMN_ORIGIN, origin_icon(PIN, PIN_COLOUR))
+        row.setText(COLUMN_WHAT, _tr("Pinned {}").format(clock) if clock else _tr("Pinned"))
+        tip = _tr("Map pinned at {}: Compare shows it left of the line.").format(clock) if clock else _tr("Pinned")
+        for column in range(COLUMNS):
+            row.setToolTip(column, tip)
+        return row
 
     @staticmethod
     def _tip(item: TimelineItem, marked: str, sources: dict) -> str:
@@ -281,6 +327,7 @@ class HistoryController(QObject):
             self.history_action.triggered.connect(self._open_from_compare)
         self._connect(getattr(dock, "undoRedoStateRequested", None), self.schedule_refresh)
         self._connect(getattr(dock, "currentLayerChanged", None), self.schedule_refresh)
+        self._connect(getattr(self._compare, "pinChanged", None), self.schedule_refresh)  # the line of the pin
         self._connect(QgsProject.instance().cleared, self.close_panel)
 
     def _connect(self, signal, slot) -> None:
@@ -459,13 +506,16 @@ class HistoryController(QObject):
     def _fill(self, focus: UndoFocus) -> None:
         items = self.read()
         sources = {item.key: self._name(item.key) for item in items if item.kind == KIND_COVERAGE}
-        self.panel.set_timeline(items, focus, sources)
+        pin = getattr(self._compare, "pinned", None)
+        self.panel.set_timeline(items, focus, sources, pin.taken_at if pin is not None else None)
 
     def _make_panel(self) -> HistoryPanel:
         if self.panel is None:
             self.panel = HistoryPanel(self._dock)
             self.panel.compare_button.clicked.connect(self.compare_selected)
             self.panel.pin_button.clicked.connect(self.pin_selected)
+            self.panel.compare_pin_button.clicked.connect(self.compare_pin)
+            self.panel.unpin_button.clicked.connect(self.remove_pin)
         return self.panel
 
     def _open_from_compare(self, *_args) -> None:
@@ -511,18 +561,61 @@ class HistoryController(QObject):
         item = self.panel.selected() if self.panel is not None else None
         return item if item is not None and item.applied else None
 
+    @property
+    def can_compare(self) -> bool:
+        """The map before an item can be compared: the dock has Compare, and its button (without it the comparison
+        would not end with the operations of the action bar)."""
+        return self._compare is not None and getattr(self._compare, "button", None) is not None
+
     def compare_selected(self, *_args) -> int:
         """Compare the map now with the map before the selected item; the number of layers drawn otherwise."""
         item = self._selected()
         if item is None or self._compare is None:
             return 0
-        before = map_before(self.panel.items, item)
+        items = self.panel.items
         self.close_panel()
+        return self._compare_item(items, item)
+
+    def compare_agent_turn(self, turn: int, step: Optional[int] = None) -> int:
+        """Compare the map now with the map before a turn of the agent, or one of its steps, as the panel does for the
+        item selected: ``turn`` its rank in the history of the agent, oldest first (as the history page of the agent
+        lists it), ``step`` its rank in that turn. The number of layers drawn otherwise; 0: nothing compared."""
+        if self._compare is None:
+            return 0
+        from ...adapters.agent.turn_checkpoint import HISTORY_KEY
+        try:
+            items = self.read()
+        except Exception:  # whatever a history raises: nothing compared
+            logger.warning("History: not read", exc_info=True)
+            return 0
+        item = agent_item(items, HISTORY_KEY, turn, step)
+        if item is None:  # undone meanwhile: said, rather than a click that does nothing
+            logger.debug("History: turn %s, step %s no longer applied", turn, step)
+            self._say(_tr("Nothing to compare: nothing this step changed can be drawn."))
+            return 0
+        self.close_panel()
+        return self._compare_item(items, item)
+
+    def _compare_item(self, items: List[TimelineItem], item: TimelineItem) -> int:
+        """Compare with the map before ``item`` of ``items``, labelled with what it did."""
+        before = map_before(items, item)
         text = _short(item.label)
         count = self._compare.compare_with(before, (_tr("Before: {}").format(text) if text else "", _tr("Now")))
         if not count and not self._compare.named:  # what it cannot draw is named instead
             self._say(_tr("Nothing to compare: nothing this step changed can be drawn."))
         return count
+
+    def compare_pin(self, *_args) -> int:
+        """Compare with the pin, as a click on Compare does; the number of layers drawn otherwise."""
+        if self._compare is None or self._compare.pinned is None:
+            return 0
+        self.close_panel()
+        return self._compare.compare_pin()
+
+    def remove_pin(self, *_args) -> None:
+        """Remove the pin: the panel, still open, lists the history without it (``pinChanged``)."""
+        if self._compare is not None:
+            self._compare.unpin()
 
     def pin_selected(self, *_args):
         """Pin the map before the selected item: the map now, the layers changed since as they were then."""

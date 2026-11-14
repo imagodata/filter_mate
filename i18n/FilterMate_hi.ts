@@ -1190,6 +1190,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>यहाँ तक पूर्ववत करें</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>तुलना करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>इस अनुरोध या चरण से पहले का नक्शा एक रेखा के बाईं ओर, अभी का नक्शा उसके दाईं ओर</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>आज़माएँ</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>पिन हटाएँ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>रेखा लॉक करने के लिए नक्शे पर क्लिक करें, छोड़ने के लिए फिर से क्लिक करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>रेखा लॉक है: छोड़ने के लिए क्लिक करें</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>मौजूदा स्थिति पिन करने के लिए राइट-क्लिक करें।</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>इस चरण से पहले का नक्शा पिन करें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>पिन किए गए नक्शे से तुलना करें</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

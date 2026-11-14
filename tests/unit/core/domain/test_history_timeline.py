@@ -7,8 +7,8 @@ import pytest
 
 from core.domain.compare_states import BeforeMap, BeforeState
 from core.domain.history_timeline import (
-    KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, UndoFocus, counts, cross_items, label_of, latest, link,
-    linked_pairs, map_before, mark, states_before, timeline, vector_items, walkable,
+    KIND_AGENT, KIND_COVERAGE, KIND_STEP, KIND_VECTOR, UndoFocus, agent_item, counts, cross_items, label_of, latest,
+    link, linked_pairs, map_before, mark, states_before, timeline, vector_items, walkable,
 )
 
 pytestmark = pytest.mark.unit
@@ -70,6 +70,26 @@ def test_the_turns_of_the_agent_list_the_steps_of_the_last_one_applied_only():
     # Before the second step: towns as it was then, and roads as the third step found it.
     assert {state.layer_id: state.subset for state in items[3].befores} == {"towns": "", "roads": "c"}
     assert {state.layer_id: state.subset for state in items[2].befores} == {"roads": "b", "towns": ""}
+
+
+def test_a_turn_or_a_step_of_the_agent_is_found_by_its_rank_as_its_history_page_lists_it():
+    first = operation(100, [(snap("roads", "a"), snap("roads", "b"))], "First", steps=[("Old step", ())])
+    last = operation(200, [(snap("roads", "b"), snap("roads", "c"))], "Last",
+                     steps=[("Filter roads", (snap("roads", "b"),)), ("Again", (snap("roads", "bc"),))])
+    undone = operation(300, [(snap("dem"), snap("dem"))], "Undone")
+    listed = timeline(cross_items("agent", [first, last], [undone], name_of, agent=True),
+                      cross_items("dem", [operation(150, [], "Clip")], [], name_of))
+    assert agent_item(listed, "agent", 0).label == "First"
+    assert agent_item(listed, "agent", 1).label == "Last"
+    assert agent_item(listed, "agent", 1, 1).label == "Again" and agent_item(listed, "agent", 1, 1).kind == KIND_STEP
+    # The item of the list itself: the map before it is composed as the history panel composes it.
+    found = agent_item(listed, "agent", 1, 0)
+    assert found is next(item for item in listed if item.label == "Filter roads")
+    assert {state.layer_id: state.subset for state in map_before(listed, found).states} == {"roads": "b"}
+    assert agent_item(listed, "agent", 0, 0) is None  # the steps of an earlier turn are not listed
+    assert agent_item(listed, "agent", 2) is None  # undone: its rank is not in the turns applied
+    assert agent_item(listed, "agent", 1, 2) is None and agent_item(listed, "other", 0) is None
+    assert agent_item(listed, "dem", 0) is None  # a raster operation is not a turn
 
 
 def test_a_raster_operation_keeps_its_former_source():

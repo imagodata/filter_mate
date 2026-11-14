@@ -1190,6 +1190,16 @@ Apakah Anda setuju dengan semuanya? Tidak berarti tidak ada yang dijalankan.</tr
         <translation>Urungkan sampai sini</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Bandingkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Peta sebelum permintaan atau langkah ini di kiri sebuah garis, peta saat ini di kanannya</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>COBA</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>Hapus sematan</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Klik peta untuk mengunci garis, klik lagi untuk melepaskannya.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>garis dikunci: klik untuk melepaskannya</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Klik kanan untuk menyematkan keadaan saat ini.</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Sematkan peta sebelum langkah ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Bandingkan dengan peta yang disematkan</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

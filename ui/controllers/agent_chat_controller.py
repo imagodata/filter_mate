@@ -229,6 +229,7 @@ class AgentChatController(QObject):
         self.panel.history_requested.connect(self._show_history)
         self.panel.resend_requested.connect(self._on_resend)
         self.panel.step_undo_requested.connect(self._on_undo_to_step)
+        self.panel.compare_requested.connect(self._on_compare)
         self.panel.settings_requested.connect(self.open_settings)
         self.panel.setup_requested.connect(self.start_setup)
         self.panel.shown.connect(self._on_panel_shown)
@@ -374,7 +375,21 @@ class AgentChatController(QObject):
         self._refresh_recipes()
         self.panel.set_can_undo(TurnCheckpoint.can_undo())
         self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
+        history = self._history_panel()
+        self.panel.set_can_compare(history is not None and history.can_compare)
         self._show_undo_state()
+
+    def _history_panel(self):
+        """The history of the project of the dock (``HistoryController``), None when the dock has none: read when
+        needed, the dock may set it up after the chat."""
+        integration = getattr(self._parent_widget, "_controller_integration", None)
+        return getattr(integration, "history_controller", None) if integration is not None else None
+
+    def _on_compare(self, turn: int, step: int) -> None:
+        """The map before a turn (or one of its steps) left of a line, composed as the history of the project does."""
+        history = self._history_panel()
+        if history is not None:
+            history.compare_agent_turn(turn, step if step >= 0 else None)
 
     def _show_undo_state(self) -> None:
         """The action bar follows the history of the agent while AGENT is open: nothing to undo while it works."""
@@ -783,10 +798,9 @@ class AgentChatController(QObject):
                      or any(kind not in NO_FILE_KINDS for kind in configured_kinds.values()))
         handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
                                   allow_remote_sources=opens_web,
-                                  # The address of a service the user added is still a name, for the recipes kept
-                                  # before it had an id; never the address of a basemap, which no recipe holds.
-                                  platforms=[model_name(source) for source in data_sources] + configured_names
-                                  + [platform_name(source) for source in data_sources if source.kind != KIND_XYZ],
+                                  # By the names a model knows them by, only: the address of a service the user
+                                  # added would come back in the words of a refusal ("Enabled: ...").
+                                  platforms=[model_name(source) for source in data_sources] + configured_names,
                                   platform_aliases=platform_aliases(data_sources),
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers.update(settings_handlers(offered, self._approve_skill))

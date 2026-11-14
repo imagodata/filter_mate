@@ -1190,6 +1190,16 @@ Hi esteu d'acord amb totes? No: no se n'executa cap.</translation>
         <translation>Desfés fins aquí</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Comparar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>El mapa d'abans d'aquesta petició o pas a l'esquerra d'una línia, el mapa actual a la dreta</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROVEU</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>Treu la fixació</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Feu clic al mapa per bloquejar la línia; torneu-hi a fer clic per alliberar-la.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>línia bloquejada: feu clic per alliberar-la</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Clic dret per fixar l'estat actual.</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixa el mapa d'abans d'aquest pas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Comparar amb el mapa fixat</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

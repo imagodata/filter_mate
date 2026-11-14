@@ -1190,6 +1190,16 @@ Czy zgadzasz się na wszystkie? Nie: żadne nie zostanie wykonane.</translation>
         <translation>Cofnij do tego miejsca</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Porównaj</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Mapa sprzed tego żądania lub kroku po lewej stronie linii, obecna mapa po jej prawej stronie</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>WYPRÓBUJ</translation>
@@ -4790,6 +4800,16 @@ What would you like to do?</translation>
         <translation>Usuń przypięcie</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Kliknij mapę, aby zablokować linię; kliknij ponownie, aby ją zwolnić.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>linia zablokowana: kliknij, aby ją zwolnić</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Kliknij prawym przyciskiem, aby przypiąć bieżący stan.</translation>
@@ -4978,6 +4998,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Przypnij mapę sprzed tego kroku</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Porównaj z przypiętą mapą</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

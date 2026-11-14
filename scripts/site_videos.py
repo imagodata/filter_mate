@@ -9,7 +9,8 @@ Usage (Windows QGIS driven from WSL or a Windows shell)::
     qgis-bin.exe --nologo --lang en --code scripts/site_videos.py
 
 then ``scripts/site_video_render.py`` turns the recording into the MP4 and
-poster used by the site.
+poster used by the site. ``scripts/site_videos_headless.sh`` records the same
+clips without a screen, in the Docker image of QGIS (nothing opens on the desk).
 
 The scenes are the use cases of ``website/stories.html`` played on the BD TOPO
 3.5 GeoPackage of Haute-Garonne, driven through the real dock widget like
@@ -51,6 +52,12 @@ DARK = THEME == 'dark'
 ROOT = os.environ.get('FM_VIDEO_OUT', r'C:\Users\Simon\AppData\Local\Temp\fm_video')
 GPKG = os.environ.get('FM_GPKG', r'C:\Users\Simon\Documents\bdtopo31\BDT_3-5_GPKG_LAMB93_D031-ED2026-03-15.gpkg')
 # FM_MEASURE=1: replay a scene for its logged counts only, no frame grabbed, in fm_video\\measure\\<clip>
+# FM_PLACE_RIVER / FM_PLACE_NOISE / FM_PLACE_EXPORT: the commune of the buffer and favorites, noise and export clips
+PLACE_RIVER = os.environ.get('FM_PLACE_RIVER', 'Grenade')
+PLACE_NOISE = os.environ.get('FM_PLACE_NOISE', 'Muret')
+PLACE_EXPORT = os.environ.get('FM_PLACE_EXPORT', 'Saint-Gaudens')
+# FM_PG: a PostgreSQL connection ("host=... dbname=... user=... password=..."); the layers then come from PostGIS
+PG = os.environ.get('FM_PG', '')
 MEASURE = bool(os.environ.get('FM_MEASURE'))
 OUT = os.path.join(ROOT, 'measure' if MEASURE else '', CLIP + ('-dark' if DARK else ''))
 EXPORT_DIR = os.path.join(ROOT, 'export_out')
@@ -445,7 +452,11 @@ def setup(layer_names, focus_layer, focus_expr, scale=1.25, dense_scale=120000):
         # whole department (1.2 M buildings) in a task holding the GeoPackage,
         # and froze the main thread for minutes in the first recordings.
         for name in layer_names:
-            vl = QgsVectorLayer(f'{GPKG}|layername={name}', name, 'ogr')
+            if PG:
+                vl = QgsVectorLayer(f'{PG} key=\'fid\' table="public"."{name}" (geom)', name, 'postgres')
+                log(f'postgres layer {name} valid={vl.isValid()} count={vl.featureCount()}')
+            else:
+                vl = QgsVectorLayer(f'{GPKG}|layername={name}', name, 'ogr')
             QgsProject.instance().addMapLayer(vl)
             node = QgsProject.instance().layerTreeRoot().findLayer(vl.id())
             if node:
@@ -1133,6 +1144,23 @@ HERO = boot(S1_LAYERS, 'commune', '"nom_officiel" = \'Saint-Gaudens\'', scale=No
     (0, cam('layers', dur=1.4)), hold(2600),
 ] + ending(S1_TARGETS)
 
+# metropole (teaser 5.1.1): from the whole department to Toulouse Métropole, then one click filters 12 layers.
+SM_LAYERS = ['epci'] + S1_TARGETS
+METROPOLE = boot(SM_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', scale=None, dense_scale=400000) + [
+    (0, restyle('epci', (138, 143, 134, 30), '#6b7280', 0.8, selection_alpha=140)),
+    (500, source('epci')), (1500, single_mode(tracking=True, selecting=True)), (1500, filtering_tab),
+    (1000, rec_start), (0, cam('full', dur=0, drift=1.04)),
+    (1200, cam(EXPLORE_ZONE, dur=1.6, pad=30)),
+] + act(picker_edit) + type_into(picker_edit, 'Toulouse M', per_char=140) + [
+    (900, pick_focus)] + settle() + show_map(2600, 1.03) + [
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(S1_TARGETS) + predicates(['intersect']) + [
+    (200, buffer_off), hold(500), (400, cam(ACTION_ZONE, dur=1.3, pad=40)),
+] + run_filter() + [
+    (200, cam('canvas', dur=1.8, drift=1.05)), hold(2500), hold(1700),
+    (0, cam('layers', dur=1.4)), hold(2600),
+] + ending(S1_TARGETS)
+
 # explore: the three exploring modes on the communes of the department.
 EXPLORE_LAYERS = ['epci', 'commune', 'surface_hydrographique', 'troncon_hydrographique']
 EXPLORE = boot(EXPLORE_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', scale=None) + [
@@ -1158,8 +1186,8 @@ S3_LAYERS = ['commune', 'zone_d_habitation', 'surface_hydrographique', 'batiment
              'troncon_de_route', 'erp']
 S3_FLOOD_TARGETS = ['batiment', 'erp', 'troncon_de_route']
 
-# buffer (story 3): what the Garonne can reach in Grenade, 300 m then 100 m, then Undo.
-BUFFER = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Grenade\'', 1.2) + scope('commune') + recorded_scene(1.2) \
+# buffer (story 3): what the Garonne can reach in Grenade (FM_PLACE_RIVER), 300 m then 100 m, then Undo.
+BUFFER = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + scope('commune') + recorded_scene(1.2) \
     + pick_layer('surface_hydrographique') + [
     (1200, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.4, pad=30)),
 ] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [
@@ -1177,11 +1205,88 @@ BUFFER = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Grenade\'', 1.2) + scope
     + [still('s3-05')] \
     + ending(S3_FLOOD_TARGETS)
 
+
+# compare (teaser 5.1.1): the Garonne and 300 m around in Blagnac, then Compare: before left of the line, after right.
+def swipe_item():
+    for it in iface.mapCanvas().scene().items():
+        if type(it).__name__ == 'SwipeItem':
+            return it
+    return None
+
+
+def swipe_to(fraction):
+    def _s():
+        it = swipe_item()
+        if it is None:
+            log('no swipe item')
+            return
+        it.set_fraction(fraction)
+        canvas = iface.mapCanvas()
+        r = to_main(canvas, QRect(int(canvas.width() * fraction), canvas.height() // 2, 1, 1))
+        REC.event('point', x=r.center().x(), y=r.center().y())
+    return _s
+
+
+def swipe_ready():
+    def _s():
+        it = swipe_item()
+        return it is None or it.busy
+    _s.max_tries = 120
+    return _s
+
+
+def sweep(a, b, ms=2600, steps=40):
+    return [(ms // steps, swipe_to(a + (b - a) * (i + 1) / steps)) for i in range(steps)]
+
+
+def compare_button():
+    return dock().findChild(QPushButton, 'pushButton_action_compare')
+
+
+def click_compare():
+    compare_button().click()
+
+
+COMPARE = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Blagnac\'', 1.2) + scope('commune') + recorded_scene(1.2) \
+    + pick_layer('surface_hydrographique') + [
+    (1200, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.4, pad=30)),
+] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [
+    hold(1500),
+] + select_all_multi_menu() + [hold(400), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(S3_FLOOD_TARGETS) + predicates(['intersect']) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(300) + and_targets() + [
+    hold(500), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + show_map(2500) + [(0, quiet_message_bar), (0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
+    + act(compare_button, click_compare) + [(500, swipe_ready()), (0, cam('canvas', dur=1.4)), hold(1200)] \
+    + sweep(0.5, 0.15) + [hold(700)] + sweep(0.15, 0.85, ms=3600, steps=56) + [hold(700)] + sweep(0.85, 0.5, ms=1800, steps=28) \
+    + [hold(1200), (0, lambda: log(f'swipe item {swipe_item()} busy={getattr(swipe_item(), "busy", None)}'))] \
+    + act(compare_button, click_compare) + [hold(800)] + ending(S3_FLOOD_TARGETS)
+
+
+# postgis (teaser 5.1.1): the same question on PostGIS layers (FM_PG): the Garonne and 300 m around in Blagnac.
+def dock_head():
+    r = rect_of(dock())
+    return QRect(r.x(), r.y(), r.width(), 360)
+
+
+POSTGIS = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Blagnac\'', 1.2) + scope('commune') + recorded_scene(1.2) \
+    + pick_layer('surface_hydrographique') + [
+    (1200, cam(dock_head, dur=1.4, pad=10)), hold(2200),
+    (0, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.2, pad=30)),
+] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [
+    hold(1200),
+] + select_all_multi_menu() + [hold(400), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(S3_FLOOD_TARGETS) + predicates(['intersect']) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(300) + and_targets() + [
+    hold(500), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, quiet_message_bar)] + show_map(3500) + [(0, cam(dock_head, dur=1.3, pad=10)), hold(2200)] \
+    + ending(S3_FLOOD_TARGETS)
+
 S2_LAYERS = ['commune', 'zone_d_habitation', 'batiment', 'troncon_de_voie_ferree', 'troncon_de_route', 'erp']
 NOISE_EXPR = 'CASE WHEN "importance" = \'1\' THEN 300 WHEN "importance" = \'2\' THEN 250 ELSE 100 END'
 
 # noise (story 2): buildings exposed to major-road noise in Muret, buffer by expression.
-NOISE = boot(S2_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.2) + scope('commune') + recorded_scene(1.2) \
+NOISE = boot(S2_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_NOISE}\'', 1.2) + scope('commune') + recorded_scene(1.2) \
     + pick_layer('troncon_de_route') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom('"importance" IN (\'1\', \'2\')') + settle() + show_map(2400) + [
     note_expr('major roads', 'troncon_de_route', '"importance" IN (\'1\', \'2\')'),
@@ -1333,7 +1438,7 @@ def fav_cleanup():
 
 
 # favorites (story 7): save the 300 m result of story 3, clear everything, replay it.
-FAVORITES = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Grenade\'', 1.2) + [(0, no_auto_zoom)] + scope('commune') + [
+FAVORITES = boot(S3_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_RIVER}\'', 1.2) + [(0, no_auto_zoom)] + scope('commune') + [
     (500, source('surface_hydrographique')), (2000, multi_mode), (3000, select_all_multi), hold(4000),
     (500, filtering_tab),
     (300, lambda: check_combo_items(dock().checkableComboBoxLayer_filtering_layers_to_filter, S3_FLOOD_TARGETS, True)),
@@ -1388,11 +1493,11 @@ def export_datatype():
 
 def export_zip():
     os.makedirs(EXPORT_DIR, exist_ok=True)
-    dock().lineEdit_exporting_zip.setText(os.path.join(EXPORT_DIR, 'saint_gaudens.zip'))
+    dock().lineEdit_exporting_zip.setText(os.path.join(EXPORT_DIR, PLACE_EXPORT.lower().replace('-', '_').replace(' ', '_') + '.zip'))
 
 
 # export (story 1): the commune dossier as one GeoPackage with styles, zipped.
-EXPORT = boot(S1_LAYERS, 'commune', '"nom_officiel" = \'Saint-Gaudens\'', 1.3) + scope('commune') \
+EXPORT = boot(S1_LAYERS, 'commune', f'"nom_officiel" = \'{PLACE_EXPORT}\'', 1.3) + scope('commune') \
     + recorded_scene(1.3) + [note('scope', S1_TARGETS), (0, cam('dock', dur=1.4, pad=10))] \
     + act(toolbox_button('export'), lambda: dock().toolBox_tabTools.setCurrentIndex(1)) + [
     (1200, cam(EXPORT_ZONE, dur=1.4, pad=40)),
@@ -1483,8 +1588,12 @@ FM5_DTM = os.path.join(FM5_DIR, 'mnt_village.tif')
 FM5_SLOPE = os.path.join(FM5_DIR, 'pente_village.tif')
 FM5_GPKG = os.path.join(FM5_DIR, 'estavar.gpkg')
 FM5_TILE = os.path.join(FM5_DIR, 'estavar_village.copc.laz')
-FM5_EXTENT = (617000, 6152100, 618000, 6153100)
-DTM_COLORS = [(1200, '#3f7d4f'), (1225, '#8fb46a'), (1250, '#d8d39a'), (1280, '#c8a27a'), (1315, '#f3efe8')]
+# FM5_EXTENT ("xmin,ymin,xmax,ymax"), FM5_DTM_RANGE ("low,high" in metres), FM5_HEIGHT, FM5_SURVEY_EXPR, FM5_SURVEY_RECT,
+# FM5_SURVEY_ZIP: another square kilometre than Estavar (the teaser uses Fenouillet / Saint-Alban, Toulouse Métropole)
+FM5_EXTENT = tuple(float(v) for v in os.environ.get('FM5_EXTENT', '617000,6152100,618000,6153100').split(','))
+_DTM_LOW, _DTM_HIGH = (float(v) for v in os.environ.get('FM5_DTM_RANGE', '1200,1315').split(','))
+DTM_COLORS = [(round(_DTM_LOW + f * (_DTM_HIGH - _DTM_LOW), 1), c) for f, c in
+              ((0.0, '#3f7d4f'), (0.217, '#8fb46a'), (0.435, '#d8d39a'), (0.696, '#c8a27a'), (1.0, '#f3efe8'))]
 FM5_STYLE = {'troncon_de_route': ('#e07b24', 1.1, 1.0)}  # readable on the hillshade, light or dark
 SLOPE_COLORS = [(0, '#f4f1e4'), (15, '#e8d48c'), (30, '#de8f3c'), (60, '#ad3a2c'), (100, '#5c1a22')]
 
@@ -1547,6 +1656,9 @@ def setup5(layer_names, hidden=(), margin=1.03):
                 ml = ramp_layer(FM5_DTM, name, DTM_COLORS, 0.62)
             elif name == 'pente':
                 ml = ramp_layer(FM5_SLOPE, name, SLOPE_COLORS, 0.72)
+            elif name == 'ortho':
+                from qgis.core import QgsRasterLayer
+                ml = QgsRasterLayer(os.path.join(FM5_DIR, 'ortho_rvb.tif'), name, 'gdal')
             elif name == 'lhd':
                 from qgis.core import QgsPointCloudLayer
                 ml = QgsPointCloudLayer(FM5_TILE, name, 'copc')
@@ -1748,7 +1860,7 @@ SLOPE = boot5(['hillshade', 'pente', 'mnt', 'parcelle', 'batiment'], hidden=('mn
 # heights (story 10): building points (class 6) more than 9 m above the DTM (PDAL) -> buildings with
 # at least half of their footprint under such points.
 HEIGHTS = boot5(['hillshade', 'mnt', 'lhd', 'batiment'], hidden=('mnt',)) + fm5_scene() + to_exploring('lhd') \
-    + class_condition(6, 'mnt', 9, 's10') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + class_condition(6, 'mnt', int(os.environ.get('FM5_HEIGHT', '9')), 's10') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
     + targets(['batiment']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
     (200, buffer_off), hold(500), still('s10-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + run_filter_long() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + [still('s10-04')] \
@@ -1764,22 +1876,153 @@ PRUNING = boot5(['hillshade', 'mnt', 'lhd', 'batiment', 'troncon_de_route'], hid
     + ending(['troncon_de_route'])
 
 
+# sam (teaser 5.1.1): three clicks of SAM 2.1 on the orthophoto draw three buildings, which then filter the parcels.
+# FM_SAM_POINTS ("x,y;x,y") and FM_SAM_RECT: the clicks and the frame, by default three roofs of Fenouillet (FM5_DIR)
+SAM_POINTS = [tuple(float(v) for v in xy.split(',')) for xy in
+              os.environ.get('FM_SAM_POINTS', '571404,6289272;571245,6289540;571331,6289646').split(';')]
+SAM_RECT = tuple(float(v) for v in os.environ.get('FM_SAM_RECT', '571180,6289120,571560,6289700').split(','))
+
+
+def detector_button():
+    return dock().findChild(QWidget, 'pushButton_checkable_exploring_raster_detector')
+
+
+def sam_ready():
+    from filter_mate.adapters.qgis.coverage_layers import segmentation
+    panel = raster_panel()
+    panel._runtime_asked = True
+    state = segmentation.model_state()
+    panel.set_segmentation_readiness(state.runtime, state.installed)
+    panel._engine_combo.setCurrentIndex(panel._engine_combo.findData('sam'))
+    log(f'sam runtime={state.runtime} installed={state.installed} ready={panel.segmentation_ready()} '
+        f'engine={panel.object_engine()}')
+
+
+def sam_click(x, y):
+    def _s():
+        from qgis.core import QgsPointXY
+        canvas = iface.mapCanvas()
+        pt = QgsPointXY(x, y)
+        px = canvas.getCoordinateTransform().transform(pt)
+        r = to_main(canvas, QRect(int(px.x()), int(px.y()), 1, 1))
+        REC.event('point', x=r.center().x(), y=r.center().y())
+        REC.event('click', x=r.center().x(), y=r.center().y())
+        ctrl = coverage()._segmentation_controller()
+        if not ctrl.on_map():
+            log(f'sam tool not on the map ({type(canvas.mapTool()).__name__}): activated')
+            ctrl.activate()
+        log(f'sam click {x} {y} tool {type(canvas.mapTool()).__name__}')
+        ctrl.tool.pointPicked.emit(pt, True, False)
+    return _s
+
+
+def sam_done(n):
+    def _s():
+        ctrl = coverage()._segmentation_controller()
+        done = ctrl._task is None and raster_panel().segment_count() >= n
+        if done:
+            log(f'sam objects {raster_panel().segment_count()}')
+        return not done
+    _s.max_tries = 240
+    return _s
+
+
+def sam_clicks():
+    steps = []
+    for i, (x, y) in enumerate(SAM_POINTS):
+        steps += [(900, sam_click(x, y)), (300, speed(3.0)), (500, sam_done(i + 1)), (200, speed(1.0)), hold(1400)]
+    return steps
+
+
+SAM = boot5(['ortho', 'parcelle']) + fm5_scene() + to_exploring('ortho') \
+    + act(group_check(lambda: raster_panel()._pipette_group), open_group(lambda: raster_panel()._pipette_group)) + [
+    hold(600), (0, sam_ready), (0, ensure_visible(lambda: raster_panel()._engine_combo)), hold(300),
+    (0, cam(lambda: raster_panel()._pipette_group, dur=1.2, pad=30)),
+] + act(lambda: raster_panel()._target_buttons['object'], lambda: raster_panel()._target_buttons['object'].click()) + [
+    hold(1200), (0, lambda: log(f'target {raster_panel().pick_target()} engine {raster_panel().object_engine()}')),
+    (0, zoom_rect(*SAM_RECT)),
+] + settle() + show_map(1500) + act(detector_button, lambda: detector_button().isChecked() or detector_button().click()) + [hold(900)] \
+    + sam_clicks() + show_map(2500) + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(['parcelle']) + predicates(['intersect']) + [
+    hold(500), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, lambda: counts(['parcelle']))] + show_map(4000, 1.05) + ending(['parcelle'])
+
+
+# agent (teaser 5.1.1): one request typed in AGENT, answered by a local Ollama model, then Undo this turn.
+AGENT_MODEL = os.environ.get('FM_AGENT_MODEL', 'qwen3:8b')
+AGENT_REQUEST = os.environ.get('FM_AGENT_REQUEST', 'Keep the communes with more than 20000 inhabitants')
+
+
+def agent_chat():
+    d = dock()
+    if getattr(d, '_agent_chat', None) is None:
+        log('agent panel installed by the script')
+        d.install_agent_panel(plugins['filter_mate'])
+    return d._agent_chat
+
+
+def agent_panel():
+    return agent_chat().panel
+
+
+def agent_setup():
+    from qgis.core import QgsSettings
+    from filter_mate.adapters.agent.settings import AgentSettings, save_settings, load_settings
+    chat = agent_chat()
+    QgsSettings().setValue('FilterMate/agent/setup_offered_version', chat.plugin_version())
+    save_settings(AgentSettings(preset='ollama', model=AGENT_MODEL, consent=True,
+                                consent_target='http://localhost:11434', local_filtering_only=True,
+                                tool_families=False))
+    chat._settings_dialog = lambda: False
+    chat.open_settings = lambda: False
+    chat._refresh_ready()
+    chat.new_conversation()
+    log(f'agent settings {load_settings()}')
+
+
+def agent_open():
+    dock()._fm_sections.open_top('agent')
+
+
+def agent_done():
+    def _s():
+        busy = agent_chat().chat_busy() or agent_panel()._working
+        if not busy:
+            log('agent thread: ' + agent_panel().thread.toPlainText().replace('\n', ' | ')[:900])
+        return busy
+    _s.max_tries = 1600
+    return _s
+
+
+AGENT = boot(['epci', 'commune', 'surface_hydrographique'], 'commune', '"nom_officiel" = \'Toulouse\'', scale=None) + [
+    (500, agent_setup), (800, agent_open), (1500, wait_idle()), (500, rec_start), (0, cam('full', dur=0, drift=1.03)),
+    hold(1200), (0, cam(agent_panel, dur=1.4, pad=12)),
+] + act(lambda: agent_panel().input, lambda: agent_panel().input.setFocus()) \
+    + type_into(lambda: agent_panel().input, AGENT_REQUEST, per_char=55) + [hold(500)] \
+    + act(lambda: agent_panel().send_button, lambda: agent_panel().send_button.click()) + [
+    (500, speed(6.0)), (1500, agent_done()), (300, speed(1.0)), hold(3000),
+    (0, lambda: counts(['commune'])), (0, cam('full', dur=1.6)), hold(3200), (0, cam(agent_panel, dur=1.3, pad=12)),
+    hold(1200), (0, lambda: log(f'undo offered {agent_panel().undo_offered()}')),
+] + act(lambda: agent_panel().undo_button, lambda: agent_panel().undo_button.click()) + settle() + [
+    (0, cam('full', dur=1.4)), hold(2500)] + ending(['commune'])
+
+
 def zip_edit():
     return dock().lineEdit_exporting_zip
 
 
-SURVEY_ZIP = os.path.join(EXPORT_DIR, 'estavar_eglise.zip')
+SURVEY_ZIP = os.path.join(EXPORT_DIR, os.environ.get('FM5_SURVEY_ZIP', 'estavar_eglise.zip'))
 
 
 # survey (story 12): the church and 50 m around clip the DTM and the LiDAR, then both are exported.
 SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + pick_layer('batiment') + [
     (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
-] + typed_custom('"nature" = \'Eglise\'', per_char=70) + settle() + show_map(2000) + [
+] + typed_custom(os.environ.get('FM5_SURVEY_EXPR', '"nature" = \'Eglise\''), per_char=70) + settle() + show_map(2000) + [
     still('s12-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['mnt', 'lhd']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(50) + [
     hold(500), still('s12-02'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, zoom_rect(617207, 6152391, 617507, 6152691))] + settle() + show_map(4000, 1.05) + [
+] + run_filter() + [(0, zoom_rect(*(float(v) for v in os.environ.get('FM5_SURVEY_RECT', '617207,6152391,617507,6152691').split(','))))] + settle() + show_map(4000, 1.05) + [
     still('s12-03'),
     (0, cam('dock', dur=1.4, pad=10)),
 ] + act(toolbox_button('export'), lambda: dock().toolBox_tabTools.setCurrentIndex(1)) + [
@@ -1797,7 +2040,7 @@ SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene(
     + act('pushButton_action_export', export_with_recap) + [hold(1500)] \
     + settle(4.0) + [(0, wait_long())] + show_map(3000) + ending()
 
-CLIPS = {'hero': HERO, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
+CLIPS = {'hero': HERO, 'metropole': METROPOLE, 'compare': COMPARE, 'sam': SAM, 'agent': AGENT, 'postgis': POSTGIS, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
          'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
          'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY}
 STEPS = CLIPS[CLIP]

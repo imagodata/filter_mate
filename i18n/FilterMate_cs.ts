@@ -1190,6 +1190,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Vrátit až sem</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Porovnat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Mapa před tímto požadavkem či krokem vlevo od čáry, současná mapa vpravo od ní</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ZKUSTE</translation>
@@ -4778,6 +4788,16 @@ What would you like to do?</translation>
         <translation>Odebrat připnutí</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Kliknutím do mapy čáru zamknete, dalším kliknutím ji uvolníte.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>čára zamčena: kliknutím ji uvolníte</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Pravým kliknutím připnete aktuální stav.</translation>
@@ -4966,6 +4986,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Připnout mapu před tímto krokem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Porovnat s připnutou mapou</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>
