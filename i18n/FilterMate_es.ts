@@ -1085,6 +1085,26 @@ Do you agree?</source>
         <translation>Los {} pasos anteriores se mantienen y se pueden deshacer.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>No se pudo acceder al proveedor, nuevo intento en {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>El proveedor está ocupado, nuevo intento en {} s…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>La petición se detuvo a medias. Pasos ya hechos, que se mantienen (Deshacer los revierte): {}. Pida al agente que continúe cuando esté listo.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Detenido a medias. Pasos ya hechos, que se mantienen (Deshacer los revierte): {}. Pida al agente que continúe si quiere el resto.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

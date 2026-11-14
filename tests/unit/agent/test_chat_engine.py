@@ -6,7 +6,7 @@ import math
 
 import pytest
 
-from core.agent.chat_engine import MAX_RETRY_WAIT, ChatEngine
+from core.agent.chat_engine import MAX_RETRY_WAIT, NO_RETRY_ABOVE, ChatEngine
 from core.agent.messages import (
     ROLE_ASSISTANT, ROLE_USER, STOP_END, STOP_MAX_TOKENS, STOP_REFUSAL, STOP_TOOL_USE, Message, ProviderError,
     StreamFailure, TextDelta, TextPart, ToolCallPart, TurnComplete,
@@ -343,8 +343,9 @@ class RetryListener(Listener):
 
 
 def check_wire(kind, body):
-    """The request is one each provider takes: every call answered right after it, no empty message, and for
-    Anthropic, roles that alternate."""
+    """The request is one each provider takes: every call answered right after it, no empty message, and roles
+    that alternate for the user (Anthropic: all roles; OpenAI and Ollama: never two messages of the user in a row).
+    Returns the end of the last message of the user."""
     if kind == "anthropic":
         messages = body["messages"]
         roles = [message["role"] for message in messages]
@@ -357,6 +358,8 @@ def check_wire(kind, body):
                 assert [block.get("tool_use_id") for block in following[:len(uses)]] == uses
         return messages[-1]["content"][-1]["text"]
     messages = body["messages"][1:]  # after the system message
+    roles = [message["role"] for message in messages]
+    assert roles[0] == "user" and not any(a == b == "user" for a, b in zip(roles, roles[1:]))
     for position, message in enumerate(messages):
         if message["role"] == "tool":
             before = [m for m in messages[:position] if m["role"] != "tool"][-1]
@@ -381,12 +384,12 @@ def test_a_failure_at_the_second_turn_keeps_the_first_and_the_next_request_is_va
     transport.emit(turn(STOP_TOOL_USE, TextPart("Adding."), call("read", "1"), call("write", "2")))
     transport.emit(StreamFailure(ProviderError("stream", "The response was cut before its end.")))
     outcome = listener.outcomes[0]
-    assert outcome.status == "failed" and outcome.kept_steps == 2 and seen == ["read", "write"]
+    assert outcome.status == "failed" and outcome.kept_steps == 1 and seen == ["read", "write"]  # a reading is no step
     assert [m.role for m in session.messages] == [ROLE_USER, ROLE_ASSISTANT, ROLE_USER]
     assert "the request to the model failed" in session.messages[-1].text
     engine.send("go on")
     body = json.loads(transport.starts[-1][0].body)
-    assert check_wire(kind, body) == "go on"
+    assert check_wire(kind, body).endswith("go on")  # OpenAI and Ollama: in one message with the note
     assert "broke off here" in json.dumps(body)
 
 
@@ -398,14 +401,14 @@ def test_a_stop_during_a_tool_leaves_a_valid_conversation(kind):
     transport.emit(turn(STOP_TOOL_USE, call("write", "1"), call("export", "2"), call("read", "3")))
     assert seen == ["write"] and listener.outcomes[0].kept_steps == 1
     engine.send("go on")
-    assert check_wire(kind, json.loads(transport.starts[-1][0].body)) == "go on"
+    assert check_wire(kind, json.loads(transport.starts[-1][0].body)).endswith("go on")
 
 
 def test_the_note_replaces_the_turns_left_note():
     engine, session, transport, listener, _ = _engine()
     session._limits = type(session._limits)(max_model_turns=3, warn_turns_left=2)
     engine.send("go")
-    transport.emit(turn(STOP_TOOL_USE, call("read", "1")))
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
     assert "model turns left" in session.messages[-1].text
     engine.cancel()
     texts = [part.text for part in session.messages[-1].parts if isinstance(part, TextPart)]
@@ -420,7 +423,7 @@ def test_a_stop_before_the_tools_of_a_turn_ran_drops_that_turn_and_keeps_the_one
     transport, listener = Transport(), Listener()
     engine = ChatEngine(session, executor, transport, listener, Checkpoint(), defer=pending.append)
     engine.send("go")
-    transport.emit(turn(STOP_TOOL_USE, call("read", "1")))
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
     pending.pop(0)()  # the tools ran
     pending.pop(0)()  # the next request left
     transport.emit(turn(STOP_TOOL_USE, call("write", "2")))  # its tools wait for the event loop: Stop comes first
@@ -450,13 +453,87 @@ def test_a_refusal_after_tools_keeps_them(setup):
     assert "the model declined to go on" in session.messages[-1].text and len(session.messages) == 3
 
 
-def test_failed_steps_are_kept_but_not_counted(setup):
+def test_failed_steps_forget_the_request(setup):
     engine, session, transport, listener, checkpoint, _ = setup
     checkpoint.fail = True  # the write is refused before it runs
     engine.send("go")
     transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
     transport.emit(StreamFailure(ProviderError("auth", "bad")))
-    assert listener.outcomes[0].kept_steps == 0 and len(session.messages) == 3
+    assert listener.outcomes[0].kept_steps == 0 and session.messages == ()
+
+
+def test_declined_steps_forget_the_request(setup):
+    engine, session, transport, listener, _, seen = setup
+    listener.accept = False  # the export is refused by the user
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("export", "1")))
+    transport.emit(StreamFailure(ProviderError("auth", "bad")))
+    assert seen == [] and listener.outcomes[0].kept_steps == 0 and session.messages == ()
+
+
+def test_a_failure_after_readings_only_forgets_the_request(setup):
+    engine, session, transport, listener, _, seen = setup
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("read", "1"), call("read", "2")))
+    transport.emit(StreamFailure(ProviderError("auth", "bad")))
+    assert seen == ["read", "read"]
+    assert listener.outcomes[0].status == "failed" and listener.outcomes[0].kept_steps == 0
+    assert session.messages == ()
+    engine.send("again")  # the request is sent again whole: the conversation starts clean
+    assert [m.role for m in session.messages] == [ROLE_USER]
+
+
+def test_a_stop_after_readings_only_forgets_the_request(setup):
+    engine, session, transport, listener, _, _ = setup
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("read", "1")))
+    engine.cancel()
+    assert listener.outcomes[0].status == "cancelled" and listener.outcomes[0].kept_steps == 0
+    assert session.messages == ()
+
+
+def test_a_reading_beside_a_change_is_kept_but_not_counted(setup):
+    engine, session, transport, listener, _, _ = setup
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("read", "1"), call("write", "2")))
+    transport.emit(StreamFailure(ProviderError("auth", "bad")))
+    assert listener.outcomes[0].kept_steps == 1 and len(session.messages) == 3
+
+
+@pytest.mark.parametrize("kind", sorted(PROVIDERS))
+def test_a_bad_request_after_a_change_forgets_the_request_but_counts_the_step(kind):
+    engine, session, transport, listener, seen = _engine(PROVIDERS[kind])
+    engine.send("add the parks")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
+    transport.emit(StreamFailure(ProviderError("bad_request", "Too long for the model.", status=400)))
+    outcome = listener.outcomes[0]
+    assert outcome.status == "failed" and outcome.error.kind == "bad_request"
+    assert seen == ["write"] and outcome.kept_steps == 1
+    assert session.messages == ()  # nothing of it stays: it would be refused again with every later request
+    engine.send("go on")
+    assert [m.role for m in session.messages] == [ROLE_USER]
+    assert check_wire(kind, json.loads(transport.starts[-1][0].body)) == "go on"
+
+
+def test_another_failure_after_a_change_keeps_the_request(setup):
+    engine, session, transport, listener, _, _ = setup
+    engine.send("go")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
+    transport.emit(StreamFailure(ProviderError("auth", "bad")))
+    assert listener.outcomes[0].kept_steps == 1 and len(session.messages) == 3
+
+
+@pytest.mark.parametrize("kind", ["openai", "ollama"])
+def test_the_roles_alternate_for_the_user_after_a_request_that_broke_off(kind):
+    engine, session, transport, listener, _ = _engine(PROVIDERS[kind])
+    engine.send("add the parks")
+    transport.emit(turn(STOP_TOOL_USE, call("write", "1")))
+    transport.emit(StreamFailure(ProviderError("auth", "bad")))  # the step stays, with the note
+    engine.send("go on")
+    body = json.loads(transport.starts[-1][0].body)
+    last = check_wire(kind, body)  # also checks that no two messages of the user follow each other
+    assert last.startswith("This request broke off here") and last.endswith("\n\ngo on")
+    assert [m["role"] for m in body["messages"][1:]] == ["user", "assistant", "tool", "user"]
 
 
 # --- a provider busy for a moment is asked again ------------------------------------------------------------------
@@ -538,14 +615,25 @@ def test_a_network_failure_is_tried_again_when_it_may_pass(transient):
     assert bool(delays) is transient and (listener.outcomes == []) is transient
 
 
-@pytest.mark.parametrize("retry_after,wait", [(12.0, 12.0), (120.0, MAX_RETRY_WAIT), (0.0, 0.0), (-3.0, 2.0),
-                                              (math.nan, 2.0), (math.inf, MAX_RETRY_WAIT)])
+@pytest.mark.parametrize("retry_after,wait", [(12.0, 12.0), (NO_RETRY_ABOVE, MAX_RETRY_WAIT), (0.0, 0.0),
+                                              (-3.0, 2.0), (math.nan, 2.0)])
 def test_the_wait_follows_retry_after_up_to_a_bound(retry_after, wait):
     delays = []
     engine, _, transport, listener, _ = _engine(delays=delays)
     engine.send("hello")
     transport.emit(StreamFailure(ProviderError("rate_limit", "slow down", status=429, retry_after=retry_after)))
     assert delays[0][0] == wait and listener.retries == [(wait, "rate_limit")]
+
+
+@pytest.mark.parametrize("retry_after", [NO_RETRY_ABOVE + 1, 3600.0, math.inf])
+@pytest.mark.parametrize("kind", ["rate_limit", "server"])
+def test_no_new_try_when_the_provider_asks_to_come_back_much_later(kind, retry_after):
+    delays = []
+    engine, _, transport, listener, _ = _engine(delays=delays)
+    engine.send("hello")
+    transport.emit(StreamFailure(ProviderError(kind, "come back tomorrow", status=429, retry_after=retry_after)))
+    assert delays == [] and listener.retries == []
+    assert not engine.busy and listener.outcomes[0].status == "failed" and listener.outcomes[0].error.kind == kind
 
 
 def test_stop_during_the_wait_cancels_the_new_try():

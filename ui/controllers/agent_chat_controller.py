@@ -50,7 +50,7 @@ from ...core.agent.recipes import (
     stale_reference, steps_of as recipe_steps, summary as recipe_summary, with_live, without as recipe_without,
 )
 from ...core.agent.messages import (
-    ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
+    ERROR_AUTH, ERROR_BAD_REQUEST, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ROLE_USER, Message, ProviderError, StreamFailure,
     TextPart, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
@@ -1523,7 +1523,7 @@ class AgentChatController(QObject):
         executor.hold(held)
         return ChatEngine(session, executor, QtTransport(self), self,
                           self._checkpoint, defer=lambda step: QTimer.singleShot(0, step), policy=self._policy,
-                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), step))
+                          delay=lambda seconds, step: QTimer.singleShot(int(seconds * 1000), self._again(step)))
 
     @staticmethod
     def _chat_owned(handlers) -> dict:
@@ -1927,6 +1927,14 @@ class AgentChatController(QObject):
             return
         self.panel.add_text(text)
         self._answer.append(text)
+
+    def _again(self, step):
+        """``step`` (a new try of the model turn), once the status no longer says a new try is coming."""
+        def run():
+            if not self._abandoned and self.chat_busy():
+                self.panel.set_status(_tr("Thinking…"))
+            step()
+        return run
 
     def on_retry(self, seconds: float, error: ProviderError) -> None:
         """The provider failed for a moment: the engine asks it again by itself after ``seconds``."""
@@ -2439,21 +2447,24 @@ class AgentChatController(QObject):
             message = self._error_message(outcome.error)
             fix = outcome.error.kind in FIXED_IN_SETTINGS
             self._say("")
-            if kept:  # sent again whole, the request would do those steps twice: the agent knows where it stopped
-                detail = (_tr("The request stopped midway: {} steps were done and stay in place (Undo takes them "
-                              "back). Fix the settings, then ask for what is left.") if fix else
-                          _tr("The request stopped midway: {} steps were done and stay in place (Undo takes them "
-                              "back). Ask the agent to go on when you are ready.")).format(kept)
+            # Fixing the settings starts another conversation, and a request the server refused for what it holds
+            # was forgotten whole (ChatEngine._interrupt): either way the agent will not know what was done.
+            known = kept and not fix and outcome.error.kind != ERROR_BAD_REQUEST
+            if known:  # sent again whole, the request would do those steps twice: the agent knows where it stopped
+                detail = _tr("The request stopped midway. Steps already done, which stay in place (Undo takes "
+                             "them back): {}. Ask the agent to go on when you are ready.").format(kept)
             else:
                 self._give_back_request()
                 detail = _tr("The request is back in the line below: fix the settings, then send it again.") if fix \
                     else _tr("The request is back in the line below: send it again when you are ready.")
+                if kept:
+                    detail = _tr("The {} steps before stay, and can be undone.").format(kept) + " " + detail
             self.panel.show_error(message, detail, fix)
             return
         if outcome.status == OUTCOME_CANCELLED:
             if kept:
-                self._say(_tr("Stopped midway: {} steps were done and stay in place (Undo takes them back). Ask the "
-                              "agent to go on if you want the rest.").format(kept))
+                self._say(_tr("Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. "
+                              "Ask the agent to go on if you want the rest.").format(kept))
                 return
             self._give_back_request()
             self._say(_tr("Stopped."))

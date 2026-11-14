@@ -1085,6 +1085,26 @@ Egyetért?</translation>
         <translation>Az előző {} lépés megmarad, és visszavonható.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>A szolgáltatót nem sikerült elérni, újabb próbálkozás {} s múlva…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>A szolgáltató foglalt, újabb próbálkozás {} s múlva…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>A kérés félúton megállt. A már elvégzett lépések, amelyek a helyükön maradnak (a Visszavonás visszaveszi őket): {}. Kérje meg az ügynököt, hogy folytassa, amikor készen áll.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Félúton leállt. A már elvégzett lépések, amelyek a helyükön maradnak (a Visszavonás visszaveszi őket): {}. Kérje meg az ügynököt, hogy folytassa, ha a többit is szeretné.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Widget: {}</translation>

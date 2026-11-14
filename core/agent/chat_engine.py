@@ -12,8 +12,8 @@ from dataclasses import dataclass, replace
 from typing import Any, Callable, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from .messages import (
-    ERROR_NETWORK, ERROR_RATE_LIMIT, ERROR_SERVER, ERROR_STREAM, ProviderError, StreamEvent, StreamFailure, TextDelta,
-    ToolCallPart, ToolResultPart, TurnComplete,
+    ERROR_BAD_REQUEST, ERROR_NETWORK, ERROR_RATE_LIMIT, ERROR_SERVER, ERROR_STREAM, ProviderError, StreamEvent,
+    StreamFailure, TextDelta, ToolCallPart, ToolResultPart, TurnComplete,
 )
 from .providers.base import HttpRequest
 from .session import CAUSE_FAILED, CAUSE_STOPPED, STATUS_DONE, STATUS_RUN_TOOLS, AgentSession, TurnDecision
@@ -34,10 +34,14 @@ _NO_UNDO_POINT = "The undo point could not be made, so nothing was done."
 # then that long, up to MAX_RETRY_WAIT.
 RETRY_WAITS = (2.0, 6.0)
 MAX_RETRY_WAIT = 30.0
+NO_RETRY_ABOVE = 120.0  # a Retry-After beyond this is not a busy moment: the failure is shown at once
 
 
 def worth_retrying(error: ProviderError) -> bool:
     """A failure that may be over in a few seconds; never a refused key, a bad request or a used-up quota."""
+    wait = error.retry_after
+    if wait is not None and wait > NO_RETRY_ABOVE:  # asked to come back much later (a quota of the day): not now
+        return False
     return error.kind in (ERROR_RATE_LIMIT, ERROR_SERVER) or (error.kind == ERROR_NETWORK and error.transient)
 
 
@@ -309,7 +313,9 @@ class ChatEngine:
     def _interrupt(self, status: str, cause: str, ran: Sequence[ToolResultPart] = (),
                    error: Optional[ProviderError] = None) -> None:
         """End a request before its end: what it ran stays in the conversation (``interrupt_request``)."""
-        kept = self._session.interrupt_request(cause, ran)
+        # A request the server refuses for what it holds would be refused again with every later one: forgotten.
+        forget = error is not None and error.kind == ERROR_BAD_REQUEST
+        kept = self._session.interrupt_request(cause, ran, forget=forget)
         self._finish(ChatOutcome(status, error=error, kept_steps=kept))
 
     def _finish(self, outcome: ChatOutcome) -> None:

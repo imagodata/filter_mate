@@ -1085,6 +1085,26 @@ Do you agree?</source>
         <translation>Предишните {} стъпки остават и могат да бъдат отменени.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1943"/>
+        <source>The provider could not be reached, trying again in {} s…</source>
+        <translation>Доставчикът не можа да бъде достигнат, нов опит след {} с…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1944"/>
+        <source>The provider is busy, trying again in {} s…</source>
+        <translation>Доставчикът е зает, нов опит след {} с…</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2454"/>
+        <source>The request stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on when you are ready.</source>
+        <translation>Заявката спря по средата. Вече направени стъпки, които остават (Отмяна ги връща): {}. Помолете агента да продължи, когато сте готови.</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2466"/>
+        <source>Stopped midway. Steps already done, which stay in place (Undo takes them back): {}. Ask the agent to go on if you want the rest.</source>
+        <translation>Спряно по средата. Вече направени стъпки, които остават (Отмяна ги връща): {}. Помолете агента да продължи, ако искате останалото.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="828"/>
         <source>Widget: {}</source>
         <translation>Уиджет: {}</translation>

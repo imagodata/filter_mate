@@ -127,22 +127,27 @@ class AgentSession:
     def tool_names(self) -> Tuple[str, ...]:
         return tuple(tool.name for tool in self._tools)
 
-    def interrupt_request(self, cause: str, ran: Sequence[ToolResultPart] = ()) -> int:
-        """End the current request where it broke off (a failure, Stop, a refusal), keeping the tools it ran.
+    def interrupt_request(self, cause: str, ran: Sequence[ToolResultPart] = (), forget: bool = False) -> int:
+        """End the current request where it broke off (a failure, Stop, a refusal), keeping the changes it made.
 
-        What they changed stays in QGIS: forgotten, the request sent again would do it twice. The conversation is cut
-        after the last message of tool results, so every call kept has its result and no turn of the model is left
-        without its answer; that message ends with a note saying why the request stopped there (``cause``, one of
-        the ``CAUSE_*`` constants). It stays a message of results: the next request follows it as a message of its
-        own, as after the turn limit. When nothing ran, the request is forgotten, as if never sent.
+        What its tools changed stays in QGIS: forgotten, the request sent again would do it twice. So when a tool
+        that changes something ran, the conversation is cut after the last message of tool results (every call kept
+        has its result, no turn of the model is left without its answer) and that message ends with a note saying
+        why the request stopped there (``cause``, one of the ``CAUSE_*`` constants). It stays a message of results:
+        the next request follows it as a message of its own, as after the turn limit.
+
+        When nothing was changed (nothing ran, only readings, only refused or failed calls), the request is
+        forgotten, as if never sent: the user sends it again whole. So it is with ``forget``, whatever ran: a
+        request the server refuses for what it holds (too long for the model) would fail again with every later one.
 
         Args:
             cause: Why the request stopped.
             ran: The results of the first calls of the last turn, run before Stop came in the middle of the turn:
                 the other calls are answered as not run. Without any, that turn is dropped.
+            forget: Forget the request even when it changed something.
 
         Returns:
-            How many of the calls kept ran without an error.
+            How many calls of tools that change something ran without an error, kept or not.
         """
         last = self._messages[-1] if len(self._messages) > self._request_start else None
         if ran and last is not None and last.role == ROLE_ASSISTANT and len(ran) <= len(last.tool_calls):
@@ -156,13 +161,28 @@ class AgentSession:
                 end = index + 1
                 break
         del self._messages[end:]
-        if end == self._request_start:
-            return 0
+        changes = self._changes_done()
+        if forget or not changes:
+            del self._messages[self._request_start:]
+            return changes
         # The note of the turns left, if any, is no longer true.
         results = tuple(part for part in self._messages[-1].parts if not isinstance(part, TextPart))
         self._messages[-1] = Message(ROLE_USER, results + (TextPart(INTERRUPTED_NOTE.format(_CAUSES[cause])),))
-        return sum(1 for message in self._messages[self._request_start:] for part in message.parts
-                   if isinstance(part, ToolResultPart) and not part.is_error)
+        return changes
+
+    def _changes_done(self) -> int:
+        """Calls of the current request that ran without an error, of tools that change something."""
+        reads = {tool.name for tool in self._tools if tool.read_only}
+        changes, calls = 0, ()
+        for message in self._messages[self._request_start:]:
+            if message.role == ROLE_ASSISTANT:
+                calls = message.tool_calls
+                continue
+            results = [part for part in message.parts if isinstance(part, ToolResultPart)]
+            # By position: a result answers the call of the same rank in the turn before it.
+            changes += sum(1 for call, result in zip(calls, results) if not result.is_error and call.name not in reads)
+            calls = ()
+        return changes
 
     def next_request(self) -> HttpRequest:
         return self._provider.build_request(self._system, self._messages, self._tools)

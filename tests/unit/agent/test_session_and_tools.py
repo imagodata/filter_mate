@@ -29,8 +29,8 @@ READ = ToolSpec("read", "Read something here.", SCHEMA, read_only=True)
 EXPORT = ToolSpec("export", "Write a file there.", {"type": "object", "properties": {}}, destructive=True)
 
 
-def session(limit=12):
-    return AgentSession(create_provider(ProviderConfig("anthropic", "m")), [READ], "S", AgentLimits(limit))
+def session(limit=12, tools=(READ,)):
+    return AgentSession(create_provider(ProviderConfig("anthropic", "m")), list(tools), "S", AgentLimits(limit))
 
 
 def call(tool="read", call_id="c1", **arguments):
@@ -271,14 +271,28 @@ class TestExchange:
         result = run_exchange(chat, "go", FakeTransport([failure]), self.executor([]))
         assert result.error.kind == "auth" and chat.messages == ()
 
-    def test_a_failure_after_tools_keeps_them_with_a_note(self):
+    def test_a_failure_after_a_change_keeps_it_with_a_note(self):
         failure = StreamFailure(ProviderError("server", "Overloaded", status=529))
-        chat = session()
-        transport = FakeTransport([turn(STOP_TOOL_USE, call("read", name="x"))], [failure])
-        result = run_exchange(chat, "go", transport, self.executor([]))
+        chat = session(tools=(READ, EXPORT))
+        transport = FakeTransport([turn(STOP_TOOL_USE, call("export"))], [failure])
+        result = run_exchange(chat, "go", transport, self.executor([]), confirm=lambda c: True)
         assert result.error.kind == "server"
         assert [m.role for m in chat.messages] == [ROLE_USER, ROLE_ASSISTANT, ROLE_USER]
         assert isinstance(chat.messages[-1].parts[0], ToolResultPart) and "broke off here" in chat.messages[-1].text
+
+    def test_a_failure_after_readings_only_forgets_the_request(self):
+        failure = StreamFailure(ProviderError("server", "Overloaded", status=529))
+        chat = session(tools=(READ, EXPORT))
+        transport = FakeTransport([turn(STOP_TOOL_USE, call("read", name="x"))], [failure])
+        result = run_exchange(chat, "go", transport, self.executor([]))
+        assert result.error.kind == "server" and chat.messages == ()
+
+    def test_a_declined_change_is_no_change(self):
+        failure = StreamFailure(ProviderError("server", "Overloaded", status=529))
+        chat = session(tools=(READ, EXPORT))
+        transport = FakeTransport([turn(STOP_TOOL_USE, call("export"))], [failure])
+        run_exchange(chat, "go", transport, self.executor([]), confirm=lambda c: False)
+        assert chat.messages == ()
 
     def test_nobody_confirms_an_invalid_export(self):
         strict = ToolSpec("export", "Write a file there.", {"type": "object", "required": ["a"]}, destructive=True)
