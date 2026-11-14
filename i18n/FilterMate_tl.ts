@@ -1200,6 +1200,16 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>Ang mapa bago ang kahilingan o hakbang na ito sa kaliwa ng isang linya, ang kasalukuyang mapa sa kanan nito</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Ang mapa bago ang hakbang na ito sa kaliwa ng isang linya, ang kasalukuyang mapa sa kanan nito</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Ang mapa bago ang buong kahilingan sa kaliwa ng isang linya, ang kasalukuyang mapa sa kanan nito: ang mga hakbang lamang ng huling kahilingan ang inihahambing nang isa-isa</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SUBUKAN</translation>
@@ -4800,6 +4810,16 @@ What would you like to do?</translation>
         <translation>Alisin ang pin</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>I-pin ang mapa bago ang bawat kahilingan sa agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Pahalang na linya</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>I-click ang mapa upang i-lock ang linya, i-click muli upang palayain ito.</translation>
@@ -4838,6 +4858,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Na-pin {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Na-pin {} (bago ang kahilingan sa agent)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

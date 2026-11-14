@@ -1205,6 +1205,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>La carte d'avant cette demande ou cette étape à gauche d'un trait, la carte actuelle à sa droite</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>La carte d'avant cette étape à gauche d'un trait, la carte actuelle à sa droite</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>La carte d'avant toute la demande à gauche d'un trait, la carte actuelle à sa droite : seules les étapes de la dernière demande se comparent une à une</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ESSAYEZ</translation>
@@ -4815,6 +4825,16 @@ What would you like to do?</translation>
         <translation>Retirer l'épingle</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Épingler la carte avant chaque demande à l'agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Trait horizontal</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Cliquer sur la carte fige le trait, cliquer à nouveau le libère.</translation>
@@ -4853,6 +4873,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Épinglée à {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Épinglée à {} (avant la demande à l'agent)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>
