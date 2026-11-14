@@ -146,6 +146,8 @@ class UndoRedoHandler:
             show_warning_callback: Optional callback to show warning messages
         """
         self._history_manager = history_manager
+        # What each layer of the run under way really held before it (initialize_filter_history), by layer id.
+        self._before_run: Dict[str, str] = {}
         self._get_project_layers = get_project_layers
         self._get_project = get_project
         self._get_iface = get_iface
@@ -797,6 +799,8 @@ class UndoRedoHandler:
             layer_count: Number of layers affected
         """
         filter_expression = source_layer.subsetString()
+        # Read before the run, for this run only: a run that starts without reading leaves nothing behind
+        before_run, self._before_run = self._before_run, {}
 
         logger.info(f"push_filter_to_history: source={source_layer.name()}, expr='{filter_expression[:40] if filter_expression else '(none)'}...', layer_count={layer_count}")
 
@@ -819,6 +823,11 @@ class UndoRedoHandler:
             previous_expressions = self._collect_previous_expressions(
                 source_layer.id(), list(remote_layers_info.keys())
             )
+            # 2026-11-14: what a layer held before the run is what Undo must give back. The last entry of
+            # the history said otherwise for a layer changed outside the dock since (a turn of the agent,
+            # a raster source, the query builder of QGIS): Undo then went past that change.
+            previous_expressions.update(
+                {layer_id: subset for layer_id, subset in before_run.items() if layer_id in previous_expressions})
 
             logger.info(f"push_filter_to_history: Creating GLOBAL entry with {len(remote_layers_info) + 1} layers")
             for lid, prev_expr in previous_expressions.items():
@@ -843,7 +852,8 @@ class UndoRedoHandler:
                 expression=filter_expression,
                 feature_count=feature_count,
                 description=description,
-                metadata={"backend": provider_type, "operation": "filter", "layer_count": layer_count}
+                metadata={"backend": provider_type, "operation": "filter", "layer_count": layer_count},
+                previous_expression=before_run.get(source_layer.id())
             )
 
             history_pos = history._current_index + 1 if hasattr(history, '_current_index') else '?'
@@ -968,6 +978,7 @@ class UndoRedoHandler:
         """
         project_layers = self._get_project_layers()
         project = self._get_project()
+        self._before_run = {current_layer.id(): current_layer.subsetString() or ""}
 
         # Initialize per-layer history for source layer if needed
         history = self._history_manager.get_or_create_history(current_layer.id())
@@ -1010,6 +1021,7 @@ class UndoRedoHandler:
 
                     # Collect CURRENT state for all remote layers (for global state)
                     remote_layers_info[assoc_layer.id()] = (assoc_layer.subsetString(), _history_count(assoc_layer))
+                    self._before_run[assoc_layer.id()] = assoc_layer.subsetString() or ""
 
         # ALWAYS push global state BEFORE filtering if we have remote layers
         if remote_layers_info:
