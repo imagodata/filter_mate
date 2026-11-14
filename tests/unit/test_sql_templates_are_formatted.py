@@ -25,7 +25,8 @@ ALLOWLIST = {
     ("adapters/backends/postgresql/cleanup.py", "SESSION_VIEW_PATTERN"),
 }
 # QSS templates use their own ``{token}`` substitution tables.
-SKIP_PREFIXES = ("ui/styles/", "ui/layout/")
+# Tile templates keep their ``{z}``, ``{x}``, ``{y}``: QGIS replaces them, for each tile it asks.
+SKIP_PREFIXES = ("ui/styles/", "ui/layout/", "core/agent/basemaps.py")
 
 
 def _python_files() -> Iterator[str]:

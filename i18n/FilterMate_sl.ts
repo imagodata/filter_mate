@@ -236,6 +236,11 @@ Se strinjate?</translation>
         <translation>Vir odgovarja.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Vir streže svoje ploščice.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Najprej vnesite svoj ključ API.</translation>
@@ -255,6 +260,11 @@ Se strinjate?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Plast dodana: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Podlaga dodana: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Se strinjate?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>Agent želi pod plasti projekta dodati to spletno podlago:
+{}
+
+Njen strežnik riše zemljevid, ko ga premikate: vidi, katera območja gledate, in nič od vaših plasti. Se strinjate?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <translation>Povezovalnik MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Podlaga (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>Povezovalniki MCP</translation>
@@ -1440,6 +1466,11 @@ Se strinjate z vsemi? Ne: ne izvede se nobeno.</translation>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Satelitski posnetki</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Podlage</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

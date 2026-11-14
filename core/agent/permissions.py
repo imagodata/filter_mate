@@ -84,7 +84,7 @@ SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile"})
 # Tools whose question holds what the one question for several actions has no room for: the address of a source and
 # what reading it implies, the service a layer comes from, the features deleted, the file written, the settings
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
-ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({"add_layer", "add_service_layer", "delete_features",
+ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({"add_layer", "add_service_layer", "add_basemap", "delete_features",
                                                         "export_layout"})
 
 

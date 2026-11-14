@@ -236,6 +236,11 @@ Do you agree?</source>
         <translation>वह उत्तर देता है।</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>वह अपनी टाइलें उपलब्ध कराता है।</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>पहले अपनी API कुंजी दर्ज करें।</translation>
@@ -255,6 +260,11 @@ Do you agree?</source>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>परत जोड़ी गई: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>आधार मानचित्र जोड़ा गया: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>एजेंट इस वेब आधार मानचित्र को प्रोजेक्ट की परतों के नीचे जोड़ना चाहता है:
+{}
+
+आप जैसे-जैसे मानचित्र को सरकाते हैं, इसका सर्वर उसे बनाता जाता है: वह देखता है कि आप किन क्षेत्रों को देख रहे हैं, पर आपकी परतों में से कुछ नहीं देखता। क्या आप सहमत हैं?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>MCP कनेक्टर</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>आधार मानचित्र (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>MCP कनेक्टर</translation>
@@ -1440,6 +1466,11 @@ Do you agree to all of them? No runs none of them.</source>
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>उपग्रह इमेजरी</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>आधार मानचित्र</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

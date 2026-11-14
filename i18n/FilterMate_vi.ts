@@ -236,6 +236,11 @@ Quý vị có đồng ý không?</translation>
         <translation>Nguồn có phản hồi.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1572"/>
+        <source>It serves its tiles.</source>
+        <translation>Nguồn cung cấp các ô bản đồ của mình.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="1442"/>
         <source>Enter your API key first.</source>
         <translation>Hãy nhập khóa API của bạn trước.</translation>
@@ -255,6 +260,11 @@ Quý vị có đồng ý không?</translation>
         <location filename="../ui/controllers/agent_chat_controller.py" line="611"/>
         <source>Layer added: {}</source>
         <translation>Đã thêm lớp: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1964"/>
+        <source>Basemap added: {}</source>
+        <translation>Đã thêm bản đồ nền: {}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="608"/>
@@ -714,6 +724,17 @@ Do you agree?</source>
 {} · {}
 
 Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2219"/>
+        <source>The agent wants to add this web basemap under the layers of the project:
+{}
+
+Its server draws the map as you move it: it sees which areas you look at, and nothing of your layers. Do you agree?</source>
+        <translation>Tác tử muốn thêm bản đồ nền web này bên dưới các lớp của dự án:
+{}
+
+Máy chủ của nó vẽ bản đồ khi bạn di chuyển: nó thấy bạn đang xem những khu vực nào, và không thấy gì từ các lớp của bạn. Bạn có đồng ý không?</translation>
     </message>
     <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="715"/>
@@ -1279,6 +1300,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <translation>Trình kết nối MCP</translation>
     </message>
     <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1397"/>
+        <source>Basemap (XYZ)</source>
+        <translation>Bản đồ nền (XYZ)</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="982"/>
         <source>MCP connectors</source>
         <translation>Các trình kết nối MCP</translation>
@@ -1440,6 +1466,11 @@ Bạn có đồng ý với tất cả không? Không thì không hành động n
         <location filename="../ui/widgets/agent_panel.py" line="981"/>
         <source>Satellite imagery</source>
         <translation>Ảnh vệ tinh</translation>
+    </message>
+    <message>
+        <location filename="../../ui/widgets/agent_panel.py" line="1436"/>
+        <source>Basemaps</source>
+        <translation>Bản đồ nền</translation>
     </message>
     <message>
         <location filename="../ui/widgets/agent_panel.py" line="588"/>

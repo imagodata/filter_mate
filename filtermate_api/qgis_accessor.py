@@ -616,6 +616,14 @@ class QGISFilterMateAccessor:
         extra = self.configured_domains() if extra_domains is None else extra_domains
         return LayerSummary(**self._control("add_service_layer", platform, typename, name=name, extra_domains=extra))
 
+    def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return LayerSummary(**self._control("add_basemap", platform, name=name, extra_domains=extra))
+
+    def check_basemap(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        self._control("check_basemap", platform, extra_domains=extra)
+
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
                      selected_only: bool = True, raster_selection: Optional[Dict] = None,

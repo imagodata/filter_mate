@@ -9,11 +9,12 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 from urllib.parse import urlsplit
 
+from .basemaps import BASEMAPS, template_problem
 from .mcp_client import server_url_problem
-from .open_data import KIND_CKAN, KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, base_url
+from .open_data import KIND_CKAN, KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_XYZ, base_url
 
 KIND_MCP = "mcp"
-USER_KINDS = (KIND_MCP, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC)
+USER_KINDS = (KIND_MCP, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ)
 ORIGIN_OFFICIAL = "official"
 ORIGIN_COMMUNITY = "community"
 ORIGIN_LOCAL = "local"
@@ -75,7 +76,8 @@ BUILT_IN: Tuple[Source, ...] = (
            "IGN Géoplateforme tools. Start it first: TRANSPORT_TYPE=http npx -y @ignfab/geocontext"),
     Source("osm_mcp", "OpenStreetMap (MCP)", KIND_MCP, "https://openstreetmap.caseyjhand.com/mcp", ORIGIN_COMMUNITY,
            "Places and Overpass queries, worldwide"),
-)
+) + tuple(Source(basemap.id, basemap.title, KIND_XYZ, basemap.url,
+                 ORIGIN_OFFICIAL if basemap.official else ORIGIN_COMMUNITY, basemap.note) for basemap in BASEMAPS)
 _BUILT_IN_IDS = frozenset(source.id for source in BUILT_IN)
 
 
@@ -92,12 +94,12 @@ def make_source(address: str, kind: str, title: str = "") -> Source:
         raise ValueError("this address cannot be read")
     if kind != KIND_MCP:  # a connector keeps its address as given: /mcp/ and /mcp are not the same
         address = base_url(address.rstrip("/"))
-    problem = server_url_problem(address)
+    problem = (template_problem(address) if kind == KIND_XYZ else "") or server_url_problem(address)
     if problem:
         raise ValueError(problem)
     parts = urlsplit(address)
     origin = ORIGIN_LOCAL if parts.scheme == "http" else ORIGIN_USER
-    if kind not in (KIND_MCP, KIND_WFS, KIND_STAC):
+    if kind not in (KIND_MCP, KIND_WFS, KIND_STAC, KIND_XYZ):
         address = parts.netloc if parts.scheme == "https" and not parts.path else address
     digest = hashlib.blake2b(f"{kind}|{address}".encode("utf-8"), digest_size=3).hexdigest()
     identifier = _ID.sub("_", f"{kind}_{parts.netloc}{parts.path}".lower()).strip("_")[:30] + "_" + digest
@@ -146,7 +148,25 @@ def platform_name(source: Source) -> str:
     return source.id if source.id in _BUILT_IN_IDS else source.address.lower()
 
 
+def model_name(source: Source) -> str:
+    """What a model passes for a source of the chat: a basemap the user added goes by its id.
+
+    Its address may hold the key of an account (``?apikey=...``), which the provider of the model, the thread and a
+    recipe kept in the project must never see; and a model would have to copy a long template without a slip.
+    """
+    return source.id if source.kind == KIND_XYZ else platform_name(source)
+
+
+def basemap_addresses(sources: Iterable[Source]) -> Dict[str, str]:
+    """For each basemap the user added: the name a model gives it, and the platform the plugin knows it by."""
+    return {source.id: platform_name(source) for source in sources
+            if source.kind == KIND_XYZ and source.id not in _BUILT_IN_IDS}
+
+
 def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
     """Names for the instructions of the conversation."""
-    return {"platforms": [platform_name(source) for source in sources if not source.is_connector],
+    return {"platforms": [platform_name(source) for source in sources
+                          if not source.is_connector and source.kind != KIND_XYZ],
+            "basemaps": [f"{source.id} ({source.title})" if source.id not in _BUILT_IN_IDS else source.id
+                         for source in sources if source.kind == KIND_XYZ],
             "connectors": [source.title for source in sources if source.is_connector]}

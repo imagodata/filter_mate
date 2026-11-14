@@ -17,6 +17,12 @@ All of this changes how the project shows, never its data, and is undone with th
   color ramp. set_labels writes a field on the map, or turns the labels off.
 - After a style the user will judge by eye, look with view_map when it is offered.
 
+## A background under the map
+
+add_basemap puts a web basemap the user enabled under every layer: carto_light for a neutral background,
+carto_light_nolabels under layers that have their own labels, osm_tiles for a street map, ign_plan or ign_ortho in
+France. When none is enabled, say that one can be ticked in the settings of the agent, Sources tab.
+
 ## Layouts
 
 1. Set the map first: filters, style, zoom_to.
