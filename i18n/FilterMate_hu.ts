@@ -1169,6 +1169,16 @@ Mindegyikhez hozzájárul? A Nem egyiket sem hajtja végre.</translation>
         <translation>Visszavonás idáig</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Összehasonlítás</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>A kérés vagy lépés előtti térkép egy vonaltól balra, a mostani térkép tőle jobbra</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PRÓBÁLJA KI</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Rögzítés eltávolítása</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Kattintson a térképre a vonal zárolásához, újra a feloldásához.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>a vonal zárolva: kattintson a feloldáshoz</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Jobb kattintással rögzítheti a jelenlegi állapotot.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>A lépés előtti térkép rögzítése</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Összehasonlítás a rögzített térképpel</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

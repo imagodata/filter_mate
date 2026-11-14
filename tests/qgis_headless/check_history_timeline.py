@@ -4,7 +4,8 @@
 The three histories listed newest first (a vector filter of the dock, a raster operation, a turn of the agent and its
 steps, a filter undone), what Undo and Redo would take marked as the action bar chooses its history, the list kept
 up to date while open, the map before a step compared (the image left of the line is the map of then) and pinned,
-the tooltips of Undo and Redo.
+the same from the history page of the agent (a turn or a step by its rank), the pin listed first to be compared or
+removed, the tooltips of Undo and Redo.
 
     docker run --rm --init --network none -v "$PWD:/src:ro" -e QT_QPA_PLATFORM=offscreen qgis/qgis:ltr \\
         python3 /src/tests/qgis_headless/check_history_timeline.py
@@ -176,7 +177,8 @@ def main():
     from filter_mate.core.services.cross_filter_service import get_cross_filter_service
     from filter_mate.core.services.history_service import HistoryEntry, HistoryService
     from filter_mate.ui.controllers.compare_controller import CompareController
-    from filter_mate.ui.controllers.history_controller import COLUMN_MARK, COLUMN_WHAT, HistoryController
+    from filter_mate.ui.controllers.history_controller import (COLUMN_MARK, COLUMN_ORIGIN, COLUMN_WHAT, INDEX_ROLE,
+                                                               PIN_INDEX, HistoryController)
 
     project = QgsProject.instance()
     folder = tempfile.mkdtemp()
@@ -349,6 +351,30 @@ def main():
     check("compare before a step of the agent: the east squares, blue as the first step left them",
           ok and count(left, BLUE) > count(now, BLUE) and count(left, RED) == 0
           and labels[0] == "Before: Keep east_a", (ok, count(left, BLUE), count(now, BLUE), count(left, RED), labels))
+    step_blue = count(left, BLUE)
+
+    # From the history page of the agent: a turn or one of its steps by its rank, composed as the panel composes it.
+    def compare_agent(turn, step=None):
+        renders = compare.session.renders if compare.session is not None else 0
+        drawn_count = controller.compare_agent_turn(turn, step)
+        session = compare.session
+        ok = drawn_count > 0 and wait(lambda: session.renders > renders and not session.item.busy, 15)
+        session.item.set_fraction(1.0)
+        QgsApplication.processEvents()
+        image = grab(canvas)
+        labels = session.item.labels
+        compare.stop()
+        return ok, image, labels
+    ok, left, labels = compare_agent(0, 1)
+    check("from the agent, a step: the map before it, as from the panel", ok and abs(count(left, BLUE) - step_blue) <= 2
+          and count(left, RED) == 0 and labels == ("Before: Keep east_a", "Now"),
+          (ok, count(left, BLUE), step_blue, count(left, RED), labels))
+    ok, left, labels = compare_agent(0)
+    check("from the agent, a turn: its style and filter undone, labelled with its request", ok
+          and abs(count(left, RED) - east_red) <= 2 and count(left, BLUE) == 0
+          and labels == ("Before: Blue squares, east_a alone", "Now"), (ok, count(left, RED), east_red, labels))
+    check("from the agent, a turn or a step not listed: nothing compared", controller.compare_agent_turn(1) == 0
+          and controller.compare_agent_turn(0, 2) == 0 and not compare.button.isChecked())
 
     # Pin the map before the raster operation: the map now, the DEM and the squares as they were then.
     controller.open(undo)
@@ -380,6 +406,55 @@ def main():
     from filter_mate.core.domain.compare_states import BeforeMap
     check("a pin of no known time: no hour shown, never 01:00", compare._labels(BeforeMap(pinned_at=0.0))
           == ("Pinned", "Now"))
+
+    # The pin in the panel: a line apart at the top, compared or removed from there, listed as it comes and goes.
+    panel = controller.open(undo)
+    tree = panel.tree
+    check("no pin: no line of the pin", panel.pinned_at is None
+          and tree.topLevelItem(0).data(COLUMN_ORIGIN, INDEX_ROLE) != PIN_INDEX)
+    compare.pin()
+    listed = wait(lambda: panel.pinned_at is not None, 2)
+    top = tree.topLevelItem(0)
+    check("pinned while open: the pin heads the list, apart from the steps", listed
+          and top.data(COLUMN_ORIGIN, INDEX_ROLE) == PIN_INDEX and top.text(COLUMN_WHAT).startswith("Pinned ")
+          and top.childCount() == 0 and not top.icon(COLUMN_ORIGIN).isNull()
+          and tree.topLevelItem(1).text(COLUMN_WHAT) == "West square" and panel.counts.text() == "3 to undo · 1 to redo",
+          (listed, top.text(COLUMN_WHAT), panel.counts.text()))
+    check("the line of the pin says when it was taken and what Compare shows",
+          top.toolTip(COLUMN_WHAT).startswith("Map pinned at ") and top.text(COLUMN_WHAT)[len("Pinned "):]
+          in top.toolTip(COLUMN_WHAT), top.toolTip(COLUMN_WHAT))
+    check("a step selected: its own buttons, not those of the pin", not panel.pin_row_selected()
+          and not panel.compare_button.isHidden() and panel.compare_pin_button.isHidden() and panel.unpin_button.isHidden())
+    tree.setCurrentItem(top)
+    check("the pin selected: compare with it or remove it", panel.pin_row_selected() and panel.selected() is None
+          and not panel.compare_pin_button.isHidden() and not panel.unpin_button.isHidden()
+          and panel.compare_button.isHidden() and panel.pin_button.isHidden() and not panel.note.isVisible()
+          and (panel.compare_pin_button.text(), panel.unpin_button.text()) == ("Compare with the pin", "Remove the pin"))
+    controller.refresh()
+    check("a refill keeps the pin selected", panel.pin_row_selected() and tree.topLevelItem(0).isSelected())
+    said.clear()
+    panel.compare_pin_button.click()
+    session = compare.session
+    check("Compare with the pin: the pin compared as the button compares it, the panel closed",
+          compare.button.isChecked() and session.active and session.item.labels[0].startswith("Pinned ")
+          and not panel.isVisible() and said == ["Nothing changed since the pin."], (session.item.labels, said))
+    compare.stop()
+    controller.open(undo)
+    tree.setCurrentItem(tree.topLevelItem(0))
+    panel.unpin_button.click()
+    removed = wait(lambda: panel.pinned_at is None, 2)
+    check("Remove the pin: gone from Compare and from the list, the panel still open on the steps",
+          removed and compare.pinned is None and panel.isVisible() and tree.topLevelItem(0).text(COLUMN_WHAT)
+          == "West square" and not panel.compare_button.isHidden() and panel.unpin_button.isHidden(),
+          (removed, compare.pinned, tree.topLevelItem(0).text(COLUMN_WHAT)))
+    controller.close_panel()
+    compare.pin()
+    QgsApplication.processEvents()
+    controller.open(undo)
+    check("a pin taken while closed is listed at the next opening", panel.pinned_at is not None
+          and tree.topLevelItem(0).data(COLUMN_ORIGIN, INDEX_ROLE) == PIN_INDEX)
+    controller.close_panel()
+    compare.unpin()
 
     # The tooltips of Undo and Redo say what they would do, in which history.
     undo.setEnabled(True)
@@ -475,6 +550,11 @@ def main():
           and [action.text() for action in compare.menu.actions()] == ["Pin the current state", "Remove the pin"])
     check("torn down: the tooltips of the .ui again", undo.toolTip() == "Undo the last filter"
           and redo.toolTip() == "Redo the last filter", (undo.toolTip(), redo.toolTip()))
+    compare.pin()
+    wait(lambda: False, 0.1)
+    check("torn down: a pin no longer reaches the panel", controller.panel.pinned_at is None
+          and not controller._timer.isActive())
+    compare.unpin()
 
     # A setup that fails half way leaves nothing behind: no event filter on the buttons, no entry in the menu.
     class Refusing:

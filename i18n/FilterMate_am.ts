@@ -1169,6 +1169,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>እስከዚህ ድረስ ቀልብስ</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>አነጻጽር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>ከዚህ ጥያቄ ወይም ደረጃ በፊት ያለው ካርታ ከመስመር በግራ፣ የአሁኑ ካርታ በቀኙ</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ሞክር</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>ሰኪውን አስወግድ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>መስመሩን ለመቆለፍ ካርታውን ጠቅ ያድርጉ፤ ለመልቀቅ እንደገና ጠቅ ያድርጉ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>መስመሩ ተቆልፏል፦ ለመልቀቅ ጠቅ ያድርጉ</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>የአሁኑን ሁኔታ ለመሰካት በቀኝ ጠቅ ያድርጉ።</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>ከዚህ ደረጃ በፊት ያለውን ካርታ ሰካ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>ከተሰካው ካርታ ጋር አነጻጽር</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

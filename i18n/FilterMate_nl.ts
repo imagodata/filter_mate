@@ -1169,6 +1169,16 @@ Gaat u akkoord met alle? Nee voert er geen uit.</translation>
         <translation>Ongedaan maken tot hier</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Vergelijken</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>De kaart vóór dit verzoek of deze stap links van een lijn, de huidige kaart rechts ervan</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROBEER</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Vastzetting verwijderen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Klik op de kaart om de lijn te vergrendelen, klik opnieuw om te ontgrendelen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>lijn vergrendeld: klik om te ontgrendelen</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Rechtsklik om de huidige toestand vast te zetten.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>De kaart vóór deze stap vastzetten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Vergelijken met de vastgezette kaart</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

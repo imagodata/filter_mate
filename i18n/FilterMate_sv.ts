@@ -1169,6 +1169,16 @@ Godkänner du alla? Nej kör ingen av dem.</translation>
         <translation>Ångra hit</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Jämför</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Kartan före den här begäran eller det här steget till vänster om en linje, kartan nu till höger om den</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROVA</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Ta bort fästningen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Klicka på kartan för att låsa linjen, klicka igen för att frigöra den.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>linjen är låst: klicka för att frigöra den</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Högerklicka för att fästa nuvarande läge.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fäst kartan före det här steget</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Jämför med den fästa kartan</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

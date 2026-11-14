@@ -1169,6 +1169,16 @@ Stimmen Sie allen zu? Bei Nein wird keine ausgeführt.</translation>
         <translation>Bis hierhin rückgängig machen</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Vergleichen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Die Karte vor dieser Anfrage oder diesem Schritt links einer Linie, die aktuelle Karte rechts davon</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>PROBIEREN</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Anheftung entfernen</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Auf die Karte klicken, um die Linie zu sperren; erneut klicken, um sie zu lösen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>Linie gesperrt: zum Lösen klicken</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Rechtsklick, um den aktuellen Zustand anzuheften.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Karte vor diesem Schritt anheften</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Mit der angehefteten Karte vergleichen</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

@@ -1174,6 +1174,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Annuler jusqu'ici</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Comparer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>La carte d'avant cette demande ou cette étape à gauche d'un trait, la carte actuelle à sa droite</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ESSAYEZ</translation>
@@ -4779,6 +4789,16 @@ What would you like to do?</translation>
         <translation>Retirer l'épingle</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Cliquer sur la carte fige le trait, cliquer à nouveau le libère.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>trait figé : cliquer pour le libérer</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Clic droit pour épingler l'état actuel.</translation>
@@ -4967,6 +4987,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Épingler la carte d'avant cette étape</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Comparer avec l'épingle</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

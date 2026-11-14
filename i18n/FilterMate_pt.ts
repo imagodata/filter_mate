@@ -1169,6 +1169,16 @@ Você concorda com todas? Não: nenhuma é executada.</translation>
         <translation>Anular até aqui</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Comparar</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>O mapa antes deste pedido ou passo à esquerda de uma linha, o mapa atual à sua direita</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>EXPERIMENTE</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Remover a fixação</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Clicar no mapa bloqueia a linha; clicar de novo liberta-a.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>linha bloqueada: clicar para a libertar</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Clique direito para fixar o estado atual.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixar o mapa antes deste passo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Comparar com o mapa fixado</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

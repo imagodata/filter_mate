@@ -35,6 +35,7 @@ logger = logging.getLogger("FilterMate.compare")
 RENDER_DELAY_MS = 250  # a pan or a zoom in progress renders once it stops
 LABEL_GAP = 8.0  # between the line and its labels
 LABEL_PADDING = 5.0
+HANDLE_RADIUS = 6.0  # the knob of a line fixed by a click, under the labels
 
 # A clone of a web feature service asks the server again, on the main thread: left out of the before image.
 WEB_FEATURE_PROVIDERS = frozenset({"wfs", "oapif", "arcgisfeatureserver"})
@@ -259,7 +260,8 @@ class MapWatch(QObject):
 
 class SwipeItem(QgsMapCanvasItem):
     """The "before" image over its map extent, left of the swipe line; the line itself, a sign while it renders, and
-    what each side shows, written at the top on both sides of the line."""
+    what each side shows, written at the top on both sides of the line. A line fixed by a click is thicker, with a
+    knob under the labels, and the label on its right says so (``fixed_note``)."""
 
     def __init__(self, canvas) -> None:
         super().__init__(canvas)
@@ -270,6 +272,8 @@ class SwipeItem(QgsMapCanvasItem):
         self.fraction = 0.5
         self.busy = True
         self.labels: Tuple[str, str] = ("", "")
+        self.frozen = False  # fixed by a click: the line no longer follows the mouse
+        self.fixed_note = ""  # added to the label right of a line fixed
         self._font = QFont(canvas.font())
         self._metrics = QFontMetricsF(self._font)
         self.setZValue(5)
@@ -293,6 +297,16 @@ class SwipeItem(QgsMapCanvasItem):
         self.labels = (before or "", now or "")
         self.update()
 
+    def set_frozen(self, frozen: bool) -> None:
+        self.prepareGeometryChange()  # the knob and the longer label on the right
+        self.frozen = bool(frozen)
+        self.update()
+
+    def shown_labels(self) -> Tuple[str, str]:
+        """The labels as drawn: the one on the right says when the line is fixed."""
+        note = self.fixed_note if self.frozen else ""
+        return self.labels[0], " · ".join(text for text in (self.labels[1], note) if text)
+
     def label_rects(self) -> Tuple[QRectF, QRectF]:
         """Where the labels are drawn, in the coordinates of the item: left of the line, right of it (empty rectangle:
         no label). At the top of the canvas, wherever the map moved the item since its image."""
@@ -301,7 +315,7 @@ class SwipeItem(QgsMapCanvasItem):
         top = LABEL_GAP - self.pos().y()
         height = metrics.height() + LABEL_PADDING
         rects = []
-        for text, left in ((self.labels[0], True), (self.labels[1], False)):
+        for text, left in zip(self.shown_labels(), (True, False)):
             if not text:
                 rects.append(QRectF())
                 continue
@@ -309,12 +323,25 @@ class SwipeItem(QgsMapCanvasItem):
             rects.append(QRectF(line - LABEL_GAP - width if left else line + LABEL_GAP, top, width, height))
         return rects[0], rects[1]
 
+    def handle_rect(self) -> QRectF:
+        """The knob of a line fixed, under the labels (empty rectangle: the line follows the mouse)."""
+        if not self.frozen:
+            return QRectF()
+        top = LABEL_GAP - self.pos().y() + self._metrics.height() + LABEL_PADDING + LABEL_GAP
+        line = self._size.width() * self.fraction
+        return QRectF(line - HANDLE_RADIUS, top, 2 * HANDLE_RADIUS, 2 * HANDLE_RADIUS)
+
     def boundingRect(self):  # noqa: N802 - Qt override
-        """The image, the line (its pen beyond the edges) and the labels: nothing drawn outside, no trail left."""
-        bounds = self._size.adjusted(-2.0, 0.0, 2.0, 0.0)
+        """The image, the line (its pen beyond the edges), the labels and the knob: nothing drawn outside, no trail
+        left."""
+        pen = 3.0 if self.frozen else 2.0  # half the width of the line, rounded up
+        bounds = self._size.adjusted(-pen, 0.0, pen, 0.0)
         for rect in self.label_rects():
             if not rect.isEmpty():
                 bounds = bounds.united(rect)
+        handle = self.handle_rect()
+        if not handle.isEmpty():
+            bounds = bounds.united(handle.adjusted(-1.0, -1.0, 1.0, 1.0))  # its white ring
         return bounds
 
     def updatePosition(self):  # noqa: N802 - Qt override
@@ -338,17 +365,23 @@ class SwipeItem(QgsMapCanvasItem):
             painter.setClipRect(QRectF(0.0, 0.0, line, height))
             painter.drawImage(self._size, self._image)
             painter.restore()
-        pen = QPen(QColor(255, 255, 255, 230), 3)
+        pen = QPen(QColor(255, 255, 255, 230), 5 if self.frozen else 3)
         painter.setPen(pen)
         painter.drawLine(QPointF(line, 0.0), QPointF(line, height))
-        pen = QPen(QColor(40, 40, 40, 220), 1, Qt.PenStyle.DashLine if self.busy else Qt.PenStyle.SolidLine)
+        pen = QPen(QColor(40, 40, 40, 220), 2 if self.frozen else 1,
+                   Qt.PenStyle.DashLine if self.busy else Qt.PenStyle.SolidLine)
         painter.setPen(pen)
         painter.drawLine(QPointF(line, 0.0), QPointF(line, height))
-        # Light text on a dark pill: readable on any map.
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        handle = self.handle_rect()
+        if not handle.isEmpty():  # a dark knob ringed with white, on the line: it stays where it was clicked
+            painter.setPen(QPen(QColor(255, 255, 255), 2))
+            painter.setBrush(QColor(40, 40, 40))
+            painter.drawEllipse(handle.center(), HANDLE_RADIUS - 1.0, HANDLE_RADIUS - 1.0)
+        # Light text on a dark pill: readable on any map.
         painter.setFont(self._font)
-        for text, rect in zip(self.labels, self.label_rects()):
+        for text, rect in zip(self.shown_labels(), self.label_rects()):
             if not text:
                 continue
             painter.setPen(Qt.PenStyle.NoPen)
@@ -360,16 +393,39 @@ class SwipeItem(QgsMapCanvasItem):
 
 
 class SwipeTool(QgsMapTool):
-    """The swipe line follows the mouse over the map; nothing else is done with the clicks."""
+    """The swipe line follows the mouse over the map; a left click fixes it where it is, another frees it. The wheel
+    and the middle button still move the map: the canvas handles them whatever the tool."""
+
+    CLICK_SLACK = 4  # pixels the mouse may move between press and release and still be a click
 
     def __init__(self, canvas, item: SwipeItem) -> None:
         super().__init__(canvas)
         self._item = item
+        self._pressed = None  # where the left button went down on the map; None: not down here
 
-    def canvasMoveEvent(self, event):  # noqa: N802 - Qt override
+    def _follow(self, event) -> None:
         width = self.canvas().width()
         if width > 0 and self._item is not None:
             self._item.set_fraction(event.pos().x() / width)
+
+    def canvasMoveEvent(self, event):  # noqa: N802 - Qt override
+        if self._item is not None and not self._item.frozen:
+            self._follow(event)
+
+    def canvasPressEvent(self, event):  # noqa: N802 - Qt override
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._pressed = event.pos()
+
+    def canvasReleaseEvent(self, event):  # noqa: N802 - Qt override
+        if self._item is None or event.button() != Qt.MouseButton.LeftButton:
+            return
+        pressed, self._pressed = self._pressed, None
+        # Only a click made on the map: a release alone (a menu closed over the map, the second half of a double
+        # click) or the end of a drag changed the line without the user meaning it.
+        if pressed is None or (event.pos() - pressed).manhattanLength() > self.CLICK_SLACK:
+            return
+        self._follow(event)  # fixed where it was clicked; freed under the mouse
+        self._item.set_frozen(not self._item.frozen)
 
 
 class CompareSession(QObject):
@@ -395,6 +451,7 @@ class CompareSession(QObject):
         self.absent: FrozenSet[str] = frozenset()  # layers of the canvas not on the map before
         self.present: Tuple[str, ...] = ()  # layers hidden now, on the map before
         self.refused: List[str] = []  # names of the layers whose state before could not be drawn
+        self.fixed_note = ""  # what the label right of the line adds once a click fixed it
         self._keep = False  # a pin: the comparison waits for a change instead of stopping
         self.renders = 0  # before images done, for the checks
 
@@ -430,7 +487,8 @@ class CompareSession(QObject):
         self._retire_job()
         self.clones, self.absent, self.present, self.refused, self._keep = clones, absent, present, refused, keep
         if self.item is None:
-            self.item = SwipeItem(self.canvas)
+            self.item = SwipeItem(self.canvas)  # a new line: it follows the mouse again
+            self.item.fixed_note = self.fixed_note
             self.tool = SwipeTool(self.canvas, self.item)
             self._previous_tool = self.canvas.mapTool()
             self.canvas.setMapTool(self.tool)

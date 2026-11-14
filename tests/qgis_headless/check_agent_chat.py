@@ -16,6 +16,7 @@ import tempfile
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from types import SimpleNamespace
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 HOME = tempfile.mkdtemp()
@@ -2083,6 +2084,36 @@ def check_steps_beside_filters(chat, provider, ask, layer):
     chat._say = say
 
 
+def check_compare_from_history(chat, step_items):
+    """Compare on the history page: hidden while the dock has no history of the project; with one, it asks for the map
+    before the step or the request selected, by its rank in the history of the agent. The step items listed again."""
+    panel = chat.panel
+    check("compare: hidden while the dock has no history of the project", panel.compare_button.isHidden())
+    asked = []
+    chat._parent_widget._controller_integration = SimpleNamespace(history_controller=SimpleNamespace(
+        can_compare=True, compare_agent_turn=lambda turn, step=None: asked.append((turn, step)) or 1))
+    chat._show_history()
+    items = [panel.history_list.item(index) for index in range(panel.history_list.count())]
+    step_items = [item for item in items if item.data(Qt.ItemDataRole.UserRole + 1) is not None]
+    rank = len([turn for turn in chat._checkpoint.turns() if turn.get("applied")]) - 1
+    panel.history_list.clearSelection()
+    check("compare: shown, off while nothing is selected", not panel.compare_button.isHidden()
+          and not panel.compare_button.isEnabled())
+    panel.history_list.setCurrentItem(step_items[1])
+    check("compare: on a step, beside Undo back to here", panel.compare_button.isEnabled()
+          and not panel.step_button.isHidden())
+    panel.compare_button.click()
+    panel.history_list.setCurrentItem(items[items.index(step_items[0]) - 1])  # the request of these steps
+    check("compare: on a request applied", panel.compare_button.isEnabled() and panel.step_button.isHidden())
+    panel.compare_button.click()
+    check("compare: the step, then the request, asked by their rank", asked == [(rank, 1), (rank, None)], (asked, rank))
+    panel.set_working(True)
+    check("compare: off while the agent works", not panel.compare_button.isEnabled())
+    panel.set_working(False)
+    del chat._parent_widget._controller_integration
+    return step_items
+
+
 def check_steps(chat, provider, settings, ask, layer):
     """Lot 2 of the undo plan: the steps of a turn, and "undo back to here"."""
     panel = chat.panel
@@ -2102,12 +2133,25 @@ def check_steps(chat, provider, settings, ask, layer):
     panel.history_list.setCurrentItem(step_items[1])
     check("steps: undo back to here is offered on a step, send again is not", panel.step_button.isEnabled()
           and not panel.resend_button.isEnabled())
+    step_items = check_compare_from_history(chat, step_items)
+    panel.history_list.setCurrentItem(step_items[1])
     panel.step_button.click()
     check("steps: back to before the second step", layer.subsetString() == '"pop" > 1000', layer.subsetString())
     chat._on_undo()
     check("steps: that is a step of the history too", layer.subsetString() == '"pop" > 2000', layer.subsetString())
     chat._on_undo()
     check("steps: and the turn still undoes whole", layer.subsetString() == "", layer.subsetString())
+    chat._parent_widget._controller_integration = SimpleNamespace(history_controller=SimpleNamespace(
+        can_compare=True, compare_agent_turn=lambda turn, step=None: 0))
+    chat._show_history()
+    undone = [panel.history_list.item(index) for index in range(panel.history_list.count())
+              if panel.history_list.item(index).data(Qt.ItemDataRole.UserRole) == "deux filtres"]
+    panel.history_list.setCurrentItem(undone[-1])
+    check("compare: off on a request undone", undone and not chat._checkpoint.turns()[-1]["applied"]
+          and not panel.compare_button.isHidden() and not panel.compare_button.isEnabled())
+    del chat._parent_widget._controller_integration
+    chat._refresh_history()
+    check("compare: gone with the history of the project", panel.compare_button.isHidden())
     panel.show_thread()
 
     check_steps_beside_filters(chat, provider, ask, layer)

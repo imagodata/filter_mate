@@ -1169,6 +1169,16 @@ Hammasiga rozimisiz? Yo‘q tanlansa, hech biri bajarilmaydi.</translation>
         <translation>Shu yergacha bekor qilish</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Solishtirish</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Shu so'rov yoki bosqichdan oldingi xarita chiziqning chap tomonida, hozirgi xarita o'ng tomonida</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SINAB KORING</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Mahkamlashni olib tashlash</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Chiziqni qulflash uchun xaritani bosing, bo'shatish uchun yana bosing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>chiziq qulflangan: bo'shatish uchun bosing</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Joriy holatni mahkamlash uchun o'ng tugmani bosing.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Shu qadamdan oldingi xaritani mahkamlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Mahkamlangan xarita bilan solishtirish</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

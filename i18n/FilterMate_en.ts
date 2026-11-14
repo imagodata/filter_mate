@@ -1703,6 +1703,16 @@ Do you agree to all of them? No runs none of them.</translation>
         <translation>Undo back to here</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Compare</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>The map before this request or step left of a line, the map now on its right</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="277"/>
         <source>Undo the last</source>
         <translation>Undo the last</translation>
@@ -4759,6 +4769,16 @@ What would you like to do?</translation>
         <translation>Remove the pin</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Click on the map to fix the line, click again to free it.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>line fixed: click to free it</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Right-click to pin the current state.</translation>
@@ -4947,6 +4967,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Pin the map before this step</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Compare with the pin</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

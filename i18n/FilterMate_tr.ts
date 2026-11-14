@@ -1169,6 +1169,16 @@ Hepsini onaylıyor musunuz? Hayır derseniz hiçbiri çalışmaz.</translation>
         <translation>Buraya kadar geri al</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Karşılaştır</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Bu istekten veya adımdan önceki harita bir çizginin solunda, şimdiki harita sağında</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>DENEYİN</translation>
@@ -4764,6 +4774,16 @@ What would you like to do?</translation>
         <translation>Sabitlemeyi kaldır</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Çizgiyi kilitlemek için haritaya tıklayın, serbest bırakmak için yeniden tıklayın.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>çizgi kilitli: serbest bırakmak için tıklayın</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Mevcut durumu sabitlemek için sağ tıklayın.</translation>
@@ -4952,6 +4972,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Bu adımdan önceki haritayı sabitle</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Sabitlenen haritayla karşılaştır</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>
