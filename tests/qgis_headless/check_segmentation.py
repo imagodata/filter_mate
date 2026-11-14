@@ -994,8 +994,20 @@ def test_agent_similar_objects(folder):
               written is not None and written.providerType() == "ogr" and row["appearance"] >= drawn.SIMILAR_APPEARANCE_MIN
               and 800 < row["area_m2"] < 1000 and written.crs() == layer.crs(),
               (written and written.source(), row and row.attributes()))
-        check("and the example as SAM drew it", answer["example"]["sam_score"] == 0.9 and 800 < answer["example"]["area_m2"] < 1000,
-              answer["example"])
+        check("and the example as SAM drew it", answer["examples"]["count"] == 1
+              and answer["examples"]["sam_score"] == {"median": 0.9, "minimum": 0.9}
+              and 800 < answer["examples"]["area_m2"]["minimum"] < 1000
+              and 800 < answer["examples"]["area_m2"]["maximum"] < 1000,
+              answer["examples"])
+        # Several objects drawn in the dock are examples together: with the large square drawn last, the alike
+        # square is still found through the clicked one (the last alone would reject it by its area).
+        large = shape_geometry(layer, "large")
+        answer = drawn.similar_objects(layer.id(), use_dock_object=True,
+                                       dock_objects={layer.id(): [clicked.asWkt(), large.asWkt()]},
+                                       extent_wkt=everywhere)
+        found = names_of(answer)
+        check("every object drawn in the dock is an example, the last one drawn not the only one",
+              found == ["alike"] and answer["examples"]["count"] == 2, (found, answer.get("examples")))
         points.selectByIds([next(f.id() for f in points.getFeatures())])
         # The east half: the alike square and the strip, not the large square, whose uniform cells would fill the
         # 40 candidates of the window first (the best 40 peaks of the features, as measured).

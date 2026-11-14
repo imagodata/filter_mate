@@ -708,16 +708,24 @@ def overlap(first: Any, second: Any) -> float:
         return 0.0
 
 
-def is_similar(geometry: Any, reference_area: float, reference_compactness: float, ratio: Tuple[float, float], shape: bool) -> bool:
-    """Whether an object drawn by SAM is like the clicked one: its area, and its compactness with ``shape``, within the ratios."""
+def is_similar(geometry: Any, reference_area: Any, reference_compactness: Any, ratio: Tuple[float, float], shape: bool) -> bool:
+    """Whether an object drawn by SAM is like the clicked ones: its area, and its compactness with ``shape``, within the ratios.
+
+    ``reference_area`` and ``reference_compactness``: one value, or the values of several reference
+    objects: the bounds then run from the smallest to the largest of them
+    (:func:`~.raster_adapter.similar_area_bounds`).
+    """
     from .geometry_tools import compactness
     from .raster_adapter import similar_area_bounds, similar_shape_bounds
-    bounds = similar_area_bounds([reference_area], ratio)
+    areas = [reference_area] if isinstance(reference_area, (int, float)) else list(reference_area or ())
+    bounds = similar_area_bounds(areas, ratio)
     if bounds is None or not bounds[0] <= geometry.area() <= bounds[1]:
         return False
     if not shape:
         return True
-    shapes = similar_shape_bounds([reference_compactness], ratio)
+    compactnesses = [reference_compactness] if isinstance(reference_compactness, (int, float)) \
+        else list(reference_compactness or ())
+    shapes = similar_shape_bounds(compactnesses, ratio)
     return shapes is None or shapes[0] <= compactness(geometry) <= shapes[1]
 
 
@@ -838,14 +846,34 @@ def raster_look(layer: Any, alpha_band: Optional[int] = None) -> dict:
     return look
 
 
+class _Drawing:
+    """The interfaces that draw a provider, and the provider they read (:func:`open_drawing`)."""
+
+    def __init__(self, pipe: Any, provider: Any) -> None:
+        self.pipe, self.provider = pipe, provider  # released in this order: the renderer never reads a provider gone
+
+    def last(self) -> Any:
+        return self.pipe.last()
+
+
 def open_drawing(source: str, provider_key: str, look: dict) -> Any:
-    """A pipe drawing ``source`` as ``look`` says (:func:`raster_look`); None when the source cannot be read. Worker.
+    """What draws ``source`` as ``look`` says (:func:`raster_look`); None when the source cannot be read. Worker.
 
     A bare provider, not a QgsRasterLayer: a layer computes the statistics of its default renderer
     when it opens, one more read of the whole coverage (a WCS: a GetCoverage of all of it for each
     window; see ``target_appliers._ProviderLayer.open``). The windows are read in the coordinates of
     the layer as they are: a CRS the user set in QGIS on a file whose own is wrong or missing only
     names them, there is no reprojection to get wrong.
+
+    The provider stays owned by Python, read by the renderer but out of the pipe. PyQt5 keeps the
+    QObjects made by C++ that Python wraps in a set, which the main thread edits without the GIL
+    when one of them is destroyed. Owned by the pipe, the provider was destroyed in the worker
+    before its wrapper, and both threads took it out of that set at once: a corrupted heap, a crash
+    later on the main thread (one run in four of check_segmentation in QGIS 3.44). Owned by Python,
+    its wrapper goes first, in the worker, and the main thread finds nothing left to remove.
+
+    Returns:
+        An object whose ``last()`` is the end of the pipe, as :func:`render_drawing` reads it.
     """
     from qgis.core import QgsDataProvider, QgsProviderRegistry, QgsRasterPipe
     if look.get('renderer') is None:
@@ -854,12 +882,13 @@ def open_drawing(source: str, provider_key: str, look: dict) -> Any:
     if provider is None or not provider.isValid():
         return None
     pipe = QgsRasterPipe()
-    if not pipe.set(provider):
-        return None
-    for key in ('renderer', 'brightness', 'hue', 'resampler'):
+    renderer = look['renderer'].clone()
+    if not renderer.setInput(provider) or not pipe.set(renderer):
+        raise RuntimeError('the renderer of the layer does not fit its source')
+    for key in ('brightness', 'hue', 'resampler'):
         if look.get(key) is not None and not pipe.set(look[key].clone()):
             raise RuntimeError(f'the {key} of the layer does not fit its source')
-    return pipe
+    return _Drawing(pipe, provider)
 
 
 def render_drawing(pipe: Any, window: SegmentationWindow, is_canceled: Any) -> QImage:

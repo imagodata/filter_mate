@@ -468,7 +468,9 @@ address, else its content type), its size, and whether the server gives parts of
   at IoU 0.5, area and shape within 0.5 to 2, appearance at least 0.8). These are the settings of the *feature peaks
   only* variant of `scripts/sam_similar_candidates.py`, chosen there for the recall and judged at precision 0.55, recall
   0.20 on ten buildings: the tool and the system prompt say the layer is to be checked, not counted. With
-  `use_dock_object` the accessor reads the objects of the dock on the main thread and the last one is the example.
+  `use_dock_object` the accessor reads the objects of the dock on the main thread and every one of them is an
+  example: peaks and appearance take the best cosine over the examples, the area and shape bounds run over all of
+  them (2026-11-13: the last one alone, a small pool, found nothing anywhere; see `docs/SEGMENTATION.md`).
 - `render_window` waits for the rendering without user input when it runs on the main thread: a click during the run
   must not start another tool.
 - SAM missing: the tool says how the user installs it. The agent cannot install it, on purpose (pip and a download

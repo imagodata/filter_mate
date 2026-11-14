@@ -177,12 +177,12 @@ under way and the first load of the model it stays under the 45 s an MCP client 
 general words, their detail stays in the FilterMate log. SAM must be installed from the dock.
 
 `POST /objects/similar` (`similar_objects`) finds on `raster` the objects that look like an example: `example_layer`
-(a vector layer with exactly one feature selected) or `use_dock_object` (the last object drawn on that raster in the
-dock), one of them; `extent_wkt` and `extent_crs` (default: the visible map), `same_shape` (default true) and `name`.
+(a vector layer with exactly one feature selected) or `use_dock_object` (every object drawn on that raster in the
+dock, each an example), one of them; `extent_wkt` and `extent_crs` (default: the visible map), `same_shape` (default true) and `name`.
 The area is searched window by window (1024 pixels at the cell of the example, at most 64 windows, 20 s), by the
 encoder features alone: it needs no values of the raster. The objects found are added as a temporary GeoPackage
 with `appearance` and `area_m2`; the answer gives `layer` (null when nothing was found), `objects`, `examined`,
-`windows`, `windows_planned`, `stopped_early`, `seconds`, `example` and `appearance`. Measured on buildings of a 25 cm
+`windows`, `windows_planned`, `stopped_early`, `seconds`, `examples` and `appearance`. Measured on buildings of a 25 cm
 orthophoto: about half of what it finds is right, and it finds about a fifth of what is there (`docs/SEGMENTATION.md`).
 
 `point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
@@ -396,7 +396,7 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `remove_layers` | `POST /layers/remove` | removes layers from the project (files kept) |
 | `search_open_data` | `GET /open-data/search` | datasets of an allowed open data platform, with their geo resources |
 | `segment_objects` | `POST /objects/segment` | SAM draws on a raster the objects that the points or polygons of a guide layer point at, as a new layer |
-| `similar_objects` | `POST /objects/similar` | SAM finds on a raster the objects that look like an example (a selected feature, or the last object drawn in the dock), as a new layer to check |
+| `similar_objects` | `POST /objects/similar` | SAM finds on a raster the objects that look like an example (a selected feature, or the objects drawn in the dock), as a new layer to check |
 
 The tools carry MCP annotations: the four readers are `readOnlyHint`; no filter tool is destructive (a filter changes
 what a layer shows, never its data, and `clear_filters` reverts it); `export_layers` is the only one flagged

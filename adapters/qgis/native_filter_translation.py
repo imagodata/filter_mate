@@ -51,6 +51,9 @@ _UTF8_TEXT_STORAGES = ('esri shapefile', 'geojson', 'flatgeobuf')
 # QVariant.Type / QMetaType.Type ids (the same numbers in Qt 5 and Qt 6).
 _BOOL_ID, _INT_IDS, _DOUBLE_ID, _STRING_ID = 1, (2, 3, 4, 5), 6, 10
 _POSTGRES_TEXT = ('text', 'varchar')
+# PostgreSQL server encodings that hold neither the long s (U+017F) nor the Kelvin sign (U+212A)
+_NO_OTHER_CASES = ('LATIN1', 'LATIN2', 'LATIN9', 'WIN1250', 'WIN1251', 'WIN1252')
+_SERVER_ENCODINGS = {}  # connection info of the layer -> server_encoding, read once per session
 _NOT_PLAIN_TEXT = ('json', 'jsonb')
 
 
@@ -129,6 +132,43 @@ def case_sensitive_like(layer):
         return False
 
 
+def server_encoding(layer):
+    """``server_encoding`` of the PostgreSQL database of ``layer`` (``UTF8``, ``LATIN1``...), '' when not read.
+
+    Asked once per connection through the provider connection of QGIS, and
+    kept for the session: the encoding of a database does not change.
+    """
+    try:
+        uri = layer.dataProvider().uri()
+        key = uri.connectionInfo(False)
+        if key not in _SERVER_ENCODINGS:
+            from qgis.core import QgsProviderRegistry
+            connection = QgsProviderRegistry.instance().providerMetadata('postgres').createConnection(uri.uri(False), {})
+            rows = connection.executeSql('SHOW server_encoding')
+            _SERVER_ENCODINGS[key] = str(rows[0][0]).strip().upper()
+        return _SERVER_ENCODINGS[key]
+    except Exception as exc:  # nosec B110 - no connection, a layer being deleted: the encoding stays unknown
+        logger.debug('PostgreSQL server encoding not read: %s', exc)
+        return ''
+
+
+def ilike_other_cases(layer, dialect):
+    """Whether an ILIKE of ``layer``'s database is written with the long s and the Kelvin sign.
+
+    Returns:
+        True for a UTF-8 database (and for the dialects that do not ask),
+        False for an encoding that holds neither character, None when the
+        encoding is another one or was not read (``translate_native`` then
+        leaves an ILIKE on s or k to QGIS).
+    """
+    if dialect != POSTGRESQL:
+        return True
+    encoding = server_encoding(layer)
+    if encoding == 'UTF8':
+        return True
+    return False if encoding in _NO_OTHER_CASES else None
+
+
 def translate_for_layer(layer, expression, texts_as_like=False):
     """Write ``expression`` for the data source of ``layer``.
 
@@ -166,7 +206,8 @@ def translate_for_layer(layer, expression, texts_as_like=False):
     return translate_native(tree, dialect, field_types(fields, dialect),
                             case_sensitive_like=texts_as_like and case_sensitive_like(layer),
                             variables=constant_variables(layer, referenced_variables(tree)),
-                            geometry=native_geometry(layer) if uses_geometry(tree) else None)
+                            geometry=native_geometry(layer) if uses_geometry(tree) else None,
+                            other_cases=ilike_other_cases(layer, dialect) if 'ILIKE' in expression.upper() else True)
 
 
 def constant_variables(layer, names):
