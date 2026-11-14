@@ -1159,6 +1159,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>Скасувати до цього місця</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Порівняти</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Мапа до цього запиту чи кроку ліворуч від лінії, поточна мапа праворуч від неї</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>СПРОБУЙТЕ</translation>
@@ -4749,6 +4759,16 @@ What would you like to do?</translation>
         <translation>Відкріпити</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Клацніть на мапі, щоб зафіксувати лінію, клацніть ще раз, щоб звільнити її.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>лінію зафіксовано: клацніть, щоб звільнити</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Клацніть правою кнопкою, щоб закріпити поточний стан.</translation>
@@ -4937,6 +4957,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Закріпити мапу до цього кроку</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Порівняти із закріпленою мапою</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

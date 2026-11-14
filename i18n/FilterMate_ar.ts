@@ -1159,6 +1159,16 @@ Do you agree to all of them? No runs none of them.</source>
         <translation>التراجع حتى هنا</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>مقارنة</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>الخريطة قبل هذا الطلب أو هذه الخطوة على يسار خط، والخريطة الآن على يمينه</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>جرّب</translation>
@@ -4749,6 +4759,16 @@ What would you like to do?</translation>
         <translation>إزالة التثبيت</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>انقر على الخريطة لقفل الخط، وانقر مرة أخرى لتحريره.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>الخط مقفل: انقر لتحريره</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>انقر بزر الفأرة الأيمن لتثبيت الحالة الحالية.</translation>
@@ -4937,6 +4957,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>تثبيت الخريطة قبل هذه الخطوة</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>المقارنة مع الخريطة المثبتة</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

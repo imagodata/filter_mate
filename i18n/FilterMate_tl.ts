@@ -1159,6 +1159,16 @@ Sang-ayon ka ba sa lahat? Kapag Hindi, walang patatakbuhin.</translation>
         <translation>I-undo hanggang dito</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Ihambing</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Ang mapa bago ang kahilingan o hakbang na ito sa kaliwa ng isang linya, ang kasalukuyang mapa sa kanan nito</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>SUBUKAN</translation>
@@ -4749,6 +4759,16 @@ What would you like to do?</translation>
         <translation>Alisin ang pin</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>I-click ang mapa upang i-lock ang linya, i-click muli upang palayain ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>naka-lock ang linya: i-click upang palayain ito</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>I-right-click para i-pin ang kasalukuyang estado.</translation>
@@ -4937,6 +4957,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>I-pin ang mapa bago ang hakbang na ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Ihambing sa naka-pin na mapa</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

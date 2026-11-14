@@ -1159,6 +1159,16 @@ Hyväksytkö ne kaikki? Ei suorittaa ei yhtään niistä.</translation>
         <translation>Kumoa tähän asti</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Vertaa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Kartta ennen tätä pyyntöä tai vaihetta viivan vasemmalla puolella, nykyinen kartta sen oikealla puolella</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>KOKEILE</translation>
@@ -4749,6 +4759,16 @@ What would you like to do?</translation>
         <translation>Poista kiinnitys</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Lukitse viiva napsauttamalla karttaa, vapauta se napsauttamalla uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>viiva lukittu: vapauta napsauttamalla</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Kiinnitä nykyinen tila napsauttamalla hiiren oikealla painikkeella.</translation>
@@ -4937,6 +4957,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Kiinnitä kartta ennen tätä vaihetta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Vertaa kiinnitettyyn karttaan</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>

@@ -1159,6 +1159,16 @@ Sunteți de acord cu toate? Nu: nu se execută niciuna.</translation>
         <translation>Anulează până aici</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_panel.py" line="436"/>
+        <source>Compare</source>
+        <translation>Compară</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_panel.py" line="438"/>
+        <source>The map before this request or step left of a line, the map now on its right</source>
+        <translation>Harta dinaintea acestei cereri sau a acestui pas în stânga unei linii, harta actuală în dreapta ei</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ÎNCERCAȚI</translation>
@@ -4749,6 +4759,16 @@ What would you like to do?</translation>
         <translation>Elimină fixarea</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="198"/>
+        <source>Click on the map to fix the line, click again to free it.</source>
+        <translation>Clic pe hartă pentru a bloca linia, din nou pentru a o elibera.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="371"/>
+        <source>line fixed: click to free it</source>
+        <translation>linie blocată: clic pentru a o elibera</translation>
+    </message>
+    <message>
         <location filename="../../ui/controllers/compare_controller.py" line="182"/>
         <source>Right-click to pin the current state.</source>
         <translation>Clic dreapta pentru a fixa starea curentă.</translation>
@@ -4937,6 +4957,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/history_controller.py" line="133"/>
         <source>Pin the map before this step</source>
         <translation>Fixează harta de dinaintea acestui pas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/history_controller.py" line="148"/>
+        <source>Compare with the pin</source>
+        <translation>Compară cu harta fixată</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/history_controller.py" line="260"/>
