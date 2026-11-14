@@ -1475,7 +1475,7 @@
    "description": "Change attribute values of features, in the edit buffer of the layer: nothing is saved. The layer goes into editing mode; the user reviews the changes and saves them (Save Layer Edits) or discards them. Choose the features with expression and/or selected_only. Keys, joined and virtual fields are not changed; a value that does not fit its field is refused. Returns changed (features), editing and unsaved. In the chat of FilterMate, undoing the turn takes the changes back while they are not saved.",
    "read_only": false,
    "destructive": false,
-   "idempotent": true,
+   "idempotent": false,
    "open_world": false,
    "input_schema": {
     "properties": {
@@ -1583,7 +1583,7 @@
       "type": "string"
      },
      "features": {
-      "description": "[{\"wkt\": \"POINT(1.44 43.6)\", \"attributes\": {\"nom\": \"Puits\"}}]: geometries of the type of the layer",
+      "description": "[{\"wkt\": \"POINT(1.44 43.6)\", \"attributes\": {\"nom\": \"Puits\"}}]: geometries of the type of the layer, coordinates in crs (the CRS of the layer by default; degrees only with EPSG:4326)",
       "items": {
        "additionalProperties": true,
        "type": "object"
@@ -1714,10 +1714,10 @@
   {
    "name": "export_layout",
    "title": "Export a print layout",
-   "description": "Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root. A file of the same name there is overwritten. The chat of FilterMate asks the user first. Returns path (relative to the sub-folder) and bytes.",
+   "description": "Write a print layout of the project as a PDF or PNG file in a sub-folder of the export root. A file of the same name there is kept: the new one is named <name>_2, <name>_3... The chat of FilterMate asks the user first. Returns path (relative to the sub-folder) and bytes.",
    "read_only": false,
    "destructive": true,
-   "idempotent": true,
+   "idempotent": false,
    "open_world": false,
    "input_schema": {
     "properties": {
@@ -2174,7 +2174,7 @@
      },
      "extent_wkt": {
       "default": "",
-      "description": "Area searched as WKT, e.g. map_context's extent_wkt; empty: the visible map",
+      "description": "Area searched as WKT, e.g. map_context's extent_wkt with its canvas_crs as extent_crs; empty: the visible map",
       "maxLength": 100000,
       "type": "string"
      },

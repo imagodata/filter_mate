@@ -10,6 +10,10 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("style", layer_id, before, after, name)``: the symbology, labels and rendering of the layer, as XML;
 * ``("notes", "", before, after)``: the notes of the agent kept in the project (lists of texts);
 * ``("join", layer_id, spec, "", name)``: a join the turn added to a layer (``fields_joins.join_specs``);
+  ``("join", layer_id, spec, "removed", name)``: a join QGIS took away from a layer when the turn removed the layer it
+  joined (undone, it comes back once that layer is back);
+* ``("relation", "", xml, "", name)``: a relation of the project QGIS took away when the turn removed one of its
+  layers, as XML (undone, it comes back once both layers are back);
 * ``("tree", "", before, after)``: where each layer is in the layer tree and the groups, checked or not (JSON);
 * ``("layer_name", layer_id, before, after)``: the name of a layer;
 * ``("bookmarks", "", before, after)``: the spatial bookmarks of the project, as XML;
@@ -17,8 +21,9 @@ Kept as plain tuples in the operation of the turn, so undo and redo reach them w
 * ``("current_style", layer_id, before, after)``: the style of its style manager a layer has on (a theme sets it);
 * ``("widgets", "", before, after)``: the widgets of the panel kept in the project (``core/agent/widgets.py``);
 * ``("recipes", "", before, after)``: the recipes kept in the project (``core/agent/recipes.py``), as JSON;
-* ``("edits", layer_id, before, after, name)``: the index of the undo stack of a layer being edited, before and
-  after the commands of the turn (``adapters/public_api/feature_edits.py``);
+* ``("edits", layer_id, before, after, name, opened)``: the index of the undo stack of a layer being edited, before
+  and after the commands of the turn (``adapters/public_api/feature_edits.py``); ``opened``: the layer was not being
+  edited before them (the turn put it in editing mode, and undoing the turn takes it out: ``_closable``);
 * ``("layout", "", xml, "", name)``: a print layout the turn added to the project;
 * ``("project_crs", "", before, after)``: the CRS of the project, as an authid or ``WKT:`` and its WKT;
 * ``("settings", "", before, after, step)``: settings of FilterMate (config.json) the turn changed, as JSON
@@ -265,6 +270,36 @@ def _edit_index(layer: Any) -> int:
     return stack.index() if stack is not None else 0
 
 
+def _closable(layer: Any, effect: Tuple[Any, ...]) -> bool:
+    """Whether undoing an ``edits`` effect takes its layer out of editing mode: the turn put it in (``opened``), its
+    undo stack is back where it began with the commands of the turn still above (not saved since), and nothing else
+    is pending. QGIS refuses a filter on a layer being edited; leaving the editing mode drops the undo stack, so the
+    commands of the turn cannot be applied again afterwards."""
+    if len(effect) < 6 or not effect[5] or effect[2] != 0:
+        return False
+    if not isinstance(layer, QgsVectorLayer) or not layer.isEditable():
+        return False
+    stack = layer.undoStack()
+    return stack.index() == 0 and stack.count() >= effect[3] and not layer.isModified()
+
+
+def _relation_xml(relation: Any) -> str:
+    document = QDomDocument()
+    root = document.createElement("relations")
+    document.appendChild(root)
+    relation.writeXml(root, document)
+    return document.toString()
+
+
+def _relation_of(project: QgsProject, xml: str) -> Any:
+    """The relation ``xml`` holds, read against the layers of the project now: invalid while one of them is missing."""
+    from qgis.core import QgsRelation, QgsRelationContext
+    document = QDomDocument()
+    document.setContent(xml)
+    node = document.documentElement().firstChildElement("relation")
+    return QgsRelation.createFromXml(node, QgsReadWriteContext(), QgsRelationContext(project))
+
+
 def _visible(project: QgsProject, layer_id: str) -> Optional[bool]:
     node = project.layerTreeRoot().findLayer(layer_id)
     return None if node is None else bool(node.itemVisibilityChecked())
@@ -285,6 +320,10 @@ class EffectsRecorder:
         self._record_settings = settings
         self._ids_before: Optional[Set[str]] = None
         self._removed: Dict[str, Tuple[str, Place, str, str]] = {}
+        # What QGIS takes away with a layer removed: the joins of other layers to it (removed id, layer, spec, name),
+        # the relations of the project that cite it (by relation id: removed id, XML, name).
+        self._unjoined: List[Tuple[str, str, Dict[str, Any], str]] = []
+        self._relations: Dict[str, Tuple[str, str, str]] = {}
         self._selection: Dict[str, Tuple[int, ...]] = {}
         self._visibility: Dict[str, bool] = {}
         self._styles: Dict[str, str] = {}
@@ -297,7 +336,7 @@ class EffectsRecorder:
         self._themes: Optional[str] = None
         self._bookmarks: Optional[str] = None
         self._current_styles: Dict[str, Optional[str]] = {}
-        self._edits: Dict[str, int] = {}
+        self._edits: Dict[str, Tuple[int, bool]] = {}  # index of the undo stack, and not being edited then
         self._layouts: Optional[Set[str]] = None
         self._crs: Optional[str] = None
         # (call of the turn, path, value before that call), in order: a setting changed twice has two records.
@@ -316,6 +355,7 @@ class EffectsRecorder:
                     if layer is not None and layer.id() not in self._removed:
                         self._removed[layer.id()] = (_definition(layer), _place(project, layer.id()), layer.providerType(),
                                                      layer.name())
+                        self._taken_with(project, layer.id())
             elif name == "select_features":
                 layer = _resolve(project, arguments.get("layer"))
                 selected = _selection(layer) if layer is not None else None
@@ -336,7 +376,7 @@ class EffectsRecorder:
             elif name in EDIT_TOOLS:
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._edits:
-                    self._edits[layer.id()] = _edit_index(layer)
+                    self._edits[layer.id()] = (_edit_index(layer), not layer.isEditable())
             elif name == "join_layers":
                 layer = _resolve(project, arguments.get("layer"))
                 if isinstance(layer, QgsVectorLayer) and layer.id() not in self._joins:
@@ -393,6 +433,19 @@ class EffectsRecorder:
         except RuntimeError:  # a layer went away meanwhile: nothing to keep for it
             logger.debug("Agent undo: a layer could not be read before a step", exc_info=True)
 
+    def _taken_with(self, project: QgsProject, layer_id: str) -> None:
+        """What QGIS takes away when the layer ``layer_id`` is removed: the joins of the other layers to it and the
+        relations of the project that cite it."""
+        from ..public_api.fields_joins import join_specs
+        for owner in project.mapLayers().values():
+            if isinstance(owner, QgsVectorLayer) and owner.id() != layer_id:
+                self._unjoined.extend((layer_id, owner.id(), spec, owner.name()) for spec in join_specs(owner)
+                                      if spec["join_layer_id"] == layer_id)
+        for relation_id, relation in project.relationManager().relations().items():
+            if layer_id in (relation.referencingLayerId(), relation.referencedLayerId()) \
+                    and relation_id not in self._relations:
+                self._relations[relation_id] = (layer_id, _relation_xml(relation), relation.name())
+
     def finish(self) -> Tuple[Tuple[Any, ...], ...]:
         """What the turn did beside the filters, in the order to apply it again."""
         if self._ids_before is None:
@@ -400,6 +453,17 @@ class EffectsRecorder:
         project = QgsProject.instance()
         effects: List[Tuple[Any, ...]] = []
         now = set(project.mapLayers())
+        # What QGIS took away with a layer removed goes before the layer in the list: undone (the list is read from
+        # its end), the layer comes back first, then the joins to it and the relations that cite it.
+        for removed_id, owner_id, spec, owner_name in self._unjoined:
+            owner = project.mapLayer(owner_id)
+            if removed_id not in now and isinstance(owner, QgsVectorLayer) and not any(
+                    join.joinLayerId() == removed_id for join in owner.vectorJoins()):
+                effects.append(("join", owner_id, spec, "removed", owner_name))
+        relations = project.relationManager().relations() if self._relations else {}
+        for relation_id, (removed_id, xml, name) in self._relations.items():
+            if removed_id not in now and relation_id not in relations:
+                effects.append(("relation", "", xml, "", name))
         for layer_id, (definition, place, provider, name) in self._removed.items():
             if layer_id not in now:
                 effects.append(("removed", layer_id, "" if provider == "memory" else definition, place, name))
@@ -451,11 +515,11 @@ class EffectsRecorder:
                 layout = project.layoutManager().layoutByName(name)
                 if layout is not None:
                     effects.append(("layout", "", layout_xml(layout), "", name))
-        for layer_id, before in self._edits.items():
+        for layer_id, (before, opened) in self._edits.items():
             layer = project.mapLayer(layer_id)
             after = _edit_index(layer) if layer is not None else before
             if after != before:
-                effects.append(("edits", layer_id, before, after, layer.name()))
+                effects.append(("edits", layer_id, before, after, layer.name(), opened))
         for layer_id, before_joins in self._joins.items():
             layer = project.mapLayer(layer_id)
             if isinstance(layer, QgsVectorLayer):
@@ -577,12 +641,17 @@ _LAYER_CHANGES = frozenset({"added", "removed", "style", "join", "layer_name", "
 
 
 def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSet[str] = frozenset(),
-                  presence: Optional[bool] = None) -> Tuple[List[str], List[str]]:
+                  presence: Optional[bool] = None, edits: Optional[bool] = None,
+                  close: FrozenSet[str] = frozenset()) -> Tuple[List[str], List[str]]:
     """Undo (or apply again) what a turn did beside the filters: names of what changed, and of what could not.
 
     What would change a layer whose id is in ``keep`` (protected from the agent) is left as it is. ``presence``: only
     the layers added or removed (True), only the rest (False), or all (None): the layers come back before their
-    filters, and a selection after them (a filter empties it).
+    filters, and a selection after them (a filter empties it). ``edits``: only the edits (True), all but them (False),
+    or all (None): undone, they go before the filters (a layer being edited refuses a filter). ``close``: the ids of
+    the layers whose filter is restored next: undone, such a layer leaves the editing mode the turn put it in
+    (``_closable``), and its edits can no longer be applied again; any other layer stays in editing mode, where
+    applying the turn again finds its commands.
     """
     project = QgsProject.instance()
     done: List[str] = []
@@ -590,6 +659,8 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
     for effect in (reversed(effects) if undo else effects):
         kind, layer_id = effect[0], effect[1]
         if presence is not None and (kind in ("added", "removed")) != presence:
+            continue
+        if edits is not None and (kind == "edits") != edits:
             continue
         if kind in _LAYER_CHANGES and layer_id in keep:
             layer = project.mapLayer(layer_id)
@@ -652,9 +723,11 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 # Only over the commands of the turn: saved, discarded or edited since, the layer is left as it is.
                 if stack is not None and stack.index() == start and stack.count() >= max(start, end):
                     stack.setIndex(end)
+                    if undo and layer_id in close and _closable(layer, effect):
+                        layer.rollBack()  # out of the editing mode the turn opened: a filter can change again
                     layer.triggerRepaint()
                     done.append(layer.name())
-                else:
+                else:  # also applying again after an undo that left the editing mode: its undo stack went with it
                     left.append(effect[4] if len(effect) > 4 else layer_id)
             elif kind == "join":
                 from ..public_api.fields_joins import add_join, remove_join
@@ -662,9 +735,11 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                 spec = effect[2]
                 present = isinstance(layer, QgsVectorLayer) and any(
                     join.joinLayerId() == spec["join_layer_id"] for join in layer.vectorJoins())
+                # A join the turn added goes with an undo; one QGIS took away with the layer removed comes back.
+                wanted = (effect[3] == "removed") == undo
                 if not isinstance(layer, QgsVectorLayer):
                     left.append(effect[4])
-                elif undo:
+                elif not wanted:
                     if present:
                         remove_join(layer, spec["join_layer_id"])
                     done.append(layer.name())
@@ -672,6 +747,24 @@ def apply_effects(effects: Sequence[Tuple[Any, ...]], undo: bool, keep: FrozenSe
                     done.append(layer.name())
                 else:
                     left.append(layer.name())  # the join layer went away meanwhile
+            elif kind == "relation":
+                manager = project.relationManager()
+                document = QDomDocument()
+                document.setContent(effect[2])
+                relation_id = document.documentElement().firstChildElement("relation").attribute("id")
+                if not undo:  # removed again with its layer: QGIS takes it away by itself
+                    if relation_id in manager.relations():
+                        manager.removeRelation(relation_id)
+                    done.append(effect[4])
+                elif relation_id in manager.relations():
+                    done.append(effect[4])
+                else:
+                    relation = _relation_of(project, effect[2])
+                    if relation.isValid():
+                        manager.addRelation(relation)
+                        done.append(effect[4])
+                    else:
+                        left.append(effect[4])  # one of its layers did not come back
             elif kind == "tree":
                 _set_tree_state(project, effect[2] if undo else effect[3])
                 done.append(_tree_label())

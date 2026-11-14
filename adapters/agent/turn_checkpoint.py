@@ -302,23 +302,34 @@ class TurnCheckpoint:
 
     @staticmethod
     def _effects_of(operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset(),
-                    presence: Optional[bool] = None):
+                    presence: Optional[bool] = None, edits: Optional[bool] = None):
         """Apply the effects of ``operation`` towards its state before (``back``) or after; ``(done, left)``."""
         reversed_ = getattr(operation, "effects_reversed", False)
-        return apply_effects(getattr(operation, "effects", ()), undo=back != reversed_, keep=keep, presence=presence)
+        # A layer whose filter the operation restores must leave the editing mode the turn put it in.
+        filtered = frozenset(before.layer_id for before, _after in operation.changes)
+        return apply_effects(getattr(operation, "effects", ()), undo=back != reversed_, keep=keep, presence=presence,
+                             edits=edits, close=filtered)
 
     def _move(self, operation: CrossOperation, back: bool, keep: FrozenSet[str] = frozenset()):
         """``operation`` to its state before (``back``) or after: ``(changed, left as they are, a layer refused)``.
 
         The layers added or removed first (a filter needs its layer), then the filters, then the rest (a filter empties
-        a selection). When a layer refused, the layers go back and nothing else changes.
+        a selection). The edits of the turn go with the rest, except when they are undone: QGIS filters no layer being
+        edited, so they are taken back before the filters, and a layer the turn put in editing mode leaves it. When a
+        layer refused, the layers and the edits go back as far as they can and nothing else changes.
         """
+        undoing = back != getattr(operation, "effects_reversed", False)
         done, not_done = self._effects_of(operation, back, keep, presence=True)
+        if undoing:
+            edited, not_edited = self._effects_of(operation, back, keep, presence=False, edits=True)
+            done, not_done = done + edited, not_done + not_edited
         names, left, refused = self._apply(operation, use_before=back, keep=keep)
         if refused:
+            if undoing:
+                self._effects_of(operation, not back, keep, presence=False, edits=True)
             self._effects_of(operation, not back, presence=True)
             return names, left, True
-        more, not_more = self._effects_of(operation, back, keep, presence=False)
+        more, not_more = self._effects_of(operation, back, keep, presence=False, edits=False if undoing else None)
         return _merged(names, done + more), _merged(left, not_done + not_more), False
 
     def undo_to_step(self, step: int, description: str = "") -> Tuple[List[str], List[str]]:
@@ -377,11 +388,16 @@ class TurnCheckpoint:
         # Its effects are those of the steps, undone: undoing this operation applies them again.
         operation = CrossOperation(HISTORY_KEY, tuple(pairs), description=description[:MAX_LABEL],
                                    effects=effects, effects_reversed=True)
+        # The edits before the filters: a layer being edited refuses a filter (see _move).
+        edited, not_edited = apply_effects(effects, undo=True, presence=False, edits=True,
+                                           close=frozenset(now.layer_id for now, _target in pairs))
+        done, not_done = done + edited, not_done + not_edited
         names, left, refused = self._apply(operation, use_before=False) if pairs else ([], [], False)
-        if refused:  # a layer refused (being edited): the layers go back, it can be tried again
+        if refused:  # a layer refused (being edited by the user): what moved goes back, it can be tried again
+            apply_effects(effects, undo=False, presence=False, edits=True)
             apply_effects(effects, undo=False, presence=True)
             return names, left
-        more, not_more = apply_effects(effects, undo=True, presence=False)
+        more, not_more = apply_effects(effects, undo=True, presence=False, edits=False)
         if names or done or more:
             history.push(operation)
         return _merged(names, done + more), _merged(left, not_done + not_more)
