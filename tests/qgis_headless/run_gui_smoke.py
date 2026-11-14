@@ -869,7 +869,8 @@ def s_compare_pin():
     menu = controller.menu
     texts = [action.text() for action in menu.actions()]
     check('compare: right-click opens the menu of the button', menu.isVisible()
-          and texts == ['Pin the current state', 'Remove the pin', '', 'History…'], f"visible={menu.isVisible()} {texts}")
+          and texts == ['Pin the current state', 'Remove the pin', 'Pin the map before each request of the agent', '',
+                        'Horizontal line', '', 'History…'], f"visible={menu.isVisible()} {texts}")
     next(action for action in menu.actions() if action.text() == 'Pin the current state').trigger()
     menu.close()
     check('compare: pinned from the menu, available, its tooltip says when', controller.pinned is not None
