@@ -130,3 +130,53 @@ def test_add_layer_still_refuses_a_name_resolving_to_a_local_address(resolver, q
     with pytest.raises(ValueError, match="only a public address can be read"):
         project_control.add_layer("https://data.example.org/a.geojson")
     assert qgis_layers == []
+
+
+# --- a platform that stalls is asked twice (2026-11-14, data.gouv.fr) -------------------------------------------------
+
+def _answers(monkeypatch, *answers):
+    """``fetch`` giving ``answers`` one after the other (an exception is raised); the timeouts asked are returned."""
+    left, timeouts = list(answers), []
+
+    def fetch(url, **options):
+        timeouts.append(options["timeout_ms"])
+        answer = left.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+    monkeypatch.setattr(project_control, "fetch", fetch)
+    return timeouts
+
+
+_FOUND = SimpleNamespace(status=200, headers={}, content=b'{"data": [{"id": "a", "title": "Communes"}]}')
+
+
+@pytest.mark.parametrize("first", [
+    project_control.HttpFailure(project_control.TOO_LONG),
+    SimpleNamespace(status=200, headers={}, content=b"<html>Service unavailable</html>"),
+    SimpleNamespace(status=503, headers={}, content=b""),
+], ids=["too long", "not JSON", "503"])
+def test_a_search_that_stalled_is_asked_once_more(monkeypatch, first):
+    timeouts = _answers(monkeypatch, first, _FOUND)
+    assert project_control.search_open_data("communes")["count"] == 1
+    assert timeouts == list(project_control.SEARCH_TIMEOUTS_MS) and timeouts[0] < timeouts[1]
+
+
+def test_a_search_that_stalled_twice_sends_the_model_elsewhere(monkeypatch):
+    late = project_control.HttpFailure(project_control.TOO_LONG)
+    timeouts = _answers(monkeypatch, late, late)
+    with pytest.raises(ValueError, match="datagouv did not answer.*another platform"):
+        project_control.search_open_data("communes")
+    assert len(timeouts) == 2
+
+
+@pytest.mark.parametrize("answer, message", [
+    (project_control.HttpFailure(project_control.STOPPED), "did not answer: stopped"),  # the user pressed Stop
+    (project_control.HttpFailure("Connection refused"), "Connection refused"),
+    (SimpleNamespace(status=404, headers={}, content=b""), r"error \(404\)"),
+], ids=["stopped", "refused", "404"])
+def test_a_search_that_failed_for_good_is_asked_once(monkeypatch, answer, message):
+    timeouts = _answers(monkeypatch, answer)
+    with pytest.raises(ValueError, match=message) as failure:
+        project_control.search_open_data("communes")
+    assert len(timeouts) == 1 and "asked twice" not in str(failure.value)

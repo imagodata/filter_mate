@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### AGENT (experimental)
+
+- **A source that stalls no longer costs the whole wait, nor the conversation.** On 14 November data.gouv.fr answered the same search in 1 second, in 33 seconds or not at all, and its connector took from 0.3 to 13 seconds to say hello. A search that gets no answer in time, an error of an overloaded server (502, 503, 504) or a page that is not data is now asked a second time before it fails, and a connector that took too long is tried once more (8 seconds, then 20). The connectors of a conversation are asked all at once instead of one after the other: one that is not started (a local connector) or that stalls no longer adds its wait to the others'. Stop ends these waits at once, second tries included. When a platform does not answer, the agent is told to search another one you enabled instead of asking the same one in other words, and to go to the IGN layers first for the French reference data (communes, departments, cadastre, roads, buildings) when you enabled them.
+
 ## [5.1.1] - 2026-11-14
 
 The fixes of a review of 5.1.0, and what was merged since. The free quota of the agent is removed: AGENT works with your own API key or a local Ollama model. New: the agent sets FilterMate up with you, asks its questions with choices to click and follows your own skills; the dock compares the map before and after the last filter; a filter reads the variables of QGIS, of the project and of the layer.
