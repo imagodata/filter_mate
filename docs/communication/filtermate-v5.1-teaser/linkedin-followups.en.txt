@@ -1,0 +1,56 @@
+Four follow-up posts, one subject each, with a cut of the teaser or the full take (4:5). Links go in the first
+comment (linkedin-first-comment.en.txt).
+
+=== Day 2 · AGENT ===
+
+"Keep the communes with more than 20,000 inhabitants."
+
+I typed that in FilterMate's AGENT panel in QGIS. It read the fields of the layer, wrote the filter ("population" > 20000), applied it, and said what it kept: 7 communes out of 930. One click on Undo this turn, and the 930 are back.
+
+What matters to me in an agent inside a GIS:
+→ every step says how many features it keeps
+→ a filter written by the model is a plain WHERE clause, checked before it runs
+→ exports and removals are asked first; every turn can be undone
+→ it works with your own API key, or with a local Ollama model: in this take the model runs on my laptop, and nothing leaves it
+
+AGENT is experimental. It is in FilterMate 5.1, free and open source.
+
+What would you ask it first?
+
+#QGIS #GIS #OpenSource #AI
+
+=== Day 5 · SAM ===
+
+One click on a roof, and the roof is a polygon.
+
+FilterMate 5.1 draws objects on an orthophoto with SAM 2.1, on the CPU: no GPU, no account, a 62 MB model downloaded once. The objects then filter your other layers: here, three clicks on three roofs keep the five parcels under them.
+
+It is experimental, and I say what was measured: building roofs on a 25 cm orthophoto. One click gives a median overlap of 0.65 with the reference footprint, a box 0.82. Parcels and trees are not validated yet, and a large roof may come out in part, as in the video.
+
+Free and open source, QGIS 3.22 to 4.x.
+
+#QGIS #RemoteSensing #GIS #OpenSource
+
+=== Day 8 · History and Compare ===
+
+Which buildings did my last filter remove?
+
+In FilterMate 5.1, a Compare button sits beside Undo and Redo. Click it, and a line follows the mouse over the map: left of it, the map before the last filter; right of it, the map as it is. Here: the buildings of Blagnac, then only those within 300 m of the Garonne (5,528 of them).
+
+Filters are views of your layers, not copies: Undo and Redo walk through them, and Compare shows what a step changed before you keep it.
+
+Free and open source, QGIS 3.22 to 4.x.
+
+#QGIS #GIS #OpenSource #Geospatial
+
+=== Day 10 · Export ===
+
+The analysis is done. Now send only the answer.
+
+FilterMate exports the layers as they are filtered, into one GeoPackage that can keep the QGIS project and the structure of its groups: the person who opens it finds the same map, with only the features that answer the question. No folder of intermediate exports, and the source data is never altered.
+
+The same filters run from Processing, a Python or REST API, or an MCP server, when the question comes back every month.
+
+Free and open source, QGIS 3.22 to 4.x.
+
+#QGIS #GIS #OpenSource #GeoPackage

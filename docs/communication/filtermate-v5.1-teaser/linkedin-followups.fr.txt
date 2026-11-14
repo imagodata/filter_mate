@@ -1,0 +1,56 @@
+Quatre posts de relance, un sujet chacun, avec un extrait du teaser ou la prise entière (4:5). Les liens vont en
+premier commentaire (linkedin-first-comment.fr.txt).
+
+=== J+2 · AGENT ===
+
+« Garde les communes de plus de 20 000 habitants. »
+
+Je l'ai tapé dans le panneau AGENT de FilterMate, dans QGIS. Il a lu les champs de la couche, écrit le filtre ("population" > 20000), l'a appliqué, et dit ce qu'il gardait : 7 communes sur 930. Un clic sur Annuler ce tour, et les 930 reviennent.
+
+Ce qui compte pour moi dans un agent au sein d'un SIG :
+→ chaque étape annonce combien d'entités elle garde
+→ un filtre écrit par le modèle est une simple clause WHERE, contrôlée avant de s'exécuter
+→ les exports et les suppressions sont demandés d'abord ; chaque tour s'annule
+→ il fonctionne avec votre propre clé d'API, ou avec un modèle local Ollama : dans cette prise, le modèle tourne sur mon portable, et rien n'en sort
+
+AGENT est expérimental. Il est dans FilterMate 5.1, gratuit et open source.
+
+Que lui demanderiez-vous en premier ?
+
+#QGIS #SIG #OpenSource #IA
+
+=== J+5 · SAM ===
+
+Un clic sur un toit, et le toit devient un polygone.
+
+FilterMate 5.1 dessine des objets sur une orthophoto avec SAM 2.1, sur le processeur : pas de carte graphique, pas de compte, un modèle de 62 Mo téléchargé une fois. Les objets filtrent ensuite vos autres couches : ici, trois clics sur trois toits gardent les cinq parcelles qu'ils recouvrent.
+
+C'est expérimental, et je dis ce qui a été mesuré : des toits de bâtiments sur une orthophoto à 25 cm. Un clic donne un recouvrement médian de 0,65 avec l'emprise de référence, une boîte 0,82. Parcelles et arbres ne sont pas encore validés, et un grand toit peut sortir en partie, comme dans la vidéo.
+
+Gratuit et open source, de QGIS 3.22 à 4.x.
+
+#QGIS #Télédétection #SIG #OpenSource
+
+=== J+8 · Historique et Comparer ===
+
+Quels bâtiments mon dernier filtre a-t-il retirés ?
+
+Dans FilterMate 5.1, un bouton Comparer se trouve à côté d'Annuler et de Rétablir. Un clic, et une ligne suit la souris sur la carte : à sa gauche, la carte avant le dernier filtre ; à sa droite, la carte telle qu'elle est. Ici : les bâtiments de Blagnac, puis seulement ceux à moins de 300 m de la Garonne (5 528).
+
+Les filtres sont des vues de vos couches, pas des copies : Annuler et Rétablir les parcourent, et Comparer montre ce qu'une étape a changé avant de la garder.
+
+Gratuit et open source, de QGIS 3.22 à 4.x.
+
+#QGIS #SIG #OpenSource #Géomatique
+
+=== J+10 · Export ===
+
+L'analyse est faite. Il reste à n'envoyer que la réponse.
+
+FilterMate exporte les couches telles qu'elles sont filtrées, dans un GeoPackage qui peut garder le projet QGIS et la structure de ses groupes : la personne qui l'ouvre retrouve la même carte, avec les seules entités qui répondent à la question. Pas de dossier d'exports intermédiaires, et les données sources ne sont jamais modifiées.
+
+Les mêmes filtres se lancent depuis Processing, une API Python ou REST, ou un serveur MCP, quand la question revient chaque mois.
+
+Gratuit et open source, de QGIS 3.22 à 4.x.
+
+#QGIS #SIG #OpenSource #GeoPackage

@@ -1,0 +1,8 @@
+FilterMate 5.1 pour #QGIS en 55 secondes (vidéo en anglais) : un clic filtre 12 couches (les 360 577 bâtiments de Toulouse Métropole), en vecteur, raster et nuage de points, dans le SQL de chaque source.
+
+Nouveau et expérimental : SAM détoure un objet d'un clic sur votre processeur, et un agent filtre à partir d'une phrase, avec votre clé ou un modèle local.
+
+Gratuit, open source, QGIS 3.22 à 4.x.
+https://imagodata.github.io/filter_mate/index.fr.html
+
+#SIG #Géomatique #LiDAR #LogicielLibre

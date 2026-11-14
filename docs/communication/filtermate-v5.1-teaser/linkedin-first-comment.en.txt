@@ -1,0 +1,6 @@
+Install: in QGIS, Plugins > Manage and Install Plugins > search "FilterMate"
+Site and guide: https://imagodata.github.io/filter_mate/
+Plugin page: https://plugins.qgis.org/plugins/filter_mate/
+Source and issues: https://github.com/imagodata/filter_mate
+
+Data in the video: BD TOPO®, BD ORTHO® and LiDAR HD © IGN, Licence Ouverte 2.0.
