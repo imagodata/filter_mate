@@ -447,6 +447,28 @@ class TestHandlers:
         refused = executor.execute(ToolCallPart("c", "add_basemap", {"platform": address}))
         assert refused.is_error and "abc" not in refused.content.replace(address, "")  # the address is not a name
 
+    def test_the_address_of_a_service_the_user_added_never_reaches_the_model(self, tmp_path):
+        """Its address may hold the key of an account: answers, refusals and errors name it by its id."""
+        address = "https://geocode.example.com/search?apikey=S3cr3t"
+        name = "geocoder_geocode_example_com_s_6827a8"
+        accessor = Accessor()
+        accessor.find_place = lambda query, platform="", limit=5, extra_domains=None: \
+            InMemoryAccessor.find_place(accessor, query, platform, limit, extra_domains)
+        handlers = build_handlers(accessor, tmp_path, platforms=(name, address.lower(), "photon"),
+                                  extra_domains=f"{address}:geocoder", platform_aliases={name: address.lower()})
+        executor = ToolExecutor(chat_tools(), handlers)
+        found = executor.execute(ToolCallPart("c", "find_place", {"query": "Toulouse", "platform": name}))
+        assert not found.is_error and "s3cr3t" not in found.content.lower() and name in found.content
+        refused = executor.execute(ToolCallPart("c", "find_place", {"query": "Toulouse", "platform": "nowhere"}))
+        assert refused.is_error and "s3cr3t" not in refused.content.lower()
+        assert name in refused.content and "photon" in refused.content  # what is enabled is still listed, by name
+
+        def fails(query, platform="", limit=5, extra_domains=None):
+            raise FilterRejected(f"{platform} did not answer: https://GEOCODE.example.com/search?apikey=S3cr3t&q=x")
+        accessor.find_place = fails
+        failed = executor.execute(ToolCallPart("c", "find_place", {"query": "Toulouse", "platform": name}))
+        assert failed.is_error and "s3cr3t" not in failed.content.lower() and name in failed.content
+
     def test_export_stays_below_the_root(self, api):
         accessor, root = api
         assert run(accessor, root, "export_layers", layers=["a"], subfolder="ok/sub")[0] is False

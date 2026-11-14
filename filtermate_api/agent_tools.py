@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
@@ -99,13 +100,39 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     ``share_values`` False: what an algorithm answers besides its layers (statistics) is not sent.
     """
     enabled_platforms = {name.lower() for name in platforms}
+    aliases = {name.lower(): address for name, address in (platform_aliases or {}).items()}
+    # The address of a service the user added may hold the key of an account: it is accepted as a name (the recipes
+    # kept before it had an id), never listed, never answered.
+    hidden = sorted({address for address in aliases.values()}, key=len, reverse=True)
+    listed = sorted(enabled_platforms - {address.lower() for address in hidden})
 
     def _allowed_platform(name: str) -> str:
         if name.lower() not in enabled_platforms:
-            raise ToolFailure(f"{name!r} is not enabled in the agent sources. Enabled: "
-                              f"{', '.join(sorted(enabled_platforms)) or 'none'}.")
+            raise ToolFailure(f"{_named(name)!r} is not enabled in the agent sources. Enabled: "
+                              f"{', '.join(listed) or 'none'}.")
         # A service the user added is named by its id: its address, which may hold a key, never goes to the model.
-        return (platform_aliases or {}).get(name.lower(), name)
+        return aliases.get(name.lower(), name)
+
+    def _named(text: str) -> str:
+        """``text`` with the address of each service the user added replaced by the id the model knows it by."""
+        for address in hidden:
+            name = next(name for name, target in aliases.items() if target == address)
+            for form in (address, address.split("://", 1)[-1]):
+                text = re.sub(re.escape(form), lambda _: name, text, flags=re.IGNORECASE)
+        return text
+
+    def _on_platform(args: Dict[str, Any], call: Callable[[str], Any]) -> Dict[str, Any]:
+        """The answer of ``call`` on the platform the model named, which stays named as the model named it."""
+        platform = _allowed_platform(args["platform"])
+        try:
+            answer = asdict(call(platform))
+        except QGISBusy:
+            raise
+        except ValueError as exc:  # FilterRejected among them: its message names the platform it was given
+            raise ToolFailure(_named(str(exc))) from None
+        if "platform" in answer:
+            answer["platform"] = _named(str(answer["platform"]))
+        return answer
 
     def list_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         return select_layers((asdict(layer) for layer in accessor.list_layers()), args.get("kind"),
@@ -373,26 +400,25 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return _report("Remove", accessor.remove_layers(args["layers"]))
 
     def search_open_data(args: Dict[str, Any]) -> Dict[str, Any]:
-        return asdict(accessor.search_open_data(args["query"], platform=_allowed_platform(args["platform"]),
-                                                limit=args["limit"], extra_domains=extra_domains))
+        return _on_platform(args, lambda platform: accessor.search_open_data(
+            args["query"], platform=platform, limit=args["limit"], extra_domains=extra_domains))
 
     def search_imagery(args: Dict[str, Any]) -> Dict[str, Any]:
-        return asdict(accessor.search_imagery(
+        return _on_platform(args, lambda platform: accessor.search_imagery(
             bbox=args.get("bbox"), start=args["start"], end=args["end"], max_cloud=args["max_cloud"],
-            collections=args.get("collections"), limit=args["limit"], platform=_allowed_platform(args["platform"]),
-            extra_domains=extra_domains))
+            collections=args.get("collections"), limit=args["limit"], platform=platform, extra_domains=extra_domains))
 
     def add_service_layer(args: Dict[str, Any]) -> Dict[str, Any]:
-        return asdict(accessor.add_service_layer(_allowed_platform(args["platform"]), args["typename"],
-                                                 name=args["name"], extra_domains=extra_domains))
+        return _on_platform(args, lambda platform: accessor.add_service_layer(
+            platform, args["typename"], name=args["name"], extra_domains=extra_domains))
 
     def find_place(args: Dict[str, Any]) -> Dict[str, Any]:
-        return asdict(accessor.find_place(args["query"], platform=_allowed_platform(args["platform"]),
-                                          limit=args["limit"], extra_domains=extra_domains))
+        return _on_platform(args, lambda platform: accessor.find_place(
+            args["query"], platform=platform, limit=args["limit"], extra_domains=extra_domains))
 
     def add_basemap(args: Dict[str, Any]) -> Dict[str, Any]:
-        return asdict(accessor.add_basemap(_allowed_platform(args["platform"]), name=args["name"],
-                                           extra_domains=extra_domains))
+        return _on_platform(args, lambda platform: accessor.add_basemap(
+            platform, name=args["name"], extra_domains=extra_domains))
 
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         try:

@@ -237,7 +237,10 @@ undone; the user chooses a level in the Autonomy tab of the settings, which says
 - The notes of the project and `undo_agent_step` run at every level: the user asks for them, and they change only
   what the agent keeps.
 - A question offers "Yes for this conversation": that tool then runs alone until a new conversation, another project or
-  another level. Never for `run_pyqgis`, asked at every run whatever the level.
+  another level. Never for `run_pyqgis`, asked at every run whatever the level. Two tools are allowed for what the
+  call reaches, not as a whole (`permissions.grant_key`): `add_layer` for the host of its address (local files are
+  another yes), `delete_features` for its layer. A text read on the web cannot ride a yes given to another address.
+  The question shows the address whole, up to 600 characters after the host, and says how many are not shown.
 - The level is read at each call (`ChatEngine(policy=...)`), and sent with each request, after the project summary,
   when it is not `standard` (the system prompt stays constant for the cache).
 - An invalid call is never asked nor refused: it runs to answer its mistake.
@@ -498,8 +501,14 @@ address, else its content type), its size, and whether the server gives parts of
   (`IgnoreGetMapUrl`, `IgnoreGetFeatureInfoUrl`). What is left to the service: where the REST tiles of a WMTS and
   the legends are, as QGIS reads them. `wfs_catalog` has the same limit, without such a switch (to do). A service
   the user added by its address (WFS, WMS, WMTS, STAC, geocoder, basemap) goes to the model by its id
-  (`sources.model_name`, `platform_aliases`): the address may hold a key. An image service ticked alone does not
-  open the web to `add_layer`.
+  (`sources.model_name`, `platform_aliases`): the address may hold a key. The address is still accepted as a name
+  (the recipes kept before the id), but it is never listed in a refusal nor answered: `agent_tools._on_platform`
+  puts the id back in the `platform` of an answer and in the message of an error. Not covered: the first 30
+  characters of host and path are in the id itself, and a platform of `open_data_domains` in the configuration file
+  goes by its address. An image service ticked alone does not open the web to `add_layer`.
+- A file added from the web is opened without the style it carries (`LayerOptions.loadDefaultStyle` False in
+  `project_control._add_layer`): its expressions would run at the first rendering. A local file keeps its style.
+  A path that starts with two slashes of either lean is a share of another machine, refused like `\\\\host`.
 - **Place search** (`open_data.geocode_url`, `parse_places`): geocoders that answer GeoJSON points to `q` and `limit`
   (IGN Géoplateforme for France, Photon for the world, any other of that shape the user adds). `find_place` is a
   read: the name the user wrote goes to the geocoder, nothing of the project does; each place comes with the extent

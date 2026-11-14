@@ -48,6 +48,14 @@ def _common_metaclass(*bases):
     return metas[0] if len(metas) == 1 else type("_QObjectABCMeta", tuple(metas), {})
 
 
+def _being_edited(layer) -> bool:
+    """Whether ``layer`` is in editing mode; False for what cannot say."""
+    try:
+        return bool(layer.isEditable())
+    except (AttributeError, RuntimeError):
+        return False
+
+
 class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metaclass(QObject, IFilterMatePublicAPI)):
     """
     Public API for inter-plugin communication with FilterMate.
@@ -142,6 +150,11 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
                     msg = last_server_filter_error(layer) or msg
                 except ImportError:  # lightweight local-provider test adapters
                     pass
+                if _being_edited(layer):
+                    # QGIS filters no layer in editing mode: the expression is not the cause, writing it again
+                    # changes nothing.
+                    msg = (f"{layer.name()!r} is being edited, and QGIS does not filter a layer in editing mode: "
+                           f"the expression is not the cause. Its edits must be saved or dropped in QGIS first.")
                 logger.warning(f"PublicAPI: {msg}")
                 self.error_occurred.emit(operation, msg)
                 if _raise_on_rejection:

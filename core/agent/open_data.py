@@ -278,7 +278,9 @@ def source_problem(source: str, allow_remote: bool) -> str:
     path = _LAYER_NAME_SUFFIX.sub("", source)
     if path.lower().startswith(("http://", "ftp://", "file:")) or "://" in path:
         return "only a local file or an https URL can be added"
-    if path.startswith(("\\\\", "//")) or path.lower().startswith("/vsi") or any(char in path for char in '|<>?*"=&%'):
+    # A share of another machine, however its two first slashes lean: Windows reads /\\host\\share as a share too.
+    shared = len(path) > 1 and path[0] in "\\/" and path[1] in "\\/"
+    if shared or path.lower().startswith("/vsi") or any(char in path for char in '|<>?*"=&%'):
         return "only a plain local file can be added"
     if _DRIVER_PREFIX.match(path) and not _WINDOWS_DRIVE.match(path):
         return "only a plain local file can be added"
@@ -623,11 +625,19 @@ def _parse_stac_items(payload: Any) -> List[Dict[str, Any]]:
     return scenes[:MAX_RESULTS]
 
 
+SHOWN_URL = 600
+
+
 def display_source(source: str) -> str:
-    """What the user reads before accepting: the host first, the rest cut."""
+    """What the user reads before accepting: the host first, then the address, whole.
+
+    An address too long to show whole says how much of it is not shown: what would leave with the request is never
+    cut in silence (a path or a query can carry data out).
+    """
     if source.lower().startswith("https://"):
         parts = urlsplit(source)
-        path = parts.path if len(parts.path) <= 80 else parts.path[:77] + "..."
-        query = f"?{parts.query[:120]}" if parts.query else ""  # what would leave with the request is shown
-        return f"{parts.hostname}\n{parts.scheme}://{parts.netloc}{path}{query}"
+        rest = parts.path + (f"?{parts.query}" if parts.query else "")
+        if len(rest) > SHOWN_URL:
+            rest = f"{rest[:SHOWN_URL]}...\n({len(rest) - SHOWN_URL} more characters are not shown)"
+        return f"{parts.hostname}\n{parts.scheme}://{parts.netloc}{rest}"
     return source[:300]

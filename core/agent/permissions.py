@@ -19,6 +19,7 @@ allow one tool for the rest of a conversation, from the question itself; code is
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Protocol, Sequence, Set
+from urllib.parse import urlsplit
 
 from .skills import CONNECTOR_PREFIX
 
@@ -202,6 +203,26 @@ def clean_rules(rules: Any) -> Dict[str, str]:
     return cleaned
 
 
+def grant_key(name: str, arguments: Optional[Dict[str, Any]] = None) -> str:
+    """What a "yes for this conversation" covers: the tool, and for two tools what the call reaches.
+
+    ``add_layer`` is allowed for the host its address names (or for local files): a yes to one address is not a yes
+    to any other, which a text read on the web could ask for with data in it. ``delete_features`` is allowed for the
+    layer it empties. Every other tool is allowed as a whole.
+    """
+    arguments = arguments if isinstance(arguments, dict) else {}
+    if name == "add_layer":
+        source = str(arguments.get("source") or "").strip()
+        try:
+            host = (urlsplit(source).hostname or "") if source.lower().startswith("https://") else "local"
+        except ValueError:
+            host = ""
+        return f"{name}@{host.lower()}"
+    if name == "delete_features":
+        return f"{name}@{str(arguments.get('layer') or '')}"
+    return name
+
+
 def level_or_default(value: Optional[str]) -> str:
     return value if value in LEVELS else DEFAULT_LEVEL
 
@@ -326,7 +347,7 @@ class PermissionPolicy:
             return RUN
         if self.level == ADVISOR:
             return REFUSE
-        if spec.name in self._granted and self.grantable(spec):
+        if grant_key(spec.name, arguments) in self._granted and self.grantable(spec):
             return RUN
         return ASK
 
@@ -361,8 +382,9 @@ class PermissionPolicy:
         return (spec.name not in CODE_TOOLS and spec.name not in SETTINGS_TOOLS
                 and self.rules.get(spec.name) != RULE_ASK and not self._advisor_connector_tool(spec.name))
 
-    def grant(self, name: str) -> None:
-        self._granted.add(name)
+    def grant(self, name: str, arguments: Optional[Dict[str, Any]] = None) -> None:
+        """Allow ``name`` for the conversation, as far as ``grant_key`` says for a call with ``arguments``."""
+        self._granted.add(grant_key(name, arguments))
 
     @property
     def granted(self) -> frozenset:
