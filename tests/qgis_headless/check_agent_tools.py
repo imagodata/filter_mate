@@ -644,6 +644,20 @@ def check_tree_more(project):
     moved = layer_tree.group_layers(["communes"], above="routes")
     check("above: in the group of the layer, just over it", moved["group"] == "Fond" and
           [name for name, path in names() if path == "Fond"] == ["communes", "routes"], names())
+    # Already in the group and above the anchor: the place it leaves used to be counted twice, one too high.
+    layer_tree.group_layers(["communes"], above="routes")
+    check("above: already just over it, it stays there",
+          [name for name, path in names() if path == "Fond"] == ["communes", "routes"], names())
+    third = QgsVectorLayer("Point?crs=EPSG:4326", "tiers", "memory")
+    project.addMapLayer(third)
+    layer_tree.group_layers(["tiers"], "Fond", at_top=False)   # communes, routes, tiers
+    layer_tree.group_layers(["communes"], above="tiers")       # routes, communes, tiers
+    check("above: from higher in the same group, just over it",
+          [name for name, path in names() if path == "Fond"] == ["routes", "communes", "tiers"], names())
+    layer_tree.group_layers(["communes"], above="routes")
+    check("above: from lower in the same group, just over it",
+          [name for name, path in names() if path == "Fond"] == ["communes", "routes", "tiers"], names())
+    project.removeMapLayer(third.id())
     check("above: a layer not in the tree, refused", refused(layer_tree.group_layers, ["communes"], above="nope"))
     recorder.before_call(ToolCallPart("c2", "rename_layer", {"layer": "Fond", "name": "Référence", "group": True}))
     renamed = layer_tree.rename_layer("Fond", "Référence", group=True)

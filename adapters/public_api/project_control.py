@@ -380,7 +380,15 @@ def _add_layer(source: str, name: str, kind: str) -> Dict[str, Any]:
         title = title or (stem if stem != 'layer' else '')  # an export with no file name keeps the end of its link
     title = title or source.rsplit('/', 1)[-1].split('?', 1)[0][:80] or 'layer'
     with _gdal_time_limits(remote and not copy):
-        layer = QgsVectorLayer(opened, title, 'ogr') if kind == 'vector' else QgsRasterLayer(opened, title, 'gdal')
+        if kind == 'vector':
+            options = QgsVectorLayer.LayerOptions(QgsProject.instance().transformContext())
+        else:
+            options = QgsRasterLayer.LayerOptions()
+        # A file from the web may carry a style of its own (a GeoPackage, a .qml beside it): its expressions would
+        # run at the first rendering, on the other layers of the project too. The user's own files keep theirs.
+        options.loadDefaultStyle = not remote
+        layer = QgsVectorLayer(opened, title, 'ogr', options) if kind == 'vector' \
+            else QgsRasterLayer(opened, title, 'gdal', options)
     if not layer.isValid():
         # Nothing more is read from an invalid layer: its provider and its error crashed QGIS 3.22.
         if copy:

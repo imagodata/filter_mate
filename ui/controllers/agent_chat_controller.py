@@ -2429,7 +2429,7 @@ class AgentChatController(QObject):
         text = self._confirm_text(call)
         answer = self._ask_choice(title, text)
         if answer == ANSWER_CONVERSATION:
-            self._policy.grant(call.name)
+            self._policy.grant(call.name, call.arguments)  # add_layer: for that host; delete_features: that layer
         return answer in (ANSWER_ONCE, ANSWER_CONVERSATION)
 
     def _confirm(self, call: ToolCallPart, title: str) -> bool:

@@ -87,8 +87,13 @@ def test_a_stac_catalog_the_user_added_is_asked_whatever_its_name_resolves_to(re
 # --- a link a model gives is checked, each name once per call ------------------------------------------------------
 
 class _Layer:
-    def __init__(self, source, name, provider):
+    class LayerOptions:
+        def __init__(self, *_):
+            self.loadDefaultStyle = True
+
+    def __init__(self, source, name, provider, options=None):
         self.source = source
+        self.options = options
 
     def isValid(self):
         return True
@@ -101,8 +106,8 @@ def qgis_layers(monkeypatch, tmp_path):
     added = []
     monkeypatch.setattr(core, "QgsApplication", SimpleNamespace(qgisSettingsDirPath=lambda: str(tmp_path)), raising=False)
     monkeypatch.setattr(core, "QgsVectorLayer", _Layer, raising=False)
-    monkeypatch.setattr(core, "QgsProject", SimpleNamespace(instance=lambda: SimpleNamespace(addMapLayer=added.append)),
-                        raising=False)
+    project = SimpleNamespace(addMapLayer=added.append, transformContext=lambda: None)
+    monkeypatch.setattr(core, "QgsProject", SimpleNamespace(instance=lambda: project), raising=False)
     monkeypatch.setattr(project_control, "_summary", lambda layer: {"source": layer.source})
     return added
 
@@ -119,6 +124,7 @@ def test_add_layer_resolves_each_name_once(resolver, qgis_layers, monkeypatch):
     monkeypatch.setattr(project_control, "fetch", fetch)
     summary = project_control.add_layer("https://data.example.org/moved.geojson")
     assert summary["source"].endswith("a.geojson") and len(qgis_layers) == 1
+    assert qgis_layers[0].options.loadDefaultStyle is False  # a style carried by a file of the web is not run
     assert resolver.asked == ["data.example.org"]
     project_control.add_layer("https://data.example.org/moved.geojson")
     assert resolver.asked == ["data.example.org"] * 2  # the next call resolves it again: nothing is kept between calls
