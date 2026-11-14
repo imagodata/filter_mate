@@ -92,6 +92,40 @@ def test_an_undo_back_to_a_step_turns_its_effects_around():
     assert before.present == ()
 
 
+def test_an_undo_back_to_a_step_keeps_the_last_state_of_each_layer():
+    """Reversed, the map before the operation is the map after the last step: the last effect on a layer counts."""
+    operation = SimpleNamespace(changes=(), effects_reversed=True, effects=(
+        ("style", "L", "<a/>", "<b/>", "roads"), ("style", "L", "<b/>", "<c/>", "roads"),
+        ("visibility", "V", True, False), ("visibility", "V", False, True),
+        ("added", "T", "<qlr/>", ((), 0), "temp"), ("removed", "T", "<qlr/>", ((), 0), "temp")))
+    before = map_from_operation(operation)
+    assert before.states == (BeforeState("L", None, style="<c/>"),)
+    assert before.present == ("V",)  # shown again by the last step: drawn
+    assert before.absent == frozenset({"T"}) and before.missing == ()  # added then removed: neither there nor missed
+
+
+def test_a_turn_keeps_the_first_state_of_each_layer():
+    operation = SimpleNamespace(changes=(), effects=(
+        ("visibility", "V", True, False), ("visibility", "V", False, True),
+        ("added", "T", "<qlr/>", ((), 0), "temp"), ("removed", "T", "<qlr/>", ((), 0), "temp")))
+    before = map_from_operation(operation)
+    assert before.present == ("V",) and before.absent == frozenset({"T"}) and before.missing == ()
+
+
+def test_what_a_turn_changed_and_is_not_drawn_is_named():
+    operation = SimpleNamespace(changes=(), effects=(
+        ("tree", "", "{}", "{}"), ("project_crs", "", "EPSG:2154", "EPSG:4326"),
+        ("edits", "E", 0, 3, "parcels"), ("edits", "E", 3, 5, "parcels"), ("join", "J", {}, "", "roads"),
+        ("current_style", "S", "default", "night"), ("layer_name", "N", "old", "new"),
+        ("edits", "A", 0, 1, "buffer"), ("added", "A", "<qlr/>", ((), 0), "buffer"),
+        ("notes", "", [], ["x"]), ("bookmarks", "", "", "")))
+    before = map_from_operation(operation)
+    assert before.unshown == (("tree", "", ""), ("project_crs", "", ""), ("edits", "E", "parcels"),
+                              ("join", "J", "roads"), ("current_style", "S", ""), ("layer_name", "N", ""))
+    assert before.empty is False and before.absent == frozenset({"A"})  # the layer it added is not named again
+    assert map_from_operation(SimpleNamespace(changes=(), effects=(("tree", "", "", ""),))).empty
+
+
 def test_an_operation_with_nothing_drawable_is_empty():
     assert map_from_operation(SimpleNamespace(changes=(), effects=(("notes", "", [], ["x"]),))).empty
     only_removed = map_from_operation(SimpleNamespace(changes=(), effects=(("removed", "old", "", ((), 0), "p"),)))

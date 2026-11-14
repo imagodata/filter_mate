@@ -200,6 +200,7 @@ def main():
 
     zones.setSubsetString("")
     check_map_before(project, canvas, fixtures, zones, session)
+    check_reading(project, zones)
     check_button(project, canvas, fixtures, zones)
 
     print(f"{'ALL PASSED' if not FAILURES else str(len(FAILURES)) + ' FAILED'}", flush=True)
@@ -230,8 +231,10 @@ def squares(fixtures, name, colour, subset=""):
 
 
 def recolour(layer, colour):
+    """A new colour, said as the layer properties of QGIS say it (styleChanged)."""
     layer.renderer().symbol().setColor(colour)
     layer.triggerRepaint()
+    layer.emitStyleChanged()
 
 
 def drawn(canvas):
@@ -335,6 +338,18 @@ def check_map_before(project, canvas, fixtures, zones, session):
     offset = session.item.pos()
     probe = image.pixelColor(int(rect_left.left() + offset.x() + 2), int(rect_left.center().y() + offset.y()))
     check("labels: a dark pill readable on a light map", probe.red() < 140 and probe.green() < 140, probe.name())
+    session.item.set_fraction(0.01)  # the line at the left edge: the label before reaches out of the image
+    bounds = session.item.boundingRect()
+    rects = session.item.label_rects()
+    check("labels: inside the bounds of the item, even out of its image", rects[0].left() < 0
+          and all(bounds.contains(rect) for rect in rects), (bounds, rects))
+    position = session.item.pos()
+    session.item.setPos(position.x(), position.y() + 120)  # the map panned down since the image
+    shifted = session.item.label_rects()[0]
+    check("labels: at the top of the canvas when the item moved down", abs(shifted.top() + session.item.pos().y() - 8.0)
+          < 0.5 and session.item.boundingRect().contains(shifted), (shifted, session.item.pos()))
+    session.item.setPos(position)
+    session.item.set_fraction(0.5)
 
     # Nothing differs: a pin waits, the line alone, no render.
     renders = session.renders
@@ -366,6 +381,55 @@ def check_map_before(project, canvas, fixtures, zones, session):
 
 
 STATE = {}
+
+
+def check_reading(project, zones):
+    """Reading the map for a pin changes no layer; a vector layer pinned is drawn through its plain subset."""
+    from qgis.core import QgsVectorTileLayer
+    import filter_mate.adapters.qgis.compare_swipe as swipe
+    from filter_mate.adapters.qgis.coverage_layers.snapshots import (DERIVED_PROPERTY, DerivedSourceRegistry,
+                                                                     registry, take_snapshot)
+    from filter_mate.adapters.qgis.coverage_layers.vector_tile_filters import style_xml
+    from filter_mate.core.domain.compare_states import BeforeState
+    from filter_mate.core.domain.filter_state import LayerSnapshot
+    from filter_mate.core.domain.layer_kind import LayerKind
+
+    tiles = QgsVectorTileLayer("type=xyz&url=file:///nowhere/{z}/{x}/{y}.pbf&zmin=0&zmax=14", "tiles")
+    project.addMapLayer(tiles)
+    xml = style_xml(tiles)
+    # A state another session left on the layer (a copy of a filtered layer), its style not the one shown.
+    other = xml.replace("<renderer ", "<renderer data-other=\"1\" ", 1)
+    DerivedSourceRegistry().record(LayerSnapshot(tiles.id(), "vector_tile", source=tiles.source(),
+                                                 provider=tiles.providerType(), renderer_xml=other,
+                                                 original_renderer_xml=other, derived=True), tiles)
+    stored = tiles.customProperty(DERIVED_PROPERTY)
+    keys = sorted(tiles.customPropertyKeys())
+    pinned = swipe.map_state()
+    state = next(layer for layer in pinned.layers if layer.layer_id == tiles.id())
+    check("pin: a vector tile layer read without being changed", style_xml(tiles) == xml
+          and tiles.customProperty(DERIVED_PROPERTY) == stored and sorted(tiles.customPropertyKeys()) == keys
+          and registry().get(tiles.id()) is None and state.snapshot is not None
+          and state.snapshot.renderer_xml == xml, (bool(stored), registry().get(tiles.id())))
+    try:  # the registry path, for the record: what the pin no longer does
+        take_snapshot(tiles, LayerKind.VECTOR_TILE)
+        print("INFO take_snapshot of the tiles changes them: "
+              f"style={style_xml(tiles) != xml} property={tiles.customProperty(DERIVED_PROPERTY) != stored} "
+              f"registry={registry().get(tiles.id()) is not None}", flush=True)
+    except Exception as exc:
+        print(f"INFO take_snapshot of the tiles raised {exc!r}", flush=True)
+    registry().forget(tiles.id())
+    project.removeMapLayer(tiles.id())
+
+    # A vector layer pinned: its plain subset on the clone, never restore_snapshot (rewritten for its source).
+    def refused(*_args, **_kwargs):
+        raise AssertionError("restore_snapshot called")
+    swipe.restore_snapshot, restore = refused, swipe.restore_snapshot
+    snapshot = LayerSnapshot(zones.id(), "vector", subset="\"name\" = 'west_a'")
+    clone = swipe.before_clone(zones, BeforeState(zones.id(), snapshot.subset, snapshot=snapshot))
+    swipe.restore_snapshot = restore
+    check("pin: a vector clone takes its subset directly", clone is not None
+          and clone.subsetString() == "\"name\" = 'west_a'" and zones.subsetString() != clone.subsetString(),
+          clone.subsetString() if clone is not None else None)
 
 
 class Dock(QWidget):
@@ -440,6 +504,46 @@ def check_button(project, canvas, fixtures, zones):
     check("pin: a map drawn again with the same differences renders nothing", session.renders == renders
           and not controller._follow_timer.isActive(), (renders, session.renders))
 
+    # The map is read again only when something may have changed, its styles only for the layers that changed.
+    import filter_mate.adapters.agent.turn_effects as turn_effects
+    watch, reads, styles = controller._watch, [], []
+    original_read, original_style = watch.read, turn_effects._style
+    watch.read = lambda canvas=None: (reads.append(1), original_read(canvas))[1]
+    turn_effects._style = lambda layer: (styles.append(layer.name()), original_style(layer))[1]
+    drawn(canvas)
+    canvas.setExtent(canvas.extent())
+    drawn(canvas)
+    wait(lambda: False, 0.5)
+    check("watch: a pan or a refresh with nothing changed reads nothing", not reads and not watch.dirty, reads)
+    renders = session.renders
+    recolour(zones, YELLOW)
+    deadline = time.time() + 1.0
+    while time.time() < deadline:  # an animated symbol: the map drawn every 50 ms
+        canvas.mapCanvasRefreshed.emit()
+        wait(lambda: False, 0.05)
+    read_while_drawn = len(reads)
+    check("watch: read while the map is drawn every 50 ms (a throttle, not a debounce)", read_while_drawn >= 1,
+          read_while_drawn)
+    check("watch: only the style of the layer restyled is read again", styles == ["zones"], styles)
+    check("watch: the new difference is drawn", wait(lambda: session.renders > renders and not session.item.busy, 10),
+          session.renders)
+    watch.read, turn_effects._style = original_read, original_style
+    del watch.read
+    recolour(zones, RED)
+    drawn(canvas)
+    wait(lambda: not watch.dirty and not controller._follow_timer.isActive(), 5)
+
+    # The layers moved in the tree, the same differences: the image before is drawn again, in the new order.
+    renders = session.renders
+    root = project.layerTreeRoot()
+    node = root.findLayer(zones.id())
+    root.insertChildNode(0, node.clone())
+    root.removeChildNode(node)
+    drawn(canvas)
+    check("watch: a layer moved in the tree draws the image before again", wait(lambda: session.renders > renders
+                                                                              and not session.item.busy, 10)
+          and [layer.id() for layer in root.layerOrder()][0] == zones.id(), session.renders)
+
     # Back as pinned: on, nothing to draw, said.
     said.clear()
     zones.setSubsetString("\"name\" LIKE 'east%'")
@@ -454,8 +558,7 @@ def check_button(project, canvas, fixtures, zones):
     drawn(canvas)
     wait(lambda: bool(said), 5)
     check("pin: a layer removed since is named, the comparison goes on",
-          said == ["Compare cannot draw these layers as they were: blue"] and session.active and button.isChecked(),
-          said)
+          said == ["Not drawn as they were: blue"] and session.active and button.isChecked(), said)
 
     # Another map tool ends it; the pin stays.
     zoom = QgsMapToolZoom(canvas, False)
@@ -469,6 +572,68 @@ def check_button(project, canvas, fixtures, zones):
     check("unpin: no mark, unavailable without Undo", controller.pinned is None and not button.isEnabled()
           and button.icon().pixmap(32, 32).toImage() == unpinned_icon,
           (controller.pinned, button.isEnabled(), button.icon().pixmap(32, 32).toImage() == unpinned_icon))
+
+    # Without a pin, what cannot be drawn is said once, not again at each refresh (a turn of the agent).
+    from filter_mate.core.domain.compare_states import BeforeMap, BeforeState
+    dock.pushButton_action_undo_filter.setEnabled(True)
+    west = "\"name\" LIKE 'west%'"
+    controller.last_operation = lambda: BeforeMap((BeforeState(zones.id(), west),), missing=("parcels",))
+    said.clear()
+    button.click()
+    controller.refresh()
+    controller.refresh()
+    check("last operation: a removed layer named once, not at each refresh", button.isChecked() and session.active
+          and said == ["Not drawn as they were: parcels"], said)
+    button.click()
+    controller.last_operation = lambda: BeforeMap(missing=("parcels",))
+    said.clear()
+    button.click()
+    check("last operation that only removed a layer: named, not 'nothing to compare'", not button.isChecked()
+          and said == ["Not drawn as they were: parcels"], said)
+    del controller.last_operation
+    dock.pushButton_action_undo_filter.setEnabled(False)
+
+    # compare_with: a step given, the pin aside; it ends as the last operation does.
+    said.clear()
+    compared = controller.compare_with(BeforeMap((BeforeState(zones.id(), west),), unshown=(
+        ("tree", "", ""), ("edits", zones.id(), "zones"))), labels=("Before: step 3", "Now"))
+    check("compare_with: on with its labels, available without Undo, what it cannot draw named",
+          compared == 1 and button.isChecked() and button.isEnabled() and session.item.labels == ("Before: step 3", "Now")
+          and said == ["Not drawn as they were: layer tree, zones"], (compared, said, session.item.labels))
+    dock.pushButton_action_filter.click()
+    check("compare_with: Filter ends it, the button as Undo is", not session.active and not button.isChecked()
+          and not button.isEnabled())
+
+    # Failures are said: a pin not taken, a pinned map not read when starting or following.
+    import filter_mate.ui.controllers.compare_controller as compare_module
+
+    def unreadable(*_args):
+        raise KeyError("unreadable")
+    said.clear()
+    compare_module.map_state, readable = unreadable, compare_module.map_state
+    check("pin: a map that cannot be read is said, nothing pinned", controller.pin() is None
+          and controller.pinned is None and said == ["The map could not be pinned."], said)
+    compare_module.map_state = readable
+    from filter_mate.adapters.qgis.compare_swipe import map_state
+    state = map_state(canvas)
+    controller.pin_state(state)
+    check("pin_state: the state given is the pin", controller.pinned is state and button.isEnabled())
+    said.clear()
+    controller.before_map = unreadable
+    button.click()
+    check("pin: a map not read when starting stops, never 'nothing changed'", not button.isChecked()
+          and not session.active and said == ["Compare stopped: the map could not be read."], said)
+    del controller.before_map
+    button.click()
+    said.clear()
+    watch.read = unreadable
+    zones.setSubsetString(west)
+    drawn(canvas)
+    check("pin: a map not read while following stops the comparison and says so",
+          wait(lambda: not session.active, 5) and not button.isChecked()
+          and said == ["Compare stopped: the map could not be read."], said)
+    del watch.read
+    zones.setSubsetString("\"name\" LIKE 'east%'")
 
     # A new project forgets the pin.
     controller.pin()

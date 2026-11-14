@@ -21,6 +21,10 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Collection, FrozenSet, Iterable, List, Optional, Sequence, Tuple
 
 
+# Effects of a turn of the agent (adapters/agent/turn_effects.py) the comparison does not draw again: named instead.
+UNSHOWN_EFFECTS = ("tree", "edits", "current_style", "join", "project_crs", "layer_name")
+
+
 @dataclass(frozen=True)
 class BeforeState:
     """A layer as it was before the step. ``source`` / ``provider`` empty: the layer kept its source; ``subset``
@@ -52,6 +56,8 @@ class BeforeMap:
         missing: names of what was on the map and cannot be drawn again (a layer removed since).
         label: what the step was (the description of the operation); empty for a pin.
         pinned_at: when the state compared was pinned (a ``time.time()``), None for a step of the history.
+        unshown: what the step changed that is not drawn as it was, as ``(effect kind, layer id or "", name)``
+            (the layer tree, the CRS of the project, edits, a join, the style chosen in the style manager, a name).
     """
 
     states: Tuple[BeforeState, ...] = ()
@@ -60,6 +66,7 @@ class BeforeMap:
     missing: Tuple[str, ...] = ()
     label: str = ""
     pinned_at: Optional[float] = None
+    unshown: Tuple[Tuple[str, str, str], ...] = ()
 
     @property
     def empty(self) -> bool:
@@ -130,47 +137,55 @@ def map_from_history_entry(entry: Any, layer_ids: Optional[Collection[str]] = No
 def map_from_operation(operation: Any) -> BeforeMap:
     """The map before a cross operation: its snapshots before, and what its effects changed beside the filters.
 
-    An operation recorded by "undo back to here" holds the effects of the steps it undid (``effects_reversed``):
-    undoing it applies them again, so the map before it is the map after them.
+    The state of a layer before the operation is the one before the first effect that touched it. An operation
+    recorded by "undo back to here" holds the effects of the steps it undid (``effects_reversed``): undoing it applies
+    them again, so the map before it is the map after them, after the last effect on each layer. What the comparison
+    does not draw (the layer tree, the CRS, edits, joins...) is named in ``unshown``.
     """
     states = {state.layer_id: state for state in from_cross_operation(operation)}
     order = list(states)
-    absent, present, missing = set(), [], []
+    absent, present, missing, unshown = set(), [], {}, []
     reversed_ = bool(getattr(operation, "effects_reversed", False))
-    styled = set()
-    for effect in getattr(operation, "effects", None) or ():
-        if len(effect) < 4:
+    effects = list(getattr(operation, "effects", None) or ())
+    if reversed_:
+        effects.reverse()  # the first one met on each layer is the last one applied
+    seen = set()  # (what, layer id): only the first effect met counts
+    for effect in effects:
+        if len(effect) < 2:
             continue
         kind, layer_id = effect[0], str(effect[1] or "")
-        before = effect[3] if reversed_ else effect[2]
-        if kind == "style" and layer_id and before and layer_id not in styled:
-            styled.add(layer_id)  # the first one: the style before the turn touched it
+        before = (effect[3] if reversed_ else effect[2]) if len(effect) > 3 else None
+        name = str(effect[4]) if len(effect) > 4 and effect[4] else ""
+        group = "presence" if kind in ("added", "removed") else kind
+        if (group, layer_id) in seen:
+            continue
+        seen.add((group, layer_id))
+        if kind == "style" and layer_id and before:
             state = states.get(layer_id)
             states[layer_id] = replace(state, style=before) if state is not None else BeforeState(
                 layer_id, None, style=before)
             if state is None:
                 order.append(layer_id)
-        elif kind == "visibility" and layer_id and bool(effect[2]) != bool(effect[3]):
+        elif kind == "visibility" and layer_id and len(effect) > 3 and bool(effect[2]) != bool(effect[3]):
             if before:
-                if layer_id not in present:
-                    present.append(layer_id)
-                absent.discard(layer_id)
+                present.append(layer_id)
             else:
                 absent.add(layer_id)
-                if layer_id in present:
-                    present.remove(layer_id)
         elif kind in ("added", "removed") and layer_id:
             # Added by the operation (or removed by one that undid its adding): not on the map before it.
             if (kind == "added") != reversed_:
                 absent.add(layer_id)
             else:
-                name = str(effect[4]) if len(effect) > 4 and effect[4] else layer_id
-                if name not in missing:
-                    missing.append(name)
+                missing[layer_id] = name or layer_id
+        elif kind in UNSHOWN_EFFECTS:
+            unshown.append((kind, layer_id, name))
     present = [layer_id for layer_id in present if layer_id not in absent]
     drawn = tuple(states[layer_id] for layer_id in order if layer_id not in absent)  # an absent layer needs no clone
-    return BeforeMap(drawn, frozenset(absent), tuple(present), tuple(missing),
-                     str(getattr(operation, "description", "") or ""))
+    gone = tuple(name for layer_id, name in missing.items() if layer_id not in absent)
+    # A layer not on the map before (added by the operation) or not drawn at all (removed) has nothing else to name.
+    unshown = tuple(item for item in unshown if not item[1] or (item[1] not in absent and item[1] not in missing))
+    return BeforeMap(drawn, frozenset(absent), tuple(present), gone,
+                     str(getattr(operation, "description", "") or ""), unshown=unshown)
 
 
 def _filter_key(snapshot: Any) -> Tuple[str, str, str, str]:

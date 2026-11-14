@@ -17,7 +17,8 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple, Union
+from functools import partial
+from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Optional, Sequence, Tuple, Union
 
 from qgis.core import QgsMapLayer, QgsMapRendererParallelJob, QgsMapSettings, QgsPointXY, QgsProject, QgsRectangle
 from qgis.gui import QgsMapCanvasItem, QgsMapTool
@@ -25,6 +26,8 @@ from qgis.PyQt.QtCore import QObject, QPointF, QRectF, Qt, QTimer, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QFont, QFontMetricsF, QImage, QPainter, QPen
 
 from ...core.domain.compare_states import BeforeMap, BeforeState, LayerState, MapState, before_layer_order
+from ...core.domain.filter_state import LayerSnapshot
+from ...core.domain.layer_kind import LayerKind
 from .coverage_layers.snapshots import DerivedSourceRegistry, registry, restore_snapshot, take_snapshot
 
 logger = logging.getLogger("FilterMate.compare")
@@ -65,7 +68,14 @@ def before_clone(layer: QgsMapLayer, state: BeforeState) -> Optional[QgsMapLayer
         return None
     if clone is None:
         return None
-    if state.snapshot is not None:  # a cross operation or a pin: restored the way Undo restores it
+    snapshot = state.snapshot
+    if snapshot is not None and getattr(snapshot, "kind", "") == "vector" and not getattr(snapshot, "derived", False):
+        # The plain path of the dock: restore_snapshot sets the subset through safe_set_subset_string, which rewrites
+        # it for its source (PostgreSQL) and warns in the message bar at each drawing, then the clone differs from it.
+        subset = snapshot.subset or ""
+        if hasattr(clone, "setSubsetString") and clone.subsetString() != subset and not clone.setSubsetString(subset):
+            return None
+    elif snapshot is not None:  # a cross operation or a pin: restored the way Undo restores it
         try:
             restore_snapshot(clone, state.snapshot, _CloneRegistry(registry().original_alpha_band(layer.id())))
         except Exception:  # a former source removed since: that layer is left out of the before image
@@ -92,11 +102,25 @@ def before_clone(layer: QgsMapLayer, state: BeforeState) -> Optional[QgsMapLayer
     return clone
 
 
-def map_state(canvas=None) -> MapState:
+def _pin_snapshot(layer: QgsMapLayer, kind: LayerKind):
+    """The filter of ``layer`` read without changing it: ``take_snapshot`` of a vector tile goes through the registry,
+    which may adopt the layer, put its style back or remove its properties."""
+    if kind is LayerKind.VECTOR_TILE:
+        from .coverage_layers.vector_tile_filters import style_xml
+        return LayerSnapshot(layer.id(), kind.value, source=layer.source(), provider=layer.providerType(),
+                             renderer_xml=style_xml(layer))
+    return take_snapshot(layer, kind)
+
+
+def map_state(canvas=None, style: Optional[Callable[[QgsMapLayer], Optional[str]]] = None) -> MapState:
     """Every layer of the project now, for a pin: its filter, its style, drawn or not (checked with its groups in
-    the layer tree; on ``canvas`` for a layer the tree does not hold)."""
+    the layer tree; on ``canvas`` for a layer the tree does not hold). Nothing of a layer is changed.
+
+    ``style``: reads the style of a layer as XML (``MapWatch.style`` keeps it until the layer changes).
+    """
     from ..agent.turn_effects import _style
     from ..public_api.operations import layer_kind
+    style = style or _style
     project = QgsProject.instance()
     root = project.layerTreeRoot()
     drawn = {layer.id() for layer in canvas.layers()} if canvas is not None else set()
@@ -107,13 +131,130 @@ def map_state(canvas=None) -> MapState:
     for layer in layers:
         node = root.findLayer(layer.id())
         try:
-            snapshot = take_snapshot(layer, layer_kind(layer))
-        except (RuntimeError, ValueError, AttributeError):  # one odd layer must not lose the pin
+            snapshot = _pin_snapshot(layer, layer_kind(layer))
+        except (RuntimeError, ValueError, AttributeError, TypeError):  # one odd layer must not lose the pin
             logger.debug("Compare: %s not read", layer.name(), exc_info=True)
             snapshot = None
         visible = node.isVisible() if node is not None else layer.id() in drawn
-        states.append(LayerState(layer.id(), layer.name(), snapshot, _style(layer), bool(visible)))
+        states.append(LayerState(layer.id(), layer.name(), snapshot, style(layer), bool(visible)))
     return MapState(tuple(states), time.time())
+
+
+class MapWatch(QObject):
+    """Whether the map may have changed since it was last read, for a pin compared again when the map is drawn: a pan,
+    a zoom, an animated symbol or a layer refreshed on a timer draw the map again without changing it. Keeps the style
+    of each layer as read (the costly part of a reading) until that layer says it changed."""
+
+    # What a layer says when what a pin keeps of it may have changed (the signals it has: by kind and version).
+    LAYER_SIGNALS = ("styleChanged", "rendererChanged", "dataSourceChanged", "subsetStringChanged", "opacityChanged",
+                     "blendModeChanged")
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.dirty = True
+        self.reordered = False  # the order of the layers changed: the image before is drawn again, same differences
+        self.watching = False
+        self._styles: Dict[str, Optional[str]] = {}
+        self._layers: Dict[str, Tuple[Any, List[Any]]] = {}  # layer id: (its slot, the signals connected to it)
+        self._connected: List[Tuple[Any, Any]] = []
+
+    def start(self, canvas=None) -> None:
+        """Watch the project, its layer tree, each layer and ``canvas``; the next reading reads everything again."""
+        self.dirty = True
+        if self.watching:
+            return
+        self.watching, self.reordered = True, False
+        self._styles = {}
+        project = QgsProject.instance()
+        root = project.layerTreeRoot()
+        signals = [(project.layersAdded, self._on_added), (project.layersWillBeRemoved, self._on_removed)]
+        # Shown or hidden; moved in the tree or in a custom order (a move is a removal and an addition of nodes).
+        for name, slot in (("visibilityChanged", self._changed), ("layerOrderChanged", self._reordered),
+                           ("customLayerOrderChanged", self._reordered), ("hasCustomLayerOrderChanged", self._reordered),
+                           ("addedChildren", self._reordered), ("removedChildren", self._reordered)):
+            signal = getattr(root, name, None)
+            if signal is not None:
+                signals.append((signal, slot))
+        if canvas is not None:
+            signals.append((canvas.layersChanged, self._changed))  # a map theme followed by the canvas
+        for signal, slot in signals:
+            signal.connect(slot)
+            self._connected.append((signal, slot))
+        for layer in project.mapLayers().values():
+            self._watch(layer)
+
+    def stop(self) -> None:
+        for signal, slot in self._connected:
+            try:
+                signal.disconnect(slot)
+            except (TypeError, RuntimeError):
+                pass
+        self._connected = []
+        for layer_id in list(self._layers):
+            self._unwatch(layer_id)
+        self._styles = {}
+        self.watching, self.dirty, self.reordered = False, True, False
+
+    def style(self, layer: QgsMapLayer) -> Optional[str]:
+        """The style of ``layer`` as XML, read again only when the layer said it changed."""
+        from ..agent.turn_effects import _style
+        layer_id = layer.id()
+        if not self.watching or layer_id not in self._layers:
+            return _style(layer)
+        if layer_id not in self._styles:
+            self._styles[layer_id] = _style(layer)
+        return self._styles[layer_id]
+
+    def read(self, canvas=None) -> MapState:
+        """The map now (``map_state``), with the styles kept; not dirty until something changes again."""
+        self.dirty = False
+        return map_state(canvas, self.style)
+
+    def _changed(self, *_args) -> None:
+        self.dirty = True
+
+    def _reordered(self, *_args) -> None:
+        self.dirty = self.reordered = True
+
+    def _layer_changed(self, layer_id: str, *_args) -> None:
+        self.dirty = True
+        self._styles.pop(layer_id, None)
+
+    def _watch(self, layer) -> None:
+        try:
+            layer_id = layer.id()
+        except RuntimeError:
+            return
+        if layer_id in self._layers:
+            return
+        slot = partial(self._layer_changed, layer_id)
+        signals = []
+        for name in self.LAYER_SIGNALS:
+            signal = getattr(layer, name, None)
+            if signal is None:
+                continue
+            signal.connect(slot)
+            signals.append(signal)
+        self._layers[layer_id] = (slot, signals)
+
+    def _unwatch(self, layer_id: str) -> None:
+        slot, signals = self._layers.pop(layer_id, (None, []))
+        for signal in signals:
+            try:
+                signal.disconnect(slot)
+            except (TypeError, RuntimeError):  # the layer is already gone
+                pass
+        self._styles.pop(layer_id, None)
+
+    def _on_added(self, layers) -> None:
+        self.dirty = True
+        for layer in layers:
+            self._watch(layer)
+
+    def _on_removed(self, layer_ids) -> None:
+        self.dirty = True
+        for layer_id in layer_ids:
+            self._unwatch(layer_id)
 
 
 class SwipeItem(QgsMapCanvasItem):
@@ -130,6 +271,7 @@ class SwipeItem(QgsMapCanvasItem):
         self.busy = True
         self.labels: Tuple[str, str] = ("", "")
         self._font = QFont(canvas.font())
+        self._metrics = QFontMetricsF(self._font)
         self.setZValue(5)
 
     def set_image(self, image: Optional[QImage], extent: QgsRectangle, busy: Optional[bool] = None) -> None:
@@ -142,19 +284,21 @@ class SwipeItem(QgsMapCanvasItem):
         self.update()
 
     def set_fraction(self, fraction: float) -> None:
+        self.prepareGeometryChange()  # the labels move with the line, and the bounds with them
         self.fraction = min(max(float(fraction), 0.0), 1.0)
         self.update()
 
     def set_labels(self, before: str, now: str) -> None:
+        self.prepareGeometryChange()
         self.labels = (before or "", now or "")
         self.update()
 
     def label_rects(self) -> Tuple[QRectF, QRectF]:
         """Where the labels are drawn, in the coordinates of the item: left of the line, right of it (empty rectangle:
-        no label). At the top of the canvas, even when the item was moved with the map since its image."""
-        metrics = QFontMetricsF(self._font)
+        no label). At the top of the canvas, wherever the map moved the item since its image."""
+        metrics = self._metrics
         line = self._size.width() * self.fraction
-        top = max(0.0, -self.pos().y()) + LABEL_GAP
+        top = LABEL_GAP - self.pos().y()
         height = metrics.height() + LABEL_PADDING
         rects = []
         for text, left in ((self.labels[0], True), (self.labels[1], False)):
@@ -166,7 +310,12 @@ class SwipeItem(QgsMapCanvasItem):
         return rects[0], rects[1]
 
     def boundingRect(self):  # noqa: N802 - Qt override
-        return self._size
+        """The image, the line (its pen beyond the edges) and the labels: nothing drawn outside, no trail left."""
+        bounds = self._size.adjusted(-2.0, 0.0, 2.0, 0.0)
+        for rect in self.label_rects():
+            if not rect.isEmpty():
+                bounds = bounds.united(rect)
+        return bounds
 
     def updatePosition(self):  # noqa: N802 - Qt override
         if self._extent.isEmpty():

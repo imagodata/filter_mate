@@ -23,7 +23,7 @@ from qgis.PyQt.QtCore import QCoreApplication, QEvent, QObject, QPointF, QRectF,
 from qgis.PyQt.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
 from qgis.PyQt.QtWidgets import QMenu, QPushButton
 
-from ...adapters.qgis.compare_swipe import CompareSession, map_state
+from ...adapters.qgis.compare_swipe import CompareSession, MapWatch, map_state
 from ...core.domain.compare_states import (BeforeMap, MapState, from_cross_operation, map_from_history_entry,
                                            map_from_operation, map_from_pin)
 
@@ -94,6 +94,8 @@ class CompareController(QObject):
         self._integration = integration
         self.session: Optional[CompareSession] = None
         self._pin: Optional[MapState] = None
+        self._given: Optional[BeforeMap] = None  # a step compared through compare_with, the pin aside
+        self._watch = MapWatch(self)  # while a pin is compared: whether the map may have changed
         self._shown: Optional[BeforeMap] = None  # what the comparison draws, to draw again only what changed
         self._said: Tuple[str, ...] = ()  # the layers already said not to be drawn as they were
         self._follow_timer = QTimer(self)
@@ -172,7 +174,8 @@ class CompareController(QObject):
         if self.button is None:
             return
         try:
-            enabled = self._pin is not None or self._undo is None or self._undo.isEnabled()
+            enabled = (self._pin is not None or self._given is not None or self._undo is None
+                       or self._undo.isEnabled())
             self.button.setEnabled(enabled)
             self.button.setIcon(compare_icon(pinned=self._pin is not None))
             if self.unpin_action is not None:
@@ -255,7 +258,9 @@ class CompareController(QObject):
     def before_map(self) -> BeforeMap:
         """What Compare draws left of the line now: the pinned map, or the map before the last operation."""
         if self._pin is not None:
-            return map_from_pin(self._pin, map_state(self._canvas()))
+            canvas = self._canvas()
+            now = self._watch.read(canvas) if self._watch.watching else map_state(canvas)
+            return map_from_pin(self._pin, now)
         return self.last_operation()
 
     def _canvas(self):
@@ -270,18 +275,33 @@ class CompareController(QObject):
     def pinned(self) -> Optional[MapState]:
         return self._pin
 
+    def _pinned_mode(self) -> bool:
+        """The comparison shows the pin (not a step given by ``compare_with``) and follows the map."""
+        return self._pin is not None and self._given is None
+
     def pin(self, *_args) -> Optional[MapState]:
         """Keep the map as it is now: Compare shows it until the pin is removed or the project changes."""
         try:
-            self._pin = map_state(self._canvas())
-        except Exception:  # a project that cannot be read pins nothing; the map is left alone
-            logger.debug("Compare: map not pinned", exc_info=True)
+            state = map_state(self._canvas())
+        except Exception:  # whatever a layer raises: nothing is pinned, and the user is told
+            logger.warning("Compare: map not pinned", exc_info=True)
+            self._say(_tr("The map could not be pinned."))
             return None
+        self.pin_state(state)
+        self._say(_tr("Map pinned at {}: Compare shows it left of the line.").format(_clock(state.taken_at)))
+        return state
+
+    def pin_state(self, state: MapState) -> None:
+        """Pin ``state`` (``map_state()`` of the map now, or of a step kept elsewhere): Compare shows it from now on."""
+        self._pin = state
         self._sync_button()
-        if self.session is not None and self.session.active:
-            self._show(self.before_map(), quiet=True)
-        self._say(_tr("Map pinned at {}: Compare shows it left of the line.").format(_clock(self._pin.taken_at)))
-        return self._pin
+        if self.session is not None and self.session.active and self._given is None:
+            self._watch.start(self._canvas())
+            try:
+                self._show(self.before_map(), quiet=True)
+            except Exception:
+                logger.warning("Compare: map not read", exc_info=True)
+                self._fail()
 
     def unpin(self, *_args) -> None:
         """Forget the pin: Compare shows the map before the last operation again (when there is one)."""
@@ -289,8 +309,9 @@ class CompareController(QObject):
             return
         self._pin = None
         self._follow_timer.stop()
+        self._watch.stop()
         self._sync_button()
-        if self.session is not None and self.session.active:
+        if self.session is not None and self.session.active and self._given is None:
             self.start()
 
     def _on_project_cleared(self, *_args) -> None:
@@ -302,6 +323,7 @@ class CompareController(QObject):
 
     def _on_toggled(self, on: bool) -> None:
         if on:
+            self._said = ()  # a comparison asked again says again what it cannot draw
             self.start()
         else:
             self.stop()
@@ -316,79 +338,146 @@ class CompareController(QObject):
             left = _tr("Before: {}").format(text) if text else ""
         return left, _tr("Now")
 
+    def _session(self, canvas) -> CompareSession:
+        if self.session is None:
+            self.session = CompareSession(canvas, self)
+            self.session.ended.connect(self.stop)
+            self._connect(canvas.mapCanvasRefreshed, self._on_map_drawn)
+        return self.session
+
     def start(self) -> int:
         """Compare now; the number of layers drawn otherwise than now (0: nothing to compare, the button goes up;
         with a pin, the comparison stays on and fills in at the next change)."""
         canvas = self._canvas()
-        count = 0
-        pinned = self._pin is not None
-        if canvas is not None:
-            try:
-                before = self.before_map()
-            except Exception:  # a history that cannot be read compares nothing; the map is left alone
-                logger.debug("Compare: history not read", exc_info=True)
-                before = BeforeMap(pinned_at=self._pin.taken_at if pinned else None)
-            if self.session is None:
-                self.session = CompareSession(canvas, self)
-                self.session.ended.connect(lambda: self._set_checked(False))
-                self._connect(canvas.mapCanvasRefreshed, self._on_map_drawn)
-            self._said = ()
-            count = self._show(before)
-            if pinned:
-                self._set_checked(True)
-                return count
-        if not count:
+        if canvas is None:
             self._say(_tr("Nothing to compare: no filter to undo here."))
+            self._set_checked(False)
+            return 0
+        self._given = None
+        self._session(canvas)
+        pinned = self._pin is not None
+        if pinned:
+            self._watch.start(canvas)
+        try:
+            before = self.before_map()
+        except Exception:
+            logger.warning("Compare: %s not read", "map" if pinned else "history", exc_info=True)
+            if pinned:  # never "nothing changed" for a map that could not be read
+                self._fail()
+                return 0
+            before = BeforeMap()  # a history that cannot be read compares nothing; the map is left alone
+        count = self._show(before)
+        if pinned:
+            self._set_checked(True)
+            return count
+        if not count:
+            if not self._said:  # a step whose changes cannot be drawn was named instead
+                self._say(_tr("Nothing to compare: no filter to undo here."))
             self._set_checked(False)
         return count
 
-    def _show(self, before: BeforeMap, quiet: bool = False) -> int:
-        """Draw ``before`` left of the line; say once which layers cannot be drawn as they were, and, with a pin, that
-        nothing changed since it."""
-        pinned = self._pin is not None
-        count = self.session.start(before, QgsProject.instance().mapLayers(), keep=pinned, labels=self._labels(before))
+    def compare_with(self, before: BeforeMap, labels: Optional[Tuple[str, str]] = None) -> int:
+        """Compare with ``before`` (a step of the history, for instance), the pin aside: ended as the comparison with
+        the last operation is (Filter, Undo, another current layer...). The number of layers drawn otherwise than now;
+        0: nothing drawn, the comparison is off."""
+        canvas = self._canvas()
+        if canvas is None:
+            return 0
+        self._session(canvas)
+        self._follow_timer.stop()
+        self._watch.stop()
+        self._given = before
+        self._said = ()
+        self._sync_button()  # available while it compares, Undo or not
+        count = self._show(before, labels=labels)
+        if count:
+            self._set_checked(True)
+        else:
+            self.stop()
+        return count
+
+    def _names(self, before: BeforeMap, refused) -> Tuple[str, ...]:
+        """What is not drawn as it was: layers removed since, changes the comparison does not draw, clones refused."""
+        project = QgsProject.instance()
+        names = list(before.missing)
+        for kind, layer_id, name in before.unshown:
+            if kind == "tree":
+                names.append(_tr("layer tree"))
+            elif kind == "project_crs":
+                names.append(_tr("project CRS"))
+            else:
+                layer = project.mapLayer(layer_id) if layer_id else None
+                names.append(layer.name() if layer is not None else (name or layer_id))
+        names += list(refused)
+        return tuple(dict.fromkeys(name for name in names if name))
+
+    def _show(self, before: BeforeMap, quiet: bool = False, labels: Optional[Tuple[str, str]] = None) -> int:
+        """Draw ``before`` left of the line; say what cannot be drawn as it was when that changed, and, with a pin,
+        that nothing changed since it."""
+        keep = self._pinned_mode()
+        count = self.session.start(before, QgsProject.instance().mapLayers(), keep=keep,
+                                   labels=labels or self._labels(before))
         self._shown = before if self.session.active else None
-        names = tuple(dict.fromkeys(tuple(before.missing) + tuple(self.session.refused)))
-        if names and names != self._said and self.session.active:
-            self._say(_tr("Compare cannot draw these layers as they were: {}").format(", ".join(names)))
+        names = self._names(before, self.session.refused)
+        if names and names != self._said:
+            self._say(_tr("Not drawn as they were: {}").format(", ".join(names)))
         self._said = names
-        if pinned and before.empty and not before.missing and not quiet:
+        if keep and before.empty and not names and not quiet:
             self._say(_tr("Nothing changed since the pin."))
         return count
 
+    def _fail(self) -> None:
+        self.stop()
+        self._say(_tr("Compare stopped: the map could not be read."))
+
     def _on_map_drawn(self) -> None:
-        if self._pin is not None and self.session is not None and self.session.active:
+        """The map was drawn: a pin is compared again if something may have changed, at most every FOLLOW_DELAY_MS
+        (a throttle: refreshes closer than that, an animated symbol, would hold back a debounce for ever)."""
+        if (self._pinned_mode() and self.session is not None and self.session.active and self._watch.dirty
+                and not self._follow_timer.isActive()):
             self._follow_timer.start()
 
     def _follow(self) -> None:
         """A pin: compare the map again, and draw the map before again only when what differs changed."""
-        if self._pin is None or self.session is None or not self.session.active:
+        if not self._pinned_mode() or self.session is None or not self.session.active or not self._watch.dirty:
             return
         try:
             before = self.before_map()
-        except Exception:
-            logger.debug("Compare: map not read", exc_info=True)
+        except Exception:  # a comparison frozen on a map it cannot read would mislead: it stops, and says so
+            logger.warning("Compare: map not read", exc_info=True)
+            self._fail()
             return
-        if before != self._shown:  # the same differences: the image drawn holds
+        reordered, self._watch.reordered = self._watch.reordered, False
+        if before != self._shown:
             self._show(before)
+        elif reordered and not before.empty:  # the same differences in another order: drawn again
+            self.session.render()
 
     def refresh(self) -> None:
         """AGENT opened or closed, a turn of the agent done or undone: compare against what Undo reads now (a pin
-        follows the map by itself)."""
-        if self.session is not None and self.session.active and self._pin is None:
+        follows the map by itself, a step given by ``compare_with`` ends)."""
+        if self.session is None or not self.session.active or self._pinned_mode():
+            return
+        if self._given is not None:
+            self.stop()
+        else:
             self.start()
 
     def _on_operation(self, *_args) -> None:
         """Filter, Undo, Redo, Unfilter or another current layer: the state before is another one; a pin stays."""
-        if self._pin is None:
+        if not self._pinned_mode():
             self.stop()
 
     def stop(self, *_args) -> None:
+        given, self._given = self._given, None
         self._follow_timer.stop()
+        self._watch.stop()
         if self.session is not None:
             self.session.stop()
         self._shown = None
         self._set_checked(False)
+        if given is not None:  # available because it compared: as Undo is again
+            self._sync_button()
 
     def teardown(self) -> None:
         for signal, slot in self._connections:
@@ -398,6 +487,7 @@ class CompareController(QObject):
                 pass
         self._connections = []
         self._follow_timer.stop()
+        self._watch.stop()
         for watched in (self._undo, self.button):
             try:
                 if watched is not None:
@@ -407,6 +497,7 @@ class CompareController(QObject):
         if self.session is not None:
             self.session.close()
         self._pin = None
+        self._given = None
         self._set_checked(False)
 
     def _set_checked(self, on: bool) -> None:
