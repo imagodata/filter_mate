@@ -604,10 +604,11 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Style a layer", idempotent=True))
     async def set_layer_style(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
-        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray"], Field(description=(
+        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "keep"], Field(description=(
             "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of "
             "a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band "
-            "values), gray (a gray stretch)"))],
+            "values), gray (a gray stretch). Any of them replaces the style of the layer. keep: the style stays as "
+            "it is and only opacity changes (the only mode for a WMS, WMTS or basemap image)"))],
         rules: Annotated[Optional[List[StyleRule]], Field(max_length=20, description=(
             'rules: one symbol per condition; a feature is drawn by the first rule it matches: [{"expression": '
             '"\\"population\\" > 10000", "color": "#d7191c", "label": "Towns"}, {"expression": "", "color": '

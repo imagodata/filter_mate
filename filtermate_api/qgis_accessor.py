@@ -270,6 +270,16 @@ class QGISFilterMateAccessor:
         """Return all valid vector, raster and point cloud layers of the current QgsProject."""
         return run_on_main_thread(self._list_layers_main_thread)
 
+    def layer_names(self) -> Dict[str, str]:
+        """``{layer id: name}`` of every layer of the project: nothing is counted nor read."""
+        def read() -> Dict[str, str]:
+            try:
+                from qgis.core import QgsProject
+            except ImportError:
+                return {}
+            return {layer_id: _safe(layer.name, "") for layer_id, layer in QgsProject.instance().mapLayers().items()}
+        return run_on_main_thread(read)
+
     def _list_layers_main_thread(self) -> List[LayerSummary]:
         try:
             from qgis.core import QgsProject, QgsVectorLayer

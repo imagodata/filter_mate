@@ -609,6 +609,12 @@ tools of the plugin's own settings, profiles and skills, plus 10 of its own: `un
 `run_pyqgis`, `view_map`, the widgets, the recipes and `show_settings_link`, some only under their setting); the MCP
 server of the plugin serves 53 (the chat's tools without its own, plus `map_image` and `contact_sheet`).
 
+- **Layers of the same name** (`agent_tools._one_layer_per_name`): a call of the chat or of the MCP server of the
+  plugin that names a layer by a name several layers have is refused with their ids. Each tool used to pick one its
+  own way (the first vector one, the first of the kind wanted, the first of any kind), in no order the user sees.
+- **`set_layer_style` mode `keep`**: the opacity alone; every other mode replaces the style. An image drawn by its
+  service (WMS, WMTS, tiles) takes no other mode: it has no band value to stretch.
+
 ### Settings of FilterMate and skills (2026-11-12)
 
 `describe_settings`, `get_setting`, `change_settings` and `diagnose_performance` work on FilterMate itself, not on the
