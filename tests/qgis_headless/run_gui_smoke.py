@@ -1565,10 +1565,8 @@ BOARD_TEXTS = {
         'questions': [
             {'header': 'Couche', 'question': 'Deux couches portent des routes. Laquelle mettre en valeur ?',
              'options': [{'label': 'troncon_de_route (recommandé)', 'description': 'BD TOPO, 48 210 tronçons'},
-                         {'label': 'routes_departementales', 'description': '312 tronçons'}]},
-            {'header': 'Rendu', 'question': 'Que faut-il montrer ?', 'multi_select': True,
-             'options': [{'label': 'Une couleur par importance'}, {'label': 'Le nom des routes'},
-                         {'label': 'Une largeur selon le nombre de voies'}]}],
+                         {'label': 'routes_departementales', 'description': '312 tronçons'},
+                         {'label': 'Les deux'}]}],
     },
     'en': {
         'communes': 'Keep the communes of more than 10,000 people',
@@ -1588,10 +1586,8 @@ BOARD_TEXTS = {
         'questions': [
             {'header': 'Layer', 'question': 'Two layers hold roads. Which one should stand out?',
              'options': [{'label': 'troncon_de_route (recommended)', 'description': 'BD TOPO, 48,210 sections'},
-                         {'label': 'routes_departementales', 'description': '312 sections'}]},
-            {'header': 'Look', 'question': 'What should it show?', 'multi_select': True,
-             'options': [{'label': 'A colour by importance'}, {'label': 'The names of the roads'},
-                         {'label': 'A width by number of lanes'}]}],
+                         {'label': 'routes_departementales', 'description': '312 sections'},
+                         {'label': 'Both'}]}],
     },
 }
 
@@ -1665,7 +1661,6 @@ def capture_boards(d, chat, folder):
     # The cards of the thread: the questions of ask_user, then the offer to set FilterMate up.
     controller = importlib.import_module(f'{PACKAGE}.ui.controllers.agent_chat_controller')
     parse_questions = importlib.import_module(f'{PACKAGE}.core.agent.questions').parse_questions
-    d.resize(int(os.environ.get('FM_BOARD_W', '360')), 900)  # the whole card, down to its Answer button
     panel.clear_thread()
     panel.add_user(t['style_roads'])
     panel.add_question_card({'other': controller._tr('Other'), 'answer': controller._tr('Answer'),
@@ -1674,7 +1669,6 @@ def capture_boards(d, chat, folder):
     panel.show_thread()
     shot('Question')
     panel.clear_thread()
-    d.resize(int(os.environ.get('FM_BOARD_W', '360')), 640)
     chat._show_setup_offer()
     panel.show_thread()
     QApplication.processEvents()

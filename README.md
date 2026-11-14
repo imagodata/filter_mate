@@ -25,11 +25,11 @@ exports from a request, with the model you choose.
 <p align="center"><em>The panel follows the current layer: several vector features ticked, a raster with its histogram, a LiDAR point cloud.</em></p>
 
 <p align="center">
-  <img src="website/img/guide/agent-chat.png?v=5" alt="AGENT: two requests in a sentence, each with a filter card that gives the features kept" width="260">
+  <img src="website/img/guide/agent-chat.png?v=6" alt="AGENT: two requests in a sentence, each with a filter card that gives the features kept" width="260">
   &nbsp;
-  <img src="website/img/guide/agent-question.png?v=5" alt="AGENT asks which of two road layers is meant and what to show, with choices to click" width="260">
+  <img src="website/img/guide/agent-question.png?v=6" alt="AGENT asks which of two road layers is meant, with choices to click" width="260">
   &nbsp;
-  <img src="website/img/guide/agent-setup.png?v=5" alt="AGENT offers to set FilterMate up: look, data, what the agent may do alone" width="260">
+  <img src="website/img/guide/agent-setup.png?v=6" alt="AGENT offers to set FilterMate up: look, data, what the agent may do alone" width="260">
 </p>
 <p align="center"><em>AGENT (experimental): a request in a sentence and its filters, a question with choices when the decision is yours, and the offer to set FilterMate up.</em></p>
 
