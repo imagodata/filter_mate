@@ -180,11 +180,6 @@ Pourquoi : {}
         <translation>Le quota gratuit n'est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/agent_chat_controller.py" line="412"/>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Injoignable pour cette conversation : {}</translation>
-    </message>
-    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="426"/>
         <source>Connecting to {}…</source>
         <translation>Connexion à {}…</translation>
