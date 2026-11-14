@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from ...core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
+from ..qgis.feature_count import exact_feature_count, features_to_read
 from .operations import layer_kind, resolve_layer
 
 logger = logging.getLogger('FilterMate.Introspection')
@@ -256,8 +257,8 @@ def _vector_details(layer) -> Dict[str, Any]:
     fields = [{'name': item.name(), 'type': item.typeName(), 'alias': item.alias() or '',
                'filterable': item.name().lower() in stored}
               for item in list(layer.fields())[:MAX_FIELDS]]
-    count = _safe(layer.featureCount, -1)
-    return {'fields': fields, 'feature_count': max(count if isinstance(count, int) else -1, -1),
+    count = _safe(lambda: exact_feature_count(layer))  # featureCount() of a filtered GeoPackage can ignore the filter
+    return {'fields': fields, 'feature_count': -1 if count is None else count,
             'subset': _safe(layer.subsetString, '') or '', 'sql_dialect': sql_dialect(layer),
             'geometry_type': _safe(lambda: QgsWkbTypes.displayString(layer.wkbType()), '') or ''}
 
@@ -360,7 +361,9 @@ def preview_filter(reference: str, expression: str) -> Optional[Dict[str, Any]]:
     error = _provider_error(trial)
     if error or (count < 0 and not any(True for _ in trial.getFeatures(QgsFeatureRequest().setLimit(1)))):
         return {**answer, 'valid': False, 'error': error or 'the provider could not run this expression'}
-    return {**answer, 'valid': True, 'feature_count': count if count >= 0 else -1}
+    # featureCount() told whether it runs; of a filtered GeoPackage it can be the count of the whole table.
+    exact = exact_feature_count(trial)
+    return {**answer, 'valid': True, 'feature_count': -1 if exact is None else exact}
 
 
 def _unknown_names(layer, expression: str) -> List[str]:
@@ -567,7 +570,7 @@ def layer_statistics(reference: str, field_name: str = '', group_by: str = '', m
     if field_name and measure:
         raise ValueError('give a field or a measure, not both')
     _refuse_web_service(layer)
-    known = layer.selectedFeatureCount() if selected_only else (_safe(layer.featureCount, -1) or 0)
+    known = layer.selectedFeatureCount() if selected_only else (_safe(lambda: features_to_read(layer), -1) or 0)
     too_many = (f"'{layer.name()}' has more than {MAX_STAT_FEATURES} features to read: filter it or select "
                 "features first")
     if known > MAX_STAT_FEATURES:

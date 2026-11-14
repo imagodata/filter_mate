@@ -27,6 +27,7 @@ from ...core.agent.open_data import (
 from ...core.agent.sql_guard import expression_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
 from ..agent.bounded_http import STOPPED, TOO_LARGE, TOO_LONG, HttpFailure, fetch
+from ..qgis.feature_count import exact_feature_count
 from .operations import layer_kind, resolve_layer
 
 logger = logging.getLogger('FilterMate.ProjectControl')
@@ -66,7 +67,7 @@ def _canvas():
 def _summary(layer, count_features: bool = True) -> Dict[str, Any]:
     crs = layer.crs()
     # On a web service the count is one more request, blocking and out of reach of Stop.
-    count = layer.featureCount() if count_features and hasattr(layer, 'featureCount') else -1
+    count = exact_feature_count(layer) if count_features and hasattr(layer, 'featureCount') else -1
     return {'layer_id': layer.id(), 'name': layer.name(), 'layer_kind': layer_kind(layer).value,
             'provider_type': layer.providerType(), 'crs_authid': crs.authid() if crs is not None else '',
             'feature_count': count if isinstance(count, int) else -1}

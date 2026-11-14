@@ -2118,6 +2118,112 @@ def check_compare_from_history(chat, step_items):
     return step_items
 
 
+def check_card_compare(chat, provider, settings, ask, layer):
+    """Compare on the cards of the thread, and the map pinned before each request: a card compares the map before its
+    own step (by the path of the history page), before its whole request once a later one came; none while the agent
+    works, on a step that changed nothing, on a request undone, without Compare in the dock, or on a card of a
+    conversation shown again. The map is read before the first change of a request, and pinned once the request
+    changed it."""
+    from qgis.core import QgsProject, QgsSettings
+    from filter_mate.adapters.agent.turn_checkpoint import TurnCheckpoint
+    from filter_mate.ui.widgets.agent_thread import ChangeCard
+
+    panel, thread = chat.panel, chat.panel.thread
+    asked, reads, pins = [], [], []
+    history = SimpleNamespace(can_compare=True,
+                              compare_agent_turn=lambda turn, step=None: asked.append((turn, step)) or 1)
+    compare = SimpleNamespace(read_automatic_pin=lambda: reads.append(layer.subsetString()) or f"map {len(reads)}",
+                              pin_automatic=lambda state: pins.append(state) or True)
+    chat._parent_widget._controller_integration = SimpleNamespace(history_controller=history, compare_controller=compare)
+    settings()
+    layer.setSubsetString("")
+
+    def cards():
+        return [item.widget for item in thread._items if isinstance(item.widget, ChangeCard)]
+
+    def shown():
+        return [not card.compare_button.isHidden() for card in cards()]
+
+    provider.reset((200, {}, tool_turn("list_layers", {})), (200, {}, text_turn("Voilà les couches.")))
+    ask("quelles couches ?")
+    check("pin before a request: a request that only reads reads nothing, pins nothing", reads == [] and pins == [],
+          (reads, pins))
+    # Three changes, the second of them none (the same filter again), two of them asked in one turn of the model.
+    provider.reset((200, {}, tools_turn(("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}),
+                                        ("apply_filter", {"layer_name": "communes", "expression": '"pop" > 1000'}))),
+                   (200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 2000'},
+                                       "toolu_cc")),
+                   (200, {}, text_turn("Trois filtres.")))
+    ask("trois filtres")
+    rank = len(TurnCheckpoint.applied()) - 1
+    check("pin before a request: the map read once, before the first change, pinned at the end",
+          reads == [""] and pins == ["map 1"], (reads, pins))
+    first = cards()
+    check("compare on the cards: on each step that changed the map, not on the one that changed nothing",
+          len(first) == 3 and shown() == [True, False, True], (len(first), shown()))
+    check("compare on the cards: discreet, beside Undo, says it is this step",
+          first[0].compare_button.isFlat() and first[0].compare_button.text() == "Compare"
+          and "this step" in first[0].compare_button.toolTip(), first[0].compare_button.toolTip())
+    first[2].compare_button.click()
+    first[0].compare_button.click()
+    check("compare on the cards: the map before each step, by its rank in the history", asked == [(rank, 1), (rank, 0)],
+          (asked, rank))
+    panel.set_working(True)
+    working = shown()
+    panel.set_working(False)
+    check("compare on the cards: none while the agent works", working == [False, False, False] and shown()[0], working)
+
+    seen = []
+    on_tool_start = chat.on_tool_start
+    chat.on_tool_start = lambda call: (seen.append(shown()), on_tool_start(call))[1]
+    provider.reset((200, {}, tool_turn("apply_filter", {"layer_name": "communes", "expression": '"pop" > 3000'},
+                                       "toolu_cd")),
+                   (200, {}, text_turn("Encore un.")))
+    ask("encore un filtre")
+    del chat.on_tool_start
+    check("compare on the cards: hidden during the next request", seen and not any(seen[0]), seen)
+    check("pin before a request: the next request pins the map as it left it", reads == ["", '"pop" > 2000']
+          and pins == ["map 1", "map 2"], (reads, pins))
+    asked.clear()
+    cards()[3].compare_button.click()
+    first[2].compare_button.click()
+    check("compare on the cards: a request of a single step compares that step; an earlier request, as a whole",
+          shown() == [True, False, True, True] and asked == [(rank + 1, None), (rank, None)]
+          and "whole request" in first[2].compare_button.toolTip() and "this step" in cards()[3].compare_button.toolTip(),
+          (asked, shown(), first[2].compare_button.toolTip()))
+    provider.reset((200, {}, tool_turn("list_layers", {})), (200, {}, text_turn("Rien changé.")))
+    ask("rien à changer")
+    check("pin before a request: a request that changes nothing keeps the pin before it", pins == ["map 1", "map 2"],
+          pins)
+    chat._on_undo()
+    asked.clear()
+    first[2].compare_button.click()
+    check("compare on the cards: a request undone loses it, the one before compares its steps again",
+          shown() == [True, False, True, False] and asked == [(rank, 1)] and "this step" in first[2].compare_button.toolTip(),
+          (shown(), asked))
+    history.can_compare = False
+    chat._refresh_history()
+    hidden = shown()
+    history.can_compare = True
+    del chat._parent_widget._controller_integration
+    chat._refresh_history()
+    check("compare on the cards: none when the dock cannot compare, nor without its history",
+          hidden == [False] * 4 and shown() == [False] * 4, (hidden, shown()))
+    chat._parent_widget._controller_integration = SimpleNamespace(history_controller=history, compare_controller=compare)
+    chat._refresh_history()
+    path = os.path.join(tempfile.mkdtemp(), "cards.qgz")
+    QgsProject.instance().setFileName(path)  # the conversation is kept for the project, then shown again
+    chat._restore_transcript()
+    check("compare on the cards: none on a conversation shown again", len(cards()) == 4 and not any(shown())
+          and not thread.compare_cards(), (len(cards()), shown()))
+    QgsProject.instance().setFileName("")
+    QgsSettings().remove("filter_mate/agent/transcripts")
+    chat._on_undo()
+    del chat._parent_widget._controller_integration
+    settings()
+    layer.setSubsetString("")
+
+
 def check_steps(chat, provider, settings, ask, layer):
     """Lot 2 of the undo plan: the steps of a turn, and "undo back to here"."""
     panel = chat.panel
@@ -2159,6 +2265,7 @@ def check_steps(chat, provider, settings, ask, layer):
     panel.show_thread()
 
     check_steps_beside_filters(chat, provider, ask, layer)
+    check_card_compare(chat, provider, settings, ask, layer)
 
     # Lot 4: "undo what you just did" in the conversation.
     settings()

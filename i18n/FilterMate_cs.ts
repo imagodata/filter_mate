@@ -1200,6 +1200,16 @@ Souhlasíte se všemi? Ne: neprovede se žádná.</translation>
         <translation>Mapa před tímto požadavkem či krokem vlevo od čáry, současná mapa vpravo od ní</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/agent_thread.py" line="445"/>
+        <source>The map before this step left of a line, the map now on its right</source>
+        <translation>Mapa před tímto krokem vlevo od čáry, současná mapa vpravo od ní</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/agent_thread.py" line="446"/>
+        <source>The map before the whole request left of a line, the map now on its right: only the steps of the last request are compared one by one</source>
+        <translation>Mapa před celým požadavkem vlevo od čáry, současná mapa vpravo od ní: jednotlivě se porovnávají jen kroky posledního požadavku</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/agent_panel.py" line="432"/>
         <source>TRY</source>
         <translation>ZKUSTE</translation>
@@ -4788,6 +4798,16 @@ What would you like to do?</translation>
         <translation>Odebrat připnutí</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/compare_controller.py" line="205"/>
+        <source>Pin the map before each request of the agent</source>
+        <translation>Připnout mapu před každým požadavkem na agenta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="209"/>
+        <source>Horizontal line</source>
+        <translation>Vodorovná čára</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/compare_controller.py" line="198"/>
         <source>Click on the map to fix the line, click again to free it.</source>
         <translation>Kliknutím do mapy čáru zamknete, dalším kliknutím ji uvolníte.</translation>
@@ -4826,6 +4846,11 @@ What would you like to do?</translation>
         <location filename="../../ui/controllers/compare_controller.py" line="311"/>
         <source>Pinned {}</source>
         <translation>Připnuto {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/compare_controller.py" line="82"/>
+        <source>Pinned {} (before the agent's request)</source>
+        <translation>Připnuto {} (před požadavkem na agenta)</translation>
     </message>
     <message>
         <location filename="../../ui/controllers/compare_controller.py" line="343"/>

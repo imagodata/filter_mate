@@ -19,7 +19,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .compare_states import BeforeMap, BeforeState, Effects, from_cross_operation, from_history_entry, map_with_effects
+from .compare_states import (UNSHOWN_EFFECTS, BeforeMap, BeforeState, Effects, from_cross_operation, from_history_entry,
+                             map_with_effects)
+
+# Effects of a turn of the agent that Compare draws (map_with_effects) or names (UNSHOWN_EFFECTS).
+MAP_EFFECTS = ("style", "visibility", "added", "removed") + UNSHOWN_EFFECTS
 
 KIND_VECTOR = "vector"
 KIND_COVERAGE = "coverage"
@@ -279,6 +283,42 @@ def agent_item(items: Iterable[TimelineItem], key: str, turn: int, step: Optiona
                  and item.position == step), None)
 
 
+def _draws(befores: Sequence[Any], effects: Iterable[Tuple[Any, ...]]) -> bool:
+    """Whether a turn or a step changed the map as Compare draws or names it: a filter, a style, a layer shown, hidden,
+    added or removed, the layer tree... (not a note, a selection, a widget or a setting)."""
+    return bool(befores) or any(effect and effect[0] in MAP_EFFECTS for effect in effects)
+
+
+def changes_map(operation: Any) -> bool:
+    """Whether a turn of the agent (its operation) changed the map as Compare draws or names it."""
+    return _draws(getattr(operation, "changes", ()) or (), getattr(operation, "effects", ()) or ())
+
+
+def card_target(undo_stack: Sequence[Any], op_id: int, step: Optional[int]) -> Optional[Tuple[int, Optional[int], bool]]:
+    """What the card of an action of the agent compares with (``HistoryController.compare_agent_turn``): ``(turn,
+    step, exact)``, the rank of its turn in ``undo_stack`` (the turns applied, oldest first) and the rank of its step,
+    or None (the whole turn); ``exact``: that is the map before the action itself.
+
+    ``op_id``: the operation of the turn; ``step``: the rank of the action among the steps of the turn, None for a turn
+    of a single step (the turn is the action). Only the steps of the last turn applied are compared one by one (as the
+    history lists them): the card of a step of an earlier turn compares with the map before its whole turn, not
+    exact. None when the turn is no longer applied (undone, or forgotten), or when the action changed nothing of the
+    map.
+    """
+    rank = next((index for index, operation in enumerate(undo_stack) if getattr(operation, "op_id", None) == op_id),
+                None)
+    if rank is None:
+        return None
+    operation = undo_stack[rank]
+    if step is None:
+        return (rank, None, True) if changes_map(operation) else None
+    steps = getattr(operation, "steps", ()) or ()
+    step_effects = getattr(operation, "step_effects", ()) or ()
+    if not 0 <= step < len(steps) or not _draws(steps[step][1], step_effects[step] if step < len(step_effects) else ()):
+        return None
+    return (rank, step, True) if rank == len(undo_stack) - 1 else (rank, None, False)
+
+
 def _effects_of(operation: Any) -> Effects:
     return getattr(operation, "effects", ()) or (), bool(getattr(operation, "effects_reversed", False))
 
@@ -291,15 +331,24 @@ def linked_pairs(entries: Sequence[Any], source_id: str, run_ids: Sequence[Optio
     ``entries``: the stack of the vector filters, the next taken last; ``run_ids``: the ``op_id`` each run of the
     source recorded (None: nothing clipped), the next taken last; ``operations``: the cross stack of the source, the
     next taken last. Each entry of the source taken takes a run, and the operation on top of the cross stack with it
-    when the run recorded that one. The clock cannot pair them: each is recorded when its own task ends.
+    when the run recorded that one. The clock cannot pair them: each is recorded when its own task ends. An entry left
+    without its source (its part undone alone, 2026-11-14) is no run of the layer that took its place (``ran_from``).
     """
-    mine = [entry for entry in entries if tuple(getattr(entry, "layer_ids", ()) or ())[:1] == (source_id,)]
+    mine = [entry for entry in entries if _ran_from(entry, source_id)]
     stack = list(operations)
     pairs = []
     for entry, op_id in zip(reversed(mine), reversed(list(run_ids))):
         if stack and op_id is not None and getattr(stack[-1], "op_id", None) == op_id:
             pairs.append((entry, stack.pop()))
     return pairs
+
+
+def _ran_from(entry: Any, source_id: str) -> bool:
+    """``entry`` is a vector filter run from ``source_id`` (``HistoryEntry.ran_from``; its first layer otherwise)."""
+    ran_from = getattr(entry, "ran_from", None)
+    if callable(ran_from):
+        return bool(ran_from(source_id))
+    return tuple(getattr(entry, "layer_ids", ()) or ())[:1] == (source_id,)
 
 
 def link(items: Sequence[TimelineItem], pairs: Iterable[Tuple[Any, Any]]) -> List[TimelineItem]:
@@ -342,14 +391,19 @@ class UndoFocus:
     source: str = ""
 
 
-def walkable(stack: Sequence[Any], takes: Callable[[Any], bool]) -> int:
+def walkable(stack: Sequence[Any], takes: Callable[[Any], bool],
+             whole: Callable[[Any], bool] = lambda entry: True) -> int:
     """How many entries of ``stack`` (the next one last) Undo or Redo takes one after the other: it stops at the first
-    one ``takes`` refuses (a vector filter out of the scope of the current layer)."""
+    one ``takes`` refuses (a vector filter out of the scope of the current layer), and after the first one it takes
+    a part of only (``whole`` False: the part of the current layer of a filter of several layers, the rest of it stays
+    next, out of the scope)."""
     count = 0
     for entry in reversed(stack):
         if not takes(entry):
             break
         count += 1
+        if not whole(entry):
+            break
     return count
 
 
