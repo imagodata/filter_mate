@@ -782,10 +782,9 @@ class AgentChatController(QObject):
                      or any(kind not in NO_FILE_KINDS for kind in configured_kinds.values()))
         handlers = build_handlers(accessor, _default_export_root(), share_values=values.send_values,
                                   allow_remote_sources=opens_web,
-                                  # The address of a service the user added is still a name, for the recipes kept
-                                  # before it had an id; never the address of a basemap, which no recipe holds.
-                                  platforms=[model_name(source) for source in data_sources] + configured_names
-                                  + [platform_name(source) for source in data_sources if source.kind != KIND_XYZ],
+                                  # By the names a model knows them by, only: the address of a service the user
+                                  # added would come back in the words of a refusal ("Enabled: ...").
+                                  platforms=[model_name(source) for source in data_sources] + configured_names,
                                   platform_aliases=platform_aliases(data_sources),
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
         handlers.update(settings_handlers(offered, self._approve_skill))

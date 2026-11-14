@@ -13,7 +13,7 @@ from core.agent.tool_catalog import CHAT_ONLY, SETTINGS_TOOLS, SKILL_TOOLS, chat
 from core.agent.tool_executor import ToolExecutor
 from filtermate_api.accessor import (
     CrossFilterResult, FavoritesUnavailable, FieldValues, FilteredLayer, FilterPreview, FilterRejected,
-    InMemoryAccessor, LayerDetails, LayerSummary, MapContext, OperationResult,
+    InMemoryAccessor, LayerDetails, LayerSummary, MapContext, OperationResult, PlacesResult,
 )
 from filtermate_api.agent_tools import build_handlers
 from filtermate_api.main_thread import QGISBusy
@@ -446,6 +446,29 @@ class TestHandlers:
         assert [platform for platform, _ in asked] == [address, "carto_light"]
         refused = executor.execute(ToolCallPart("c", "add_basemap", {"platform": address}))
         assert refused.is_error and "abc" not in refused.content.replace(address, "")  # the address is not a name
+
+    def test_the_address_of_a_service_never_comes_back_to_the_model(self, tmp_path):
+        """2026-11-14: the id went in; the address came back in the answer, in a refusal, in the list of a refusal."""
+        address = "https://api.example.org/geocode/search?apiKey=SECRET"
+        accessor = Accessor()
+
+        def find_place(query, platform="", limit=5, extra_domains=None):
+            if query == "down":
+                raise FilterRejected(f"{platform.upper()} did not answer: {platform}&q=down timed out")
+            return PlacesResult(platform, query, [], 0)
+        accessor.find_place = find_place
+        handlers = build_handlers(accessor, tmp_path, platforms=("geocoder_mine_1a2b3c",), extra_domains=f"{address}:geocoder",
+                                  platform_aliases={"geocoder_mine_1a2b3c": address.lower()})
+        executor = ToolExecutor(chat_tools(), handlers)
+        found = executor.execute(ToolCallPart("c", "find_place", {"query": "Albi", "platform": "geocoder_mine_1a2b3c"}))
+        assert not found.is_error and json.loads(found.content)["platform"] == "geocoder_mine_1a2b3c"
+        down = executor.execute(ToolCallPart("c", "find_place", {"query": "down", "platform": "geocoder_mine_1a2b3c"}))
+        other = executor.execute(ToolCallPart("c", "find_place", {"query": "Albi", "platform": "photon"}))
+        by_address = executor.execute(ToolCallPart("c", "find_place", {"query": "Albi", "platform": address}))
+        for refused in (down, other, by_address):
+            assert refused.is_error and "secret" not in refused.content.lower().replace(address.lower(), ""), refused.content
+        assert "geocoder_mine_1a2b3c did not answer" in down.content and "api.example.org" not in down.content
+        assert "Enabled: geocoder_mine_1a2b3c." in other.content
 
     def test_export_stays_below_the_root(self, api):
         accessor, root = api
