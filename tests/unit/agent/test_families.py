@@ -85,3 +85,11 @@ def test_a_tool_held_names_the_skills_that_bring_it():
     answer = executor.execute(ToolCallPart("1", "create_layout", {})).content
     assert '"cartography"' in answer and "its list says which" not in answer
     assert all(f'"{name}"' in answer for name in held["create_layout"])
+
+
+def test_finding_a_place_is_never_held_back_by_a_skill_that_names_it():
+    """The skill of the workflows names find_place: held back, "zoom to Albi" would first load instructions."""
+    assert "find_place" in ALWAYS
+    named = [skill.name for skill in skills.SKILLS.values() if "find_place" in skill.tools]
+    assert named, "no skill names find_place any more: this test and the exception can go"
+    assert "find_place" not in hidden_tools(chat_tools(), skills.SKILLS.values())

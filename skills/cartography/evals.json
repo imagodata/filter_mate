@@ -405,6 +405,129 @@
     "add_field",
     "update_features"
    ]
+  },
+  {
+   "id": "style_choose_categories",
+   "prompt": "Mets des couleurs aux routes pour qu'on distingue leur nature.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "routes",
+       "mode": "categorized",
+       "field": "nature"
+      },
+      "call_args": {
+       "layer": "routes",
+       "mode": "categorized",
+       "field": "nature"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_algorithm",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "style_choose_method_skewed",
+   "prompt": "Colore les communes selon leur population, choisis ce qui se lit le mieux.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "communes",
+       "mode": "graduated",
+       "field": "population",
+       "method": {
+        "any_of": [
+         "quantile",
+         "jenks"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "communes",
+       "mode": "graduated",
+       "field": "population",
+       "method": "quantile",
+       "ramp": "YlOrRd"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_algorithm",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "style_opacity_keeps_the_style",
+   "trap": true,
+   "prompt": "Rends les bâtiments à moitié transparents, sans rien changer d'autre à leur style.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "batiments",
+       "mode": "keep",
+       "opacity": 0.5
+      },
+      "call_args": {
+       "layer": "batiments",
+       "mode": "keep",
+       "opacity": 0.5
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_algorithm",
+    "update_features"
+   ]
+  },
+  {
+   "id": "style_thresholds_are_rules",
+   "prompt": "Mets en rouge les bâtiments de plus de 20 m et en gris tous les autres.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "batiments",
+       "mode": "rules"
+      },
+      "call_args": {
+       "layer": "batiments",
+       "mode": "rules",
+       "rules": [
+        {
+         "expression": "\"hauteur\" > 20",
+         "color": "red",
+         "label": "Plus de 20 m"
+        },
+        {
+         "expression": "",
+         "color": "#cccccc",
+         "label": "Autres"
+        }
+       ]
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "run_algorithm",
+    "update_features"
+   ]
   }
  ]
 }

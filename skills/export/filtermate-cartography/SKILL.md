@@ -18,7 +18,40 @@ All of this changes how the project shows, never its data, and is undone with th
   expression is empty), for what a single field does not say. set_labels writes a field on the map, or an expression
   that joins or formats values ("nom" || ' (' || "population" || ')'), and turns the labels off. With
   visible_from_scale the labels only show once the map is close enough (50000: from 1:50 000).
+- Every mode replaces the style of the layer. To change its opacity alone, use the mode keep with opacity: the
+  categories of a layer and the colors of an orthophoto stay. It is the only mode of a WMS, WMTS or basemap image.
 - After a style the user will judge by eye, look with view_map when it is offered.
+
+## Choosing a style
+
+When the user names no mode, ramp or number of classes, choose from the data, and say in one sentence what you chose.
+
+1. What the field holds (describe_layer for its type, field_values for a text field):
+   - a text or a code with few values (a nature, a usage, a class): categorized. Above about 12 values the colors
+     can no longer be told apart, and above 100 the mode is refused: group them with rules, or filter first.
+   - a number that measures (a population, a surface, a height, a rate): graduated.
+   - thresholds the user gives, or that have a meaning (over 10 000 inhabitants, under 5 % of slope): rules, one
+     color per condition, a last rule with an empty expression for the others.
+   - no field at all (the layer as a whole): single, with the color asked.
+2. For graduated, read the field with layer_statistics before choosing the method:
+   - the mean well under the middle of minimum and maximum (a few very large values: populations, surfaces):
+     quantile, or jenks when the user wants natural groups; equal_interval would put nearly everything in the first
+     class.
+   - values spread evenly: equal_interval, or pretty for round limits in the legend.
+   - a value compared with the average: stddev, with a diverging ramp.
+   - five classes read well; three to seven is the range. More only when asked.
+3. The ramp says what the values mean:
+   - more of something, from light to dark: Blues, Greens, Reds, YlOrRd, Viridis (read by color-blind people, and
+     in grey when printed).
+   - two directions around a middle (a change, a gap from the average, a balance): RdBu, RdYlGn, BrBG, with stddev
+     or with rules around the middle. RdYlGn puts red on the low values: pass invert when high is bad.
+   - categories: Spectral by default. Give the colors yourself with rules when they have a meaning.
+   - an elevation raster: pseudocolor with Spectral inverted, or Viridis; a slope or a density with YlOrRd.
+4. Colors people expect: water blue, vegetation green, built-up areas grey or red, a risk or an alert in red, what
+   is allowed in green. The color of a single symbol is a name (red, steelblue) or #rrggbb.
+5. Make it readable: a neutral basemap without labels under a colored layer; an opacity under 1 (0.6 to 0.8) on
+   filled polygons that hide the background; labels only on a layer of a few hundred features, or from a scale
+   (visible_from_scale) on a larger one.
 
 ## A background under the map
 

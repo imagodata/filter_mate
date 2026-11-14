@@ -1,0 +1,183 @@
+{
+ "cases": [
+  {
+   "id": "workflow_within_distance",
+   "trap": true,
+   "prompt": "Garde les bâtiments situés à moins de 200 m d'un cours d'eau.",
+   "expect": [
+    [
+     {
+      "tool": "cross_filter",
+      "args": {
+       "source_layer": "cours_eau",
+       "target_layers": [
+        "batiments"
+       ],
+       "buffer": 200
+      },
+      "call_args": {
+       "source_layer": "cours_eau",
+       "target_layers": [
+        "batiments"
+       ],
+       "predicates": [
+        "Intersect"
+       ],
+       "buffer": 200,
+       "selected_only": false
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "run_algorithm",
+    "add_layer",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "workflow_several_criteria",
+   "prompt": "Je veux les bâtiments industriels de plus de 10 m de haut, puis seulement ceux qui sont dans la commune sélectionnée.",
+   "expect": [
+    [
+     {
+      "tool": "apply_filter",
+      "args": {
+       "layer_name": "batiments",
+       "expression": {
+        "contains": [
+         "usage",
+         "Industriel",
+         "hauteur",
+         "10"
+        ]
+       }
+      },
+      "call_args": {
+       "layer_name": "batiments",
+       "expression": "\"usage\" = 'Industriel' AND \"hauteur\" > 10"
+      }
+     },
+     {
+      "tool": "cross_filter",
+      "args": {
+       "source_layer": "communes",
+       "target_layers": [
+        "batiments"
+       ],
+       "operator": "AND"
+      },
+      "call_args": {
+       "source_layer": "communes",
+       "target_layers": [
+        "batiments"
+       ],
+       "predicates": [
+        "Are within"
+       ],
+       "operator": "AND"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "run_algorithm",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "workflow_count_by_category",
+   "trap": true,
+   "prompt": "Quelle longueur de routes y a-t-il pour chaque nature de voie ?",
+   "expect": [],
+   "forbid": [
+    "run_algorithm",
+    "add_field",
+    "apply_filter",
+    "export_layers",
+    "create_widget"
+   ]
+  },
+  {
+   "id": "workflow_thematic_map",
+   "prompt": "Fais-moi une carte des communes selon leur population, avec leurs noms, prête à imprimer en A4.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "communes",
+       "mode": "graduated",
+       "field": "population"
+      },
+      "call_args": {
+       "layer": "communes",
+       "mode": "graduated",
+       "field": "population",
+       "method": "quantile",
+       "ramp": "YlOrRd"
+      }
+     },
+     {
+      "tool": "set_labels",
+      "args": {
+       "layer": "communes"
+      },
+      "call_args": {
+       "layer": "communes",
+       "field": "nom"
+      }
+     },
+     {
+      "tool": "create_layout",
+      "args": {},
+      "call_args": {
+       "name": "Communes par population",
+       "title": "Population des communes",
+       "page": "A4"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "export_layout",
+    "export_layers",
+    "run_algorithm"
+   ]
+  },
+  {
+   "id": "workflow_start_again",
+   "setup": {
+    "filters": {
+     "batiments": "\"usage\" = 'Industriel'",
+     "communes": "\"population\" > 10000"
+    }
+   },
+   "prompt": "Remets tout à zéro, je veux revoir toutes les couches entières.",
+   "expect": [
+    [
+     {
+      "tool": "clear_filters",
+      "args": {
+       "layers": [
+        "batiments",
+        "communes"
+       ]
+      },
+      "call_args": {
+       "layers": [
+        "batiments",
+        "communes"
+       ]
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "remove_layers",
+    "apply_filter",
+    "run_algorithm"
+   ]
+  }
+ ]
+}

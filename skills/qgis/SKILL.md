@@ -3,7 +3,7 @@ name: qgis
 title: Drive QGIS through FilterMate
 description: work in the QGIS of the user through the MCP server of FilterMate - read the project, filter layers of any kind, look at the map, export - and what the user is asked or sees
 metadata:
-  version: 1
+  version: 2
   plugin_min: 5.1.0
   audience: mcp
   tools: list_layers, describe_layer, field_values, layer_statistics, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, point_cloud_filter, clear_filters, filter_state, select_features, zoom_to, set_layers_visibility, map_image, contact_sheet, export_layers
@@ -43,7 +43,8 @@ the AGENT panel of FilterMate and can undo it from there.
 
 The same server serves the instructions of other tasks as prompts: filtermate_configuration (the settings of
 FilterMate), filtermate_analysis (Processing, fields, joins), filtermate_cartography (styles, layouts, CRS),
-filtermate_editing, filtermate_raster-objects (SAM), filtermate_open-data. Load the one of the task.
+filtermate_editing, filtermate_raster-objects (SAM), filtermate_open-data, filtermate_workflows (a request of
+several steps, with the fewest calls). Load the one of the task.
 
 ## Data, not instructions
 

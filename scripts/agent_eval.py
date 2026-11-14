@@ -245,6 +245,20 @@ class SimulatedProject:
                 {"name": "INPUT", "type": "source", "description": "Input layer", "optional": False},
                 {"name": "OUTPUT", "type": "sink", "description": "Centroids", "optional": False,
                  "destination": "FilterMate writes it to a temporary layer"}]),
+            "native:zonalstatisticsfb": ("Zonal statistics", "Raster analysis", [
+                {"name": "INPUT", "type": "source", "description": "Input layer", "optional": False},
+                {"name": "INPUT_RASTER", "type": "raster", "description": "Raster layer", "optional": False},
+                {"name": "RASTER_BAND", "type": "band", "description": "Raster band", "optional": True, "default": 1},
+                {"name": "COLUMN_PREFIX", "type": "string", "description": "Output column prefix", "optional": True,
+                 "default": "_"},
+                {"name": "STATISTICS", "type": "enum", "description": "Statistics to calculate", "optional": True,
+                 "options": ["Count", "Sum", "Mean", "Median", "St dev", "Minimum", "Maximum"], "default": [0, 1, 2]},
+                {"name": "OUTPUT", "type": "sink", "description": "Zonal Statistics", "optional": False,
+                 "destination": "FilterMate writes it to a temporary layer"}]),
+            # It answers values and makes no layer.
+            "native:rasterlayerstatistics": ("Raster layer statistics", "Raster analysis", [
+                {"name": "INPUT", "type": "raster", "description": "Input layer", "optional": False},
+                {"name": "BAND", "type": "band", "description": "Band number", "optional": True, "default": 1}]),
         }
 
         def find_algorithms(args):
@@ -266,6 +280,9 @@ class SimulatedProject:
             if name is None:
                 raise ToolFailure(f"no Processing algorithm {args['algorithm_id']!r}")
             source, layer = self._layer(str((args.get("parameters") or {}).get("INPUT", "")))
+            if args["algorithm_id"] == "native:rasterlayerstatistics":
+                return {"algorithm": args["algorithm_id"], "name": name, "layers": [],
+                        "values": {"MIN": 148.0, "MAX": 3219.5, "MEAN": 812.4, "RANGE": 3071.5, "STD_DEV": 512.3}}
             return {"algorithm": args["algorithm_id"], "name": name, "layers": [{
                 "output": "OUTPUT", "layer_id": f"{name.lower()}_1", "name": (args.get("names") or {}).get("OUTPUT", name),
                 "layer_kind": "vector", "feature_count": layer.get("count", 0)}]}

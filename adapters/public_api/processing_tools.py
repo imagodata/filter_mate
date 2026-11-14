@@ -14,7 +14,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.processing_policy import (
-    FILE_DESTINATIONS, GIVEN_TYPES, INTERPOLATION_DATA, LAYER_DESTINATIONS, LAYER_INPUTS, MULTI_LAYER_INPUTS,
+    FILE_DESTINATIONS, GIVEN_TYPES, INTERPOLATION_TYPES, LAYER_DESTINATIONS, LAYER_INPUTS, MULTI_LAYER_INPUTS,
     forced_values, matches, refusal,
 )
 from ...core.agent.sql_guard import processing_expression_problem
@@ -197,7 +197,7 @@ def _parameter(definition) -> Dict[str, Any]:
         row['value'] = '"EPSG:2154", or a layer of the project for its CRS'
     elif kind == 'expression':
         row['value'] = 'a QGIS expression (plain conditions and computations; functions outside a list are refused)'
-    elif kind == INTERPOLATION_DATA:
+    elif kind in INTERPOLATION_TYPES:
         row['value'] = ('one row per input, joined by "::|::": "layer::~::value source::~::field index::~::source type", '
                         'the layer a vector layer of the project (name or id), value source 0 a field (its index from '
                         '0), 1 the Z or 2 the M of the geometries (field index -1), source type 0 points, 1 structure '
@@ -364,7 +364,7 @@ def _value(definition, value: Any) -> Any:
         return value
     if kind == 'enum':
         return _enum_value(definition, value)
-    if kind == INTERPOLATION_DATA:
+    if kind in INTERPOLATION_TYPES:
         return _interpolation_data(name, value)
     if isinstance(value, (dict,)):
         raise ValueError(f"{name}: an object is not taken here")

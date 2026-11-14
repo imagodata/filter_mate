@@ -2,7 +2,9 @@
 """Which Processing algorithms a model may run (core/agent/processing_policy.py) and what its formulas may hold."""
 import pytest
 
-from core.agent.processing_policy import DENIED, VALUE_ALGORITHMS, forced_values, matches, refusal
+from core.agent.processing_policy import (
+    CHECKED_TYPES, DENIED, INTERPOLATION_TYPES, VALUE_ALGORITHMS, forced_values, matches, refusal,
+)
 from core.agent.sql_guard import expression_problem, processing_expression_problem
 
 pytestmark = pytest.mark.unit
@@ -78,6 +80,17 @@ def test_interpolations_run_their_rows_are_rewritten_by_the_adapter():
     idw = [("INTERPOLATION_DATA", "idw_interpolation_data", False), ("DISTANCE_COEFFICIENT", "number", False),
            ("EXTENT", "extent", False), ("PIXEL_SIZE", "number", False), ("OUTPUT", "rasterDestination", False)]
     assert refusal("qgis:idwinterpolation", "qgis", idw) == ""
+
+
+def test_the_types_qgis_4_gave_to_a_pixel_size_and_to_the_rows_of_an_interpolation_are_known():
+    """2026-11-14: unknown here, a heatmap was refused in QGIS 4.2 and the interpolations in 4.3."""
+    heat = [("INPUT", "source", False), ("RADIUS", "distance", False), ("PIXEL_SIZE", "heatmappixelsize", False),
+            ("OUTPUT", "rasterDestination", False)]
+    assert refusal("native:heatmapkerneldensityestimation", "native", heat) == ""
+    tin = [("INTERPOLATION_DATA", "interpolationdata", False), ("EXTENT", "extent", False),
+           ("PIXEL_SIZE", "interpolationpixelsize", False), ("OUTPUT", "rasterDestination", False)]
+    assert refusal("native:tininterpolation", "native", tin) == ""
+    assert {"interpolationdata", "idw_interpolation_data"} <= INTERPOLATION_TYPES <= CHECKED_TYPES
 
 
 def test_what_sends_data_out_is_refused_by_name():

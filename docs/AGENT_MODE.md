@@ -659,6 +659,18 @@ project; `load_skill` loads the instructions of a task. They are declared in `co
   (`filtermate_configuration`) and the settings reference as the resource `filtermate://settings/reference`;
   `skills/export/filtermate-<name>/SKILL.md` is the same text as an Agent Skill for an application connected to it
   (`scripts/export_agent_skills.py`, checked by a test; not in the plugin zip).
+- Skills of the work itself (2026-11-14): `workflows` gives the short chain for a request of several steps (near or
+  inside something, around a place, several criteria, a count by category, a thematic map, data fetched then
+  filtered) and what makes a turn cost less (read once, one call for several layers, a filter rather than a layer);
+  `cartography` says how to choose a style from the data (the mode from what the field holds, the method from
+  `layer_statistics`, the ramp from what the values mean); `analysis` lists the Processing algorithms whose id is
+  the same from QGIS 3.22 to 4.3 and that the rules let run (read in each of them with `describe_algorithm`), so the
+  model skips `find_algorithms` for them. `find_place` is always offered (`families.ALWAYS`) though `workflows`
+  names it. Not measured with a real model: the cases of the three skills pass offline only.
+- Processing in QGIS 4: the size of a pixel of a heatmap (`heatmappixelsize`, 4.2) and of an interpolation
+  (`interpolationpixelsize`, 4.3), and the rows of an interpolation (`interpolationdata`, 4.3), have types of their
+  own there; unknown to `processing_policy`, a heatmap was refused in 4.2 and the interpolations in 4.3. The rows
+  are written again by FilterMate under either name (`INTERPOLATION_TYPES`).
 
 What the chat adds to the REST checks, because a model can be steered by what it reads:
 

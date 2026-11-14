@@ -3,7 +3,8 @@
 
 Plain Python. An option of the agent (on by default): fewer tools in each request. The
 tools that filter and read (``FILTERING_TOOLS``) are always offered, and load_skill; the other tools a skill of the
-plugin names come with that skill, when the chat can load it. A tool no such skill names stays offered, and a skill
+plugin names come with that skill, when the chat can load it (find_place is always offered too: finding a place
+needs no instructions). A tool no such skill names stays offered, and a skill
 from elsewhere unlocks nothing (its tools are ignored, ``skills.set_extra``). Other applications (MCP) always get
 every tool.
 """
@@ -14,7 +15,8 @@ from typing import Dict, Iterable, List, Sequence, Set
 from .skills import Skill
 from .tool_catalog import FILTERING_TOOLS, LOAD_SKILL, ToolSpec
 
-ALWAYS = frozenset(FILTERING_TOOLS) | {LOAD_SKILL}
+# find_place: a place is found before anything else ("zoom to Albi"), so no skill that names it holds it back.
+ALWAYS = frozenset(FILTERING_TOOLS) | {LOAD_SKILL, "find_place"}
 
 
 def bringing(tools: Sequence[ToolSpec], skills: Iterable[Skill]) -> Dict[str, List[str]]:

@@ -1003,6 +1003,19 @@ def check_processing(project, gpkg):
     quiet = tools.run_algorithm(stats_id, {"INPUT_LAYER": "communes", "FIELD_NAME": "pop"}, share_values=False)
     check("processing: values left out when they are not shared", "values" not in quiet, quiet)
 
+    # A heatmap and an interpolation: since QGIS 4.2 and 4.3 the size of their pixels and the inputs of an
+    # interpolation have types of their own, unknown to the rules until 2026-11-14 (both were refused there).
+    heat = tools.run_algorithm("qgis:heatmapkerneldensityestimation", {"INPUT": "communes", "RADIUS": 5, "PIXEL_SIZE": 1})
+    check("processing: a heatmap", bool(heat["layers"]) and heat["layers"][0]["layer_kind"] == "raster", heat)
+    rows = f"communes::~::0::~::{gpkg.fields().lookupField('pop')}::~::0"
+    area = [650000, 6859990, 650060, 6860010]
+    idw = tools.run_algorithm("qgis:idwinterpolation", {"INTERPOLATION_DATA": rows, "EXTENT": area, "PIXEL_SIZE": 1})
+    check("processing: an interpolation from a layer of the project", bool(idw["layers"]) and
+          idw["layers"][0]["layer_kind"] == "raster", idw)
+    check("processing: an interpolation refuses a path as its input", refused(
+        tools.run_algorithm, "qgis:idwinterpolation",
+        {"INTERPOLATION_DATA": rows.replace("communes", gpkg.source(), 1), "EXTENT": area, "PIXEL_SIZE": 1}))
+
     operations._RUNNING.append("something")
     check("processing: refused while FilterMate is busy", "already running" in refused(
         tools.run_algorithm, "native:buffer", {"INPUT": "communes"}))
