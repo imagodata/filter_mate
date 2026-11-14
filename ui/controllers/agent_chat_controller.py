@@ -25,6 +25,7 @@ from ...adapters.agent.plugin_settings import settings_handlers
 from ...adapters.agent.bounded_http import CHAT as CHAT_WAITS, HttpFailure, abort_active, fetch, on_abort, owned_by
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
+from ...core.domain.history_timeline import KIND_AGENT
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader, connector_entries, shown_title
 from ...core.agent.mcp_client import McpError
@@ -72,6 +73,7 @@ from ...filtermate_api.config import _default_export_root
 from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
 from .agent_mcp_bridge import NO_UNDO_POINT, AgentMcpBridge
+from .history_tips import button_tip
 from ..widgets.agent_panel import (
     ANSWER_CONVERSATION, ANSWER_NO, ANSWER_ONCE, AgentPanel, AgentSettingsDialog, ask_code, ask_plain,
     ask_with_conversation, level_short, preset_label,
@@ -368,11 +370,12 @@ class AgentChatController(QObject):
         undone = [turn for turn in turns if not turn.get("applied")]
         busy = self.chat_busy() or self._mcp.busy
         can_undo, can_redo = TurnCheckpoint.can_undo() and not busy, TurnCheckpoint.can_redo() and not busy
-        last = one_line(applied[-1].get("request") or "", 80) if applied else ""
-        following = one_line(undone[0].get("request") or "", 80) if undone else ""
+        last = (applied[-1].get("request") or "") if applied and can_undo else ""
+        following = (undone[0].get("request") or "") if undone and can_redo else ""
+        # Said as Undo and Redo say the other histories (history_tips): the step, the history, how far.
         return {"can_undo": can_undo, "can_redo": can_redo,
-                "undo_tip": _tr("Undo: {}").format(last) if can_undo and last else _tr("Nothing to undo."),
-                "redo_tip": _tr("Redo: {}").format(following) if can_redo and following else _tr("Nothing to redo.")}
+                "undo_tip": button_tip(True, last, KIND_AGENT, len(applied)),
+                "redo_tip": button_tip(False, following, KIND_AGENT, len(undone))}
 
     def describe_call(self, call: ToolCallPart) -> str:
         """A step of a turn, in the words of the thread, on one line."""

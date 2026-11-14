@@ -211,6 +211,15 @@ class ControllerIntegration:
         if not self._is_setup:
             return
 
+        # The history first: it adds an entry to the menu of Compare.
+        history = getattr(self, "_history_controller", None)
+        self._history_controller = None
+        if history is not None:
+            try:
+                history.teardown()
+            except Exception as e:  # never in the way of the rest of the teardown
+                logger.error(f"Error during history teardown: {e}")
+
         compare = getattr(self, "_compare_controller", None)
         self._compare_controller = None
         if compare is not None:
@@ -260,6 +269,9 @@ class ControllerIntegration:
         compare = getattr(self, "_compare_controller", None)
         if compare is not None:  # its swipe tool would keep the map while the dock is hidden
             compare.stop()
+        history = getattr(self, "_history_controller", None)
+        if history is not None:
+            history.close_panel()
         controller = self._point_cloud_ui_controller
         if controller is not None:
             controller.release_map_tools()
@@ -338,6 +350,14 @@ class ControllerIntegration:
         except Exception:
             logger.warning("Compare mode not set up", exc_info=True)
             self._compare_controller = None
+
+        # The history of the project, over the dock (right-click on Undo or Redo), and what their tooltips say.
+        try:
+            from .history_controller import HistoryController
+            self._history_controller = HistoryController(self._dockwidget, self, self._compare_controller)
+        except Exception:
+            logger.warning("History panel not set up", exc_info=True)
+            self._history_controller = None
 
         logger.debug("All controllers created")
 
@@ -1989,6 +2009,11 @@ class ControllerIntegration:
     @property
     def coverage_controller(self) -> Optional[CoverageModeController]:
         return self._point_cloud_ui_controller
+
+    @property
+    def history_controller(self):
+        """The history panel and the tooltips of Undo / Redo (``HistoryController``), None when not set up."""
+        return getattr(self, "_history_controller", None)
 
     def delegate_coverage_activate_awaited(self) -> bool:
         """Show the raster / point cloud layer picked before add_layers registered it; True when shown."""

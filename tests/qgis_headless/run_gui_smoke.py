@@ -869,7 +869,7 @@ def s_compare_pin():
     menu = controller.menu
     texts = [action.text() for action in menu.actions()]
     check('compare: right-click opens the menu of the button', menu.isVisible()
-          and texts == ['Pin the current state', 'Remove the pin'], f"visible={menu.isVisible()} {texts}")
+          and texts == ['Pin the current state', 'Remove the pin', '', 'History…'], f"visible={menu.isVisible()} {texts}")
     next(action for action in menu.actions() if action.text() == 'Pin the current state').trigger()
     menu.close()
     check('compare: pinned from the menu, available, its tooltip says when', controller.pinned is not None
@@ -912,6 +912,42 @@ def s_compare_pin_check():
         iface.mapCanvas().setMapTool(previous)
     check('compare: off after the pin, the tool there before', not button.isChecked() and not session.active
           and iface.mapCanvas().mapTool() is previous)
+
+
+def s_history_check():
+    """The history of the project: a right-click on Undo opens it over the dock, the filter just done listed first
+    among the filters of the dock, marked as what Undo would undo; its tooltip names it."""
+    from qgis.PyQt.QtCore import QPoint
+    from qgis.PyQt.QtGui import QContextMenuEvent
+    from filter_mate.core.domain.history_timeline import KIND_VECTOR
+    from filter_mate.ui.controllers.history_controller import COLUMN_MARK, COLUMN_WHAT, INDEX_ROLE
+    d = dock()
+    controller = d._controller_integration.history_controller
+    if not check('history: set up with the dock', controller is not None):
+        return None
+    undo = d.pushButton_action_undo_filter
+    QApplication.sendEvent(undo, QContextMenuEvent(QContextMenuEvent.Reason.Mouse, QPoint(4, 4),
+                                                   undo.mapToGlobal(QPoint(4, 4))))
+    QApplication.processEvents()
+    panel = controller.panel
+    if not check('history: a right-click on Undo opens the panel', panel is not None and panel.isVisible()):
+        return None
+    vector = [(index, item) for index, item in enumerate(panel.items) if item.kind == KIND_VECTOR]
+    rows = {panel.tree.topLevelItem(i).data(0, INDEX_ROLE): panel.tree.topLevelItem(i)
+            for i in range(panel.tree.topLevelItemCount())}
+    first = vector[0] if vector else (None, None)
+    row = rows.get(first[0])
+    source = d.current_layer
+    check('history: the vector filter just done is listed, marked as what Undo undoes',
+          first[1] is not None and first[1].applied and source is not None and source.name() in first[1].layers
+          and row is not None and row.text(COLUMN_MARK) == 'Undo' and row.text(COLUMN_WHAT) == first[1].label,
+          f"vector={[(item.label, item.layers, item.applied) for _i, item in vector]} "
+          f"mark={row.text(COLUMN_MARK) if row is not None else None}")
+    controller.close_panel()
+    controller.refresh()
+    check('history: the tooltip of Undo names the filter and its history', first[1] is not None
+          and undo.toolTip().startswith('Undo: ' + first[1].label[:40]) and 'vector filters of the dock' in undo.toolTip(),
+          undo.toolTip())
 
 
 def s_vector_check():
@@ -1996,7 +2032,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_compare_pin,
-         s_compare_pin_check, s_vector_check,
+         s_compare_pin_check, s_history_check, s_vector_check,
          s_vector_undo_check,
          s_user_pick_after_undo_check,
          s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,

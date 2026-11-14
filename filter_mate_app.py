@@ -2596,7 +2596,8 @@ class FilterMateApp:
         if self.dockwidget.agent_has_focus():
             self.dockwidget.show_agent_undo_state(undo_btn, redo_btn)
             return
-        self.dockwidget.restore_undo_tooltips(undo_btn, redo_btn)
+        # The tooltips say what the buttons would do, once their state below is set.
+        self.dockwidget.refresh_undo_tips(undo_btn, redo_btn)
 
         # FIX 2026-02-18: Only update undo/redo on filtering tab (index 0)
         # On other tabs, these buttons must stay disabled per select_tabTools_index()

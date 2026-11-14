@@ -7307,8 +7307,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         return (getattr(self, '_agent_chat', None) is not None and sections is not None
                 and bool(getattr(sections, 'is_open', lambda _key: False)('agent')))
 
-    def restore_undo_tooltips(self, undo_button, redo_button) -> None:
-        """Back to the dock history: the tooltips the buttons had before AGENT named its steps."""
+    def refresh_undo_tips(self, undo_button, redo_button) -> None:
+        """The tooltips of Undo and Redo say what they would undo or redo, from the history they walk now, once their
+        state is set (HistoryController); without it, the tooltips they had before AGENT named its steps."""
+        integration = getattr(self, '_controller_integration', None)
+        history = getattr(integration, 'history_controller', None) if integration is not None else None
+        if history is not None:
+            history.schedule_refresh()
+            return
         saved = getattr(self, '_fm_undo_tooltips', None)
         if saved:
             undo_button.setToolTip(saved[0])

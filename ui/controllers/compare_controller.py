@@ -275,6 +275,11 @@ class CompareController(QObject):
     def pinned(self) -> Optional[MapState]:
         return self._pin
 
+    @property
+    def named(self) -> Tuple[str, ...]:
+        """What the last comparison said it could not draw as it was (a layer removed since...)."""
+        return self._said
+
     def _pinned_mode(self) -> bool:
         """The comparison shows the pin (not a step given by ``compare_with``) and follows the map."""
         return self._pin is not None and self._given is None
