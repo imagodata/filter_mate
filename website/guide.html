@@ -69,7 +69,7 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">User guide for FilterMate 5.1</span>
+    <span class="section-label">User guide for FilterMate 5.1.1</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
@@ -169,7 +169,7 @@
         <tr><td><strong>Title bar badges</strong></td><td>Favorites, detach and close are badges of the panel's title bar. The &#9733; button opens the favorites menu; it turns amber once favorites are saved. A button next to it folds EXPLORING. The colored source tag of the layer card shows the kind of the current layer and what reads it: the backend for a vector layer (PostgreSQL, Spatialite, OGR, Memory), the provider for a raster or a point cloud. For example <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
         <tr><td><strong>Upper stack</strong></td><td><strong>Agent</strong>, then the <strong>Exploring</strong> zone. AGENT is a chat that filters from a sentence (<a href="#agent">section 14</a>). Exploring selects on the current layer, described by the card at the top. For a vector layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons. Rasters and point clouds get their own tools (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Lower stack</strong></td><td>Three collapsible sections: <strong>Filtering</strong>, <strong>Exporting</strong> and <strong>Configuration</strong>.</td></tr>
-        <tr><td><strong>Action bar</strong></td><td>The six buttons that actually do something: Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
+        <tr><td><strong>Action bar</strong></td><td>The seven buttons that actually do something: Filter, Undo, Redo, Compare, Unfilter, Export, About.</td></tr>
     </table>
     </div>
 
@@ -193,8 +193,8 @@
                 <figcaption>Header: the favorites button and the current layer, a vector layer read by the Spatialite backend.</figcaption>
             </figure>
             <figure>
-                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Unfilter, Export and About" loading="lazy" width="614" height="119">
-                <figcaption>Action bar after a filter: Undo is enabled, Redo is not yet.</figcaption>
+                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Compare, Unfilter, Export and About" loading="lazy" width="357" height="49">
+                <figcaption>Action bar after a filter: Undo is enabled, Redo is not yet, Compare is on.</figcaption>
             </figure>
         </div>
     </div>
@@ -407,8 +407,8 @@ AND ST_Intersects("geom",
 <section id="actions">
     <h2><span class="num">7</span>Action bar, undo and history</h2>
     <figure>
-        <img src="img/guide/action-bar.png" alt="The six action buttons" loading="lazy" width="614" height="119">
-        <figcaption>From left to right: Filter, Undo, Redo, Unfilter, Export, About.</figcaption>
+        <img src="img/guide/action-bar.png" alt="The seven action buttons" loading="lazy" width="357" height="49">
+        <figcaption>From left to right: Filter, Undo, Redo, Compare (on here), Unfilter, Export, About.</figcaption>
     </figure>
     <div class="table-wrap">
     <table>
@@ -416,6 +416,7 @@ AND ST_Intersects("geom",
         <tr><td><strong>Filter</strong></td><td>Builds and applies the filter described by the Exploring zone and the Filtering tab.</td></tr>
         <tr><td><strong>Undo</strong></td><td>Restores the previous filter state of the affected layers. The history is per project and survives a restart of QGIS. While AGENT is open, Undo and Redo walk the turns of the agent instead (<a href="#agent">section 14</a>).</td></tr>
         <tr><td><strong>Redo</strong></td><td>Re-applies a filter you just undid.</td></tr>
+        <tr><td><strong>Compare</strong> <small>(5.1.1)</small></td><td>Shows the map as it was before the last filter on the left of a line that follows the mouse, and the map as it is on its right: what Undo would bring back. Available when Undo is; click it again to leave. Choosing another map tool, Filter, Undo, Redo, Unfilter, another layer or another project ends the comparison.</td></tr>
         <tr><td><strong>Unfilter</strong></td><td>Removes FilterMate's filter from the source layer and its targets, leaving other layers alone. Unlike Undo, it does not step back through history.</td></tr>
         <tr><td><strong>Export</strong></td><td>Runs the export configured in the Exporting tab.</td></tr>
         <tr><td><strong>About</strong></td><td>Opens the FilterMate website in your browser.</td></tr>
@@ -535,7 +536,7 @@ AND ST_Intersects("geom",
         <tr><td><code>LANGUAGE</code></td><td>auto or one of 34 locales</td><td><em>auto</em> follows the QGIS locale. The interface retranslates without restart.</td></tr>
         <tr><td><code>UI_PROFILE</code></td><td>auto / compact / normal / hidpi</td><td>Widget sizes, applied at once and at startup. <em>auto</em> picks from the screen of the QGIS window and its scaling: a usable height under 800 logical pixels selects <em>compact</em> whatever the scaling. Force <em>hidpi</em> on 4K displays if controls look small.</td></tr>
         <tr><td><code>DOCK_POSITION</code></td><td>left / right / top / bottom</td><td>Where the panel docks when opened.</td></tr>
-        <tr><td><code>ACTION_BAR_POSITION</code></td><td>top / bottom / left / right</td><td>Position of the six action buttons.</td></tr>
+        <tr><td><code>ACTION_BAR_POSITION</code></td><td>top / bottom / left / right</td><td>Position of the action buttons.</td></tr>
         <tr><td><code>ACTIVE_THEME</code></td><td>auto / default / dark / light</td><td><em>auto</em> follows the QGIS theme.</td></tr>
         <tr><td><code>feature_picker_limit</code></td><td>number, default 1000</td><td>Maximum rows loaded in the multiple-selection list.</td></tr>
         <tr><td><code>AGENT</code></td><td>true / false</td><td>Shows the AGENT section (<code>enabled</code> under <code>APP.OPTIONS.AGENT</code>). On by default. Turning it on shows the section the next time the panel opens; turning it off hides it after QGIS restarts.</td></tr>
@@ -893,6 +894,35 @@ processing.run("filtermate:batch_filter", {
         <img src="img/guide/agent-chat.png" alt="AGENT open above the folded EXPLORING section: two requests, each with a filter card that gives the features kept" loading="lazy" width="360" height="720">
         <figcaption>Two requests and their cards: each filter names its layers and gives the features it kept; <em>Undo</em> on the last card takes it back. AGENT shares the upper stack with EXPLORING, folded here.</figcaption>
     </figure>
+
+    <h3>It asks when the choice is yours <small>(5.1.1)</small></h3>
+    <p>
+        When a decision is yours and its choices can be named (which layer, which look), the agent does not guess and does not write a question for you to answer by typing.
+        A card shows one to four questions, each with two to four choices, the recommended one first, and always an <em>Other</em> in your own words. <strong>Answer</strong> sends your choices back and the request goes on in the same turn.
+        Closing the card answers nothing: the agent then says what it would have done. An answer decides what to do, it never authorizes it: a change that follows is asked as your level of autonomy says.
+    </p>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-question.png" alt="A question card in the AGENT thread: which of two road layers to style, then what to show, with choices to tick and an Other field" loading="lazy" width="360" height="900">
+        <figcaption>A request with two possible layers: the agent asks which one, and what to show, before it changes anything.</figcaption>
+    </figure>
+
+    <h3>Set FilterMate up with the agent <small>(5.1.1)</small></h3>
+    <p>
+        The first time a new version opens, AGENT offers once to set FilterMate up. The agent looks at what the project holds, asks a few questions (what you do with it, your screen, language and look, your data), then proposes the settings, each shown before and after. Nothing changes until you click <strong>Apply</strong>, and the change is undone like any other step.
+        Start it again at any time from the menu <em>Vector &gt; FilterMate &gt; Set up FilterMate with the agent</em>, or from the <strong>&#8943;</strong> menu of the panel. You can also simply ask: what a setting does, the dark theme, why your filters are slow.
+    </p>
+
+    <figure class="narrow">
+        <img src="img/guide/agent-setup.png" alt="The offer to set FilterMate up with the agent: what it covers, with the Start and Not now buttons" loading="lazy" width="360" height="640">
+        <figcaption>The offer, shown once per version: <em>Start</em> begins the questions, <em>Not now</em> leaves it to the menu.</figcaption>
+    </figure>
+
+    <h3>Your own skills <small>(5.1.1)</small></h3>
+    <p>
+        A team can write its own instructions for the agent (how it names layers, which sources to use, the steps of a delivery) as a skill: a folder holding a <code>SKILL.md</code>, in <code>FilterMate/skills</code> of your QGIS profile or in <code>filtermate_skills</code> next to a project.
+        Before the agent follows one for the first time, you read all of it and allow it, and you are asked again when it changes. A skill gives the agent no right: every change stays asked as your settings say.
+    </p>
 
     <h3>Filters apply at once, and each step can be undone</h3>
     <ul>

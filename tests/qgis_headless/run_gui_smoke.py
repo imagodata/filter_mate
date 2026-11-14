@@ -694,11 +694,12 @@ def s_agent_setup_offer_check():
     first = chat.offer_setup_once('smoke-9.9.9')
     second = chat.offer_setup_once('smoke-9.9.9')
     cards = len(chat._settings_cards)
-    shown = cards >= 1 and 'Set FilterMate up with the agent?' in chat.panel.thread.toPlainText()
+    controller = importlib.import_module(f'{PACKAGE}.ui.controllers.agent_chat_controller')
+    shown = cards >= 1 and controller._tr('Set FilterMate up with the agent?') in chat.panel.thread.toPlainText()
     plugin = qgis.utils.plugins[PACKAGE]
     entries = [action.text() for action in plugin.actions]
     check('setup with the agent: offered once per version, in the QGIS menu and the panel menu',
-          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and 'Set up FilterMate with the agent' in entries
+          first is True and second is False and bool(shown) and len(chat._settings_cards) == before + 1 and plugin.tr('Set up FilterMate with the agent') in entries
           and chat.panel.setup_action is not None, f"first={first} second={second} entries={entries}")
     chat.new_conversation()  # the checks of the AGENT section that follow expect its welcome
     return waits(0.2)
@@ -823,6 +824,9 @@ def s_compare_check():
     check('compare: on after a filter, the source and the dem drawn as they were', button.isChecked()
           and layer('dem').id() in compared and source is not None and source.id() in compared
           and canvas.mapTool() is session.tool, f"checked={button.isChecked()} compared={compared}")
+    if os.environ.get('FM_BOARDS'):  # the action bar of the guide: after a filter, Compare on
+        QApplication.processEvents()
+        d.frame_actions.grab().save(os.path.join(os.environ['FM_BOARDS'], 'ActionBar.png'))
     STATE['compare_session'] = session
     STATE['compare_previous_tool'] = previous
     return lambda: session is None or session.renders >= 1
@@ -1557,6 +1561,14 @@ BOARD_TEXTS = {
         'parcels': "Les parcelles de plus d'un hectare",
         'select_roads': 'Sélection de 3 routes',
         'which_layers': 'Quelles couches contient ce projet ?',
+        'style_roads': 'Mets les routes en valeur sur la carte',
+        'questions': [
+            {'header': 'Couche', 'question': 'Deux couches portent des routes. Laquelle mettre en valeur ?',
+             'options': [{'label': 'troncon_de_route (recommandé)', 'description': 'BD TOPO, 48 210 tronçons'},
+                         {'label': 'routes_departementales', 'description': '312 tronçons'}]},
+            {'header': 'Rendu', 'question': 'Que faut-il montrer ?', 'multi_select': True,
+             'options': [{'label': 'Une couleur par importance'}, {'label': 'Le nom des routes'},
+                         {'label': 'Une largeur selon le nombre de voies'}]}],
     },
     'en': {
         'communes': 'Keep the communes of more than 10,000 people',
@@ -1572,6 +1584,14 @@ BOARD_TEXTS = {
         'parcels': 'The parcels larger than one hectare',
         'select_roads': 'Selection of 3 roads',
         'which_layers': 'Which layers does this project hold?',
+        'style_roads': 'Make the roads stand out on the map',
+        'questions': [
+            {'header': 'Layer', 'question': 'Two layers hold roads. Which one should stand out?',
+             'options': [{'label': 'troncon_de_route (recommended)', 'description': 'BD TOPO, 48,210 sections'},
+                         {'label': 'routes_departementales', 'description': '312 sections'}]},
+            {'header': 'Look', 'question': 'What should it show?', 'multi_select': True,
+             'options': [{'label': 'A colour by importance'}, {'label': 'The names of the roads'},
+                         {'label': 'A width by number of lanes'}]}],
     },
 }
 
@@ -1642,6 +1662,29 @@ def capture_boards(d, chat, folder):
     panel.show_history()
     shot('History')
     panel.show_thread()
+    # The cards of the thread: the questions of ask_user, then the offer to set FilterMate up.
+    controller = importlib.import_module(f'{PACKAGE}.ui.controllers.agent_chat_controller')
+    parse_questions = importlib.import_module(f'{PACKAGE}.core.agent.questions').parse_questions
+    d.resize(int(os.environ.get('FM_BOARD_W', '360')), 900)  # the whole card, down to its Answer button
+    panel.clear_thread()
+    panel.add_user(t['style_roads'])
+    panel.add_question_card({'other': controller._tr('Other'), 'answer': controller._tr('Answer'),
+                             'no_answer': controller._tr('No answer'),
+                             'close': controller._tr('Close without answering')}, parse_questions(t['questions']))
+    panel.show_thread()
+    shot('Question')
+    panel.clear_thread()
+    d.resize(int(os.environ.get('FM_BOARD_W', '360')), 640)
+    chat._show_setup_offer()
+    panel.show_thread()
+    QApplication.processEvents()
+    bar = panel.thread.verticalScrollBar() if hasattr(panel.thread, 'verticalScrollBar') else None
+    if bar is not None:
+        bar.setValue(bar.minimum())  # from its heading
+    shot('Setup')
+    chat._settings_cards.clear()
+    chat._setup_card = None
+    panel.clear_thread()
     settings = importlib.import_module(f'{PACKAGE}.adapters.agent.settings')
     load_settings, target_of = settings.load_settings, settings.target_of
     AgentSettingsDialog = importlib.import_module(f'{PACKAGE}.ui.widgets.agent_panel').AgentSettingsDialog
