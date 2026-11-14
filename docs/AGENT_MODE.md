@@ -620,7 +620,9 @@ estimated:
   vertices);
 - `identify_at`: the features and the raster values at a point, on the visible layers or the ones named.
 
-A web service is not read by any of them.
+A web service is not read by any of them, but for `sample_features`: a few features of what the map shows (the
+extent of the map as the filter rectangle, 20 at most, no expression nor selection), which its server was already
+asked to draw it; never the layer as a whole. The answer says so in `scope`.
 
 Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/processing_policy.py`):
 
@@ -649,9 +651,12 @@ Processing (`adapters/public_api/processing_tools.py`, rule in `core/agent/proce
 - without attribute values shared, what an algorithm answers besides its layers (statistics) is left out.
 
 Style (`adapters/public_api/layer_style.py`): `set_layer_style` (vector: single, categorized on a field of 100 values
-at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation;
+at most, graduated in 2 to 12 classes by quantile, equal interval, Jenks, pretty breaks or standard deviation, or
+`rules`: 20 rules at most, each a condition held to the list of `select_features`, a color and a legend name, one
+of them with no condition for every other feature;
 raster: pseudocolor or gray stretch of a band, its range read from the statistics of the band or given, never read
-from a web service) and `set_labels` (a field, size, color, halo; or off), with a ramp of the style of QGIS and an
+from a web service) and `set_labels` (a field, or an expression held to the list of `update_features`; size, color, halo, the scale
+from which they show; or off), with a ramp of the style of QGIS and an
 opacity. The answer says how many classes were made, never their values. Before the first call of a turn on a layer,
 the turn checkpoint keeps its symbology, labels and rendering as XML (`exportNamedStyle`), and undoing the turn puts
 them back (`importNamedStyle`); redoing it applies the new style again.

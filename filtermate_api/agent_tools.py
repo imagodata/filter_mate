@@ -275,12 +275,14 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
 
     def set_layer_style(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in ("field", "color", "ramp", "classes", "method", "invert", "band")}
-        options.update({key: args.get(key) for key in ("opacity", "minimum", "maximum")})
+        options.update({key: args.get(key) for key in ("opacity", "minimum", "maximum", "rules")})
         return asdict(accessor.set_layer_style(args["layer"], args["mode"], **options))
 
     def set_labels(args: Dict[str, Any]) -> Dict[str, Any]:
         return asdict(accessor.set_labels(args["layer"], field=args["field"], enabled=args["enabled"],
-                                          size=args.get("size"), color=args["color"], buffer=args["buffer"]))
+                                          size=args.get("size"), color=args["color"], buffer=args["buffer"],
+                                          expression=args["expression"],
+                                          visible_from_scale=args.get("visible_from_scale")))
 
     def create_layout(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in ("title", "page", "orientation", "extent_layer", "legend", "scale_bar",

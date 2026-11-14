@@ -111,6 +111,17 @@ class RasterSelection(BaseModel):
         return self
 
 
+class StyleRule(BaseModel):
+    """One rule of a rule-based style: the features a condition keeps, and their color."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expression: str = Field(default="", max_length=2000, description=(
+        'QGIS condition (NOT SQL), as for select_features: "population" > 10000. Empty: every other feature'))
+    color: str = Field(..., min_length=1, max_length=50, description="#rrggbb or a color name")
+    label: str = Field(default="", max_length=100, description="Its name in the legend")
+
+
 class PointCloudCriteria(BaseModel):
     """Points kept on a point cloud (ASPRS classes, ranges, return number, expression)."""
 
@@ -278,8 +289,9 @@ def build_server(client: FilterMateClient) -> Any:
         """A few features of a vector layer with their attributes, to see what its rows look like.
 
         Among the features the layer shows now (its filter applies). Returns crs_authid, features [{fid, attributes
-        {field: value}, geometry {type, centroid, bbox}}], truncated (more features match) and fields_truncated. Long
-        text is cut at 200 characters. Refused on web services.
+        {field: value}, geometry {type, centroid, bbox}}], truncated (more features match), fields_truncated and
+        scope. Long text is cut at 200 characters. A web service (WFS) is read only where the map shows it, without
+        expression nor selection (scope: the features the map shows): zoom to the area first.
         """
         return await call("POST", "/layers/sample", _body(
             layer=layer, limit=limit, fields=fields, expression=expression, selected_only=selected_only,
@@ -592,9 +604,15 @@ def build_server(client: FilterMateClient) -> Any:
     @mcp.tool(annotations=_write("Style a layer", idempotent=True))
     async def set_layer_style(
         layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name")],
-        mode: Annotated[Literal["single", "categorized", "graduated", "pseudocolor", "gray"], Field(description=(
+        mode: Annotated[Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray"], Field(description=(
             "Vector: single (one symbol, color), categorized (one color per value of field), graduated (classes of "
-            "a numeric field). Raster: pseudocolor (a color ramp over band values), gray (a gray stretch)"))],
+            "a numeric field), rules (a color per condition, see rules). Raster: pseudocolor (a color ramp over band "
+            "values), gray (a gray stretch)"))],
+        rules: Annotated[Optional[List[StyleRule]], Field(max_length=20, description=(
+            'rules: one symbol per condition, the first that matches drawn first in the legend: [{"expression": '
+            '"\\"population\\" > 10000", "color": "#d7191c", "label": "Towns"}, {"expression": "", "color": '
+            '"#cccccc", "label": "Others"}]. An empty expression is every other feature; without one, the features '
+            "no rule matches are not drawn"))] = None,
         field: Annotated[str, Field(max_length=1000, description="Field for categorized and graduated")] = "",
         color: Annotated[str, Field(max_length=50, description="single: #rrggbb or a color name")] = "",
         ramp: Annotated[str, Field(max_length=100, description=(
@@ -617,7 +635,8 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layers/style", _body(
             layer=layer, mode=mode, field=field, color=color, ramp=ramp, classes=classes, method=method,
-            invert=invert, opacity=opacity, band=band, minimum=minimum, maximum=maximum))
+            invert=invert, opacity=opacity, band=band, minimum=minimum, maximum=maximum,
+            rules=[rule.model_dump() for rule in rules] if rules else None))
 
     @mcp.tool(annotations=_write("Label a layer", idempotent=True))
     async def set_labels(
@@ -627,14 +646,22 @@ def build_server(client: FilterMateClient) -> Any:
         size: Annotated[Optional[float], Field(ge=4, le=72, description="Text size in points")] = None,
         color: Annotated[str, Field(max_length=50, description="Text color, #rrggbb or a name")] = "",
         buffer: Annotated[bool, Field(description="A light halo around the text, to read it on any background")] = True,
+        expression: Annotated[str, Field(max_length=2000, description=(
+            "Instead of field: a QGIS expression (NOT SQL) written on the map, to join or format values: "
+            "\"nom\" || ' (' || \"population\" || ')', upper(\"nom\"), round(\"area\" / 10000, 1) || ' ha'"))] = "",
+        visible_from_scale: Annotated[Optional[float], Field(ge=1, le=1e9, description=(
+            "Show the labels only when the map is at least this close: 50000 for 1:50 000 and closer. At every "
+            "scale by default"))] = None,
     ) -> Dict[str, Any]:
-        """Write the values of a field next to the features of a vector layer on the map, or turn the labels off.
+        """Write the values of a field, or of an expression, next to the features of a vector layer on the map, or
+        turn the labels off.
 
-        Returns labels (on or off) and field. In the chat of FilterMate, undoing the turn brings the previous labels
+        Returns labels (on or off), field or expression, and visible_from_scale. In the chat of FilterMate, undoing the turn brings the previous labels
         back.
         """
-        return await call("POST", "/layers/labels", _body(layer=layer, field=field, enabled=enabled, size=size,
-                                                          color=color, buffer=buffer))
+        return await call("POST", "/layers/labels", _body(
+            layer=layer, field=field, enabled=enabled, size=size, color=color, buffer=buffer, expression=expression,
+            visible_from_scale=visible_from_scale))
 
     @mcp.tool(annotations=_write("Edit attributes of features", idempotent=True))
     async def update_features(

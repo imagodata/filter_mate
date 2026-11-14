@@ -321,8 +321,41 @@ def check_style(project, gpkg, work):
     single = style.set_layer_style("communes", "single", color="#00ff00")
     check("style: one symbol of a color", gpkg.renderer().type() == "singleSymbol" and
           gpkg.renderer().symbol().color().name() == "#00ff00", single)
+    ruled = style.set_layer_style("communes", "rules", rules=[
+        {"expression": '"pop" > 5000', "color": "#d7191c", "label": "Towns"},
+        {"expression": '"nom" LIKE \'A%\'', "color": "blue"}, {"color": "#cccccc"}])
+    rule_renderer = gpkg.renderer()
+    children = rule_renderer.rootRule().children() if rule_renderer.type() == "RuleRenderer" else []
+    check("style: rules", ruled["classes"] == 3 and [child.filterExpression() for child in children[:2]]
+          == ['"pop" > 5000', '"nom" LIKE \'A%\''] and children[2].isElse() and children[2].label() == "Others"
+          and children[0].label() == "Towns" and children[0].symbol().color().name() == "#d7191c", ruled)
+    for call, label in ((lambda: style.set_layer_style("communes", "rules"), "rules without rules"),
+                        (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": '"absent" = 1', "color": "red"}]),
+                         "a rule on an unknown field"),
+                        (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": "env('HOME') = 'x'", "color": "red"}]),
+                         "a rule that reads the environment"),
+                        (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": '"pop" >', "color": "red"}]),
+                         "a rule that is no expression"),
+                        (lambda: style.set_layer_style("communes", "rules", rules=[{"color": "red"}, {"color": "blue"}]),
+                         "two rules for the other features"),
+                        (lambda: style.set_layer_style("communes", "rules", rules=[{"expression": '"pop" > 1'}]), "a rule with no color")):
+        check(f"style refuses {label}", bool(refused(call)), label)
+    style.set_layer_style("communes", "single", color="#00ff00")  # what the turn ends with, for the redo below
+    written = style.set_labels("communes", expression='"nom" || \' (\' || "pop" || \')\'', visible_from_scale=50000)
+    pal = gpkg.labeling().settings()
+    check("labels: an expression, shown from a scale", written["expression"] and written["field"] == ""
+          and written["visible_from_scale"] == 50000.0 and pal.isExpression and pal.scaleVisibility
+          and pal.minimumScale == 50000.0 and pal.maximumScale == 0.0 and gpkg.labelsEnabled(), written)
+    for call, label in ((lambda: style.set_labels("communes", "nom", expression='"nom"'), "a field and an expression"),
+                        (lambda: style.set_labels("communes", expression="file_exists('/etc/passwd')"), "an expression that reads the disk"),
+                        (lambda: style.set_labels("communes", expression='"absent"'), "an expression on an unknown field"),
+                        (lambda: style.set_labels("communes", "nom", visible_from_scale=0), "a scale of zero")):
+        check(f"labels refuse {label}", bool(refused(call)), label)
     labels = style.set_labels("communes", "nom", size=9, color="navy")
-    check("style: labels on a field", labels == {"layer_name": "communes", "labels": True, "field": "nom"}
+    check("labels: a field again, at every scale", labels["field"] == "nom" and labels["expression"] == ""
+          and not gpkg.labeling().settings().isExpression and not gpkg.labeling().settings().scaleVisibility, labels)
+    check("style: labels on a field", labels == {"layer_name": "communes", "labels": True, "field": "nom",
+                                                 "expression": "", "visible_from_scale": None}
           and gpkg.labelsEnabled() and gpkg.labeling().settings().fieldName == "nom", labels)
     for call, label in ((lambda: style.set_layer_style("communes", "graduated", field="nom"), "graduated on text"),
                         (lambda: style.set_layer_style("communes", "single", color="url(x)"), "a bad color"),

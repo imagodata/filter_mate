@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
+from ...core.agent.sql_guard import expression_problem, processing_expression_problem
 from ...core.domain.layer_kind import LayerKind
 from .operations import layer_kind, resolve_layer
 
@@ -19,7 +20,8 @@ logger = logging.getLogger('FilterMate.LayerStyle')
 MAX_CATEGORIES = 100
 MAX_CLASSES = 12
 MAX_RAMPS_LISTED = 40
-VECTOR_MODES = ('single', 'categorized', 'graduated')
+VECTOR_MODES = ('single', 'categorized', 'graduated', 'rules')
+MAX_RULES = 20
 RASTER_MODES = ('pseudocolor', 'gray')
 METHODS = ('quantile', 'equal_interval', 'jenks', 'pretty', 'stddev')
 DEFAULT_RAMPS = {'categorized': 'Spectral', 'graduated': 'Viridis', 'pseudocolor': 'Spectral'}
@@ -202,9 +204,57 @@ def _refresh(layer) -> None:
         pass
 
 
+def _expression(layer, text: str, problem) -> str:
+    """An expression a model wrote, checked: a plain one of the list accepted, that QGIS parses, on fields of the layer.
+
+    Raises:
+        ValueError: With the reason.
+    """
+    from qgis.core import QgsExpression, QgsFeatureRequest
+    text = (text or '').strip()
+    refused = problem(text)
+    if refused:
+        raise ValueError(f"this expression is refused: {refused}")
+    parsed = QgsExpression(text)
+    if parsed.hasParserError():
+        raise ValueError(f"this is no QGIS expression: {parsed.parserErrorString()[:200]}")
+    unknown = sorted(name for name in parsed.referencedColumns()
+                     if name != QgsFeatureRequest.ALL_ATTRIBUTES and layer.fields().lookupField(name) < 0)
+    if unknown:
+        raise ValueError(f"unknown field(s): {', '.join(unknown)[:200]}")
+    return text
+
+
+def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
+    """A renderer with one symbol per condition; a rule with no condition draws every other feature."""
+    from qgis.core import QgsRuleBasedRenderer
+    if not rules:
+        raise ValueError('rules is a list of {expression, color, label}')
+    if len(rules) > MAX_RULES:
+        raise ValueError(f'{MAX_RULES} rules at most')
+    root = QgsRuleBasedRenderer.Rule(None)
+    others = 0
+    for number, rule in enumerate(rules, 1):
+        if not isinstance(rule, dict) or not rule.get('color'):
+            raise ValueError(f'rule {number} has no color')
+        symbol = _symbol(layer, _color(str(rule['color'])))
+        condition = str(rule.get('expression') or '').strip()
+        label = str(rule.get('label') or '')[:100]
+        if condition:
+            child = QgsRuleBasedRenderer.Rule(symbol, 0, 0, _expression(layer, condition, expression_problem), label)
+        else:
+            others += 1
+            child = QgsRuleBasedRenderer.Rule(symbol, 0, 0, 'ELSE', label or 'Others', '', True)
+        root.appendChild(child)
+    if others > 1:
+        raise ValueError('one rule at most has no expression: it draws every other feature')
+    return QgsRuleBasedRenderer(root), len(rules)
+
+
 def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ramp: str = '', classes: int = 5,
                     method: str = 'quantile', invert: bool = False, opacity: Optional[float] = None, band: int = 1,
-                    minimum: Optional[float] = None, maximum: Optional[float] = None) -> Dict[str, Any]:
+                    minimum: Optional[float] = None, maximum: Optional[float] = None,
+                    rules: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """Draw a layer anew; what was made, without the values of its classes.
 
     Raises:
@@ -226,6 +276,8 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
             color_ramp, answer['ramp'] = _ramp(ramp, mode, invert)
             renderer, answer['classes'] = _categorized(found, field, color_ramp)
             answer['field'] = renderer.classAttribute()
+        elif mode == 'rules':
+            renderer, answer['classes'] = _rule_based(found, rules)
         else:
             if method not in METHODS:
                 raise ValueError(f"method is one of {', '.join(METHODS)}")
@@ -252,11 +304,13 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
 
 
 def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional[float] = None, color: str = '',
-               buffer: bool = True) -> Dict[str, Any]:
-    """Label the features of a vector layer with a field, or turn its labels off.
+               buffer: bool = True, expression: str = '', visible_from_scale: Optional[float] = None) -> Dict[str, Any]:
+    """Label the features of a vector layer with a field or an expression, or turn its labels off.
+
+    ``visible_from_scale``: the labels show when the map is at least that close (50000 for 1:50 000 and closer).
 
     Raises:
-        ValueError: Not a vector layer, an unknown field, a bad size or color.
+        ValueError: Not a vector layer, an unknown field, an expression refused, a bad size, scale or color.
     """
     from qgis.core import QgsPalLayerSettings, QgsTextBufferSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling
     found = _layer(layer)
@@ -266,10 +320,21 @@ def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional
         found.setLabelsEnabled(False)
         _refresh(found)
         return {'layer_name': found.name(), 'labels': False}
-    index = _field_index(found, field)
+    if field and expression:
+        raise ValueError('give a field or an expression, not both')
     settings = QgsPalLayerSettings()
-    settings.fieldName = found.fields().at(index).name()
-    settings.isExpression = False
+    if expression:
+        settings.fieldName = _expression(found, expression, processing_expression_problem)
+        settings.isExpression = True
+    else:
+        settings.fieldName = found.fields().at(_field_index(found, field)).name()
+        settings.isExpression = False
+    if visible_from_scale is not None:
+        if not 1 <= float(visible_from_scale) <= 1e9:
+            raise ValueError('visible_from_scale is the denominator of a scale: 50000 for 1:50 000')
+        settings.scaleVisibility = True
+        settings.minimumScale = float(visible_from_scale)  # the farthest scale the labels show at
+        settings.maximumScale = 0.0
     text = QgsTextFormat()
     if size is not None:
         if not 4 <= float(size) <= 72:
@@ -286,4 +351,6 @@ def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional
     found.setLabeling(QgsVectorLayerSimpleLabeling(settings))
     found.setLabelsEnabled(True)
     _refresh(found)
-    return {'layer_name': found.name(), 'labels': True, 'field': settings.fieldName}
+    return {'layer_name': found.name(), 'labels': True, 'field': '' if expression else settings.fieldName,
+            'expression': settings.fieldName if expression else '',
+            'visible_from_scale': float(visible_from_scale) if visible_from_scale is not None else None}

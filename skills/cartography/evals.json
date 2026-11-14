@@ -340,6 +340,71 @@
     "add_layer",
     "run_algorithm"
    ]
+  },
+  {
+   "id": "style_rules",
+   "prompt": "Mets en rouge les communes de plus de 10000 habitants et les autres en gris.",
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "args": {
+       "layer": "communes",
+       "mode": "rules"
+      },
+      "call_args": {
+       "layer": "communes",
+       "mode": "rules",
+       "rules": [
+        {
+         "expression": "\"population\" > 10000",
+         "color": "red",
+         "label": "Plus de 10 000 habitants"
+        },
+        {
+         "expression": "",
+         "color": "grey",
+         "label": "Autres"
+        }
+       ]
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "export_layers",
+    "update_features"
+   ]
+  },
+  {
+   "id": "labels_expression",
+   "prompt": "Étiquette les communes avec leur nom suivi de la population entre parenthèses.",
+   "expect": [
+    [
+     {
+      "tool": "set_labels",
+      "args": {
+       "layer": "communes",
+       "expression": {
+        "contains": [
+         "nom",
+         "population"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "communes",
+       "expression": "\"nom\" || ' (' || \"population\" || ')'"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "apply_filter",
+    "add_field",
+    "update_features"
+   ]
   }
  ]
 }
