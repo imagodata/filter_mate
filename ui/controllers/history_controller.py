@@ -448,8 +448,13 @@ class HistoryController(QObject):
 
         def takes(entry) -> bool:
             return _entry_in_scope(entry, current_id, targets)
+
+        def whole(entry) -> bool:
+            # Without layers to filter, the current layer's part alone (UndoRedoHandler._perform_layer_undo): the
+            # rest of the entry stays next, without this layer
+            return bool(targets) or set(entry.layer_ids) <= {current_id}
         undo_stack, redo_stack = history.get_undo_stack(), history.get_redo_stack()
-        undo_left, redo_left = walkable(undo_stack, takes), walkable(redo_stack, takes)
+        undo_left, redo_left = walkable(undo_stack, takes, whole), walkable(redo_stack, takes, whole)
         undo = tuple(undo_stack[-1:]) if undo_left else ()
         redo = tuple(redo_stack[-1:]) if redo_left else ()
         # The raster / point cloud targets of a vector source follow its Undo and Redo when the run they recorded is
@@ -459,11 +464,11 @@ class HistoryController(QObject):
                 cross = coverage.service.history
                 runs = (getattr(coverage, "_linked_runs", None) or {}).get(current_id) or []
                 done = (getattr(coverage, "_linked_redo", None) or {}).get(current_id) or []
-                if undo and undo[0].layer_ids and undo[0].layer_ids[0] == current_id and runs:
+                if undo and undo[0].ran_from(current_id) and runs:
                     operation = cross.peek_undo(current_id)
                     if coverage._run_is_next(runs[-1], operation):
                         undo += (operation,)
-                if redo and redo[0].layer_ids and redo[0].layer_ids[0] == current_id and done:
+                if redo and redo[0].ran_from(current_id) and done:
                     operation = cross.peek_redo(current_id)
                     if coverage._run_is_next(done[-1], operation):
                         redo += (operation,)

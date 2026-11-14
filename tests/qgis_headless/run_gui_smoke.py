@@ -1328,6 +1328,106 @@ def s_switch_late_check():
           current is not None and current.name() == 'late_pick', current.name() if current else 'no layer')
 
 
+def s_partial_undo_setup():
+    """2026-11-14: Undo without the layers to filter restores the current layer alone, and it popped the whole step
+    of a filter that had filtered other layers: they kept their filter and lost their step. A filter from zones to a
+    vector target, Undo on zones, then the target current and Undo: the target gets back its state before."""
+    from osgeo import ogr, osr
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(2154)
+    path = os.path.join(tempfile.mkdtemp(prefix='fm_partial_'), 'blocks.gpkg')
+    source = ogr.GetDriverByName('GPKG').CreateDataSource(path)
+    table = source.CreateLayer('blocks', srs, ogr.wkbPolygon)
+    table.CreateField(ogr.FieldDefn('label', ogr.OFTString))
+    for label, (xmin, ymin, xmax, ymax) in (('in_east_a', (700720, 6599420, 700780, 6599480)),
+                                            ('far', (700300, 6599950, 700350, 6599990))):
+        feature = ogr.Feature(table.GetLayerDefn())
+        feature.SetField('label', label)
+        feature.SetGeometry(ogr.CreateGeometryFromWkt(
+            f"POLYGON(({xmin} {ymin},{xmax} {ymin},{xmax} {ymax},{xmin} {ymax},{xmin} {ymin}))"))
+        table.CreateFeature(feature)
+    source = None
+    # zones is still filtered to east_a by the steps before: from no filter, its Undo is seen to change it
+    layer('zones').setSubsetString('')
+    project.addMapLayer(QgsVectorLayer(f'{path}|layername=blocks', 'blocks', 'ogr'))
+    return lambda: registered('blocks') and tasks_idle()
+
+
+def s_partial_undo_source():
+    return pick_vector('zones')
+
+
+def s_partial_undo_select():
+    d = dock()
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    east_a = next(feature for feature in layer('zones').getFeatures() if feature['name'] == 'east_a')
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(east_a.id())
+    set_targets(['blocks'])
+    set_predicates(['Intersect'])
+    ready = targets_ready(['blocks'])
+    return lambda: bool(dock().get_current_features()[0]) and ready()
+
+
+def s_partial_undo_filter():
+    before = STATE['partial_before'] = {name: layer(name).subsetString() for name in ('zones', 'blocks')}
+    run_task('filter')
+    return lambda: layer('blocks').subsetString() != before['blocks'] and tasks_idle()
+
+
+def s_partial_undo_on_source():
+    d, before = dock(), STATE['partial_before']
+    zones, blocks = layer('zones'), layer('blocks')
+    filtered = STATE['partial_filtered'] = {name: layer(name).subsetString() for name in ('zones', 'blocks')}
+    entry = app().history_manager.peek_undo()
+    check('partial undo: the filter from zones filtered the target, one step for both',
+          filtered['zones'] != before['zones'] and filtered['blocks'] != before['blocks'] and entry is not None
+          and set(entry.layer_ids) == {zones.id(), blocks.id()},
+          f"filtered={filtered} step={entry.layer_ids if entry else None}")
+    d.pushButton_checkable_filtering_layers_to_filter.setChecked(False)
+    run_task('undo')
+    return settled()
+
+
+def s_partial_undo_on_source_check():
+    d, before, filtered = dock(), STATE['partial_before'], STATE['partial_filtered']
+    zones, blocks = layer('zones'), layer('blocks')
+    history = app().history_manager
+    rest, part = history.peek_undo(), history.peek_redo()
+    check('partial undo: zones alone restored, the target keeps its filter and its step',
+          zones.subsetString() == before['zones'] and blocks.subsetString() == filtered['blocks']
+          and rest is not None and rest.layer_ids == (blocks.id(),) and part is not None
+          and part.layer_ids == (zones.id(),),
+          f"zones={zones.subsetString()!r} blocks={blocks.subsetString()!r} "
+          f"rest={rest.layer_ids if rest else None} part={part.layer_ids if part else None}")
+    check('partial undo: on zones, Undo waits for the rest of the step, Redo redoes its part',
+          not d.pushButton_action_undo_filter.isEnabled() and d.pushButton_action_redo_filter.isEnabled(),
+          f"undo={d.pushButton_action_undo_filter.isEnabled()} redo={d.pushButton_action_redo_filter.isEnabled()}")
+    return pick_vector('blocks')
+
+
+def s_partial_undo_on_target():
+    check('partial undo: the target current, Undo available', dock().pushButton_action_undo_filter.isEnabled())
+    run_task('undo')
+    return settled()
+
+
+def s_partial_undo_on_target_check():
+    before, blocks = STATE['partial_before'], layer('blocks')
+    history = app().history_manager
+    redo = history.get_redo_stack()
+    check('partial undo: the target current, Undo gives it back its state before the filter',
+          blocks.subsetString() == before['blocks'] and layer('zones').subsetString() == before['zones']
+          and [entry.layer_ids for entry in redo[-2:]] == [(layer('zones').id(),), (blocks.id(),)],
+          f"blocks={blocks.subsetString()!r} redo={[entry.layer_ids for entry in redo[-2:]]}")
+    STATE['removed_blocks'] = blocks.id()
+    project.removeMapLayer(blocks.id())  # the steps that follow expect the layers of the switch steps
+    return lambda: STATE['removed_blocks'] not in app().PROJECT_LAYERS and tasks_idle()
+
+
+def s_partial_undo_done():
+    return pick_vector('late_pick')
+
+
 def s_close_dock():
     check('back to a vector layer: vector groups again', dock().mGroupBox_exploring_single_selection.isVisible())
     STATE['coverage_before_close'] = coverage()
@@ -2046,7 +2146,10 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_remove_layer, s_remove_layer_check,
          s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
          s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
-         s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check,
+         s_switch_same_layer_check, s_switch_late_check,
+         s_partial_undo_setup, s_partial_undo_source, s_partial_undo_select, s_partial_undo_filter,
+         s_partial_undo_on_source, s_partial_undo_on_source_check, s_partial_undo_on_target,
+         s_partial_undo_on_target_check, s_partial_undo_done, s_plugin_imports_check,
          s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel, s_finish]
 
 

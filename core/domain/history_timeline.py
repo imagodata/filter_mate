@@ -291,15 +291,24 @@ def linked_pairs(entries: Sequence[Any], source_id: str, run_ids: Sequence[Optio
     ``entries``: the stack of the vector filters, the next taken last; ``run_ids``: the ``op_id`` each run of the
     source recorded (None: nothing clipped), the next taken last; ``operations``: the cross stack of the source, the
     next taken last. Each entry of the source taken takes a run, and the operation on top of the cross stack with it
-    when the run recorded that one. The clock cannot pair them: each is recorded when its own task ends.
+    when the run recorded that one. The clock cannot pair them: each is recorded when its own task ends. An entry left
+    without its source (its part undone alone, 2026-11-14) is no run of the layer that took its place (``ran_from``).
     """
-    mine = [entry for entry in entries if tuple(getattr(entry, "layer_ids", ()) or ())[:1] == (source_id,)]
+    mine = [entry for entry in entries if _ran_from(entry, source_id)]
     stack = list(operations)
     pairs = []
     for entry, op_id in zip(reversed(mine), reversed(list(run_ids))):
         if stack and op_id is not None and getattr(stack[-1], "op_id", None) == op_id:
             pairs.append((entry, stack.pop()))
     return pairs
+
+
+def _ran_from(entry: Any, source_id: str) -> bool:
+    """``entry`` is a vector filter run from ``source_id`` (``HistoryEntry.ran_from``; its first layer otherwise)."""
+    ran_from = getattr(entry, "ran_from", None)
+    if callable(ran_from):
+        return bool(ran_from(source_id))
+    return tuple(getattr(entry, "layer_ids", ()) or ())[:1] == (source_id,)
 
 
 def link(items: Sequence[TimelineItem], pairs: Iterable[Tuple[Any, Any]]) -> List[TimelineItem]:
@@ -342,14 +351,19 @@ class UndoFocus:
     source: str = ""
 
 
-def walkable(stack: Sequence[Any], takes: Callable[[Any], bool]) -> int:
+def walkable(stack: Sequence[Any], takes: Callable[[Any], bool],
+             whole: Callable[[Any], bool] = lambda entry: True) -> int:
     """How many entries of ``stack`` (the next one last) Undo or Redo takes one after the other: it stops at the first
-    one ``takes`` refuses (a vector filter out of the scope of the current layer)."""
+    one ``takes`` refuses (a vector filter out of the scope of the current layer), and after the first one it takes
+    a part of only (``whole`` False: the part of the current layer of a filter of several layers, the rest of it stays
+    next, out of the scope)."""
     count = 0
     for entry in reversed(stack):
         if not takes(entry):
             break
         count += 1
+        if not whole(entry):
+            break
     return count
 
 
