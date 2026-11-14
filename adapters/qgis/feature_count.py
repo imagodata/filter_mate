@@ -19,6 +19,15 @@ ignored, one feature after the other. The count is what the reading gives
 clock is looked at every ``CLOCK_EVERY`` features, and past the budget there
 is no number rather than the number of the whole table.
 
+A plain filter (a condition, with none of the words below) is read by
+batches where GDAL has them and was compared (``ARROW_FROM``): the same
+reading done in GDAL rather than feature after feature from Python, ten times
+as fast, so ten times as many features counted within the budget. A filter
+with LIMIT, ORDER BY, GROUP BY or a query of its own keeps the reading
+feature after feature: by batches GDAL leaves those words out and counts more
+(2026-11-14: ``"numero" >= 20 LIMIT 10`` read 10 features one way, 270 000 the
+other).
+
 Not bounded by the budget: opening the file, and the wait for the first
 feature (a selective filter on a big table goes through it all before the
 first one). A file locked by another connection is not waited for
@@ -44,10 +53,20 @@ COUNT_BUDGET = 1.0  # seconds of the calling thread one count may take
 CLOCK_EVERY = 64  # features read between two looks at the clock (every feature costs no more: measured)
 CACHE_SIZE = 64
 _CACHE: 'OrderedDict[tuple, int]' = OrderedDict()
+# Counts made on a copy of a layer under a filter about to be set on it: (path, table, index, subset) -> (count,
+# when). See ``note_trial``.
+TRIAL_WINDOW = 3.0  # seconds such a count stays good for the layer the same filter is then set on
+TRIALS_KEPT = 8
+_TRIALS: 'OrderedDict[tuple, Tuple[int, float]]' = OrderedDict()
 _clock = time.monotonic
 _QUERY = re.compile(r'\s*(SELECT|WITH)\b', re.IGNORECASE)
 # Several queries (what they read depends on the columns asked), or a different answer at each reading.
 _NO_NUMBER = re.compile(r'\b(UNION|INTERSECT|EXCEPT)\b|\bRANDOM(BLOB)?\s*\(', re.IGNORECASE)
+# More than a condition: read feature after feature, as QGIS reads it. Inside a text too ('limit 3'): only slower.
+_NOT_PLAIN = re.compile(r'\b(SELECT|WITH|LIMIT|OFFSET|ORDER|GROUP|HAVING|WINDOW|UNION|INTERSECT|EXCEPT)\b|;|--|/\*',
+                        re.IGNORECASE)
+ARROW_FROM = 3100000  # GDAL 3.10: batches and features were compared in 3.10 and 3.12 (QGIS 4.2, 3.44, 4.3)
+ARROW_BATCH = 2048  # features of a batch: the clock is looked at after each
 
 
 def exact_feature_count(layer: Any, budget: Optional[float] = None) -> Optional[int]:
@@ -79,6 +98,52 @@ def exact_feature_count(layer: Any, budget: Optional[float] = None) -> Optional[
         while len(_CACHE) > CACHE_SIZE:
             _CACHE.popitem(last=False)
     return count
+
+
+def _counted_table(layer: Any) -> Optional[Tuple[str, str, int, str]]:
+    """``(path, table, index, subset)`` of a filtered GeoPackage layer counted here; None for any other."""
+    try:
+        subset = (layer.subsetString() or '') if _is_geopackage(layer) else ''
+        if not subset.strip() or layer.isModified():
+            return None
+        path, table, index = source_parts(layer.source())
+    except (RuntimeError, AttributeError):
+        return None
+    if path is None or _QUERY.match(subset) or _NO_NUMBER.search(subset):
+        return None
+    return path, table, index, subset
+
+
+def note_trial(trial: Any, count: int) -> None:
+    """``count`` features were just read on ``trial``, a private copy of a layer under the filter it is about to get.
+
+    Setting a filter on a GeoPackage layer makes QGIS (3.28 and later) reopen its file, which rewrites the header:
+    the file is no longer "as it was", and the count made a moment ago on the copy was read a second time, then a
+    third by whoever asked next (2026-11-14: three readings of 60 000 features for one filter). ``adopt_trial``
+    gives the count to the layer once the filter is set.
+    """
+    table = _counted_table(trial)
+    if table is None or _known(count) is None:
+        return
+    _TRIALS[table] = (count, _clock())
+    _TRIALS.move_to_end(table)
+    while len(_TRIALS) > TRIALS_KEPT:
+        _TRIALS.popitem(last=False)
+
+
+def adopt_trial(layer: Any) -> None:
+    """The filter of ``layer`` was just set: a count made on its copy under that very filter within
+    ``TRIAL_WINDOW`` seconds is kept for the file as it is now. Nothing is read."""
+    table = _counted_table(layer)
+    found = _TRIALS.pop(table, None) if table is not None else None
+    if found is None or _clock() - found[1] > TRIAL_WINDOW:
+        return
+    key = _cache_key(*table)
+    if key is not None:
+        _CACHE[key] = found[0]
+        _CACHE.move_to_end(key)
+        while len(_CACHE) > CACHE_SIZE:
+            _CACHE.popitem(last=False)
 
 
 def features_to_read(layer: Any, budget: Optional[float] = None) -> int:
@@ -168,6 +233,12 @@ def _read_count(path: str, table: str, index: int, subset: str, budget: float) -
             + [definition.GetGeomFieldDefn(i).GetName() for i in range(definition.GetGeomFieldCount())]
             + ['OGR_GEOMETRY', 'OGR_STYLE'])
         gdal.ErrorReset()  # a field not ignored only makes the reading longer
+        if _by_batches(gdal, layer, subset):
+            count = _count_batches(layer, deadline)
+            if count is not _FEATURE_BY_FEATURE:
+                return None if count is None or _failed(gdal) else count
+            layer.ResetReading()
+            gdal.ErrorReset()
         count = 0
         feature = layer.GetNextFeature()
         while feature is not None:
@@ -184,6 +255,35 @@ def _read_count(path: str, table: str, index: int, subset: str, budget: float) -
         if local_option:
             local_option('SQLITE_BUSY_TIMEOUT', busy)
         gdal.PopErrorHandler()
+
+
+_FEATURE_BY_FEATURE = object()  # no batches here after all: read the features
+
+
+def _by_batches(gdal: Any, layer: Any, subset: str) -> bool:
+    """Whether ``subset`` is a plain condition and this GDAL reads it by batches as it reads it by features."""
+    if _NOT_PLAIN.search(subset) or not hasattr(layer, 'GetArrowStream'):
+        return False
+    try:
+        return int(gdal.VersionInfo('VERSION_NUM')) >= ARROW_FROM
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
+def _count_batches(layer: Any, deadline: float) -> Any:
+    """The features of ``layer`` under its filter, read by batches of ``ARROW_BATCH``; None past ``deadline``,
+    ``_FEATURE_BY_FEATURE`` when GDAL gives no batches for this layer."""
+    stream = layer.GetArrowStream([f'MAX_FEATURES_IN_BATCH={ARROW_BATCH}'])
+    if stream is None:
+        return _FEATURE_BY_FEATURE
+    count = 0
+    while True:
+        batch = stream.GetNextRecordBatch()
+        if batch is None:
+            return count
+        count += batch.GetLength()
+        if _clock() > deadline:
+            return None
 
 
 def _failed(gdal) -> bool:

@@ -746,6 +746,39 @@ them back (`importNamedStyle`); redoing it applies the new style again.
 outside the list answers 400. A filter still reaches the database with the rights of the user, so an external agent exposed to
 untrusted data is best run with a database role that cannot write.
 
+## Where the time of a request goes
+
+    docker run --rm -v "$PWD":/src -e QT_QPA_PLATFORM=offscreen qgis/qgis:ltr \
+        python3 /src/tests/qgis_headless/measure_agent_operations.py
+
+`tests/qgis_headless/measure_agent_operations.py` plays requests through the chat as a user sends them (the
+controller, the engine, the undo point, the tools) on a project of 300 000 points, 60 000 polygons and a score of
+small layers, against a local server that answers scripted turns at once: what is timed is FilterMate. Each request is
+played three times and the fastest is told (one run says little); `FM_MEASURE_PROFILE=1` names the functions that
+cost most, and triples the cost of every Python loop, so it is never left on to compare times. The plugin must be
+able to write its log, or each line logged costs a traceback: copy the checkout in the container first.
+
+Measured on 2026-11-14 (QGIS 3.44, times in the tools):
+
+- What surrounds the tools costs nothing to speak of: the undo point under 0.01 s a call with 23 layers, the panel
+  under 0.1 s a request. The time of a request is the model's, then the tools'.
+- An attribute filter on a GeoPackage read the features it keeps three times: the trial `preview_filter` makes, the
+  trial `apply_filter` makes itself, the count after it. `feature_count` keeps a count for the file as it is, but from
+  QGIS 3.28 a layer opened to be written switches a GeoPackage to its write-ahead log and back, which rewrites the
+  header of the file: the trial copy did so, then setting the filter, and no count kept ever answered. The trial
+  copy is now opened read-only (`forceReadOnly`: it changes nothing in the file), and its count is kept for the layer
+  once the filter is set (`note_trial`, `adopt_trial`, within 3 s, for the same table and filter).
+- A plain condition is read by batches (`GetArrowStream`, GDAL 3.10 and later) rather than feature after feature
+  from Python: 270 000 features in 0.03 s against 0.31 s. A filter with LIMIT, ORDER BY, GROUP BY or a query of its
+  own stays feature after feature: by batches GDAL leaves those words out and counts more than QGIS reads.
+  `check_gpkg_feature_count.py` compares both ways and what QGIS reads on twenty filters.
+- With both: a filter that keeps 60 000 addresses of 300 000, tried then applied, 0.50 s to 0.08 s; one that keeps
+  270 000, 1.42 s to 0.24 s. The count after a filter in the dock, the list of layers and the widgets read the same
+  way.
+- Not gained: `layer_statistics` (0.6 s for 300 000 features, of which 0.35 s is the provider handing them over;
+  summing them up in one go was tried and brought nothing) and the spatial filters (0.05 to 0.5 s, mostly QGIS
+  setting the filter of the target).
+
 ## Evaluation bench
 
     python scripts/agent_eval.py                                        # scripted model, free, tests the bench itself

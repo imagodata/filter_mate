@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from ...core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
-from ..qgis.feature_count import exact_feature_count, features_to_read
+from ..qgis.feature_count import exact_feature_count, features_to_read, note_trial
 from .operations import layer_kind, resolve_layer
 
 logger = logging.getLogger('FilterMate.Introspection')
@@ -350,8 +350,13 @@ def preview_filter(reference: str, expression: str) -> Optional[Dict[str, Any]]:
     if unknown:
         return {**answer, 'valid': False, 'error': (
             f"unknown field(s): {', '.join(unknown)}. Field names take double quotes, text values single quotes.")}
-    trial = QgsVectorLayer(layer.source(), 'filtermate_preview', layer.providerType(),
-                           QgsVectorLayer.LayerOptions(False, False))
+    options = QgsVectorLayer.LayerOptions(False, False)
+    # Read-only where QGIS can (3.28): a GeoPackage opened to be written is switched to its write-ahead log and
+    # back, which rewrites the header of the file. A trial announced as changing nothing changed the file of the
+    # user, and the counts kept for the file as it was (feature_count) were lost each time.
+    if hasattr(options, 'forceReadOnly'):
+        options.forceReadOnly = True
+    trial = QgsVectorLayer(layer.source(), 'filtermate_preview', layer.providerType(), options)
     if not trial.isValid():
         return {**answer, 'valid': False, 'error': 'the data source could not be opened to try this filter'}
     if not safe_set_subset_string(trial, expression):
@@ -363,6 +368,8 @@ def preview_filter(reference: str, expression: str) -> Optional[Dict[str, Any]]:
         return {**answer, 'valid': False, 'error': error or 'the provider could not run this expression'}
     # featureCount() told whether it runs; of a filtered GeoPackage it can be the count of the whole table.
     exact = exact_feature_count(trial)
+    if exact is not None:
+        note_trial(trial, exact)  # the filter applied next is not counted again (feature_count.adopt_trial)
     return {**answer, 'valid': True, 'feature_count': -1 if exact is None else exact}
 
 
