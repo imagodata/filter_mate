@@ -856,6 +856,64 @@ def s_compare_off_check():
         iface.mapCanvas().unsetMapTool(pan)
 
 
+def s_compare_pin():
+    """Compare pinned from the menu of its button (right-click), then a layer hidden: the comparison follows the map."""
+    from qgis.PyQt.QtCore import QPoint
+    from qgis.utils import iface
+    d = dock()
+    button = d.pushButton_action_compare
+    controller = d._controller_integration._compare_controller
+    STATE['compare_pin_tool'] = iface.mapCanvas().mapTool()
+    button.customContextMenuRequested.emit(QPoint(4, 4))  # what a right-click on the button sends
+    QApplication.processEvents()
+    menu = controller.menu
+    texts = [action.text() for action in menu.actions()]
+    check('compare: right-click opens the menu of the button', menu.isVisible()
+          and texts == ['Pin the current state', 'Remove the pin'], f"visible={menu.isVisible()} {texts}")
+    next(action for action in menu.actions() if action.text() == 'Pin the current state').trigger()
+    menu.close()
+    check('compare: pinned from the menu, available, its tooltip says when', controller.pinned is not None
+          and button.isEnabled() and 'pinned at' in button.toolTip(), button.toolTip())
+    button.click()
+    session = controller.session
+    check('compare: on with the pin, nothing changed yet', button.isChecked() and session is not None
+          and session.active and not session.compared_layer_ids() and not session.present
+          and session.item.labels[0].startswith('Pinned '), f"labels={session.item.labels if session else None}")
+    dem = layer('dem')
+    node = QgsProject.instance().layerTreeRoot().findLayer(dem.id())
+    STATE['compare_pin_dem_visible'] = node.itemVisibilityChecked()
+    node.setItemVisibilityChecked(False)
+    iface.mapCanvas().refresh()
+    return lambda: dem.id() in session.present and not session.item.busy
+
+
+def s_compare_pin_check():
+    from qgis.utils import iface
+    d = dock()
+    button = d.pushButton_action_compare
+    controller = d._controller_integration._compare_controller
+    session = controller.session
+    dem = layer('dem')
+    check('compare: a layer hidden since the pin is drawn left of the line', button.isChecked() and session.active
+          and dem.id() in session.present and session.renders >= 1, f"present={session.present}")
+    QgsProject.instance().layerTreeRoot().findLayer(dem.id()).setItemVisibilityChecked(
+        STATE.get('compare_pin_dem_visible', True))
+    controller._show_menu()
+    unpin = next(action for action in controller.menu.actions() if action.text() == 'Remove the pin')
+    check('compare: the pin can be removed from the menu', unpin.isEnabled())
+    unpin.trigger()
+    controller.menu.close()
+    check('compare: no pin, available as Undo is again', controller.pinned is None
+          and button.isEnabled() == d.pushButton_action_undo_filter.isEnabled() and 'pinned at' not in button.toolTip())
+    if button.isChecked():
+        button.click()
+    previous = STATE.get('compare_pin_tool')
+    if previous is not None and iface.mapCanvas().mapTool() is not previous:
+        iface.mapCanvas().setMapTool(previous)
+    check('compare: off after the pin, the tool there before', not button.isChecked() and not session.active
+          and iface.mapCanvas().mapTool() is previous)
+
+
 def s_vector_check():
     dem = layer('dem')
     if not check('vector source -> raster target: clipped VRT', dem.source().endswith('.vrt') and dem.isValid(),
@@ -1937,7 +1995,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_agent_setup_offer_check,
          s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
-         s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_vector_check,
+         s_vector_source, s_vector_select, s_vector_filter, s_compare_check, s_compare_off_check, s_compare_pin,
+         s_compare_pin_check, s_vector_check,
          s_vector_undo_check,
          s_user_pick_after_undo_check,
          s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,

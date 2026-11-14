@@ -4739,6 +4739,81 @@ What would you like to do?</translation>
         <translation>ไม่มีอะไรให้เปรียบเทียบ: ไม่มีตัวกรองให้ยกเลิกที่นี่</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="154"/>
+        <source>Pin the current state</source>
+        <translation>ปักหมุดสถานะปัจจุบัน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="156"/>
+        <source>Remove the pin</source>
+        <translation>เลิกปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="182"/>
+        <source>Right-click to pin the current state.</source>
+        <translation>คลิกขวาเพื่อปักหมุดสถานะปัจจุบัน</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="184"/>
+        <source>Compare: the map pinned at {} left of the line, as it is on its right; the line follows the mouse</source>
+        <translation>เปรียบเทียบ: แผนที่ที่ปักหมุดเมื่อ {} อยู่ทางซ้ายของเส้น แผนที่ปัจจุบันอยู่ทางขวา เส้นจะเลื่อนตามเมาส์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="186"/>
+        <source>Right-click to pin again or remove the pin.</source>
+        <translation>คลิกขวาเพื่อปักหมุดใหม่หรือเลิกปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="283"/>
+        <source>Map pinned at {}: Compare shows it left of the line.</source>
+        <translation>ปักหมุดแผนที่เมื่อ {}: เปรียบเทียบจะแสดงแผนที่นั้นทางซ้ายของเส้น</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="311"/>
+        <source>Pinned {}</source>
+        <translation>ปักหมุด {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="316"/>
+        <source>Before: {}</source>
+        <translation>ก่อน: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="317"/>
+        <source>Now</source>
+        <translation>ตอนนี้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="356"/>
+        <source>Nothing changed since the pin.</source>
+        <translation>ไม่มีอะไรเปลี่ยนแปลงตั้งแต่ปักหมุด</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="423"/>
+        <source>Not drawn as they were: {}</source>
+        <translation>ไม่ได้วาดให้เหมือนเดิม: {}</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="405"/>
+        <source>layer tree</source>
+        <translation>แผนผังเลเยอร์</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="407"/>
+        <source>project CRS</source>
+        <translation>CRS ของโครงการ</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="288"/>
+        <source>The map could not be pinned.</source>
+        <translation>ไม่สามารถปักหมุดแผนที่ได้</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/compare_controller.py" line="431"/>
+        <source>Compare stopped: the map could not be read.</source>
+        <translation>หยุดการเปรียบเทียบ: ไม่สามารถอ่านแผนที่ได้</translation>
+    </message>
+    <message>
         <location filename="../filter_mate_dockwidget.py" line="1498"/>
         <source>Favorites manager not available</source>
         <translation>ตัวจัดการรายการโปรดไม่พร้อมใช้งาน</translation>
