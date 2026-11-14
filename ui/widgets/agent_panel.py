@@ -921,8 +921,11 @@ class AgentPanel(QFrame):
         return card
 
     def add_question_card(self, texts: dict, questions):
-        """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread)."""
-        self._show_conversation()
+        """The questions of ask_user in the thread, with choices to click and a free Other (agent_thread).
+
+        The thread is shown even from the history page: the turn waits for the answer.
+        """
+        self.stack.setCurrentIndex(_THREAD_PAGE)
         card = self.thread.add_question_card(texts, questions)
         self._in_answer = False
         return card
