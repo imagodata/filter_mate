@@ -243,6 +243,42 @@ Do you agree?</source>
 Acceptez-vous ?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>official</source>
+        <translation>officiel</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>community</source>
+        <translation>communauté</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1509"/>
+        <source>on this computer</source>
+        <translation>sur cet ordinateur</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1511"/>
+        <source>added by you</source>
+        <translation>ajouté par vous</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1512"/>
+        <source>The agent wants to use the connector {} ({}):
+{}
+
+Its tools will see of your project only what the agent sends them, and what they answer comes back to the agent. Allow it for the rest of this conversation?</source>
+        <translation>L'agent veut utiliser le connecteur {} ({}) :
+{}
+
+Ses outils ne verront de votre projet que ce que l'agent leur envoie, et ce qu'ils répondent revient à l'agent. L'autoriser pour le reste de cette conversation ?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1871"/>
+        <source>Connector: {}</source>
+        <translation>Connecteur : {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="712"/>
         <source>The agent wants to add this layer of a web service to the project:
 {} · {}

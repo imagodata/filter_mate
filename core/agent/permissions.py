@@ -115,6 +115,12 @@ TURNED_OFF_REFUSAL = ("Not done: the user turned the tool {} off for the agent. 
 CONNECTOR_DECLINED = ("Not loaded: the user declined the connector {}; do not ask again in this conversation. Go on "
                       "without it, and tell the user when the request needs it.")
 
+# The tools of a connector reach the outside, which the advisor level never runs: loading one there would ask the
+# user, connect, and leave tools that are all refused (review of 2026-11-14).
+CONNECTOR_ADVISOR = ("Not loaded: the user set the agent to advise only, and the tools of an external connector do not "
+                     "run at that level. Tell them the request needs the connector {}, and that another level can be "
+                     "chosen in the settings of the agent. Do not ask again at this level.")
+
 ADVISOR_REFUSAL = ("Not done: the user set the agent to advise only, so nothing that changes the project runs. "
                    "Tell them, step by step, what you would do and with which tools, so they can do it themselves or "
                    "choose another level in the settings of the agent. Do not try another tool to do it.")
@@ -260,6 +266,8 @@ class PermissionPolicy:
         off, the level."""
         if name in self._declined:
             return CONNECTOR_DECLINED.format(repr(name))
+        if name.startswith(CONNECTOR_PREFIX) and self.level == ADVISOR:
+            return CONNECTOR_ADVISOR.format(repr(name))
         return (self.protection_refusal(name, arguments)
                 or (TURNED_OFF_REFUSAL.format(repr(name)) if self.turned_off(name) else "")
                 or ADVISOR_REFUSAL)
@@ -324,9 +332,10 @@ class PermissionPolicy:
 
     def _connector_verdict(self, name: str) -> str:
         """Loading a connector (``connector-<id>``, see tool_executor.connector_gate): data of QGIS may leave with
-        its tools, so it is asked at every level, advisor included, once per conversation. The rules of the Tools tab
+        its tools, so it is asked at every level above advisor, once per conversation; at the advisor level its
+        tools would all be refused, so it is refused without a question nor a connection. The rules of the Tools tab
         for load_skill do not reach it: "never" for a connector is unticking it in the Sources tab."""
-        if name in self._declined:
+        if name in self._declined or self.level == ADVISOR:
             return REFUSE
         return RUN if name in self._granted else ASK
 
@@ -363,12 +372,14 @@ class PermissionPolicy:
         return frozenset(self._declined)
 
     def forget(self) -> None:
-        """A new conversation, another project, another level: what was allowed, or declined, is asked again."""
+        """A new conversation, another project: what was allowed, or declined, is asked again."""
         self._granted.clear()
         self._declined.clear()
 
     def set_level(self, level: str) -> None:
+        """Another level in the same conversation: what was allowed is asked again. A connector declined stays
+        declined: the model was told not to ask again in this conversation."""
         level = level_or_default(level)
         if level != self.level:
             self.level = level
-            self.forget()
+            self._granted.clear()

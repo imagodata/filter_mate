@@ -1239,15 +1239,45 @@ def check_chat(provider, layer, authcfg, work):
     threading.Thread(target=server.serve_forever, daemon=True).start()
     source = make_source(f"http://127.0.0.1:{server.server_address[1]}/mcp", "mcp", "Local")
     hello = tool_name(source.id, "hello")
+    entry = "connector-" + source.id
     settings(enabled_sources=(source.id,), custom_sources=custom_to_json([source]))
-    provider.reset((200, {}, tool_turn(hello, {"who": "QGIS"})), (200, {}, text_turn("ok")))
-    ask("dis bonjour")
+
+    def skill_names(request):
+        load = next(tool for tool in request["body"]["tools"] if tool["name"] == "load_skill")
+        return load["input_schema"]["properties"]["name"]["enum"]
+
+    def initialized():
+        return sum(1 for item in mcp_seen if item[0] == "initialize")
+
+    # Lot A (2026-11-14): nothing connects when a conversation starts; the model loads a connector when it needs it.
+    provider.reset((200, {}, text_turn("bonjour")))
+    ask("salut")
     names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
-    check("connector: its tools are offered", hello in names and tool_name(source.id, "change") in names, names)
-    result = provider.requests[1]["body"]["messages"][2]["content"][0]
+    check("connector: nothing connects when the conversation starts", mcp_seen == [] and hello not in names
+          and entry in skill_names(provider.requests[0]), (mcp_seen, names))
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append((text, len(mcp_seen))) or True
+    provider.reset((200, {}, tool_turn("load_skill", {"name": entry})), (200, {}, tool_turn(hello, {"who": "QGIS"})),
+                   (200, {}, text_turn("ok")))
+    ask("dis bonjour")
+
+    def loadings():  # the questions about loading the connector; a call of one of its tools is asked too
+        return [item for item in asked if "wants to use the connector" in item[0]]
+    check("connector: loading it asks first, then connects", len(loadings()) == 1 and asked[0][1] == 0 and "Local" in asked[0][0]
+          and source.address in asked[0][0] and initialized() == 1, (asked, mcp_seen))
+    first = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
+    then = [tool["name"] for tool in provider.requests[1]["body"]["tools"]]
+    check("connector: its tools come from the next turn", hello not in first and hello in then
+          and tool_name(source.id, "change") in then, (first, then))
+    result = provider.requests[2]["body"]["messages"][-1]["content"][0]
     check("connector: the call is answered", not result.get("is_error") and "Bonjour" in result["content"] and "QGIS" in result["content"], result)
     check("connector: the session is kept", mcp_seen[-1][0] == "tools/call" and mcp_seen[-1][1] == "sess-1" and
           mcp_seen[-1][2]["name"] == "hello", mcp_seen[-1])
+    provider.reset((200, {}, tool_turn("load_skill", {"name": entry})), (200, {}, text_turn("ok")))
+    ask("encore")
+    again = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("connector: loaded again, no question, no connection", len(loadings()) == 1 and initialized() == 1
+          and not again.get("is_error"), (asked, again))
     check("connector: the call stays in the thread", "Local: hello" in panel.thread.toPlainText(), panel.thread.toPlainText())
     asked.clear()
     chat._ask_user = lambda title, text: asked.append(text) or False
@@ -1256,25 +1286,36 @@ def check_chat(provider, layer, authcfg, work):
     ask("change")
     check("connector: a call not declared read-only asks first", asked and "Local" in asked[0] and
           sum(1 for item in mcp_seen if item[0] == "tools/call") == calls_before, asked)
-    chat._ask_user = lambda title, text: answers["export"]
+    settings(enabled_sources=(source.id,), custom_sources=custom_to_json([source]))
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    provider.reset((200, {}, tool_turn("load_skill", {"name": entry})), (200, {}, tool_turn("load_skill", {"name": entry}, "toolu_2")),
+                   (200, {}, text_turn("ok")))
+    seen_before = len(mcp_seen)
+    ask("dis bonjour")
+    refusals = [provider.requests[index]["body"]["messages"][-1]["content"][0] for index in (1, 2)]
+    check("connector: a no is final for the conversation", len(asked) == 1 and len(mcp_seen) == seen_before and all(
+        item.get("is_error") and "do not ask again in this conversation" in item["content"] for item in refusals), (asked, refusals))
     server.shutdown()
     server.server_close()
     dead = make_source("http://127.0.0.1:9/mcp", "mcp", "Dead")
     settings(enabled_sources=(dead.id,), custom_sources=custom_to_json([dead]))
-    provider.reset((200, {}, text_turn("sans connecteur")))
+    chat._ask_user = lambda title, text: True
+    provider.reset((200, {}, tool_turn("load_skill", {"name": "connector-" + dead.id})), (200, {}, text_turn("sans connecteur")))
     ask("salut")
-    check("connector: one that does not answer does not stop the chat", provider.requests and "Dead" in panel.thread.toPlainText(),
-          panel.thread.toPlainText())
+    failed = provider.requests[1]["body"]["messages"][-1]["content"][0]
+    check("connector: one that does not answer is said, the chat goes on", failed.get("is_error") and "does not answer" in failed["content"]
+          and "sans connecteur" in panel.thread.toPlainText() and "Not reachable" not in panel.thread.toPlainText(),
+          (failed, panel.thread.toPlainText()))
+    chat._ask_user = lambda title, text: answers["export"]
 
     check_hostile_connector()
     settings(enabled_sources=("datagouv_mcp",))
-    chat._add_connectors = lambda active, tools, handlers: []
     provider.reset((200, {}, tool_turn("add_layer", {"source": "https://example.org/a.geojson"})), (200, {}, text_turn("ok")))
     answers["export"] = True
     ask("ajoute")
     result = provider.requests[1]["body"]["messages"][2]["content"][0]
     check("a connector alone does not open the web to add_layer", result.get("is_error") is True and "open data" in result["content"], result)
-    del chat._add_connectors
 
     values = AgentSettings(preset="anthropic", model="m", enabled_sources=("ign_wfs",), custom_sources=custom_to_json([source]))
     tested = []

@@ -767,6 +767,42 @@ Do you agree?</source>
 Bạn có đồng ý không?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>official</source>
+        <translation>chính thức</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>community</source>
+        <translation>từ cộng đồng</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1509"/>
+        <source>on this computer</source>
+        <translation>trên máy tính này</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1511"/>
+        <source>added by you</source>
+        <translation>do bạn thêm</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1512"/>
+        <source>The agent wants to use the connector {} ({}):
+{}
+
+Its tools will see of your project only what the agent sends them, and what they answer comes back to the agent. Allow it for the rest of this conversation?</source>
+        <translation>Tác tử muốn dùng trình kết nối {} ({}):
+{}
+
+Các công cụ của nó chỉ thấy từ dự án của bạn những gì tác tử gửi cho chúng, và những gì chúng trả lời sẽ quay lại tác tử. Cho phép trong phần còn lại của cuộc trò chuyện này?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1871"/>
+        <source>Connector: {}</source>
+        <translation>Trình kết nối: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Tín dụng hoặc hạn mức của tài khoản này đã hết.</translation>

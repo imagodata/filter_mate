@@ -767,6 +767,42 @@ Do you agree?</source>
 Apakah Anda setuju?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>official</source>
+        <translation>resmi</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>community</source>
+        <translation>komunitas</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1509"/>
+        <source>on this computer</source>
+        <translation>di komputer ini</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1511"/>
+        <source>added by you</source>
+        <translation>ditambahkan oleh Anda</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1512"/>
+        <source>The agent wants to use the connector {} ({}):
+{}
+
+Its tools will see of your project only what the agent sends them, and what they answer comes back to the agent. Allow it for the rest of this conversation?</source>
+        <translation>Agen ingin menggunakan konektor {} ({}):
+{}
+
+Alat-alatnya hanya akan melihat dari proyek Anda apa yang dikirim agen kepadanya, dan jawabannya kembali ke agen. Izinkan untuk sisa percakapan ini?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1871"/>
+        <source>Connector: {}</source>
+        <translation>Konektor: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Kredit atau kuota akun ini telah habis.</translation>

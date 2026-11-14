@@ -767,6 +767,42 @@ Do you agree?</source>
 Συμφωνείτε;</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>official</source>
+        <translation>επίσημος</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>community</source>
+        <translation>της κοινότητας</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1509"/>
+        <source>on this computer</source>
+        <translation>σε αυτόν τον υπολογιστή</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1511"/>
+        <source>added by you</source>
+        <translation>προστέθηκε από εσάς</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1512"/>
+        <source>The agent wants to use the connector {} ({}):
+{}
+
+Its tools will see of your project only what the agent sends them, and what they answer comes back to the agent. Allow it for the rest of this conversation?</source>
+        <translation>Ο πράκτορας θέλει να χρησιμοποιήσει τον συνδέτη {} ({}):
+{}
+
+Τα εργαλεία του θα βλέπουν από το έργο σας μόνο όσα τους στέλνει ο πράκτορας, και ό,τι απαντούν επιστρέφει στον πράκτορα. Να επιτραπεί για το υπόλοιπο αυτής της συνομιλίας;</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1871"/>
+        <source>Connector: {}</source>
+        <translation>Συνδέτης: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Η πίστωση ή η ποσόστωση αυτού του λογαριασμού έχει εξαντληθεί.</translation>

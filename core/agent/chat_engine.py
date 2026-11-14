@@ -233,10 +233,12 @@ class ChatEngine:
                 logger.exception("Agent undo point failed")
                 return ToolResultPart(call.call_id, _NO_UNDO_POINT, is_error=True)
         self._notify(self._listener.on_tool_start, call)
+        generation = self._generation
         result = self._executor.execute(call)
         gate = connector_gate(call) if verdict == ASK else None
-        if gate is not None and not result.is_error:
-            # Granted once loaded only: a connector that did not answer keeps nothing, and is asked again.
+        if gate is not None and not result.is_error and generation == self._generation and not self._cancelled:
+            # Granted once loaded only: a connector that did not answer keeps nothing, and is asked again. Nor when
+            # the conversation ended while it loaded: the policy outlives it, and the yes would go to the next one.
             self._policy.grant(gate.name)
         self._notify(self._listener.on_tool_end, call, result)
         return result

@@ -767,6 +767,42 @@ Do you agree?</source>
 Sumasang-ayon ka ba?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>official</source>
+        <translation>opisyal</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>community</source>
+        <translation>mula sa komunidad</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1509"/>
+        <source>on this computer</source>
+        <translation>sa computer na ito</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1511"/>
+        <source>added by you</source>
+        <translation>idinagdag mo</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1512"/>
+        <source>The agent wants to use the connector {} ({}):
+{}
+
+Its tools will see of your project only what the agent sends them, and what they answer comes back to the agent. Allow it for the rest of this conversation?</source>
+        <translation>Gustong gamitin ng agent ang connector na {} ({}):
+{}
+
+Makikita lang ng mga tool nito sa proyekto mo ang ipinapadala ng agent sa kanila, at ang isasagot nila ay babalik sa agent. Payagan ito para sa natitirang bahagi ng usapang ito?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1871"/>
+        <source>Connector: {}</source>
+        <translation>Connector: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>Naubos na ang credit o quota ng account na ito.</translation>

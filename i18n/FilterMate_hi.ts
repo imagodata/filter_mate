@@ -767,6 +767,42 @@ Do you agree?</source>
 क्या आप सहमत हैं?</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>official</source>
+        <translation>आधिकारिक</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1508"/>
+        <source>community</source>
+        <translation>समुदाय का</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1509"/>
+        <source>on this computer</source>
+        <translation>इस कंप्यूटर पर</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1511"/>
+        <source>added by you</source>
+        <translation>आपके द्वारा जोड़ा गया</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1512"/>
+        <source>The agent wants to use the connector {} ({}):
+{}
+
+Its tools will see of your project only what the agent sends them, and what they answer comes back to the agent. Allow it for the rest of this conversation?</source>
+        <translation>एजेंट कनेक्टर {} ({}) का उपयोग करना चाहता है:
+{}
+
+इसके टूल आपके प्रोजेक्ट का केवल उतना ही देखेंगे जितना एजेंट उन्हें भेजेगा, और उनका जवाब एजेंट के पास लौट आएगा। क्या इसे इस बातचीत के बाकी समय के लिए अनुमति देनी है?</translation>
+    </message>
+    <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="1871"/>
+        <source>Connector: {}</source>
+        <translation>कनेक्टर: {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="781"/>
         <source>The credit or quota of this account is used up.</source>
         <translation>इस खाते का क्रेडिट या कोटा समाप्त हो गया है।</translation>

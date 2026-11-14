@@ -58,6 +58,11 @@ def entry_line(source: Source) -> str:
     return f"{_bounded(_title(source), MAX_TITLE)}: {note}"
 
 
+def shown_title(source: Source) -> str:
+    """The title of a connector as the user and the model read it: never one that hides a character."""
+    return _bounded(_title(source), MAX_TITLE)
+
+
 def connector_entries(sources: Iterable[Source]) -> Tuple[ConnectorEntry, ...]:
     """The connectors among ``sources``, in the order given (the platforms are not entries)."""
     return tuple(ConnectorEntry(entry_name(source), entry_line(source), source)
@@ -102,6 +107,15 @@ class ConnectorLoader:
         self._capacity = room
         self._room = room
         self._loaded: Dict[str, Dict[str, Any]] = {}
+
+    def loaded(self, name: str) -> bool:
+        """Is the connector ``name`` loaded in this conversation? Loading it again answers at once."""
+        return name in self._loaded
+
+    @property
+    def full(self) -> bool:
+        """No room left for the tools of another connector: loading one is refused without connecting."""
+        return self._room <= 0
 
     def source(self, name: str) -> Optional[Source]:
         entry = self._entries.get(name)
