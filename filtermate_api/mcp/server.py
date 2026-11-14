@@ -923,11 +923,13 @@ def build_server(client: FilterMateClient) -> Any:
                                           idempotentHint=False, openWorldHint=True))
     async def add_layer(
         source: Annotated[str, Field(min_length=1, max_length=2000, description=(
-            "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, fgb, csv, tif; a GeoPackage "
-            "table with |layername=name), or a public https URL of such a file (a resource url from "
-            "search_open_data). Nothing else: no http, no provider URI, no database connection."))],
+            "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, gpx, fgb, csv, xlsx, parquet, "
+            "tif, or a point cloud: las, laz, copc.laz; a GeoPackage table with |layername=name), or a public https "
+            "URL of a vector or raster file (a resource url from search_open_data). Nothing else: no http, no "
+            "provider URI, no database connection."))],
         name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: the file name)")] = "",
-        kind: Annotated[Literal["vector", "raster"], Field(description="vector (default) or raster")] = "vector",
+        kind: Annotated[Literal["vector", "raster", "point_cloud"], Field(description=(
+            "vector (default), raster, or point_cloud (a local las or laz file is one whatever is given here)"))] = "vector",
     ) -> Dict[str, Any]:
         """Add a layer to the open project from a local file or a public https URL.
 

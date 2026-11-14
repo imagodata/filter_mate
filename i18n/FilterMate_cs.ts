@@ -695,6 +695,11 @@ Zůstanou ve vyrovnávací paměti úprav, dokud úpravy vrstvy neuložíte, a z
         <translation>Zastaveno.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Tento požadavek: přečteno {} tokenů (z toho {} z mezipaměti), zapsáno {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Server MCP se nepodařilo spustit: {}</translation>

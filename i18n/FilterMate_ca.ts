@@ -695,6 +695,11 @@ Es queden a la memòria d'edició fins que deseu les edicions de la capa, i desf
         <translation>Aturat.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Aquesta petició: {} tokens llegits (dels quals {} de la memòria cau), {} escrits</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>El servidor MCP no ha pogut arrencar: {}</translation>

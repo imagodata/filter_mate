@@ -695,6 +695,11 @@ Chúng vẫn ở trong bộ đệm chỉnh sửa cho đến khi bạn lưu các 
         <translation>Đã dừng.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Yêu cầu này: đã đọc {} token (trong đó {} từ bộ nhớ đệm), đã ghi {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Không thể khởi động máy chủ MCP: {}</translation>

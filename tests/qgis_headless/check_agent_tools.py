@@ -1133,6 +1133,25 @@ def main(introspection):
             check(f"add refuses {label}", False)
         except ValueError:
             check(f"add refuses {label}", True)
+    cloud_file = os.path.join(os.environ.get("FM_FIXTURES", ""), "cloud.las")
+    if os.path.isfile(cloud_file):
+        # A LAS file is a point cloud whatever kind is given: asked as a vector layer, it came back "not a vector".
+        from qgis.core import QgsProviderRegistry
+        try:
+            cloud = project_control.add_layer(cloud_file, name="nuage_bis")
+            check("add a local point cloud", cloud["layer_kind"] == "point_cloud" and cloud["name"] == "nuage_bis" and
+                  project.mapLayer(cloud["layer_id"]).isValid(), cloud)
+            project_control.remove_layers(["nuage_bis"])
+        except ValueError as exc:  # the plain qgis/qgis images are built without PDAL: said, not a broken layer
+            check("add a local point cloud: a QGIS without PDAL says so",
+                  QgsProviderRegistry.instance().providerMetadata("pdal") is None and "PDAL" in str(exc), exc)
+        for source, kind, label in (("https://example.org/a.laz", "vector", "a remote point cloud"),
+                                    (gpkg_path, "point_cloud", "a GeoPackage as a point cloud")):
+            try:
+                project_control.add_layer(source, kind=kind)
+                check(f"add refuses {label}", False)
+            except ValueError as exc:
+                check(f"add refuses {label}", "point cloud" in str(exc), exc)
     removed = project_control.remove_layers(["communes_bis", "nope"])
     check("remove", removed["done"] == ["communes_bis"] and not project.mapLayersByName("communes_bis"), removed)
 

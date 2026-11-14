@@ -47,7 +47,11 @@ GEO_FORMATS = frozenset({
     "geojson", "gpkg", "geopackage", "shp", "shapefile", "zip", "kml", "gml", "csv", "fgb", "flatgeobuf",
     "tif", "tiff", "geotiff", "cog",
 })
-LOCAL_FORMATS = frozenset({"csv", "fgb", "geojson", "gml", "gpkg", "json", "kml", "shp", "tif", "tiff"})
+LOCAL_FORMATS = frozenset({"csv", "fgb", "geojson", "gml", "gpkg", "gpx", "json", "kml", "las", "laz", "parquet", "shp",
+                           "tif", "tiff", "xlsx"})
+# A point cloud is opened by its own providers, from a local file only (a .copc.laz is read as it is, a .las or a
+# .laz is indexed by QGIS beside the file).
+POINT_CLOUD_FORMATS = frozenset({"las", "laz"})
 # What a link serves, when its address ends with the name of a format instead of a file name (``exports/shp``,
 # ``download?format=shp``) or only its content type tells: the extension GDAL knows it by. A shapefile comes zipped.
 _FORMAT_WORDS = {
@@ -437,6 +441,12 @@ def remote_file(url: str, status: int, headers: Mapping[str, str]) -> RemoteFile
         told = str(headers.get("content-length") or "").strip() if status != 416 else ""
     return RemoteFile(stem + ("." + extension if extension else ""), by_parts,
                       int(told) if _BYTE_COUNT.fullmatch(told) else -1)
+
+
+def is_point_cloud(source: str) -> bool:
+    """Whether the address or the path names a point cloud file (``.las``, ``.laz``, ``.copc.laz``)."""
+    path = urlsplit(source).path if source.lower().startswith("https://") else _LAYER_NAME_SUFFIX.sub("", source)
+    return path.lower().rsplit(".", 1)[-1] in POINT_CLOUD_FORMATS
 
 
 def reads_in_place(url: str, kind: str, found: RemoteFile) -> bool:

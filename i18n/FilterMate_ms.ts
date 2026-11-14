@@ -695,6 +695,11 @@ Ciri kekal dalam penimbal suntingan sehingga anda menyimpan suntingan lapisan, d
         <translation>Dihentikan.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Permintaan ini: {} token dibaca ({} daripada cache), {} ditulis</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>Pelayan MCP tidak dapat dimulakan: {}</translation>

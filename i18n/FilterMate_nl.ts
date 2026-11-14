@@ -695,6 +695,11 @@ Ze blijven in de bewerkingsbuffer tot u de bewerkingen van de laag opslaat, en h
         <translation>Gestopt.</translation>
     </message>
     <message>
+        <location filename="../../ui/controllers/agent_chat_controller.py" line="2410"/>
+        <source>This request: {} tokens read ({} from the cache), {} written</source>
+        <translation>Dit verzoek: {} tokens gelezen (waarvan {} uit de cache), {} geschreven</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="340"/>
         <source>The MCP server could not start: {}</source>
         <translation>De MCP-server kon niet worden gestart: {}</translation>
