@@ -567,6 +567,42 @@ features of OpenStreetMap that carry given tags in an area, from an Overpass ser
 - Checked by `tests/qgis_headless/check_agent_osm.py` in QGIS 3.22, LTR and latest (65 checks; an Overpass server
   of this machine that can be busy, stop short, be cut, redirect or go slow; with `FM_NET=1` the real ones).
 
+### Population (2026-11-15)
+
+"How many people live in Pune", "the density of each district", "the people more than 2 km from a hospital".
+`add_population` (`adapters/public_api/population.py`) brings in the people of an area as a raster of people per
+pixel, from a population grid the user ticked: `meta_population`, the High Resolution Settlement Layer of Data for
+Good at Meta and CIESIN (CC BY 4.0), at 30 m, one VRT over 237 cloud optimized GeoTIFFs on AWS, read by parts.
+It covers most countries, not all: China, Russia, Iran and North Korea are left out (measured 2026-11-15).
+
+- People are summed, never averaged. The grid is read on the grid of its source (EPSG:4326, one arc second) and
+  made coarser by whole blocks of pixels (3 x 3 by default, about 90 m; 32 x 32 for 1 km), with `resampleAlg=sum`
+  and the overviews of the source left out (they are averages). Every total is then exact, in GDAL 3.4 as in
+  3.12. Warping to a grid in metres was measured first and left: it cuts pixels at the edges (Lyon at 1 km: 3 % of
+  the people lost in GDAL 3.12, 8 % in GDAL 3.4).
+- Its answer gives `total`, the people of the rectangle around the area (a boundary is no rectangle: that is
+  zonal statistics), grown to whole pixels. The people of polygons (districts, an area around hospitals) are `native:zonalstatisticsfb` with the sum
+  (`STATISTICS [1]`), which reprojects the polygons itself; the workflows skill gives the chain, the reprojection
+  to the UTM zone before a buffer in metres included.
+- 50,000 km2 at most (every pixel of the source is read: about 1 s for 1,000 km2, 10 s for the Gironde), 16 million
+  pixels written (coarser beyond, and said). An area where nobody lives is refused rather than added empty.
+- Out of the grid is not "nobody". The rectangles of the files of the VRT say where it has data: an area out of
+  all of them is refused as not covered (Beijing, Moscow, Tehran, Svalbard), and the share of an area out of them is
+  said in the note. A country left out inside the rectangle of a file (the Russian side of the border with
+  Finland) still reads as nobody: the grid holds no mark for it.
+- What the server sends is checked before it is read: the pixels of the VRT must be those the module counts on (a
+  grid moved would make every total wrong without a word), and it may name only GeoTIFF files beside it (a path of
+  this machine, a parent folder or an address is refused); a VRT runs no Python (`GDAL_VRT_ENABLE_PYTHON=NO`).
+  GDAL 3.1 at least (`resampleAlg=sum`).
+- `add_field` and `update_features` now measure `$area` in square metres and `$length` in metres on the ellipsoid,
+  whatever the CRS of the layer: a density of a layer in degrees was computed on square degrees, 10 billion times
+  too large.
+- The numbers are a model of a census and of the buildings seen on satellite images (2015 to 2020 by country): the
+  note of the answer says to say so.
+- Checked by `tests/qgis_headless/check_agent_population.py` in QGIS 3.22, 3.28 (GDAL 3.4), LTR and latest (38
+  checks; a VRT over a GeoTIFF on the grid of the real one, served by parts, with people where the check put them;
+  with `FM_NET=1` the people of Lyon and of Pune, and Beijing said not covered).
+
 ## Objects on a raster
 
 `adapters/public_api/drawn_objects.py`, with `POST /objects/segment` and `GET /map/context`:
@@ -690,17 +726,18 @@ Each entry was checked to answer without an account; `tests/qgis_headless/check_
 
 A description is read at every request. With every tool offered to a local model (the families off), the
 instructions and the tools must hold in the 32k context Ollama is asked for: beyond, it asks for 64k, which
-doubles the memory of the model. On 2026-11-15, 70 tools and the instructions weigh 99,719 characters for
-100,352 at most: about 600 characters are left. The elevation, contour and OpenStreetMap tools were written
-shorter for that (the light of a hillshade is no argument a model reads; the REST route keeps it), and the next
-tool needs room made first (`cross_filter` alone weighs 7,000). A test fails when the step is passed
-(`test_ollama_provider.py`).
+doubles the memory of the model. A local model is not sent what only checks an argument (`maxLength`,
+`minLength`, `maxItems`, `minItems`, `additionalProperties`), and an optional value (`anyOf` a type or null) is
+written as its type (`providers/ollama_chat.wire_schema`): the plugin checks every call against the whole schema
+of the catalog, so nothing is lost, and 6,600 characters were won. On 2026-11-15, 71 tools and the instructions
+weigh 94,343 characters for 100,352 at most: about 6,000 characters are left. A test fails when the step is
+passed (`test_ollama_provider.py`).
 
 That measure is the tools and the instructions alone. The notes about the sources ticked come on top, and are
-written by the chat controller, which needs QGIS: measured on 2026-11-15, 770 characters for a basemap, a
-geocoder, an elevation source and an OpenStreetMap server, 1,990 with one source of every kind ticked. So with
-the families off and every kind of source ticked, the first request of a local model already passes the step;
-with the families on (the default), a request is far under it. The conversation itself is not weighed either.
+written by the chat controller, which needs QGIS: measured on 2026-11-15, 864 characters for a basemap, a
+geocoder, an elevation source, an OpenStreetMap server and a population grid, 2,086 with one source of every kind
+ticked: still under the step with the families off. With the families on (the default), a request is far under
+it. The conversation itself is not weighed either.
 
 The catalog is JSON because that server needs pydantic and the MCP SDK, which QGIS does not have. A test fails when the
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's

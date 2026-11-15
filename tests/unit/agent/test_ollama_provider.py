@@ -10,7 +10,8 @@ from core.agent.messages import (
 )
 from core.agent.providers import KIND_OLLAMA, PRESETS, create_provider
 from core.agent.providers.base import ProviderConfig
-from core.agent.providers.ollama_chat import CONTEXT_STEPS, context_for, native_base
+from core.agent.json_schema import validate
+from core.agent.providers.ollama_chat import CONTEXT_STEPS, context_for, native_base, wire_schema
 from core.agent.tool_catalog import FILTERING_NOTE, FILTERING_TOOLS, ToolSpec, chat_tools, filtering_only
 from core.agent.system_prompt import SYSTEM_PROMPT
 
@@ -87,6 +88,43 @@ class TestRequest:
                         "create_widget", "add_layer"):
             assert missing not in FILTERING_TOOLS
         assert "every tool" in FILTERING_NOTE
+
+    def test_a_local_model_reads_the_schemas_without_what_only_checks(self):
+        schema = {"type": "object", "additionalProperties": False, "required": ["layer"], "properties": {
+            "layer": {"type": "string", "minLength": 1, "maxLength": 1000, "description": "Layer id or name"},
+            "names": {"type": "array", "items": {"type": "string", "maxLength": 9}, "minItems": 1, "maxItems": 5},
+            "opacity": {"anyOf": [{"type": "number", "minimum": 0, "maximum": 1}, {"type": "null"}], "default": None,
+                        "description": "0 to 1"},
+            "mode": {"anyOf": [{"enum": ["AND", "OR"], "type": "string"}, {"type": "null"}], "default": None},
+            "either": {"anyOf": [{"type": "string"}, {"type": "integer"}]}}}
+        assert wire_schema(schema) == {"type": "object", "required": ["layer"], "properties": {
+            "layer": {"type": "string", "description": "Layer id or name"},
+            "names": {"type": "array", "items": {"type": "string"}},
+            "opacity": {"type": "number", "minimum": 0, "maximum": 1, "default": None, "description": "0 to 1"},
+            "mode": {"enum": ["AND", "OR"], "type": "string", "default": None},
+            "either": {"anyOf": [{"type": "string"}, {"type": "integer"}]}}}
+        assert schema["properties"]["layer"]["maxLength"] == 1000  # the catalog keeps them: the plugin checks with it
+        # What a model sends is still checked against the whole schema: a null passes, a name too long does not.
+        assert validate({"layer": "a", "opacity": None}, schema) == []
+        assert validate({"layer": "a" * 1001}, schema) and validate({"layer": "a", "names": ["x" * 10]}, schema)
+
+    def test_a_schema_of_a_connector_is_never_broken(self):
+        # A property named as a keyword stays a property; an anyOf of null alone stays as it is.
+        schema = {"type": "object", "required": ["maxItems"], "properties": {
+            "maxItems": {"type": "integer", "maximum": 9}, "odd": {"anyOf": [{"type": "null"}, {"type": "null"}]}},
+            "$defs": {"minLength": {"type": "string", "maxLength": 3}}}
+        assert wire_schema(schema) == {"type": "object", "required": ["maxItems"], "properties": {
+            "maxItems": {"type": "integer", "maximum": 9}, "odd": {"anyOf": [{"type": "null"}, {"type": "null"}]}},
+            "$defs": {"minLength": {"type": "string"}}}
+
+    def test_every_tool_is_sent_without_its_checks(self):
+        request = ollama().build_request("system", [Message(ROLE_USER, (TextPart("hi"),))], chat_tools())
+        sent = json.dumps(json.loads(request.body)["tools"])
+        assert "maxLength" not in sent and "additionalProperties" not in sent and '{"type": "null"}' not in sent
+        named = {tool.name: tool.input_schema for tool in chat_tools()}
+        for tool in json.loads(request.body)["tools"]:
+            assert set(tool["function"]["parameters"].get("properties", {})) == set(
+                named[tool["function"]["name"]].get("properties", {}))
 
     def test_context_steps(self):
         assert CONTEXT_STEPS == (16_384, 32_768, 65_536)

@@ -172,7 +172,9 @@ def update_features(layer: str, values: Optional[Dict[str, Any]] = None, formula
 
     Args:
         values: ``{field: value}``, each converted to the type of its field.
-        formulas: ``{field: QGIS expression}`` computed on each feature ("pop" * 2, $area / 10000).
+        formulas: ``{field: QGIS expression}`` computed on each feature ("pop" * 2, $area / 10000). $area is in
+            square metres and $length in metres, on the ellipsoid, whatever the CRS of the layer: 2026-11-15, a
+            density of a layer in degrees was computed on square degrees, 10 billion times too large.
 
     Raises:
         ValueError: A layer or field that cannot be edited, a value of the wrong type, a refused expression.
@@ -194,7 +196,14 @@ def update_features(layer: str, values: Optional[Dict[str, Any]] = None, formula
     if not ids:
         return _answer(found, changed=0)
     context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(found))
+    if computed:
+        from qgis.core import QgsUnitTypes
+        from .introspection import distance_area
+        calculator, _planar, _ellipsoid = distance_area(found)
     for expression_object in computed.values():
+        expression_object.setGeomCalculator(calculator)
+        expression_object.setDistanceUnits(QgsUnitTypes.DistanceUnit.DistanceMeters)
+        expression_object.setAreaUnits(QgsUnitTypes.AreaUnit.AreaSquareMeters)
         expression_object.prepare(context)
     changed = 0
     opened = _start_editing(found, f"set {', '.join(list(values) + list(formulas))}")

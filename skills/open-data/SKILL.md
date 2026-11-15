@@ -1,12 +1,12 @@
 ---
 name: open-data
 title: Bring data in, take layers out
-description: bring data in - what OpenStreetMap maps in an area (buildings, roads, shops, hospitals...), datasets of the open data platforms the user allowed, a file, a URL, a WFS service, a satellite scene, a web basemap, the elevation of an area - and remove layers from the project
+description: bring data in - what OpenStreetMap maps in an area (buildings, roads, shops, hospitals...), datasets of the open data platforms the user allowed, a file, a URL, a WFS service, a satellite scene, a web basemap, the elevation or the population of an area - and remove layers from the project
 metadata:
-  version: 4
-  plugin_min: 5.1.0
+  version: 5
+  plugin_min: 5.1.1
   audience: chat, mcp
-  tools: search_open_data, add_layer, add_service_layer, search_imagery, add_basemap, add_elevation, add_osm_features, find_place, remove_layers, list_layers
+  tools: search_open_data, add_layer, add_service_layer, search_imagery, add_basemap, add_elevation, add_population, add_osm_features, find_place, remove_layers, list_layers
   risk: change
   trust: builtin
 ---
@@ -83,6 +83,19 @@ user enabled: copernicus_dem, worldwide at 30 m. It is data, not an image: a ras
 is then colored, shaded, cut into contours or read under polygons. A relief map is the terrain skill: load it.
 When no elevation source is enabled, say that Copernicus DEM can be ticked in the settings of the agent, Sources
 tab, under Satellite imagery.
+
+## Population
+
+add_population brings in the people of an area (a place found, or the visible map) from a population source the
+user enabled: meta_population, people per pixel of 30 m estimated from a census and the buildings seen on
+satellite images, for most countries (not China, Russia nor Iran: it says so). Its answer gives total, the people of
+the rectangle around the area: for a town found by find_place, "about" that many live in and around it. For the
+people inside a boundary (a commune, districts, around places), the workflows skill gives the chain
+(native:zonalstatisticsfb). resolution 100 (the default) for a town or its districts, 1000 only for the total of a
+region. Say that the numbers are estimates, not a census. It is drawn as a pseudocolor ramp (Magma or YlOrRd,
+cut 2).
+When no population source is enabled, say that it can be ticked in the settings of the agent, Sources tab, under
+Satellite imagery.
 
 ## Removing layers
 

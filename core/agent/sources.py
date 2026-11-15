@@ -12,10 +12,11 @@ from urllib.parse import urlsplit
 from .basemaps import BASEMAPS, template_problem
 from .elevation import SOURCES as ELEVATION_SOURCES
 from .osm import SERVERS as OVERPASS_SERVERS
+from .population import SOURCES as POPULATION_SOURCES
 from .mcp_client import server_url_problem
 from .open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_STAC,
-    KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS,
+    KIND_POPULATION, KIND_STAC, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
     NO_DATA_KINDS, base_url,
 )
 
@@ -97,6 +98,9 @@ BUILT_IN += tuple(Source(server.id, server.title, KIND_OVERPASS, server.url, ORI
 BUILT_IN += tuple(Source(source.id, source.title, KIND_ELEVATION, source.base,
                          ORIGIN_OFFICIAL if source.official else ORIGIN_COMMUNITY, source.note)
                   for source in ELEVATION_SOURCES)
+BUILT_IN += tuple(Source(source.id, source.title, KIND_POPULATION, source.base,
+                         ORIGIN_OFFICIAL if source.official else ORIGIN_COMMUNITY, source.note)
+                  for source in POPULATION_SOURCES)
 BUILT_IN += tuple(Source(basemap.id, basemap.title, KIND_XYZ, basemap.url,
                          ORIGIN_OFFICIAL if basemap.official else ORIGIN_COMMUNITY, basemap.note)
                   for basemap in BASEMAPS)
@@ -220,5 +224,6 @@ def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
             "basemaps": [named(source) for source in sources if source.kind == KIND_XYZ],
             "elevation": [named(source) for source in sources if source.kind == KIND_ELEVATION],
             "osm": [named(source) for source in sources if source.kind == KIND_OVERPASS],
+            "population": [named(source) for source in sources if source.kind == KIND_POPULATION],
             "databases": [f"{source.id} ({source.title})" for source in sources if source.kind == KIND_DATABASE],
             "connectors": [source.title for source in sources if source.is_connector]}

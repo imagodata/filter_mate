@@ -8,9 +8,10 @@ left for the next tool. Run it after a change of a tool description or of the in
     python scripts/agent_request_weight.py [--top 10]
 
 Not weighed: the notes about the sources the user ticked, which the chat controller adds to the instructions (it
-needs QGIS), and the conversation. Measured on 2026-11-15, these notes are 770 characters for a basemap, a
-geocoder, an elevation source and an OpenStreetMap server, 1,990 with one source of every kind: the room printed
-here must hold them too for a first request to stay in the step with everything ticked and the families off.
+needs QGIS), and the conversation. Measured on 2026-11-15, these notes are 864 characters for a basemap, a
+geocoder, an elevation source, an OpenStreetMap server and a population grid, 2,086 with one source of every kind:
+the room printed here must hold them too for a first request to stay in the step with everything ticked and the
+families off.
 """
 import argparse
 import json
@@ -29,8 +30,9 @@ from agent.tool_catalog import chat_tools  # noqa: E402
 
 
 # What ui/controllers/agent_chat_controller.py adds to the instructions for the sources ticked, measured in QGIS
-# on 2026-11-15: (a basemap, a geocoder, an elevation source and an OpenStreetMap server; one source of every kind).
-NOTES_OF_SOURCES = (770, 1990)
+# on 2026-11-15: (a basemap, a geocoder, an elevation source, an OpenStreetMap server and a population grid; one
+# source of every kind).
+NOTES_OF_SOURCES = (864, 2086)
 
 
 def weigh():
