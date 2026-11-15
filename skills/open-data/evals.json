@@ -289,6 +289,35 @@
         "search_open_data",
         "run_algorithm"
       ]
+    },
+    {
+      "id": "georisques_flood_areas",
+      "prompt": "Affiche les zones inondables de Bordeaux pour une crue centennale.",
+      "expect": [
+        [
+          {
+            "tool": "add_service_layer",
+            "args": {
+              "platform": "georisques_wms",
+              "typename": {
+                "contains": [
+                  "ALEA_SYNT_01_02MOY"
+                ]
+              }
+            },
+            "call_args": {
+              "platform": "georisques_wms",
+              "typename": "ALEA_SYNT_01_02MOY",
+              "name": "Zones inondables (crue centennale)"
+            }
+          }
+        ]
+      ],
+      "forbid": [
+        "add_osm_features",
+        "add_layer",
+        "remove_layers"
+      ]
     }
   ]
 }

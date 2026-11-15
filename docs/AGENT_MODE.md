@@ -640,7 +640,18 @@ It covers most countries, not all: China, Russia, Iran and North Korea are left 
 
 `core/agent/sources.py` is one list, in the Sources tab of the settings, nothing ticked by default:
 
-- **Open data platforms**: data.gouv.fr, Opendatasoft, national CKAN portals, WFS services (IGN Géoplateforme, IBGE, PRG).
+- **Open data platforms**: data.gouv.fr, Opendatasoft, national CKAN portals, WFS services (IGN Géoplateforme,
+  Géorisques, IBGE, PRG).
+- **Géorisques** (2026-11-15), the French natural and industrial risks of the BRGM, one MapServer for two platforms:
+  `georisques_wms` draws the flood areas of the territories at risk by return period (`ALEA_SYNT_01_01FOR`,
+  `ALEA_SYNT_01_02MOY` for 100 years, `ALEA_SYNT_01_04FAI`), the regulatory zones of the flood plans
+  (`PPRN_ZONE_INOND`), the potential flood envelopes, groundwater flooding, clay; `georisques_wfs` has the
+  perimeters of the plans and the communes concerned, as data (463 perimeters around Bordeaux; GML, no GeoJSON).
+  Their titles say "Surface inondable", so a search for "zone inondable" found nothing: when either is ticked, the
+  instructions name the key layers (`system_prompt.platforms_note`). The server draws some layers empty in some
+  CRS (the regulatory zones in Lambert-93, the perimeters in EPSG:3857), measured with its own GetMap: QGIS 3.22,
+  which asks in the CRS of the layer, then shows nothing of the regulatory zones over a project in Lambert-93.
+  Checked by `check_agent_image_services_live.py` (the flood areas of Bordeaux drawn, its plans read).
 - **Image services** (`adapters/public_api/image_catalog.py`): WMS and WMTS (IGN Géoplateforme built in, any other the
   user adds). `search_open_data` searches their capabilities as it does for a WFS, `add_service_layer` builds the
   source of the `wms` provider for a layer the service lists (the CRS of the project when the layer has it, else Web

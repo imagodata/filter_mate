@@ -446,3 +446,14 @@ class TestPlatformsNote:
         from core.agent.system_prompt import platforms_note
         assert "ign_wfs" not in platforms_note(["datagouv", "opendatasoft"])
         assert "administrative boundaries" in platforms_note(["ign_wfs"])
+
+    def test_the_layers_of_georisques_are_named_when_it_is_enabled(self):
+        """Its titles say "Surface inondable": a search in the words of a user ("zone inondable") found nothing."""
+        from core.agent.system_prompt import platforms_note
+        assert "ALEA_SYNT" not in platforms_note(["datagouv", "ign_wfs"])
+        for ticked in (["georisques_wms"], ["georisques_wfs"], ["georisques_wms", "georisques_wfs"]):
+            note = platforms_note(ticked)
+            assert "ALEA_SYNT_01_02MOY" in note and "ms:PPRN_PERIMETRE_INOND" in note and note.count("Géorisques") == 1
+        assert {source.id for source in BUILT_IN} >= {"georisques_wms", "georisques_wfs"}
+        assert resolve_platform("georisques_wms") == ("wms", "https://mapsref.brgm.fr/wxs/georisques/risques")
+        assert resolve_platform("georisques_wfs") == ("wfs", "https://mapsref.brgm.fr/wxs/georisques/risques")

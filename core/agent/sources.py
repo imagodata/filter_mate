@@ -59,6 +59,12 @@ BUILT_IN: Tuple[Source, ...] = (
            "France, maps and imagery as tiles: orthophotos by year, old maps, cadastre, relief, land cover"),
     Source("ign_wms", "IGN Géoplateforme (WMS)", KIND_WMS, "https://data.geopf.fr/wms-r", ORIGIN_OFFICIAL,
            "France, maps and imagery drawn on request, in the CRS of the project"),
+    Source("georisques_wms", "Géorisques (WMS)", KIND_WMS, "https://mapsref.brgm.fr/wxs/georisques/risques",
+           ORIGIN_OFFICIAL, "France, natural and industrial risks as maps: flood areas by return period, zones of the "
+           "risk prevention plans, groundwater flooding, landslides, clay, radon"),
+    Source("georisques_wfs", "Géorisques (WFS)", KIND_WFS, "https://mapsref.brgm.fr/wxs/georisques/risques",
+           ORIGIN_OFFICIAL, "France, natural and industrial risks as data: perimeters of the risk prevention plans, "
+           "communes concerned"),
     Source("ign_geocoder", "IGN Géoplateforme (places, France)", KIND_GEOCODER, "https://data.geopf.fr/geocodage/search",
            ORIGIN_OFFICIAL, "France: addresses, streets and communes, for where they are"),
     Source("photon", "Photon (places, worldwide)", KIND_GEOCODER, "https://photon.komoot.io/api", ORIGIN_COMMUNITY,
