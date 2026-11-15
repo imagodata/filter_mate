@@ -10511,8 +10511,8 @@ onnxruntime загружается из PyPI с помощью pip, модель
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>Обрезка по экстенту источника: подходящие объекты этой веб-службы нельзя перечислить (более 500 или нет стабильного ключа). Объекты внутри этого экстента могут лежать вне самого источника.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Обрезка по экстенту источника: подходящие объекты этой веб-службы нельзя перечислить (слишком много для одного запроса или нет стабильного ключа). Объекты внутри этого экстента могут лежать вне самого источника.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

@@ -10511,8 +10511,8 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>ตัดตามขอบเขตของแหล่งข้อมูล: ไม่สามารถแจกแจงฟีเจอร์ที่ตรงกันของบริการเว็บนี้ได้ (มากกว่า 500 รายการ หรือไม่มีคีย์ที่คงที่) ฟีเจอร์ที่อยู่ในขอบเขตนี้อาจอยู่นอกตัวแหล่งข้อมูลเอง</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>ตัดตามขอบเขตของแหล่งข้อมูล: ไม่สามารถแจกแจงฟีเจอร์ที่ตรงกันของบริการเว็บนี้ได้ (มากเกินกว่าคำขอเดียวจะรับได้ หรือไม่มีคีย์ที่คงที่) ฟีเจอร์ที่อยู่ในขอบเขตนี้อาจอยู่นอกตัวแหล่งข้อมูลเอง</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

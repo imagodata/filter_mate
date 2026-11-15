@@ -10511,8 +10511,8 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>Cắt theo phạm vi của nguồn: không thể liệt kê các đối tượng khớp của dịch vụ web này (hơn 500, hoặc không có khóa ổn định). Các đối tượng nằm trong phạm vi đó có thể nằm ngoài chính nguồn.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Cắt theo phạm vi của nguồn: không thể liệt kê các đối tượng khớp của dịch vụ web này (quá nhiều cho một yêu cầu, hoặc không có khóa ổn định). Các đối tượng nằm trong phạm vi đó có thể nằm ngoài chính nguồn.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

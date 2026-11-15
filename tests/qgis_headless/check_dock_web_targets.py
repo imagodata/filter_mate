@@ -155,8 +155,9 @@ def s_setup():
     feature.setGeometry(QgsGeometry.fromWkt('POLYGON((95 95, 705 95, 505 405, 95 405, 95 95))'))
     medium = QgsFeature(zones.fields())
     medium.setAttributes(['medium'])
-    # 231 of the points lie in it: a list of keys under 500, and too long for a server that reads 8 KB of address.
-    medium.setGeometry(QgsGeometry.fromWkt('POLYGON((95 95, 305 95, 305 205, 95 205, 95 95))'))
+    # Twenty of the points lie in it: a list of keys short enough for most servers (7 KB of address), and too long
+    # for the WFS type ``strict``, which reads 3,000 bytes.
+    medium.setGeometry(QgsGeometry.fromWkt('POLYGON((95 95, 145 95, 145 135, 95 135, 95 95))'))
     zones.dataProvider().addFeatures([feature, medium])
     zones.updateExtents()
     project.addMapLayer(zones)
@@ -300,8 +301,11 @@ def s_settled():
 
 
 def s_refused_select():
-    """A source of 231 features and a WFS that refuses the long address their keys make, as a real one does."""
+    """A source of twenty features and a WFS that refuses the address their keys make, as a real one did."""
     STATE['exact'] = importlib.import_module(f'{PACKAGE}.adapters.qgis.remote_materializer').supports_reply_validation()
+    transfer = importlib.import_module(f'{PACKAGE}.adapters.qgis.server_subset_job')
+    # From QGIS 3.32 a WFS filter is tried on a copy of the provider before it is set: the refusal is seen there.
+    STATE['asks'] = transfer.transfer_mode_for_layer(layer('strict')) == transfer.ASYNC
     return choose('medium', ('strict',))
 
 
@@ -320,11 +324,17 @@ def s_refused_check():
         check('dock, a QGIS that sets no WFS filter: the WFS layer is left as it was', strict.subsetString() == '',
               strict.subsetString()[:140])
         return None
+    if STATE['exact'] and not STATE['asks']:
+        # QGIS 3.24 to 3.31 sets the filter without asking the service: the refusal only shows when the layer is
+        # read, in the words of QGIS. As before this change.
+        check('dock, a QGIS that sets a WFS filter without asking: the list of keys is set',
+              '"id" IN' in strict.subsetString(), strict.subsetString()[:140])
+        return after(3.0)
     check('dock: the keys the service refused give way to a cut by the extent of the source',
-          strict.subsetString().startswith("intersects_bbox($geometry, geom_from_wkt('POLYGON((95 95, 305 95, "
-                                           "305 205, 95 205, 95 95))'))"), strict.subsetString()[:140])
+          strict.subsetString().startswith("intersects_bbox($geometry, geom_from_wkt('POLYGON((95 95, 145 95, "
+                                           "145 135, 95 135, 95 95))'))"), strict.subsetString()[:140])
     given = bench.shown(strict)
-    check('dock: the layer gives what meets that extent', given == bench.inside(95, 95, 305, 205), len(given))
+    check('dock: the layer gives what meets that extent', given == bench.inside(95, 95, 145, 135), len(given))
     if STATE['exact']:
         check('dock: the service did refuse the list of keys, and the message says so',
               bool(bench.TOO_LONG) and 'refused the list' in said, (bench.TOO_LONG[:2], said[:600]))

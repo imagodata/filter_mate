@@ -232,3 +232,57 @@ class TestExtentSubset:
     def test_nothing_else_is_read_as_an_extent(self, wkt):
         from core.domain.source_capability import extent_of_wkt
         assert extent_of_wkt(wkt) is None
+
+
+class TestKeyListRequest:
+    """A list of keys goes in the address of every request of a WFS layer, and a server reads so much of it.
+
+    2026-11-15, measured in QGIS 3.44 on a local WFS 2.0: 187 bytes a key of four digits (2132 bytes for 10 keys,
+    22702 for 120), and 301 when the layer joins the rectangle of the map to its filter (3775 and 36885). Read
+    on a real WFS (IGN Géoplateforme): 25 keys of 24 characters are taken, about 100 are refused.
+    """
+
+    def test_the_estimate_is_no_shorter_than_what_qgis_wrote(self):
+        from core.domain.source_capability import key_list_request_bytes
+        for count, alone, by_rectangle in ((10, 2132, 3775), (40, 7742, 12805), (120, 22702, 36885)):
+            keys = range(1000, 1000 + count)
+            assert alone <= key_list_request_bytes("id", keys) <= alone + 400
+            assert by_rectangle <= key_list_request_bytes("id", keys, by_rectangle=True) <= by_rectangle + 400
+        words = ["COMMUNE_00000000000{:05d}".format(number) for number in range(40)]
+        assert 8585 <= key_list_request_bytes("nom", words) <= 8585 + 400
+        assert 13648 <= key_list_request_bytes("nom", words, by_rectangle=True) <= 13648 + 400
+
+    def test_what_a_real_service_took_fits_and_what_it_refused_does_not(self):
+        from core.domain.source_capability import key_list_fits
+        communes = ["COMMUNE_00000000000{:05d}".format(number) for number in range(100)]
+        assert key_list_fits("cleabs", communes[:25])
+        assert not key_list_fits("cleabs", communes)
+
+    def test_a_layer_that_asks_by_rectangle_takes_fewer_keys(self):
+        from core.domain.source_capability import key_list_fits
+        keys = list(range(1000, 1035))
+        assert key_list_fits("id", keys) and not key_list_fits("id", keys, by_rectangle=True)
+        assert key_list_fits("id", keys[:20], by_rectangle=True)
+
+    def test_the_limit_is_the_one_of_the_settings(self):
+        from core.domain.source_capability import key_list_fits
+        keys = list(range(1000, 1200))
+        assert not key_list_fits("id", keys) and key_list_fits("id", keys, 64000)
+        assert not key_list_fits("id", keys, 0) and not key_list_fits("id", keys, None) and not key_list_fits("id", keys, "x")
+
+    def test_a_key_weighs_what_it_is_once_percent_encoded(self):
+        from core.domain.source_capability import key_list_request_bytes
+        plain = key_list_request_bytes("id", ["abc"])
+        assert key_list_request_bytes("id", ["a c"]) == plain + 2  # %20
+        assert key_list_request_bytes("id", ["é"]) == key_list_request_bytes("id", ["a"]) + 5  # %C3%A9
+        assert key_list_request_bytes("id", []) < 1000
+
+    @pytest.mark.parametrize("source, expected", [
+        ("pagingEnabled='true' restrictToRequestBBOX='1' typename='a:b' url='https://example.org/wfs'", True),
+        ("restricttorequestbbox=1 typename='a:b'", True), ('restrictToRequestBBOX="1"', True),
+        ("restrictToRequestBBOX='0' typename='a:b'", False), ("typename='a:b' url='https://example.org/wfs'", False),
+        ("restrictToRequestBBOX='10'", False), ("", False), (None, False),
+    ])
+    def test_a_layer_says_whether_it_asks_by_rectangle(self, source, expected):
+        from core.domain.source_capability import asks_by_rectangle
+        assert asks_by_rectangle(source) is expected

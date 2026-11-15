@@ -10511,8 +10511,8 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>Beskåret efter kildens udstrækning: de matchende objekter i denne webtjeneste kan ikke listes (flere end 500, eller ingen stabil nøgle). Objekter inden for denne udstrækning kan ligge uden for selve kilden.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Beskåret efter kildens udstrækning: de matchende objekter i denne webtjeneste kan ikke listes (for mange til én forespørgsel, eller ingen stabil nøgle). Objekter inden for denne udstrækning kan ligge uden for selve kilden.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

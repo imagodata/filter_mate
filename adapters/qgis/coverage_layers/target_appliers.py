@@ -331,6 +331,9 @@ class VectorTargetJob(TargetJob):
         self._pk, self._raw_pk = self._primary_key(layer)
         # The cut by extent set in place of the list of keys when the service refuses it (apply).
         self._extent_fallback = ''
+        # A layer that only asks the rectangle of the map writes a longer address for the same keys.
+        from ....core.domain.source_capability import asks_by_rectangle
+        self._by_rectangle = asks_by_rectangle(layer.source())
         self._no_key = ''
         if self._pk is None:
             no_key = translate(
@@ -505,6 +508,17 @@ class VectorTargetJob(TargetJob):
                 return
         capability = self._capability
         limit = capability.key_list_limit if capability is not None and capability.is_remote_service else None
+        if remote and kept and not complement:
+            # 2026-11-15: QGIS writes the keys in the address of each request, and a server stops reading an address
+            # at a length of its own (8 KB for most): a longer list gave an empty layer, or was refused. Not sent.
+            from ....core.domain.source_capability import key_list_fits
+            from ..remote_materializer import request_bytes_limit
+            from ....config.config import ENV_VARS
+            if not key_list_fits(self._pk, kept, request_bytes_limit(ENV_VARS),
+                                 self._by_rectangle) and self._cut_by_extent(
+                    geometry, request.methods):
+                self._source = None
+                return
         if limit and len(kept) > limit:
             self._source = None
             if self._cut_by_extent(geometry, request.methods):

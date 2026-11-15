@@ -129,6 +129,20 @@ def materialization_limits(params=None):
         return defaults
 
 
+def request_bytes_limit(params=None) -> int:
+    """``APP.OPTIONS.REMOTE_MATERIALIZATION.max_request_bytes``: the longest address of a request sent to a service.
+
+    A list of keys that would make a longer one is not sent (``source_capability.key_list_fits``). A value that
+    is unreadable, under 1,000 or over 1,000,000 keeps the default (8,000: what most servers read).
+    """
+    from ...core.domain.source_capability import REMOTE_REQUEST_BYTES
+    try:
+        value = int(get_app_option_value(params, "REMOTE_MATERIALIZATION", "max_request_bytes", REMOTE_REQUEST_BYTES))
+    except (TypeError, ValueError):
+        return REMOTE_REQUEST_BYTES
+    return value if 1000 <= value <= 1000000 else REMOTE_REQUEST_BYTES
+
+
 def require_worker():
     """Refuse remote reads before touching a provider on the GUI thread."""
     from qgis.PyQt.QtCore import QCoreApplication, QThread

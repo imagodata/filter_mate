@@ -40,9 +40,10 @@ RESULTS = []
 ASKED = []  # one entry per GetFeature of the WFS server
 REFUSED = []  # the status of every request a server refused: QGIS shows an empty layer for them, and says nothing
 TOO_LONG = []  # the length of every request the type ``strict`` refused on purpose
-# A server stops reading an address at a length of its own: 8 KB is common (Apache, nginx, Tomcat). The type
-# ``strict`` does the same: read on a real WFS (2026-11-15), a list of 25 keys is set and one of 100 is refused.
-STRICT_MAX = 8000
+# A server stops reading an address at a length of its own: 8 KB for most (Apache, nginx, Tomcat), which is what
+# FilterMate counts on before sending a list of keys; some read less. The type ``strict`` reads 3,000 bytes: a
+# list FilterMate believes short enough is refused there, as a real WFS refused one (2026-11-15).
+STRICT_MAX = 3000
 TILES = []  # (name, z, x, y) of every tile asked of the tile server
 MAPS = []  # (name, width, height, (x_min, y_min, x_max, y_max)) of every GetMap asked of the WMS server
 WORLD = 20037508.342789244  # half the side of the square of Web Mercator
@@ -250,9 +251,11 @@ def check_dialect(fields):
 
 
 def check_refused_keys(operations, port, crs, exact):
-    """A service that refuses a long list of keys, as a real one does far under 500 keys: cut by extent instead."""
+    """Lists of keys that do not fit in an address, or that a service refuses: cut by extent instead."""
+    from filter_mate.adapters.qgis.server_subset_job import ASYNC, transfer_mode_for_layer
     strict = wfs_layer(port, "strict")
     check("the WFS layer that refuses long requests opens", strict.isValid())
+    asks = transfer_mode_for_layer(strict) == ASYNC  # the filter is tried on a copy of the provider before it is set
 
     def info_of(report):
         return next(iter((report.details.get("layers") or {}).values()), {})
@@ -267,30 +270,55 @@ def check_refused_keys(operations, port, crs, exact):
               and shown(strict) == inside(95, 95, 125, 115) and not TOO_LONG,
               (report.failed, strict.subsetString()[:80], TOO_LONG))
     operations.clear_filters([strict.id()])
-    # 231 keys, under 500: about 43 KB of address. It was "subset rejected by the provider", the layer left whole.
+    # 231 keys, under 500: about 70 KB of address for this layer, more than a server reads. The list is not sent.
     medium = QgsGeometry.fromWkt("POLYGON((95 95, 305 95, 305 205, 95 205, 95 95))")
     del TOO_LONG[:]
     report = operations.cross_filter_by_geometry(medium, crs, [strict.id()])
     info = info_of(report)
-    if exact:
+    check("a list of keys too long for an address: not sent, the layer is cut by the extent of the source",
+          not report.failed and strict.subsetString().startswith("intersects_bbox(") and not TOO_LONG
+          and "extent of the source" in str(info.get("by_extent")) and info.get("kept") is None,
+          (report.failed, strict.subsetString()[:80], TOO_LONG[:2], info))
+    check("a list of keys too long for an address: the layer gives what meets the extent",
+          shown(strict) == inside(95, 95, 305, 205) and not TOO_LONG, (len(shown(strict)), TOO_LONG[:2]))
+    operations.clear_filters([strict.id()])
+    # Twenty keys: short enough for most servers (7 KB), too long for this one. It was "subset rejected by the
+    # provider", the layer left whole.
+    refused = QgsGeometry.fromWkt("POLYGON((95 95, 145 95, 145 135, 95 135, 95 95))")  # 5 x 4 points
+    del TOO_LONG[:]
+    report = operations.cross_filter_by_geometry(refused, crs, [strict.id()])
+    info = info_of(report)
+    if not exact:
+        check("a QGIS that cannot check a service: cut by the extent of the source, nothing refused",
+              not report.failed and strict.subsetString().startswith("intersects_bbox(") and not TOO_LONG,
+              (report.failed, strict.subsetString()[:80], TOO_LONG[:2], info))
+    elif asks:
         check("a list of keys the service refuses: cut by the extent of the source instead, and says why",
               not report.failed and strict.subsetString().startswith("intersects_bbox(") and TOO_LONG
               and "refused the list" in str(info.get("by_extent")) and info.get("kept") is None,
               (report.failed, strict.subsetString()[:80], TOO_LONG[:2], info))
     else:
-        check("a QGIS that cannot check a service: cut by the extent of the source, nothing refused",
-              not report.failed and strict.subsetString().startswith("intersects_bbox(") and not TOO_LONG,
-              (report.failed, strict.subsetString()[:80], TOO_LONG[:2], info))
-    check("a list of keys the service refuses: the layer gives what meets the extent",
-          shown(strict) == inside(95, 95, 305, 205), len(shown(strict)))
+        # QGIS 3.24 to 3.31 sets the filter of a WFS without asking the service: the refusal only shows when the
+        # layer is read, in the words of QGIS ("Download of features failed"). As before this change.
+        check("a QGIS that sets a WFS filter without asking: the list is set, the refusal comes at the first read",
+              not report.failed and '"id" IN' in strict.subsetString(), (report.failed, strict.subsetString()[:80]))
+    if exact and not asks:
+        del TOO_LONG[:]
+        shown(strict)
+        check("a QGIS that sets a WFS filter without asking: the service does refuse the read", bool(TOO_LONG), TOO_LONG[:2])
+    else:
+        check("a list of keys the service refuses: the layer gives what meets the extent",
+              shown(strict) == inside(95, 95, 145, 135), len(shown(strict)))
     operations.clear_filters([strict.id()])
     check("a list of keys the service refuses: Unfilter gives the whole service back",
           strict.subsetString() == "" and len(shown(strict)) == TOTAL, strict.subsetString()[:80])
     # AND NOT has no cut by extent: refused as before, the previous filter kept.
     strict.setSubsetString('"num" < 4000')
-    report = operations.cross_filter_by_geometry(medium, crs, [strict.id()], operator="AND NOT")
-    check("a list of keys the service refuses, under AND NOT: refused, the previous filter kept",
-          bool(report.failed) and strict.subsetString() == '"num" < 4000', (report.failed, strict.subsetString()[:80]))
+    report = operations.cross_filter_by_geometry(refused, crs, [strict.id()], operator="AND NOT")
+    if exact and asks:
+        check("a list of keys the service refuses, under AND NOT: refused, the previous filter kept",
+              bool(report.failed) and strict.subsetString() == '"num" < 4000',
+              (report.failed, strict.subsetString()[:80]))
     strict.setSubsetString("")
     QgsProject.instance().removeMapLayer(strict.id())
 
@@ -327,8 +355,9 @@ def check_wfs(operations):
         return
 
     # Fewer than 500 features match: their keys are listed, as before.
-    small = QgsGeometry.fromWkt("POLYGON((95 95, 155 95, 155 135, 95 135, 95 95))")  # 6 x 4 points = 24
-    few = inside(95, 95, 155, 135)
+    # Twelve keys: an address of about 4.4 KB for these layers, which only ask the rectangle of the map.
+    small = QgsGeometry.fromWkt("POLYGON((95 95, 135 95, 135 125, 95 125, 95 95))")  # 4 x 3 points = 12
+    few = inside(95, 95, 135, 125)
     started = time.perf_counter()
     report = operations.cross_filter_by_geometry(small, crs, [keyed.id()])
     elapsed = time.perf_counter() - started
@@ -341,7 +370,7 @@ def check_wfs(operations):
     if exact:
         check("under 500 features: the keys are listed, nothing is said of an extent",
               not report.error and not report.failed and '"id" IN' in keyed.subsetString() and "by_extent" not in info
-              and info.get("kept") == len(few) == 24, (report.error, report.failed, keyed.subsetString()[:80], info))
+              and info.get("kept") == len(few) == 12, (report.error, report.failed, keyed.subsetString()[:80], info))
     else:
         # It was refused there ("The service filter cannot be proved complete"): nothing is read, so nothing is
         # listed, whatever the number of features.

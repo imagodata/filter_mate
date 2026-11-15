@@ -10511,8 +10511,8 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>स्रोत के विस्तार से काटा गया: इस वेब सेवा के मेल खाने वाले फ़ीचर सूचीबद्ध नहीं किए जा सकते (500 से अधिक, या कोई स्थिर कुंजी नहीं)। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>स्रोत के विस्तार से काटा गया: इस वेब सेवा के मेल खाने वाले फ़ीचर सूचीबद्ध नहीं किए जा सकते (एक अनुरोध के लिए बहुत अधिक, या कोई स्थिर कुंजी नहीं)। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

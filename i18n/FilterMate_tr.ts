@@ -10511,8 +10511,8 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>Kaynağın kapsamına göre kesildi: bu web hizmetinin eşleşen nesneleri listelenemiyor (500'den fazla veya kararlı anahtar yok). Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Kaynağın kapsamına göre kesildi: bu web hizmetinin eşleşen nesneleri listelenemiyor (tek bir istek için çok fazla veya kararlı anahtar yok). Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

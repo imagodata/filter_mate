@@ -127,7 +127,15 @@ def remote(monkeypatch):
     materializer.materialization_limits = lambda params=None: "limits"
     materializer.materialize = lambda target, rect, server, matches, limits, feedback: state.outcome
     materializer.mark_partial_result = lambda layer, partial, final: state.marked.append((partial, final))
+    state.request_bytes = 8000
+    materializer.request_bytes_limit = lambda params=None: state.request_bytes
     monkeypatch.setitem(sys.modules, materializer.__name__, materializer)
+    # The cut by extent left for a list of keys the service refuses: the real module, pure Python.
+    path = os.path.normpath(os.path.join(os.path.dirname(_EXECUTOR), "..", "..", "qgis", "extent_fallback.py"))
+    spec = importlib.util.spec_from_file_location(f"{_PKG}.adapters.qgis.extent_fallback", path)
+    state.fallback = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(state.fallback)
+    monkeypatch.setitem(sys.modules, spec.name, state.fallback)
     probe = types.ModuleType(f"{_PKG}.adapters.qgis.source_capability_probe")
     probe.capability_for_layer = lambda layer: SimpleNamespace(provider_key="wfs")
     monkeypatch.setitem(sys.modules, probe.__name__, probe)
@@ -147,7 +155,8 @@ def _apply(state, outcome, old_subset, operator):
     queued = []
     builder = _Builder(queued)
     crs = object()
-    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "")
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "", id=lambda: "target",
+                            source=lambda: getattr(state, "source", "typename='a:b' url='https://example.org/wfs'"))
     source = SimpleNamespace(crs=lambda: crs)
     state.outcome = outcome
     result = executor.apply_remote_spatial_filter(builder, layer, source, ["intersects"], None, None, False,
@@ -373,3 +382,55 @@ def test_a_qgis_that_cannot_check_a_service_refuses_those_that_take_no_filter_by
     applied, queued, builder = _apply(extent, UNVERIFIED, None, None)
     assert applied is False and queued == []
     assert builder.last_error.startswith("The service filter cannot be proved complete")
+
+
+# QGIS writes the keys in the address of every request, and a server stops reading an address at a length of its
+# own: 8 KB for most. Read on a real WFS, 25 keys are taken and about 100 are refused; on a server that reads less
+# of the longer form a layer writes when it only asks the rectangle of the map, the layer came back empty.
+
+def _keys(count):
+    return Outcome(keys=tuple(range(1000, 1000 + count)), complete=True, fetched=count, reason="")
+
+
+def test_a_list_of_keys_that_fits_in_an_address_is_sent_and_leaves_its_cut_by_extent(extent):
+    applied, queued, builder = _apply(extent, _keys(30), None, None)
+    assert applied is True and len(queued) == 1 and queued[0].startswith('"id" IN (') and not builder.user_warnings
+    # Should the service refuse it all the same, whoever sets the filter finds the cut by extent to set instead.
+    assert extent.fallback.take("target", queued[0]) == BOX
+
+
+def test_a_list_of_keys_too_long_for_an_address_is_not_sent(extent):
+    """It was sent: refused by the service, or taken and answered by an empty layer."""
+    applied, queued, builder = _apply(extent, _keys(60), None, None)
+    assert applied is True and queued == [BOX] and not builder.last_error
+    assert any(warning.startswith(BY_EXTENT) for warning in builder.user_warnings)
+    assert extent.fallback.pending() == 0
+
+
+def test_a_layer_that_asks_by_rectangle_writes_a_longer_address(extent):
+    extent.source = "restrictToRequestBBOX='1' typename='a:b' url='https://example.org/wfs'"
+    applied, queued, _builder = _apply(extent, _keys(30), None, None)
+    assert applied is True and queued == [BOX]
+    applied, queued, _builder = _apply(extent, _keys(15), None, None)
+    assert applied is True and queued[0].startswith('"id" IN (')
+
+
+def test_the_length_of_an_address_is_a_setting(extent):
+    extent.request_bytes = 64000
+    applied, queued, builder = _apply(extent, _keys(60), None, None)
+    assert applied is True and queued[0].startswith('"id" IN (') and not builder.user_warnings
+
+
+def test_a_long_list_stays_a_list_where_an_extent_cannot_say_it(extent):
+    """AND NOT has no cut by extent: the keys are sent as before."""
+    applied, queued, _builder = _apply(extent, _keys(60), '"nature" = 2', "AND NOT")
+    assert applied is True and len(queued) == 1 and '"id" IN (' in queued[0] and BOX not in queued[0]
+
+
+@pytest.mark.parametrize("provider", ["arcgisfeatureserver"])
+def test_a_service_that_takes_no_filter_by_extent_keeps_its_list(extent, monkeypatch, provider):
+    from core.domain.source_capability import classify
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.source_capability_probe"], "capability_for_layer",
+                        lambda layer: classify(provider, "url='https://example.org/x'"))
+    applied, queued, _builder = _apply(extent, _keys(60), None, None)
+    assert applied is True and queued[0].startswith('"id" IN (')

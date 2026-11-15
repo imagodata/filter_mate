@@ -1039,8 +1039,8 @@ def _remote_message(reason):
         # Not a refusal: what is said of a service cut by the extent of the source (cut_by_extent).
         'by_extent': QCoreApplication.translate(
             'RemoteMaterializer',
-            'Cut by the extent of the source: the matching features of this web service cannot be listed (more '
-            'than 500, or no stable key). Features inside that extent may lie outside the source itself.'),
+            'Cut by the extent of the source: the matching features of this web service cannot be listed (too '
+            'many for one request, or no stable key). Features inside that extent may lie outside the source itself.'),
         # The same cut where the service refused the keys it was sent (extent_fallback): their address was too long.
         'by_extent_refused': QCoreApplication.translate(
             'RemoteMaterializer',
@@ -1328,6 +1328,17 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
     if refusal:
         cut = cut_by_extent()
         return refuse_with(refusal) if cut is None else cut
+    if keys and extent_possible and not complement:
+        # 2026-11-15: QGIS writes the keys in the address of each request, and a server stops reading an address at
+        # a length of its own (8 KB for most): a longer list gave an empty layer, or was refused. Not sent.
+        from ....core.domain.source_capability import asks_by_rectangle, key_list_fits
+        from ...qgis.remote_materializer import request_bytes_limit
+        sent = list(keys) + [keys[0]] * max(0, listed - len(keys))  # the keys of a previous step go with them
+        if not key_list_fits(builder._get_primary_key(layer), sent, request_bytes_limit(builder.task_params),
+                             asks_by_rectangle(layer.source() if hasattr(layer, 'source') else '')):
+            cut = cut_by_extent()
+            if cut is not None:
+                return cut
     key_filter = builder._build_fid_filter_with_values(layer, list(keys), builder._get_primary_key(layer)) if keys else '1 = 0'
     if complement:
         key_filter = '1 = 1' if not keys else 'NOT ({})'.format(key_filter)

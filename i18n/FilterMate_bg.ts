@@ -10511,8 +10511,8 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>Изрязване по обхвата на източника: съответстващите обекти на тази уеб услуга не могат да бъдат изброени (повече от 500 или няма стабилен ключ). Обекти в този обхват може да са извън самия източник.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Изрязване по обхвата на източника: съответстващите обекти на тази уеб услуга не могат да бъдат изброени (твърде много за една заявка или няма стабилен ключ). Обекти в този обхват може да са извън самия източник.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

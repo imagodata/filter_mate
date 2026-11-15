@@ -10511,8 +10511,8 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>Recorte pela extensão da origem: as entidades correspondentes deste serviço web não podem ser enumeradas (mais de 500, ou sem chave estável). Entidades dentro dessa extensão podem ficar fora da própria origem.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Recorte pela extensão da origem: as entidades correspondentes deste serviço web não podem ser enumeradas (demasiadas para um só pedido, ou sem chave estável). Entidades dentro dessa extensão podem ficar fora da própria origem.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

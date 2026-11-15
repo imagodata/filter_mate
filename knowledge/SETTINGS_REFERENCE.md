@@ -41,6 +41,7 @@
 |---|---|---|---|
 | `max_features` | 20000 |  | Maximum remote rows copied for an exact local filter (one extra row detects truncation) |
 | `timeout_seconds` | 90 | 1–86400 | Maximum remote read and local evaluation duration in seconds |
+| `max_request_bytes` | 8000 | 1000–1000000 | Longest address of a request sent to a web service, in bytes. The exact filter of a WFS layer lists the keys of its features in that address; a longer list is not sent and the layer is cut by the extent of the source instead. Most servers read 8,000 bytes: raise it for a server that reads more |
 
 ## Settings > Performance > Server filters
 

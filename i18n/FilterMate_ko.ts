@@ -10511,8 +10511,8 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
-        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
-        <translation>소스 범위로 잘라냈습니다: 이 웹 서비스의 일치하는 피처를 나열할 수 없습니다(500개 초과 또는 안정적인 키 없음). 이 범위 안의 피처가 소스 자체의 바깥에 있을 수 있습니다.</translation>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>소스 범위로 잘라냈습니다: 이 웹 서비스의 일치하는 피처를 나열할 수 없습니다(한 번의 요청에 담기에는 너무 많음 또는 안정적인 키 없음). 이 범위 안의 피처가 소스 자체의 바깥에 있을 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>

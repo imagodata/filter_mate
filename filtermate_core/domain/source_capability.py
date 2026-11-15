@@ -72,6 +72,22 @@ class NetworkCost(Enum):
 REMOTE_KEY_LIST_LIMIT = 500
 # ORA-01795: maximum number of expressions in a list is 1000.
 ORACLE_IN_LIST_MAX = 1000
+# The exact filter of a web service lists the keys of its features, and QGIS writes that list in the address of
+# every request (GET). A server stops reading an address at a length of its own: 8 KB for most (Apache, nginx,
+# Tomcat, Jetty), and nothing tells it beforehand. Read on a real WFS (IGN Géoplateforme, 2026-11-15): 25 keys are
+# taken, about 100 are refused. Past REMOTE_REQUEST_BYTES a list of keys is not sent
+# (APP.OPTIONS.REMOTE_MATERIALIZATION.max_request_bytes): a WFS is cut by the extent of the source instead.
+REMOTE_REQUEST_BYTES = 8000
+# What one key weighs in that address, without its field name and its value (added as they are percent-encoded),
+# and the rest of the address (service, type, paging, CRS). Measured in QGIS 3.44 on a local WFS 2.0 (2026-11-15):
+# 187 bytes a key of four digits in a field of two letters, 262 bytes for the rest. A layer that only asks the
+# rectangle of the map (``restrictToRequestBBOX``, as the layers the agent adds) joins that rectangle to the list,
+# and QGIS then writes every element with its namespaces: 301 bytes a key, 765 for the rest. The rest is counted
+# larger than measured: the address and the type of a real service are longer than those of a local one.
+REQUEST_BYTES_PER_KEY = 181
+REQUEST_FIXED_BYTES = 500
+REQUEST_BYTES_PER_KEY_BY_RECTANGLE = 295
+REQUEST_FIXED_BYTES_BY_RECTANGLE = 1000
 # Web services whose subset takes a filter by extent, with no key to list: a WFS, whose subset is a QGIS
 # expression that QGIS writes as an OGC filter in each request (``intersects_bbox`` as ``<fes:BBOX>``: read in the
 # requests of QGIS 3.22, 3.44 and 4.3 on 2026-11-15). Not OGC API Features nor ArcGIS: what they are sent for
@@ -172,6 +188,33 @@ class SourceCapability:
         """Whether an attribute predicate needs a validated server dialect."""
         return self.is_remote_service or (
             self.locality is Locality.DATABASE and self.network_cost is NetworkCost.HIGH)
+
+
+def asks_by_rectangle(source: Any) -> bool:
+    """Whether a WFS layer only asks its server the rectangle of the map (``restrictToRequestBBOX='1'``)."""
+    return bool(re.search(r"restrictToRequestBBOX\s*=\s*['\"]?1\b", str(source or ''), re.IGNORECASE))
+
+
+def key_list_request_bytes(field: str, literals, by_rectangle: bool = False) -> int:
+    """About how long the address of a request is with these keys of ``field`` in its filter, in bytes.
+
+    For the decision to send the list or not (``REMOTE_REQUEST_BYTES``). ``by_rectangle``: the layer joins the
+    rectangle of the map to its filter (``asks_by_rectangle``), the longer of the two forms QGIS writes.
+    """
+    from urllib.parse import quote
+    name = len(quote(str(field or ''), safe=''))
+    each = REQUEST_BYTES_PER_KEY_BY_RECTANGLE if by_rectangle else REQUEST_BYTES_PER_KEY
+    fixed = REQUEST_FIXED_BYTES_BY_RECTANGLE if by_rectangle else REQUEST_FIXED_BYTES
+    return fixed + sum(each + name + len(quote(str(literal), safe='')) for literal in literals)
+
+
+def key_list_fits(field: str, literals, limit: Optional[int] = None, by_rectangle: bool = False) -> bool:
+    """Whether a list of keys fits in the address of a request a server reads (``limit`` bytes, 8000 by default)."""
+    try:
+        bound = int(limit) if limit else REMOTE_REQUEST_BYTES
+    except (TypeError, ValueError):
+        bound = REMOTE_REQUEST_BYTES
+    return key_list_request_bytes(field, literals, by_rectangle) <= max(1, bound)
 
 
 def _coordinate(value: float) -> str:
