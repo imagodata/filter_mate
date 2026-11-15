@@ -10359,6 +10359,11 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
         <source>rendered rasters require a rendered color capture</source>
         <translation>i raster renderizzati richiedono un'acquisizione dei colori renderizzati</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>il SR di questa mappa web è stato cambiato rispetto a quello del suo servizio: ripristinalo per filtrarla</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Selezionare o filtrare la sorgente remota prima del filtraggio spaziale.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Questo layer di servizio web è stato ritagliato sull'estensione di una sorgente: il suo filtro conserva elementi al di fuori di quella sorgente. Seleziona gli elementi da usare, o rimuovi il filtro, prima di usarlo come sorgente.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

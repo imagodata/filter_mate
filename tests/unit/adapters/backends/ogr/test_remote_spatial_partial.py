@@ -127,6 +127,9 @@ def remote(monkeypatch):
     materializer.materialization_limits = lambda params=None: "limits"
     materializer.materialize = lambda target, rect, server, matches, limits, feedback: state.outcome
     materializer.mark_partial_result = lambda layer, partial, final: state.marked.append((partial, final))
+    state.cut_by_extent = []
+    materializer.mark_extent_result = lambda layer, expression: state.cut_by_extent.append(expression)
+    materializer.is_extent_source = lambda layer: False
     state.request_bytes = 8000
     materializer.request_bytes_limit = lambda params=None: state.request_bytes
     state.checks_replies = False  # a QGIS that cannot check a service: what UNVERIFIED stands for below
@@ -342,7 +345,6 @@ def test_a_service_that_takes_no_filter_by_extent_is_refused_as_before(extent, m
     assert builder.last_error.startswith("More than 500 keys would be sent")
 
 
-
 # A QGIS that cannot check what a service answers (before 3.26, or before 3.36 under Python 3.12) reads no service:
 # the exact filter was refused there, and a WFS is now cut by the extent of the source, which needs no read.
 UNVERIFIED = Outcome(keys=(), complete=False, fetched=0, reason="unverified_filter")
@@ -438,7 +440,6 @@ def test_a_service_that_takes_no_filter_by_extent_keeps_its_list(extent, monkeyp
     assert applied is True and queued[0].startswith('"id" IN (')
 
 
-
 def test_a_read_that_found_nothing_on_a_qgis_that_checks_replies_is_refused_as_before(extent):
     """Not a cut by extent with the reason of an older QGIS: the server may have answered with an error."""
     extent.checks_replies = True
@@ -476,3 +477,12 @@ def test_nothing_is_left_for_a_filter_set_at_once(extent):
     finally:
         sys.modules.pop(sql.__name__, None)
     assert applied is True and len(set_now) == 1 and extent.fallback.pending() == 0
+
+
+def test_a_layer_cut_by_extent_is_marked_so(extent):
+    """It keeps features beside the source: used later as a source by its filter, it is refused (source_jobs)."""
+    _applied, _queued, _builder = _apply(extent, TOO_MANY, None, None)
+    assert extent.cut_by_extent == [BOX]
+    extent.cut_by_extent.clear()
+    _apply(extent, _keys(10), None, None)
+    assert extent.cut_by_extent == []  # an exact list is no cut by extent

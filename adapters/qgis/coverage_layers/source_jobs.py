@@ -149,6 +149,10 @@ class RemoteVectorSourceJob(VectorSourceJob):
             raise ValueError(_remote_message('unbounded_source'))
         if is_partial_source(layer):
             raise ValueError(_remote_message('incomplete_source'))
+        from ..remote_materializer import is_extent_source
+        if not self._fids and is_extent_source(layer):
+            # Its filter is a cut by extent: features beside the source that cut it are kept. A selection is exact.
+            raise ValueError(_remote_message('extent_source'))
         self._snapshot = _snapshot(layer)
         self._limits = materialization_limits(ENV_VARS)  # the dock's budgets (APP.OPTIONS.REMOTE_MATERIALIZATION)
 

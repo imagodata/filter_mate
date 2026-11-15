@@ -10359,6 +10359,11 @@ onnxruntime загружается из PyPI с помощью pip, модель
         <source>rendered rasters require a rendered color capture</source>
         <translation>отображаемые растры требуют захвата отображаемых цветов</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>система координат этой веб-карты изменена по сравнению с системой её службы: верните её, чтобы фильтровать</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime загружается из PyPI с помощью pip, модель
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Перед пространственной фильтрацией выберите или отфильтруйте удалённый источник.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Этот слой веб-службы обрезан по экстенту источника: его фильтр сохраняет объекты вне этого источника. Прежде чем использовать его как источник, выделите нужные объекты или снимите фильтр.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

@@ -10359,6 +10359,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <source>rendered rasters require a rendered color capture</source>
         <translation>レンダリング済みラスタには、描画色のキャプチャが必要です</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>この Web 地図の CRS がサービスの CRS から変更されています: フィルタするには元に戻してください</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>空間フィルタの前に、リモートソースを選択またはフィルタしてください。</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>この Web サービスのレイヤはソースの範囲で切り抜かれています: フィルタはそのソースの外側の地物も保持します。ソースとして使う前に、使用する地物を選択するか、フィルタを解除してください。</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

@@ -43,6 +43,32 @@ def is_partial_source(layer):
     return key in _PARTIAL_LAYERS or getattr(layer, "_filtermate_partial_subset", None) is not None
 
 
+_EXTENT_CUTS = {}  # layer id -> the filter by extent set on it (source_capability.extent_subset)
+
+
+def mark_extent_result(layer, extent_expression):
+    """Remember that ``layer`` was cut by the extent of a source: it holds features outside that source.
+
+    2026-11-15: such a layer, used later as a source, carried its extra features into the next filter without a
+    word. It stays one as long as its subset holds that filter by extent (``is_extent_source``): an exact filter
+    set later by AND keeps the cut, one that replaces the subset takes it away. Nothing to do for an exact filter.
+    """
+    if extent_expression:
+        _EXTENT_CUTS[layer.id()] = extent_expression
+
+
+def is_extent_source(layer):
+    """Whether the filter of ``layer`` still holds a cut by extent (``mark_extent_result``)."""
+    key = layer.id()
+    expression = _EXTENT_CUTS.get(key)
+    if not expression:
+        return False
+    if expression not in (layer.subsetString() or ''):
+        _EXTENT_CUTS.pop(key, None)
+        return False
+    return True
+
+
 def mark_partial_result(layer, partial, expression):
     """Remember a partial source until a complete replacement or explicit reset."""
     key = layer.id()

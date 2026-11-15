@@ -421,6 +421,29 @@ def check_wfs(operations):
           (report.failed, keyed.subsetString()[:140], len(given), len(wanted)))
     operations.clear_filters([keyed.id()])
     keyed.setSubsetString("")
+    # Cut by extent, then used as a source by its filter: refused (it keeps features beside the source that cut it).
+    report = operations.cross_filter_by_geometry(large, crs, [keyed.id()])
+    if exact and keyed.subsetString().startswith("intersects_bbox("):
+        again = operations.cross_filter(keyed, [keyless.id()], selected_only=False)
+        check("a layer cut by extent, used as a source by its filter: refused, and says why",
+              bool(again.error or again.failed) and "cut by the extent of a source" in str(again.error),
+              (again.error, again.failed))
+        keyed.selectByIds([feature.id() for feature in keyed.getFeatures(
+            QgsFeatureRequest().setFilterRect(QgsRectangle(95, 95, 125, 115)))])
+        again = operations.cross_filter(keyed, [keyless.id()])
+        check("a selection of a layer cut by extent is a source",
+              not again.error and "cut by the extent of a source" not in str(again.failed), (again.error, again.failed))
+        keyed.removeSelection()
+        operations.clear_filters([keyless.id()])
+    operations.clear_filters([keyed.id()])
+    # A source of one point: its extent has no area, sent as a small rectangle around it.
+    point = QgsGeometry.fromWkt("POINT(100 100)")  # the point of feature 1010
+    report = operations.cross_filter_by_geometry(point, crs, [keyless.id()])
+    subset = keyless.subsetString()
+    check("a source of one point: a rectangle of some area around it, which holds the feature at that point",
+          not report.failed and subset.startswith("intersects_bbox(") and "100 100, 100 100" not in subset
+          and shown(keyless) == [1010], (report.failed, subset[:120], shown(keyless)[:5]))
+    operations.clear_filters([keyless.id()])
     # Disjoint is never cut by an extent: what lies outside a rectangle is a negation, which the validated WFS
     # dialect does not write (what a server answers for a feature without geometry is not proven).
     report = operations.cross_filter_by_geometry(large, crs, [keyed.id()], predicates=("Disjoint",))
@@ -678,6 +701,15 @@ def check_web_maps(operations):
           bool(report.failed) and "answered none" in str(report.failed) and dead.providerType() == "wms"
           and dead.source() == dead_uri and dead.isValid(), (report.failed, dead.providerType()))
 
+    # A web map whose CRS was set by hand to another than the one of its service: refused, the service left live.
+    moved, moved_uri = tiles("tiles")
+    moved.setCrs(QgsCoordinateReferenceSystem("EPSG:4326"))
+    report = operations.cross_filter_by_geometry(QgsGeometry.fromWkt("POLYGON((1 1, 2 1, 2 2, 1 2, 1 1))"),
+                                                 QgsCoordinateReferenceSystem("EPSG:4326"), [moved.id()])
+    check("a web map whose CRS was changed by hand: refused with its reason, the layer left as it was",
+          bool(report.failed) and "CRS of this web map was changed" in str(report.failed)
+          and moved.providerType() == "wms" and moved.source() == moved_uri, (report.failed, moved.providerType()))
+    QgsProject.instance().removeMapLayer(moved.id())
     # A WMS: no levels, the resolution is the one the budget gives; GetMap is asked over the area kept only.
     plan, plan_uri = wms("wms")
     check("WMS: the layer opens, and is listed among the targets", plan.isValid()

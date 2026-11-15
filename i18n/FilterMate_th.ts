@@ -10359,6 +10359,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <source>rendered rasters require a rendered color capture</source>
         <translation>ราสเตอร์ที่แสดงผลต้องใช้การจับภาพสีที่แสดงผล</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>ระบบพิกัดของแผนที่เว็บนี้ถูกเปลี่ยนไปจากของบริการ: โปรดตั้งกลับเพื่อกรอง</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>เลือกหรือกรองต้นทางระยะไกลก่อนการกรองเชิงพื้นที่</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>ชั้นข้อมูลบริการเว็บนี้ถูกตัดตามขอบเขตของแหล่งข้อมูล: ตัวกรองยังเก็บฟีเจอร์ที่อยู่นอกแหล่งข้อมูลนั้น โปรดเลือกฟีเจอร์ที่จะใช้ หรือยกเลิกตัวกรอง ก่อนใช้เป็นแหล่งข้อมูล</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

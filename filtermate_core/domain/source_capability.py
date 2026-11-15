@@ -190,6 +190,19 @@ class SourceCapability:
             self.locality is Locality.DATABASE and self.network_cost is NetworkCost.HIGH)
 
 
+_IN_LIST = re.compile(r"\bIN\s*\(((?:[^()']|'(?:[^']|'')*')*)\)", re.IGNORECASE)
+_LITERAL = re.compile(r"'((?:[^']|'')*)'|(-?\d+(?:\.\d+)?)")
+
+
+def key_literals_in(subset: Optional[str]) -> list:
+    """The values of the ``IN (...)`` lists of ``subset``: the keys a previous filter sends with a new list."""
+    values = []
+    for group in _IN_LIST.findall(subset or ''):
+        for text, number in _LITERAL.findall(group):
+            values.append(text.replace("''", "'") if text or not number else number)
+    return values
+
+
 def asks_by_rectangle(source: Any) -> bool:
     """Whether a WFS layer only asks its server the rectangle of the map (``restrictToRequestBBOX='1'``)."""
     return bool(re.search(r"restrictToRequestBBOX\s*=\s*['\"]?1\b", str(source or ''), re.IGNORECASE))
@@ -236,9 +249,26 @@ def extent_expression(x_min: float, y_min: float, x_max: float, y_max: float) ->
         return None
     if not all(math.isfinite(value) for value in bounds) or bounds[0] > bounds[2] or bounds[1] > bounds[3]:
         return None
+    # A source of one point, or a straight horizontal or vertical line, has an extent of no area: sent as it is, an
+    # envelope of no area is read differently by each server (empty, point test, error). A billionth of the
+    # coordinates around it, never less than what the WKT writes (nine decimals).
+    margin = max(1e-9, 1e-9 * max(abs(value) for value in bounds))
+    if bounds[2] - bounds[0] < margin:
+        bounds[0], bounds[2] = bounds[0] - margin, bounds[2] + margin
+    if bounds[3] - bounds[1] < margin:
+        bounds[1], bounds[3] = bounds[1] - margin, bounds[3] + margin
     left, bottom, right, top = (_coordinate(value) for value in bounds)
     ring = f"{left} {bottom}, {right} {bottom}, {right} {top}, {left} {top}, {left} {bottom}"
     return f"intersects_bbox($geometry, geom_from_wkt('POLYGON(({ring}))'))"
+
+
+_EXTENT_IN_SUBSET = re.compile(r"intersects_bbox\(\$geometry, geom_from_wkt\('POLYGON\(\([^()']*\)\)'\)\)")
+
+
+def extent_subset_in(subset: Optional[str]) -> str:
+    """The filter by extent ``extent_expression`` wrote that ``subset`` holds, as it is written there; '' if none."""
+    match = _EXTENT_IN_SUBSET.search(subset or '')
+    return match.group(0) if match else ''
 
 
 _EXTENT_WKT = re.compile(r"\s*POLYGON\s*\(\(([^()]*)\)\)\s*\Z", re.IGNORECASE)

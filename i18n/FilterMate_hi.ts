@@ -10359,6 +10359,11 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <source>rendered rasters require a rendered color capture</source>
         <translation>रेंडर किए गए रास्टर के लिए रेंडर किया गया रंग कैप्चर आवश्यक है</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>इस वेब मानचित्र का CRS उसकी सेवा के CRS से बदला गया है: इसे फ़िल्टर करने के लिए वापस सेट करें</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>स्थानिक फ़िल्टरिंग से पहले रिमोट स्रोत चुनें या फ़िल्टर करें।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>इस वेब सेवा परत को एक स्रोत के विस्तार से काटा गया था: इसका फ़िल्टर उस स्रोत के बाहर के फ़ीचर रखता है। इसे स्रोत के रूप में उपयोग करने से पहले उपयोग किए जाने वाले फ़ीचर चुनें, या इसका फ़िल्टर हटाएँ।</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

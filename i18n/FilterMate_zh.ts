@@ -10359,6 +10359,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <source>rendered rasters require a rendered color capture</source>
         <translation>渲染栅格需要渲染颜色捕获</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>此 Web 地图的坐标系已被更改为与其服务不同：请改回后再过滤</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>进行空间过滤之前，请先选择或过滤远程数据源。</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>此 Web 服务图层已按某个源的范围裁剪：其过滤器保留了该源之外的要素。将其用作源之前，请选择要使用的要素，或取消过滤。</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

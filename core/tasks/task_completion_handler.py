@@ -205,6 +205,9 @@ def _say_cut_by_extent(layer: Any, subset: str) -> None:
         from ...adapters.backends.ogr.filter_executor import _remote_message
         from ...adapters.qgis.remote_materializer import mark_partial_result
         mark_partial_result(layer, False, subset)  # the server answers every feature of the extent
+        from ...adapters.qgis.remote_materializer import mark_extent_result
+        from ...core.domain.source_capability import extent_subset_in
+        mark_extent_result(layer, extent_subset_in(subset))
         message = f"{layer.name()}: {_remote_message('by_extent_refused')}"
         logger.warning(f"  ↪ {message}")
         iface.messageBar().pushWarning("FilterMate", message)

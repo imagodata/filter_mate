@@ -10359,6 +10359,11 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <source>rendered rasters require a rendered color capture</source>
         <translation>a megjelenített raszterekhez megjelenített színrögzítés szükséges</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>ennek a webtérképnek a vetületét megváltoztatták a szolgáltatásáéhoz képest: állítsa vissza a szűréshez</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Térbeli szűrés előtt jelölje ki vagy szűrje a távoli forrást.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Ezt a webszolgáltatás-réteget egy forrás kiterjedése szerint vágták ki: a szűrője a forráson kívüli objektumokat is megtart. Mielőtt forrásként használná, jelölje ki a használandó objektumokat, vagy szüntesse meg a szűrését.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

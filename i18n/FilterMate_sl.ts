@@ -10359,6 +10359,11 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <source>rendered rasters require a rendered color capture</source>
         <translation>upodobljeni rastri zahtevajo zajem upodobljenih barv</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>koordinatni sistem tega spletnega zemljevida je bil spremenjen glede na sistem njegove storitve: ponastavite ga za filtriranje</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Pred prostorskim filtriranjem izberite ali filtrirajte oddaljeni vir.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Ta sloj spletne storitve je bil obrezan po obsegu vira: njegov filter ohranja objekte zunaj tega vira. Preden ga uporabite kot vir, izberite objekte, ki jih želite uporabiti, ali odstranite filter.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>
