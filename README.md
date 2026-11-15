@@ -2,7 +2,7 @@
 
 **🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers in QGIS, from one panel.**
 
-[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.1-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.1.2-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
@@ -77,8 +77,11 @@ the original source back, and project files are always saved with the original s
   (four levels of autonomy, a rule per tool, layers it must never change). Recipes keep a request in the project and run
   it again without any model, or by themselves each time the edits of their source are saved. When a choice is yours
   it asks with choices to click; it sets FilterMate up with you (offered once per version, and from the menu
-  Vector > FilterMate); a team can give it its own skills, a `SKILL.md` you read and allow first. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: open data portals,
-  WFS services, Sentinel-2 scenes, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
+  Vector > FilterMate); a team can give it its own skills, a `SKILL.md` you read and allow first. When the
+  project has no such layer, it brings in what a request needs: the elevation of an area (a relief map with its
+  contours in one sentence), OpenStreetMap features by tags, the population of an area, the natural risks of France. An expert mode, off by default, lets it run Python code in QGIS, shown and confirmed at each run and not undone. Optional sources: open data portals,
+  WFS, WMS and WMTS services (IGN, Géorisques), Sentinel-2 scenes, Copernicus elevation, OpenStreetMap (Overpass),
+  a population grid, remote MCP connectors. A built-in MCP server lets Claude Code or another client on
   your computer use the same tools ([docs/AGENT_MODE.md](docs/AGENT_MODE.md)).
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster, a value condition
   on a point cloud attribute.
