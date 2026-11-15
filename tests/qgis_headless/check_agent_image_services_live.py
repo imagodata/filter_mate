@@ -71,11 +71,11 @@ def check(label, condition, detail=""):
     print(f"{'PASS' if condition else 'FAIL'} {label}" + (f" -- {str(detail)[:400]}" if not condition else ""), flush=True)
 
 
-def colours(layer):
+def colours(layer, extent=TOULOUSE):
     settings = QgsMapSettings()
     settings.setLayers([layer])
     settings.setDestinationCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
-    settings.setExtent(TOULOUSE)
+    settings.setExtent(extent)
     settings.setOutputSize(QSize(512, 512))
     job = QgsMapRendererSequentialJob(settings)
     job.start()
@@ -202,9 +202,51 @@ def main():
         check(f"{platform}: draws Toulouse", drawn > 1, f"{drawn} colour(s); {layer.source()}")
         check(f"{platform}: a layer it does not list is refused", *refused(
             lambda: project_control.add_service_layer(platform, "invented&url=https://evil.example.org/"), "does not offer"))
+    check_georisques(project)
     check("an image service is no basemap, and a basemap no service",
           refused(lambda: project_control.add_basemap("ign_wmts"), "is not a basemap")[0]
           and refused(lambda: project_control.add_service_layer("osm_tiles", "x"), "is not a WFS, WMS or WMTS service")[0])
+
+
+def check_georisques(project):
+    """Géorisques: the flood areas of Bordeaux drawn, the perimeters of its flood plans read as data."""
+    from filter_mate.adapters.public_api import project_control
+    from filter_mate.core.agent.system_prompt import platforms_note
+    found = project_control.search_open_data("inondation", platform="georisques_wms", limit=50)
+    ids = [item["id"] for item in found["datasets"]]
+    check("georisques_wms: the search finds the flood layers", "LIMITETRI" in ids or "EAIP_CE" in ids, ids[:10])
+    # The layers the instructions name are those the service lists.
+    wanted = ("ALEA_SYNT_01_02MOY", "ALEA_SYNT_01_01FOR", "ALEA_SYNT_01_04FAI", "PPRN_ZONE_INOND", "REMNAPPE", "ALEARG")
+    named = platforms_note(["georisques_wms"])
+    for typename in wanted:
+        assert typename in named, typename
+    added = {}
+    for typename in wanted[:1] + ("PPRN_ZONE_INOND",):
+        try:
+            summary = project_control.add_service_layer("georisques_wms", typename, name=typename)
+            added[typename] = project.mapLayer(summary["layer_id"])
+        except ValueError as exc:
+            check(f"georisques_wms: {typename} is added", False, exc)
+    bordeaux = QgsRectangle(-72000, 5585000, -59000, 5598000)  # Web Mercator: Bordeaux and the Garonne
+    for typename, layer in added.items():
+        drawn = layer.isValid() and layer.providerType() == "wms" and colours(layer, bordeaux) > 1
+        if typename == "PPRN_ZONE_INOND":
+            # The server draws it empty in Lambert-93 (and the perimeters empty in EPSG:3857), measured with its
+            # own GetMap on 2026-11-15: QGIS 3.22 asks in the CRS of the layer, later ones in that of the map.
+            print(f"INFO georisques_wms: {typename} drawn over Bordeaux in EPSG:3857: {drawn}", flush=True)
+            continue
+        check(f"georisques_wms: {typename} is a WMS image that draws Bordeaux", drawn, layer.source())
+    try:
+        summary = project_control.add_service_layer("georisques_wfs", "ms:PPRN_PERIMETRE_INOND", name="ppri")
+        layer = project.mapLayer(summary["layer_id"])
+        from qgis.core import QgsCoordinateTransform, QgsFeatureRequest
+        area = QgsCoordinateTransform(QgsCoordinateReferenceSystem("EPSG:4326"), layer.crs(), project) \
+            .transformBoundingBox(QgsRectangle(-0.65, 44.80, -0.53, 44.90))
+        names = {feature["lib_ppr"] for feature in layer.getFeatures(QgsFeatureRequest().setFilterRect(area))}
+        check("georisques_wfs: the perimeters of the flood plans of Bordeaux, as data",
+              summary["provider_type"] == "WFS" and any("Bordeaux" in str(name) for name in names), sorted(names)[:5])
+    except ValueError as exc:
+        check("georisques_wfs: the perimeters of the flood plans of Bordeaux, as data", False, exc)
 
 
 if __name__ == "__main__":

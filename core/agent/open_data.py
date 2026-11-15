@@ -57,6 +57,10 @@ PLATFORMS: Dict[str, Tuple[str, str]] = {
     "ign_wfs": (KIND_WFS, "data.geopf.fr/wfs/ows"),
     "ign_wmts": (KIND_WMTS, "data.geopf.fr/wmts"),
     "ign_wms": (KIND_WMS, "data.geopf.fr/wms-r"),
+    # Géorisques (BRGM for the Ministry of Ecology): one MapServer for both. The WMS draws the flood areas, the
+    # regulatory zones of the risk plans, the potential flood envelopes; the WFS has their perimeters and lists.
+    "georisques_wms": (KIND_WMS, "mapsref.brgm.fr/wxs/georisques/risques"),
+    "georisques_wfs": (KIND_WFS, "mapsref.brgm.fr/wxs/georisques/risques"),
     "ign_geocoder": (KIND_GEOCODER, "data.geopf.fr/geocodage/search"),
     "photon": (KIND_GEOCODER, "photon.komoot.io/api"),
     "earth_search": (KIND_STAC, "earth-search.aws.element84.com/v1"),

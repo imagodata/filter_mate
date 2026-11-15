@@ -31,7 +31,8 @@ named mcp_..., from the next turn on.
    land cover), found with search_open_data on that platform: an image put under the layers, not data.
 4. A platform that does not answer, or finds nothing after two searches: search another one the user allowed
    instead of asking it again in other words. For the French reference layers (communes, departments, cadastre,
-   roads, buildings), ign_wfs first when it is allowed.
+   roads, buildings), ign_wfs first when it is allowed. For French natural risks (flood areas, risk plans,
+   groundwater, clay), georisques_wms draws them and georisques_wfs has their perimeters as data.
 
 ## OpenStreetMap
 

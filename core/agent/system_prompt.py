@@ -122,4 +122,9 @@ def platforms_note(platforms: Sequence[str]) -> str:
     if "ign_wfs" in platforms:
         note += (" ign_wfs holds the French reference layers (administrative boundaries such as communes and "
                  "departments, cadastre, roads, buildings, hydrography): search it first for those.")
+    if "georisques_wms" in platforms or "georisques_wfs" in platforms:
+        # Its titles say "Surface inondable", not "zone": a search in the words of a user found nothing (2026-11-15).
+        note += (" Géorisques layers: river floods ALEA_SYNT_01_01FOR, ALEA_SYNT_01_02MOY (100 years), "
+                 "ALEA_SYNT_01_04FAI (frequent to rare), PPRN_ZONE_INOND, REMNAPPE, ALEARG (WMS); "
+                 "ms:PPRN_PERIMETRE_INOND (WFS, data).")
     return note
