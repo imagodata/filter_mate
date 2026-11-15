@@ -292,7 +292,8 @@ class _Unlisted:
 def BY_EXTENT(reason: str = '') -> str:
     """What is said of a web service cut by the extent of the source: the words of the dock (filter_executor)."""
     from ...backends.ogr.filter_executor import _remote_message
-    return _remote_message('by_extent_unverified' if reason == 'unverified_filter' else 'by_extent')
+    return _remote_message({'unverified_filter': 'by_extent_unverified', 'refused': 'by_extent_refused'}.get(
+        reason, 'by_extent'))
 
 
 class VectorTargetJob(TargetJob):
@@ -328,6 +329,8 @@ class VectorTargetJob(TargetJob):
         self._centroid_eligible = self._is_polygon or layer.geometryType() == line_type
         self._use_centroids = False
         self._pk, self._raw_pk = self._primary_key(layer)
+        # The cut by extent set in place of the list of keys when the service refuses it (apply).
+        self._extent_fallback = ''
         self._no_key = ''
         if self._pk is None:
             no_key = translate(
@@ -478,7 +481,8 @@ class VectorTargetJob(TargetJob):
             methods = whole_methods
         coverage = float(request.coverage_min or 0.0) if self._is_polygon else 0.0
         complement = False
-        if self._remote_target is not None:
+        remote = self._remote_target is not None
+        if remote:
             if self._no_key:
                 # Nothing to list, so nothing to read: the server is asked what meets the extent of the source.
                 self._remote_target = None
@@ -529,6 +533,10 @@ class VectorTargetJob(TargetJob):
             self._expression = f"NOT ({self._expression})" if kept else '1 = 1'
         else:
             self.outcome.kept_count = len(kept)
+            if remote and kept:
+                # 2026-11-15: a service may refuse this list (its address is too long for it, far under 500 keys
+                # on a real WFS): apply() then sets the cut by extent kept here.
+                self._extent_fallback = self._extent_expression(geometry, request.methods) or ''
             # OR / AND NOT nothing leave the previous subset as it was.
             self.outcome.emptied = not kept and not _keeps_previous(self.before.subset, self.operator)
         if self._partial:
@@ -552,13 +560,7 @@ class VectorTargetJob(TargetJob):
             or Disjoint (both keep what lies outside the rectangle, a negation the validated WFS dialect does not
             write: what a server answers for a feature without geometry is not proven), an empty source.
         """
-        from ....core.domain.source_capability import extent_subset
-        if self._capability is None or (self.operator or '').upper() == 'AND NOT' or geometry.isEmpty():
-            return False
-        if 'disjoint' in methods:
-            return False
-        box = geometry.boundingBox()
-        expression = extent_subset(self._capability, box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum())
+        expression = self._extent_expression(geometry, methods)
         if expression is None:
             return False
         self._source = None
@@ -568,6 +570,16 @@ class VectorTargetJob(TargetJob):
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
         return True
+
+    def _extent_expression(self, geometry, methods) -> Optional[str]:
+        """The filter by the extent of ``geometry`` this target takes; None where a cut by extent cannot be made."""
+        from ....core.domain.source_capability import extent_subset
+        if self._capability is None or (self.operator or '').upper() == 'AND NOT' or geometry.isEmpty():
+            return None
+        if 'disjoint' in methods:
+            return None
+        box = geometry.boundingBox()
+        return extent_subset(self._capability, box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum())
 
     def _predicate_geometry(self, geometry):
         """The geometry used by the predicate; the original feature is retained in the target layer."""
@@ -624,10 +636,22 @@ class VectorTargetJob(TargetJob):
             return None
         subset = combine_subset(self.before.subset, self._expression, self.operator)
         try:
-            from ....infrastructure.database.sql_utils import safe_set_subset_string
-            ok = safe_set_subset_string(layer, subset)
+            from ....infrastructure.database.sql_utils import safe_set_subset_string as set_subset
         except ImportError:
-            ok = layer.setSubsetString(subset)
+            def set_subset(target, text):
+                return target.setSubsetString(text)
+        ok = set_subset(layer, subset)
+        if not ok and self._extent_fallback:
+            # The service refused the list of keys: cut by the extent of the source instead, and said.
+            by_extent = combine_subset(self.before.subset, self._extent_fallback, self.operator)
+            ok = set_subset(layer, by_extent)
+            if ok:
+                subset, self._partial = by_extent, ''
+                self.outcome.details.pop('partial', None)
+                self.outcome.details['by_extent'] = True
+                self.outcome.message = BY_EXTENT('refused')
+                self.outcome.kept_count = None  # what the rectangle holds was not counted
+                self.outcome.emptied = False
         if not ok:
             self.outcome.success = False
             self.outcome.message = f"subset rejected by the provider: {subset[:200]}"

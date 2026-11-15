@@ -10516,6 +10516,11 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Manba qamrovi bo'yicha kesildi: veb-xizmat o'zining mos obyektlari ro'yxatini rad etdi (ko'pincha so'rov uning uchun juda uzun bo'ladi). Shu qamrov ichidagi obyektlar manbaning o'zidan tashqarida bo'lishi mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
         <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
         <translation>Manba qamrovi bo'yicha kesildi: QGIS ning bu versiyasi veb-xizmat javoblarini tekshira olmaydi, shuning uchun uning mos obyektlari sanab o'tilmaydi. Shu qamrov ichidagi obyektlar manbaning o'zidan tashqarida bo'lishi mumkin.</translation>
     </message>

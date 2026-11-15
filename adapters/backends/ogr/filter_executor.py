@@ -1041,6 +1041,11 @@ def _remote_message(reason):
             'RemoteMaterializer',
             'Cut by the extent of the source: the matching features of this web service cannot be listed (more '
             'than 500, or no stable key). Features inside that extent may lie outside the source itself.'),
+        # The same cut where the service refused the keys it was sent (extent_fallback): their address was too long.
+        'by_extent_refused': QCoreApplication.translate(
+            'RemoteMaterializer',
+            'Cut by the extent of the source: the web service refused the list of its matching features (most '
+            'often a request too long for it). Features inside that extent may lie outside the source itself.'),
         # The same cut where no read can be checked (QGIS before 3.26, or before 3.36 under Python 3.12).
         'by_extent_unverified': QCoreApplication.translate(
             'RemoteMaterializer',
@@ -1343,6 +1348,14 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
             verified = False
         if not verified:
             return refuse('unverified_filter')
+    if extent_possible and not complement and not union.isEmpty():
+        # 2026-11-15: a service may refuse this list of keys (their address is too long for it, well under 500
+        # keys: read on a real WFS). Whoever sets it falls back to the cut by extent left here (extent_fallback).
+        from ....core.domain.source_capability import extent_subset
+        from ...qgis.extent_fallback import remember
+        by_extent = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
+        if by_extent is not None:
+            remember(layer.id(), final, builder._combine_with_old_subset(old_subset, combine_operator, by_extent))
     return write(final, outcome is not None and not outcome.complete)
 
 

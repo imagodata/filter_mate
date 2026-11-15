@@ -153,16 +153,22 @@ def s_setup():
     feature.setAttributes(['big'])
     # More than 500 of the points of the WFS layer lie in it (61 x 31 in its rectangle).
     feature.setGeometry(QgsGeometry.fromWkt('POLYGON((95 95, 705 95, 505 405, 95 405, 95 95))'))
-    zones.dataProvider().addFeatures([feature])
+    medium = QgsFeature(zones.fields())
+    medium.setAttributes(['medium'])
+    # 231 of the points lie in it: a list of keys under 500, and too long for a server that reads 8 KB of address.
+    medium.setGeometry(QgsGeometry.fromWkt('POLYGON((95 95, 305 95, 305 205, 95 205, 95 95))'))
+    zones.dataProvider().addFeatures([feature, medium])
     zones.updateExtents()
     project.addMapLayer(zones)
     bench.wfs_layer(services.server_port, 'keyed')
+    bench.wfs_layer(services.server_port, 'strict')
     uri = f"type=xyz&url=http://127.0.0.1:{maps.server_port}/tiles/{{z}}/{{x}}/{{y}}.png&zmin=0&zmax=14&crs=EPSG:3857"
     tiles = QgsRasterLayer(uri, 'tuiles', 'wms')
     project.addMapLayer(tiles)
     STATE['tiles_source'] = tiles.source()
     iface.mapCanvas().setExtent(zones.extent())
-    check('the source, the WFS layer and the tiles load', zones.isValid() and layer('keyed').isValid() and tiles.isValid())
+    check('the source, the WFS layers and the tiles load', zones.isValid() and layer('keyed').isValid()
+          and layer('strict').isValid() and tiles.isValid())
 
 
 def s_open_plugin():
@@ -180,11 +186,12 @@ def s_open_plugin():
     cache = importlib.import_module(f'{PACKAGE}.adapters.qgis.coverage_layers.cache')
     cache.set_cache_root(os.path.join(os.path.dirname(plugins), 'cache'))
     qgis.utils.plugins[PACKAGE].run()
-    return lambda: dock() is not None and registered('zones', 'keyed', 'tuiles') and tasks_idle()
+    return lambda: dock() is not None and registered('zones', 'keyed', 'strict', 'tuiles') and tasks_idle()
 
 
 def s_source():
-    check('dock open, the three layers registered', dock() is not None and registered('zones', 'keyed', 'tuiles'))
+    check('dock open, the four layers registered', dock() is not None
+          and registered('zones', 'keyed', 'strict', 'tuiles'))
     dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
     return after(3.0, lambda: dock().current_layer is not None and dock().current_layer.name() == 'zones')
 
@@ -197,24 +204,39 @@ def s_select():
           tiles is not None and bool(tiles.flags() & Qt.ItemFlag.ItemIsEnabled), sorted(rows))
     check('the WFS layer is listed among the layers to filter', 'keyed' in rows, sorted(rows))
     d.mGroupBox_exploring_single_selection.setChecked(True)
-    big = next(iter(layer('zones').getFeatures()))
-    d.mFeaturePickerWidget_exploring_single_selection.setFeature(big.id())
-    for name, item in rows.items():
-        item.setCheckState(Qt.CheckState.Checked if name in ('keyed', 'tuiles') else Qt.CheckState.Unchecked)
+    return choose('big', ('keyed', 'tuiles'))
+
+
+def choose(zone, targets):
+    """The feature ``zone`` of the source in EXPLORING, ``targets`` ticked among the layers to filter, Intersect."""
+    d = dock()
+    chosen = next(feature for feature in layer('zones').getFeatures() if feature['name'] == zone)
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(chosen.id())
+    for item in target_rows():
+        if item.flags() & Qt.ItemFlag.ItemIsEnabled:
+            name = item.text().split(' [')[0]
+            item.setCheckState(Qt.CheckState.Checked if name in targets else Qt.CheckState.Unchecked)
     if not d.pushButton_checkable_filtering_layers_to_filter.isChecked():
         d.pushButton_checkable_filtering_layers_to_filter.setChecked(True)
     if not d.pushButton_checkable_filtering_geometric_predicates.isChecked():
         d.pushButton_checkable_filtering_geometric_predicates.setChecked(True)
     d.comboBox_filtering_geometric_predicates.setCheckedItems(['Intersect'])
-    wanted = {layer('keyed').id(), layer('tuiles').id()}
-    return lambda: bool(d.get_current_features()[0]) and wanted <= set(d.get_layers_to_filter() or [])
+    wanted = {layer(name).id() for name in targets}
+
+    def ready():
+        features = d.get_current_features()[0]
+        return bool(features) and features[0]['name'] == zone and wanted == set(d.get_layers_to_filter() or [])
+    return ready
 
 
 def wfs_filters():
     """Whether this QGIS sets the filter of a WFS at all (from 3.24: its setter crashes before)."""
     transfer = importlib.import_module(f'{PACKAGE}.adapters.qgis.server_subset_job')
     policy = importlib.import_module(f'{PACKAGE}.core.filter.server_transfer_policy')
-    return transfer.transfer_mode_for_layer(layer('keyed')) != policy.REFUSE
+    mode = transfer.transfer_mode_for_layer(layer('keyed'))
+    # Prepared and checked off the main thread before it is set (from 3.32): a filter the service refuses is seen.
+    STATE['prepared'] = mode == policy.ASYNC
+    return mode != policy.REFUSE
 
 
 def s_filter():
@@ -272,6 +294,69 @@ def s_unfilter_check():
     check('dock: Unfilter gives the whole WFS layer back', keyed.subsetString() == '', keyed.subsetString()[:80])
 
 
+def s_settled():
+    """For a few seconds after a filter or an unfilter the dock puts back what it had: wait before choosing again."""
+    return after(3.0)
+
+
+def s_refused_select():
+    """A source of 231 features and a WFS that refuses the long address their keys make, as a real one does."""
+    STATE['exact'] = importlib.import_module(f'{PACKAGE}.adapters.qgis.remote_materializer').supports_reply_validation()
+    return choose('medium', ('strict',))
+
+
+def s_refused_filter():
+    del bench.TOO_LONG[:], SAID[:], LOGGED[:]
+    iface.messageBar().clearWidgets()
+    dock().launchTaskEvent(False, 'filter')
+    return lambda: (not STATE['wfs'] or layer('strict').subsetString() != '') and tasks_idle()
+
+
+def s_refused_check():
+    strict = layer('strict')
+    said = ' | '.join(message_bar_texts())
+    print(f"   said: {message_bar_texts()}", flush=True)
+    if not STATE['wfs']:
+        check('dock, a QGIS that sets no WFS filter: the WFS layer is left as it was', strict.subsetString() == '',
+              strict.subsetString()[:140])
+        return None
+    check('dock: the keys the service refused give way to a cut by the extent of the source',
+          strict.subsetString().startswith("intersects_bbox($geometry, geom_from_wkt('POLYGON((95 95, 305 95, "
+                                           "305 205, 95 205, 95 95))'))"), strict.subsetString()[:140])
+    given = bench.shown(strict)
+    check('dock: the layer gives what meets that extent', given == bench.inside(95, 95, 305, 205), len(given))
+    if STATE['exact']:
+        check('dock: the service did refuse the list of keys, and the message says so',
+              bool(bench.TOO_LONG) and 'refused the list' in said, (bench.TOO_LONG[:2], said[:600]))
+    else:
+        check('dock, a QGIS that cannot check a service: cut by extent at once, and the message says why',
+              not bench.TOO_LONG and 'this version of QGIS' in said, (bench.TOO_LONG[:2], said[:600]))
+    return after(3.0)
+
+
+def s_refused_unfilter():
+    dock().launchTaskEvent(False, 'unfilter')
+    return lambda: layer('strict').subsetString() == '' and tasks_idle()
+
+
+def s_refused_unfilter_check():
+    check('dock: Unfilter gives the whole WFS layer back', layer('strict').subsetString() == '',
+          layer('strict').subsetString()[:80])
+
+
+def s_refused_or_not():
+    """The keys a service refuses: where QGIS prepares a WFS filter before setting it (from 3.32).
+
+    From 3.24 to 3.31 it sets the filter without asking the service anything: the refusal is not seen then, only as
+    an empty layer when the layer is read, as before 2026-11-15.
+    """
+    if STATE.get('prepared'):
+        at = STEPS.index(s_refused_or_not) + 1
+        STEPS[at:at] = REFUSED_KEYS
+    else:
+        print('SKIP   dock: the keys the service refused (this QGIS sets a WFS filter without preparing it)', flush=True)
+
+
 def s_finish():
     check('no Python error', not STATE['errors'], '; '.join(STATE['errors'][:3]))
     failed = STATE['results'].count(False)
@@ -280,8 +365,10 @@ def s_finish():
     os._exit(1 if failed else 0)  # the exit code of QGIS is the result
 
 
+REFUSED_KEYS = [s_settled, s_refused_select, s_refused_filter, s_filter_said, s_refused_check, s_refused_unfilter,
+                s_refused_unfilter_check]
 STEPS = [s_setup, s_open_plugin, s_source, s_select, s_filter, s_filter_said, s_filter_check, s_unfilter,
-         s_unfilter_check, s_finish]
+         s_unfilter_check, s_refused_or_not, s_finish]
 
 
 def run_step(index=0):

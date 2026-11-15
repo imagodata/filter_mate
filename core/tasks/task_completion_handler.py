@@ -190,6 +190,28 @@ def _unfreeze_canvas(canvas) -> None:
         logger.debug(f"Could not unfreeze canvas: {e}")
 
 
+def _extent_fallback():
+    """The module holding the cuts by extent left for refused filters; None where it cannot be loaded."""
+    try:
+        from ...adapters.qgis import extent_fallback
+        return extent_fallback
+    except Exception:  # a filter is set whatever happens to this lookup
+        return None
+
+
+def _say_cut_by_extent(layer: Any, subset: str) -> None:
+    """Tell that a web service refused its exact filter and was cut by the extent of the source instead."""
+    try:
+        from ...adapters.backends.ogr.filter_executor import _remote_message
+        from ...adapters.qgis.remote_materializer import mark_partial_result
+        mark_partial_result(layer, False, subset)  # the server answers every feature of the extent
+        message = f"{layer.name()}: {_remote_message('by_extent_refused')}"
+        logger.warning(f"  ↪ {message}")
+        iface.messageBar().pushWarning("FilterMate", message)
+    except (ImportError, RuntimeError, AttributeError) as exc:
+        logger.warning(f"Cut by extent not reported: {exc}")
+
+
 def apply_pending_subset_requests(
     pending_requests: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
     safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
@@ -368,6 +390,19 @@ def apply_pending_subset_requests(
                     import time as _time
                     _time.sleep(0.3)
                     success = safe_set_subset_fn(layer, expression_str)
+
+                extent_fallback = _extent_fallback()
+                if success and extent_fallback is not None:
+                    extent_fallback.forget(layer.id())
+                elif extent_fallback is not None:
+                    # 2026-11-15: a web service refused the keys of an exact filter (their address is too long for
+                    # it, far under 500 keys on a real WFS). The cut by the extent of the source left for that
+                    # case is set instead, and said: the layer is filtered, not left whole with an error.
+                    by_extent = extent_fallback.take(layer.id(), expression_str)
+                    if by_extent and safe_set_subset_fn(layer, by_extent):
+                        success = True
+                        expression_str = by_extent
+                        _say_cut_by_extent(layer, by_extent)
 
                 set_ms = (_perf_time.perf_counter() - set_started) * 1000.0
                 phase_details = f", set {set_ms:.0f} ms"

@@ -10498,6 +10498,11 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Oříznuto podle rozsahu zdroje: webová služba odmítla seznam svých odpovídajících prvků (nejčastěji je pro ni požadavek příliš dlouhý). Prvky uvnitř tohoto rozsahu mohou ležet mimo samotný zdroj.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
         <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
         <translation>Oříznuto podle rozsahu zdroje: tato verze QGIS nedokáže ověřit odpovědi webové služby, takže její odpovídající prvky nejsou vypsány. Prvky uvnitř tohoto rozsahu mohou ležet mimo samotný zdroj.</translation>
     </message>
