@@ -4,6 +4,13 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+## [5.1.2] - 2026-11-15
+
+The agent brings in the data a request needs when the project has none: the elevation of an area (a relief map with
+its contours in one sentence), what OpenStreetMap maps there, how many people live there, and the natural risks of
+France. A web map can be a layer to filter, and a WFS layer is cut by the extent of the source when its features
+cannot be listed.
+
 ### AGENT (experimental)
 
 - **A relief map from one sentence.** *A terrain map of Lyon over Google Satellite, with a semi-transparent elevation ramp, a subtle hillshade, contours every 25 m and the index contours at 100 m* was answered that the tools brought in no elevation. The agent now does it, in eight steps and a few seconds of work: it finds the place, adds the basemap, brings in the elevation of the area, colors it by height, shades the relief over the colors, draws the contours, then looks at its map and corrects the opacities. Elevation is a new source to tick in the Sources tab, with the satellite imagery: Copernicus DEM, worldwide at 30 m, free and without an account. Only the area asked is read (0.4 MB for Lyon, not the 43 MB of its tile), written on a grid in metres and kept in the QGIS profile; the agent says that it is a surface model, with buildings and trees in it. Contour lines are drawn from any elevation raster of the project, each with its height and whether it is an index contour, and come in thin lines with the index contours thicker; the closed contours of a few pixels, which are buildings in a surface model, are left out and counted. QGIS stays alive while it reads, and Stop ends it. Undoing the request removes every layer it made. A layer you protected from the agent is read, never copied.
