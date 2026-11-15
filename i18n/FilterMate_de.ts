@@ -9177,6 +9177,11 @@ Das Raster wird wie in der Karte gezeichnet, mit seinem Stil. SAM wird einmalig 
         <translation>Web-Hintergrundkarte (WMS / WMTS / XYZ, ArcGIS MapServer): nur Farben, sie kann nicht gefiltert werden</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Webkarte, die nicht erfasst werden kann (ArcGIS MapServer, GDAL-Beschreibung eines WMS): nur Farben, sie kann nicht gefiltert werden</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Alle Vektorlayer auswählen</translation>
@@ -10268,6 +10273,16 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Begrenzte Rastererfassung fehlgeschlagen</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>die Webkarte hat nicht rechtzeitig geantwortet</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>die Webkarte hat keine der Anfragen der Erfassung beantwortet</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>Lokale Rastererfassung konnte nicht geöffnet werden</translation>
@@ -10383,6 +10398,21 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Layer mit dargestellten Farben können keine Filterziele sein.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Webkarte als Standbild mit {0} x {1} Pixeln erfasst ({2} {3} pro Pixel) und dann mit der Quelle zugeschnitten: Hineinzoomen zeigt nicht mehr Details. Filter entfernen stellt den Live-Dienst wieder her.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>Karteneinheiten</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} Anfrage(n) an den Dienst blieb(en) unbeantwortet: Das Bild kann Lücken haben.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Das entfernte räumliche Prädikat konnte nicht ausgewertet werden; der vorherige Filter bleibt erhalten.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Zuschnitt auf die Ausdehnung der Quelle: Die passenden Objekte dieses Webdienstes können nicht aufgelistet werden (zu viele für eine Anfrage oder kein stabiler Schlüssel). Objekte innerhalb dieser Ausdehnung können außerhalb der Quelle selbst liegen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Zuschnitt auf die Ausdehnung der Quelle: Der Webdienst hat die Liste seiner passenden Objekte abgelehnt (meist eine für ihn zu lange Anfrage). Objekte innerhalb dieser Ausdehnung können außerhalb der Quelle selbst liegen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Zuschnitt auf die Ausdehnung der Quelle: Diese QGIS-Version kann die Antworten eines Webdienstes nicht prüfen, daher werden dessen passende Objekte nicht aufgelistet. Objekte innerhalb dieser Ausdehnung können außerhalb der Quelle selbst liegen.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

@@ -1036,6 +1036,21 @@ def _remote_message(reason):
             'RemoteMaterializer', 'Disjoint combined with another predicate requires a local copy of the remote target.'),
         'invalid_geometry': QCoreApplication.translate(
             'RemoteMaterializer', 'The remote spatial predicate could not be evaluated; the previous filter is kept.'),
+        # Not a refusal: what is said of a service cut by the extent of the source (cut_by_extent).
+        'by_extent': QCoreApplication.translate(
+            'RemoteMaterializer',
+            'Cut by the extent of the source: the matching features of this web service cannot be listed (too '
+            'many for one request, or no stable key). Features inside that extent may lie outside the source itself.'),
+        # The same cut where the service refused the keys it was sent (extent_fallback): their address was too long.
+        'by_extent_refused': QCoreApplication.translate(
+            'RemoteMaterializer',
+            'Cut by the extent of the source: the web service refused the list of its matching features (most '
+            'often a request too long for it). Features inside that extent may lie outside the source itself.'),
+        # The same cut where no read can be checked (QGIS before 3.26, or before 3.36 under Python 3.12).
+        'by_extent_unverified': QCoreApplication.translate(
+            'RemoteMaterializer',
+            'Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so '
+            'its matching features are not listed. Features inside that extent may lie outside the source itself.'),
     }
     return messages.get(reason, QCoreApplication.translate(
         'RemoteMaterializer',
@@ -1155,13 +1170,22 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         builder.user_warnings.append(builder.last_error)
         return False
 
-    refusal = builder._key_list_refusal(layer)
-    if refusal:
-        builder.last_error = refusal
-        builder.user_warnings.append(refusal)
+    def refuse_with(message):
+        builder.last_error = message
+        builder.user_warnings.append(message)
         return False
+
+    from ...qgis.source_capability_probe import capability_for_layer
+    capability = capability_for_layer(layer)
+    # 2026-11-15: where the matching features cannot be listed (no stable key, more than 500 keys), a service
+    # that takes a filter by extent is cut by the extent of the source instead of being refused (cut_by_extent).
+    extent_possible = bool(capability and getattr(capability, 'takes_extent_subset', False)
+                           and (combine_operator or '').strip().upper() != 'AND NOT')
+    no_key = builder._key_list_refusal(layer)
+    if no_key and not extent_possible:
+        return refuse_with(no_key)
     if 'disjoint' in names and names != ['disjoint']:
-        return refuse('mixed_disjoint')
+        return refuse_with(no_key) if no_key else refuse('mixed_disjoint')
     union = builder._source_geometry(source, buffer_value, buffer_expression)
     if union is None:
         return refuse('invalid_geometry')
@@ -1175,8 +1199,45 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         rect = transform.transformBoundingBox(rect)
         target_transform = QgsCoordinateTransform(layer.crs(), source.crs(), builder._transform_context())
     complement = names == ['disjoint']
-    from ...qgis.source_capability_probe import capability_for_layer
-    capability = capability_for_layer(layer)
+
+    def write(final, partial):
+        """Queue (or set) the subset ``final``; the tail of both ways of filtering."""
+        parent = builder.task_params.get('_parent_task') if builder.task_params else None
+        if parent is not None and parent.isCanceled():
+            return refuse('cancelled')
+        from ...qgis.remote_materializer import mark_partial_result
+        callback = builder.task_params.get('_subset_queue_callback') if builder.task_params else None
+        if callback is not None:
+            callback(layer, final)
+            mark_partial_result(layer, partial, final)
+            return True
+        from ....infrastructure.database.sql_utils import safe_set_subset_string
+        success = safe_set_subset_string(layer, final)
+        if success:
+            mark_partial_result(layer, partial, final)
+        return success
+
+    def cut_by_extent(reason=''):
+        """The subset that asks the server what meets the extent of the source, queued; None when there is none.
+
+        No key is listed: the result has no bound, and is a cut by extent, said so (a feature inside the rectangle
+        and outside the source itself stays). Not for Disjoint: it keeps what lies outside the rectangle, a negation
+        the validated WFS dialect does not write (what a server answers for a feature without geometry is not proven).
+        """
+        if not extent_possible or complement or union.isEmpty():
+            return None
+        from ....core.domain.source_capability import extent_subset
+        expression = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
+        if expression is None:
+            return None
+        builder.user_warnings.append('{}: {}'.format(layer.name(), _remote_message(
+            'by_extent_unverified' if reason == 'unverified_filter' else 'by_extent')))
+        builder.remote_materialization_outcome = None  # nothing was read, or what was read is not what is kept
+        return write(builder._combine_with_old_subset(old_subset, combine_operator, expression), False)
+
+    if no_key:
+        cut = cut_by_extent()
+        return refuse_with(no_key) if cut is None else cut
     oapif = bool(capability and capability.provider_key == 'oapif')
     if oapif and ((old_subset and combine_operator and combine_operator != 'AND')
                   or (combine_operator or '').strip().upper() == 'AND NOT'):
@@ -1233,6 +1294,15 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
                               materialization_limits(builder.task_params), builder._feedback)
         builder.remote_materialization_outcome = outcome
         if not outcome.complete:
+            from ...qgis.remote_materializer import supports_reply_validation
+            if outcome.reason == 'key_limit' or (
+                    outcome.reason == 'unverified_filter' and not supports_reply_validation()):
+                # Not listed (more than 500 keys), or not read at all (a QGIS that cannot check what a service
+                # answers: the exact filter was refused there, with no way out but a local copy). A read that
+                # found nothing on a QGIS that checks its replies is refused as before: a cut by extent would
+                # say a wrong reason, and set a filter on a server that may have answered with an error.
+                cut = cut_by_extent(outcome.reason)
+                return refuse(outcome.reason) if cut is None else cut
             if outcome.reason not in ('feature_limit', 'timeout'):
                 return refuse(outcome.reason)
             if complement:
@@ -1260,9 +1330,19 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
                                                           through_old, complement)
     refusal = builder._key_list_refusal(layer, listed)
     if refusal:
-        builder.last_error = refusal
-        builder.user_warnings.append(refusal)
-        return False
+        cut = cut_by_extent()
+        return refuse_with(refusal) if cut is None else cut
+    if keys and extent_possible and not complement:
+        # 2026-11-15: QGIS writes the keys in the address of each request, and a server stops reading an address at
+        # a length of its own (8 KB for most): a longer list gave an empty layer, or was refused. Not sent.
+        from ....core.domain.source_capability import asks_by_rectangle, key_list_fits
+        from ...qgis.remote_materializer import request_bytes_limit
+        sent = list(keys) + [keys[0]] * max(0, listed - len(keys))  # the keys of a previous step go with them
+        if not key_list_fits(builder._get_primary_key(layer), sent, request_bytes_limit(builder.task_params),
+                             asks_by_rectangle(layer.source() if hasattr(layer, 'source') else '')):
+            cut = cut_by_extent()
+            if cut is not None:
+                return cut
     key_filter = builder._build_fid_filter_with_values(layer, list(keys), builder._get_primary_key(layer)) if keys else '1 = 0'
     if complement:
         key_filter = '1 = 1' if not keys else 'NOT ({})'.format(key_filter)
@@ -1283,21 +1363,16 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
             verified = False
         if not verified:
             return refuse('unverified_filter')
-    parent = builder.task_params.get('_parent_task') if builder.task_params else None
-    if parent is not None and parent.isCanceled():
-        return refuse('cancelled')
-    from ...qgis.remote_materializer import mark_partial_result
-    partial = outcome is not None and not outcome.complete
-    callback = builder.task_params.get('_subset_queue_callback') if builder.task_params else None
-    if callback is not None:
-        callback(layer, final)
-        mark_partial_result(layer, partial, final)
-        return True
-    from ....infrastructure.database.sql_utils import safe_set_subset_string
-    success = safe_set_subset_string(layer, final)
-    if success:
-        mark_partial_result(layer, partial, final)
-    return success
+    queued = bool(builder.task_params and builder.task_params.get('_subset_queue_callback'))
+    if queued and extent_possible and not complement and not union.isEmpty():
+        # 2026-11-15: a service may refuse this list of keys (their address is too long for it, well under 500
+        # keys: read on a real WFS). Whoever sets it falls back to the cut by extent left here (extent_fallback).
+        from ....core.domain.source_capability import extent_subset
+        from ...qgis.extent_fallback import remember
+        by_extent = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
+        if by_extent is not None:
+            remember(layer.id(), final, builder._combine_with_old_subset(old_subset, combine_operator, by_extent))
+    return write(final, outcome is not None and not outcome.complete)
 
 
 def execute_ogr_spatial_selection(

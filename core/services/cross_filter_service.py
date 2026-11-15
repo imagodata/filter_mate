@@ -79,8 +79,8 @@ class CrossFilterService:
             if layer is None:
                 continue
             try:
-                from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
-                if is_non_analysis_raster(layer):
+                from ...adapters.qgis.point_cloud_capability import is_untargetable_raster
+                if is_untargetable_raster(layer):
                     raise ValueError("rendered or unsupported raster: cannot be a filter target")
                 job = make_job(layer, target.kind, request.other_layers_combine_operator, clip_mode)
             except Exception as exc:

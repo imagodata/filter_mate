@@ -569,7 +569,8 @@ class TestStreamRasterClassification:
 class TestStreamRasterTargets:
     rasters = TestStreamRasterClassification.rasters
     @pytest.mark.parametrize("provider,source,allowed", [
-        ("wms", "type=xyz&url=https://example.org", False),
+        ("wms", "type=xyz&url=https://example.org", True),  # 2026-11-15: a web map is captured, then cut
+        ("wms", "url=https://example.org&layers=plan", True),
         ("arcgismapserver", "url=https://example.org", False),
         ("gdal", GDAL_WMS_XML, False),
         ("wcs", "url=https://example.org", True),
@@ -604,7 +605,8 @@ class TestStreamRasterTargets:
 
 
     @pytest.mark.parametrize("provider,source,allowed", [
-        ("wms", "url=https://example.org", False),
+        ("wms", "url=https://example.org", True),  # 2026-11-15: a web map is captured, then cut
+        ("arcgismapserver", "url=https://example.org/MapServer", False),
         ("gdal", GDAL_WMS_XML, False),
         ("wcs", "url=https://example.org", True),
     ])
@@ -768,18 +770,40 @@ class TestVectorSourceTargetOptions:
         assert not cap.is_listed_coverage_target(_ListedVector("roads"), True)
         assert not cap.is_listed_coverage_target(None, True)
 
-    @pytest.mark.parametrize("provider,source", [("wms", OSM_XYZ), ("wms", "type=wmts&url=https://example.org"),
-                                                 ("arcgismapserver", "url=https://example.org/MapServer"),
+    @pytest.mark.parametrize("provider,source", [("arcgismapserver", "url=https://example.org/MapServer"),
                                                  ("gdal", GDAL_WMS_XML)])
-    def test_rendered_raster_is_never_a_target_but_is_shown_greyed(self, all_kinds, provider, source):
-        basemap = _ListedRaster("osm", provider, source)
+    def test_rendered_raster_that_is_not_captured_is_never_a_target_but_is_shown_greyed(self, all_kinds, provider,
+                                                                                         source):
+        basemap = _ListedRaster("ortho", provider, source)
+        assert cap.is_untargetable_raster(basemap) and not cap.is_captured_target_raster(basemap)
         for vector_source in (True, False):
             assert not cap.is_listed_coverage_target(basemap, vector_source)
             assert cap.is_listed_rendered_raster(basemap, vector_source)
 
+    @pytest.mark.parametrize("source", [OSM_XYZ, "type=wmts&url=https://example.org",
+                                        "crs=EPSG:3857&format=image/png&layers=plan&styles=&url=https://example.org/wms"])
+    def test_a_web_map_is_a_target_and_is_not_greyed(self, all_kinds, source):
+        """2026-11-15: WMS, WMTS and XYZ tiles are captured in the area the source keeps, then cut."""
+        basemap = _ListedRaster("osm", "wms", source)
+        assert cap.is_captured_target_raster(basemap) and not cap.is_untargetable_raster(basemap)
+        assert cap.is_non_analysis_raster(basemap)  # still no raster of values: not exported as it is
+        for vector_source in (True, False):
+            assert cap.is_listed_coverage_target(basemap, vector_source)
+            assert not cap.is_listed_rendered_raster(basemap, vector_source)
+        _options(raster=False)
+        assert not cap.is_listed_coverage_target(basemap, True)  # it goes with the raster targets of a vector source
+        assert cap.is_listed_coverage_target(basemap, False)
+
+    def test_other_layers_are_no_captured_targets(self, all_kinds):
+        assert not cap.is_captured_target_raster(_ListedRaster("dem"))
+        assert not cap.is_captured_target_raster(_ListedVector("roads"))
+        assert not cap.is_captured_target_raster(None)
+        assert not cap.is_untargetable_raster(_ListedRaster("dem"))
+        assert not cap.is_untargetable_raster(_ListedVector("roads"))
+
     def test_greyed_basemaps_go_with_the_raster_targets(self, all_kinds):
         """Shown where the rasters of values are listed, never where rasters were turned off."""
-        basemap = _ListedRaster("osm", "wms", OSM_XYZ)
+        basemap = _ListedRaster("ortho", "arcgismapserver", "url=https://example.org/MapServer")
         _options(raster=False)
         assert not cap.is_listed_rendered_raster(basemap, True)
         assert cap.is_listed_rendered_raster(basemap, False)
@@ -793,12 +817,15 @@ class TestVectorSourceTargetOptions:
 
     def test_targets_left_out_at_launch(self, all_kinds):
         dem, lidar, basemap = _ListedRaster("dem"), _ListedPointCloud("lidar"), _ListedRaster("osm", "wms", OSM_XYZ)
+        greyed = _ListedRaster("ortho", "arcgismapserver", "url=https://example.org/MapServer")
         assert not cap.is_unlisted_vector_source_target(dem)
         assert not cap.is_unlisted_vector_source_target(lidar)
-        assert cap.is_unlisted_vector_source_target(basemap)
+        assert not cap.is_unlisted_vector_source_target(basemap)  # 2026-11-15: a web map is a target
+        assert cap.is_unlisted_vector_source_target(greyed)
         _options(raster=False, point_cloud=False)
         assert cap.is_unlisted_vector_source_target(dem)
         assert cap.is_unlisted_vector_source_target(lidar)
+        assert cap.is_unlisted_vector_source_target(basemap)
         # Vector and vector tile targets are never concerned.
         assert not cap.is_unlisted_vector_source_target(_ListedVector("roads"))
         assert not cap.is_unlisted_vector_source_target(QgsVectorTileLayer())
@@ -833,12 +860,14 @@ class TestTargetListsFollowTheOptions:
     @pytest.fixture
     def dock(self, all_kinds, monkeypatch):
         layers = [_ListedVector("roads"), _ListedVector("parcels"), _ListedRaster("dem"), _ListedRaster("dtm"),
-                  _ListedPointCloud("lidar"), _ListedRaster("osm", "wms", OSM_XYZ)]
+                  _ListedPointCloud("lidar"), _ListedRaster("osm", "wms", OSM_XYZ),
+                  _ListedRaster("ortho", "arcgismapserver", "url=https://example.org/MapServer")]
         project = _FakeProject(layers)
         core = sys.modules["qgis.core"]
         monkeypatch.setattr(core, "QgsProject", types.SimpleNamespace(instance=lambda: project), raising=False)
         geometry = {"roads": "GeometryType.Line", "parcels": "GeometryType.Polygon", "dem": "GeometryType.Raster",
-                    "dtm": "GeometryType.Raster", "lidar": "GeometryType.PointCloud", "osm": "GeometryType.Raster"}
+                    "dtm": "GeometryType.Raster", "lidar": "GeometryType.PointCloud", "osm": "GeometryType.Raster",
+                    "ortho": "GeometryType.Raster"}
         project_layers = {layer_id: {
             "infos": {"layer_id": layer_id, "layer_name": layer_id, "layer_crs_authid": "EPSG:31370",
                       "layer_geometry_type": geometry_type},
@@ -908,8 +937,9 @@ class TestTargetListsFollowTheOptions:
     @pytest.mark.parametrize("path", ["controller", "direct"])
     def test_options_on_list_rasters_and_point_clouds(self, monkeypatch, dock, path):
         targets = self._fill(monkeypatch, dock, path)
-        assert targets.rows == ["parcels", "dem", "dtm", "lidar"]
-        assert targets.greyed == [("osm", "osm [EPSG:31370]")]
+        # 2026-11-15: the tiles (osm) are a target like the rasters of values; the ArcGIS map stays greyed.
+        assert targets.rows == ["parcels", "dem", "dtm", "lidar", "osm"]
+        assert targets.greyed == [("ortho", "ortho [EPSG:31370]")]
 
     @pytest.mark.parametrize("path", ["controller", "direct"])
     def test_raster_option_off_drops_the_rasters_and_their_greyed_basemaps(self, monkeypatch, dock, path):
@@ -922,26 +952,26 @@ class TestTargetListsFollowTheOptions:
     def test_point_cloud_option_off_drops_the_point_clouds(self, monkeypatch, dock, path):
         _options(point_cloud=False)
         targets = self._fill(monkeypatch, dock, path)
-        assert targets.rows == ["parcels", "dem", "dtm"]
-        assert [layer_id for layer_id, _ in targets.greyed] == ["osm"]
+        assert targets.rows == ["parcels", "dem", "dtm", "osm"]
+        assert [layer_id for layer_id, _ in targets.greyed] == ["ortho"]
 
     @pytest.mark.parametrize("path", ["controller", "direct"])
     def test_options_are_for_a_vector_source_only(self, monkeypatch, dock, path):
         _options(raster=False, point_cloud=False)
         targets = self._fill(monkeypatch, dock, path, source_id="dem")
-        assert targets.rows == ["roads", "parcels", "dtm", "lidar"]
-        assert [layer_id for layer_id, _ in targets.greyed] == ["osm"]
+        assert targets.rows == ["roads", "parcels", "dtm", "lidar", "osm"]
+        assert [layer_id for layer_id, _ in targets.greyed] == ["ortho"]
 
     @pytest.mark.parametrize("path", ["controller", "direct"])
     def test_a_list_of_greyed_basemaps_only_is_filled_all_the_same(self, monkeypatch, dock, path):
-        for layer_id in ("parcels", "dem", "dtm", "lidar"):
+        for layer_id in ("parcels", "dem", "dtm", "lidar", "osm"):
             del dock.PROJECT_LAYERS[layer_id]
             del dock.project._layers[layer_id]
         targets = self._fill(monkeypatch, dock, path)  # asserts that the filling reports success
-        assert targets.rows == [] and [layer_id for layer_id, _ in targets.greyed] == ["osm"]
+        assert targets.rows == [] and [layer_id for layer_id, _ in targets.greyed] == ["ortho"]
 
     @pytest.mark.parametrize("path", ["controller", "direct"])
     def test_a_web_basemap_source_is_not_listed_greyed(self, monkeypatch, dock, path):
         """The source is never among its targets, greyed or not."""
-        targets = self._fill(monkeypatch, dock, path, source_id="osm")
-        assert "osm" not in targets.rows and targets.greyed == []
+        targets = self._fill(monkeypatch, dock, path, source_id="ortho")
+        assert "ortho" not in targets.rows and targets.greyed == []

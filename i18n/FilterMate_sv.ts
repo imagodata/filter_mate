@@ -9177,6 +9177,11 @@ Rastret ritas som på kartan, med sin stil. SAM installeras en gång från grupp
         <translation>Webbakgrundskarta (WMS / WMTS / XYZ, ArcGIS MapServer): endast färger, den kan inte filtreras</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Webbkarta som inte kan fångas (ArcGIS MapServer, GDAL-beskrivning av en WMS): endast färger, den kan inte filtreras</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Markera alla vektorlager</translation>
@@ -10268,6 +10273,16 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <translation>begränsad rasterinfångning misslyckades</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>webbkartan svarade inte i tid</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>webbkartan besvarade ingen av infångningens förfrågningar</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>lokal rasterinfångning kunde inte öppnas</translation>
@@ -10383,6 +10398,21 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Lager med renderade färger kan inte vara filtermål.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Webbkartan har fångats som en stillbild på {0} x {1} pixlar ({2} {3} per pixel) och sedan beskurits efter källan: att zooma in visar inte fler detaljer. Ta bort filter ger tillbaka den levande tjänsten.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>kartenheter</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} förfrågan/förfrågningar till tjänsten besvarades inte: bilden kan ha hål.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime kommer från PyPI med pip, modellen från huggingface.co/{1}, och va
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Det rumsliga fjärrpredikatet kunde inte utvärderas; det tidigare filtret behålls.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Beskuren efter källans utsträckning: de matchande objekten i den här webbtjänsten kan inte listas (för många för en förfrågan, eller ingen stabil nyckel). Objekt inom utsträckningen kan ligga utanför själva källan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Beskuren efter källans utsträckning: webbtjänsten avvisade listan över sina matchande objekt (oftast en förfrågan som är för lång för den). Objekt inom utsträckningen kan ligga utanför själva källan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Beskuren efter källans utsträckning: den här versionen av QGIS kan inte kontrollera svaren från en webbtjänst, så dess matchande objekt listas inte. Objekt inom utsträckningen kan ligga utanför själva källan.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

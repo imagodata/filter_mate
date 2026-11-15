@@ -459,10 +459,46 @@ def automatic(task):
     file_source.source = lambda: "/vsicurl/http://offline.test/source.geojson"
     success, queued, _ = filter_keys(remote_memory(), file_source)
     check("remote file source retains its existing unfiltered semantics", success and bool(queued))
-    success, queued, builder = filter_keys(remote_memory(700), huge)
+    # 2026-11-15: past 500 keys a WFS is cut by the extent of the source, and says so; it was refused.
+    overflow = remote_memory(700)
+    success, queued, builder = filter_keys(overflow, huge)
+    box = "intersects_bbox($geometry, geom_from_wkt('POLYGON((-1 0, 800 0, 800 2, -1 2, -1 0))'))"
     check(
-        "service key overflow never applies a subset",
+        "WFS key overflow is cut by the extent of the source, with its warning",
+        success and queued == [box] and builder.remote_materialization_outcome is None
+        and any("extent of the source" in warning for warning in builder.user_warnings),
+        str(queued)[:160] + str(builder.user_warnings)[:200],
+    )
+    provider_call(overflow, "setSubsetString", box)
+    check("the filter by extent keeps what meets the extent", overflow.featureCount() == 700, str(overflow.featureCount()))
+    provider_call(overflow, "setSubsetString", "")
+    success, queued, builder = filter_keys(remote_memory(700), huge, old_subset='"label" = \'other\'', combine_operator="AND")
+    check(
+        "WFS key overflow under AND keeps the previous filter beside the extent",
+        success and len(queued) == 1 and queued[0].count(box) == 1 and "\"label\" = 'other'" in queued[0],
+        str(queued)[:200],
+    )
+    for label, kwargs in (("AND NOT", {"old_subset": '"id" < 600', "combine_operator": "AND NOT"}),):
+        success, queued, builder = filter_keys(remote_memory(700), huge, **kwargs)
+        check(
+            "WFS key overflow under {} never applies a subset".format(label),
+            not success and not queued and "500" in str(builder.last_error),
+            str(queued)[:120] + str(builder.last_error),
+        )
+    success, queued, builder = filter_keys(remote_memory(700), huge, predicate="ST_Disjoint")
+    check(
+        "WFS key overflow with Disjoint never applies a subset",
+        not success and not queued and "500" in str(builder.last_error),
+        str(queued)[:120] + str(builder.last_error),
+    )
+    arcgis = remote_memory(700)
+    arcgis.providerType = lambda: "arcgisfeatureserver"
+    arcgis.source = lambda: "url='http://offline.test/arcgis/rest/services/x/FeatureServer/0'"
+    success, queued, builder = filter_keys(arcgis, huge)
+    check(
+        "a service that takes no filter by extent never applies a subset past 500 keys",
         not success and not queued and builder.remote_materialization_outcome.reason == "key_limit",
+        str(queued)[:120] + str(builder.last_error),
     )
 
 

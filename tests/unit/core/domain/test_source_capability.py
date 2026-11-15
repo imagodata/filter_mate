@@ -163,3 +163,126 @@ def test_probe_never_counts_a_remote_layer():
     probe = _probe()
     assert probe.feature_count_or_none(_Layer("w2", "OAPIF", OAPIF_URI)) is None
     assert probe.is_remote_layer(_Layer("w3", "arcgisfeatureserver", AFS_URI))
+
+
+class TestExtentSubset:
+    """A web service cut by the extent of the source, where its features cannot be listed (2026-11-15)."""
+
+    def test_a_wfs_takes_a_filter_by_extent(self):
+        from core.domain.source_capability import extent_subset
+        capability = classify("WFS", WFS_URI)
+        assert capability.takes_extent_subset
+        subset = extent_subset(capability, 1.5, -2, 30, 40.25)
+        assert subset == ("intersects_bbox($geometry, geom_from_wkt('POLYGON((1.5 -2, 30 -2, 30 40.25, 1.5 40.25, "
+                          "1.5 -2))'))")
+
+    @pytest.mark.parametrize("provider, uri", [
+        ("OAPIF", OAPIF_URI), ("arcgisfeatureserver", "url='https://example.org/FeatureServer/0'"),
+        ("ogr", "/data/a.gpkg|layername=a"), ("postgres", "dbname='gis' table=\"a\""), ("memory", "Point"),
+    ])
+    def test_no_other_source_does(self, provider, uri):
+        """What an OGC API or an ArcGIS service is sent for such an expression was not read: refused as before."""
+        from core.domain.source_capability import extent_subset
+        capability = classify(provider, uri)
+        assert not capability.takes_extent_subset and extent_subset(capability, 0, 0, 1, 1) is None
+
+    def test_coordinates_are_plain_decimals(self):
+        """WKT in a filter sent to a server: never an exponent, nine decimals at most, no negative zero."""
+        from core.domain.source_capability import extent_subset
+        subset = extent_subset(classify("WFS", WFS_URI), 1e-7, -0.0, 652381.123456789123, 6.862e6)
+        assert "POLYGON((0.0000001 0, 652381.123456789 0, 652381.123456789 6862000, 0.0000001 6862000, " \
+               "0.0000001 0))" in subset
+        assert "e" not in subset.split("POLYGON")[1].lower()
+
+    @pytest.mark.parametrize("bounds", [
+        (float("nan"), 0, 1, 1), (0, 0, float("inf"), 1), (2, 0, 1, 1), (0, 2, 1, 1), ("a", 0, 1, 1), (None, 0, 1, 1),
+    ])
+    def test_a_rectangle_that_is_none_gives_no_filter(self, bounds):
+        from core.domain.source_capability import extent_subset
+        assert extent_subset(classify("WFS", WFS_URI), *bounds) is None
+
+    def test_a_point_is_a_rectangle(self):
+        """A source of one point: its extent has no size, the server is still asked what meets it."""
+        from core.domain.source_capability import extent_subset
+        assert "POLYGON((5 6, 5 6, 5 6, 5 6, 5 6))" in extent_subset(classify("WFS", WFS_URI), 5, 6, 5, 6)
+
+    @pytest.mark.parametrize("bounds", [
+        (1.5, -2, 30, 40.25), (0, 0, 0, 0), (-652381.123456789, 6862000, 652381.5, 6862000.25), (1e-7, 0, 1, 1),
+    ])
+    def test_the_rectangle_is_read_back_from_what_was_written(self, bounds):
+        """The validated server dialect reads the bounds of the WKT, and writes the filter again from them."""
+        from core.domain.source_capability import extent_expression, extent_of_wkt
+        written = extent_expression(*bounds)
+        wkt = written.split("geom_from_wkt('")[1].split("')")[0]
+        assert extent_of_wkt(wkt) == tuple(float(value) for value in bounds)
+        assert extent_expression(*extent_of_wkt(wkt)) == written
+
+    @pytest.mark.parametrize("wkt", [
+        "POLYGON((0 0, 10 0, 10 10, 0 10))",                       # not closed
+        "POLYGON((0 0, 10 0, 10 10, 0 10, 0 1))",                  # closed elsewhere
+        "POLYGON((0 0, 10 1, 10 10, 0 10, 0 0))",                  # not axis-aligned
+        "POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))",                  # the other way round
+        "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0),(1 1, 2 1, 2 2, 1 2, 1 1))",  # a hole
+        "POLYGON((0 0, 1e3 0, 1e3 10, 0 10, 0 0))",                # an exponent
+        "POLYGON((0 0 5, 10 0 5, 10 10 5, 0 10 5, 0 0 5))",        # a third coordinate
+        "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0)) ; DROP",           # something after
+        "MULTIPOLYGON(((0 0, 10 0, 10 10, 0 10, 0 0)))", "POINT(0 0)", "", None, 5,
+        "POLYGON((" + ", ".join(["0 0"] * 200) + "))",             # too long
+    ])
+    def test_nothing_else_is_read_as_an_extent(self, wkt):
+        from core.domain.source_capability import extent_of_wkt
+        assert extent_of_wkt(wkt) is None
+
+
+class TestKeyListRequest:
+    """A list of keys goes in the address of every request of a WFS layer, and a server reads so much of it.
+
+    2026-11-15, measured in QGIS 3.44 on a local WFS 2.0: 187 bytes a key of four digits (2132 bytes for 10 keys,
+    22702 for 120), and 301 when the layer joins the rectangle of the map to its filter (3775 and 36885). Read
+    on a real WFS (IGN Géoplateforme): 25 keys of 24 characters are taken, about 100 are refused.
+    """
+
+    def test_the_estimate_is_no_shorter_than_what_qgis_wrote(self):
+        from core.domain.source_capability import key_list_request_bytes
+        for count, alone, by_rectangle in ((10, 2132, 3775), (40, 7742, 12805), (120, 22702, 36885)):
+            keys = range(1000, 1000 + count)
+            assert alone <= key_list_request_bytes("id", keys) <= alone + 400
+            assert by_rectangle <= key_list_request_bytes("id", keys, by_rectangle=True) <= by_rectangle + 400
+        words = ["COMMUNE_00000000000{:05d}".format(number) for number in range(40)]
+        assert 8585 <= key_list_request_bytes("nom", words) <= 8585 + 400
+        assert 13648 <= key_list_request_bytes("nom", words, by_rectangle=True) <= 13648 + 400
+
+    def test_what_a_real_service_took_fits_and_what_it_refused_does_not(self):
+        from core.domain.source_capability import key_list_fits
+        communes = ["COMMUNE_00000000000{:05d}".format(number) for number in range(100)]
+        assert key_list_fits("cleabs", communes[:25])
+        assert not key_list_fits("cleabs", communes)
+
+    def test_a_layer_that_asks_by_rectangle_takes_fewer_keys(self):
+        from core.domain.source_capability import key_list_fits
+        keys = list(range(1000, 1035))
+        assert key_list_fits("id", keys) and not key_list_fits("id", keys, by_rectangle=True)
+        assert key_list_fits("id", keys[:20], by_rectangle=True)
+
+    def test_the_limit_is_the_one_of_the_settings(self):
+        from core.domain.source_capability import key_list_fits
+        keys = list(range(1000, 1200))
+        assert not key_list_fits("id", keys) and key_list_fits("id", keys, 64000)
+        assert not key_list_fits("id", keys, 0) and not key_list_fits("id", keys, None) and not key_list_fits("id", keys, "x")
+
+    def test_a_key_weighs_what_it_is_once_percent_encoded(self):
+        from core.domain.source_capability import key_list_request_bytes
+        plain = key_list_request_bytes("id", ["abc"])
+        assert key_list_request_bytes("id", ["a c"]) == plain + 2  # %20
+        assert key_list_request_bytes("id", ["é"]) == key_list_request_bytes("id", ["a"]) + 5  # %C3%A9
+        assert key_list_request_bytes("id", []) < 1000
+
+    @pytest.mark.parametrize("source, expected", [
+        ("pagingEnabled='true' restrictToRequestBBOX='1' typename='a:b' url='https://example.org/wfs'", True),
+        ("restricttorequestbbox=1 typename='a:b'", True), ('restrictToRequestBBOX="1"', True),
+        ("restrictToRequestBBOX='0' typename='a:b'", False), ("typename='a:b' url='https://example.org/wfs'", False),
+        ("restrictToRequestBBOX='10'", False), ("", False), (None, False),
+    ])
+    def test_a_layer_says_whether_it_asks_by_rectangle(self, source, expected):
+        from core.domain.source_capability import asks_by_rectangle
+        assert asks_by_rectangle(source) is expected

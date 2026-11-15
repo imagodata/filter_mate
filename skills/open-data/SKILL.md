@@ -72,8 +72,9 @@ one. Prefer few clouds when the user does not say.
 add_basemap puts a basemap the user enabled under every layer: osm_tiles for a street map, carto_light for a neutral
 background, carto_light_nolabels under layers that have their own labels, carto_dark under bright symbols,
 google_satellite for photographs anywhere, ign_plan or ign_ortho in France, opentopomap for relief. A basemap is an
-image: it is not filtered, read nor exported. When none is enabled, say that one can be ticked in the settings of
-the agent, Sources tab.
+image: it has no values to filter, read nor export. A filter between layers can still cut it to an area: it is
+then a still image at one resolution (the warning of the filter says which), and clearing the filter gives the
+live service back. When none is enabled, say that one can be ticked in the settings of the agent, Sources tab.
 
 ## Elevation
 

@@ -257,14 +257,39 @@ def test_service_source_provider_that_cannot_open_is_refused(monkeypatch):
         worker(job._prepare_remote, lambda: False)
 
 
-def test_rendered_target_refuses_before_pixels(monkeypatch):
+@pytest.mark.parametrize('provider, uri', [('arcgismapserver', 'url=https://example.invalid/MapServer'),
+                                            ('gdal', '<GDAL_WMS><Service name="TMS"/></GDAL_WMS>')])
+def test_rendered_target_that_is_not_captured_refuses_before_pixels(monkeypatch, provider, uri):
     fk.install(monkeypatch, appliers)
-    source = layer('wms', 'url=tiles')
+    source = layer(provider, uri)
     job = appliers.RasterTargetJob(source, None)
     job.compute(None, None, None, None, lambda: False)
     assert not job.outcome.success
     assert 'cannot be filter targets' in job.outcome.message
     source.dataProvider.assert_not_called()
+
+
+def test_web_map_filtered_as_a_source_by_its_own_colours_is_still_refused(monkeypatch):
+    """Its capture is the one of the screen, made for a selection of colours, not for a cut."""
+    fk.install(monkeypatch, appliers)
+    source = layer('wms', 'type=xyz&url=tiles')
+    job = appliers.RasterTargetJob(source, None)
+    assert job._web_map and job._remote
+    job._analysis_source = ('/tmp/screen.tif', 'gdal')
+    job.compute(None, None, None, None, lambda: False)
+    assert not job.outcome.success and 'cannot be filter targets' in job.outcome.message
+    source.dataProvider.assert_not_called()
+
+
+def test_web_map_target_opens_nothing_before_the_worker(monkeypatch):
+    """2026-11-15: a WMS, a WMTS or tiles are a target; nothing of the service is read when the job is built."""
+    fk.install(monkeypatch, appliers)
+    source = layer('wms', 'type=xyz&url=tiles')
+    job = appliers.RasterTargetJob(source, None)
+    assert job._web_map and job._rendered and job._remote
+    source.dataProvider.assert_not_called()
+    with pytest.raises(RuntimeError, match='worker thread'):
+        job._open_web_map()  # the main thread never opens the service
 
 
 @pytest.mark.parametrize('provider', ['wcs', 'postgresraster', 'gdal'])
@@ -393,3 +418,88 @@ class TestCaptureWindow:
         kept = fk.FakeGeometry.fromWkt('MULTIPOLYGON(((-2 -2,-1 -2,-1 -1,-2 -1,-2 -2)),((63 63,67 63,67 67,63 67,63 63)))')
         box, grid = self._window(kept)
         assert grid == (3, 3) and box == pytest.approx((50, 50, 80, 80), abs=1e-4)
+
+
+# --- web maps (2026-11-15): the grid of the capture of a WMS, a WMTS or tiles ---------------------------------
+
+WORLD = 20037508.342789244
+FULL = (-WORLD, -WORLD, WORLD, WORLD)
+LEVELS = [2 * WORLD / 256 / 2 ** z for z in range(0, 15)]  # as QGIS gives them: any order, map units per pixel
+
+
+def test_web_map_grid_takes_the_finest_level_within_the_budget():
+    """200 km by 150 km, a million pixels: level 10 (153 m) is past the budget, level 9 (306 m) is not."""
+    area, columns, rows, resolution = materialization.web_map_grid(FULL, (100000, 100000, 300000, 250000), 1000000,
+                                                                   LEVELS)
+    assert resolution == pytest.approx(2 * WORLD / 256 / 2 ** 9)
+    assert columns * rows <= 1000000 and columns >= 654 and rows >= 490
+    # Snapped to the pixels of the level from the upper left corner of the service, one cell of margin all round.
+    assert area[0] <= 100000 - resolution and area[2] >= 300000 + resolution
+    assert area[1] <= 100000 - resolution and area[3] >= 250000 + resolution
+    for bound, origin in ((area[0], -WORLD), (area[2], -WORLD), (area[1], WORLD), (area[3], WORLD)):
+        cells = (bound - origin) / resolution
+        assert cells == pytest.approx(round(cells), abs=1e-6)
+    assert (area[2] - area[0]) / columns == pytest.approx(resolution)
+    assert (area[3] - area[1]) / rows == pytest.approx(resolution)
+
+
+def test_web_map_grid_is_never_finer_than_the_finest_level():
+    """A parcel of 50 m: the budget would afford millimetres; the tiles stop at their last level."""
+    area, columns, rows, resolution = materialization.web_map_grid(FULL, (1000, 1000, 1050, 1050), 16000000, LEVELS)
+    assert resolution == pytest.approx(min(LEVELS)) and columns * rows < 1000
+
+
+def test_web_map_grid_without_levels_is_what_the_budget_gives():
+    """A WMS draws at any resolution: the finest one the budget affords, the margin included."""
+    area, columns, rows, resolution = materialization.web_map_grid(
+        (-111319, -111325, 111319, 111325), (-50000, -50000, 50000, 60000), 1000000)
+    assert 0.97 * 1000000 <= columns * rows <= 1000000
+    assert resolution == pytest.approx(104.9, rel=0.02)
+    assert area[0] < -50000 and area[1] < -50000 and area[2] > 50000 and area[3] > 60000
+
+
+def test_web_map_grid_past_the_coarsest_level_is_coarser_than_it():
+    """The whole world with a budget of one tile and a half: a grid coarser than level 0, still within the budget."""
+    area, columns, rows, resolution = materialization.web_map_grid(FULL, FULL, 30000, LEVELS[5:])
+    assert resolution > max(LEVELS[5:]) and columns * rows <= 30000
+    assert area == pytest.approx(FULL)
+
+
+def test_web_map_grid_stays_inside_the_service():
+    area, columns, rows, _resolution = materialization.web_map_grid(
+        (0, 0, 1000, 1000), (-500, -500, 400, 2000), 10000)
+    assert area[0] == 0 and area[1] == 0 and area[2] <= 1000 and area[3] == 1000
+    assert columns * rows <= 10000
+
+
+@pytest.mark.parametrize('box', [(2000, 2000, 3000, 3000), (1000, 0, 1500, 500), (10, 10, 10, 90),
+                                 (float('nan'), 0, 1, 1), (0, 0, float('inf'), 1)])
+def test_web_map_grid_refuses_an_area_that_does_not_meet_the_service(box):
+    with pytest.raises(ValueError):
+        materialization.web_map_grid((0, 0, 1000, 1000), box, 10000)
+
+
+def test_web_map_grid_refuses_a_budget_that_is_none():
+    with pytest.raises(ValueError):
+        materialization.web_map_grid((0, 0, 1000, 1000), (0, 0, 10, 10), 0)
+
+
+@pytest.mark.parametrize('levels', [[0, -1, float('nan'), float('inf'), 'x', None], []])
+def test_web_map_grid_ignores_levels_that_are_none(levels):
+    _area, columns, rows, resolution = materialization.web_map_grid((0, 0, 1000, 1000), (0, 0, 1000, 1000), 10000, levels)
+    assert columns * rows <= 10000 and resolution > 0
+
+
+@pytest.mark.parametrize('value, expected', [
+    (None, 16000000), (0, 16000000), (-5, 16000000), ('x', 16000000), (True, 16000000), ({}, 16000000),
+    (4000000, 4000000), ('4 000 000', 4000000), ('4_000_000', 4000000), (4e6, 4000000), ({'value': 2000000}, 2000000),
+    (10, 65536),  # never less than one tile
+    (1e12, 268435456), ('4 000 000 000', 268435456),  # never more than 16384 x 16384
+])
+def test_web_map_budget_read_from_the_configuration(value, expected):
+    assert materialization.web_map_max_pixels(value) == expected
+
+
+def test_web_map_capture_runs_in_a_worker_only():
+    with pytest.raises(RuntimeError, match='worker thread'):
+        materialization.materialize_web_map(Mock(), Rect(0, 0, 10, 10), 10, 10)

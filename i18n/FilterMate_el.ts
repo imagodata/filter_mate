@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>Διαδικτυακός χάρτης υποβάθρου (WMS / WMTS / XYZ, ArcGIS MapServer): μόνο χρώματα, δεν μπορεί να φιλτραριστεί</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Διαδικτυακός χάρτης που δεν μπορεί να καταγραφεί (ArcGIS MapServer, περιγραφή GDAL ενός WMS): μόνο χρώματα, δεν μπορεί να φιλτραριστεί</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Επιλογή όλων των διανυσματικών επιπέδων</translation>
@@ -10268,6 +10273,16 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>η περιορισμένη καταγραφή ράστερ απέτυχε</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>ο διαδικτυακός χάρτης δεν απάντησε εγκαίρως</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>ο διαδικτυακός χάρτης δεν απάντησε σε κανένα από τα αιτήματα της καταγραφής</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>δεν ήταν δυνατό το άνοιγμα της τοπικής καταγραφής ράστερ</translation>
@@ -10383,6 +10398,21 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Τα επίπεδα αποδιδόμενων χρωμάτων δεν μπορούν να είναι στόχοι φίλτρου.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Ο διαδικτυακός χάρτης καταγράφηκε ως στατική εικόνα {0} x {1} εικονοστοιχείων ({2} {3} ανά εικονοστοιχείο) και στη συνέχεια αποκόπηκε από την πηγή: η μεγέθυνση δεν δείχνει περισσότερη λεπτομέρεια. Η Αφαίρεση φίλτρου επαναφέρει τη ζωντανή υπηρεσία.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>μονάδες χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} αίτημα(τα) προς την υπηρεσία δεν απαντήθηκαν: η εικόνα μπορεί να έχει κενά.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Το απομακρυσμένο χωρικό κατηγόρημα δεν ήταν δυνατό να αξιολογηθεί· διατηρείται το προηγούμενο φίλτρο.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Αποκοπή με βάση την έκταση της πηγής: οι οντότητες αυτής της διαδικτυακής υπηρεσίας που ταιριάζουν δεν μπορούν να απαριθμηθούν (πάρα πολλές για ένα αίτημα ή χωρίς σταθερό κλειδί). Οντότητες μέσα σε αυτή την έκταση μπορεί να βρίσκονται εκτός της ίδιας της πηγής.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Αποκοπή με βάση την έκταση της πηγής: η διαδικτυακή υπηρεσία απέρριψε τη λίστα των οντοτήτων της που ταιριάζουν (συνήθως το αίτημα είναι πολύ μεγάλο για αυτήν). Οντότητες μέσα σε αυτή την έκταση μπορεί να βρίσκονται εκτός της ίδιας της πηγής.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Αποκοπή με βάση την έκταση της πηγής: αυτή η έκδοση του QGIS δεν μπορεί να ελέγξει τις απαντήσεις μιας διαδικτυακής υπηρεσίας, επομένως οι οντότητές της που ταιριάζουν δεν απαριθμούνται. Οντότητες μέσα σε αυτή την έκταση μπορεί να βρίσκονται εκτός της ίδιας της πηγής.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

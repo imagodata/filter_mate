@@ -498,7 +498,7 @@ def build_server(client: FilterMateClient) -> Any:
         of each target unless operator is given. Not recorded in the undo history: revert with clear_filters.
 
         Returns filtered (names of the layers filtered), failed ({layer: reason}), skipped ({layer: reason}) and
-        warnings ({layer: reason}: filtered, but a web service read up to its budget, so features may be missing).
+        warnings ({layer: reason}: filtered, but not exactly: the reason says how).
         A layer that is not found is reported in failed; a source that is not found is an error.
         """
         return await call("POST", "/filters/cross", _body(
@@ -1007,8 +1007,8 @@ def build_server(client: FilterMateClient) -> Any:
         """Add a layer of a WFS, WMS or WMTS service, read from the service as the map moves.
 
         A WFS layer is data, filtered on the server. A WMS or WMTS layer is an image drawn by the service (old maps,
-        orthophotos of a year, cadastre, land cover): put under the other layers, it cannot be filtered, read nor
-        exported. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate
+        orthophotos of a year, cadastre, land cover): put under the other layers, it has no values to filter, read
+        nor export. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate
         asks the user first.
         """
         return await call("POST", "/layers/add-service", _body(platform=platform, typename=typename, name=name))
@@ -1026,8 +1026,8 @@ def build_server(client: FilterMateClient) -> Any:
     ) -> Dict[str, Any]:
         """Add a web basemap (XYZ tiles) to the project, under every other layer.
 
-        A basemap is an image drawn by its server as the map moves: a background, which cannot be filtered, read
-        nor exported. Only a basemap of the list can be added, and in the chat of FilterMate only one the user ticked;
+        A basemap is an image drawn by its server as the map moves: a background, with no values to filter, read
+        nor export. Only a basemap of the list can be added, and in the chat of FilterMate only one the user ticked;
         an address is never written here. Returns the layer summary. The chat of FilterMate asks the user first.
         """
         return await call("POST", "/layers/add-basemap", _body(platform=platform, name=name))

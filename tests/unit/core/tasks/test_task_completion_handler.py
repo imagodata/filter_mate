@@ -323,3 +323,65 @@ class TestApplyPendingProviderWork:
         layer.reload.assert_not_called()
         layer.featureCount.assert_called_once()
         layer.triggerRepaint.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# apply_pending_subset_requests: a web service that refuses the keys of an exact filter
+# ---------------------------------------------------------------------------
+
+def _fallback_module():
+    """adapters/qgis/extent_fallback.py, pure Python, loaded by its path (its package needs QGIS)."""
+    import importlib.util
+    import pathlib
+    path = pathlib.Path(__file__).resolve().parents[4] / "adapters" / "qgis" / "extent_fallback.py"
+    spec = importlib.util.spec_from_file_location("fm_extent_fallback_under_test", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class TestApplyPendingRefusedKeys:
+    """2026-11-15: read on a real WFS, a list of about 100 keys is refused (its address is too long for the
+    server) where one of 25 is set. The cut by the extent of the source left for the layer is set instead."""
+
+    KEYS = '"id" IN (1, 2, 3)'
+    BOX = "intersects_bbox($geometry, geom_from_wkt('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'))"
+
+    def _run(self, monkeypatch, refused, remembered=True):
+        fallback = _fallback_module()
+        said = []
+        monkeypatch.setattr(_tch, "_extent_fallback", lambda: fallback)
+        monkeypatch.setattr(_tch, "_say_cut_by_extent", lambda layer, subset: said.append((layer.name(), subset)))
+        layer = _make_layer("communes", "url='https://example.org/wfs' typename='a:b'", provider="WFS")
+        if remembered:
+            fallback.remember(layer.id(), self.KEYS, self.BOX)
+        asked = []
+
+        def safe_set(target, expression):
+            asked.append(expression)
+            return expression not in refused
+
+        failures = []
+        with patch.object(_tch, "_freeze_canvas", return_value=None):
+            applied = apply_pending_subset_requests([(layer, self.KEYS)], safe_set, failures=failures)
+        return applied, asked, said, failures, fallback
+
+    def test_the_cut_by_extent_is_set_in_place_of_the_keys_the_service_refused(self, monkeypatch):
+        applied, asked, said, failures, fallback = self._run(monkeypatch, refused={self.KEYS})
+        assert applied == 1 and asked == [self.KEYS, self.BOX]
+        assert said == [("communes", self.BOX)] and failures == []
+        assert fallback.pending() == 0
+
+    def test_keys_the_service_takes_leave_nothing_behind(self, monkeypatch):
+        applied, asked, said, failures, fallback = self._run(monkeypatch, refused=set())
+        assert applied == 1 and asked == [self.KEYS] and said == [] and failures == []
+        assert fallback.pending() == 0  # forgotten: a later refusal of the same text finds nothing
+
+    def test_a_service_that_refuses_both_is_reported_as_before(self, monkeypatch):
+        applied, asked, said, failures, _fallback = self._run(monkeypatch, refused={self.KEYS, self.BOX})
+        assert applied == 0 and asked == [self.KEYS, self.BOX] and said == []
+        assert len(failures) == 1 and failures[0].startswith("communes:")
+
+    def test_a_filter_with_no_fallback_is_reported_as_before(self, monkeypatch):
+        applied, asked, said, failures, _fallback = self._run(monkeypatch, refused={self.KEYS}, remembered=False)
+        assert applied == 0 and asked == [self.KEYS] and said == [] and len(failures) == 1

@@ -101,7 +101,12 @@ jobs:
             timeout 900 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
               --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py 2>&1 \
               | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
-            timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py'
+            timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py
+            # Web services ticked among the layers to filter: tiles captured then cut, a WFS cut by the extent of
+            # the source, what the dock says of them, Unfilter (two local servers, no public service).
+            timeout 300 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+              --profiles-path /tmp/profiles-web --code /src/tests/qgis_headless/check_dock_web_targets.py 2>&1 \
+              | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"'
 
     - name: Streaming sources checks (local HTTP fixtures, no public service)
       if: ${{ !cancelled() }}
@@ -110,14 +115,15 @@ jobs:
         INSTALL_PDAL: ${{ matrix.pdal == true }}
       run: |
         # Lots A to E of docs/internal/plans/V5_STREAMING: WFS / OGC API / ArcGIS filters, bounded remote
-        # spatial filters, streaming rasters, vector tiles and remote point clouds. Each script serves its own
+        # spatial filters, streaming rasters, vector tiles, remote point clouds, and web services cut by the extent
+        # of a source (WFS past 500 keys, WMS / WMTS / XYZ captured then cut). Each script serves its own
         # loopback HTTP fixture; public services stay opt-in (FM_STREAM_PUBLIC=1), never in CI.
         docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" \
           -e QT_QPA_PLATFORM=offscreen -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 -e INSTALL_PDAL \
           "$IMAGE" bash -c '
             if [ "$INSTALL_PDAL" = "true" ]; then bash /src/tests/qgis_headless/install_pdal.sh || exit 1; fi
             failed=""
-            for check in vector_filters versions vector_spatial api_sources raster raster_automation d_materialization tiles_pointclouds; do
+            for check in vector_filters versions vector_spatial api_sources raster raster_automation d_materialization tiles_pointclouds extent_clip; do
               echo "::group::check_stream_$check"
               timeout 600 python3 /src/tests/qgis_headless/check_stream_$check.py || failed="$failed $check"
               echo "::endgroup::"
