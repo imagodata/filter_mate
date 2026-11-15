@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    ContourResult, ElevationResult,
+    ContourResult, ElevationResult, OsmResult,
     Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
@@ -144,6 +144,35 @@ def add_elevation(payload: AddElevationBody, request: Request) -> ElevationResul
         return _accessor(request).add_elevation(
             payload.platform, extent_wkt=payload.extent_wkt, crs=payload.crs, resolution=payload.resolution,
             target_crs=payload.target_crs, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class OsmTagBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str = Field(..., min_length=1, max_length=60, pattern=r"^[A-Za-z][A-Za-z0-9_:.-]*$")
+    value: str = Field(default="", max_length=80, description="Empty: any value")
+
+
+class AddOsmBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    tags: List[OsmTagBody] = Field(..., min_length=1, max_length=10, description="Features with one of these tags")
+    platform: str = Field(default="overpass_fr", min_length=1, max_length=200, description="Overpass server")
+    extent_wkt: str = Field(default="", max_length=100_000, description="Area as WKT (default: the visible map)")
+    crs: str = Field(default="", max_length=64, description="CRS of extent_wkt (default: the CRS of the map)")
+    geometry: Literal["as_mapped", "points", "lines", "polygons"] = "as_mapped"
+    name: str = Field(default="", max_length=180)
+
+
+@router.post("/layers/add-osm", response_model=OsmResult)
+def add_osm_features(payload: AddOsmBody, request: Request) -> OsmResult:
+    """Add the OpenStreetMap features that carry given tags in an area, read from an Overpass server."""
+    try:
+        return _accessor(request).add_osm_features(
+            payload.platform, [tag.model_dump() for tag in payload.tags], extent_wkt=payload.extent_wkt,
+            crs=payload.crs, geometry=payload.geometry, name=payload.name)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

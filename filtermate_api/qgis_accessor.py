@@ -33,6 +33,7 @@ from .accessor import (
     ContourResult,
     CrossFilterResult,
     ElevationResult,
+    OsmResult,
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
@@ -650,6 +651,18 @@ class QGISFilterMateAccessor:
         return ElevationResult(**self._control(
             "add_elevation", platform, extent_wkt=extent_wkt, crs=crs, resolution=resolution, target_crs=target_crs,
             name=name, extra_domains=extra, module="adapters.public_api.terrain"))
+
+    def add_osm_features(self, platform: str, tags: List[Dict[str, Any]], extent_wkt: str = "", crs: str = "",
+                         geometry: str = "as_mapped", name: str = "",
+                         extra_domains: Optional[str] = None) -> OsmResult:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return OsmResult(**self._control(
+            "add_osm_features", platform, tags, extent_wkt=extent_wkt, crs=crs, geometry=geometry, name=name,
+            extra_domains=extra, module="adapters.public_api.osm_features"))
+
+    def check_osm(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        self._control("check_osm", platform, extra_domains=extra, module="adapters.public_api.osm_features")
 
     def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
         extra = self.configured_domains() if extra_domains is None else extra_domains

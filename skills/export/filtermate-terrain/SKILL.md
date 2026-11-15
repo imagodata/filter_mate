@@ -47,9 +47,9 @@ When the user gives none, choose, and say what you chose.
 - **Opacity.** Over a photograph (a satellite basemap): the colored elevation at 0.45 to 0.6, the hillshade at 0.2
   to 0.35, so that the photograph still reads. Over a neutral basemap or none: the elevation at 0.8 to 1, the
   hillshade at 0.4 to 0.5. "Subtle" is the low end, "strong" the high end.
-- **The light.** azimuth 315 and altitude 45 are the usual ones: leave them. multidirectional shows the slopes that
-  face away from the light. In flat country (less than 100 m between minimum and maximum) pass z_factor 2 or 3 to
-  deepen the relief.
+- **The light** comes from the north-west, as on every relief map. multidirectional shows the slopes that face
+  away from it. In flat country (less than 100 m between minimum and maximum) pass z_factor 2 or 3 to deepen the
+  relief.
 - **The contour interval**, from maximum minus minimum: under 100 m, every 5 (index 25); 100 to 400 m, every 10
   (index 50); 400 to 1500 m, every 25 (index 100); above, every 50 (index 250) or every 100 (index 500). An index
   contour is every fourth or fifth one, and index_interval is a multiple of interval.

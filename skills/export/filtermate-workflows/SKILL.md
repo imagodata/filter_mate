@@ -96,6 +96,16 @@ relief, the contours, a look at the result) and the values to choose when the us
 2. add_layer with a geojson or gpkg resource; the user confirms.
 3. describe_layer on the new layer: its fields and values are not those you expect. Then filter it as any layer.
 
+## What a place holds, when no layer has it
+
+"The hospitals of Pune", "the buildings along the river in this district", "a heatmap of the restaurants".
+
+1. find_place, then zoom_to with its extent_wkt and crs EPSG:4326.
+2. add_osm_features with the tags of what is asked and that extent (the open-data skill lists the usual tags):
+   geometry points to count, measure from or make a heatmap, polygons for buildings, lines for roads.
+3. Then as any layer: a filter by distance from another layer (cross_filter with buffer), a count
+   (layer_statistics), a style, a heatmap or a buffer zone with run_algorithm.
+
 ## Start again, or keep
 
 - "Start again", "show everything": clear_filters on the layers you filtered, in one call.

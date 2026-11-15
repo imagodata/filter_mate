@@ -25,7 +25,8 @@ from .agent_thread import DONE_COLOR, AgentThread, ElidedLabel, plain_tooltip
 from .agent_widgets_strip import WidgetsStrip
 from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_WFS, KIND_WMS,
+    KIND_WMTS, KIND_XYZ,
 )
 from ...core.agent.permissions import ADVISOR, AUTONOMOUS, CAREFUL, LEVELS, STANDARD, level_or_default
 from ...core.agent.providers import PRESETS
@@ -1439,7 +1440,7 @@ class AgentSettingsDialog(QDialog):
         self.new_kind = QComboBox(page)
         for kind, label in ((KIND_MCP, _tr("MCP connector")), (KIND_OPENDATASOFT, "Opendatasoft"), (KIND_CKAN, "CKAN"),
                             (KIND_WFS, "WFS"), (KIND_WMS, "WMS"), (KIND_WMTS, "WMTS"), (KIND_STAC, "STAC"), (KIND_XYZ, _tr("Basemap (XYZ)")),
-                            (KIND_GEOCODER, _tr("Place search"))):
+                            (KIND_GEOCODER, _tr("Place search")), (KIND_OVERPASS, "OpenStreetMap (Overpass)")):
             self.new_kind.addItem(label, kind)
         self.add_button = QPushButton(_tr("Add"), page)
         self.add_button.setObjectName("pushButton_agent_add_source")

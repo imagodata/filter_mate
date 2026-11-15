@@ -3,10 +3,10 @@ name: workflows
 title: Chain the steps of a request
 description: a request that needs several steps - what lies within a distance or inside an area, a place found then the data around it, a count by category, several criteria at once, a thematic map ready to print, data fetched then filtered - done with the fewest calls, in the right order
 metadata:
-  version: 2
+  version: 3
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, find_place, search_open_data, add_layer, add_service_layer, set_layer_style, set_labels, create_layout, export_layout, run_algorithm
+  tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, find_place, search_open_data, add_layer, add_service_layer, add_osm_features, set_layer_style, set_labels, create_layout, export_layout, run_algorithm
   risk: change
   trust: builtin
 ---
@@ -99,6 +99,16 @@ relief, the contours, a look at the result) and the values to choose when the us
 1. search_open_data on an enabled platform (add_service_layer for a layer of a WFS, WMS or WMTS platform).
 2. add_layer with a geojson or gpkg resource; the user confirms.
 3. describe_layer on the new layer: its fields and values are not those you expect. Then filter it as any layer.
+
+## What a place holds, when no layer has it
+
+"The hospitals of Pune", "the buildings along the river in this district", "a heatmap of the restaurants".
+
+1. find_place, then zoom_to with its extent_wkt and crs EPSG:4326.
+2. add_osm_features with the tags of what is asked and that extent (the open-data skill lists the usual tags):
+   geometry points to count, measure from or make a heatmap, polygons for buildings, lines for roads.
+3. Then as any layer: a filter by distance from another layer (cross_filter with buffer), a count
+   (layer_statistics), a style, a heatmap or a buffer zone with run_algorithm.
 
 ## Start again, or keep
 
