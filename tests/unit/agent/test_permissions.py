@@ -44,6 +44,8 @@ class TestRiskClasses:
         ("update_features", BUFFER), ("add_features", BUFFER), ("add_field", BUFFER), ("join_layers", PROJECT),
         ("delete_features", LOCAL), ("export_layers", LOCAL), ("export_layout", LOCAL), ("remove_layers", LOCAL),
         ("add_layer", OUTSIDE), ("add_service_layer", OUTSIDE), ("add_basemap", OUTSIDE),
+        # Elevation is read from the network; contours and a copy are layers made of the project, undone with the turn.
+        ("add_elevation", OUTSIDE), ("contour_lines", PROJECT), ("duplicate_layer", PROJECT),
     ])
     def test_class_of_the_tools_of_the_catalog(self, name, risk):
         assert risk_of(tools_by_name()[name]) == risk
@@ -563,12 +565,12 @@ class TestAskedAlone:
 
     def test_the_tools_asked_alone(self):
         tools = tools_by_name()
-        for name in ("add_layer", "add_service_layer", "add_basemap", "delete_features", "export_layout", "change_settings",
-                     "apply_settings_profile"):
+        for name in ("add_layer", "add_service_layer", "add_basemap", "add_elevation", "delete_features", "export_layout",
+                     "change_settings", "apply_settings_profile"):
             assert asked_alone(name, tools[name]), name  # in the catalog, and asked alone
         assert asked_alone("run_pyqgis", spec("run_pyqgis", destructive=True))
         for name in ("apply_filter", "cross_filter", "remove_layers", "export_layers", "set_layer_style",
-                     "update_features"):
+                     "update_features", "contour_lines", "duplicate_layer"):
             assert not asked_alone(name, tools[name]), name
 
     def test_a_connector_and_an_unknown_tool_are_asked_alone(self):

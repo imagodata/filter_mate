@@ -95,6 +95,8 @@ WRITES = [
     ("add_field", lambda a: a.add_field("cadastre", "densite")),
     ("join_layers", lambda a: a.join_layers("cadastre", "routes", "a", "a")),
     ("rename_layer", lambda a: a.rename_layer("cadastre", "parcelles")),
+    # A copy reads and writes the source of its layer, and is not protected: an edit of it was one of the layer.
+    ("duplicate_layer", lambda a: a.duplicate_layer("cadastre", name="copie")),
     ("remove_layers", lambda a: a.remove_layers(["routes", "cadastre"])),
     ("map_theme apply", lambda a: a.map_theme("apply", "Cadastre")),
     ("remove_layers joined by it", lambda a: a.remove_layers(["owners"])),

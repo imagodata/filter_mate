@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""How a layer is drawn, for the agent: one symbol, categories, classes, a raster ramp, labels, opacity.
+"""How a layer is drawn, for the agent: one symbol, categories, classes, rules, a raster ramp or a hillshade,
+labels, opacity and blending.
 
 Main thread only, plain dicts out. The answer gives how many classes were made, never the values they hold: the
 attribute values stay out of what the model reads, as ``describe_layer`` does. The chat captures the style of the
@@ -23,8 +24,23 @@ MAX_CLASSES = 12
 MAX_RAMPS_LISTED = 40
 VECTOR_MODES = ('single', 'categorized', 'graduated', 'rules')
 MAX_RULES = 20
-RASTER_MODES = ('pseudocolor', 'gray')
-KEEP = 'keep'  # the drawing as it is: the opacity alone changes
+RASTER_MODES = ('pseudocolor', 'gray', 'hillshade')
+KEEP = 'keep'  # the drawing as it is: the opacity and the blending alone change
+# How a layer mixes with what is drawn under it. multiply darkens (a hillshade over colors, colors over a
+# photograph); screen lightens; overlay and soft_light keep the lights and the shadows of what is under.
+BLENDS = {'normal': 'SourceOver', 'multiply': 'Multiply', 'screen': 'Screen', 'overlay': 'Overlay',
+          'darken': 'Darken', 'lighten': 'Lighten', 'soft_light': 'SoftLight', 'hard_light': 'HardLight'}
+MAX_WIDTH = 20.0  # millimetres: a line, an outline, the size of a point
+MAX_CUT = 49.0  # percent of the values left out at each end of a raster stretch
+LABEL_PLACEMENTS = ('auto', 'curved', 'horizontal')
+# Ramps of FilterMate, beside those of QGIS: the first color, stops (where, color), the last color. Terrain is the
+# hypsometric tints of a relief map, from the green of the low ground to the pale rock of the summits; the style of
+# QGIS holds none that reads as heights.
+# The summits are a pale rock, not white: stretched over the heights of one town, white reads as a haze over its
+# hills (seen on Lyon, 2026-11-15).
+OWN_RAMPS = {'terrain': ('Terrain', '#3f8f4f', ((0.2, '#a9cc7a'), (0.42, '#f3e7a9'), (0.64, '#d0a468'),
+                                              (0.84, '#9a6b4c')), '#e3d5c2')}
+_DEGREES_Z_FACTOR = 1.0 / 111_320.0  # heights in metres over a grid in degrees
 METHODS = ('quantile', 'equal_interval', 'jenks', 'pretty', 'stddev')
 DEFAULT_RAMPS = {'categorized': 'Spectral', 'graduated': 'Viridis', 'pseudocolor': 'Spectral'}
 
@@ -49,13 +65,24 @@ def _color(text: str):
 
 def _ramp(name: str, mode: str, invert: bool):
     from qgis.core import QgsStyle
+    own = OWN_RAMPS.get((name or '').strip().casefold())
+    if own is not None:
+        from qgis.core import QgsGradientColorRamp, QgsGradientStop
+        from qgis.PyQt.QtGui import QColor
+        title, first, stops, last = own
+        ramp = QgsGradientColorRamp(QColor(first), QColor(last), False,
+                                    [QgsGradientStop(offset, QColor(color)) for offset, color in stops])
+        if invert:
+            ramp.invert()
+        return ramp, title
     style = QgsStyle.defaultStyle()
     names = list(style.colorRampNames())
     wanted = name or DEFAULT_RAMPS.get(mode, 'Spectral')
     found = next((item for item in names if item.casefold() == wanted.casefold()), None)
     if found is None:
         if name:
-            raise ValueError(f"no color ramp {name!r}; some are: {', '.join(sorted(names)[:MAX_RAMPS_LISTED])}")
+            listed = sorted(names)[:MAX_RAMPS_LISTED] + [title for title, *_ in OWN_RAMPS.values()]
+            raise ValueError(f"no color ramp {name!r}; some are: {', '.join(listed)}")
         found = names[0] if names else None
     ramp = style.colorRamp(found) if found else None
     if ramp is None:
@@ -76,13 +103,38 @@ def _field_index(layer, field: str, numeric: bool = False) -> int:
     return index
 
 
-def _symbol(layer, color=None):
+def _width(value: Any) -> Optional[float]:
+    """A width in millimetres a model gave; None when it gave none."""
+    if value is None:
+        return None
+    try:
+        width = float(value)
+    except (TypeError, ValueError):
+        raise ValueError('width is a number of millimetres') from None
+    if not math.isfinite(width) or not 0 < width <= MAX_WIDTH:
+        raise ValueError(f'width goes up to {MAX_WIDTH:g} millimetres, above zero')
+    return width
+
+
+def _symbol(layer, color=None, width: Optional[float] = None):
+    """The default symbol of the geometry of ``layer``, in ``color``; ``width`` (millimetres) is the width of a
+    line, of the outline of a polygon, or the size of a point."""
     from qgis.core import QgsSymbol
     symbol = QgsSymbol.defaultSymbol(layer.geometryType())
     if symbol is None:
         raise ValueError(f"'{layer.name()}' has no geometry to draw")
     if color is not None:
         symbol.setColor(color)
+    if width is not None:
+        if hasattr(symbol, 'setWidth'):  # a line
+            symbol.setWidth(width)
+        elif hasattr(symbol, 'setSize'):  # a point
+            symbol.setSize(width)
+        else:  # a polygon: its outline
+            for index in range(symbol.symbolLayerCount()):
+                part = symbol.symbolLayer(index)
+                if hasattr(part, 'setStrokeWidth'):
+                    part.setStrokeWidth(width)
     return symbol
 
 
@@ -138,8 +190,11 @@ def _graduated(layer, field: str, ramp, classes: int, method: str):
     return renderer, made
 
 
-def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[float]):
+def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[float], cut: Optional[float] = None):
     """``(minimum, maximum)`` given, or read from the statistics of the band (not for a web service).
+
+    ``cut``: percent of the values left out at each end for a bound that is not given (2: from the 2nd to the
+    98th percentile), so that a few extreme pixels do not flatten the colors of all the others.
 
     2026-11-12: a bound given must be a finite number, and the minimum below the maximum (NaN, Infinity and an
     inverted range were applied as given).
@@ -154,6 +209,16 @@ def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[fl
     from .introspection import _is_web_service
     if _is_web_service(layer):
         raise ValueError(f"'{layer.name()}' is a web service: give minimum and maximum, it is not read to find them")
+    if cut is not None:
+        if not math.isfinite(float(cut)) or not 0 < float(cut) <= MAX_CUT:
+            raise ValueError(f'cut is a percentage left out at each end, above 0 and up to {MAX_CUT:g}')
+        share = float(cut) / 100.0
+        low, high = layer.dataProvider().cumulativeCut(band, share, 1.0 - share, layer.extent(), 250000)
+        low = low if minimum is None else float(minimum)
+        high = high if maximum is None else float(maximum)
+        if not (math.isfinite(low) and math.isfinite(high)) or low >= high:
+            raise ValueError(f"band {band} of '{layer.name()}' has no range of values to stretch")
+        return low, high
     from qgis.core import Qgis, QgsRasterBandStats
     # One enum value: 3.40 and later warn on an int, which a union of two of them is.
     flags = getattr(getattr(Qgis, 'RasterBandStatistic', None), 'All', None)
@@ -172,11 +237,49 @@ def _band_range(layer, band: int, minimum: Optional[float], maximum: Optional[fl
     return low, high
 
 
-def _raster_renderer(layer, mode: str, band: int, ramp_name: str, invert: bool, minimum, maximum):
-    from qgis.core import QgsContrastEnhancement, QgsSingleBandGrayRenderer, QgsSingleBandPseudoColorRenderer
-    if not 1 <= band <= layer.bandCount():
-        raise ValueError(f"'{layer.name()}' has bands 1 to {layer.bandCount()}")
-    low, high = _band_range(layer, band, minimum, maximum)
+def _hillshade(layer, band: int, azimuth: float, altitude: float, z_factor: Optional[float], multidirectional: bool):
+    """A shaded relief drawn from the elevations of ``band``, as lit from ``azimuth`` at ``altitude``.
+
+    Raises:
+        ValueError: A light that is no direction, or a factor that is no number above zero.
+    """
+    from qgis.core import QgsHillshadeRenderer
+    for name, value, top in (('azimuth', azimuth, 360.0), ('altitude', altitude, 90.0)):
+        if not math.isfinite(float(value)) or not 0 <= float(value) <= top:
+            raise ValueError(f'{name} goes from 0 to {top:g} degrees')
+    if z_factor is None:
+        # Elevations in metres over a grid in degrees: without this every slope is a cliff, and the relief black.
+        z_factor = _DEGREES_Z_FACTOR if layer.crs().isGeographic() else 1.0
+    if not math.isfinite(float(z_factor)) or not 0 < float(z_factor) <= 1000:
+        raise ValueError('z_factor is above 0: 1 for elevations in the units of the grid, more to deepen the relief')
+    renderer = QgsHillshadeRenderer(layer.dataProvider(), band, float(azimuth), float(altitude))
+    renderer.setZFactor(float(z_factor))
+    renderer.setMultiDirectional(bool(multidirectional))
+    return renderer, float(z_factor)
+
+
+def _smooth_zoom(layer) -> None:
+    """Draw a raster zoomed in by blending its pixels, not as squares.
+
+    A hillshade is shaded pixel by pixel: on the map of a town, where a pixel of 30 m covers several of the screen,
+    every slope showed as steps (seen on Lyon, 2026-11-15).
+    """
+    try:
+        from qgis.core import QgsBilinearRasterResampler, QgsCubicRasterResampler
+        resample = layer.resampleFilter()
+        if resample is not None:
+            resample.setZoomedInResampler(QgsCubicRasterResampler())
+            resample.setZoomedOutResampler(QgsBilinearRasterResampler())
+    except (ImportError, AttributeError, RuntimeError):
+        logger.debug("raster resampling not set", exc_info=True)  # drawn as squares, as before
+
+
+def _raster_renderer(layer, mode: str, band: int, ramp_name: str, invert: bool, minimum, maximum,
+                     cut: Optional[float] = None, discrete: bool = False, classes: int = 5):
+    from qgis.core import (
+        QgsColorRampShader, QgsContrastEnhancement, QgsSingleBandGrayRenderer, QgsSingleBandPseudoColorRenderer,
+    )
+    low, high = _band_range(layer, band, minimum, maximum, cut)
     provider = layer.dataProvider()
     if mode == 'gray':
         renderer = QgsSingleBandGrayRenderer(provider, band)
@@ -191,7 +294,12 @@ def _raster_renderer(layer, mode: str, band: int, ramp_name: str, invert: bool, 
     renderer = QgsSingleBandPseudoColorRenderer(provider, band)
     renderer.setClassificationMin(low)
     renderer.setClassificationMax(high)
-    renderer.createShader(ramp)
+    if discrete:
+        # Flat steps of equal height, as a hypsometric map: the shader takes the ramp, a new one each time.
+        renderer.createShader(ramp, QgsColorRampShader.Type.Discrete, QgsColorRampShader.ClassificationMode.EqualInterval,
+                              max(2, min(int(classes), MAX_CLASSES)))
+    else:
+        renderer.createShader(ramp)
     return renderer, ramp_used, low, high
 
 
@@ -248,7 +356,7 @@ def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
     """A renderer with one symbol per condition; a rule with no condition draws every other feature."""
     from qgis.core import QgsRuleBasedRenderer
     if not rules:
-        raise ValueError('rules is a list of {expression, color, label}')
+        raise ValueError('rules is a list of {expression, color, label, width}')
     if len(rules) > MAX_RULES:
         raise ValueError(f'{MAX_RULES} rules at most')
     root = QgsRuleBasedRenderer.Rule(None)
@@ -257,7 +365,7 @@ def _rule_based(layer, rules: Optional[List[Dict[str, Any]]]):
     for number, rule in enumerate(rules, 1):
         if not isinstance(rule, dict) or not rule.get('color'):
             raise ValueError(f'rule {number} has no color')
-        symbol = _symbol(layer, _color(str(rule['color'])))
+        symbol = _symbol(layer, _color(str(rule['color'])), _width(rule.get('width')))
         condition = str(rule.get('expression') or '').strip()
         label = str(rule.get('label') or '')[:100]
         if condition:
@@ -288,25 +396,38 @@ def _drawn_by_its_service(layer) -> bool:
     return capability is not None and not capability.has_raw_values
 
 
+def _blend_mode(name: str):
+    """The composition mode of Qt a blending is; ValueError for one that is not of the list."""
+    from qgis.PyQt.QtGui import QPainter
+    if name not in BLENDS:
+        raise ValueError(f"blend is one of {', '.join(BLENDS)}")
+    return getattr(QPainter.CompositionMode, 'CompositionMode_' + BLENDS[name])
+
+
 def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ramp: str = '', classes: int = 5,
                     method: str = 'quantile', invert: bool = False, opacity: Optional[float] = None, band: int = 1,
                     minimum: Optional[float] = None, maximum: Optional[float] = None,
-                    rules: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+                    rules: Optional[List[Dict[str, Any]]] = None, width: Optional[float] = None, blend: str = '',
+                    cut: Optional[float] = None, discrete: bool = False, azimuth: float = 315.0,
+                    altitude: float = 45.0, z_factor: Optional[float] = None,
+                    multidirectional: bool = False) -> Dict[str, Any]:
     """Draw a layer anew; what was made, without the values of its classes.
 
     Raises:
-        ValueError: An unknown layer, mode, field, color or ramp, a field with too many values, a raster with no
-            range to stretch.
+        ValueError: An unknown layer, mode, field, color, ramp or blending, a field with too many values, a raster
+            with no range to stretch.
     """
     found = _layer(layer)
     kind = layer_kind(found)
     if opacity is not None and not 0 <= float(opacity) <= 1:
         raise ValueError('opacity goes from 0 (invisible) to 1 (opaque)')
+    blending = _blend_mode(blend) if blend else None
     answer: Dict[str, Any] = {'layer_name': found.name(), 'mode': mode}
     if mode == KEEP:
-        # Only the opacity: the way the layer is drawn (its categories, the colors of an orthophoto) stays.
-        if opacity is None:
-            raise ValueError("the mode keep changes the opacity alone: give opacity")
+        # Only the opacity and the blending: the way the layer is drawn (its categories, the colors of an
+        # orthophoto) stays.
+        if opacity is None and blending is None:
+            raise ValueError("the mode keep changes the opacity and the blending alone: give opacity or blend")
         if kind not in (LayerKind.VECTOR, LayerKind.RASTER):
             raise ValueError(f"'{found.name()}' is a {kind.value} layer: only vector and raster layers are styled here")
     elif kind is LayerKind.VECTOR:
@@ -314,7 +435,7 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
             raise ValueError(f"a vector layer takes the modes {', '.join(VECTOR_MODES + (KEEP,))}")
         from qgis.core import QgsSingleSymbolRenderer
         if mode == 'single':
-            renderer = QgsSingleSymbolRenderer(_symbol(found, _color(color) if color else None))
+            renderer = QgsSingleSymbolRenderer(_symbol(found, _color(color) if color else None, _width(width)))
         elif mode == 'categorized':
             color_ramp, answer['ramp'] = _ramp(ramp, mode, invert)
             renderer, answer['classes'] = _categorized(found, field, color_ramp)
@@ -335,30 +456,79 @@ def set_layer_style(layer: str, mode: str, field: str = '', color: str = '', ram
         if _drawn_by_its_service(found):
             # A WMS, a WMTS, tiles: an image already in colors, with no value to stretch (bounds given used to be
             # applied to it, and the image went wrong).
-            raise ValueError(f"'{found.name()}' is an image drawn by its service: only its opacity can change "
-                             f"(mode keep)")
-        renderer, ramp_used, low, high = _raster_renderer(found, mode, int(band), ramp, invert, minimum, maximum)
-        found.setRenderer(renderer)
-        answer.update({'band': int(band), 'minimum': low, 'maximum': high})
-        if ramp_used:
-            answer['ramp'] = ramp_used
+            raise ValueError(f"'{found.name()}' is an image drawn by its service: only its opacity and its blending "
+                             f"can change (mode keep)")
+        band = int(band)
+        if not 1 <= band <= found.bandCount():
+            raise ValueError(f"'{found.name()}' has bands 1 to {found.bandCount()}")
+        if mode == 'hillshade':
+            renderer, factor = _hillshade(found, band, azimuth, altitude, z_factor, multidirectional)
+            found.setRenderer(renderer)
+            _smooth_zoom(found)
+            answer.update({'band': band, 'azimuth': float(azimuth), 'altitude': float(altitude), 'z_factor': factor})
+        else:
+            renderer, ramp_used, low, high = _raster_renderer(found, mode, band, ramp, invert, minimum, maximum,
+                                                              cut, bool(discrete), classes)
+            found.setRenderer(renderer)
+            answer.update({'band': band, 'minimum': low, 'maximum': high})
+            if ramp_used:
+                answer['ramp'] = ramp_used
+            if discrete and mode == 'pseudocolor':
+                answer['classes'] = max(2, min(int(classes), MAX_CLASSES))
     else:
         raise ValueError(f"'{found.name()}' is a {kind.value} layer: only vector and raster layers are styled here")
     if opacity is not None:
         found.setOpacity(float(opacity))
         answer['opacity'] = float(opacity)
+    if blending is not None:
+        found.setBlendMode(blending)
+        answer['blend'] = blend
     _refresh(found)
     return answer
 
 
+def _place_labels(layer, settings, placement: str) -> None:
+    """Where the labels of a line layer go: along each line following its curve, or flat beside it.
+
+    Raises:
+        ValueError: A placement that is none, or one asked of a layer that has no lines.
+    """
+    from qgis.core import QgsPalLayerSettings, QgsWkbTypes
+    if placement not in LABEL_PLACEMENTS:
+        raise ValueError(f"placement is one of {', '.join(LABEL_PLACEMENTS)}")
+    if placement == 'auto':
+        return
+    if QgsWkbTypes.geometryType(layer.wkbType()) != QgsWkbTypes.GeometryType.LineGeometry:
+        raise ValueError(f"placement {placement} is for a layer of lines: '{layer.name()}' has none")
+    if placement == 'horizontal':
+        settings.placement = QgsPalLayerSettings.Placement.Horizontal
+        return
+    settings.placement = QgsPalLayerSettings.Placement.Curved
+    try:
+        # On the line itself, as the heights of contours are written: the name of the flag moved with the versions.
+        from qgis.core import QgsLabeling
+        flags = getattr(QgsLabeling, 'LinePlacementFlag', QgsLabeling)
+        settings.lineSettings().setPlacementFlags(QgsLabeling.LinePlacementFlags(flags.OnLine))
+    except (ImportError, AttributeError, TypeError):
+        try:
+            from qgis.core import Qgis
+            settings.lineSettings().setPlacementFlags(Qgis.LabelLinePlacementFlag.OnLine)
+        except (AttributeError, TypeError):
+            logger.debug("labels on the line: flag not set in this QGIS", exc_info=True)  # above the line, then
+
+
 def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional[float] = None, color: str = '',
-               buffer: bool = True, expression: str = '', visible_from_scale: Optional[float] = None) -> Dict[str, Any]:
+               buffer: bool = True, expression: str = '', visible_from_scale: Optional[float] = None,
+               placement: str = 'auto') -> Dict[str, Any]:
     """Label the features of a vector layer with a field or an expression, or turn its labels off.
 
     ``visible_from_scale``: the labels show when the map is at least that close (50000 for 1:50 000 and closer).
+    ``placement``: for lines, ``curved`` writes each label on its line, following it (the heights of contours, the
+    names of rivers), ``horizontal`` flat beside it; ``auto`` leaves the choice to QGIS.
 
     Raises:
-        ValueError: Not a vector layer, an unknown field, an expression refused, a bad size, scale or color.
+        ValueError: Not a vector layer, an unknown field, an expression refused, a bad size, scale, color or
+            placement.
     """
     from qgis.core import QgsPalLayerSettings, QgsTextBufferSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling
     found = _layer(layer)
@@ -377,6 +547,7 @@ def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional
     else:
         settings.fieldName = found.fields().at(_field_index(found, field)).name()
         settings.isExpression = False
+    _place_labels(found, settings, placement or 'auto')
     if visible_from_scale is not None:
         if not 1 <= float(visible_from_scale) <= 1e9:
             raise ValueError('visible_from_scale is the denominator of a scale: 50000 for 1:50 000')
@@ -401,4 +572,5 @@ def set_labels(layer: str, field: str = '', enabled: bool = True, size: Optional
     _refresh(found)
     return {'layer_name': found.name(), 'labels': True, 'field': '' if expression else settings.fieldName,
             'expression': settings.fieldName if expression else '',
-            'visible_from_scale': float(visible_from_scale) if visible_from_scale is not None else None}
+            'visible_from_scale': float(visible_from_scale) if visible_from_scale is not None else None,
+            'placement': placement or 'auto'}

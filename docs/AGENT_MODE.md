@@ -488,6 +488,48 @@ address, else its content type), its size, and whether the server gives parts of
 
 `search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 
+### Terrain (2026-11-15)
+
+A relief map asked in one sentence ("a terrain map of Lyon over Google Satellite, a semi-transparent elevation
+ramp with a subtle hillshade, contours every 25 m, index contours at 100 m") is a chain of tools, given to the
+model by the skill `terrain`: `find_place`, `add_basemap`, `add_elevation`, `set_layer_style` (pseudocolor),
+`duplicate_layer`, `set_layer_style` (hillshade, blend multiply), `contour_lines`, then a look with `view_map`.
+Eight calls and about 6 s of tools on Lyon (373 x 380 pixels, 0.4 MB read).
+
+- `add_elevation` (`adapters/public_api/terrain.py`) reads, from each tile of the model the area touches, only
+  the part it needs (GDAL reads the files by parts through `/vsicurl/`), warps it on a grid in metres and writes
+  one GeoTIFF in the QGIS profile. The grid is the CRS of the project when it is in metres and keeps distances
+  (not Web Mercator, whose metres are those of the equator), else the UTM zone of the area: a slope, a hillshade
+  and a contour need metres. Bounded: 16 squares of one degree, 16 million pixels (a larger area is written
+  coarser, and said so), 240 s. The layer goes under the data, above the web basemaps.
+- `contour_lines` draws the contours of any raster file of the project with the GDAL API, in this process: each
+  line has `elevation` and `is_index` (a multiple of `index_interval`). Closed contours shorter than ten pixels
+  are left out and counted (`left_out`): in a surface model they are the bumps of buildings (on Lyon, 634 of 852
+  lines for an eighth of their length). The layer comes drawn in thin lines with the index contours thicker.
+- Both read in a worker thread while the event loop turns: the interface stays alive and Stop ends them. GDAL
+  reads with its own HTTP client, which Stop cannot cut in the middle of a request: it is heard between two tiles
+  and at each block, and a server gone mute is given up after 8 s (measured: a Stop pressed 1 s into a tile that
+  stalls is answered after 8.0 s). When QGIS closes meanwhile, the work is told to end and waited for, without
+  turning on an event loop that no longer waits. The other operations of FilterMate are refused meanwhile.
+- The Processing algorithms of GDAL stay refused (`core/agent/processing_policy.py`): they build a command line,
+  and these tools give GDAL values this code builds, never a text of the model. A CRS is an authid, never a
+  definition (which can name a grid by its address). What GDAL says of a failure goes to the model without an
+  address nor a folder of this machine (`elevation.quiet_message`), and a refusal names no height of a raster of
+  the user when the values are not shared.
+- A layer the user protected is read (its contours are drawn) and never copied: a copy is a second layer on the
+  same source and no protected one, so what is edited in it is written in the file of the layer copied
+  (`duplicate_layer` is among the tools that change their layer, `permissions.CHANGED_LAYERS`).
+- A raster stored with a scale or an offset (tenths of metres in whole numbers) is read through them, and its
+  heights are read by GDAL in the worker, never on the main thread: the raster may be on a server.
+- `set_layer_style` draws a raster as a hillshade (blended between its pixels when the map is closer than they
+  are), mixes a layer with what is under it (`blend`), leaves the extreme values out of a ramp (`cut`), draws
+  flat steps (`discrete`), and gives a width to one symbol or to each rule; `Terrain` is a ramp of FilterMate (the
+  style of QGIS holds none that reads as heights). `set_labels` writes labels along lines (`placement`).
+  `duplicate_layer` adds a second layer on the same data: one layer is drawn one way.
+- Checked by `tests/qgis_headless/check_agent_terrain.py` in QGIS 3.22, LTR and latest: 125 checks, the tiles
+  served by parts by a server of this machine (which can also stall, or serve what is no image), and with
+  `FM_NET=1` the real ones.
+
 ## Objects on a raster
 
 `adapters/public_api/drawn_objects.py`, with `POST /objects/segment` and `GET /map/context`:
@@ -566,8 +608,13 @@ address, else its content type), its size, and whether the server gives parts of
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
   asset links, so they are left out for now.
+- **Elevation** (`core/agent/elevation.py`): Copernicus DEM GLO-30, worldwide at 30 m, one GeoTIFF per square
+  degree in a public bucket of AWS, read by parts and without an account. `add_elevation` is offered only when
+  it is ticked (listed with the satellite imagery); a model names the source and an area, never an address, and
+  the address of a tile is built from whole degrees. Ticked alone it opens neither `search_open_data` nor the web
+  to `add_layer`. A surface model: buildings and trees are in it, which the tool says with its answer.
 - **Basemaps** (`core/agent/basemaps.py`): XYZ tiles (OpenStreetMap, Carto, IGN Plan and aerial photographs through
-  the WMTS of the Géoplateforme, OpenTopoMap) and any XYZ address the user adds. `add_basemap` puts one under every
+  the WMTS of the Géoplateforme, Google Satellite, OpenTopoMap) and any XYZ address the user adds. `add_basemap` puts one under every
   layer after asking its server for a tile (where the map is, then a quarter of the world: a server of one country
   has none for the world). A model names a basemap of the list, never an address: one the user added goes by its id
   (`sources.model_name`), since its address may hold the key of an account. A basemap ticked alone does not open the
@@ -785,7 +832,7 @@ Measured on 2026-11-14 (QGIS 3.44, times in the tools):
     FILTERMATE_AGENT_API_KEY=... python scripts/agent_eval.py --live \
         --provider anthropic --model claude-haiku-5-5                    # real model, costs money
 
-69 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
+104 cases in French and English (69 shared, the others with the skills), on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
 read-only requests, and one attribute value holding a prompt injection. A case is scored on the filters finally applied.
 It is what decides whether a model, in particular a local one, is good enough to offer. `--json` writes, for each case, the tools called and their
 arguments (on the simulated project, no data of a user), to read a failure without running it again.

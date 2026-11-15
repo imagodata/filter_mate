@@ -30,7 +30,9 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from .accessor import (
+    ContourResult,
     CrossFilterResult,
+    ElevationResult,
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
@@ -513,9 +515,10 @@ class QGISFilterMateAccessor:
 
     def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
                    color: str = "", buffer: bool = True, expression: str = "",
-                   visible_from_scale: Optional[float] = None) -> LabelsResult:
+                   visible_from_scale: Optional[float] = None, placement: str = "auto") -> LabelsResult:
         return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
-                                          buffer=buffer, expression=expression, visible_from_scale=visible_from_scale))
+                                          buffer=buffer, expression=expression, visible_from_scale=visible_from_scale,
+                                          placement=placement))
 
     @staticmethod
     def _layouts(name: str, *args, **kwargs):
@@ -639,6 +642,27 @@ class QGISFilterMateAccessor:
     def add_basemap(self, platform: str, name: str = "", extra_domains: Optional[str] = None) -> LayerSummary:
         extra = self.configured_domains() if extra_domains is None else extra_domains
         return LayerSummary(**self._control("add_basemap", platform, name=name, extra_domains=extra))
+
+    def add_elevation(self, platform: str = "copernicus_dem", extent_wkt: str = "", crs: str = "",
+                      resolution: Optional[float] = None, target_crs: str = "", name: str = "",
+                      extra_domains: Optional[str] = None) -> ElevationResult:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return ElevationResult(**self._control(
+            "add_elevation", platform, extent_wkt=extent_wkt, crs=crs, resolution=resolution, target_crs=target_crs,
+            name=name, extra_domains=extra, module="adapters.public_api.terrain"))
+
+    def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        self._control("check_elevation", platform, extra_domains=extra, module="adapters.public_api.terrain")
+
+    def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
+                      name: str = "", min_length: Optional[float] = None, share_values: bool = True) -> ContourResult:
+        return ContourResult(**self._control(
+            "contour_lines", layer, interval, index_interval=index_interval, band=band, name=name,
+            min_length=min_length, share_values=share_values, module="adapters.public_api.terrain"))
+
+    def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
+        return LayerSummary(**self._control("duplicate_layer", layer, name=name, changes={"layer": layer}))
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
                    extra_domains: Optional[str] = None) -> PlacesResult:

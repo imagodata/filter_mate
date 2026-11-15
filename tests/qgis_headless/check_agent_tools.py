@@ -393,7 +393,7 @@ def check_style(project, gpkg, work):
     check("labels: a field again, at every scale", labels["field"] == "nom" and labels["expression"] == ""
           and not gpkg.labeling().settings().isExpression and not gpkg.labeling().settings().scaleVisibility, labels)
     check("style: labels on a field", labels == {"layer_name": "communes", "labels": True, "field": "nom",
-                                                 "expression": "", "visible_from_scale": None}
+                                                 "expression": "", "visible_from_scale": None, "placement": "auto"}
           and gpkg.labelsEnabled() and gpkg.labeling().settings().fieldName == "nom", labels)
     for call, label in ((lambda: style.set_layer_style("communes", "graduated", field="nom"), "graduated on text"),
                         (lambda: style.set_layer_style("communes", "single", color="url(x)"), "a bad color"),

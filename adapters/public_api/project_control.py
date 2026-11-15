@@ -423,6 +423,41 @@ def _add_point_cloud(source: str, name: str, remote: bool) -> Dict[str, Any]:
     return _summary(layer)
 
 
+def duplicate_layer(layer: str, name: str = '') -> Dict[str, Any]:
+    """Add a second layer on the same data as ``layer``, with its style and its filter, just above it in the tree.
+
+    For what one layer cannot show at once: an elevation raster as colors and as a hillshade, a line with a casing
+    under it. Nothing is copied on disk: both layers read the same source (a layer held in memory gets a copy of its
+    features).
+
+    Raises:
+        ValueError: An unknown layer, one that is neither vector nor raster, or one that cannot be opened twice.
+    """
+    from qgis.core import QgsProject
+    found = resolve_layer(layer)
+    if found is None:
+        raise ValueError(f"layer {layer!r} not found")
+    if not found.isValid():
+        raise ValueError(f"'{found.name()}' is not available: its data source could not be opened")
+    if layer_kind(found) not in (LayerKind.VECTOR, LayerKind.RASTER):
+        raise ValueError(f"'{found.name()}' is a {layer_kind(found).value} layer: only vector and raster layers are "
+                         "duplicated")
+    copy = found.clone()
+    if copy is None or not copy.isValid():
+        raise ValueError(f"'{found.name()}' could not be opened a second time")
+    copy.setName((name or '').strip()[:200] or f"{found.name()} (copy)"[:200])
+    project = QgsProject.instance()
+    project.addMapLayer(copy, False)
+    root = project.layerTreeRoot()
+    node = root.findLayer(found.id())
+    parent = node.parent() if node is not None else None
+    if parent is None:
+        root.insertLayer(0, copy)
+    else:
+        parent.insertLayer(parent.children().index(node), copy)  # just above the original: drawn over it
+    return _summary(copy, count_features=False)
+
+
 def search_imagery(bbox: Optional[List[float]] = None, start: str = '', end: str = '', max_cloud: float = 20.0,
                    collections: Optional[List[str]] = None, limit: int = 5, platform: str = 'earth_search',
                    extra_domains: str = '') -> Dict[str, Any]:

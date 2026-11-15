@@ -31,8 +31,10 @@ from ...core.agent.connectors import PREFIX as CONNECTOR_PREFIX, ConnectorLoader
 from ...core.agent.mcp_client import McpError
 from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
 from ...core.agent.basemaps import shown as basemap_shown
+from ...core.agent.elevation import known as elevation_known
 from ...core.agent.open_data import (
-    KIND_DATABASE, KIND_GEOCODER, KIND_STAC, KIND_XYZ, NO_DATA_KINDS, NO_FILE_KINDS, SERVICE_KINDS, display_source,
+    KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_STAC, KIND_XYZ, NO_DATA_KINDS, NO_FILE_KINDS, SERVICE_KINDS,
+    display_source,
     parse_extra_domains,
 )
 from ...core.agent.sources import (
@@ -95,6 +97,7 @@ OPEN_DATA_TOOL = "search_open_data"
 SERVICE_TOOL = "add_service_layer"
 IMAGERY_TOOL = "search_imagery"
 BASEMAP_TOOL = "add_basemap"
+ELEVATION_TOOL = "add_elevation"
 PLACE_TOOL = "find_place"
 NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
                      "only takes local files. When data from the web is asked, say so and call show_settings_link "
@@ -103,6 +106,11 @@ NO_BASEMAP_NOTE = ("\n\nThe user enabled no web basemap: add_basemap is not avai
                    "that one can be ticked in the Sources tab of the settings of the agent, under Basemaps (OpenStreetMap, "
                    "Carto, IGN...), or an XYZ address added there, and call show_settings_link with target sources: "
                    "the user gets a button to that tab, then asks again. Do not try another way.")
+NO_ELEVATION_NOTE = ("\n\nThe user enabled no elevation source: add_elevation is not available. When a terrain, "
+                     "relief, elevation or contour map is asked and the project holds no elevation raster, say that "
+                     "Copernicus DEM can be ticked in the Sources tab of the settings of the agent, under Satellite "
+                     "imagery, and call show_settings_link with target sources: the user gets a button to that tab, "
+                     "then asks again. Do not try another way.")
 # The skill whose tools bring into the project what a connector finds (add_layer, add_service_layer...).
 DATA_SKILL = "open-data"
 ADD_FOUND_NOTE = ("add_layer adds a file this connector finds, by its https URL (geojson or gpkg first; a raster with "
@@ -864,6 +872,8 @@ class AgentChatController(QObject):
             left_out.add(IMAGERY_TOOL)
         if KIND_XYZ not in kinds and KIND_XYZ not in configured_kinds.values():
             left_out.add(BASEMAP_TOOL)
+        if KIND_ELEVATION not in kinds:
+            left_out.add(ELEVATION_TOOL)
         if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
             left_out.add(PLACE_TOOL)
         if not databases or not for_chat:
@@ -1770,6 +1780,12 @@ class AgentChatController(QObject):
         elif names["basemaps"]:
             notes.append("\n\nBasemaps the user enabled (the platform argument of add_basemap): "
                          + ", ".join(names["basemaps"]) + ".")
+        has_elevation = ELEVATION_TOOL in offered if offered is not None else bool(names["elevation"])
+        if not has_elevation:
+            notes.append(NO_ELEVATION_NOTE)
+        elif names["elevation"]:
+            notes.append("\n\nElevation sources the user enabled (the platform argument of add_elevation): "
+                         + ", ".join(names["elevation"]) + ".")
         if configured_basemaps and has_basemaps:
             notes.append("\n\nBasemaps of the configuration file (the platform argument of add_basemap): "
                          + ", ".join(configured_basemaps) + ".")
@@ -1798,6 +1814,9 @@ class AgentChatController(QObject):
             if source.kind == KIND_XYZ:
                 self._accessor().check_basemap(platform_name(source), extra_domains=domains)
                 return _tr("It serves its tiles.")
+            if source.kind == KIND_ELEVATION:
+                self._accessor().check_elevation(platform_name(source), extra_domains=domains)
+                return _tr("It answers.")
             if source.kind == KIND_DATABASE:
                 from ...adapters.public_api import database_tables
                 try:
@@ -2242,6 +2261,12 @@ class AgentChatController(QObject):
             "add_service_layer": lambda: _tr("Layer added: {}").format(args.get("name") or args.get("typename", "")),
             "add_basemap": lambda: _tr("Basemap added: {}").format(
                 args.get("name") or self._basemap_label(str(args.get("platform", "")), short=True)),
+            # Elevation, contours and a copy are layers added: the same words, already in every language.
+            "add_elevation": lambda: _tr("Layer added: {}").format(
+                args.get("name") or self._elevation_label(str(args.get("platform", "")), short=True)),
+            "contour_lines": lambda: _tr("Layer added: {}").format(
+                args.get("name") or "Contours {}".format(args.get("interval", ""))),  # as sent: not checked yet
+            "duplicate_layer": lambda: _tr("Layer added: {}").format(args.get("name") or "{} (copy)".format(layer)),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
@@ -2399,7 +2424,8 @@ class AgentChatController(QObject):
         if call.name == ADD_NOTE and isinstance(call.arguments, dict):
             return str(call.arguments.get("text", ""))
         if call.name in ("set_layer_style", "set_labels") and isinstance(call.arguments, dict):
-            keys = ("mode", "field", "ramp", "classes", "color") if call.name == "set_layer_style" else ("field",)
+            keys = (("mode", "field", "ramp", "classes", "color", "blend", "opacity") if call.name == "set_layer_style"
+                    else ("field",))
             return " · ".join(str(call.arguments[key]) for key in keys if call.arguments.get(key) not in (None, ""))
         if call.name != "run_algorithm":
             return ""
@@ -2500,6 +2526,14 @@ class AgentChatController(QObject):
                 return one_line(source.title if short else f"{source.title} · {display_source(source.address)}", 300)
         return one_line(basemap_shown(platform, short), 300)
 
+    @staticmethod
+    def _elevation_label(platform: str, short: bool = False) -> str:
+        """What the user reads of the elevation source a model named: its title, and the server it is read from."""
+        source = elevation_known(platform)
+        if source is None:
+            return one_line(platform, 100)
+        return one_line(source.title if short else f"{source.title} · {display_source(source.base)}", 300)
+
     def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
@@ -2520,10 +2554,13 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to add this web basemap under the layers of the project:\n{}\n\nIts server "
                        "draws the map as you move it: it sees which areas you look at, and nothing of your layers. "
                        "Do you agree?").format(self._basemap_label(str(call.arguments.get("platform", ""))))
-        elif call.name == "add_layer":
+        elif call.name in ("add_layer", ELEVATION_TOOL):
+            # The elevation of an area is a layer read from a server too: the same words, already in every language.
+            shown = (self._elevation_label(str(call.arguments.get("platform", ""))) if call.name == ELEVATION_TOOL
+                     else display_source(str(call.arguments.get("source", ""))))
             text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
                        "server by QGIS, and what the layer holds can be sent to the provider of the agent. "
-                       "Do you agree?").format(display_source(str(call.arguments.get("source", ""))))
+                       "Do you agree?").format(shown)
         elif call.name == "export_layout":
             text = _tr("The agent wants to export the layout {} as a {} file into the export folder ({}). A file of "
                        "the same name there is replaced. Do you agree?").format(

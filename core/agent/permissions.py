@@ -57,6 +57,9 @@ CHANGED_LAYERS = {
     "set_labels": ("layer",), "update_features": ("layer",), "delete_features": ("layer",),
     "add_features": ("layer",), "add_field": ("layer",), "join_layers": ("layer",), "rename_layer": ("layer",),
     "remove_layers": ("layers",),
+    # A copy is a second layer on the same source, and no protected one: what is edited in it is written in the
+    # file of the layer copied (2026-11-15: a protected layer was edited through its copy).
+    "duplicate_layer": ("layer",),
 }
 # Without any layer named, these act on every layer.
 ALL_WHEN_NONE = frozenset({"clear_filters"})
@@ -85,8 +88,9 @@ SETTINGS_TOOLS = frozenset({"change_settings", "apply_settings_profile"})
 # Tools whose question holds what the one question for several actions has no room for: the address of a source and
 # what reading it implies, the service a layer comes from, the features deleted, the file written, the settings
 # before and after (a card, applied by the user). Each is asked alone, in its own words, as code is.
-ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({"add_layer", "add_service_layer", "add_basemap", "add_database_table", "delete_features",
-                                                        "export_layout"})
+ASKED_ALONE = CODE_TOOLS | SETTINGS_TOOLS | frozenset({
+    "add_layer", "add_service_layer", "add_basemap", "add_elevation", "add_database_table", "delete_features",
+    "export_layout"})
 
 
 # How many actions one question lists. A yes is for what the question shows: past this number the actions are

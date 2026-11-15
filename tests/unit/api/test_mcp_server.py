@@ -30,11 +30,13 @@ EXPECTED_TOOLS = {
     "bookmark",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
     "add_service_layer", "add_basemap", "find_place", "search_imagery", "segment_objects", "similar_objects",
+    "add_elevation", "contour_lines", "duplicate_layer",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
              "preview_filter", "map_context", "search_open_data", "search_imagery", "find_place", "layer_statistics",
              "sample_features", "identify_at", "find_algorithms", "describe_algorithm"}
-OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "add_basemap", "search_imagery", "find_place"}
+OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "add_basemap", "search_imagery", "find_place",
+              "add_elevation"}
 DESTRUCTIVE = {"export_layers", "remove_layers", "delete_features", "export_layout"}
 
 
