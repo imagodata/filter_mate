@@ -34,6 +34,10 @@ _LINE_KEYS = frozenset({"highway", "waterway", "railway", "barrier", "aerialway"
                         "name", "ref", "bridge", "tunnel", "oneway", "surface", "maxspeed", "lanes"})
 # The columns every layer made has, which a key asked cannot be.
 OWN_COLUMNS = ("osm_id", "osm_type", "other_tags")
+# Names a column of a key cannot take, whatever their case: a GeoPackage tells no column from another by its
+# case. 2026-11-15: the key OSM_ID replaced the identifier of every feature, Other_Tags lost its column, and with
+# GDAL 3.4 the layer could not be opened at all (duplicate column name).
+_RESERVED = frozenset(OWN_COLUMNS + ("osm_way_id", "fid", "ogc_fid", "geom", "geometry"))
 _GDAL_LAYERS = ("points", "lines", "multipolygons", "multilinestrings", "other_relations")
 _METRES_PER_DEGREE = 111_320.0
 
@@ -93,9 +97,11 @@ def read_tags(tags: object) -> List[Tag]:
     for item in tags:
         key = item.get("key") if isinstance(item, Mapping) else None
         value = item.get("value", "") if isinstance(item, Mapping) else None
-        if not isinstance(key, str) or not _KEY.fullmatch(key) or key.replace(":", "_") in OWN_COLUMNS + ("osm_way_id",):
+        if not isinstance(key, str) or not _KEY.fullmatch(key):
             raise ValueError("a key is written as OpenStreetMap writes it, in letters, digits and : _ . - (amenity, "
                              "building, addr:street)")
+        if key.replace(":", "_").casefold() in _RESERVED:
+            raise ValueError(f"{key} is the name of a column every layer has: it cannot be a key asked")
         if value is None:
             value = ""
         if not isinstance(value, str) or (value and not _VALUE.fullmatch(value)) or value.strip() != value:
@@ -104,9 +110,12 @@ def read_tags(tags: object) -> List[Tag]:
         tag = Tag(key, value)
         if tag not in read:
             read.append(tag)
-    columns = {tag.column for tag in read}
-    if len(columns) != len({tag.key for tag in read}):
-        raise ValueError("two of these keys would share a column (addr:street and addr_street): ask for one")
+    taken = {"name": "name"}  # column, whatever its case -> the key that makes it
+    for tag in read:
+        column = tag.column.casefold()
+        if taken.setdefault(column, tag.key) != tag.key:
+            raise ValueError(f"{taken[column]} and {tag.key} would share a column (as addr:street and addr_street, "
+                             "or Building and building): ask for one")
     return read
 
 
@@ -197,10 +206,22 @@ def remark_problem(tail: bytes) -> str:
     return "the server stopped before its answer was whole: ask for a smaller area, or try again later"
 
 
+def cut_problem(tail: bytes) -> str:
+    """Why an answer is not a whole OpenStreetMap document, from its end; "" when it is one."""
+    return "" if b"</osm>" in (tail or b"") else "the answer was cut before its end: try again, or ask another server"
+
+
+REDIRECTS = (301, 302, 303, 307, 308)
+ANOTHER = "ask another OpenStreetMap server of the list when one is enabled, or try again in a minute"
+
+
 def status_problem(status: int) -> str:
     """What an HTTP status of an Overpass server means; "" for 200."""
     if status == 200:
         return ""
+    if status in REDIRECTS:
+        return (f"the server sends the request to another address ({status}), which is not followed: its address "
+                "has changed")
     if status == 400:
         return "the server refused the query (400)"
     if status == 429:
@@ -208,6 +229,21 @@ def status_problem(status: int) -> str:
     if status in (502, 503, 504):
         return f"the server is busy ({status})"
     return f"the server answered with an error ({status})"
+
+
+def status_refusal(platform: str, status: int) -> str:
+    """What a model reads of a status that is not 200: the problem, then what can be done about it.
+
+    Asking another server changes nothing to a query refused (400). The address of a server of the list cannot be
+    corrected by the user: when it has moved, the other one is asked; one the user added is corrected in the
+    Sources tab.
+    """
+    problem = f"{platform}: {status_problem(status)}"
+    if status == 400:
+        return problem
+    if status in REDIRECTS and platform not in {server.id for server in SERVERS}:
+        return f"{problem}; it is corrected in the Sources tab"
+    return f"{problem}; {ANOTHER}"
 
 
 def layer_title(name: str, kind: str, several: bool) -> str:

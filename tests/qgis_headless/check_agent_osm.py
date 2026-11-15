@@ -87,6 +87,32 @@ def osm_document(remark=""):
             + "</osm>\n").encode("utf-8")
 
 
+def odd_document():
+    """Shapes that are none, as OpenStreetMap holds some: a bow tie, a ring left open, an inner ring far from its
+    outer one, a member that is missing, a way without its nodes, a way of one node, a relation of nothing. GDAL
+    makes what it can of them and tells no error: an answer that holds one is whole."""
+    nodes = "".join(f'  <node id="{index}" lat="{45.75 + (index % 10) * 1e-4:.7f}" lon="{4.8 + (index // 10) * 1e-4:.7f}"/>\n'
+                    for index in range(1, 60))
+    ways = ('  <way id="1"><nd ref="1"/><nd ref="12"/><nd ref="2"/><nd ref="11"/><nd ref="1"/></way>\n'
+            '  <way id="2"><nd ref="21"/><nd ref="22"/><nd ref="32"/></way>\n'
+            '  <way id="3"><nd ref="41"/><nd ref="42"/><nd ref="52"/><nd ref="51"/><nd ref="41"/></way>\n'
+            '  <way id="4"><nd ref="5"/><nd ref="6"/><nd ref="16"/><nd ref="15"/><nd ref="5"/></way>\n'
+            '  <way id="5"><nd ref="900"/><nd ref="901"/><nd ref="902"/><nd ref="900"/><tag k="building" v="yes"/></way>\n'
+            '  <way id="6"><nd ref="7"/><tag k="building" v="yes"/></way>\n'
+            '  <way id="7"><nd ref="8"/><nd ref="9"/><nd ref="8"/><tag k="building" v="yes"/></way>\n'
+            '  <way id="8"><nd ref="1"/><nd ref="12"/><nd ref="2"/><nd ref="11"/><nd ref="1"/><tag k="building" v="yes"/></way>\n'
+            '  <way id="9"><nd ref="43"/><nd ref="44"/><nd ref="54"/><nd ref="53"/><nd ref="43"/><tag k="building" v="yes"/></way>\n')
+    multipolygon = '<tag k="type" v="multipolygon"/><tag k="building" v="yes"/></relation>\n'
+    relations = ('  <relation id="1"><member type="way" ref="1" role="outer"/>' + multipolygon
+                 + '  <relation id="2"><member type="way" ref="2" role="outer"/>' + multipolygon
+                 + '  <relation id="3"><member type="way" ref="3" role="outer"/><member type="way" ref="4" role="inner"/>'
+                 + multipolygon
+                 + '  <relation id="4"><member type="way" ref="777" role="outer"/>' + multipolygon
+                 + '  <relation id="5">' + multipolygon)
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<osm version="0.6" generator="check_agent_osm">\n'
+            + nodes + ways + relations + "</osm>\n").encode("utf-8")
+
+
 def serve_overpass(state):
     """An Overpass server on this machine. ``state``: ``status`` (what it answers), ``body`` (its document),
     ``delay`` (seconds before it answers); what was asked is kept in ``state["asked"]``."""
@@ -97,7 +123,18 @@ def serve_overpass(state):
         def log_message(self, *args):
             pass
 
+        def do_GET(self):
+            """Where a redirect leads: a whole answer, so that following it would not go unseen."""
+            state["asked"].append({"path": self.path, "query": "", "type": "GET"})
+            self.send_response(200)
+            self.send_header("Content-Type", "application/osm3s+xml")
+            self.send_header("Content-Length", str(len(state["body"])))
+            self.end_headers()
+            self.wfile.write(state["body"])
+
         def do_POST(self):
+            if self.path == "/elsewhere":
+                return self.do_GET()
             length = int(self.headers.get("Content-Length") or 0)
             form = parse_qs(self.rfile.read(length).decode("utf-8"))
             state["asked"].append({"path": self.path, "query": (form.get("data") or [""])[0],
@@ -106,6 +143,8 @@ def serve_overpass(state):
                 time.sleep(state["delay"])
             body = state["body"] if state["status"] == 200 else b"<html>busy</html>"
             self.send_response(state["status"])
+            if state["status"] in (301, 302, 307, 308):
+                self.send_header("Location", "/elsewhere")
             self.send_header("Content-Type", "application/osm3s+xml" if state["status"] == 200 else "text/html")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
@@ -245,6 +284,21 @@ def check_features(project, work):
               == [("Rue de la République", "Café & Thé")], [feature.attributes() for feature in layer.getFeatures()])
         project.removeMapLayer(layer.id())
 
+        # Shapes that are none are no error of the answer: what can be drawn of them is kept, the sound ones with it.
+        state["body"] = odd_document()
+        for kind in ("as_mapped", "points"):
+            said, made = "", {"layers": [], "feature_count": 0}
+            try:
+                made = ask(tags=[{"key": "building"}], geometry=kind)
+            except ValueError as exc:
+                said = str(exc)
+            names = [feature["osm_id"] for row in made["layers"]
+                     for feature in project.mapLayer(row["layer_id"]).getFeatures()]
+            check(f"features: shapes that are none do not make a whole answer refused ({kind})",
+                  not said and "9" in names and made["feature_count"] == len(names), (said, names))
+            project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+        state["body"] = osm_document()
+
         count, files = len(project.mapLayers()), kept()
         for label, arguments, needle in (
                 ("tags no feature carries", {"tags": [{"key": "amenity", "value": "prison"}]}, "no feature with these tags"),
@@ -255,13 +309,20 @@ def check_features(project, work):
                 ("an unknown kind", {"tags": HOSPITALS, "geometry": "areas"}, "geometry is one of"),
                 ("an area too large", {"tags": HOSPITALS, "extent_wkt": "POLYGON((4 45, 6 45, 6 47, 4 47, 4 45))"}, "10,000 at most"),
                 ("a point", {"tags": HOSPITALS, "extent_wkt": "POINT(4.84 45.76)"}, "a point or a line"),
-                ("a CRS written as a definition", {"tags": HOSPITALS, "crs": "+proj=longlat +nadgrids=https://x.org/g"}, "unknown CRS")):
+                ("a CRS written as a definition", {"tags": HOSPITALS, "crs": "+proj=longlat +nadgrids=https://x.org/g"}, "unknown CRS"),
+                # A GeoPackage tells no column from another by its case: these took the place of a column of the layer.
+                ("a key that is a column of every layer, in capitals", {"tags": [{"key": "OSM_ID"}]}, "column every layer has"),
+                ("a key that is the identifier of a GeoPackage", {"tags": [{"key": "FID"}]}, "column every layer has"),
+                ("two keys that differ by their case", {"tags": [{"key": "Building"}, {"key": "building"}]}, "share a column"),
+                ("a key that is the name in capitals", {"tags": [{"key": "NAME"}]}, "share a column")):
             said = refused(ask, **arguments)
             check(f"refused: {label}, nothing added nor kept", needle in said and len(project.mapLayers()) == count
                   and kept() == files and temporary() == drafts, said)
         asked = len(state["asked"])
         said = refused(ask, tags=[{"key": 'a"]'}])
         check("refused: a tag that is none is never sent", said and len(state["asked"]) == asked, said)
+        said = refused(ask, tags=[{"key": "Other_Tags"}])
+        check("refused: nor a key that would take a column of the layer", said and len(state["asked"]) == asked, said)
         for label, kind, needle in (("a platform of another kind", "datagouv", "not an OpenStreetMap"),
                                     ("a platform that is not of the list", "overpass_nowhere", "not an OpenStreetMap server of the list")):
             said = refused(osm_features.add_osm_features, kind, HOSPITALS, extent_wkt=LYON, crs="EPSG:4326")
@@ -276,6 +337,11 @@ def check_features(project, work):
                 ("an answer cut by the server for its time",
                  {"body": osm_document('runtime error: Query timed out in "query" at line 3 after 61 seconds.')},
                  "ran out of time"),
+                ("an answer cut before its end", {"body": osm_document()[:-60]}, "cut before its end"),
+                # Broken after its hospitals: GDAL reads them, and what it read is only a part of what was asked.
+                ("an answer that cannot be read to its end",
+                 {"body": osm_document().replace(b'<relation id="200">', b'<relation id="200"><<')},
+                 "could not be read to its end"),
                 ("an answer cut by the server for its size",
                  {"body": osm_document("runtime error: Query run out of memory using about 2048 MB of RAM.")},
                  "too large for the server")):
@@ -285,6 +351,35 @@ def check_features(project, work):
             state.update(status=saved["status"], body=saved["body"])
             check(f"server: {label} is said so, nothing added nor kept", needle in said
                   and len(project.mapLayers()) == count and kept() == files and temporary() == drafts, said)
+        # Another plugin may have turned the exceptions of GDAL on, for the whole of QGIS: the same is said and done.
+        from osgeo import gdal
+        raising = gdal.GetUseExceptions()
+        gdal.UseExceptions()
+        try:
+            state["body"] = osm_document().replace(b'<relation id="200">', b'<relation id="200"><<')
+            said = refused(ask, tags=HOSPITALS)
+            check("server: with the exceptions of GDAL on, an answer that cannot be read to its end is said the same",
+                  "could not be read to its end" in said and len(project.mapLayers()) == count and kept() == files
+                  and temporary() == drafts, said)
+            state["body"] = osm_document()
+            made = ask(tags=HOSPITALS + [{"key": "building"}], geometry="points")
+            check("server: with the exceptions of GDAL on, a whole answer is read as before",
+                  made["feature_count"] == 4 and temporary() == drafts, made)
+            project.removeMapLayers([row["layer_id"] for row in made["layers"]])
+            files = kept()
+        finally:
+            if not raising:
+                gdal.DontUseExceptions()
+        for status in (301, 307):
+            asked = len(state["asked"])
+            state["status"] = status
+            said = refused(ask, tags=HOSPITALS)
+            state["status"] = 200
+            check(f"server: a redirect ({status}) is not followed, and said as an address to correct",
+                  f"another address ({status})" in said and "Sources tab" in said and "ask another" not in said
+                  and [row["path"] for row in state["asked"][asked:]] == ["/api/interpreter"]
+                  and len(project.mapLayers()) == count and kept() == files and temporary() == drafts,
+                  (said, state["asked"][asked:]))
         limit = osm_features.MAX_BYTES
         osm_features.MAX_BYTES = 500
         said = refused(ask, tags=HOSPITALS)
@@ -307,6 +402,28 @@ def check_features(project, work):
               (said, round(waited, 1)))
         check("server: FilterMate is busy during the request, and free again after the Stop",
               busy and "add_osm_features" in busy[0] and operations.busy_reason() == "", (busy, operations.busy_reason()))
+        # Stop once the answer is on disk and GDAL reads it: enough features for the reading to last.
+        state["body"] = ('<?xml version="1.0" encoding="UTF-8"?>\n<osm version="0.6" generator="check_agent_osm">\n'
+                         + "".join(f'  <node id="{index}" lat="{45.70 + index * 1e-6:.7f}" lon="4.8000000">'
+                                   '<tag k="amenity" v="hospital"/></node>\n' for index in range(1, 60001))
+                         + "</osm>\n").encode("utf-8")
+        reading = []
+
+        def stop_the_reading():
+            if kept() != files and not reading:
+                reading.append(operations.busy_reason())
+                bounded_http.abort_active()
+
+        watch = QTimer()
+        watch.setInterval(2)
+        watch.timeout.connect(stop_the_reading)
+        watch.start()
+        said = refused(ask, tags=HOSPITALS, geometry="points")
+        watch.stop()
+        state["body"] = osm_document()
+        check("server: Stop while the answer is read ends the reading, nothing added nor kept",
+              said == "stopped" and reading and "add_osm_features" in reading[0] and operations.busy_reason() == ""
+              and len(project.mapLayers()) == count and kept() == files and temporary() == drafts, (said, reading))
         check("server: the Test of the Sources tab", osm_features.check_osm(platform, extra_domains=domains)["status"] == 200)
         state["status"] = 503
         said = refused(osm_features.check_osm, platform, extra_domains=domains)

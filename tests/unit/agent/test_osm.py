@@ -6,8 +6,9 @@ import pytest
 from core.agent.open_data import KIND_OVERPASS, KINDS, NO_DATA_KINDS, NO_FILE_KINDS, parse_extra_domains, resolve_platform
 from core.agent.osm import (
     DEFAULT_SERVER, GEOMETRIES, MAX_AREA_KM2, MAX_BYTES, MAX_TAGS, SERVERS, Tag, area_km2, area_problem, columns,
-    default_name,
-    gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem, status_problem, summary,
+    cut_problem, default_name,
+    gdal_config, layer_title, matches, overpass_query, read_tags, remark_problem, status_problem, status_refusal,
+    summary,
 )
 from core.agent.sources import BUILT_IN, describe_enabled, make_source, model_name, platform_aliases, platform_domains
 
@@ -58,6 +59,29 @@ def test_tags_are_read_one_by_one():
 def test_what_is_no_tag_is_refused(tags):
     with pytest.raises(ValueError):
         read_tags(tags)
+
+
+@pytest.mark.parametrize("tags, word", [
+    ([{"key": "Name"}], "share a column"), ([{"key": "NAME"}], "share a column"),
+    ([{"key": "OSM_ID"}], "column every layer has"), ([{"key": "Osm_Type"}], "column every layer has"),
+    ([{"key": "Other_Tags"}], "column every layer has"), ([{"key": "fid"}], "column every layer has"),
+    ([{"key": "FID"}], "column every layer has"), ([{"key": "geom"}], "column every layer has"),
+    ([{"key": "osm:id"}], "column every layer has"),
+    ([{"key": "Building"}, {"key": "building"}], "share a column"),
+    ([{"key": "addr:street"}, {"key": "Addr_Street"}], "share a column"),
+])
+def test_a_key_that_would_take_the_column_of_another_is_refused_whatever_its_case(tags, word):
+    """A GeoPackage tells no column from another by its case: OSM_ID replaced the identifier of every feature,
+    and with GDAL 3.4 the layer could not be opened (2026-11-15)."""
+    with pytest.raises(ValueError, match=word):
+        read_tags(tags)
+
+
+def test_keys_that_only_look_alike_are_kept():
+    tags = read_tags([{"key": "name"}, {"key": "name:fr"}, {"key": "FIXME"}, {"key": "building", "value": "yes"},
+                      {"key": "building", "value": "house"}])
+    assert [tag.column for tag in tags] == ["name", "name_fr", "FIXME", "building", "building"]
+    assert columns(tags) == ["name", "name_fr", "FIXME", "building"]
 
 
 def test_the_query_is_written_from_the_tags_and_the_bounds_alone():
@@ -114,11 +138,32 @@ def test_a_whole_answer_has_no_remark():
     assert remark_problem(b"</relation>\n\n</osm>\n") == "" and remark_problem(b"") == ""
 
 
+def test_an_answer_without_its_end_is_not_whole():
+    assert cut_problem(b"</relation>\n\n</osm>\n") == ""
+    assert "cut before its end" in cut_problem(b'<way id="1"><nd ref="2"/>') and cut_problem(b"")
+
+
 def test_what_a_status_means():
     assert status_problem(200) == ""
+    for moved in (301, 302, 307, 308):
+        assert "another address" in status_problem(moved) and "its address has changed" in status_problem(moved)
     assert "too many requests (429)" in status_problem(429)
     assert "busy" in status_problem(504) and "busy" in status_problem(502)
     assert "refused the query" in status_problem(400) and "(500)" in status_problem(500)
+
+
+def test_what_can_be_done_about_a_status():
+    mine = "https://overpass.example.org/api/interpreter"
+    # A query refused is refused by every server; a busy one has others.
+    assert status_refusal("overpass_fr", 400) == "overpass_fr: the server refused the query (400)"
+    assert status_refusal("overpass_fr", 504).endswith("ask another OpenStreetMap server of the list when one is "
+                                                       "enabled, or try again in a minute")
+    # The address of a server of the list is not the user's to correct: the other one is asked. One they added is.
+    moved = status_refusal("overpass_fr", 301)
+    assert "another address (301)" in moved and "Sources tab" not in moved and "ask another" in moved
+    moved = status_refusal(mine, 308)
+    assert "another address (308)" in moved and moved.endswith("it is corrected in the Sources tab")
+    assert "ask another" not in moved
 
 
 def test_names_of_the_layers_made():

@@ -554,8 +554,18 @@ features of OpenStreetMap that carry given tags in an area, from an Overpass ser
   three and in 28 s the third. So the first is the default, and a refusal says to ask another server of the list
   rather than the same again. An answer the server cut for its time or its memory (a 200 that ends with a
   remark) is refused, never read as whole.
-- Checked by `tests/qgis_headless/check_agent_osm.py` in QGIS 3.22, LTR and latest (52 checks; an Overpass server
-  of this machine that can be busy, stop short or go slow; with `FM_NET=1` the real ones).
+- A part of an answer is never given as the whole. An answer without its `</osm>` is refused before it is read.
+  One GDAL cannot read to its end is refused too, and that is asked after every feature: GDAL tells that it
+  could not read further on a call that still gives a feature, then gives those it had read and ends without a
+  word (2026-11-15: a file broken at its node 29,990 gave 29,990 features and no error at its end). A redirect
+  is not followed: it is said as an address to correct in the Sources tab.
+- A key asked cannot take the column of another, whatever its case: a GeoPackage tells no column from another by
+  its case. `OSM_ID` replaced the identifier of every feature, and with GDAL 3.4 the layer could not be opened;
+  `Building` with `building`, `Name`, `fid`, `geom` are refused the same way, before anything is sent.
+- The address of a server the user added never comes back to the model: neither whole, nor by its host name
+  (`Host ... not found` named it).
+- Checked by `tests/qgis_headless/check_agent_osm.py` in QGIS 3.22, LTR and latest (65 checks; an Overpass server
+  of this machine that can be busy, stop short, be cut, redirect or go slow; with `FM_NET=1` the real ones).
 
 ## Objects on a raster
 
@@ -685,6 +695,12 @@ doubles the memory of the model. On 2026-11-15, 70 tools and the instructions we
 shorter for that (the light of a hillshade is no argument a model reads; the REST route keeps it), and the next
 tool needs room made first (`cross_filter` alone weighs 7,000). A test fails when the step is passed
 (`test_ollama_provider.py`).
+
+That measure is the tools and the instructions alone. The notes about the sources ticked come on top, and are
+written by the chat controller, which needs QGIS: measured on 2026-11-15, 770 characters for a basemap, a
+geocoder, an elevation source and an OpenStreetMap server, 1,990 with one source of every kind ticked. So with
+the families off and every kind of source ticked, the first request of a local model already passes the step;
+with the families on (the default), a request is far under it. The conversation itself is not weighed either.
 
 The catalog is JSON because that server needs pydantic and the MCP SDK, which QGIS does not have. A test fails when the
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's

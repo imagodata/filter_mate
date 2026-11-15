@@ -108,16 +108,13 @@ NO_BASEMAP_NOTE = ("\n\nThe user enabled no web basemap: add_basemap is not avai
                    "that one can be ticked in the Sources tab of the settings of the agent, under Basemaps (OpenStreetMap, "
                    "Carto, IGN...), or an XYZ address added there, and call show_settings_link with target sources: "
                    "the user gets a button to that tab, then asks again. Do not try another way.")
-NO_ELEVATION_NOTE = ("\n\nThe user enabled no elevation source: add_elevation is not available. When a terrain, "
-                     "relief, elevation or contour map is asked and the project holds no elevation raster, say that "
-                     "Copernicus DEM can be ticked in the Sources tab of the settings of the agent, under Satellite "
-                     "imagery, and call show_settings_link with target sources: the user gets a button to that tab, "
-                     "then asks again. Do not try another way.")
-NO_OSM_NOTE = ("\n\nThe user enabled no OpenStreetMap server: add_osm_features is not available. When what is asked "
-               "is not in the project and is what OpenStreetMap maps (buildings, roads, shops, hospitals, schools, "
-               "parks... of a place), say that an OpenStreetMap (Overpass) server can be ticked in the Sources tab "
-               "of the settings of the agent, under Open data platforms, and call show_settings_link with target "
-               "sources: the user gets a button to that tab, then asks again.")
+# Short: these notes are read at every request, and the tools they name are then not offered at all.
+NO_ELEVATION_NOTE = ("\n\nNo elevation source is enabled (add_elevation is not available): for a relief or contour "
+                     "map of a place the project has no elevation raster of, say that Copernicus DEM can be ticked "
+                     "in the Sources tab, under Satellite imagery, and call show_settings_link with target sources.")
+NO_OSM_NOTE = ("\n\nNo OpenStreetMap server is enabled (add_osm_features is not available): for the buildings, "
+               "roads, shops, hospitals... of a place no layer of the project holds, say that one can be ticked in "
+               "the Sources tab, under Open data platforms, and call show_settings_link with target sources.")
 # The skill whose tools bring into the project what a connector finds (add_layer, add_service_layer...).
 DATA_SKILL = "open-data"
 ADD_FOUND_NOTE = ("add_layer adds a file this connector finds, by its https URL (geojson or gpkg first; a raster with "
@@ -1800,8 +1797,7 @@ class AgentChatController(QObject):
             notes.append(NO_OSM_NOTE)
         elif names["osm"]:
             notes.append("\n\nOpenStreetMap servers the user enabled (the platform argument of add_osm_features): "
-                         + ", ".join(names["osm"]) + ". When one is busy or does not answer, ask another one of "
-                         "this list rather than the same again.")
+                         + ", ".join(names["osm"]) + ".")
         if configured_basemaps and has_basemaps:
             notes.append("\n\nBasemaps of the configuration file (the platform argument of add_basemap): "
                          + ", ".join(configured_basemaps) + ".")
@@ -2282,11 +2278,15 @@ class AgentChatController(QObject):
                 args.get("name") or self._basemap_label(str(args.get("platform", "")), short=True)),
             # Elevation, contours and a copy are layers added: the same words, already in every language.
             "add_elevation": lambda: _tr("Layer added: {}").format(
-                args.get("name") or self._elevation_label(str(args.get("platform", "")), short=True)),
-            "add_osm_features": lambda: _tr("Layer added: {}").format(args.get("name") or self._osm_tags(args)),
+                one_line(str(args.get("name") or ""), 100) or self._elevation_label(str(args.get("platform", "")),
+                                                                                   short=True)),
+            # A name is shown as the model sent it, not checked yet: on one line.
+            "add_osm_features": lambda: _tr("Layer added: {}").format(
+                one_line(str(args.get("name") or ""), 100) or self._osm_tags(args)),
             "contour_lines": lambda: _tr("Layer added: {}").format(
-                args.get("name") or "Contours {}".format(args.get("interval", ""))),  # as sent: not checked yet
-            "duplicate_layer": lambda: _tr("Layer added: {}").format(args.get("name") or "{} (copy)".format(layer)),
+                one_line(str(args.get("name") or ""), 100) or "Contours {}".format(one_line(str(args.get("interval", "")), 20))),
+            "duplicate_layer": lambda: _tr("Layer added: {}").format(
+                one_line(str(args.get("name") or ""), 100) or "{} (copy)".format(layer)),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
@@ -2560,7 +2560,8 @@ class AgentChatController(QObject):
         tags = arguments.get("tags") if isinstance(arguments, dict) else None
         shown = [f"{tag.get('key', '')}={tag['value']}" if tag.get("value") else str(tag.get("key", ""))
                  for tag in (tags if isinstance(tags, list) else []) if isinstance(tag, dict)]
-        return one_line("OpenStreetMap: " + ", ".join(shown), 200)
+        # Ten tags at most, a key of 60 characters and a value of 80: all of them are shown, whatever they are.
+        return one_line("OpenStreetMap: " + ", ".join(shown), 1500)
 
     def _osm_label(self, platform: str) -> str:
         """What the user reads of the OpenStreetMap server a model named: its title, and where it is."""

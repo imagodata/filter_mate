@@ -6,6 +6,11 @@ with the instructions must stay within the 32k step (``core/agent/providers/olla
 left for the next tool. Run it after a change of a tool description or of the instructions:
 
     python scripts/agent_request_weight.py [--top 10]
+
+Not weighed: the notes about the sources the user ticked, which the chat controller adds to the instructions (it
+needs QGIS), and the conversation. Measured on 2026-11-15, these notes are 770 characters for a basemap, a
+geocoder, an elevation source and an OpenStreetMap server, 1,990 with one source of every kind: the room printed
+here must hold them too for a first request to stay in the step with everything ticked and the families off.
 """
 import argparse
 import json
@@ -21,6 +26,11 @@ from agent.providers.base import ProviderConfig  # noqa: E402
 from agent.providers.ollama_chat import ANSWER_ROOM, CHARS_PER_TOKEN, CONTEXT_STEPS  # noqa: E402
 from agent.system_prompt import SYSTEM_PROMPT  # noqa: E402
 from agent.tool_catalog import chat_tools  # noqa: E402
+
+
+# What ui/controllers/agent_chat_controller.py adds to the instructions for the sources ticked, measured in QGIS
+# on 2026-11-15: (a basemap, a geocoder, an elevation source and an OpenStreetMap server; one source of every kind).
+NOTES_OF_SOURCES = (770, 1990)
 
 
 def weigh():
@@ -41,6 +51,8 @@ def main(argv=None) -> int:
     size, room, context, tools = weigh()
     print(f"{len(tools)} tools and the instructions ({len(SYSTEM_PROMPT)} characters): {size} characters, "
           f"{room - size:+d} under the {room} of the {CONTEXT_STEPS[1]} step; num_ctx asked: {context}")
+    print(f"not weighed: the notes about the sources ticked ({NOTES_OF_SOURCES[0]} to {NOTES_OF_SOURCES[1]} "
+          "characters), the conversation")
     for weight, name in tools[:args.top]:
         print(f"  {weight:6d}  {name}")
     return 0 if context <= CONTEXT_STEPS[1] else 1

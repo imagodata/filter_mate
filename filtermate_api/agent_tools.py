@@ -12,6 +12,7 @@ import re
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
+from urllib.parse import urlsplit
 
 from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected, LayerProtected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
@@ -91,10 +92,31 @@ def _guarded(handler: Handler) -> Handler:
 
 
 def _renamed(text: str, address: str, name: str) -> str:
-    """``text`` with the address of a platform replaced by the name a model knows it by, whatever its case."""
+    """``text`` with the address of a platform replaced by the name a model knows it by, whatever its case.
+
+    And any other address of its server, then the name of that server alone: a request that failed is told by the
+    address it was sent to, which is the one the user gave with a search added to it and still holds its key
+    ("Error transferring https://api.example.org/search?apikey=...&q=Lyon"), and a server that could not be
+    reached by its host ("Host overpass.example.org not found"). A model has no need of either (2026-11-15).
+    """
     if not address or address.lower() == name.lower():
         return text
-    return re.sub(re.escape(address), lambda _match: name, text, flags=re.IGNORECASE)
+    text = re.sub(re.escape(address), lambda _match: name, text, flags=re.IGNORECASE)
+    try:
+        parts = urlsplit(address) if "://" in address else None
+        host, server = (parts.hostname or "", parts.netloc.rsplit("@", 1)[-1]) if parts is not None else ("", "")
+    except ValueError:
+        host = server = ""
+    if not host:
+        return text
+    # This machine holds other servers than the one named: there, only the same port is the same server.
+    local = host in ("localhost", "127.0.0.1", "::1")
+    there = re.escape(server) if local else re.escape(f"[{host}]" if ":" in host else host) + r"\.?(?::\d+)?"
+    text = re.sub(r"https?://(?:[^/\s@]*@)?" + there + r"(?![\w.-])[^\s\"'<>]*", lambda _match: name, text,
+                  flags=re.IGNORECASE)
+    if not local and host.lower() != name.lower():
+        text = re.sub(r"(?<![\w.-])" + re.escape(host) + r"\.?(?![\w-])", lambda _match: name, text, flags=re.IGNORECASE)
+    return text
 
 
 # The arguments of the tools that name a layer, by an id or a name.
@@ -336,6 +358,16 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
     def set_layer_style(args: Dict[str, Any]) -> Dict[str, Any]:
         options = {key: args[key] for key in _STYLE_DEFAULTS}
         options.update({key: args.get(key) for key in _STYLE_OPTIONAL})
+        # The light of a hillshade is no argument a model reads (the usual one is kept), but a recipe kept before,
+        # or a client that knows them, still gives it: followed, and refused when it is no angle, never dropped
+        # without a word. The schema no longer bounds them, so they are bounded here (not a number fails both ways).
+        for key, top in (("azimuth", 360), ("altitude", 90)):
+            value = args.get(key)
+            if value is None:
+                continue
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= top:
+                raise ToolFailure(f"{key} is a number from 0 to {top}")
+            options[key] = float(value)
         answer = asdict(accessor.set_layer_style(args["layer"], args["mode"], **options))
         # What the call did not set is not told: a hillshade has no ramp, a vector no band.
         return {key: value for key, value in answer.items()
