@@ -81,6 +81,13 @@ layer, no field to add.
 4. create_layout once the map looks right, with a title that says what the map shows. export_layout only when the
    user asks for a file.
 
+## A relief map
+
+"A terrain map of Lyon with contour lines over a satellite basemap."
+
+Load the terrain skill: it gives the chain (the place, the basemap, the elevation, colors by height, the shaded
+relief, the contours, a look at the result) and the values to choose when the user gives none.
+
 ## Data that is not in the project
 
 "Add the cycle paths of Toulouse and keep those over 2 km."

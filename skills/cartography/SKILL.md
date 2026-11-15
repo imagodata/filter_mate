@@ -3,10 +3,10 @@ name: cartography
 title: Make the map look right
 description: styles and labels, print layouts and their export, the CRS of the map, the layer tree, map themes and spatial bookmarks
 metadata:
-  version: 2
+  version: 3
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: set_layer_style, set_labels, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap
+  tools: set_layer_style, set_labels, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap, duplicate_layer
   risk: change
   trust: builtin
 ---
@@ -24,6 +24,15 @@ All of this changes how the project shows, never its data, and is undone with th
   visible_from_scale the labels only show once the map is close enough (50000: from 1:50 000).
 - Every mode replaces the style of the layer. To change its opacity alone, use the mode keep with opacity: the
   categories of a layer and the colors of an orthophoto stay. It is the only mode of a WMS, WMTS or basemap image.
+- A single symbol and each rule take a width in millimetres (a line, an outline, the size of a point): the main
+  roads thicker than the others is rules with a width each. blend says how a layer mixes with what is under it:
+  multiply darkens (colors over a photograph), normal covers; it goes with any mode, keep included.
+- A raster with values takes pseudocolor (a ramp; cut 2 leaves the extreme values out of it; discrete for flat
+  steps), gray, or hillshade (a shaded relief drawn from elevations). A relief map, with its contours, is the
+  terrain skill: load it.
+- Labels of a layer of lines follow them with placement curved (rivers, roads).
+- One layer is drawn one way. duplicate_layer adds a second layer on the same data, just above the first, for
+  what needs two: a road with a wider line under it, an elevation as colors and as a relief.
 - After a style the user will judge by eye, look with view_map when it is offered.
 
 ## Choosing a style
@@ -50,7 +59,8 @@ When the user names no mode, ramp or number of classes, choose from the data, an
    - two directions around a middle (a change, a gap from the average, a balance): RdBu, RdYlGn, BrBG, with stddev
      or with rules around the middle. RdYlGn puts red on the low values: pass invert when high is bad.
    - categories: Spectral by default. Give the colors yourself with rules when they have a meaning.
-   - an elevation raster: pseudocolor with Spectral inverted, or Viridis; a slope or a density with YlOrRd.
+   - an elevation raster: pseudocolor with Terrain (the tints of a relief map), Spectral inverted or Viridis; a
+     slope or a density with YlOrRd.
 4. Colors people expect: water blue, vegetation green, built-up areas grey or red, a risk or an alert in red, what
    is allowed in green. The color of a single symbol is a name (red, steelblue) or #rrggbb.
 5. Make it readable: a neutral basemap without labels under a colored layer; an opacity under 1 (0.6 to 0.8) on
@@ -60,8 +70,9 @@ When the user names no mode, ramp or number of classes, choose from the data, an
 ## A background under the map
 
 add_basemap puts a web basemap the user enabled under every layer: carto_light for a neutral background,
-carto_light_nolabels under layers that have their own labels, osm_tiles for a street map, ign_plan or ign_ortho in
-France. When none is enabled, say that one can be ticked in the settings of the agent, Sources tab.
+carto_light_nolabels under layers that have their own labels, osm_tiles for a street map, google_satellite for
+photographs anywhere, ign_plan or ign_ortho in France. When none is enabled, say that one can be ticked in the
+settings of the agent, Sources tab.
 
 ## Layouts
 

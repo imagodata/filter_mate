@@ -478,6 +478,86 @@ class TestHandlers:
         failed, message = run(accessor, root, "add_basemap", platform="carto_light")
         assert failed and "not enabled" in message  # a basemap is added only when the user ticked it
 
+    def test_elevation_is_added_only_from_a_source_the_user_ticked(self, tmp_path):
+        accessor, lyon = Accessor(), "POLYGON((4.78 45.7, 4.92 45.7, 4.92 45.8, 4.78 45.8, 4.78 45.7))"
+        failed, message = run(accessor, tmp_path, "add_elevation", extent_wkt=lyon, crs="EPSG:4326")
+        assert failed and "not enabled" in message and len(accessor.layers) == 1
+        asked = []
+        accessor.add_elevation = lambda platform, **options: asked.append((platform, options)) \
+            or InMemoryAccessor.add_elevation(accessor, platform, **options)
+        executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, platforms=("copernicus_dem",)))
+        result = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "crs": "EPSG:4326"}))
+        answer = json.loads(result.content)
+        assert not result.is_error and answer["platform"] == "copernicus_dem" and answer["resolution"] == 30.0
+        assert (answer["minimum"], answer["maximum"]) == (150.0, 600.0)  # what the contours are drawn between
+        assert "" not in answer.values() and None not in answer.values()  # what the call did not set is not told
+        platform, options = asked[0]
+        assert platform == "copernicus_dem" and options["extent_wkt"] == lyon and options["resolution"] is None
+        for wrong in ({"extent_wkt": lyon, "resolution": 5}, {"extent_wkt": lyon, "resolution": 6000}, {"platform": ""}):
+            assert executor.execute(ToolCallPart("c", "add_elevation", wrong)).is_error, wrong  # refused by the schema
+        # An address a model would write is no argument of the tool: the call runs, and nothing of it reaches QGIS.
+        made = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "url": "https://example.org/dem.tif"}))
+        assert not made.is_error and len(asked) == 2 and "example.org" not in json.dumps(asked[-1])
+        refused = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "platform": "earth_search"}))
+        assert refused.is_error and "not enabled" in refused.content  # a platform of another kind is not ticked here
+
+    def test_contours_and_a_copy_are_layers_made_of_the_project(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "contour_lines", layer="communes", interval=25, index_interval=100)
+        assert not error and (answer["interval"], answer["index_interval"], answer["index_count"]) == (25, 100, 4)
+        assert answer["fields"] == ["elevation", "is_index"] and answer["feature_count"] == 18
+        error, answer = run(accessor, root, "contour_lines", layer="communes", interval=10)
+        assert not error and "index_interval" not in answer and answer["index_count"] == 0
+        for wrong in ({"layer": "communes"}, {"layer": "communes", "interval": 0}, {"layer": "communes", "interval": -5},
+                      {"layer": "communes", "interval": 25, "index_interval": 0},
+                      {"layer": "communes", "interval": 25, "band": 0}):
+            assert run(accessor, root, "contour_lines", **wrong)[0] is True, wrong
+        assert run(accessor, root, "contour_lines", layer="nope", interval=25)[0] is True
+        error, answer = run(accessor, root, "duplicate_layer", layer="communes", name="Ombrage")
+        assert not error and answer["name"] == "Ombrage" and answer["layer_id"] != "L1"
+        assert run(accessor, root, "duplicate_layer", layer="nope")[0] is True
+
+    def test_the_heights_of_contours_are_values_of_the_project(self, tmp_path):
+        accessor = Accessor()
+        executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, share_values=False))
+        result = executor.execute(ToolCallPart("c", "contour_lines", {"layer": "communes", "interval": 25}))
+        answer = json.loads(result.content)
+        assert not result.is_error and "minimum" not in answer and "maximum" not in answer and answer["feature_count"]
+        seen = []
+        accessor.contour_lines = lambda layer, interval, **options: seen.append(options) \
+            or InMemoryAccessor.contour_lines(accessor, layer, interval, **options)
+        executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, share_values=False))
+        executor.execute(ToolCallPart("c", "contour_lines", {"layer": "communes", "interval": 25}))
+        assert seen[0]["share_values"] is False  # a refusal names no height either: QGIS is told
+
+    def test_a_relief_is_a_style(self, api):
+        accessor, root = api
+        seen = []
+        accessor.set_layer_style = lambda layer, mode, **options: seen.append(options) \
+            or InMemoryAccessor.set_layer_style(accessor, layer, mode, **options)
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="hillshade", blend="multiply",
+                            multidirectional=True, opacity=0.3)
+        assert not error and answer == {"layer_name": "communes", "mode": "hillshade", "opacity": 0.3, "blend": "multiply"}
+        assert (seen[0]["azimuth"], seen[0]["altitude"], seen[0]["z_factor"], seen[0]["multidirectional"]) \
+            == (315.0, 45.0, None, True)  # the light of the schema, the factor left to the layer
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="pseudocolor", ramp="Terrain",
+                            cut=2, discrete=True, classes=8)
+        assert not error and (seen[1]["cut"], seen[1]["discrete"], seen[1]["classes"], seen[1]["blend"]) == (2, True, 8, "")
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="rules", rules=[
+            {"expression": '"is_index" = 1', "color": "#5b3a1e", "width": 0.6}, {"color": "#a67c52", "width": 0.2}])
+        assert not error and [rule.get("width") for rule in seen[2]["rules"]] == [0.6, 0.2]
+        error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="keep", blend="overlay")
+        assert not error and answer["blend"] == "overlay" and seen[3]["opacity"] is None
+        for wrong in ({"mode": "hillshade", "altitude": 91}, {"mode": "hillshade", "azimuth": 361},
+                      {"mode": "hillshade", "z_factor": 0}, {"mode": "pseudocolor", "cut": 50},
+                      {"mode": "pseudocolor", "cut": 0}, {"mode": "keep", "blend": "burn"},
+                      {"mode": "single", "width": 0}, {"mode": "single", "width": 21},
+                      {"mode": "rules", "rules": [{"color": "red", "width": 0}]}):
+            assert run(accessor, root, "set_layer_style", layer="communes", **wrong)[0] is True, wrong
+        error, answer = run(accessor, root, "set_labels", layer="communes", field="nom", placement="curved")
+        assert not error and answer["placement"] == "curved"
+        assert run(accessor, root, "set_labels", layer="communes", field="nom", placement="diagonal")[0] is True
+
     def test_a_basemap_the_user_added_is_named_by_its_id(self, tmp_path):
         accessor, asked = Accessor(), []
         accessor.add_basemap = lambda platform, name="", extra_domains=None: asked.append((platform, extra_domains)) \

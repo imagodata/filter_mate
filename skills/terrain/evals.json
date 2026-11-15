@@ -1,0 +1,286 @@
+{
+ "cases": [
+  {
+   "id": "terrain_map_of_a_town",
+   "prompt": "Crée une carte du terrain de Lyon. Ajoute Google Satellite comme fond de carte. Télécharge un MNT de 30 m couvrant le centre de Lyon et crée un dégradé de couleurs d'élévation semi-transparent avec un ombrage subtil superposé. Ajoute des courbes de niveau tous les 25 m et mets en évidence les courbes maîtresses à 100 m.",
+   "touches": [
+    "elevation",
+    "elevation_copy",
+    "contours"
+   ],
+   "expect": [
+    [
+     {
+      "tool": "find_place",
+      "args": {
+       "query": {
+        "contains": [
+         "Lyon"
+        ]
+       }
+      },
+      "call_args": {
+       "query": "Lyon",
+       "platform": "photon"
+      }
+     },
+     {
+      "tool": "zoom_to",
+      "args": {
+       "crs": "EPSG:4326"
+      },
+      "call_args": {
+       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+       "crs": "EPSG:4326"
+      }
+     },
+     {
+      "tool": "add_basemap",
+      "args": {
+       "platform": "google_satellite"
+      },
+      "call_args": {
+       "platform": "google_satellite"
+      }
+     },
+     {
+      "tool": "add_elevation",
+      "args": {
+       "crs": "EPSG:4326"
+      },
+      "call_args": {
+       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+       "crs": "EPSG:4326"
+      }
+     },
+     {
+      "tool": "set_layer_style",
+      "any": true,
+      "args": {
+       "layer": "elevation",
+       "mode": "pseudocolor"
+      },
+      "call_args": {
+       "layer": "elevation_1",
+       "mode": "pseudocolor",
+       "ramp": "Terrain",
+       "cut": 2,
+       "opacity": 0.5
+      }
+     },
+     {
+      "tool": "duplicate_layer",
+      "args": {
+       "layer": "elevation"
+      },
+      "call_args": {
+       "layer": "elevation_1",
+       "name": "Ombrage"
+      }
+     },
+     {
+      "tool": "set_layer_style",
+      "any": true,
+      "args": {
+       "layer": "elevation_copy",
+       "mode": "hillshade",
+       "blend": {
+        "any_of": [
+         "multiply",
+         "overlay",
+         "soft_light"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "Ombrage",
+       "mode": "hillshade",
+       "multidirectional": true,
+       "blend": "multiply",
+       "opacity": 0.3
+      }
+     },
+     {
+      "tool": "contour_lines",
+      "args": {
+       "layer": "elevation",
+       "interval": 25,
+       "index_interval": 100
+      },
+      "call_args": {
+       "layer": "elevation_1",
+       "interval": 25,
+       "index_interval": 100
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_layer",
+    "run_algorithm",
+    "set_project_crs",
+    "search_imagery",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "terrain_contours_from_the_raster_of_the_project",
+   "trap": true,
+   "prompt": "Ajoute des courbes de niveau tous les 50 m à partir du MNT, avec les courbes maîtresses tous les 250 m.",
+   "expect": [
+    [
+     {
+      "tool": "contour_lines",
+      "args": {
+       "layer": "mnt",
+       "interval": 50,
+       "index_interval": 250
+      },
+      "call_args": {
+       "layer": "mnt",
+       "interval": 50,
+       "index_interval": 250
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_elevation",
+    "add_layer",
+    "run_algorithm",
+    "search_imagery"
+   ]
+  },
+  {
+   "id": "terrain_hillshade_over_the_colors",
+   "prompt": "Affiche le relief du MNT en ombrage par-dessus ses couleurs d'altitude.",
+   "touches": [
+    "mnt",
+    "mnt_copy"
+   ],
+   "expect": [
+    [
+     {
+      "tool": "set_layer_style",
+      "any": true,
+      "args": {
+       "layer": "mnt",
+       "mode": "pseudocolor"
+      },
+      "call_args": {
+       "layer": "mnt",
+       "mode": "pseudocolor",
+       "ramp": "Terrain",
+       "cut": 2
+      }
+     },
+     {
+      "tool": "duplicate_layer",
+      "args": {
+       "layer": "mnt"
+      },
+      "call_args": {
+       "layer": "mnt",
+       "name": "Ombrage"
+      }
+     },
+     {
+      "tool": "set_layer_style",
+      "any": true,
+      "args": {
+       "layer": "mnt_copy",
+       "mode": "hillshade"
+      },
+      "call_args": {
+       "layer": "Ombrage",
+       "mode": "hillshade",
+       "multidirectional": true,
+       "blend": "multiply",
+       "opacity": 0.45
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_elevation",
+    "run_algorithm",
+    "add_layer",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "terrain_labels_on_the_index_contours",
+   "prompt": "Trace les courbes de niveau du MNT tous les 10 m, une courbe maîtresse tous les 50 m, et écris l'altitude sur les courbes maîtresses, le long des lignes.",
+   "touches": [
+    "contours"
+   ],
+   "expect": [
+    [
+     {
+      "tool": "contour_lines",
+      "args": {
+       "layer": "mnt",
+       "interval": 10,
+       "index_interval": 50
+      },
+      "call_args": {
+       "layer": "mnt",
+       "interval": 10,
+       "index_interval": 50
+      }
+     },
+     {
+      "tool": "set_labels",
+      "args": {
+       "layer": "contours",
+       "placement": "curved",
+       "expression": {
+        "contains": [
+         "is_index",
+         "elevation"
+        ]
+       }
+      },
+      "call_args": {
+       "layer": "contours_1",
+       "expression": "if(\"is_index\" = 1, \"elevation\", '')",
+       "placement": "curved",
+       "size": 7
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_elevation",
+    "run_algorithm",
+    "add_field",
+    "update_features"
+   ]
+  },
+  {
+   "id": "terrain_slope_is_processing",
+   "prompt": "Calcule la pente à partir du MNT, dans une nouvelle couche.",
+   "expect": [
+    [
+     {
+      "tool": "run_algorithm",
+      "args": {
+       "algorithm_id": "native:slope"
+      },
+      "call_args": {
+       "algorithm_id": "native:slope",
+       "parameters": {
+        "INPUT": "mnt"
+       }
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_elevation",
+    "contour_lines",
+    "add_layer"
+   ]
+  }
+ ]
+}

@@ -223,14 +223,69 @@ class SimulatedProject:
             name, layer = self._layer(args["layer"])
             if args.get("field") and args["field"] not in layer.get("fields", {}):
                 raise ToolFailure(f"'{name}' has no field {args['field']!r} (describe_layer lists them)")
-            return {"layer_name": name, "mode": args["mode"], "field": args.get("field", ""),
-                    "classes": args.get("classes", 5) if args["mode"] == "graduated" else 3}
+            raster_modes = ("pseudocolor", "gray", "hillshade")
+            if args["mode"] != "keep" and (args["mode"] in raster_modes) != (layer["kind"] == "raster"):
+                raise ToolFailure(f"a {layer['kind']} layer does not take the mode {args['mode']}")
+            if args["mode"] == "hillshade":
+                answer = {"layer_name": name, "mode": "hillshade", "band": 1, "azimuth": args.get("azimuth", 315.0),
+                          "altitude": args.get("altitude", 45.0), "z_factor": args.get("z_factor") or 1.0}
+            elif args["mode"] in raster_modes:
+                answer = {"layer_name": name, "mode": args["mode"], "band": 1, "minimum": 162.0, "maximum": 548.0,
+                          "ramp": args.get("ramp") or "Spectral"}
+            else:
+                answer = {"layer_name": name, "mode": args["mode"], "field": args.get("field", ""),
+                          "classes": args.get("classes", 5) if args["mode"] == "graduated" else 3}
+            answer.update({key: args[key] for key in ("opacity", "blend") if args.get(key) not in (None, "")})
+            return answer
+
+        def added_layer(key, shown, layer):
+            """A layer a tool makes, known by ``key`` whatever name the model gave it: a case names it by that."""
+            self.layers[key] = layer
+            self.by_ref[key] = self.by_ref[layer["id"]] = self.by_ref[shown] = key
+
+        def add_elevation(args):
+            if args.get("platform", "copernicus_dem") != "copernicus_dem":
+                raise ToolFailure(f"{args['platform']!r} is not enabled in the agent sources. Enabled: copernicus_dem.")
+            shown = args.get("name") or "Elevation (Copernicus DEM 30 m)"
+            added_layer("elevation", shown, {"id": "elevation_1", "kind": "raster",
+                                             "bands": [{"band": 1, "name": "elevation"}]})
+            return {"layer_id": "elevation_1", "name": shown, "platform": "copernicus_dem", "crs_authid": "EPSG:32631",
+                    "resolution": args.get("resolution") or 30.0, "width": 373, "height": 380, "minimum": 151.0,
+                    "maximum": 608.0, "mean": 234.1, "size": "0.4 MB",
+                    "note": "a surface model: buildings and trees are in it"}
+
+        def duplicate_layer(args):
+            source, layer = self._layer(args["layer"])
+            if layer["kind"] not in ("vector", "raster"):
+                raise ToolFailure(f"'{source}' is a {layer['kind']} layer: only vector and raster layers are duplicated")
+            shown = args.get("name") or f"{source} (copy)"
+            added_layer(f"{source}_copy", shown, dict(copy.deepcopy(layer), id=f"{layer['id']}_copy"))
+            return {"layer_id": f"{layer['id']}_copy", "name": shown, "layer_kind": layer["kind"],
+                    "provider_type": "gdal" if layer["kind"] == "raster" else "ogr", "crs_authid": "EPSG:2154"}
+
+        def contour_lines(args):
+            source, layer = self._layer(args["layer"])
+            if layer["kind"] != "raster":
+                raise ToolFailure(f"'{source}' is not a raster with elevation values: contours are drawn from a raster "
+                                  "file (add_elevation brings one in)")
+            index = args.get("index_interval")
+            if index is not None and (index <= args["interval"] or index % args["interval"]):
+                raise ToolFailure(f"index_interval ({index:g}) is a multiple of interval ({args['interval']:g}): every "
+                                  "fourth or fifth contour is usual")
+            shown = args.get("name") or f"Contours {args['interval']:g}"
+            added_layer("contours", shown, {"id": "contours_1", "kind": "vector", "geometry": "LineString", "count": 932,
+                                           "fields": {"elevation": [175.0, 600.0], "is_index": [0, 1]}})
+            return {"layer_id": "contours_1", "name": shown, "source_layer": source, "crs_authid": "EPSG:32631",
+                    "feature_count": 932, "interval": args["interval"], "index_interval": index,
+                    "index_count": 93 if index else 0, "left_out": 640, "minimum": 175.0, "maximum": 600.0,
+                    "fields": ["elevation", "is_index"]}
 
         def set_labels(args):
             name, layer = self._layer(args["layer"])
-            if args.get("enabled", True) and args.get("field") not in layer.get("fields", {}):
+            if args.get("enabled", True) and not args.get("expression") and args.get("field") not in layer.get("fields", {}):
                 raise ToolFailure(f"'{name}' has no field {args.get('field')!r} (describe_layer lists them)")
-            return {"layer_name": name, "labels": args.get("enabled", True), "field": args.get("field", "")}
+            return {"layer_name": name, "labels": args.get("enabled", True), "field": args.get("field", ""),
+                    "expression": args.get("expression", ""), "placement": args.get("placement", "auto")}
 
         algorithms = {
             "native:buffer": ("Buffer", "Vector geometry", [
@@ -488,6 +543,7 @@ class SimulatedProject:
                 "name": args["query"], "label": args["query"], "kind": "municipality", "longitude": 1.44, "latitude": 43.6,
                 "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))"}]},
             "add_basemap": lambda args: {"layer_id": "xyz_1", "name": args.get("name") or args["platform"], "layer_kind": "raster"},
+            "add_elevation": add_elevation, "duplicate_layer": duplicate_layer, "contour_lines": contour_lines,
             "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{
                 "id": "S2B_31TCJ_20261031_0_L2A", "title": "S2B_31TCJ_20261031_0_L2A", "publisher": "sentinel-2-l2a",
                 "description": "2026-10-31 · cloud cover 2.1 %", "page": "", "resources": [
@@ -602,6 +658,8 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
         return "" if not writes else f"expected no write, got {[call.name for call in writes]}"
     for steps in alternatives:
         allowed = {name for step in steps for name in _touched(step.get("args", {}), by_ref, step["tool"])}
+        # The layers a chain makes and then styles, in an order a case does not fix ("touches").
+        allowed |= {_normalize(name, by_ref) for name in case.get("touches", ())}
         stray = {name for call in writes for name in _touched(call.arguments, by_ref, call.name)} - allowed
         if stray:
             continue  # a correction is fine, a filter left on another layer is not
@@ -612,6 +670,11 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
         called = {call.name: call for call in calls}
 
         def step_made(step):
+            # A tool called several times in a chain (a style per layer): one call that fits, the last or not. As
+            # for the other steps, a call counts as it was sent, answered or refused.
+            if step.get("any"):
+                return any(call.name == step["tool"] and matches(step.get("args", {}), call.arguments, by_ref)
+                           for call in calls)
             call = latest.get(step["tool"]) or (called.get(step["tool"]) if step["tool"] not in write_tools else None)
             return call is not None and matches(step.get("args", {}), call.arguments, by_ref)
 
@@ -630,6 +693,20 @@ class ScriptedTransport:
 
     def __init__(self, steps: Sequence[Dict[str, Any]]) -> None:
         self._steps = list(steps)
+
+    def load_first(self, held: Dict[str, Sequence[str]], skill: str = "") -> None:
+        """Load, before the calls, the skill each tool held back comes with (``held``: tool -> its skills; the
+        skill of the case first): what a model does when the tools of a task are offered once its skill is loaded.
+        A call made before would be answered "call load_skill first", and a chain that styles the layers it makes
+        would style layers that are not there."""
+        asked = {(step.get("call_args") or step.get("args") or {}).get("name") for step in self._steps
+                 if step["tool"] == "load_skill"}
+        loaded: List[str] = []
+        for step in self._steps:
+            skills = held.get(step["tool"]) or ()
+            if skills and not set(skills) & (set(loaded) | asked):  # one the case loads itself is not loaded twice
+                loaded.append(skill if skill in skills else skills[0])
+        self._steps = [{"tool": "load_skill", "call_args": {"name": name}} for name in loaded] + self._steps
 
     def send(self, request, session):
         json.loads(request.body)
@@ -698,6 +775,8 @@ def run_case(case: Dict[str, Any], provider, transport, filtering: bool = False,
         held = bringing(tools, SKILLS.values())
         hidden = {tool.name: tool for tool in tools if tool.name in held}
         tools = tuple(tool for tool in tools if tool.name not in held)
+        if isinstance(transport, ScriptedTransport):
+            transport.load_first(held, case.get("skill", ""))
     session = AgentSession(provider, tools, (prompt or SYSTEM_PROMPT) + (FILTERING_NOTE if filtering else ""),
                            AgentLimits())
     project.offered = offered
@@ -746,7 +825,7 @@ def load_cases(only: Optional[Sequence[str]] = None) -> List[Dict[str, Any]]:
         cases = json.load(stream)["cases"]
     for evals in sorted(SKILLS_PATH.glob("*/evals.json")):
         with open(evals, encoding="utf-8") as stream:
-            cases += json.load(stream)["cases"]
+            cases += [dict(case, skill=evals.parent.name) for case in json.load(stream)["cases"]]
     return [case for case in cases if not only or case["id"] in only]
 
 

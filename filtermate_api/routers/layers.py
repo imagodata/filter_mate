@@ -112,6 +112,7 @@ class StyleRule(BaseModel):
     expression: str = Field("", max_length=2000, description="QGIS condition; empty for every other feature")
     color: str = Field(..., min_length=1, max_length=50)
     label: str = Field("", max_length=100)
+    width: Optional[float] = Field(None, gt=0, le=20, description="Line or outline width, point size, in mm")
 
 
 class StyleRequest(BaseModel):
@@ -119,7 +120,7 @@ class StyleRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     layer: str = Field(..., min_length=1, max_length=_MAX_NAME)
-    mode: Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "keep"]
+    mode: Literal["single", "categorized", "graduated", "rules", "pseudocolor", "gray", "hillshade", "keep"]
     rules: Optional[List[StyleRule]] = Field(None, max_length=20)
     field: str = Field("", max_length=_MAX_NAME)
     color: str = Field("", max_length=50)
@@ -131,6 +132,15 @@ class StyleRequest(BaseModel):
     band: int = Field(1, ge=1, le=1000)
     minimum: Optional[float] = None
     maximum: Optional[float] = None
+    width: Optional[float] = Field(None, gt=0, le=20, description="single: line or outline width, point size, in mm")
+    blend: Literal["", "normal", "multiply", "screen", "overlay", "darken", "lighten", "soft_light",
+                   "hard_light"] = ""
+    cut: Optional[float] = Field(None, gt=0, le=49, description="Raster: percent of the values left out at each end")
+    discrete: bool = Field(False, description="pseudocolor: flat steps (classes of them) instead of a continuous ramp")
+    azimuth: float = Field(315.0, ge=0, le=360, description="hillshade: where the light comes from, in degrees")
+    altitude: float = Field(45.0, ge=0, le=90, description="hillshade: height of the light above the horizon")
+    z_factor: Optional[float] = Field(None, gt=0, le=1000, description="hillshade: stretch of the heights")
+    multidirectional: bool = Field(False, description="hillshade: lit from several directions")
 
     @model_validator(mode="after")
     def _check_range(self) -> "StyleRequest":
@@ -141,7 +151,8 @@ class StyleRequest(BaseModel):
 
 @router.post("/style", response_model=StyleResult)
 def set_layer_style(payload: StyleRequest, request: Request) -> StyleResult:
-    """Draw a layer anew: one symbol, categories, classes, a raster ramp or gray stretch, its opacity."""
+    """Draw a layer anew: one symbol, categories, classes, rules, a raster ramp, gray stretch or hillshade, its
+    opacity and how it blends with what is under it."""
     options = payload.model_dump(exclude={"layer", "mode"})
     return _accessor(request).set_layer_style(payload.layer, payload.mode, **options)
 
@@ -157,6 +168,7 @@ class LabelsRequest(BaseModel):
     buffer: bool = True
     expression: str = Field("", max_length=2000)
     visible_from_scale: Optional[float] = Field(None, ge=1, le=1e9)
+    placement: Literal["auto", "curved", "horizontal"] = "auto"
 
 
 @router.post("/labels", response_model=LabelsResult)
@@ -164,7 +176,8 @@ def set_labels(payload: LabelsRequest, request: Request) -> LabelsResult:
     """Label a vector layer with a field, or turn its labels off."""
     return _accessor(request).set_labels(payload.layer, field=payload.field, enabled=payload.enabled,
                                          size=payload.size, color=payload.color, buffer=payload.buffer,
-                                         expression=payload.expression, visible_from_scale=payload.visible_from_scale)
+                                         expression=payload.expression, visible_from_scale=payload.visible_from_scale,
+                                         placement=payload.placement)
 
 
 class UpdateFeaturesRequest(BaseModel):

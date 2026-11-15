@@ -59,6 +59,9 @@ BASEMAPS: Tuple[Basemap, ...] = (
     Basemap("ign_ortho", "IGN aerial photographs (France)",
             _GEOPF.format(layer="ORTHOIMAGERY.ORTHOPHOTOS", image="image/jpeg"),
             "© IGN", "France, aerial photographs of IGN (open licence)", 19, True),
+    Basemap("google_satellite", "Google Satellite", "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+            "© Google", "Worldwide satellite and aerial photographs. The terms of Google Maps apply: read them "
+            "before a commercial or a heavy use", 20),
     Basemap("opentopomap", "OpenTopoMap", "https://tile.opentopomap.org/{z}/{x}/{y}.png",
             "© OpenStreetMap contributors, SRTM | © OpenTopoMap (CC-BY-SA)",
             "Worldwide topographic map with contours. Run by volunteers: no heavy use", 17),
