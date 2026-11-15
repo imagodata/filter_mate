@@ -425,7 +425,10 @@ class VectorTargetJob(TargetJob):
                               materialization_limits(ENV_VARS), self.feedback)
         self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
         if not outcome.complete:
-            if outcome.reason in ('key_limit', 'unverified_filter'):
+            from ..remote_materializer import supports_reply_validation
+            if outcome.reason == 'key_limit' or (
+                    outcome.reason == 'unverified_filter' and not supports_reply_validation()):
+                # (A read that found nothing on a QGIS that checks its replies stays refused, as before.)
                 return _Unlisted(outcome.reason)  # compute() cuts by the extent of the source, or refuses with it
             if outcome.reason not in ('feature_limit', 'timeout'):
                 self.outcome.message = _remote_message(outcome.reason)

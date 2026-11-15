@@ -1230,8 +1230,8 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         expression = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
         if expression is None:
             return None
-        builder.user_warnings.append(_remote_message(
-            'by_extent_unverified' if reason == 'unverified_filter' else 'by_extent'))
+        builder.user_warnings.append('{}: {}'.format(layer.name(), _remote_message(
+            'by_extent_unverified' if reason == 'unverified_filter' else 'by_extent')))
         builder.remote_materialization_outcome = None  # nothing was read, or what was read is not what is kept
         return write(builder._combine_with_old_subset(old_subset, combine_operator, expression), False)
 
@@ -1294,9 +1294,13 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
                               materialization_limits(builder.task_params), builder._feedback)
         builder.remote_materialization_outcome = outcome
         if not outcome.complete:
-            if outcome.reason in ('key_limit', 'unverified_filter'):
+            from ...qgis.remote_materializer import supports_reply_validation
+            if outcome.reason == 'key_limit' or (
+                    outcome.reason == 'unverified_filter' and not supports_reply_validation()):
                 # Not listed (more than 500 keys), or not read at all (a QGIS that cannot check what a service
-                # answers: the exact filter was refused there, with no way out but a local copy).
+                # answers: the exact filter was refused there, with no way out but a local copy). A read that
+                # found nothing on a QGIS that checks its replies is refused as before: a cut by extent would
+                # say a wrong reason, and set a filter on a server that may have answered with an error.
                 cut = cut_by_extent(outcome.reason)
                 return refuse(outcome.reason) if cut is None else cut
             if outcome.reason not in ('feature_limit', 'timeout'):
@@ -1359,7 +1363,8 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
             verified = False
         if not verified:
             return refuse('unverified_filter')
-    if extent_possible and not complement and not union.isEmpty():
+    queued = bool(builder.task_params and builder.task_params.get('_subset_queue_callback'))
+    if queued and extent_possible and not complement and not union.isEmpty():
         # 2026-11-15: a service may refuse this list of keys (their address is too long for it, well under 500
         # keys: read on a real WFS). Whoever sets it falls back to the cut by extent left here (extent_fallback).
         from ....core.domain.source_capability import extent_subset

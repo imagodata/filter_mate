@@ -494,6 +494,7 @@ def test_web_map_grid_ignores_levels_that_are_none(levels):
     (None, 16000000), (0, 16000000), (-5, 16000000), ('x', 16000000), (True, 16000000), ({}, 16000000),
     (4000000, 4000000), ('4 000 000', 4000000), ('4_000_000', 4000000), (4e6, 4000000), ({'value': 2000000}, 2000000),
     (10, 65536),  # never less than one tile
+    (1e12, 268435456), ('4 000 000 000', 268435456),  # never more than 16384 x 16384
 ])
 def test_web_map_budget_read_from_the_configuration(value, expected):
     assert materialization.web_map_max_pixels(value) == expected

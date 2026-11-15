@@ -138,6 +138,7 @@ def materialize_raster(layer, extent=None, max_pixels=None, resolution=None, is_
 # Pixels of the capture of a web map: 4096 x 4096, about 250 tiles of 256 px, 64 MB before compression.
 WEB_MAP_MAX_PIXELS = 16000000
 WEB_MAP_MIN_PIXELS = 65536  # one tile
+WEB_MAP_MAX_BUDGET = 268435456  # 16384 x 16384: above, a configured budget is brought back to it
 WEB_MAP_TIMEOUT_SECONDS = 180.0
 
 
@@ -151,7 +152,7 @@ def web_map_max_pixels(value) -> int:
         number = int(float(value)) if not isinstance(value, bool) and value is not None else 0
     except (TypeError, ValueError, OverflowError):
         number = 0
-    return WEB_MAP_MAX_PIXELS if number <= 0 else max(WEB_MAP_MIN_PIXELS, number)
+    return WEB_MAP_MAX_PIXELS if number <= 0 else min(WEB_MAP_MAX_BUDGET, max(WEB_MAP_MIN_PIXELS, number))
 
 
 def web_map_grid(full, box, max_pixels, native_resolutions=()):
@@ -213,25 +214,65 @@ def web_map_grid(full, box, max_pixels, native_resolutions=()):
     return area, columns, rows, resolution
 
 
+_MARK = None  # one QObject of the main thread, kept for the life of the plugin (never deleted from a worker)
+_MARK_LOCK = threading.Lock()
+
+
+def _main_thread_mark():
+    """The object whose queued call tells a worker the main thread handled what was posted before it."""
+    global _MARK
+    from qgis.PyQt.QtCore import QCoreApplication, QObject, pyqtSlot
+    with _MARK_LOCK:
+        if _MARK is None:
+            application = QCoreApplication.instance()
+            if application is None:
+                return None
+
+            class Mark(QObject):
+                def __init__(self):
+                    super().__init__()
+                    self.waiting = []
+
+                @pyqtSlot()
+                def reach(self):
+                    # Every event waiting was posted before this call: the queue is in order.
+                    with _MARK_LOCK:
+                        reached, self.waiting = self.waiting, []
+                    for event in reached:
+                        event.set()
+
+            mark = Mark()
+            mark.moveToThread(application.thread())
+            _MARK = mark
+        return _MARK
+
+
 def _after_main_thread_events(seconds=1.5) -> bool:
     """Wait until the main thread handled the events already posted to it; False when it did not in time."""
-    from qgis.PyQt.QtCore import QCoreApplication, QMetaObject, QObject, Qt, pyqtSlot
-    application = QCoreApplication.instance()
-    if application is None:
+    from qgis.PyQt.QtCore import QMetaObject, Qt
+    mark = _main_thread_mark()
+    if mark is None:
         return False
     reached = threading.Event()
-
-    class Mark(QObject):
-        @pyqtSlot()
-        def reach(self):
-            reached.set()
-
-    mark = Mark()
-    mark.moveToThread(application.thread())
+    with _MARK_LOCK:
+        mark.waiting.append(reached)
     QMetaObject.invokeMethod(mark, 'reach', Qt.ConnectionType.QueuedConnection)
-    done = reached.wait(seconds)
-    mark.deleteLater()
-    return done
+    return reached.wait(seconds)
+
+
+def _service_place(layer):
+    """``(scheme, host)`` of the service a web map asks, to tell its replies from those of other layers."""
+    from urllib.parse import unquote, urlsplit
+    from qgis.core import QgsDataSourceUri
+    try:
+        url = unquote(QgsDataSourceUri(layer.source()).param('url') or '')
+        parts = urlsplit(url)
+        host = parts.netloc.lower()
+        if '}' in host:  # a template in the host ({s}.tile...): what follows it
+            host = host.rsplit('}', 1)[1].lstrip('.')
+        return parts.scheme.lower(), host
+    except Exception:  # an address that cannot be read: every reply is counted, as before
+        return '', ''
 
 
 def _has_visible_pixel(path) -> bool:
@@ -288,7 +329,7 @@ def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WE
         raise RuntimeError(_tr('raster capture canceled'))
     if not layer.isValid():
         raise RuntimeError(_tr('raster capture source could not be opened'))
-    if int(columns) < 1 or int(rows) < 1 or int(columns) * int(rows) > max(WEB_MAP_MAX_PIXELS, 1) * 64:
+    if int(columns) < 1 or int(rows) < 1 or int(columns) * int(rows) > WEB_MAP_MAX_BUDGET:
         raise ValueError(_tr('raster capture requires a positive pixel limit'))
     path = cache.new_path(layer.name(), '.tif')
     feedback = QgsRasterBlockFeedback()
@@ -306,22 +347,34 @@ def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WE
                 feedback.cancel()
                 return
 
+    scheme, host = _service_place(layer)
+
     def finished(reply):
-        # The signal of QGIS (a QgsNetworkReplyContent, a copy of the reply), in this thread's own network
-        # manager: every reply here is one of the capture.
+        # The signal of QGIS (a QgsNetworkReplyContent, a copy of the reply). The network manager of the main
+        # thread hears the replies of every thread: those of the canvas and of other layers too. Only the replies
+        # of the service of this web map are counted.
         try:
-            address = reply.request().url().toString()
+            url = reply.request().url()
+            address = url.toString()
+            place = (url.scheme().lower(), url.host().lower())
             error = reply.error()
             status = reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute)
             kind = bytes(reply.rawHeader(b'Content-Type')).decode('ascii', 'replace').strip().lower()
         except (RuntimeError, AttributeError, TypeError):
-            unread['a reply that could not be read'] = True
             return
-        if error == QNetworkReply.NetworkError.OperationCanceledError and (stop.is_set() or feedback.isCanceled()):
+        if host and (place[0] != scheme or not (place[1] == host or place[1].endswith('.' + host))):
             return
+        if error == QNetworkReply.NetworkError.OperationCanceledError:
+            return  # a request QGIS dropped (the capture ended, or the canvas moved): nothing was missed
         status = int(status) if isinstance(status, int) else 0
-        if error != QNetworkReply.NetworkError.NoError or (status == 200 and kind and not kind.startswith('image/')):
-            # HTTP 200 with something that is no image: a service exception report.
+        if error == QNetworkReply.NetworkError.ContentNotFoundError or status in (204, 404):
+            # Many tile servers answer 404 where they have no tile (beyond their coverage or their last level):
+            # an answer, transparent, not a hole.
+            unread.pop(address, None)
+        elif error != QNetworkReply.NetworkError.NoError or (
+                status == 200 and any(word in kind for word in ('xml', 'json', 'html', 'text/plain'))):
+            # HTTP 200 with a document in place of an image: a service exception report. (Tiles served as
+            # application/octet-stream are images all the same.)
             unread[address] = True
         elif status in (0, 200):
             unread.pop(address, None)  # a tile asked again and answered
@@ -346,12 +399,15 @@ def materialize_web_map(layer, area, columns, rows, is_canceled=None, timeout=WE
         (getattr(writer, 'setCreationOptions', None) or writer.setCreateOptions)(options)
         result = writer.writeRaster(pipe, int(columns), int(rows), area, layer.crs(),
                                     QgsCoordinateTransformContext(), feedback)
-        if timed_out:
-            raise RuntimeError(_tr('the web map did not answer in time'))
-        if canceled() or feedback.isCanceled():
-            raise RuntimeError(_tr('raster capture canceled'))
         if int(getattr(result, 'value', result)) != 0:
+            # A capture that ended is kept even when its deadline passed as it ended.
+            if timed_out:
+                raise RuntimeError(_tr('the web map did not answer in time'))
+            if canceled() or feedback.isCanceled():
+                raise RuntimeError(_tr('raster capture canceled'))
             raise RuntimeError(_tr('bounded raster capture failed'))
+        if canceled():
+            raise RuntimeError(_tr('raster capture canceled'))
         if main_network is not None:
             _after_main_thread_events()
         if unread and not _has_visible_pixel(path):

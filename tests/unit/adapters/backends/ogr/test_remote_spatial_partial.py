@@ -129,6 +129,8 @@ def remote(monkeypatch):
     materializer.mark_partial_result = lambda layer, partial, final: state.marked.append((partial, final))
     state.request_bytes = 8000
     materializer.request_bytes_limit = lambda params=None: state.request_bytes
+    state.checks_replies = False  # a QGIS that cannot check a service: what UNVERIFIED stands for below
+    materializer.supports_reply_validation = lambda: state.checks_replies
     monkeypatch.setitem(sys.modules, materializer.__name__, materializer)
     # The cut by extent left for a list of keys the service refuses: the real module, pure Python.
     path = os.path.normpath(os.path.join(os.path.dirname(_EXECUTOR), "..", "..", "qgis", "extent_fallback.py"))
@@ -155,7 +157,7 @@ def _apply(state, outcome, old_subset, operator):
     queued = []
     builder = _Builder(queued)
     crs = object()
-    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "", id=lambda: "target",
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "", id=lambda: "target", name=lambda: "communes",
                             source=lambda: getattr(state, "source", "typename='a:b' url='https://example.org/wfs'"))
     source = SimpleNamespace(crs=lambda: crs)
     state.outcome = outcome
@@ -281,7 +283,7 @@ def test_more_keys_than_a_service_is_sent_cut_it_by_the_extent(extent, operator,
     applied, queued, builder = _apply(extent, TOO_MANY, old_subset, operator)
     assert applied is True and queued == [expected]
     assert extent.marked == [(False, expected)]  # nothing partial: the server answers every feature of the extent
-    assert any(warning.startswith(BY_EXTENT) for warning in builder.user_warnings) and not builder.last_error
+    assert any(BY_EXTENT in warning for warning in builder.user_warnings) and not builder.last_error
     assert builder.remote_materialization_outcome is None
 
 
@@ -301,7 +303,7 @@ def test_a_service_without_a_stable_key_is_cut_by_the_extent_and_nothing_is_read
                         lambda *args: read.append(1))
     applied, queued, builder = _apply(extent, None, None, None)
     assert applied is True and queued == [BOX] and not read
-    assert any(warning.startswith(BY_EXTENT) for warning in builder.user_warnings)
+    assert any(BY_EXTENT in warning for warning in builder.user_warnings)
 
 
 def test_and_not_is_never_cut_by_the_extent(extent, monkeypatch):
@@ -320,7 +322,7 @@ def test_disjoint_is_not_cut_by_extent(extent):
     queued = []
     builder = _Builder(queued)
     crs = object()
-    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "")
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "", name=lambda: "communes")
     extent.outcome = TOO_MANY
     applied = executor.apply_remote_spatial_filter(builder, layer, SimpleNamespace(crs=lambda: crs), ["disjoint"],
                                                    None, None, False, None, None)
@@ -353,7 +355,7 @@ def test_a_qgis_that_cannot_check_a_service_cuts_it_by_the_extent(extent, operat
     """It was refused: "The service filter cannot be proved complete"."""
     applied, queued, builder = _apply(extent, UNVERIFIED, old_subset, operator)
     assert applied is True and queued == [expected] and not builder.last_error
-    said = [warning for warning in builder.user_warnings if warning.startswith(BY_EXTENT)]
+    said = [warning for warning in builder.user_warnings if BY_EXTENT in warning]
     assert len(said) == 1 and "this version of QGIS cannot check" in said[0] and "more than 500" not in said[0]
     assert builder.remote_materialization_outcome is None
 
@@ -364,7 +366,7 @@ def test_a_qgis_that_cannot_check_a_service_still_refuses_what_an_extent_cannot_
     queued = []
     builder = _Builder(queued)
     crs = object()
-    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "")
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "", name=lambda: "communes")
     extent.outcome = UNVERIFIED
     applied = executor.apply_remote_spatial_filter(builder, layer, SimpleNamespace(crs=lambda: crs), ["disjoint"],
                                                    None, None, False, None, None)
@@ -403,7 +405,7 @@ def test_a_list_of_keys_too_long_for_an_address_is_not_sent(extent):
     """It was sent: refused by the service, or taken and answered by an empty layer."""
     applied, queued, builder = _apply(extent, _keys(60), None, None)
     assert applied is True and queued == [BOX] and not builder.last_error
-    assert any(warning.startswith(BY_EXTENT) for warning in builder.user_warnings)
+    assert any(BY_EXTENT in warning for warning in builder.user_warnings)
     assert extent.fallback.pending() == 0
 
 
@@ -434,3 +436,43 @@ def test_a_service_that_takes_no_filter_by_extent_keeps_its_list(extent, monkeyp
                         lambda layer: classify(provider, "url='https://example.org/x'"))
     applied, queued, _builder = _apply(extent, _keys(60), None, None)
     assert applied is True and queued[0].startswith('"id" IN (')
+
+
+
+def test_a_read_that_found_nothing_on_a_qgis_that_checks_replies_is_refused_as_before(extent):
+    """Not a cut by extent with the reason of an older QGIS: the server may have answered with an error."""
+    extent.checks_replies = True
+    applied, queued, builder = _apply(extent, UNVERIFIED, None, None)
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("The service filter cannot be proved complete")
+
+
+def test_the_message_of_a_cut_by_extent_names_its_layer(extent):
+    """The dock shows one message per text: two layers cut by extent are told apart by their names."""
+    _applied, _queued, builder = _apply(extent, TOO_MANY, None, None)
+    assert any(warning.startswith("communes: ") and BY_EXTENT in warning for warning in builder.user_warnings)
+
+
+def test_nothing_is_left_for_a_filter_set_at_once(extent):
+    """Without the queue of the dock nobody takes a fallback back: none is left."""
+    queued = []
+    builder = _Builder(queued)
+    set_now = []
+    builder.task_params = {}
+    crs = object()
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "", id=lambda: "target", name=lambda: "communes",
+                            source=lambda: "typename='a:b' url='https://example.org/wfs'")
+    extent.outcome = _keys(10)
+    sql = types.ModuleType(f"{_PKG}.infrastructure.database.sql_utils")
+    sql.safe_set_subset_string = lambda target, subset: set_now.append(subset) or True
+    for name in ("infrastructure", "infrastructure.database"):
+        package = types.ModuleType(f"{_PKG}.{name}")
+        package.__path__ = []
+        sys.modules.setdefault(package.__name__, package)
+    sys.modules[sql.__name__] = sql
+    try:
+        applied = executor.apply_remote_spatial_filter(builder, layer, SimpleNamespace(crs=lambda: crs),
+                                                       ["intersects"], None, None, False, None, None)
+    finally:
+        sys.modules.pop(sql.__name__, None)
+    assert applied is True and len(set_now) == 1 and extent.fallback.pending() == 0

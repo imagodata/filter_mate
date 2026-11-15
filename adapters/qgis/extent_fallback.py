@@ -20,7 +20,7 @@ from typing import Optional
 _LOCK = threading.Lock()
 _PENDING: 'OrderedDict[tuple, str]' = OrderedDict()
 # A fallback is taken or forgotten when its filter is set; this bound is for the ones whose task was canceled.
-MAX_PENDING = 64
+MAX_PENDING = 256
 
 
 def remember(layer_id: str, subset: str, fallback: str) -> None:

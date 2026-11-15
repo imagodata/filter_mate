@@ -518,8 +518,11 @@ class MapHandler(BaseHTTPRequestHandler):
             TILES.append((name, z, x, y))
             if name == "slow":
                 time.sleep(1.5)  # a capture that lasts: the other tasks of the same Filter end before it
+            if name == "nocoverage":
+                self.send_error(404)  # what many tile servers answer where they have no tile
+                return
             if name == "dead" or (name == "holes" and (x + y) % 2):
-                self.send_error(404 if name == "dead" else 500)
+                self.send_error(503 if name == "dead" else 500)
                 return
             self._send(png(tile_color(z, x, y)), "image/png")
             return
@@ -660,6 +663,14 @@ def check_web_maps(operations):
           not report.failed and holes.providerType() == "gdal" and "not answered" in str(info.get("captured")),
           (report.failed, info))
     operations.clear_filters([holes.id()])
+    # A service with no tile there (404 for each): an answer, not a hole. Cut, transparent, no word of holes.
+    bare, _uri = tiles("nocoverage")
+    report = operations.cross_filter_by_geometry(triangle, crs, [bare.id()])
+    info = info_of(report)
+    check("tiles a server has not there (404): cut, and no hole is said",
+          not report.failed and bare.providerType() == "gdal" and "not answered" not in str(info.get("captured"))
+          and (pixel(bare, 200000, 150000) or (0, 0, 0, 255))[3] == 0, (report.failed, info))
+    operations.clear_filters([bare.id()])
     # A service that answers nothing: refused, the layer stays the live service.
     dead, dead_uri = tiles("dead")
     report = operations.cross_filter_by_geometry(triangle, crs, [dead.id()])
@@ -695,7 +706,7 @@ def check_web_maps(operations):
     check("WMS that answers a report in place of an image: refused, the layer left as it was",
           bool(report.failed) and broken.providerType() == "wms" and broken.source() == broken_uri,
           (report.failed, broken.providerType()))
-    for layer in (basemap, holes, dead, plan, broken):
+    for layer in (basemap, holes, bare, dead, plan, broken):
         QgsProject.instance().removeMapLayer(layer.id())
     server.shutdown()
 
