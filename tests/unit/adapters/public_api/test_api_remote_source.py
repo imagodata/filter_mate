@@ -108,6 +108,7 @@ class _Remote:
 
     def __init__(self):
         self.partial = set()
+        self.cut_by_extent = set()
         self.supported = True
         self.rows = [1, 2, 3]
         self.reason = ""
@@ -117,6 +118,7 @@ class _Remote:
         module = types.ModuleType(name)
         module._snapshot = lambda layer: SimpleNamespace(source="feature source", uri=layer.source(), provider="wfs")
         module.is_partial_source = lambda layer: layer.id() in self.partial
+        module.is_extent_source = lambda layer: layer.id() in self.cut_by_extent
         module.supports_materialization = lambda layer: self.supported
         module.materialization_limits = lambda params=None: ("limits", params)
         module.bounded_source_layer = lambda snapshot, limits: "bounded clone"
@@ -305,3 +307,20 @@ def test_a_local_source_too_large_is_refused_before_any_read(monkeypatch):
     report = operations.OperationReport()
     assert operations._source_job(layer, LayerKind.VECTOR, report, True, None, None, None, False, None, None) == (
         "job", ["a", "b"]) and read == ["selected"] and not report.error
+
+
+# 2026-11-15: a WFS layer cut by the extent of a source keeps features beside that source. Used later as a source by
+# its filter, it carried them into the next filter without a word. A selection of its features is exact.
+
+def test_a_layer_cut_by_extent_is_refused_as_a_source_by_its_filter(remote):
+    remote.cut_by_extent.add("communes")
+    with pytest.raises(ValueError, match="dock: extent_source"):
+        _source_job(_Layer(subset="x"))
+    assert not remote.reads
+
+
+def test_a_selection_of_a_layer_cut_by_extent_is_a_source(remote):
+    remote.cut_by_extent.add("communes")
+    layer = _Layer(subset="x", selected=(1, 2))
+    job = _source_job(layer)
+    assert job is not None and not remote.reads

@@ -10359,6 +10359,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <source>rendered rasters require a rendered color capture</source>
         <translation>raster đã kết xuất cần bản ghi màu đã kết xuất</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>hệ tọa độ của bản đồ web này đã bị đổi so với hệ của dịch vụ: hãy đặt lại để lọc nó</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Hãy chọn hoặc lọc nguồn từ xa trước khi lọc không gian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Lớp dịch vụ web này đã bị cắt theo phạm vi của một nguồn: bộ lọc của nó giữ các đối tượng nằm ngoài nguồn đó. Hãy chọn các đối tượng cần dùng, hoặc bỏ lọc, trước khi dùng nó làm nguồn.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

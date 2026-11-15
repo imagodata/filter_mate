@@ -10359,6 +10359,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <source>rendered rasters require a rendered color capture</source>
         <translation>تتطلب الراسترات المعروضة التقاط ألوان معروضاً</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>تم تغيير نظام الإحداثيات لخريطة الويب هذه عن نظام خدمتها: أعِده لتصفيتها</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>حدّد المصدر البعيد أو صفِّه قبل التصفية المكانية.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>قُصّت طبقة خدمة الويب هذه حسب نطاق مصدر: يحتفظ مرشحها بمعالم خارج ذلك المصدر. حدّد المعالم المراد استخدامها، أو ألغِ التصفية، قبل استخدامها كمصدر.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

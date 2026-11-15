@@ -1022,6 +1022,10 @@ def _remote_message(reason):
             'RemoteMaterializer', 'More than 500 keys would be sent to the service; narrow the selection or use a local copy.'),
         'no_stable_key': QCoreApplication.translate(
             'RemoteMaterializer', 'The service has no stable key; use a local copy.'),
+        'extent_source': QCoreApplication.translate(
+            'RemoteMaterializer',
+            'This web service layer was cut by the extent of a source: its filter keeps features outside that '
+            'source. Select the features to use, or unfilter it, before using it as a source.'),
         'unbounded_source': QCoreApplication.translate(
             'RemoteMaterializer', 'Select or filter the remote source before spatial filtering.'),
         'unverified_filter': QCoreApplication.translate(
@@ -1085,6 +1089,10 @@ def copy_remote_source(layer, params=None, feedback=None, selected_fids=None, ex
         raise ValueError(_remote_message('unbounded_source'))
     if is_partial_source(layer):
         raise ValueError(_remote_message('incomplete_source'))
+    from ...qgis.remote_materializer import is_extent_source
+    if not fids and is_extent_source(layer):
+        # Its filter is a cut by extent: features beside the source that cut it are kept. A selection is exact.
+        raise ValueError(_remote_message('extent_source'))
     request = QgsFeatureRequest()
     if fids:
         request.setFilterFids(fids)
@@ -1233,7 +1241,11 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         builder.user_warnings.append('{}: {}'.format(layer.name(), _remote_message(
             'by_extent_unverified' if reason == 'unverified_filter' else 'by_extent')))
         builder.remote_materialization_outcome = None  # nothing was read, or what was read is not what is kept
-        return write(builder._combine_with_old_subset(old_subset, combine_operator, expression), False)
+        written = write(builder._combine_with_old_subset(old_subset, combine_operator, expression), False)
+        if written:
+            from ...qgis.remote_materializer import mark_extent_result
+            mark_extent_result(layer, expression)
+        return written
 
     if no_key:
         cut = cut_by_extent()

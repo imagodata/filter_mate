@@ -517,7 +517,11 @@ class VectorTargetJob(TargetJob):
             from ....core.domain.source_capability import key_list_fits
             from ..remote_materializer import request_bytes_limit
             from ....config.config import ENV_VARS
-            if not key_list_fits(self._pk, kept, request_bytes_limit(ENV_VARS),
+            from ....core.domain.source_capability import key_literals_in
+            # The keys of a previous filter kept by AND / OR go in the same address (the dock counts them too).
+            kept_too = key_literals_in(self.before.subset) if self.before.subset and (
+                self.operator or '').upper() in ('AND', 'OR') else []
+            if not key_list_fits(self._pk, list(kept) + kept_too, request_bytes_limit(ENV_VARS),
                                  self._by_rectangle) and self._cut_by_extent(
                     geometry, request.methods):
                 self._source = None
@@ -658,12 +662,13 @@ class VectorTargetJob(TargetJob):
             def set_subset(target, text):
                 return target.setSubsetString(text)
         ok = set_subset(layer, subset)
+        extent_set = self._expression if self.outcome.details.get('by_extent') else ''
         if not ok and self._extent_fallback:
             # The service refused the list of keys: cut by the extent of the source instead, and said.
             by_extent = combine_subset(self.before.subset, self._extent_fallback, self.operator)
             ok = set_subset(layer, by_extent)
             if ok:
-                subset, self._partial = by_extent, ''
+                subset, self._partial, extent_set = by_extent, '', self._extent_fallback
                 self.outcome.details.pop('partial', None)
                 self.outcome.details['by_extent'] = True
                 self.outcome.message = BY_EXTENT('refused')
@@ -675,8 +680,10 @@ class VectorTargetJob(TargetJob):
             return None
         if self._capability is not None and self._capability.is_remote_service:
             # Partial provenance, as the dock records it (the dock refuses such a layer as a source).
-            from ..remote_materializer import mark_partial_result
+            from ..remote_materializer import mark_extent_result, mark_partial_result
             mark_partial_result(layer, bool(self._partial), subset)
+            # The filter by extent set, by compute() or in place of a refused list above; none for a list of keys.
+            mark_extent_result(layer, extent_set)
         layer.triggerRepaint()
         return take_snapshot(layer, self.kind)
 
@@ -847,6 +854,11 @@ class RasterTargetJob(TargetJob):
         extent = QgsRectangle(base.extent()) if base.isValid() else QgsRectangle()
         if not base.isValid() or extent.isEmpty() or not extent.isFinite():
             raise RuntimeError(_tr('raster capture source could not be opened'))
+        if self.crs.isValid() and base.crs().isValid() and self.crs != base.crs():
+            # The CRS of the layer was set by hand to another than the one of its service: the area kept is in the
+            # first, the image of the service in the second, and the cut would fall beside it.
+            raise RuntimeError(_tr('the CRS of this web map was changed from the one of its service: set it back '
+                                   'to filter it'))
         self._extent = extent
         return base
 

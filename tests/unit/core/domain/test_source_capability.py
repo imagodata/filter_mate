@@ -204,10 +204,11 @@ class TestExtentSubset:
     def test_a_point_is_a_rectangle(self):
         """A source of one point: its extent has no size, the server is still asked what meets it."""
         from core.domain.source_capability import extent_subset
-        assert "POLYGON((5 6, 5 6, 5 6, 5 6, 5 6))" in extent_subset(classify("WFS", WFS_URI), 5, 6, 5, 6)
+        written = extent_subset(classify("WFS", WFS_URI), 5, 6, 5, 6)
+        assert "POLYGON((4.999999994 5.999999994, 5.000000006 5.999999994" in written
 
     @pytest.mark.parametrize("bounds", [
-        (1.5, -2, 30, 40.25), (0, 0, 0, 0), (-652381.123456789, 6862000, 652381.5, 6862000.25), (1e-7, 0, 1, 1),
+        (1.5, -2, 30, 40.25), (0, 0, 1, 1), (-652381.123456789, 6862000, 652381.5, 6862000.25), (1e-7, 0, 1, 1),
     ])
     def test_the_rectangle_is_read_back_from_what_was_written(self, bounds):
         """The validated server dialect reads the bounds of the WKT, and writes the filter again from them."""
@@ -286,3 +287,33 @@ class TestKeyListRequest:
     def test_a_layer_says_whether_it_asks_by_rectangle(self, source, expected):
         from core.domain.source_capability import asks_by_rectangle
         assert asks_by_rectangle(source) is expected
+
+
+class TestExtentFollowUps:
+    """What a review of the cut by extent found (2026-11-15)."""
+
+    @pytest.mark.parametrize("bounds", [(5, 6, 5, 6), (650000, 6860000, 650000, 6861000), (1.5, 43.6, 1.6, 43.6),
+                                        (0, 0, 0, 0)])
+    def test_an_extent_of_no_area_gets_a_small_one(self, bounds):
+        from core.domain.source_capability import extent_expression, extent_of_wkt
+        written = extent_expression(*bounds)
+        left, bottom, right, top = extent_of_wkt(written.split("geom_from_wkt('")[1].split("')")[0])
+        assert right > left and top > bottom
+        assert left <= bounds[0] and right >= bounds[2] and bottom <= bounds[1] and top >= bounds[3]
+        assert right - left < 1e-2 * max(1.0, abs(bounds[2])) or bounds[2] != bounds[0]
+
+    def test_an_extent_with_an_area_is_written_as_it_is(self):
+        from core.domain.source_capability import extent_expression
+        assert "POLYGON((1.5 -2, 30 -2, 30 40.25, 1.5 40.25, 1.5 -2))" in extent_expression(1.5, -2, 30, 40.25)
+
+    def test_the_filter_by_extent_a_subset_holds(self):
+        from core.domain.source_capability import extent_expression, extent_subset_in
+        box = extent_expression(1, 2, 3, 4)
+        assert extent_subset_in(f'("nature" = 2) AND ({box})') == box
+        assert extent_subset_in('"id" IN (1, 2)') == "" and extent_subset_in(None) == ""
+
+    def test_the_keys_of_a_previous_filter(self):
+        from core.domain.source_capability import key_literals_in
+        subset = '("id" IN (1, 2, 3)) AND ("nom" IN (\'a\', \'O\'\'Brien\', \'x, y\', \'(z)\'))'
+        assert key_literals_in(subset) == ["1", "2", "3", "a", "O'Brien", "x, y", "(z)"]
+        assert key_literals_in('"a" = 1') == [] and key_literals_in(None) == []

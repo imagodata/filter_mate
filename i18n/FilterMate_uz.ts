@@ -10359,6 +10359,11 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <source>rendered rasters require a rendered color capture</source>
         <translation>tasvirlangan rasterlar tasvirlangan rang olishni talab qiladi</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>bu veb-xaritaning koordinatalar tizimi xizmatnikidan o'zgartirilgan: filtrlash uchun uni qaytaring</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Fazoviy filtrlashdan oldin masofaviy manbani tanlang yoki filtrlang.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Bu veb-xizmat qatlami manba qamrovi bo'yicha kesilgan: uning filtri o'sha manbadan tashqaridagi obyektlarni ham saqlaydi. Uni manba sifatida ishlatishdan oldin kerakli obyektlarni tanlang yoki filtrni olib tashlang.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

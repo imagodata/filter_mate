@@ -10359,6 +10359,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <source>rendered rasters require a rendered color capture</source>
         <translation>işlenmiş rasterler bir işlenmiş renk yakalaması gerektirir</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>bu web haritasının KRS'si hizmetinkinden değiştirilmiş: filtrelemek için geri alın</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Mekânsal filtrelemeden önce uzak kaynağı seçin veya filtreleyin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Bu web hizmeti katmanı bir kaynağın kapsamına göre kesildi: filtresi o kaynağın dışındaki nesneleri de tutar. Kaynak olarak kullanmadan önce kullanılacak nesneleri seçin veya filtresini kaldırın.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>

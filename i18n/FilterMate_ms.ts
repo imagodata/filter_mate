@@ -10359,6 +10359,11 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <source>rendered rasters require a rendered color capture</source>
         <translation>raster yang dirender memerlukan tangkapan warna yang dirender</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="860"/>
+        <source>the CRS of this web map was changed from the one of its service: set it back to filter it</source>
+        <translation>CRS peta web ini telah ditukar daripada CRS perkhidmatannya: tetapkan semula untuk menapisnya</translation>
+    </message>
 </context>
 <context>
     <name>RasterStatisticsTask</name>
@@ -10478,6 +10483,11 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
         <source>Select or filter the remote source before spatial filtering.</source>
         <translation>Pilih atau tapis sumber jauh sebelum penapisan spatial.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1027"/>
+        <source>This web service layer was cut by the extent of a source: its filter keeps features outside that source. Select the features to use, or unfilter it, before using it as a source.</source>
+        <translation>Lapisan perkhidmatan web ini dipotong mengikut liputan sesuatu sumber: penapisnya mengekalkan fitur di luar sumber itu. Pilih fitur yang hendak digunakan, atau buang penapisnya, sebelum menggunakannya sebagai sumber.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>
