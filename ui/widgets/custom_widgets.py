@@ -542,7 +542,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
         self._populated_timer.start()
 
     def add_unfilterable_item(self, icon, text, layer_id):
-        """Add a greyed row that cannot be checked: a web basemap, listed to say why it is no target.
+        """Add a greyed row that cannot be checked: a web map that is not captured, listed to say why it is no target.
 
         The row has no flag (neither enabled, nor selectable, nor checkable), no check
         state and no ``layer_id`` in its data: it is never checked here nor read as a
@@ -555,8 +555,9 @@ class QgsCheckableComboBoxLayer(QComboBox):
             item.setData(icon, role=Qt.ItemDataRole.DecorationRole)
         item.setData({"unfilterable_layer_id": layer_id}, role=Qt.ItemDataRole.UserRole)
         item.setData(self.tr('not filterable'), TARGET_HINT_ROLE)
-        item.setToolTip(f"{text}\n" + self.tr('Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): '
-                                              'colours only, it cannot be filtered'))
+        # 2026-11-15: a WMS, a WMTS and XYZ tiles are targets (captured, then cut); this row is what is left.
+        item.setToolTip(f"{text}\n" + self.tr('Web map that cannot be captured (ArcGIS MapServer, GDAL description '
+                                              'of a WMS): colours only, it cannot be filtered'))
         self.model().appendRow(item)
         self._populated_timer.start()
 

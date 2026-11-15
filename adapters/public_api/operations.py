@@ -114,8 +114,8 @@ def _project_targets(layers: Iterable, project, exclude_id: Optional[str], repor
         if layer.id() in seen:
             continue
         kind = layer_kind(layer)
-        from ..qgis.point_cloud_capability import is_non_analysis_raster
-        if is_non_analysis_raster(layer):
+        from ..qgis.point_cloud_capability import is_untargetable_raster
+        if is_untargetable_raster(layer):
             report.skipped[_report_label(report, layer.name(), layer.id())] = _tr(
                 "rendered or unsupported raster: cannot be a filter target")
             continue
@@ -464,6 +464,10 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
             if outcome.details.get('by_extent'):
                 # A web service whose features cannot be listed: cut by the extent of the source, not its outline.
                 per_layer[label]['by_extent'] = outcome.message
+            if outcome.details.get('captured'):
+                # A web map: a still image of the service at this resolution, maybe with holes.
+                per_layer[label]['captured'] = outcome.message
+                per_layer[label]['capture_grid'] = outcome.details.get('capture_grid')
         else:
             report.failed[label] = outcome.message or "failed"
             if outcome.details.get('internal_error'):

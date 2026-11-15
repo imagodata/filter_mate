@@ -9177,6 +9177,11 @@ Raster xaritadagidek, o'z uslubi bilan chiziladi. SAM FilterMate panelining TANL
         <translation>Veb asos xarita (WMS / WMTS / XYZ, ArcGIS MapServer): faqat ranglar, uni filtrlab bo'lmaydi</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Olib bo'lmaydigan veb-xarita (ArcGIS MapServer, WMS ning GDAL tavsifi): faqat ranglar, uni filtrlab bo'lmaydi</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Barcha vektor qatlamlarni tanlash</translation>
@@ -10268,6 +10273,16 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <translation>cheklangan raster olish muvaffaqiyatsiz</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>veb-xarita o'z vaqtida javob bermadi</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>veb-xarita olish so'rovlarining birortasiga ham javob bermadi</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>lokal raster olishni ochib bo'lmadi</translation>
@@ -10383,6 +10398,21 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Tasvirlangan rang qatlamlari filtr nishoni bo'la olmaydi.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Veb-xarita {0} x {1} pikselli harakatsiz tasvir sifatida olindi (har pikselga {2} {3}), so'ng manba bo'yicha kesildi: yaqinlashtirish ko'proq tafsilot ko'rsatmaydi. Filtrni olib tashlash jonli xizmatni qaytaradi.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>xarita birligi</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>Xizmatga yuborilgan {0} ta so'rov javobsiz qoldi: tasvirda bo'shliqlar bo'lishi mumkin.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Masofaviy fazoviy predikatni baholab bo'lmadi; oldingi filtr saqlanadi.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Manba qamrovi bo'yicha kesildi: bu veb-xizmatning mos obyektlarini sanab bo'lmaydi (500 dan ortiq yoki barqaror kalit yo'q). Shu qamrov ichidagi obyektlar manbaning o'zidan tashqarida bo'lishi mumkin.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

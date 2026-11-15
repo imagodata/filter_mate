@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>แผนที่ฐานเว็บ (WMS / WMTS / XYZ, ArcGIS MapServer): มีเพียงสี จึงกรองไม่ได้</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>แผนที่เว็บที่จับภาพไม่ได้ (ArcGIS MapServer, คำอธิบาย GDAL ของ WMS): มีเพียงสี จึงกรองไม่ได้</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>เลือกเลเยอร์เวกเตอร์ทั้งหมด</translation>
@@ -10268,6 +10273,16 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>การจับภาพราสเตอร์แบบจำกัดล้มเหลว</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>แผนที่เว็บไม่ตอบกลับภายในเวลาที่กำหนด</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>แผนที่เว็บไม่ตอบคำขอใดของการจับภาพเลย</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>ไม่สามารถเปิดการจับภาพราสเตอร์ในเครื่องได้</translation>
@@ -10383,6 +10398,21 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>เลเยอร์สีที่แสดงผลไม่สามารถเป็นเป้าหมายของตัวกรองได้</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>จับภาพแผนที่เว็บเป็นภาพนิ่งขนาด {0} x {1} พิกเซล ({2} {3} ต่อพิกเซล) แล้วตัดด้วยแหล่งข้อมูล: การซูมเข้าจะไม่แสดงรายละเอียดเพิ่ม Unfilter จะคืนบริการแบบสดกลับมา</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>หน่วยแผนที่</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>คำขอ {0} รายการถึงบริการไม่ได้รับคำตอบ: ภาพอาจมีช่องว่าง</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>ไม่สามารถประเมินเพรดิเคตเชิงพื้นที่ระยะไกลได้ ยังคงใช้ตัวกรองก่อนหน้า</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>ตัดตามขอบเขตของแหล่งข้อมูล: ไม่สามารถแจกแจงฟีเจอร์ที่ตรงกันของบริการเว็บนี้ได้ (มากกว่า 500 รายการ หรือไม่มีคีย์ที่คงที่) ฟีเจอร์ที่อยู่ในขอบเขตนี้อาจอยู่นอกตัวแหล่งข้อมูลเอง</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

@@ -9177,6 +9177,11 @@ Raster được vẽ như trên bản đồ, với kiểu hiển thị của nó
         <translation>Bản đồ nền web (WMS / WMTS / XYZ, ArcGIS MapServer): chỉ có màu, không thể lọc</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Bản đồ web không thể ghi lại (ArcGIS MapServer, mô tả GDAL của một WMS): chỉ có màu, không thể lọc</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Chọn tất cả các lớp vector</translation>
@@ -10268,6 +10273,16 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>ghi lại raster có giới hạn thất bại</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>bản đồ web không trả lời kịp thời</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>bản đồ web không trả lời yêu cầu nào của lần ghi lại</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>không mở được bản ghi raster cục bộ</translation>
@@ -10383,6 +10398,21 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Các lớp màu đã kết xuất không thể làm đích lọc.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Bản đồ web được ghi lại thành ảnh tĩnh {0} x {1} điểm ảnh ({2} {3} mỗi điểm ảnh), rồi được cắt theo nguồn: phóng to không hiện thêm chi tiết. Bỏ lọc sẽ trả lại dịch vụ trực tiếp.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>đơn vị bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} yêu cầu gửi tới dịch vụ không được trả lời: ảnh có thể có lỗ trống.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Không đánh giá được vị từ không gian từ xa; giữ bộ lọc trước đó.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Cắt theo phạm vi của nguồn: không thể liệt kê các đối tượng khớp của dịch vụ web này (hơn 500, hoặc không có khóa ổn định). Các đối tượng nằm trong phạm vi đó có thể nằm ngoài chính nguồn.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>የድር መሠረት ካርታ (WMS / WMTS / XYZ, ArcGIS MapServer)፦ ቀለሞች ብቻ፣ ሊጣራ አይችልም</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>ሊቀረጽ የማይችል የድር ካርታ (ArcGIS MapServer፣ የWMS GDAL መግለጫ)፦ ቀለሞች ብቻ፣ ሊጣራ አይችልም</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>ሁሉንም የቬክተር ንብርብሮች ምረጥ</translation>
@@ -10268,6 +10273,16 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>የተገደበ የራስተር ቀረጻ አልተሳካም</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>የድር ካርታው በጊዜ አልመለሰም</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>የድር ካርታው ለቀረጻው ጥያቄዎች አንዱንም አልመለሰም</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>የአካባቢ የራስተር ቀረጻ ሊከፈት አልቻለም</translation>
@@ -10383,6 +10398,21 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>የተሳሉ የቀለም ንብርብሮች የማጣሪያ ዒላማ ሊሆኑ አይችሉም።</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>የድር ካርታው {0} x {1} ፒክሰል የማይንቀሳቀስ ምስል ሆኖ ተቀርጿል ({2} {3} በፒክሰል)፣ ከዚያም በምንጩ ተቆርጧል፦ ማጉላት ተጨማሪ ዝርዝር አያሳይም። ማጣሪያ አንሳ የቀጥታ አገልግሎቱን ይመልሳል።</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>የካርታ አሃዶች</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>የአገልግሎቱ {0} ጥያቄ(ዎች) መልስ አላገኙም፦ ምስሉ ክፍተቶች ሊኖሩት ይችላል።</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>የርቀት ቦታዊ ተሳቢው ሊገመገም አልቻለም፤ የቀደመው ማጣሪያ ይቆያል።</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>በምንጩ ክልል ተቆርጧል፦ የዚህ የድር አገልግሎት ተዛማጅ ባህሪያት ሊዘረዘሩ አይችሉም (ከ500 በላይ፣ ወይም የተረጋጋ ቁልፍ የለም)። በዚያ ክልል ውስጥ ያሉ ባህሪያት ከምንጩ ራሱ ውጭ ሊሆኑ ይችላሉ።</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>خريطة أساس من الويب (WMS / WMTS / XYZ، ArcGIS MapServer): ألوان فقط، لا يمكن تصفيتها</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>خريطة ويب لا يمكن التقاطها (ArcGIS MapServer، وصف GDAL لخدمة WMS): ألوان فقط، لا يمكن تصفيتها</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>تحديد كل الطبقات المتجهة</translation>
@@ -10268,6 +10273,16 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>فشل التقاط الراستر المحدود</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>لم تستجب خريطة الويب في الوقت المحدد</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>لم تستجب خريطة الويب لأي من طلبات الالتقاط</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>تعذّر فتح التقاط الراستر المحلي</translation>
@@ -10383,6 +10398,21 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>لا يمكن أن تكون طبقات الألوان المعروضة أهدافاً للتصفية.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>تم التقاط خريطة الويب كصورة ثابتة بحجم {0} x {1} بكسل ({2} {3} لكل بكسل)، ثم قُصّت حسب المصدر: التكبير لا يُظهر تفاصيل أكثر. إلغاء التصفية يعيد الخدمة المباشرة.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>وحدات الخريطة</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>لم يتم الرد على {0} من طلبات الخدمة: قد تحتوي الصورة على فجوات.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>تعذّر تقييم العلاقة المكانية البعيدة؛ يبقى عامل التصفية السابق.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>قص حسب نطاق المصدر: لا يمكن سرد المعالم المطابقة في خدمة الويب هذه (أكثر من 500، أو لا يوجد مفتاح ثابت). قد تقع معالم داخل هذا النطاق خارج المصدر نفسه.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

@@ -175,6 +175,11 @@ def get_raster_layer_type() -> Optional[type]:
 ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster', 'wcs')
 NON_ANALYSIS_RASTER_PROVIDERS = ('wms', 'arcgismapserver', 'grassraster')
 RENDERED_RASTER_PROVIDERS = ('wms', 'arcgismapserver')
+# 2026-11-15: a web map of the 'wms' provider (WMS, WMTS, XYZ tiles) is a filter target: it is captured in the
+# area the source keeps, within a budget of pixels, then cut as a local raster is (RasterTargetJob). Its capture
+# was read in real QGIS 3.22, 3.44 and 4.3. An ArcGIS MapServer and a GDAL description of a WMS are not captured:
+# theirs was not read.
+CAPTURED_TARGET_PROVIDERS = ('wms',)
 
 
 def _renders_an_image(layer: Any) -> bool:
@@ -234,6 +239,25 @@ def is_non_analysis_raster(layer: Any) -> bool:
         return layer.providerType().lower() not in ANALYSIS_RASTER_PROVIDERS or _renders_an_image(layer)
     except (TypeError, RuntimeError, AttributeError):
         return False
+
+
+def is_captured_target_raster(layer: Any) -> bool:
+    """True for a web map a filter cuts from a bounded capture (WMS, WMTS, XYZ tiles)."""
+    if not _is_raster_instance(layer):
+        return False
+    try:
+        return layer.providerType().lower() in CAPTURED_TARGET_PROVIDERS
+    except (TypeError, RuntimeError, AttributeError):
+        return False
+
+
+def is_untargetable_raster(layer: Any) -> bool:
+    """True for a raster that is never a filter target: unsupported, or rendered and not captured.
+
+    The rule of the lists of targets, of the API and of the jobs; exports keep ``is_non_analysis_raster``
+    (a web map that was not cut is not exported).
+    """
+    return is_non_analysis_raster(layer) and not is_captured_target_raster(layer)
 
 
 def is_raster_layer(layer: Any) -> bool:
@@ -302,7 +326,7 @@ def is_coverage_layer(layer: Any) -> bool:
 
 
 def is_listed_coverage_target(layer: Any, vector_source: bool) -> bool:
-    """True for a raster of values / a point cloud the dock lists as a target of the source.
+    """True for a raster / a point cloud the dock lists as a target of the source (a web map of tiles included).
 
     Under a vector source, rasters and point clouds also need their option
     ``APP.OPTIONS.CROSS_FILTER.vector_source_raster_targets`` /
@@ -311,18 +335,19 @@ def is_listed_coverage_target(layer: Any, vector_source: bool) -> bool:
     """
     if is_point_cloud_layer(layer):
         return not vector_source or is_vector_source_point_cloud_targets_enabled()
-    if is_raster_layer(layer) and not is_non_analysis_raster(layer):
+    if is_raster_layer(layer) and not is_untargetable_raster(layer):
         return not vector_source or is_vector_source_raster_targets_enabled()
     return False
 
 
 def is_listed_rendered_raster(layer: Any, vector_source: bool) -> bool:
-    """True for a rendered raster (WMS / WMTS / XYZ, ArcGIS MapServer) shown greyed among the targets.
+    """True for a rendered raster that is no target (ArcGIS MapServer, GDAL WMS), shown greyed among the targets.
 
     It is listed, never checkable, where the rasters of values are listed,
-    so that a web basemap missing from the targets says why.
+    so that a web basemap missing from the targets says why. A WMS, a WMTS and
+    XYZ tiles are targets since 2026-11-15 (``is_captured_target_raster``).
     """
-    return (is_raster_layer(layer) and is_non_analysis_raster(layer)
+    return (is_raster_layer(layer) and is_untargetable_raster(layer)
             and (not vector_source or is_vector_source_raster_targets_enabled()))
 
 

@@ -9177,6 +9177,11 @@ El ráster se dibuja como en el mapa, con su estilo. SAM se instala una sola vez
         <translation>Mapa base web (WMS / WMTS / XYZ, ArcGIS MapServer): solo colores, no se puede filtrar</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Mapa web que no se puede capturar (ArcGIS MapServer, descripción GDAL de un WMS): solo colores, no se puede filtrar</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Seleccionar todas las capas vectoriales</translation>
@@ -10268,6 +10273,16 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <translation>falló la captura ráster acotada</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>el mapa web no respondió a tiempo</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>el mapa web no respondió a ninguna de las peticiones de la captura</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>no se pudo abrir la captura ráster local</translation>
@@ -10383,6 +10398,21 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Las capas de color renderizado no pueden ser objetivos del filtro.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Mapa web capturado como imagen fija de {0} x {1} píxeles ({2} {3} por píxel) y luego recortado por el origen: acercar el zoom no muestra más detalle. Desfiltrar devuelve el servicio en vivo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>unidades del mapa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} petición(es) al servicio no obtuvieron respuesta: la imagen puede tener huecos.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime viene de PyPI con pip, el modelo de huggingface.co/{1}, y cada archi
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>No se pudo evaluar el predicado espacial remoto; se conserva el filtro anterior.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Recorte por la extensión del origen: las entidades coincidentes de este servicio web no se pueden enumerar (más de 500, o sin clave estable). Puede haber entidades dentro de esa extensión que queden fuera del propio origen.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

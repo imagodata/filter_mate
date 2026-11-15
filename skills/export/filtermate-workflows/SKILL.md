@@ -38,6 +38,9 @@ ones: take the one that fits, leave out the steps the project already answers.
    inside) and buffer for a distance, in metres. One call, no buffer layer.
 3. Report kept for each target. A warning that nothing was kept points at the call: check the direction of the
    predicate and the source selection before saying "none".
+4. Say the other warnings as they are: a WFS layer cut by the extent of the source (a rectangle: features beside
+   the source stay; a smaller source or a selection gives the exact cut), a web map (WMS, WMTS, tiles) turned
+   into a still image at one resolution, with holes when its service did not answer.
 
 ## Around a place
 

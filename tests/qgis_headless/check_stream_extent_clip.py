@@ -17,25 +17,31 @@ source. Two servers written here stand for them:
 
 Prints one PASS / FAIL line per check; exits with 1 when one failed.
 """
+import math
 import os
 import re
+import struct
 import sys
 import tempfile
 import threading
 import time
+import zlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from qgis.core import (  # noqa: E402
     Qgis, QgsApplication, QgsCoordinateReferenceSystem, QgsDataSourceUri, QgsFeatureRequest, QgsGeometry, QgsProject,
-    QgsRectangle, QgsVectorLayer,
+    QgsRasterLayer, QgsRectangle, QgsVectorLayer,
 )
 
 TOTAL = 5000  # points, a row of 100 by 50, 10 m apart, from 0, 0 in Web Mercator
 RESULTS = []
 ASKED = []  # one entry per GetFeature of the WFS server
 REFUSED = []  # the status of every request a server refused: QGIS shows an empty layer for them, and says nothing
+TILES = []  # (name, z, x, y) of every tile asked of the tile server
+MAPS = []  # (name, width, height, (x_min, y_min, x_max, y_max)) of every GetMap asked of the WMS server
+WORLD = 20037508.342789244  # half the side of the square of Web Mercator
 
 
 def check(label, condition, detail=""):
@@ -343,10 +349,260 @@ def check_wfs(operations):
     server.shutdown()
 
 
+# --- web maps: a tile server (XYZ) and a WMS ---------------------------------
+
+def png(color, width=256, height=256):
+    """A PNG of one color (red, green, blue, alpha), written here: no image library off the main thread."""
+    def chunk(tag, data):
+        return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+    row = b"\x00" + bytes(color) * width
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(row * height, 1)) + chunk(b"IEND", b""))
+
+
+def tile_color(z, x, y):
+    """A tile says its level and its position by its color."""
+    return (x * 40) % 256, (y * 40) % 256, (z * 20) % 256, 255
+
+
+def tile_at(z, x_map, y_map):
+    side = 2 * WORLD / 2 ** z
+    return int(math.floor((x_map + WORLD) / side)), int(math.floor((WORLD - y_map) / side))
+
+
+WMS_COLOR = (10, 200, 30, 255)
+
+
+def wms_capabilities(base):
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<WMS_Capabilities version="1.3.0" xmlns="http://www.opengis.net/wms" xmlns:xlink="http://www.w3.org/1999/xlink">
+<Service><Name>WMS</Name><Title>fm</Title><OnlineResource xlink:type="simple" xlink:href="{base}"/>
+ <MaxWidth>2048</MaxWidth><MaxHeight>2048</MaxHeight></Service>
+<Capability>
+ <Request>
+  <GetCapabilities><Format>text/xml</Format><DCPType><HTTP><Get><OnlineResource xlink:type="simple" xlink:href="{base}?"/>
+   </Get></HTTP></DCPType></GetCapabilities>
+  <GetMap><Format>image/png</Format><DCPType><HTTP><Get><OnlineResource xlink:type="simple" xlink:href="{base}?"/>
+   </Get></HTTP></DCPType></GetMap>
+ </Request>
+ <Exception><Format>XML</Format></Exception>
+ <Layer><Title>root</Title><CRS>EPSG:3857</CRS>
+  <Layer queryable="0"><Name>plan</Name><Title>plan</Title><CRS>EPSG:3857</CRS>
+   <EX_GeographicBoundingBox><westBoundLongitude>-1</westBoundLongitude><eastBoundLongitude>1</eastBoundLongitude>
+    <southBoundLatitude>-1</southBoundLatitude><northBoundLatitude>1</northBoundLatitude></EX_GeographicBoundingBox>
+   <BoundingBox CRS="EPSG:3857" minx="-111319" miny="-111325" maxx="111319" maxy="111325"/>
+  </Layer>
+ </Layer>
+</Capability></WMS_Capabilities>"""
+
+
+class MapHandler(BaseHTTPRequestHandler):
+    """``/<name>/<z>/<x>/<y>.png`` (tiles, holes: every other tile fails, dead: none answers) and ``/<name>`` (WMS)."""
+
+    def log_message(self, *args):
+        pass
+
+    def _send(self, data, kind):
+        self.send_response(200)
+        self.send_header("Content-Type", kind)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def do_GET(self):
+        parts = urlsplit(self.path)
+        steps = parts.path.strip("/").split("/")
+        name = steps[0]
+        if len(steps) == 4:
+            z, x, y = int(steps[1]), int(steps[2]), int(steps[3].split(".")[0])
+            TILES.append((name, z, x, y))
+            if name == "dead" or (name == "holes" and (x + y) % 2):
+                self.send_error(404 if name == "dead" else 500)
+                return
+            self._send(png(tile_color(z, x, y)), "image/png")
+            return
+        query = {key.lower(): value[0] for key, value in parse_qs(parts.query).items()}
+        request = query.get("request", "").lower()
+        if request == "getcapabilities":
+            self._send(wms_capabilities(f"http://127.0.0.1:{self.server.server_port}/{name}").encode("utf-8"), "text/xml")
+        elif request == "getmap":
+            width, height = int(query["width"]), int(query["height"])
+            MAPS.append((name, width, height, tuple(float(value) for value in query["bbox"].split(","))))
+            if name == "wmsdead":  # what a WMS answers when it cannot draw: HTTP 200, and a report
+                self._send(b'<?xml version="1.0"?><ServiceExceptionReport><ServiceException>no</ServiceException>'
+                           b'</ServiceExceptionReport>', "text/xml")
+                return
+            self._send(png(WMS_COLOR, width, height), "image/png")
+        else:
+            self.send_error(400)
+
+
+def pixel(layer, x_map, y_map):
+    """The (red, green, blue, alpha) the file of a cut layer holds at a point; None outside its grid."""
+    from osgeo import gdal
+    dataset = gdal.Open(layer.source())
+    x0, dx, _, y0, _, dy = dataset.GetGeoTransform()
+    column, row = int((x_map - x0) / dx), int((y_map - y0) / dy)
+    if not (0 <= column < dataset.RasterXSize and 0 <= row < dataset.RasterYSize) or dataset.RasterCount != 4:
+        return None
+    return tuple(int(dataset.GetRasterBand(band).ReadAsArray(column, row, 1, 1)[0][0]) for band in range(1, 5))
+
+
+def grid(layer):
+    from osgeo import gdal
+    dataset = gdal.Open(layer.source())
+    return dataset.RasterXSize, dataset.RasterYSize, abs(dataset.GetGeoTransform()[1]), dataset.RasterCount
+
+
+def check_web_maps(operations):
+    """Tiles (XYZ) and a WMS as targets: captured in the area the source keeps, cut, and given back by Unfilter."""
+    from filter_mate.adapters.qgis import point_cloud_capability as capability
+    from filter_mate.adapters.qgis.coverage_layers import cache
+    from filter_mate.config.config import ENV_VARS
+    cache.set_cache_root(tempfile.mkdtemp())
+    options = ENV_VARS.setdefault("CONFIG_DATA", {}).setdefault("APP", {}).setdefault("OPTIONS", {})
+    options.setdefault("CROSS_FILTER", {})["web_map_target_max_pixels"] = {"value": 1000000}
+    options.setdefault("RASTER", {})["enabled"] = {"value": True}  # the option of the dock, off when unset
+    server = ThreadingHTTPServer(("127.0.0.1", 0), MapHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    port = server.server_port
+    crs = QgsCoordinateReferenceSystem("EPSG:3857")
+
+    def tiles(name):
+        uri = f"type=xyz&url=http://127.0.0.1:{port}/{name}/{{z}}/{{x}}/{{y}}.png&zmin=0&zmax=14&crs=EPSG:3857"
+        layer = QgsRasterLayer(uri, name, "wms")
+        QgsProject.instance().addMapLayer(layer)
+        return layer, layer.source()  # as the layer says it: QGIS 4 writes the address of a WMS its own way
+
+    def wms(name):
+        uri = f"crs=EPSG:3857&format=image/png&layers=plan&styles=&url=http://127.0.0.1:{port}/{name}"
+        layer = QgsRasterLayer(uri, name, "wms")
+        QgsProject.instance().addMapLayer(layer)
+        return layer, layer.source()
+
+    def info_of(report):
+        return next(iter((report.details.get("layers") or {}).values()), {})
+
+    basemap, basemap_uri = tiles("tiles")
+    check("tiles: the layer opens, and is listed among the targets of a vector source, not greyed",
+          basemap.isValid() and capability.is_listed_coverage_target(basemap, True)
+          and not capability.is_listed_rendered_raster(basemap, True) and capability.is_non_analysis_raster(basemap),
+          basemap.isValid())
+    basemap.renderer().setOpacity(0.6)
+    was = basemap.renderer().type()
+
+    # A triangle of 200 km by 150 km. A million pixels: level 10 (153 m) is past the budget, level 9 (306 m) is not.
+    triangle = QgsGeometry.fromWkt("POLYGON((100000 100000, 300000 100000, 200000 250000, 100000 100000))")
+    del TILES[:]
+    report = operations.cross_filter_by_geometry(triangle, crs, [basemap.id()])
+    info = info_of(report)
+    level = 2 * WORLD / 256 / 2 ** 9
+    check("tiles: cut by the source, and says it is a still image at a resolution",
+          not report.error and not report.failed and "still image" in str(info.get("captured"))
+          and "306" in str(info.get("captured")), (report.error, report.failed, info))
+    check("tiles: the layer is now a local file, with its opacity",
+          basemap.isValid() and basemap.providerType() == "gdal" and basemap.source().endswith(".vrt")
+          and abs(basemap.renderer().opacity() - 0.6) < 1e-6 and basemap.renderer().alphaBand() == 4,
+          (basemap.providerType(), basemap.source()[-40:], basemap.renderer().opacity(), basemap.renderer().alphaBand()))
+    columns, rows, cell, bands = grid(basemap)
+    check("tiles: captured at the finest level the budget affords, on the pixels of that level",
+          bands == 4 and abs(cell - level) < 1e-6 and columns * rows <= 1000000 and columns >= 654 and rows >= 490,
+          (columns, rows, cell, level, bands))
+    levels = sorted({z for _name, z, _x, _y in TILES})
+    check("tiles: only the tiles of that level over the area kept were asked", levels == [9] and 0 < len(TILES) <= 25,
+          (levels, len(TILES)))
+    inside_tile = tile_at(9, 200000, 150000)
+    check("tiles: a pixel inside the source holds the color of its tile",
+          pixel(basemap, 200000, 150000) == tile_color(9, *inside_tile), (pixel(basemap, 200000, 150000), inside_tile))
+    check("tiles: a pixel of the capture outside the source is transparent",
+          (pixel(basemap, 110000, 240000) or (0, 0, 0, 255))[3] == 0, pixel(basemap, 110000, 240000))
+
+    # AND with a smaller zone inside the triangle: a new capture, finer, of the area both keep.
+    square = QgsGeometry.fromWkt("POLYGON((180000 120000, 220000 120000, 220000 160000, 180000 160000, 180000 120000))")
+    del TILES[:]
+    report = operations.cross_filter_by_geometry(square, crs, [basemap.id()], operator="AND")
+    columns, rows, cell, _bands = grid(basemap)
+    check("tiles, AND: the area both sources keep, captured again at a finer level",
+          not report.failed and cell < level and columns * rows <= 1000000
+          and (pixel(basemap, 200000, 150000) or (0, 0, 0, 0))[3] == 255 and pixel(basemap, 250000, 110000) is None,
+          (report.failed, columns, rows, cell, pixel(basemap, 200000, 150000), pixel(basemap, 250000, 110000)))
+    # AND with a zone that meets nothing of it: nothing is kept, and the service is asked nothing.
+    away = QgsGeometry.fromWkt("POLYGON((900000 900000, 950000 900000, 950000 950000, 900000 950000, 900000 900000))")
+    del TILES[:]
+    report = operations.cross_filter_by_geometry(away, crs, [basemap.id()], operator="AND")
+    check("tiles, AND with a zone elsewhere: nothing kept, no tile asked", not report.failed and not TILES
+          and basemap.isValid() and basemap.providerType() == "gdal", (report.failed, len(TILES)))
+    operations.clear_filters([basemap.id()])
+    check("tiles: Unfilter gives the live service back, as it was",
+          basemap.isValid() and basemap.providerType() == "wms" and basemap.source() == basemap_uri
+          and basemap.renderer().type() == was and abs(basemap.renderer().opacity() - 0.6) < 1e-6,
+          (basemap.providerType(), basemap.renderer().type(), basemap.renderer().opacity()))
+
+    # Disjoint: what lies outside the source, over the whole service, as coarse as the budget makes it.
+    del TILES[:]
+    report = operations.cross_filter_by_geometry(triangle, crs, [basemap.id()], predicates=("Disjoint",))
+    info = info_of(report)
+    columns, rows, cell, _bands = grid(basemap) if basemap.providerType() == "gdal" else (0, 0, 0, 0)
+    check("tiles, Disjoint: the whole service outside the source, within the budget, and it says how coarse",
+          not report.failed and 0 < columns * rows <= 1000000 and "still image" in str(info.get("captured"))
+          and (pixel(basemap, 200000, 150000) or (0, 0, 0, 255))[3] == 0
+          and (pixel(basemap, -5000000, 3000000) or (0, 0, 0, 0))[3] == 255,
+          (report.failed, columns, rows, cell, info))
+    operations.clear_filters([basemap.id()])
+
+    # A service that fails for every other tile: the cut is made, and says the image may have holes.
+    holes, _uri = tiles("holes")
+    report = operations.cross_filter_by_geometry(triangle, crs, [holes.id()])
+    info = info_of(report)
+    check("tiles with holes: cut, and says some requests were not answered",
+          not report.failed and holes.providerType() == "gdal" and "not answered" in str(info.get("captured")),
+          (report.failed, info))
+    operations.clear_filters([holes.id()])
+    # A service that answers nothing: refused, the layer stays the live service.
+    dead, dead_uri = tiles("dead")
+    report = operations.cross_filter_by_geometry(triangle, crs, [dead.id()])
+    check("tiles that never answer: refused with its reason, the layer left as it was",
+          bool(report.failed) and "answered none" in str(report.failed) and dead.providerType() == "wms"
+          and dead.source() == dead_uri and dead.isValid(), (report.failed, dead.providerType()))
+
+    # A WMS: no levels, the resolution is the one the budget gives; GetMap is asked over the area kept only.
+    plan, plan_uri = wms("wms")
+    check("WMS: the layer opens, and is listed among the targets", plan.isValid()
+          and capability.is_listed_coverage_target(plan, True), plan.isValid())
+    wedge = QgsGeometry.fromWkt("POLYGON((-50000 -50000, 50000 -50000, 0 60000, -50000 -50000))")
+    del MAPS[:]
+    report = operations.cross_filter_by_geometry(wedge, crs, [plan.id()])
+    info = info_of(report)
+    asked = [entry for entry in MAPS if entry[0] == "wms"]
+    total = sum(width * height for _name, width, height, _box in asked)
+    within = all(box[0] >= -52000 and box[1] >= -52000 and box[2] <= 52000 and box[3] <= 62000
+                 for _name, _width, _height, box in asked)
+    check("WMS: cut by the source from a capture of the area kept, within the budget",
+          not report.failed and plan.providerType() == "gdal" and "still image" in str(info.get("captured"))
+          and asked and total <= 1050000 and within and all(max(w, h) <= 2048 for _n, w, h, _b in asked),
+          (report.failed, len(asked), total, within, info))
+    check("WMS: inside the source the image of the service, outside it nothing",
+          pixel(plan, 0, 0) == WMS_COLOR and (pixel(plan, -45000, 50000) or (0, 0, 0, 255))[3] == 0,
+          (pixel(plan, 0, 0), pixel(plan, -45000, 50000)))
+    operations.clear_filters([plan.id()])
+    check("WMS: Unfilter gives the live service back", plan.providerType() == "wms" and plan.source() == plan_uri
+          and plan.isValid(), plan.providerType())
+    # A WMS that answers a report in place of an image (HTTP 200): refused, never a transparent image.
+    broken, broken_uri = wms("wmsdead")
+    report = operations.cross_filter_by_geometry(wedge, crs, [broken.id()])
+    check("WMS that answers a report in place of an image: refused, the layer left as it was",
+          bool(report.failed) and broken.providerType() == "wms" and broken.source() == broken_uri,
+          (report.failed, broken.providerType()))
+    for layer in (basemap, holes, dead, plan, broken):
+        QgsProject.instance().removeMapLayer(layer.id())
+    server.shutdown()
+
+
 def main():
     print(f"QGIS {Qgis.QGIS_VERSION}", flush=True)
     from filter_mate.adapters.public_api import operations
     check_wfs(operations)
+    check_web_maps(operations)
 
 
 if __name__ == "__main__":

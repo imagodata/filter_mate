@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>웹 배경 지도(WMS / WMTS / XYZ, ArcGIS MapServer): 색상만 있어 필터링할 수 없습니다</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>캡처할 수 없는 웹 지도(ArcGIS MapServer, WMS의 GDAL 설명): 색상만 있어 필터링할 수 없습니다</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>모든 벡터 레이어 선택</translation>
@@ -10268,6 +10273,16 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>범위가 제한된 래스터 캡처에 실패했습니다</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>웹 지도가 제시간에 응답하지 않았습니다</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>웹 지도가 캡처 요청에 하나도 응답하지 않았습니다</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>로컬 래스터 캡처를 열 수 없습니다</translation>
@@ -10383,6 +10398,21 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>렌더링된 색상 레이어는 필터 대상이 될 수 없습니다.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>웹 지도를 {0} x {1} 픽셀의 정지 이미지로 캡처한 뒤({2} {3}/픽셀) 소스로 잘라냈습니다: 확대해도 더 자세히 보이지 않습니다. 필터 해제하면 실시간 서비스로 돌아갑니다.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>지도 단위</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>서비스 요청 {0}건이 응답을 받지 못했습니다: 이미지에 빈 곳이 있을 수 있습니다.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>원격 공간 조건자를 평가할 수 없습니다. 이전 필터를 유지합니다.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>소스 범위로 잘라냈습니다: 이 웹 서비스의 일치하는 피처를 나열할 수 없습니다(500개 초과 또는 안정적인 키 없음). 이 범위 안의 피처가 소스 자체의 바깥에 있을 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

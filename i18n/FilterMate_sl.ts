@@ -9177,6 +9177,11 @@ Raster se nariše tako kot na zemljevidu, s svojim slogom. SAM se namesti enkrat
         <translation>Spletna podlaga (WMS / WMTS / XYZ, ArcGIS MapServer): samo barve, ni je mogoče filtrirati</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Spletni zemljevid, ki ga ni mogoče zajeti (ArcGIS MapServer, opis WMS v GDAL): samo barve, ni ga mogoče filtrirati</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Izberi vse vektorske plasti</translation>
@@ -10268,6 +10273,16 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>omejen zajem rastra ni uspel</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>spletni zemljevid ni odgovoril pravočasno</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>spletni zemljevid ni odgovoril na nobeno zahtevo zajema</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>lokalnega zajema rastra ni bilo mogoče odpreti</translation>
@@ -10383,6 +10398,21 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Plasti upodobljenih barv ne morejo biti cilji filtra.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Spletni zemljevid je zajet kot mirujoča slika {0} x {1} slikovnih pik ({2} {3} na slikovno piko) in nato obrezan z virom: približevanje ne pokaže več podrobnosti. Odstrani filter vrne storitev v živo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>enote zemljevida</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>Zahtev storitvi brez odgovora: {0}. Slika ima lahko luknje.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Oddaljenega prostorskega predikata ni bilo mogoče ovrednotiti; prejšnji filter je ohranjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Obrezano po obsegu vira: ujemajočih se objektov te spletne storitve ni mogoče našteti (več kot 500 ali brez stabilnega ključa). Objekti znotraj tega obsega so lahko zunaj samega vira.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

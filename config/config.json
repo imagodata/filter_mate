@@ -786,7 +786,7 @@
         "vector_source_raster_targets": {
           "value": true,
           "choices": [true, false],
-          "description": "List the raster layers among the layers to filter of a vector source (with RASTER enabled). Web basemaps (WMS, WMTS, XYZ) are listed greyed: colours only, they cannot be filtered"
+          "description": "List the raster layers among the layers to filter of a vector source (with RASTER enabled). Web maps (WMS, WMTS, XYZ tiles) are listed too: cut from a still capture of the area kept. An ArcGIS MapServer is listed greyed: colours only, it cannot be filtered"
         },
         "vector_source_point_cloud_targets": {
           "value": true,
@@ -801,6 +801,10 @@
         "raster_source_max_pixels": {
           "value": 100000000,
           "description": "Pixels of a raster selection read at the native resolution, tile by tile; beyond, every 2nd, 4th... pixel is read (the outline stays light either way)"
+        },
+        "web_map_target_max_pixels": {
+          "value": 16000000,
+          "description": "Pixels of the still image a web map (WMS, WMTS, XYZ tiles) is captured as when a source cuts it: the finest level of the service this budget affords over the area kept"
         },
         "point_cloud_footprint_resolution": {
           "value": 2.0,

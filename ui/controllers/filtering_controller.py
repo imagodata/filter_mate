@@ -520,8 +520,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 if not layer_obj:
                     skipped_reasons.append(f"{layer_name}: layer_obj is None (not in project)")
                     continue
-                from ...adapters.qgis.point_cloud_capability import is_listed_coverage_target, is_non_analysis_raster
-                if is_non_analysis_raster(layer_obj):
+                from ...adapters.qgis.point_cloud_capability import is_listed_coverage_target, is_untargetable_raster
+                if is_untargetable_raster(layer_obj):
                     skipped_reasons.append(f"{layer_name}: rendered or unsupported raster")
                     continue
                 if is_coverage_layer(layer_obj):

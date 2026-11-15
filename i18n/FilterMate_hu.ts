@@ -9177,6 +9177,11 @@ A raszter úgy kerül megrajzolásra, mint a térképen, a saját stílusával. 
         <translation>Webes alaptérkép (WMS / WMTS / XYZ, ArcGIS MapServer): csak színek, nem szűrhető</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Nem rögzíthető webtérkép (ArcGIS MapServer, WMS GDAL-leírása): csak színek, nem szűrhető</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Az összes vektorréteg kijelölése</translation>
@@ -10268,6 +10273,16 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <translation>a korlátozott raszterrögzítés sikertelen</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>a webtérkép nem válaszolt időben</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>a webtérkép a rögzítés egyetlen kérésére sem válaszolt</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>a helyi raszterrögzítés nem nyitható meg</translation>
@@ -10383,6 +10398,21 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>A megjelenített színrétegek nem lehetnek szűrési célok.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>A webtérkép {0} x {1} képpontos állóképként lett rögzítve ({2} {3} képpontonként), majd a forrással kivágva: a nagyítás nem mutat több részletet. A szűrés megszüntetése visszaadja az élő szolgáltatást.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>térképi egység</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>A szolgáltatás {0} kérése válasz nélkül maradt: a képen lyukak lehetnek.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>A távoli térbeli predikátum nem értékelhető ki; az előző szűrő megmarad.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Kivágás a forrás kiterjedése szerint: ennek a webszolgáltatásnak az egyező objektumai nem sorolhatók fel (több mint 500, vagy nincs stabil kulcs). A kiterjedésen belüli objektumok magán a forráson kívül is lehetnek.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

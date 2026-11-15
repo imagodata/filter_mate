@@ -9177,6 +9177,11 @@ Iginuguhit ang raster tulad ng sa mapa, kasama ang estilo nito. Isang beses lang
         <translation>Web basemap (WMS / WMTS / XYZ, ArcGIS MapServer): kulay lamang, hindi ito mafi-filter</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Web map na hindi maaaring i-capture (ArcGIS MapServer, GDAL na paglalarawan ng WMS): kulay lamang, hindi ito mafi-filter</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Piliin ang lahat ng vector na layer</translation>
@@ -10268,6 +10273,16 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <translation>nabigo ang may hangganang raster capture</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>hindi sumagot sa oras ang web map</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>walang sinagot ang web map sa mga kahilingan ng capture</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>hindi mabuksan ang lokal na raster capture</translation>
@@ -10383,6 +10398,21 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Hindi maaaring maging filter target ang mga layer na may rendered na kulay.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Kinuha ang web map bilang hindi gumagalaw na larawan na {0} x {1} pixel ({2} {3} bawat pixel), pagkatapos ay pinutol ng source: walang dagdag na detalyeng lalabas kapag nag-zoom in. Ibinabalik ng Alisin ang filter ang live na serbisyo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>unit ng mapa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} kahilingan sa serbisyo ang hindi nasagot: maaaring may mga butas ang larawan.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ Ang onnxruntime ay galing sa PyPI gamit ang pip, ang modelo ay mula sa huggingfa
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Hindi nasuri ang remote na spatial predicate; pinananatili ang dating filter.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Pinutol ayon sa extent ng source: hindi mailista ang mga tumutugmang feature ng web service na ito (higit sa 500, o walang matatag na key). Maaaring nasa labas ng mismong source ang mga feature na nasa loob ng extent na iyon.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

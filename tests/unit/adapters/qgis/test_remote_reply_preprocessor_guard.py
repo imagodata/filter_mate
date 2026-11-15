@@ -239,15 +239,21 @@ class _Signal:
 class _Reply:
     """The live C++ reply, holding an unread HTTP 200 body, or a Qt network error code."""
 
-    def __init__(self, body, code, escaped):
+    def __init__(self, body, code, escaped, done=False):
         self.body, self.code = body, code
         self.readyRead, self.finished, self.errorOccurred = _Signal(escaped), _Signal(escaped), _Signal(escaped)
+        self.done = done  # already finished when the observer meets it: it will signal nothing more
+        self.peeks = 0
 
     def bytesAvailable(self):
         return len(self.body)
 
     def peek(self, size):
+        self.peeks += 1
         return self.body[:size]
+
+    def isFinished(self):
+        return self.done
 
     def error(self):
         return self.code
@@ -329,7 +335,7 @@ _EXCEPTION = b'<?xml version="1.0"?><ows:ExceptionReport xmlns:ows="http://www.o
 
 
 def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515=False, finish=True, late=False,
-                   linger=False):
+                   linger=False, done=False):
     """One OAPIF bounded read whose items reply has ``body`` and Qt error ``code``.
 
     ``invalidate`` is when PyQt drops the reply's wrapper: "never", "before" the observer
@@ -339,7 +345,8 @@ def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515
     "partial" fails the third connection step only. ``finish`` False aborts the reply
     without finished(); ``late`` emits its signals once the iterator is closed; ``linger``
     emits readyRead again after the read has returned, and runs a preprocessor call that
-    was already under way for another reply.
+    was already under way for another reply. ``done`` is a reply that had finished before
+    the observer met it.
     """
     module = _load()
     core = _qgis(monkeypatch, module, 33600, (3, 12, 3))
@@ -356,9 +363,11 @@ def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515
     request = MagicMock()
     request.attribute.return_value = None
     request.url.return_value.toString.return_value = "https://example.org/ogc/collections/points/items?limit=10"
-    trace = types.SimpleNamespace(escaped=[], retained=None, retained_after_read=None, reply=None, sip=fake_sip)
+    trace = types.SimpleNamespace(escaped=[], retained=None, retained_after_read=None, reply=None, sip=fake_sip,
+                                  peeks_before_signals=None)
 
     def signals():
+        trace.peeks_before_signals = trace.reply.peeks
         if invalidate in ("after", "twice", "always"):
             fake_sip.invalidate(id(trace.reply))
             fake_sip.pending = {"twice": 1, "always": 1000}.get(invalidate, 0)
@@ -371,7 +380,7 @@ def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515
 
     def features():
         observer = core.QgsNetworkAccessManager.setReplyPreprocessor.call_args[0][0]
-        reply = trace.reply = _Reply(body, code, trace.escaped)
+        reply = trace.reply = _Reply(body, code, trace.escaped, done)
         fake_sip.replies[id(reply)] = reply
         wrapper = fake_sip.wrapinstance(id(reply), None)
         if invalidate == "before":
@@ -466,6 +475,29 @@ def test_a_reply_lost_after_the_read_ended_does_not_refuse_it(monkeypatch, inval
 
     assert outcome.complete and outcome.keys == (1,), outcome
     assert not trace.escaped and trace.retained_after_read is False
+
+
+@pytest.mark.parametrize("body", [_HEALTHY, _EXCEPTION], ids=["healthy", "exception_report"])
+def test_a_reply_is_read_from_its_signals_never_before_them(monkeypatch, body):
+    """2026-11-15: a reply QGIS serves from its network cache shows its bytes as soon as it is created.
+
+    Peeked then, they left the cache device before Qt announced them: Qt never emitted readyRead nor
+    finished, the WFS provider waited for the 60 s network timeout of QGIS, and the abort that ended the
+    wait was counted as a failed read (seen on the GetFeature COUNT=1 of a WFS 2.0 layer, which QGIS
+    caches). The body is still read, from the signals, where a report in it is still refused.
+    """
+    outcome, trace = _observed_read(monkeypatch, "never", body)
+
+    assert trace.peeks_before_signals == 0 and trace.reply.peeks >= 1
+    assert outcome.complete is (body is _HEALTHY) and not trace.escaped
+
+
+def test_a_reply_that_had_finished_is_read_at_once(monkeypatch):
+    """Such a reply signals nothing more: what it holds is read when the observer meets it."""
+    outcome, trace = _observed_read(monkeypatch, "never", _EXCEPTION, finish=False, late=True, done=True)
+
+    assert trace.peeks_before_signals >= 1
+    assert outcome.reason == "read_error" and not trace.escaped
 
 
 def test_a_provider_wrapper_invalidated_by_pyqt_does_not_fail_the_read(monkeypatch):

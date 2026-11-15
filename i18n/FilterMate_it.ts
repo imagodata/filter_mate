@@ -9177,6 +9177,11 @@ Il raster viene disegnato come nella mappa, con il suo stile. SAM si installa un
         <translation>Mappa di base web (WMS / WMTS / XYZ, ArcGIS MapServer): solo colori, non può essere filtrata</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Mappa web che non può essere acquisita (ArcGIS MapServer, descrizione GDAL di un WMS): solo colori, non può essere filtrata</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Seleziona tutti i layer vettoriali</translation>
@@ -10268,6 +10273,16 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
         <translation>acquisizione raster limitata non riuscita</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>la mappa web non ha risposto in tempo</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>la mappa web non ha risposto a nessuna delle richieste dell'acquisizione</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>impossibile aprire l'acquisizione raster locale</translation>
@@ -10383,6 +10398,21 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>I layer a colori renderizzati non possono essere destinazioni del filtro.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Mappa web acquisita come immagine fissa di {0} x {1} pixel ({2} {3} per pixel), poi ritagliata dalla sorgente: ingrandire non mostra più dettaglio. Rimuovi filtro ripristina il servizio dal vivo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>unità di mappa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} richiesta/e al servizio non hanno avuto risposta: l'immagine può avere buchi.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Impossibile valutare il predicato spaziale remoto; viene mantenuto il filtro precedente.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Ritaglio sull'estensione della sorgente: gli elementi corrispondenti di questo servizio web non possono essere elencati (più di 500, o nessuna chiave stabile). Alcuni elementi dentro questa estensione possono trovarsi fuori dalla sorgente stessa.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

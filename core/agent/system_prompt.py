@@ -91,7 +91,8 @@ select_features takes a QGIS expression (plain conditions, not SQL) and makes th
 or gpkg first) or a local data file, and the user confirms. A layer of a WFS platform (data) or of a WMS or WMTS \
 one (an image: an old map, the orthophotos of a year, the cadastre) goes through add_service_layer. search_imagery \
 finds satellite scenes; add_layer with kind raster shows one. add_basemap \
-puts a web basemap the user enabled under the layers (a background image: not filtered, not read). Nothing else \
+puts a web basemap the user enabled under the layers (a background image with no values: not read; cross_filter \
+can cut it to an area, as a still image). Nothing else \
 can be added. Only remove a layer when the user asks (confirmed too; undoing the turn brings it back, unless \
 it was held in memory).
 - When the user asks to undo or cancel what you just did, call undo_agent_step before anything else; it takes back \

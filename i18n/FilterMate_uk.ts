@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>Вебпідкладка (WMS / WMTS / XYZ, ArcGIS MapServer): лише кольори, її не можна відфільтрувати</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Вебкарта, яку неможливо захопити (ArcGIS MapServer, опис WMS у GDAL): лише кольори, її не можна відфільтрувати</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Вибрати всі векторні шари</translation>
@@ -10268,6 +10273,16 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>не вдалося виконати обмежене захоплення растра</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>вебкарта не відповіла вчасно</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>вебкарта не відповіла на жоден запит захоплення</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>не вдалося відкрити локальне захоплення растра</translation>
@@ -10383,6 +10398,21 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Шари з кольорами відображення не можуть бути цілями фільтра.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Вебкарту захоплено як нерухоме зображення {0} x {1} пікселів ({2} {3} на піксель), а потім обрізано джерелом: наближення не покаже більше деталей. «Зняти фільтр» повертає живу службу.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>одиниці карти</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>Запитів до служби без відповіді: {0}. У зображенні можуть бути прогалини.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Не вдалося обчислити віддалений просторовий предикат; попередній фільтр збережено.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Обрізання за охопленням джерела: відповідні об'єкти цієї вебслужби неможливо перелічити (понад 500 або немає стабільного ключа). Об'єкти в межах цього охоплення можуть лежати поза самим джерелом.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

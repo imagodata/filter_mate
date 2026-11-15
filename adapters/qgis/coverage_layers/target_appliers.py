@@ -633,6 +633,48 @@ class VectorTargetJob(TargetJob):
 
 # --- raster -----------------------------------------------------------------
 
+def _transparent_cell(extent: QgsRectangle, crs_wkt: str) -> str:
+    """One transparent cell at the upper left corner of ``extent``: the capture of a web map that keeps nothing."""
+    from osgeo import gdal
+    path = cache.new_path('web_map_empty', '.tif')
+    size = max(extent.width(), extent.height()) / 4096.0 or 1.0
+    dataset = gdal.GetDriverByName('GTiff').Create(path, 1, 1, 4, gdal.GDT_Byte)
+    if dataset is None:
+        cache.settle([path])
+        raise RuntimeError(translate('RasterTargetJob', 'local raster target could not be opened'))
+    dataset.SetGeoTransform((extent.xMinimum(), size, 0, extent.yMaximum(), 0, -size))
+    if crs_wkt:
+        dataset.SetProjection(crs_wkt)
+    for index, interpretation in enumerate((gdal.GCI_RedBand, gdal.GCI_GreenBand, gdal.GCI_BlueBand,
+                                            gdal.GCI_AlphaBand)):
+        band = dataset.GetRasterBand(index + 1)
+        band.SetColorInterpretation(interpretation)
+        band.Fill(0)
+    dataset.FlushCache()
+    dataset = None  # noqa: F841 - close the file
+    return path
+
+
+def _web_map_note(capture: dict, crs) -> str:
+    """What is said of a web map cut by a source: it is a still image, at this resolution, maybe with holes."""
+    try:
+        from qgis.core import QgsUnitTypes
+        unit = QgsUnitTypes.toAbbreviatedString(crs.mapUnits())
+    except Exception:  # an invalid CRS, or a QGIS without this helper
+        unit = ''
+    resolution = '{:.3g}'.format(capture.get('resolution') or 0.0)
+    note = translate(
+        'RasterTargetJob',
+        'Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: '
+        'zooming in shows no more detail. Unfilter gives the live service back.'
+    ).format(capture.get('columns'), capture.get('rows'), resolution, unit or translate('RasterTargetJob', 'map units'))
+    if capture.get('unread'):
+        note += ' ' + translate(
+            'RasterTargetJob', '{0} request(s) of the service were not answered: the image may have holes.'
+        ).format(capture['unread'])
+    return note
+
+
 class _ProviderLayer:
     """A raster provider with the few layer calls ``materialize_raster`` makes (worker only)."""
 
@@ -693,7 +735,16 @@ class RasterTargetJob(TargetJob):
         from .raster_materialization import is_wcs, raster_reads_remotely
         capability = classify(self._base_provider, self._base_source, is_raster=True)
         self._rendered = not capability.has_raw_values
-        self._remote = raster_reads_remotely(self._base_provider, self._base_source)
+        # 2026-11-15: a web map (WMS, WMTS, XYZ tiles) draws an image and was refused as a target. It is captured
+        # in the area the source keeps, within a budget of pixels, then cut as a local raster is (_capture_web_map).
+        from ..point_cloud_capability import CAPTURED_TARGET_PROVIDERS
+        self._web_map = self._rendered and (self._base_provider or '').lower() in CAPTURED_TARGET_PROVIDERS
+        if self._web_map:
+            # The tiles of QGIS are asked by a thread of its own, which tells the network manager of the main
+            # thread what it finished: the capture listens to it (materialize_web_map).
+            from ..source_capability_probe import capture_network_manager
+            capture_network_manager()
+        self._remote = self._web_map or raster_reads_remotely(self._base_provider, self._base_source)
         self._is_wcs = is_wcs(self._base_provider, self._base_source)
         self._analysis_source = None
         self._input_source = self._base_source
@@ -736,6 +787,52 @@ class RasterTargetJob(TargetJob):
         self._extent = QgsRectangle(base.extent())
         return base
 
+    def _open_web_map(self):
+        """The web map as a bare provider, opened in the worker: its extent (``self._extent``); it has no grid."""
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            raise RuntimeError(translate('RasterTargetJob', 'remote raster target must run in a worker thread'))
+        from .raster_materialization import _tr
+        base = _ProviderLayer.open(self._base_provider, self._base_source, 'FilterMate target capture')
+        extent = QgsRectangle(base.extent()) if base.isValid() else QgsRectangle()
+        if not base.isValid() or extent.isEmpty() or not extent.isFinite():
+            raise RuntimeError(_tr('raster capture source could not be opened'))
+        self._extent = extent
+        return base
+
+    def _capture_web_map(self, base, kept: Optional[QgsGeometry], is_canceled) -> str:
+        """The image the web map draws over the area ``kept``, as a local GeoTIFF (red, green, blue, alpha).
+
+        The grid is the finest the budget of pixels affords over the bounding box of ``kept``
+        (``CROSS_FILTER.web_map_target_max_pixels``, ``raster_materialization.web_map_grid``): a level of the
+        service when it has levels (tiles), copied and not resampled. Nothing kept: one transparent cell written
+        here, the service is asked nothing.
+        """
+        from .raster_materialization import materialize_web_map, web_map_grid, web_map_max_pixels
+        parts = [] if kept is None or kept.isEmpty() else (
+            kept.asGeometryCollection() if kept.isMultipart() else [kept])
+        boxes = [box for box in (part.boundingBox() for part in parts) if box.intersects(self._extent)]
+        grid = None
+        if boxes:
+            full = (self._extent.xMinimum(), self._extent.yMinimum(), self._extent.xMaximum(), self._extent.yMaximum())
+            box = (min(b.xMinimum() for b in boxes), min(b.yMinimum() for b in boxes),
+                   max(b.xMaximum() for b in boxes), max(b.yMaximum() for b in boxes))
+            try:
+                levels = [float(level) for level in base.dataProvider().nativeResolutions()]
+            except Exception:  # a provider without levels
+                levels = []
+            try:
+                grid = web_map_grid(full, box, web_map_max_pixels(cache._config_value('web_map_target_max_pixels', None)),
+                                    levels)
+            except ValueError:
+                grid = None  # the area kept only touches the extent of the service
+        if grid is None:
+            return _transparent_cell(self._extent, base.crs().toWkt())
+        (x_min, y_min, x_max, y_max), columns, rows, resolution = grid
+        path, unread = materialize_web_map(base, QgsRectangle(x_min, y_min, x_max, y_max), columns, rows, is_canceled)
+        self.outcome.details['web_map'] = {'resolution': resolution, 'columns': columns, 'rows': rows, 'unread': unread}
+        return path
+
     def _prepare_input(self, is_canceled, base=None, kept: Optional[QgsGeometry] = None):
         """Local pixels to clip: the analysis capture, or a capture of ``base`` around ``kept``.
 
@@ -750,6 +847,11 @@ class RasterTargetJob(TargetJob):
             source, provider = self._analysis_source
             base = QgsRasterLayer(source, 'FilterMate target capture', provider)
             native_size = base.width(), base.height()
+        elif self._web_map:
+            source = self._capture_web_map(base, kept, is_canceled)
+            self.outputs.append(source)
+            base = QgsRasterLayer(source, 'FilterMate local target', 'gdal')
+            native_size = base.width(), base.height()  # a web map has no grid to be resampled from
         else:
             area, native_size = _capture_window(self._extent, base.width(), base.height(), kept)
             source = materialize_raster(base, extent=area, is_canceled=is_canceled)
@@ -765,10 +867,12 @@ class RasterTargetJob(TargetJob):
 
     def compute(self, source_geometry, source_crs, context, request, is_canceled) -> None:
         self._started = time.perf_counter()
-        if self._rendered:
+        if self._rendered and (not self._web_map or self._analysis_source is not None):
+            # Not captured (ArcGIS MapServer, GDAL WMS), or a web map filtered as a source by its own colours:
+            # the capture of its selection is the one of the screen, not one made for a cut.
             self.outcome.message = translate('RasterTargetJob', 'Rendered color layers cannot be filter targets.')
             return
-        if self._base_provider not in ('gdal', 'postgresraster') and not self._is_wcs:
+        if not self._web_map and self._base_provider not in ('gdal', 'postgresraster') and not self._is_wcs:
             self.outcome.message = f"raster provider '{self._base_provider}' cannot be clipped (GDAL files only)"
             return
         side = request.side
@@ -794,7 +898,8 @@ class RasterTargetJob(TargetJob):
             return
         remote = None
         if self._analysis_source is None and self._remote:
-            remote = self._open_remote()  # its full extent; captured below, once the kept area is known
+            # Its full extent; captured below, once the kept area is known.
+            remote = self._open_web_map() if self._web_map else self._open_remote()
         if side is CoverageSide.OUTSIDE:
             geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
@@ -833,6 +938,10 @@ class RasterTargetJob(TargetJob):
             self.outcome.message = 'canceled'
             return
         self._derived_path = path
+        capture = self.outcome.details.get('web_map')
+        if capture:
+            self.outcome.details['captured'] = True
+            self.outcome.message = _web_map_note(capture, self.crs)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
         self.outcome.details['vrt'] = path

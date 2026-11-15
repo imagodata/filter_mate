@@ -9159,6 +9159,11 @@ Rastr se kreslí tak, jak je na mapě, se svým stylem. SAM se instaluje jednou 
         <translation>Webová podkladová mapa (WMS / WMTS / XYZ, ArcGIS MapServer): pouze barvy, nelze ji filtrovat</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Webová mapa, kterou nelze zachytit (ArcGIS MapServer, popis WMS v GDAL): pouze barvy, nelze ji filtrovat</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Vybrat všechny vektorové vrstvy</translation>
@@ -10250,6 +10255,16 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <translation>omezené zachycení rastru selhalo</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>webová mapa neodpověděla včas</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>webová mapa neodpověděla na žádný z požadavků zachycení</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>místní zachycení rastru se nepodařilo otevřít</translation>
@@ -10365,6 +10380,21 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Vrstvy vykreslených barev nemohou být cíli filtru.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Webová mapa byla zachycena jako statický obrázek {0} x {1} pixelů ({2} {3} na pixel) a poté oříznuta zdrojem: přiblížení neukáže více detailů. Zrušit filtr vrátí živou službu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>mapové jednotky</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>Požadavků na službu bez odpovědi: {0}. Obrázek může mít díry.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10460,6 +10490,11 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Vzdálený prostorový predikát se nepodařilo vyhodnotit; předchozí filtr zůstává zachován.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Oříznuto podle rozsahu zdroje: odpovídající prvky této webové služby nelze vypsat (více než 500, nebo chybí stabilní klíč). Prvky uvnitř tohoto rozsahu mohou ležet mimo samotný zdroj.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

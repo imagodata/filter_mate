@@ -3279,7 +3279,8 @@ class CoverageModeController(BaseController):
                 parts.append(self.tr("{0} raster target(s) resampled to the configured pixel limit").format(len(sampled_targets)))
             # A web service target read up to its budget: applied, its message (already translated) says so.
             partial = sorted({o.message for o in task.outcomes if o.success and o.message
-                              and (o.details.get('partial') or o.details.get('by_extent'))})
+                              and (o.details.get('partial') or o.details.get('by_extent')
+                                   or o.details.get('captured'))})
             parts.extend(partial)
             emptied = self._emptied_text(task.outcomes)
             if emptied:

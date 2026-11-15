@@ -9177,6 +9177,11 @@ El ràster es dibuixa com al mapa, amb el seu estil. SAM s'instal·la una sola v
         <translation>Mapa base web (WMS / WMTS / XYZ, ArcGIS MapServer): només colors, no es pot filtrar</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Mapa web que no es pot capturar (ArcGIS MapServer, descripció GDAL d'un WMS): només colors, no es pot filtrar</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Selecciona totes les capes vectorials</translation>
@@ -10268,6 +10273,16 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <translation>ha fallat la captura ràster acotada</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>el mapa web no ha respost a temps</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>el mapa web no ha respost cap de les peticions de la captura</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>no s'ha pogut obrir la captura ràster local</translation>
@@ -10383,6 +10398,21 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Les capes de color renderitzat no poden ser objectius del filtre.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Mapa web capturat com a imatge fixa de {0} x {1} píxels ({2} {3} per píxel) i després retallat per l'origen: ampliar no mostra més detall. Desfiltra torna el servei en viu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>unitats del mapa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} petició(ons) al servei no han rebut resposta: la imatge pot tenir forats.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,11 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>No s'ha pogut avaluar el predicat espacial remot; es conserva el filtre anterior.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (more than 500, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Retall per l'extensió de l'origen: les entitats coincidents d'aquest servei web no es poden llistar (més de 500, o sense clau estable). Algunes entitats dins d'aquesta extensió poden quedar fora de l'origen mateix.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
