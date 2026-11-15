@@ -650,14 +650,43 @@ def swap_source(layer, source: str, provider: str, derived_registry: Optional[De
     (derived_registry or registry()).remember_alpha_band(layer)
     previous_source, previous_provider = layer.source(), layer.providerType()
     previous_subset = layer.subsetString() if _supports_subset(layer) else ''
+    look = _renderer_look(layer)
     layer.setDataSource(source, layer.name(), provider, QgsDataProvider.ProviderOptions(), False)
     if layer.isValid():
+        _carry_renderer_look(layer, look)
         return True
     logger.warning(f"[FM5] '{layer.name()}': '{_redacted_source(source)}' could not be opened, previous source restored")
     layer.setDataSource(previous_source, layer.name(), previous_provider, QgsDataProvider.ProviderOptions(), False)
+    _carry_renderer_look(layer, look)
     if previous_subset and not _set_subset(layer, previous_subset):
         logger.warning(f"[FM5] '{layer.name()}': its filter could not be put back: {previous_subset[:120]}")
     return False
+
+
+def _renderer_look(layer):
+    """``(type, opacity)`` of the renderer of a raster layer; None for another layer."""
+    try:
+        renderer = layer.renderer()
+        return (renderer.type(), float(renderer.opacity())) if renderer is not None else None
+    except (AttributeError, TypeError, RuntimeError):  # a point cloud renderer has neither
+        return None
+
+
+def _carry_renderer_look(layer, look) -> None:
+    """Give the opacity of the previous renderer to the one QGIS built for the new source.
+
+    2026-11-15: a web map and the local file of its capture do not share a renderer (image of a service /
+    red, green, blue bands): QGIS builds a new one, opaque. Read in QGIS 3.22, 3.44 and 4.3: the opacity is
+    the only part of the look that is lost (brightness, saturation, blending and resampling stay).
+    """
+    if look is None:
+        return
+    try:
+        renderer = layer.renderer()
+        if renderer is not None and renderer.type() != look[0] and abs(renderer.opacity() - look[1]) > 1e-9:
+            renderer.setOpacity(look[1])
+    except (AttributeError, TypeError, RuntimeError) as exc:
+        logger.debug(f"[FM5] renderer opacity not carried: {exc}")
 
 
 def _restore_alpha_band(layer, alpha: Optional[int]) -> None:

@@ -9177,6 +9177,11 @@ Raster dilukis seperti pada peta, dengan gayanya. SAM dipasang sekali daripada k
         <translation>Peta asas web (WMS / WMTS / XYZ, ArcGIS MapServer): warna sahaja, ia tidak boleh ditapis</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Peta web yang tidak boleh ditangkap (ArcGIS MapServer, perihalan GDAL bagi WMS): warna sahaja, ia tidak boleh ditapis</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Pilih semua lapisan vektor</translation>
@@ -10268,6 +10273,16 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <translation>tangkapan raster terhad gagal</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>peta web tidak menjawab dalam masa yang ditetapkan</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>peta web tidak menjawab sebarang permintaan tangkapan</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>tangkapan raster setempat tidak dapat dibuka</translation>
@@ -10383,6 +10398,21 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Lapisan warna yang dirender tidak boleh menjadi sasaran tapisan.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Peta web ditangkap sebagai imej pegun {0} x {1} piksel ({2} {3} setiap piksel), kemudian dipotong oleh sumber: mengezum masuk tidak menunjukkan lebih banyak butiran. Unfilter mengembalikan perkhidmatan langsung.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>unit peta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} permintaan kepada perkhidmatan tidak dijawab: imej mungkin berlubang.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Predikat spatial jauh tidak dapat dinilai; tapisan sebelumnya dikekalkan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Dipotong mengikut liputan sumber: fitur yang sepadan bagi perkhidmatan web ini tidak dapat disenaraikan (terlalu banyak untuk satu permintaan, atau tiada kunci stabil). Fitur di dalam liputan itu mungkin berada di luar sumber itu sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Dipotong mengikut liputan sumber: perkhidmatan web menolak senarai fitur yang sepadan (selalunya kerana permintaan terlalu panjang baginya). Fitur di dalam liputan itu mungkin berada di luar sumber itu sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Dipotong mengikut liputan sumber: versi QGIS ini tidak dapat menyemak jawapan perkhidmatan web, maka fitur yang sepadan tidak disenaraikan. Fitur di dalam liputan itu mungkin berada di luar sumber itu sendiri.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

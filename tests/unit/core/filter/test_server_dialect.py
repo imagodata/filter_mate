@@ -116,3 +116,49 @@ def test_empty_wfs_selection_uses_a_portable_field_contradiction():
 def test_column_comparisons_do_not_bypass_text_semantics(dialect, operator):
     result = translate_node(binary(operator, column('a'), column('b')), dialect, {'a': 'text', 'b': 'text'})
     assert result.status == TranslationStatus.NONE
+
+
+# 2026-11-15: the one spatial predicate a server dialect lets through, the filter by extent of a WFS.
+BOX = "intersects_bbox($geometry, geom_from_wkt('POLYGON((10 20, 30 20, 30 40.5, 10 40.5, 10 20))'))"
+
+
+def extent(bounds=(10.0, 20.0, 30.0, 40.5), text='the text QGIS dumped'):
+    return Node('extent', bounds, text=text)
+
+
+def test_a_wfs_takes_a_filter_by_extent_written_again_from_its_bounds():
+    result = translate_node(extent(), 'wfs', ['id'])
+    assert result.status == TranslationStatus.FULL
+    assert result.subset_expression == BOX and not result.local_expression
+
+
+def test_an_extent_combines_with_an_attribute_filter():
+    both = binary('AND', binary('=', column('id'), literal(1)), extent())
+    result = translate_node(both, 'wfs', ['id'])
+    assert result.status == TranslationStatus.FULL
+    assert result.subset_expression == '("id" = 1) AND ' + BOX
+    either = translate_node(binary('OR', binary('=', column('id'), literal(1)), extent()), 'wfs', ['id'])
+    assert either.status == TranslationStatus.FULL
+    assert either.subset_expression == '(("id" = 1) OR ' + BOX + ')'
+
+
+@pytest.mark.parametrize('dialect', ['arcgis', 'mssql', 'oracle', 'hana', 'oapif'])
+def test_no_other_dialect_takes_an_extent(dialect):
+    result = translate_node(extent(), dialect, ['id'])
+    assert result.status == TranslationStatus.NONE and result.local_expression == '(the text QGIS dumped)'
+
+
+def test_what_lies_outside_an_extent_is_refused():
+    """A negation: what a WFS answers for a feature without geometry is not proven."""
+    outside = Node('unary', 'NOT', (extent(),), 'NOT box')
+    assert translate_node(outside, 'wfs', ['id']).status == TranslationStatus.NONE
+
+
+@pytest.mark.parametrize('bounds', [(30.0, 20.0, 10.0, 40.5), (float('nan'), 0.0, 1.0, 1.0), (0.0, 0.0, 1.0), None, 'x'])
+def test_an_extent_that_is_none_is_refused(bounds):
+    assert translate_node(extent(bounds), 'wfs', ['id']).status == TranslationStatus.NONE
+
+
+def test_an_extent_is_not_an_operand():
+    result = translate_node(binary('=', column('id'), extent()), 'wfs', ['id'])
+    assert result.status == TranslationStatus.NONE

@@ -129,6 +129,20 @@ def materialization_limits(params=None):
         return defaults
 
 
+def request_bytes_limit(params=None) -> int:
+    """``APP.OPTIONS.REMOTE_MATERIALIZATION.max_request_bytes``: the longest address of a request sent to a service.
+
+    A list of keys that would make a longer one is not sent (``source_capability.key_list_fits``). A value that
+    is unreadable, under 1,000 or over 1,000,000 keeps the default (8,000: what most servers read).
+    """
+    from ...core.domain.source_capability import REMOTE_REQUEST_BYTES
+    try:
+        value = int(get_app_option_value(params, "REMOTE_MATERIALIZATION", "max_request_bytes", REMOTE_REQUEST_BYTES))
+    except (TypeError, ValueError):
+        return REMOTE_REQUEST_BYTES
+    return value if 1000 <= value <= 1000000 else REMOTE_REQUEST_BYTES
+
+
 def require_worker():
     """Refuse remote reads before touching a provider on the GUI thread."""
     from qgis.PyQt.QtCore import QCoreApplication, QThread
@@ -478,7 +492,20 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             except RuntimeError:
                 unobserved()
                 return
-            inspect_body()  # cached replies can have data before readyRead is connected
+            # A reply that already finished signals nothing more: read what it holds now. Any
+            # other reply is read from its own signals, and only from them: a reply QGIS serves
+            # from its network cache already shows its bytes here, and peeking them empties the
+            # cache device before Qt announced them. Qt then never emits readyRead nor finished,
+            # the provider waits for QGIS's network timeout (60 s), and the abort that ends the
+            # wait is counted as a failed read (seen 2026-11-15 on the GetFeature COUNT=1 a WFS
+            # 2.0 layer sends when it opens, which QGIS caches).
+            try:
+                already_finished = on_reply(lambda live: live.isFinished())
+            except RuntimeError:
+                unobserved()
+                return
+            if already_finished:
+                inspect_body()
 
         preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(inspect_reply)
     message_log = QgsApplication.messageLog()

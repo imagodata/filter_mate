@@ -27,6 +27,8 @@ This is a PURE PYTHON module with NO QGIS dependencies: the QGIS provider
 keys are compared in lower case (QGIS names them ``'WFS'``, ``'OAPIF'``,
 ``'arcgisfeatureserver'``, checked in QGIS 3.44).
 """
+import math
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional
@@ -70,6 +72,27 @@ class NetworkCost(Enum):
 REMOTE_KEY_LIST_LIMIT = 500
 # ORA-01795: maximum number of expressions in a list is 1000.
 ORACLE_IN_LIST_MAX = 1000
+# The exact filter of a web service lists the keys of its features, and QGIS writes that list in the address of
+# every request (GET). A server stops reading an address at a length of its own: 8 KB for most (Apache, nginx,
+# Tomcat, Jetty), and nothing tells it beforehand. Read on a real WFS (IGN Géoplateforme, 2026-11-15): 25 keys are
+# taken, about 100 are refused. Past REMOTE_REQUEST_BYTES a list of keys is not sent
+# (APP.OPTIONS.REMOTE_MATERIALIZATION.max_request_bytes): a WFS is cut by the extent of the source instead.
+REMOTE_REQUEST_BYTES = 8000
+# What one key weighs in that address, without its field name and its value (added as they are percent-encoded),
+# and the rest of the address (service, type, paging, CRS). Measured in QGIS 3.44 on a local WFS 2.0 (2026-11-15):
+# 187 bytes a key of four digits in a field of two letters, 262 bytes for the rest. A layer that only asks the
+# rectangle of the map (``restrictToRequestBBOX``, as the layers the agent adds) joins that rectangle to the list,
+# and QGIS then writes every element with its namespaces: 301 bytes a key, 765 for the rest. The rest is counted
+# larger than measured: the address and the type of a real service are longer than those of a local one.
+REQUEST_BYTES_PER_KEY = 181
+REQUEST_FIXED_BYTES = 500
+REQUEST_BYTES_PER_KEY_BY_RECTANGLE = 295
+REQUEST_FIXED_BYTES_BY_RECTANGLE = 1000
+# Web services whose subset takes a filter by extent, with no key to list: a WFS, whose subset is a QGIS
+# expression that QGIS writes as an OGC filter in each request (``intersects_bbox`` as ``<fes:BBOX>``: read in the
+# requests of QGIS 3.22, 3.44 and 4.3 on 2026-11-15). Not OGC API Features nor ArcGIS: what they are sent for
+# such an expression was not read.
+EXTENT_SUBSET_PROVIDERS = ('wfs',)
 
 # Providers whose subset string is a QGIS expression (a backslash is an escape in its literals).
 QGIS_EXPRESSION_SUBSET_PROVIDERS = ('memory', 'delimitedtext', 'wfs', 'oapif', 'sensorthings')
@@ -156,10 +179,112 @@ class SourceCapability:
         return not self.is_remote_service and self.provider_key not in NO_FEATURE_ID_SUBSET_PROVIDERS
 
     @property
+    def takes_extent_subset(self) -> bool:
+        """Whether the server can be asked for what meets an extent (``extent_subset``), with no key listed."""
+        return self.is_remote_service and self.provider_key in EXTENT_SUBSET_PROVIDERS
+
+    @property
     def requires_server_translation(self) -> bool:
         """Whether an attribute predicate needs a validated server dialect."""
         return self.is_remote_service or (
             self.locality is Locality.DATABASE and self.network_cost is NetworkCost.HIGH)
+
+
+def asks_by_rectangle(source: Any) -> bool:
+    """Whether a WFS layer only asks its server the rectangle of the map (``restrictToRequestBBOX='1'``)."""
+    return bool(re.search(r"restrictToRequestBBOX\s*=\s*['\"]?1\b", str(source or ''), re.IGNORECASE))
+
+
+def key_list_request_bytes(field: str, literals, by_rectangle: bool = False) -> int:
+    """About how long the address of a request is with these keys of ``field`` in its filter, in bytes.
+
+    For the decision to send the list or not (``REMOTE_REQUEST_BYTES``). ``by_rectangle``: the layer joins the
+    rectangle of the map to its filter (``asks_by_rectangle``), the longer of the two forms QGIS writes.
+    """
+    from urllib.parse import quote
+    name = len(quote(str(field or ''), safe=''))
+    each = REQUEST_BYTES_PER_KEY_BY_RECTANGLE if by_rectangle else REQUEST_BYTES_PER_KEY
+    fixed = REQUEST_FIXED_BYTES_BY_RECTANGLE if by_rectangle else REQUEST_FIXED_BYTES
+    return fixed + sum(each + name + len(quote(str(literal), safe='')) for literal in literals)
+
+
+def key_list_fits(field: str, literals, limit: Optional[int] = None, by_rectangle: bool = False) -> bool:
+    """Whether a list of keys fits in the address of a request a server reads (``limit`` bytes, 8000 by default)."""
+    try:
+        bound = int(limit) if limit else REMOTE_REQUEST_BYTES
+    except (TypeError, ValueError):
+        bound = REMOTE_REQUEST_BYTES
+    return key_list_request_bytes(field, literals, by_rectangle) <= max(1, bound)
+
+
+def _coordinate(value: float) -> str:
+    """A coordinate as WKT reads it: plain decimals (never an exponent), nine of them at most."""
+    text = f"{float(value):.9f}".rstrip('0').rstrip('.')
+    return '0' if text in ('', '-0') else text
+
+
+def extent_expression(x_min: float, y_min: float, x_max: float, y_max: float) -> Optional[str]:
+    """The one way a filter by extent is written; None for a rectangle that is not finite or is inverted.
+
+    Returns:
+        ``intersects_bbox($geometry, geom_from_wkt('POLYGON((...))'))``, the ring going from the lower left corner
+        counter-clockwise and closed, which is the only shape ``extent_of_wkt`` reads back.
+    """
+    try:
+        bounds = [float(value) for value in (x_min, y_min, x_max, y_max)]
+    except (TypeError, ValueError):
+        return None
+    if not all(math.isfinite(value) for value in bounds) or bounds[0] > bounds[2] or bounds[1] > bounds[3]:
+        return None
+    left, bottom, right, top = (_coordinate(value) for value in bounds)
+    ring = f"{left} {bottom}, {right} {bottom}, {right} {top}, {left} {top}, {left} {bottom}"
+    return f"intersects_bbox($geometry, geom_from_wkt('POLYGON(({ring}))'))"
+
+
+_EXTENT_WKT = re.compile(r"\s*POLYGON\s*\(\(([^()]*)\)\)\s*\Z", re.IGNORECASE)
+_PLAIN_NUMBER = re.compile(r"-?\d+(?:\.\d+)?\Z")
+
+
+def extent_of_wkt(wkt: Any) -> Optional[tuple]:
+    """The ``(x_min, y_min, x_max, y_max)`` of the rectangle ``extent_expression`` wrote; None for anything else.
+
+    The validated server dialect lets a function call through for this one shape only: a closed ring of five
+    points with plain decimal coordinates, going round an axis-aligned rectangle from its lower left corner.
+    """
+    if not isinstance(wkt, str) or len(wkt) > 512:
+        return None
+    match = _EXTENT_WKT.match(wkt)
+    if match is None:
+        return None
+    points = []
+    for pair in match.group(1).split(','):
+        numbers = pair.split()
+        if len(numbers) != 2 or not all(_PLAIN_NUMBER.match(number) for number in numbers):
+            return None
+        points.append((float(numbers[0]), float(numbers[1])))
+    if len(points) != 5:
+        return None
+    (left, bottom), second, (right, top), fourth, last = points
+    if second != (right, bottom) or fourth != (left, top) or last != (left, bottom) or left > right or bottom > top:
+        return None
+    return left, bottom, right, top
+
+
+def extent_subset(capability: 'SourceCapability', x_min: float, y_min: float, x_max: float,
+                  y_max: float) -> Optional[str]:
+    """The subset that keeps what meets an extent, in the CRS of the layer; None when the service takes none.
+
+    Where the matching features of a web service cannot be listed (more than ``REMOTE_KEY_LIST_LIMIT`` of them, or
+    no stable key), the layer is cut by the extent of the source instead: the server answers what meets the
+    rectangle, however many features that is. A feature inside the rectangle and outside the source itself stays.
+
+    Returns:
+        The expression of ``extent_expression``, or None for a service that takes no such subset or a rectangle
+        that is not finite.
+    """
+    if not getattr(capability, 'takes_extent_subset', False):
+        return None
+    return extent_expression(x_min, y_min, x_max, y_max)
 
 
 def _is_remote_path(text: str) -> bool:

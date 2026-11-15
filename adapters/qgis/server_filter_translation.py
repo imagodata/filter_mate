@@ -95,7 +95,46 @@ def _tree(node, depth=0, budget=None, extended=False, cache=None):
                 return Node('unary', '-', (operand,), text)
     if extended:
         return _extended_tree(node, child, enum, text, cache)
+    bounds = _extent_bounds(node, cache)
+    if bounds is not None:
+        return Node('extent', bounds, text=text)
     return Node('unsupported', text, text=text)
+
+
+def _extent_bounds(node, cache):
+    """The bounds of ``intersects_bbox($geometry, geom_from_wkt('POLYGON((...))'))``; None for any other node.
+
+    2026-11-15: the one function call a server dialect reads, the filter by extent a WFS is cut with where its
+    matching features cannot be listed (``source_capability.extent_expression``). The rectangle must be the one
+    that function writes; anything else stays unsupported.
+    """
+    import qgis.core as core
+    Function, Literal = core.QgsExpressionNodeFunction, core.QgsExpressionNodeLiteral
+    if not isinstance(node, Function):
+        return None
+    if 'functions' not in cache:
+        cache['functions'] = core.QgsExpression.Functions()
+    functions = cache['functions']
+
+    def call(item):
+        if not isinstance(item, Function) or not 0 <= item.fnIndex() < len(functions):
+            return None, ()
+        arguments = item.args()
+        return functions[item.fnIndex()].name(), (arguments.list() if arguments is not None else ())
+
+    name, arguments = call(node)
+    if name != 'intersects_bbox' or len(arguments) != 2:
+        return None
+    geometry, geometry_arguments = call(arguments[0])
+    reader, wkt = call(arguments[1])
+    if geometry != '$geometry' or geometry_arguments or reader != 'geom_from_wkt' or len(wkt) != 1 or (
+            not isinstance(wkt[0], Literal)):
+        return None
+    try:
+        from ...core.domain.source_capability import extent_of_wkt
+    except ImportError:  # plugin root on sys.path in pure unit tests
+        from core.domain.source_capability import extent_of_wkt
+    return extent_of_wkt(wkt[0].value())
 
 
 def _extended_tree(node, child, enum, text, cache):

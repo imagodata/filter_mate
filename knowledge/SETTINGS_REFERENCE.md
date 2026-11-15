@@ -41,6 +41,7 @@
 |---|---|---|---|
 | `max_features` | 20000 |  | Maximum remote rows copied for an exact local filter (one extra row detects truncation) |
 | `timeout_seconds` | 90 | 1–86400 | Maximum remote read and local evaluation duration in seconds |
+| `max_request_bytes` | 8000 | 1000–1000000 | Longest address of a request sent to a web service, in bytes. The exact filter of a WFS layer lists the keys of its features in that address; a longer list is not sent and the layer is cut by the extent of the source instead. Most servers read 8,000 bytes: raise it for a server that reads more |
 
 ## Settings > Performance > Server filters
 
@@ -298,10 +299,11 @@ Filtering between layers of different kinds (vector, raster, point cloud)
 
 | Setting | Default | Allowed | Description |
 |---|---|---|---|
-| `vector_source_raster_targets` | true | true, false | List the raster layers among the layers to filter of a vector source (with RASTER enabled). Web basemaps (WMS, WMTS, XYZ) are listed greyed: colours only, they cannot be filtered |
+| `vector_source_raster_targets` | true | true, false | List the raster layers among the layers to filter of a vector source (with RASTER enabled). Web maps (WMS, WMTS, XYZ tiles) are listed too: cut from a still capture of the area kept. An ArcGIS MapServer is listed greyed: colours only, it cannot be filtered |
 | `vector_source_point_cloud_targets` | true | true, false | List the point cloud layers among the layers to filter of a vector source (with POINT_CLOUD enabled) |
 | `point_cloud_clip` | exact | exact, bbox | How a point cloud target is clipped: exact (derived file, background task) or bbox (instant X/Y expression, approximate) |
 | `raster_source_max_pixels` | 100000000 |  | Pixels of a raster selection read at the native resolution, tile by tile; beyond, every 2nd, 4th... pixel is read (the outline stays light either way) |
+| `web_map_target_max_pixels` | 16000000 |  | Pixels of the still image a web map (WMS, WMTS, XYZ tiles) is captured as when a source cuts it: the finest level of the service this budget affords over the area kept |
 | `point_cloud_footprint_resolution` | 2.0 |  | Cell size (map units) of the footprint of the points kept by a point cloud selection |
 | `cache_max_gb` | 5 |  | Maximum size of the FilterMate cache of derived rasters and point clouds |
 | `cache_dir` | (empty) |  | Folder of the FilterMate cache of derived rasters and point clouds (empty: in the QGIS profile) |

@@ -9177,6 +9177,11 @@ Raster, haritadaki gibi, stiliyle birlikte çizilir. SAM, FilterMate panelinin P
         <translation>Web altlık haritası (WMS / WMTS / XYZ, ArcGIS MapServer): yalnızca renkler, filtrelenemez</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Yakalanamayan web haritası (ArcGIS MapServer, bir WMS'in GDAL tanımı): yalnızca renkler, filtrelenemez</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Tüm vektör katmanlarını seç</translation>
@@ -10268,6 +10273,16 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>sınırlı raster yakalaması başarısız oldu</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>web haritası zamanında yanıt vermedi</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>web haritası yakalama isteklerinin hiçbirine yanıt vermedi</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>yerel raster yakalaması açılamadı</translation>
@@ -10383,6 +10398,21 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>İşlenmiş renk katmanları filtre hedefi olamaz.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Web haritası {0} x {1} piksellik durağan bir görüntü olarak yakalandı (piksel başına {2} {3}), ardından kaynakla kesildi: yakınlaştırmak daha fazla ayrıntı göstermez. Filtreyi kaldır canlı hizmeti geri verir.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>harita birimi</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>Hizmete yapılan {0} istek yanıtsız kaldı: görüntüde boşluklar olabilir.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Uzak mekânsal yüklem değerlendirilemedi; önceki filtre korunuyor.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Kaynağın kapsamına göre kesildi: bu web hizmetinin eşleşen nesneleri listelenemiyor (tek bir istek için çok fazla veya kararlı anahtar yok). Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Kaynağın kapsamına göre kesildi: web hizmeti eşleşen nesnelerinin listesini reddetti (çoğunlukla istek onun için fazla uzundur). Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Kaynağın kapsamına göre kesildi: QGIS'in bu sürümü bir web hizmetinin yanıtlarını denetleyemez, bu yüzden eşleşen nesneleri listelenmez. Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

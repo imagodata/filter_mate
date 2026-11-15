@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>वेब आधार मानचित्र (WMS / WMTS / XYZ, ArcGIS MapServer): केवल रंग, इसे फ़िल्टर नहीं किया जा सकता</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>वेब मानचित्र जिसे कैप्चर नहीं किया जा सकता (ArcGIS MapServer, WMS का GDAL विवरण): केवल रंग, इसे फ़िल्टर नहीं किया जा सकता</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>सभी वेक्टर परतें चुनें</translation>
@@ -10268,6 +10273,16 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>सीमित रास्टर कैप्चर विफल रहा</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>वेब मानचित्र ने समय पर उत्तर नहीं दिया</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>वेब मानचित्र ने कैप्चर के किसी भी अनुरोध का उत्तर नहीं दिया</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>स्थानीय रास्टर कैप्चर खोला नहीं जा सका</translation>
@@ -10383,6 +10398,21 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>रेंडर की गई रंग परतें फ़िल्टर लक्ष्य नहीं हो सकतीं।</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>वेब मानचित्र को {0} x {1} पिक्सेल की स्थिर छवि के रूप में कैप्चर किया गया ({2} {3} प्रति पिक्सेल), फिर स्रोत से काटा गया: ज़ूम इन करने पर अधिक विवरण नहीं दिखता। Unfilter लाइव सेवा वापस देता है।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>मानचित्र इकाइयाँ</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>सेवा के {0} अनुरोध(ों) का उत्तर नहीं मिला: छवि में खाली जगहें हो सकती हैं।</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>रिमोट स्थानिक विधेय का मूल्यांकन नहीं किया जा सका; पिछला फ़िल्टर बनाए रखा गया है।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>स्रोत के विस्तार से काटा गया: इस वेब सेवा के मेल खाने वाले फ़ीचर सूचीबद्ध नहीं किए जा सकते (एक अनुरोध के लिए बहुत अधिक, या कोई स्थिर कुंजी नहीं)। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>स्रोत के विस्तार से काटा गया: वेब सेवा ने अपने मेल खाने वाले फ़ीचर की सूची अस्वीकार कर दी (अक्सर अनुरोध उसके लिए बहुत लंबा होता है)। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>स्रोत के विस्तार से काटा गया: QGIS का यह संस्करण वेब सेवा के उत्तरों की जाँच नहीं कर सकता, इसलिए उसके मेल खाने वाले फ़ीचर सूचीबद्ध नहीं किए जाते। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

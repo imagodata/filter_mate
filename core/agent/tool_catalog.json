@@ -584,7 +584,7 @@
   {
    "name": "cross_filter",
    "title": "Cross filter",
-   "description": "Filter layers by their spatial relation to a selection made on a source layer, any kind to any kind. Source kinds: a vector layer (its selected features), a raster (pixels kept by raster_selection, e.g. elevation between 1200 and 1300) or a point cloud (points kept by point_cloud_criteria, e.g. class 6). Targets keep what satisfies the predicates: vector features, raster pixels or LiDAR points inside the source area (outside with Disjoint). Filters apply in place to the project layers and replace the previous filter of each target unless operator is given. Not recorded in the undo history: revert with clear_filters. Returns filtered (names of the layers filtered), failed ({layer: reason}), skipped ({layer: reason}) and warnings ({layer: reason}: filtered, but a web service read up to its budget, so features may be missing). A layer that is not found is reported in failed; a source that is not found is an error.",
+   "description": "Filter layers by their spatial relation to a selection made on a source layer, any kind to any kind. Source kinds: a vector layer (its selected features), a raster (pixels kept by raster_selection, e.g. elevation between 1200 and 1300) or a point cloud (points kept by point_cloud_criteria, e.g. class 6). Targets keep what satisfies the predicates: vector features, raster pixels or LiDAR points inside the source area (outside with Disjoint). Filters apply in place to the project layers and replace the previous filter of each target unless operator is given. Not recorded in the undo history: revert with clear_filters. Returns filtered (names of the layers filtered), failed ({layer: reason}), skipped ({layer: reason}) and warnings ({layer: reason}: filtered, but not exactly: the reason says how). A layer that is not found is reported in failed; a source that is not found is an error.",
    "read_only": false,
    "destructive": false,
    "idempotent": true,
@@ -2335,7 +2335,7 @@
   {
    "name": "add_service_layer",
    "title": "Add a layer of a web service",
-   "description": "Add a layer of a WFS, WMS or WMTS service, read from the service as the map moves. A WFS layer is data, filtered on the server. A WMS or WMTS layer is an image drawn by the service (old maps, orthophotos of a year, cadastre, land cover): put under the other layers, it cannot be filtered, read nor exported. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the user first.",
+   "description": "Add a layer of a WFS, WMS or WMTS service, read from the service as the map moves. A WFS layer is data, filtered on the server. A WMS or WMTS layer is an image drawn by the service (old maps, orthophotos of a year, cadastre, land cover): put under the other layers, it has no values to filter, read nor export. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the user first.",
    "read_only": false,
    "destructive": false,
    "idempotent": false,
@@ -2371,7 +2371,7 @@
   {
    "name": "add_basemap",
    "title": "Add a web basemap",
-   "description": "Add a web basemap (XYZ tiles) to the project, under every other layer. A basemap is an image drawn by its server as the map moves: a background, which cannot be filtered, read nor exported. Only a basemap of the list can be added, and in the chat of FilterMate only one the user ticked; an address is never written here. Returns the layer summary. The chat of FilterMate asks the user first.",
+   "description": "Add a web basemap (XYZ tiles) to the project, under every other layer. A basemap is an image drawn by its server as the map moves: a background, with no values to filter, read nor export. Only a basemap of the list can be added, and in the chat of FilterMate only one the user ticked; an address is never written here. Returns the layer summary. The chat of FilterMate asks the user first.",
    "read_only": false,
    "destructive": false,
    "idempotent": false,

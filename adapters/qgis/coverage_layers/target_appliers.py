@@ -278,6 +278,24 @@ def _is_polygon_layer(layer) -> bool:
         return False
 
 
+class _Unlisted:
+    """The matching features of a web service could not be listed; ``reason`` is the one of the bounded read.
+
+    ``key_limit``: more of them than a service is sent as a list. ``unverified_filter``: nothing was read, this
+    QGIS cannot check what a service answers.
+    """
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+
+
+def BY_EXTENT(reason: str = '') -> str:
+    """What is said of a web service cut by the extent of the source: the words of the dock (filter_executor)."""
+    from ...backends.ogr.filter_executor import _remote_message
+    return _remote_message({'unverified_filter': 'by_extent_unverified', 'refused': 'by_extent_refused'}.get(
+        reason, 'by_extent'))
+
+
 class VectorTargetJob(TargetJob):
     """Keep the features of a vector target that satisfy the predicates."""
 
@@ -311,12 +329,23 @@ class VectorTargetJob(TargetJob):
         self._centroid_eligible = self._is_polygon or layer.geometryType() == line_type
         self._use_centroids = False
         self._pk, self._raw_pk = self._primary_key(layer)
+        # The cut by extent set in place of the list of keys when the service refuses it (apply).
+        self._extent_fallback = ''
+        # A layer that only asks the rectangle of the map writes a longer address for the same keys.
+        from ....core.domain.source_capability import asks_by_rectangle
+        self._by_rectangle = asks_by_rectangle(layer.source())
+        self._no_key = ''
         if self._pk is None:
-            self._error = translate(
+            no_key = translate(
                 "VectorTargetJob",
                 "{0}: no unique key field, its features cannot be listed in its filter "
                 "(a web service, or a virtual layer without a unique id column)."
             ).format(layer.name())
+            if self._remote_target is not None and getattr(self._capability, 'takes_extent_subset', False):
+                # 2026-11-15: such a service is cut by the extent of the source (compute), which lists no key.
+                self._no_key = no_key
+            else:
+                self._error = no_key
         self._expression = ''
 
     def _unfiltered_source(self, layer: QgsVectorLayer):
@@ -396,6 +425,11 @@ class VectorTargetJob(TargetJob):
                               materialization_limits(ENV_VARS), self.feedback)
         self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
         if not outcome.complete:
+            from ..remote_materializer import supports_reply_validation
+            if outcome.reason == 'key_limit' or (
+                    outcome.reason == 'unverified_filter' and not supports_reply_validation()):
+                # (A read that found nothing on a QGIS that checks its replies stays refused, as before.)
+                return _Unlisted(outcome.reason)  # compute() cuts by the extent of the source, or refuses with it
             if outcome.reason not in ('feature_limit', 'timeout'):
                 self.outcome.message = _remote_message(outcome.reason)
                 return None
@@ -453,8 +487,20 @@ class VectorTargetJob(TargetJob):
             methods = whole_methods
         coverage = float(request.coverage_min or 0.0) if self._is_polygon else 0.0
         complement = False
-        if self._remote_target is not None:
+        remote = self._remote_target is not None
+        if remote:
+            if self._no_key:
+                # Nothing to list, so nothing to read: the server is asked what meets the extent of the source.
+                self._remote_target = None
+                if not self._cut_by_extent(geometry, request.methods):
+                    self.outcome.message = self._no_key
+                return
             kept = self._compute_remote(geometry, methods, parts, part_methods, coverage)
+            if isinstance(kept, _Unlisted):
+                if not self._cut_by_extent(geometry, request.methods, kept.reason):
+                    from ...backends.ogr.filter_executor import _remote_message
+                    self.outcome.message = _remote_message(kept.reason)
+                return
             if kept is None:
                 return
             # Disjoint: the keys are those of the features that intersect (all inside the BBOX).
@@ -465,8 +511,21 @@ class VectorTargetJob(TargetJob):
                 return
         capability = self._capability
         limit = capability.key_list_limit if capability is not None and capability.is_remote_service else None
+        if remote and kept and not complement:
+            # 2026-11-15: QGIS writes the keys in the address of each request, and a server stops reading an address
+            # at a length of its own (8 KB for most): a longer list gave an empty layer, or was refused. Not sent.
+            from ....core.domain.source_capability import key_list_fits
+            from ..remote_materializer import request_bytes_limit
+            from ....config.config import ENV_VARS
+            if not key_list_fits(self._pk, kept, request_bytes_limit(ENV_VARS),
+                                 self._by_rectangle) and self._cut_by_extent(
+                    geometry, request.methods):
+                self._source = None
+                return
         if limit and len(kept) > limit:
             self._source = None
+            if self._cut_by_extent(geometry, request.methods):
+                return
             self.outcome.message = translate(
                 "VectorTargetJob",
                 "{0} features to list, more than the {1} sent to a web service: narrow the source "
@@ -491,6 +550,10 @@ class VectorTargetJob(TargetJob):
             self._expression = f"NOT ({self._expression})" if kept else '1 = 1'
         else:
             self.outcome.kept_count = len(kept)
+            if remote and kept:
+                # 2026-11-15: a service may refuse this list (its address is too long for it, far under 500 keys
+                # on a real WFS): apply() then sets the cut by extent kept here.
+                self._extent_fallback = self._extent_expression(geometry, request.methods) or ''
             # OR / AND NOT nothing leave the previous subset as it was.
             self.outcome.emptied = not kept and not _keeps_previous(self.before.subset, self.operator)
         if self._partial:
@@ -499,6 +562,41 @@ class VectorTargetJob(TargetJob):
             self.outcome.details['partial'] = True
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
+
+    def _cut_by_extent(self, geometry, methods, reason: str = '') -> bool:
+        """Cut the target by the extent of the source, on the server, where its features cannot be listed.
+
+        2026-11-15: a web service was refused past 500 matching features, or without a stable key. A WFS is asked
+        what meets the rectangle of the source instead (``source_capability.extent_subset``): no key is listed, so
+        the result has no bound. It is a cut by extent, and says so: a feature inside the rectangle and outside the
+        source itself stays, whatever the predicate. So is a WFS on a QGIS that cannot check what a service answers
+        (``reason`` ``unverified_filter``: before 3.26, or before 3.36 under Python 3.12), where nothing is read.
+
+        Returns:
+            False where the cut cannot be made, the job left as it was: a service that takes no such filter, AND NOT
+            or Disjoint (both keep what lies outside the rectangle, a negation the validated WFS dialect does not
+            write: what a server answers for a feature without geometry is not proven), an empty source.
+        """
+        expression = self._extent_expression(geometry, methods)
+        if expression is None:
+            return False
+        self._source = None
+        self._expression = expression
+        self.outcome.details['by_extent'] = True
+        self.outcome.message = BY_EXTENT(reason)
+        self.outcome.success = True
+        self.outcome.elapsed = time.perf_counter() - self._started
+        return True
+
+    def _extent_expression(self, geometry, methods) -> Optional[str]:
+        """The filter by the extent of ``geometry`` this target takes; None where a cut by extent cannot be made."""
+        from ....core.domain.source_capability import extent_subset
+        if self._capability is None or (self.operator or '').upper() == 'AND NOT' or geometry.isEmpty():
+            return None
+        if 'disjoint' in methods:
+            return None
+        box = geometry.boundingBox()
+        return extent_subset(self._capability, box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum())
 
     def _predicate_geometry(self, geometry):
         """The geometry used by the predicate; the original feature is retained in the target layer."""
@@ -555,10 +653,22 @@ class VectorTargetJob(TargetJob):
             return None
         subset = combine_subset(self.before.subset, self._expression, self.operator)
         try:
-            from ....infrastructure.database.sql_utils import safe_set_subset_string
-            ok = safe_set_subset_string(layer, subset)
+            from ....infrastructure.database.sql_utils import safe_set_subset_string as set_subset
         except ImportError:
-            ok = layer.setSubsetString(subset)
+            def set_subset(target, text):
+                return target.setSubsetString(text)
+        ok = set_subset(layer, subset)
+        if not ok and self._extent_fallback:
+            # The service refused the list of keys: cut by the extent of the source instead, and said.
+            by_extent = combine_subset(self.before.subset, self._extent_fallback, self.operator)
+            ok = set_subset(layer, by_extent)
+            if ok:
+                subset, self._partial = by_extent, ''
+                self.outcome.details.pop('partial', None)
+                self.outcome.details['by_extent'] = True
+                self.outcome.message = BY_EXTENT('refused')
+                self.outcome.kept_count = None  # what the rectangle holds was not counted
+                self.outcome.emptied = False
         if not ok:
             self.outcome.success = False
             self.outcome.message = f"subset rejected by the provider: {subset[:200]}"
@@ -572,6 +682,48 @@ class VectorTargetJob(TargetJob):
 
 
 # --- raster -----------------------------------------------------------------
+
+def _transparent_cell(extent: QgsRectangle, crs_wkt: str) -> str:
+    """One transparent cell at the upper left corner of ``extent``: the capture of a web map that keeps nothing."""
+    from osgeo import gdal
+    path = cache.new_path('web_map_empty', '.tif')
+    size = max(extent.width(), extent.height()) / 4096.0 or 1.0
+    dataset = gdal.GetDriverByName('GTiff').Create(path, 1, 1, 4, gdal.GDT_Byte)
+    if dataset is None:
+        cache.settle([path])
+        raise RuntimeError(translate('RasterTargetJob', 'local raster target could not be opened'))
+    dataset.SetGeoTransform((extent.xMinimum(), size, 0, extent.yMaximum(), 0, -size))
+    if crs_wkt:
+        dataset.SetProjection(crs_wkt)
+    for index, interpretation in enumerate((gdal.GCI_RedBand, gdal.GCI_GreenBand, gdal.GCI_BlueBand,
+                                            gdal.GCI_AlphaBand)):
+        band = dataset.GetRasterBand(index + 1)
+        band.SetColorInterpretation(interpretation)
+        band.Fill(0)
+    dataset.FlushCache()
+    dataset = None  # noqa: F841 - close the file
+    return path
+
+
+def _web_map_note(capture: dict, crs) -> str:
+    """What is said of a web map cut by a source: it is a still image, at this resolution, maybe with holes."""
+    try:
+        from qgis.core import QgsUnitTypes
+        unit = QgsUnitTypes.toAbbreviatedString(crs.mapUnits())
+    except Exception:  # an invalid CRS, or a QGIS without this helper
+        unit = ''
+    resolution = '{:.3g}'.format(capture.get('resolution') or 0.0)
+    note = translate(
+        'RasterTargetJob',
+        'Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: '
+        'zooming in shows no more detail. Unfilter gives the live service back.'
+    ).format(capture.get('columns'), capture.get('rows'), resolution, unit or translate('RasterTargetJob', 'map units'))
+    if capture.get('unread'):
+        note += ' ' + translate(
+            'RasterTargetJob', '{0} request(s) of the service were not answered: the image may have holes.'
+        ).format(capture['unread'])
+    return note
+
 
 class _ProviderLayer:
     """A raster provider with the few layer calls ``materialize_raster`` makes (worker only)."""
@@ -633,7 +785,16 @@ class RasterTargetJob(TargetJob):
         from .raster_materialization import is_wcs, raster_reads_remotely
         capability = classify(self._base_provider, self._base_source, is_raster=True)
         self._rendered = not capability.has_raw_values
-        self._remote = raster_reads_remotely(self._base_provider, self._base_source)
+        # 2026-11-15: a web map (WMS, WMTS, XYZ tiles) draws an image and was refused as a target. It is captured
+        # in the area the source keeps, within a budget of pixels, then cut as a local raster is (_capture_web_map).
+        from ..point_cloud_capability import CAPTURED_TARGET_PROVIDERS
+        self._web_map = self._rendered and (self._base_provider or '').lower() in CAPTURED_TARGET_PROVIDERS
+        if self._web_map:
+            # The tiles of QGIS are asked by a thread of its own, which tells the network manager of the main
+            # thread what it finished: the capture listens to it (materialize_web_map).
+            from ..source_capability_probe import capture_network_manager
+            capture_network_manager()
+        self._remote = self._web_map or raster_reads_remotely(self._base_provider, self._base_source)
         self._is_wcs = is_wcs(self._base_provider, self._base_source)
         self._analysis_source = None
         self._input_source = self._base_source
@@ -676,6 +837,52 @@ class RasterTargetJob(TargetJob):
         self._extent = QgsRectangle(base.extent())
         return base
 
+    def _open_web_map(self):
+        """The web map as a bare provider, opened in the worker: its extent (``self._extent``); it has no grid."""
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            raise RuntimeError(translate('RasterTargetJob', 'remote raster target must run in a worker thread'))
+        from .raster_materialization import _tr
+        base = _ProviderLayer.open(self._base_provider, self._base_source, 'FilterMate target capture')
+        extent = QgsRectangle(base.extent()) if base.isValid() else QgsRectangle()
+        if not base.isValid() or extent.isEmpty() or not extent.isFinite():
+            raise RuntimeError(_tr('raster capture source could not be opened'))
+        self._extent = extent
+        return base
+
+    def _capture_web_map(self, base, kept: Optional[QgsGeometry], is_canceled) -> str:
+        """The image the web map draws over the area ``kept``, as a local GeoTIFF (red, green, blue, alpha).
+
+        The grid is the finest the budget of pixels affords over the bounding box of ``kept``
+        (``CROSS_FILTER.web_map_target_max_pixels``, ``raster_materialization.web_map_grid``): a level of the
+        service when it has levels (tiles), copied and not resampled. Nothing kept: one transparent cell written
+        here, the service is asked nothing.
+        """
+        from .raster_materialization import materialize_web_map, web_map_grid, web_map_max_pixels
+        parts = [] if kept is None or kept.isEmpty() else (
+            kept.asGeometryCollection() if kept.isMultipart() else [kept])
+        boxes = [box for box in (part.boundingBox() for part in parts) if box.intersects(self._extent)]
+        grid = None
+        if boxes:
+            full = (self._extent.xMinimum(), self._extent.yMinimum(), self._extent.xMaximum(), self._extent.yMaximum())
+            box = (min(b.xMinimum() for b in boxes), min(b.yMinimum() for b in boxes),
+                   max(b.xMaximum() for b in boxes), max(b.yMaximum() for b in boxes))
+            try:
+                levels = [float(level) for level in base.dataProvider().nativeResolutions()]
+            except Exception:  # a provider without levels
+                levels = []
+            try:
+                grid = web_map_grid(full, box, web_map_max_pixels(cache._config_value('web_map_target_max_pixels', None)),
+                                    levels)
+            except ValueError:
+                grid = None  # the area kept only touches the extent of the service
+        if grid is None:
+            return _transparent_cell(self._extent, base.crs().toWkt())
+        (x_min, y_min, x_max, y_max), columns, rows, resolution = grid
+        path, unread = materialize_web_map(base, QgsRectangle(x_min, y_min, x_max, y_max), columns, rows, is_canceled)
+        self.outcome.details['web_map'] = {'resolution': resolution, 'columns': columns, 'rows': rows, 'unread': unread}
+        return path
+
     def _prepare_input(self, is_canceled, base=None, kept: Optional[QgsGeometry] = None):
         """Local pixels to clip: the analysis capture, or a capture of ``base`` around ``kept``.
 
@@ -690,6 +897,11 @@ class RasterTargetJob(TargetJob):
             source, provider = self._analysis_source
             base = QgsRasterLayer(source, 'FilterMate target capture', provider)
             native_size = base.width(), base.height()
+        elif self._web_map:
+            source = self._capture_web_map(base, kept, is_canceled)
+            self.outputs.append(source)
+            base = QgsRasterLayer(source, 'FilterMate local target', 'gdal')
+            native_size = base.width(), base.height()  # a web map has no grid to be resampled from
         else:
             area, native_size = _capture_window(self._extent, base.width(), base.height(), kept)
             source = materialize_raster(base, extent=area, is_canceled=is_canceled)
@@ -705,10 +917,12 @@ class RasterTargetJob(TargetJob):
 
     def compute(self, source_geometry, source_crs, context, request, is_canceled) -> None:
         self._started = time.perf_counter()
-        if self._rendered:
+        if self._rendered and (not self._web_map or self._analysis_source is not None):
+            # Not captured (ArcGIS MapServer, GDAL WMS), or a web map filtered as a source by its own colours:
+            # the capture of its selection is the one of the screen, not one made for a cut.
             self.outcome.message = translate('RasterTargetJob', 'Rendered color layers cannot be filter targets.')
             return
-        if self._base_provider not in ('gdal', 'postgresraster') and not self._is_wcs:
+        if not self._web_map and self._base_provider not in ('gdal', 'postgresraster') and not self._is_wcs:
             self.outcome.message = f"raster provider '{self._base_provider}' cannot be clipped (GDAL files only)"
             return
         side = request.side
@@ -734,7 +948,8 @@ class RasterTargetJob(TargetJob):
             return
         remote = None
         if self._analysis_source is None and self._remote:
-            remote = self._open_remote()  # its full extent; captured below, once the kept area is known
+            # Its full extent; captured below, once the kept area is known.
+            remote = self._open_web_map() if self._web_map else self._open_remote()
         if side is CoverageSide.OUTSIDE:
             geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
@@ -773,6 +988,10 @@ class RasterTargetJob(TargetJob):
             self.outcome.message = 'canceled'
             return
         self._derived_path = path
+        capture = self.outcome.details.get('web_map')
+        if capture:
+            self.outcome.details['captured'] = True
+            self.outcome.message = _web_map_note(capture, self.crs)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
         self.outcome.details['vrt'] = path

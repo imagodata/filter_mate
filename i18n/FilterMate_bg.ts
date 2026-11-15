@@ -9177,6 +9177,11 @@ The raster is drawn as in the map, with its style. SAM is installed once from th
         <translation>Уеб базова карта (WMS / WMTS / XYZ, ArcGIS MapServer): само цветове, не може да се филтрира</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="559"/>
+        <source>Web map that cannot be captured (ArcGIS MapServer, GDAL description of a WMS): colours only, it cannot be filtered</source>
+        <translation>Уеб карта, която не може да бъде заснета (ArcGIS MapServer, GDAL описание на WMS): само цветове, не може да се филтрира</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="361"/>
         <source>Select all vector layers</source>
         <translation>Избор на всички векторни слоеве</translation>
@@ -10268,6 +10273,16 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>ограниченото заснемане на растер е неуспешно</translation>
     </message>
     <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="350"/>
+        <source>the web map did not answer in time</source>
+        <translation>уеб картата не отговори навреме</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="359"/>
+        <source>the web map answered none of the requests of the capture</source>
+        <translation>уеб картата не отговори на нито една от заявките за заснемането</translation>
+    </message>
+    <message>
         <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="304"/>
         <source>local raster capture could not be opened</source>
         <translation>локалното заснемане на растер не можа да бъде отворено</translation>
@@ -10383,6 +10398,21 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Слоеве с изобразени цветове не могат да бъдат цели на филтър.</translation>
     </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="668"/>
+        <source>Web map captured as a still image of {0} x {1} pixels ({2} {3} per pixel), then cut by the source: zooming in shows no more detail. Unfilter gives the live service back.</source>
+        <translation>Уеб картата е заснета като неподвижно изображение от {0} x {1} пиксела ({2} {3} на пиксел), след което е изрязана по източника: приближаването не показва повече детайли. „Премахване на филтъра“ връща услугата на живо.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="670"/>
+        <source>map units</source>
+        <translation>единици на картата</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="673"/>
+        <source>{0} request(s) of the service were not answered: the image may have holes.</source>
+        <translation>{0} заявки към услугата останаха без отговор: изображението може да има празнини.</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
@@ -10478,6 +10508,21 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
         <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
         <translation>Отдалеченият пространствен предикат не можа да бъде оценен; предишният филтър е запазен.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1042"/>
+        <source>Cut by the extent of the source: the matching features of this web service cannot be listed (too many for one request, or no stable key). Features inside that extent may lie outside the source itself.</source>
+        <translation>Изрязване по обхвата на източника: съответстващите обекти на тази уеб услуга не могат да бъдат изброени (твърде много за една заявка или няма стабилен ключ). Обекти в този обхват може да са извън самия източник.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: the web service refused the list of its matching features (most often a request too long for it). Features inside that extent may lie outside the source itself.</source>
+        <translation>Изрязване по обхвата на източника: уеб услугата отказа списъка на съответстващите ѝ обекти (най-често заявката е твърде дълга за нея). Обекти в този обхват може да са извън самия източник.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Изрязване по обхвата на източника: тази версия на QGIS не може да провери отговорите на уеб услуга, затова съответстващите ѝ обекти не се изброяват. Обекти в този обхват може да са извън самия източник.</translation>
     </message>
     <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>

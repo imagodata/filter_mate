@@ -1253,7 +1253,13 @@ class FilterEngineTask(QgsTask):
                             if key not in existing_keys:
                                 self._pending_subset_requests.append((new_layer, new_expr))
                                 existing_keys.add(key)
-                    self.warning_messages = result.context.result_processor.warning_messages
+                    # 2026-11-15: merged, not replaced. The orchestrator puts the warnings of the backends in
+                    # this list while the task runs (a web service read up to its budget, or cut by the extent
+                    # of the source): replacing it dropped them before finished() showed them.
+                    merged = list(getattr(self, 'warning_messages', None) or [])
+                    merged.extend(warning for warning in (result.context.result_processor.warning_messages or [])
+                                  if warning not in merged)
+                    self.warning_messages = merged
 
                 if hasattr(result.context, 'expression_builder'):
                     self._expression_builder = result.context.expression_builder

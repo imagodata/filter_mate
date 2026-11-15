@@ -117,3 +117,57 @@ def test_server_filter_starts_are_the_only_tolerant_callers():
                 (tolerant if allowed else strict).append((relative, node.lineno))
     assert [name for name, _ in tolerant] == ["adapters/qgis/server_subset_job.py"] * 2
     assert all(name == "adapters/public_api/operations.py" for name, _ in strict), strict
+
+
+# 2026-11-15: one Filter of the dock with a WFS layer and a web map among its targets. The capture of the web map
+# (a CrossFilterTask) still ran when the dock set the filter of the WFS layer, and that filter was refused
+# ("A FilterMate task is still reading layers"). A cross filter task that does not touch the layer does not count.
+
+def _cross_task(status, source, *targets):
+    task = type("CrossFilterTask", (_Task,), {})(status)
+    task.source_job = types.SimpleNamespace(layer_id=source)
+    task.target_jobs = [types.SimpleNamespace(layer_id=target) for target in targets]
+    return task
+
+
+@pytest.fixture
+def cross_task(dock_task, monkeypatch):
+    listed = []
+    manager = sys.modules["qgis.core"].QgsApplication.taskManager()
+    manager.tasks.side_effect = lambda: list(listed)
+    return listed
+
+
+def test_a_cross_filter_task_on_other_layers_does_not_hold_a_server_filter(cross_task):
+    cross_task.append(_cross_task(RUNNING, "zones", "basemap"))
+    assert not operations._background_tasks_running(allow_finishing=True, layer_id="wfs")
+    assert operations._background_tasks_running(allow_finishing=True, layer_id="basemap")
+    assert operations._background_tasks_running(allow_finishing=True, layer_id="zones")
+
+
+def test_without_a_layer_every_cross_filter_task_counts(cross_task):
+    """busy_reason() and the API: any running task, whatever it reads."""
+    cross_task.append(_cross_task(RUNNING, "zones", "basemap"))
+    assert operations._background_tasks_running()
+    assert operations._background_tasks_running(allow_finishing=True)
+    assert operations.busy_reason() == operations.BACKGROUND_BUSY
+
+
+def test_a_cross_filter_task_whose_layers_cannot_be_told_counts(cross_task):
+    task = _cross_task(RUNNING, "zones")
+    task.source_job = types.SimpleNamespace(layer_id=None)
+    cross_task.append(task)
+    assert operations._background_tasks_running(allow_finishing=True, layer_id="wfs")
+
+
+def test_the_engine_task_of_the_dock_still_holds_a_server_filter(cross_task):
+    """Only a cross filter task is told apart by its layers; the filter engine task reads them all."""
+    cross_task.append(type("FilterEngineTask", (_Task,), {})(RUNNING))
+    assert operations._background_tasks_running(allow_finishing=True, layer_id="wfs")
+
+
+def test_a_cross_filter_task_of_the_service_is_told_apart_too(dock_task, monkeypatch):
+    service = types.SimpleNamespace(_running=[_cross_task(RUNNING, "zones", "basemap")])
+    monkeypatch.setattr(service_mod, "get_cross_filter_service", lambda: service)
+    assert not operations._background_tasks_running(allow_finishing=True, layer_id="wfs")
+    assert operations._background_tasks_running(allow_finishing=True, layer_id="basemap")
