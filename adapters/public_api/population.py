@@ -14,10 +14,11 @@ import shutil
 import tempfile
 from typing import Any, Callable, Dict, Optional, Sequence
 
+from ...core.agent.elevation import quiet_message
 from ...core.agent.open_data import KIND_POPULATION, megabytes, resolve_platform
 from ...core.agent.population import (
-    NOT_COVERED, PopulationSource, area_problem, covered_rects, covered_share, grid_for, grid_url, known,
-    on_the_grid, resolution_label,
+    MAX_VRT_BYTES, NOT_COVERED, PopulationSource, area_problem, covered_rects, covered_share, grid_for, grid_url,
+    known, on_the_grid, resolution_label, vrt_geotransform,
 )
 from .operations import running
 from .terrain import _Gdal, _area_in_degrees, _attempt, _ended_error, _in_background, _under_the_data
@@ -41,20 +42,43 @@ def _population_source(platform: str, extra_domains: str) -> PopulationSource:
     return source
 
 
-def _grid_problem(gdal, dataset, source: PopulationSource, bounds: Sequence[float]) -> float:
+def _vrt_text(gdal, url: str) -> str:
+    """The text of the VRT at ``url``, read as a file: GDAL 3.4 opens every file a VRT names to write its text
+    back (2026-11-15: 150 s for Lyon, 237 files over the network, against 3 s).
+
+    Raises:
+        ValueError: Its server did not answer with it, or with more than a VRT weighs.
+    """
+    gdal.ErrorReset()
+    handle = gdal.VSIFOpenL('/vsicurl/' + url, 'rb')
+    if handle is None:
+        raise ValueError("the population grid could not be read from its server: "
+                         + (quiet_message(gdal.GetLastErrorMsg()) or 'no answer'))
+    try:
+        data = gdal.VSIFReadL(1, MAX_VRT_BYTES + 1, handle) or b''
+    finally:
+        gdal.VSIFCloseL(handle)
+    if not data:  # GDAL 3.4 opens an address its server answers 404 to, and reads nothing of it
+        raise ValueError("the population grid could not be read from its server: "
+                         + (quiet_message(gdal.GetLastErrorMsg()) or 'no answer'))
+    if len(data) > MAX_VRT_BYTES:
+        raise ValueError("the population grid sent by its server cannot be read as one")
+    return data.decode('utf-8', 'replace')
+
+
+def _grid_problem(gdal, url: str, source: PopulationSource, bounds: Sequence[float]) -> float:
     """The share of ``bounds`` the files of the grid fill, once its pixels are those this module counts on.
 
     Raises:
-        ValueError: A grid whose pixels moved (every total would be wrong without a word), or a VRT that names a
-            file that is not its own.
+        ValueError: No answer, a grid whose pixels moved (every total would be wrong without a word), or a VRT that
+            names a file that is not its own.
     """
-    left, step, _skew, top, _skew2, minus = dataset.GetGeoTransform()
+    text = _vrt_text(gdal, url)
+    left, step, _skew, top, _skew2, minus = vrt_geotransform(text)
     if not on_the_grid(source, left, top, step, minus):
         raise ValueError("the population grid has changed its pixels on its server: FilterMate must be updated to "
                          "read it")
-    xml = dataset.GetMetadata('xml:VRT') or ['']
-    rects = covered_rects(xml[0] if isinstance(xml, list) else str(xml))
-    return covered_share(rects, (left, top), step, bounds)
+    return covered_share(covered_rects(text), (left, top), step, bounds)
 
 
 def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int,
@@ -68,21 +92,21 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
     """
     import numpy
     with _Gdal(tiles=True, extensions='.tif,.vrt') as gdal:
-        dataset = grid = None
+        dataset = None
         try:
             if int(gdal.VersionInfo()) < _MIN_GDAL:
                 raise ValueError(f"the population needs GDAL 3.1 or later to sum pixels; this QGIS has GDAL "
                                  f"{gdal.__version__}")
             share = 1.0
             if source is not None:
-                grid, failure = _attempt(gdal, lambda: gdal.Open('/vsicurl/' + url))
+                try:
+                    share = _grid_problem(gdal, url, source, bounds)
+                except RuntimeError as exc:  # GDAL raises once another plugin turned its exceptions on
+                    raise ValueError("the population grid could not be read from its server: "
+                                     + quiet_message(str(exc))) from None
                 reason = ended()
                 if reason:
                     raise _ended_error(reason)
-                if grid is None:
-                    raise ValueError(f"the population grid could not be read from its server: {failure}")
-                share = _grid_problem(gdal, grid, source, bounds)
-                grid = None
                 if share <= 0:
                     raise ValueError(NOT_COVERED)
             dataset, failure = _attempt(gdal, lambda: gdal.Warp(
@@ -111,7 +135,7 @@ def _read(url: str, path: str, bounds: Sequence[float], size: float, factor: int
             dataset.FlushCache()
             return answer
         finally:
-            dataset = grid = None  # closes the file before QGIS opens it, or before it is removed
+            dataset = None  # closes the file before QGIS opens it, or before it is removed
 
 
 def add_population(platform: str = 'meta_population', extent_wkt: str = '', crs: str = '',

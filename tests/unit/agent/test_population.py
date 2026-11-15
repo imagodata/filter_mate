@@ -7,7 +7,7 @@ import pytest
 from core.agent.open_data import KIND_POPULATION, NO_DATA_KINDS, NO_FILE_KINDS, resolve_platform
 from core.agent.population import (
     DEFAULT_RESOLUTION, MAX_AREA_KM2, MAX_PIXELS, SOURCES, area_problem, covered_rects, covered_share, grid_for,
-    grid_url, known, on_the_grid, pixel_metres, resolution_label, snapped,
+    grid_url, known, on_the_grid, pixel_metres, resolution_label, snapped, vrt_geotransform,
 )
 from core.agent.sources import BUILT_IN, describe_enabled
 
@@ -91,6 +91,17 @@ def test_where_the_grid_has_data_is_read_from_its_vrt():
     # The rectangles of a VRT that starts elsewhere on the grid are counted from its own corner.
     corner = (META.origin[0] + (column - 10) * META.step, META.origin[1] - (row - 10) * META.step)
     assert covered_share(covered_rects(_vrt(("1", "a.tif", (0, 0, 2000, 2000)))), corner, META.step, lyon) == 1.0
+
+
+def test_the_geotransform_of_a_vrt_is_read_from_its_text():
+    text = "<VRTDataset><GeoTransform> -1.8000041666666667e+02,  2.7777777777800118e-04,  0.0e+00,  " \
+           "7.1330694444444433e+01,  0.0e+00, -2.7777777777800118e-04</GeoTransform></VRTDataset>"
+    left, step, _a, top, _b, minus = vrt_geotransform(text)
+    assert on_the_grid(META, left, top, step, minus)
+    for wrong in ("<VRTDataset/>", "<GeoTransform>1, 2, 3</GeoTransform>", "<GeoTransform>a,b,c,d,e,f</GeoTransform>",
+                  "<GeoTransform>nan, 1, 0, 0, 0, -1</GeoTransform>"):
+        with pytest.raises(ValueError, match="cannot be read"):
+            vrt_geotransform(wrong)
 
 
 def test_a_grid_whose_pixels_moved_is_not_the_grid():

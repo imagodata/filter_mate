@@ -139,6 +139,26 @@ def covered_rects(vrt_xml: str) -> List[Tuple[int, int, int, int]]:
     return rects
 
 
+_GEOTRANSFORM = re.compile(r"<GeoTransform>([^<]*)</GeoTransform>")
+MAX_VRT_BYTES = 4 * 1024 * 1024  # 110 KB measured on 2026-11-15
+
+
+def vrt_geotransform(vrt_xml: str) -> Tuple[float, float, float, float, float, float]:
+    """The geotransform a VRT writes: its top left corner and the size of its pixels.
+
+    Raises:
+        ValueError: A VRT without one.
+    """
+    found = _GEOTRANSFORM.search(vrt_xml)
+    try:
+        values = tuple(float(value) for value in found.group(1).split(",")) if found else ()
+    except ValueError:
+        values = ()
+    if len(values) != 6 or not all(math.isfinite(value) for value in values):
+        raise ValueError("the population grid sent by its server cannot be read as one")
+    return values
+
+
 def on_the_grid(source: PopulationSource, left: float, top: float, step: float, minus: float) -> bool:
     """Whether a raster of top left corner (``left``, ``top``) and pixels of ``step`` x ``minus`` degrees has the
     pixels of ``source``: the same size, and its corner on a corner of a pixel of it."""
