@@ -1,253 +1,294 @@
 {
- "cases": [
-  {
-   "id": "open_data_add",
-   "prompt": "Ajoute les limites des communes de France depuis data.gouv.fr.",
-   "expect": [
-    [
-     {
-      "tool": "add_layer",
-      "args": {
-       "source": {
-        "contains": [
-         "https://",
-         "communes"
+  "cases": [
+    {
+      "id": "open_data_add",
+      "prompt": "Ajoute les limites des communes de France depuis data.gouv.fr.",
+      "expect": [
+        [
+          {
+            "tool": "add_layer",
+            "args": {
+              "source": {
+                "contains": [
+                  "https://",
+                  "communes"
+                ]
+              }
+            },
+            "call_args": {
+              "source": "https://static.data.gouv.fr/admin-express/communes.geojson",
+              "name": "Communes"
+            }
+          }
         ]
-       }
-      },
-      "call_args": {
-       "source": "https://static.data.gouv.fr/admin-express/communes.geojson",
-       "name": "Communes"
-      }
-     }
-    ]
-   ],
-   "forbid": [
-    "remove_layers"
-   ]
-  },
-  {
-   "id": "imagery_add",
-   "prompt": "Affiche la dernière image Sentinel-2 peu nuageuse sur la zone de la carte.",
-   "expect": [
-    [
-     {
-      "tool": "add_layer",
-      "args": {
-       "source": {
-        "contains": [
-         "https://",
-         ".tif"
+      ],
+      "forbid": [
+        "remove_layers"
+      ]
+    },
+    {
+      "id": "imagery_add",
+      "prompt": "Affiche la dernière image Sentinel-2 peu nuageuse sur la zone de la carte.",
+      "expect": [
+        [
+          {
+            "tool": "add_layer",
+            "args": {
+              "source": {
+                "contains": [
+                  "https://",
+                  ".tif"
+                ]
+              },
+              "kind": "raster"
+            },
+            "call_args": {
+              "source": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif",
+              "kind": "raster",
+              "name": "Sentinel-2"
+            }
+          }
         ]
-       },
-       "kind": "raster"
-      },
-      "call_args": {
-       "source": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif",
-       "kind": "raster",
-       "name": "Sentinel-2"
-      }
-     }
-    ]
-   ]
-  },
-  {
-   "id": "wfs_layer",
-   "prompt": "Ajoute les communes de la Géoplateforme IGN.",
-   "expect": [
-    [
-     {
-      "tool": "add_service_layer",
-      "args": {
-       "platform": "ign_wfs",
-       "typename": {
-        "contains": [
-         "commune"
+      ]
+    },
+    {
+      "id": "wfs_layer",
+      "prompt": "Ajoute les communes de la Géoplateforme IGN.",
+      "expect": [
+        [
+          {
+            "tool": "add_service_layer",
+            "args": {
+              "platform": "ign_wfs",
+              "typename": {
+                "contains": [
+                  "commune"
+                ]
+              }
+            },
+            "call_args": {
+              "platform": "ign_wfs",
+              "typename": "ADMINEXPRESS-COG-CARTO.LATEST:commune"
+            }
+          }
         ]
-       }
-      },
-      "call_args": {
-       "platform": "ign_wfs",
-       "typename": "ADMINEXPRESS-COG-CARTO.LATEST:commune"
-      }
-     }
-    ]
-   ]
-  },
-  {
-   "id": "remove_asked",
-   "prompt": "Retire la couche cours_eau du projet.",
-   "expect": [
-    [
-     {
-      "tool": "remove_layers",
-      "args": {
-       "layers": [
-        "cours_eau"
-       ]
-      },
-      "call_args": {
-       "layers": [
-        "cours_eau"
-       ]
-      }
-     }
-    ]
-   ]
-  },
-  {
-   "id": "no_remove_unasked",
-   "prompt": "Filtre les cours d'eau permanents.",
-   "expect": [
-    [
-     {
-      "tool": "apply_filter",
-      "args": {
-       "layer_name": "cours_eau",
-       "expression": {
-        "contains": [
-         "regime",
-         "Permanent"
+      ]
+    },
+    {
+      "id": "remove_asked",
+      "prompt": "Retire la couche cours_eau du projet.",
+      "expect": [
+        [
+          {
+            "tool": "remove_layers",
+            "args": {
+              "layers": [
+                "cours_eau"
+              ]
+            },
+            "call_args": {
+              "layers": [
+                "cours_eau"
+              ]
+            }
+          }
         ]
-       }
-      },
-      "call_args": {
-       "layer_name": "cours_eau",
-       "expression": "\"regime\" = 'Permanent'"
-      }
-     }
-    ]
-   ],
-   "forbid": [
-    "remove_layers",
-    "clear_filters"
-   ],
-   "trap": true
-  },
-  {
-   "id": "osm_hospitals_of_a_town",
-   "prompt": "Ajoute les hôpitaux de Pune (Inde) à partir d'OpenStreetMap.",
-   "touches": [
-    "osm_points",
-    "osm_polygons"
-   ],
-   "expect": [
-    [
-     {
-      "tool": "find_place",
-      "args": {
-       "query": {
-        "contains": [
-         "Pune"
+      ]
+    },
+    {
+      "id": "no_remove_unasked",
+      "prompt": "Filtre les cours d'eau permanents.",
+      "expect": [
+        [
+          {
+            "tool": "apply_filter",
+            "args": {
+              "layer_name": "cours_eau",
+              "expression": {
+                "contains": [
+                  "regime",
+                  "Permanent"
+                ]
+              }
+            },
+            "call_args": {
+              "layer_name": "cours_eau",
+              "expression": "\"regime\" = 'Permanent'"
+            }
+          }
         ]
-       }
-      },
-      "call_args": {
-       "query": "Pune",
-       "platform": "photon"
-      }
-     },
-     {
-      "tool": "add_osm_features",
-      "args": {
-       "tags": {
-        "contains": [
-         "amenity",
-         "hospital"
+      ],
+      "forbid": [
+        "remove_layers",
+        "clear_filters"
+      ],
+      "trap": true
+    },
+    {
+      "id": "osm_hospitals_of_a_town",
+      "prompt": "Ajoute les hôpitaux de Pune (Inde) à partir d'OpenStreetMap.",
+      "touches": [
+        "osm_points",
+        "osm_polygons"
+      ],
+      "expect": [
+        [
+          {
+            "tool": "find_place",
+            "args": {
+              "query": {
+                "contains": [
+                  "Pune"
+                ]
+              }
+            },
+            "call_args": {
+              "query": "Pune",
+              "platform": "photon"
+            }
+          },
+          {
+            "tool": "add_osm_features",
+            "args": {
+              "tags": {
+                "contains": [
+                  "amenity",
+                  "hospital"
+                ]
+              },
+              "crs": "EPSG:4326"
+            },
+            "call_args": {
+              "tags": [
+                {
+                  "key": "amenity",
+                  "value": "hospital"
+                }
+              ],
+              "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+              "crs": "EPSG:4326",
+              "geometry": "points"
+            }
+          }
         ]
-       },
-       "crs": "EPSG:4326"
-      },
-      "call_args": {
-       "tags": [
-        {
-         "key": "amenity",
-         "value": "hospital"
-        }
-       ],
-       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
-       "crs": "EPSG:4326",
-       "geometry": "points"
-      }
-     }
-    ]
-   ],
-   "forbid": [
-    "add_layer",
-    "run_algorithm",
-    "add_elevation",
-    "export_layers"
-   ]
-  },
-  {
-   "id": "osm_points_for_a_heatmap",
-   "prompt": "Charge les restaurants et les cafés du centre de Lyon en points, je veux en faire une carte de chaleur.",
-   "touches": [
-    "osm_points"
-   ],
-   "expect": [
-    [
-     {
-      "tool": "find_place",
-      "args": {
-       "query": {
-        "contains": [
-         "Lyon"
+      ],
+      "forbid": [
+        "add_layer",
+        "run_algorithm",
+        "add_elevation",
+        "export_layers"
+      ]
+    },
+    {
+      "id": "osm_points_for_a_heatmap",
+      "prompt": "Charge les restaurants et les cafés du centre de Lyon en points, je veux en faire une carte de chaleur.",
+      "touches": [
+        "osm_points"
+      ],
+      "expect": [
+        [
+          {
+            "tool": "find_place",
+            "args": {
+              "query": {
+                "contains": [
+                  "Lyon"
+                ]
+              }
+            },
+            "call_args": {
+              "query": "Lyon",
+              "platform": "photon"
+            }
+          },
+          {
+            "tool": "add_osm_features",
+            "args": {
+              "tags": {
+                "contains": [
+                  "restaurant",
+                  "cafe"
+                ]
+              },
+              "geometry": "points",
+              "crs": "EPSG:4326"
+            },
+            "call_args": {
+              "tags": [
+                {
+                  "key": "amenity",
+                  "value": "restaurant"
+                },
+                {
+                  "key": "amenity",
+                  "value": "cafe"
+                }
+              ],
+              "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+              "crs": "EPSG:4326",
+              "geometry": "points"
+            }
+          }
         ]
-       }
-      },
-      "call_args": {
-       "query": "Lyon",
-       "platform": "photon"
-      }
-     },
-     {
-      "tool": "add_osm_features",
-      "args": {
-       "tags": {
-        "contains": [
-         "restaurant",
-         "cafe"
+      ],
+      "forbid": [
+        "add_layer",
+        "add_elevation",
+        "export_layers"
+      ]
+    },
+    {
+      "id": "osm_not_for_a_layer_of_the_project",
+      "trap": true,
+      "prompt": "Combien y a-t-il de bâtiments par usage ?",
+      "expect": [],
+      "forbid": [
+        "add_osm_features",
+        "search_open_data",
+        "add_layer",
+        "run_algorithm"
+      ]
+    },
+    {
+      "id": "population_of_a_town",
+      "prompt": "Combien d'habitants vivent à Abuja, au Nigeria ?",
+      "touches": [
+        "population"
+      ],
+      "expect": [
+        [
+          {
+            "tool": "find_place",
+            "args": {
+              "query": {
+                "contains": [
+                  "Abuja"
+                ]
+              }
+            },
+            "call_args": {
+              "query": "Abuja, Nigeria",
+              "platform": "photon"
+            }
+          },
+          {
+            "tool": "add_population",
+            "args": {
+              "crs": "EPSG:4326"
+            },
+            "call_args": {
+              "extent_wkt": "POLYGON((7.35 8.95, 7.55 8.95, 7.55 9.15, 7.35 9.15, 7.35 8.95))",
+              "crs": "EPSG:4326"
+            }
+          }
         ]
-       },
-       "geometry": "points",
-       "crs": "EPSG:4326"
-      },
-      "call_args": {
-       "tags": [
-        {
-         "key": "amenity",
-         "value": "restaurant"
-        },
-        {
-         "key": "amenity",
-         "value": "cafe"
-        }
-       ],
-       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
-       "crs": "EPSG:4326",
-       "geometry": "points"
-      }
-     }
-    ]
-   ],
-   "forbid": [
-    "add_layer",
-    "add_elevation",
-    "export_layers"
-   ]
-  },
-  {
-   "id": "osm_not_for_a_layer_of_the_project",
-   "trap": true,
-   "prompt": "Combien y a-t-il de bâtiments par usage ?",
-   "expect": [],
-   "forbid": [
-    "add_osm_features",
-    "search_open_data",
-    "add_layer",
-    "run_algorithm"
-   ]
-  }
- ]
+      ],
+      "forbid": [
+        "add_osm_features",
+        "add_layer",
+        "search_open_data",
+        "run_algorithm"
+      ]
+    }
+  ]
 }

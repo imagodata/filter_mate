@@ -1058,6 +1058,29 @@ def build_server(client: FilterMateClient) -> Any:
             platform=platform, extent_wkt=extent_wkt, crs=crs, resolution=resolution, target_crs=target_crs,
             name=name), timeout=ADD_LAYER_TIMEOUT)
 
+    @mcp.tool(annotations=ToolAnnotations(title="Add the population of an area", readOnlyHint=False,
+                                          destructiveHint=False, idempotentHint=False, openWorldHint=True))
+    async def add_population(
+        extent_wkt: Annotated[str, Field(max_length=100_000, description=(
+            "The area as WKT: the extent_wkt of find_place or of map_context. Empty: the visible map"))] = "",
+        crs: Annotated[str, Field(max_length=64, description=(
+            "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty"))] = "",
+        platform: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "A population source the user allowed: meta_population (most countries, 30 m)"))] = "meta_population",
+        resolution: Annotated[Optional[float], Field(ge=30, le=10_000, description=(
+            "Pixel size in metres: 100 by default (a street), 1000 for a region"))] = None,
+        name: Annotated[str, Field(max_length=200, description="Name of the layer in the project")] = "",
+    ) -> Dict[str, Any]:
+        """Add the people of an area to the project as a raster of people per pixel, read from a population source
+        the user allowed: how many live there, where they are dense.
+
+        Pixels are summed, never averaged. Returns layer_id, total (the people of the rectangle around the area),
+        maximum (in one pixel), resolution and note. The chat of FilterMate asks the user first.
+        """
+        return await call("POST", "/layers/add-population", _body(
+            platform=platform, extent_wkt=extent_wkt, crs=crs, resolution=resolution, name=name),
+            timeout=ADD_LAYER_TIMEOUT)
+
     @mcp.tool(annotations=ToolAnnotations(title="Add OpenStreetMap features", readOnlyHint=False,
                                           destructiveHint=False, idempotentHint=False, openWorldHint=True))
     async def add_osm_features(

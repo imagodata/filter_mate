@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..accessor import (
-    ContourResult, ElevationResult, OsmResult,
+    ContourResult, ElevationResult, OsmResult, PopulationResult,
     Bookmarks, FieldAdded, FilterRejected, JoinAdded, LayerRename, LayerSummary, LayerTreeChange, MapThemes, OpenDataResult, OperationResult, PlacesResult, ProjectCrs, SegmentResult, SelectionResult,
     SimilarResult, ViewState,
 )
@@ -144,6 +144,27 @@ def add_elevation(payload: AddElevationBody, request: Request) -> ElevationResul
         return _accessor(request).add_elevation(
             payload.platform, extent_wkt=payload.extent_wkt, crs=payload.crs, resolution=payload.resolution,
             target_crs=payload.target_crs, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class AddPopulationBody(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    platform: str = Field(default="meta_population", min_length=1, max_length=200, description="Population source")
+    extent_wkt: str = Field(default="", max_length=100_000, description="Area as WKT (default: the visible map)")
+    crs: str = Field(default="", max_length=64, description="CRS of extent_wkt (default: the CRS of the map)")
+    resolution: Optional[float] = Field(default=None, ge=30, le=10_000, description="Pixel size in metres")
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/layers/add-population", response_model=PopulationResult)
+def add_population(payload: AddPopulationBody, request: Request) -> PopulationResult:
+    """Add the people of an area, read from a population grid the user allowed, as a raster of people per pixel."""
+    try:
+        return _accessor(request).add_population(
+            payload.platform, extent_wkt=payload.extent_wkt, crs=payload.crs, resolution=payload.resolution,
+            name=payload.name)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 

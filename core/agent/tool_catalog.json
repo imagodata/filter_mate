@@ -2457,6 +2457,59 @@
    }
   },
   {
+   "name": "add_population",
+   "title": "Add the population of an area",
+   "description": "Add the people of an area to the project as a raster of people per pixel, read from a population source the user allowed: how many live there, where they are dense. Pixels are summed, never averaged. Returns layer_id, total (the people of the rectangle around the area), maximum (in one pixel), resolution and note. The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "extent_wkt": {
+      "default": "",
+      "description": "The area as WKT: the extent_wkt of find_place or of map_context. Empty: the visible map",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "crs": {
+      "default": "",
+      "description": "CRS of extent_wkt: EPSG:4326 for find_place; the CRS of the map when empty",
+      "maxLength": 64,
+      "type": "string"
+     },
+     "platform": {
+      "default": "meta_population",
+      "description": "A population source the user allowed: meta_population (most countries, 30 m)",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "resolution": {
+      "anyOf": [
+       {
+        "maximum": 10000,
+        "minimum": 30,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Pixel size in metres: 100 by default (a street), 1000 for a region"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer in the project",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
    "name": "add_osm_features",
    "title": "Add OpenStreetMap features",
    "description": "Add to the project the OpenStreetMap features that carry given tags in an area: buildings, roads, hospitals, schools, shops, restaurants, parks, rivers, land use..., anywhere in the world. Added on top of the project, in EPSG:4326, each with osm_id, name and a column per key asked (addr:street is addr_street). Returns layers [{layer_id, name, geometry, feature_count, fields}] and feature_count. Ask for a town or a district, not a region. The chat of FilterMate asks the user first.",

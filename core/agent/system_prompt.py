@@ -93,8 +93,9 @@ or gpkg first) or a local data file, and the user confirms. A layer of a WFS pla
 one (an image: an old map, the orthophotos of a year, the cadastre) goes through add_service_layer. search_imagery \
 finds satellite scenes; add_layer with kind raster shows one. add_basemap \
 puts a web basemap the user enabled under the layers (a background image: not filtered, not read); add_elevation \
-brings in the elevation of an area, add_osm_features what OpenStreetMap maps there (buildings, roads, shops, \
-hospitals...), each from a source the user enabled. Nothing else can be added. Only remove a layer when the user asks (confirmed too; undoing the turn brings it back, unless \
+brings in the elevation of an area, add_population its people, add_osm_features what OpenStreetMap maps \
+there (buildings, roads, shops, hospitals...), each from a source the user enabled. Nothing else can be added. \
+Only remove a layer when the user asks (confirmed too; undoing the turn brings it back, unless \
 it was held in memory).
 - When the user asks to undo or cancel what you just did, call undo_agent_step before anything else; it takes back \
 your last request as a whole. Say what it undid.

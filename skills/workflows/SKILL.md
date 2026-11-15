@@ -1,12 +1,12 @@
 ---
 name: workflows
 title: Chain the steps of a request
-description: a request that needs several steps - what lies within a distance or inside an area, a place found then the data around it, a count by category, several criteria at once, a thematic map ready to print, data fetched then filtered - done with the fewest calls, in the right order
+description: a request that needs several steps - what lies within a distance or inside an area, a place found then the data around it, a count by category, how many people live there, several criteria, a thematic map, data fetched then filtered - done with the fewest calls, in the right order
 metadata:
-  version: 3
-  plugin_min: 5.1.0
+  version: 4
+  plugin_min: 5.1.1
   audience: chat, mcp
-  tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, find_place, search_open_data, add_layer, add_service_layer, add_osm_features, set_layer_style, set_labels, create_layout, export_layout, run_algorithm
+  tools: list_layers, describe_layer, field_values, layer_statistics, sample_features, map_context, preview_filter, apply_filter, cross_filter, geometry_filter, clear_filters, select_features, zoom_to, set_layers_visibility, export_layers, find_place, search_open_data, add_layer, add_service_layer, add_osm_features, add_population, set_layer_style, add_field, set_labels, create_layout, export_layout, run_algorithm
   risk: change
   trust: builtin
 ---
@@ -106,6 +106,24 @@ relief, the contours, a look at the result) and the values to choose when the us
    geometry points to count, measure from or make a heatmap, polygons for buildings, lines for roads.
 3. Then as any layer: a filter by distance from another layer (cross_filter with buffer), a count
    (layer_statistics), a style, a heatmap or a buffer zone with run_algorithm.
+
+## How many people
+
+"How many people live in Pune", "the density of each district", "the people more than 2 km from a hospital".
+
+1. find_place, then add_population with its extent_wkt and crs EPSG:4326, at the default resolution (100 m). Its
+   total is the people of that rectangle: "about" how many live in and around the place.
+2. The people of each polygon (districts, communes, the zones of step 3): run_algorithm native:zonalstatisticsfb
+   with INPUT the polygons, INPUT_RASTER the population layer, STATISTICS [1] (sum), COLUMN_PREFIX pop_. The layer
+   made has pop_sum. A density: add_field on it, decimal, formula "pop_sum" / ($area / 1000000) (people per km2;
+   $area is in square metres whatever the CRS).
+3. Around places (hospitals, stations): add_osm_features with geometry points on the same extent, then
+   run_algorithm native:reprojectlayer to a CRS in metres, the UTM zone of the place: zone = floor((longitude +
+   180) / 6) + 1, EPSG:32600 + zone north of the equator (zone 4: EPSG:32604), EPSG:32700 + zone south; then
+   native:buffer on it with DISTANCE in metres and DISSOLVE true. Step 2 on the buffer gives the people within
+   that distance; the people beyond are the total of step 1 minus them (places just outside the extent are not
+   counted: say so).
+4. Say that the numbers are estimates of a model, not a census, and round them (about 1.2 million).
 
 ## Start again, or keep
 

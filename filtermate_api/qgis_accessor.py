@@ -34,6 +34,7 @@ from .accessor import (
     CrossFilterResult,
     ElevationResult,
     OsmResult,
+    PopulationResult,
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
@@ -667,6 +668,18 @@ class QGISFilterMateAccessor:
     def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
         extra = self.configured_domains() if extra_domains is None else extra_domains
         self._control("check_elevation", platform, extra_domains=extra, module="adapters.public_api.terrain")
+
+    def add_population(self, platform: str = "meta_population", extent_wkt: str = "", crs: str = "",
+                       resolution: Optional[float] = None, name: str = "",
+                       extra_domains: Optional[str] = None) -> PopulationResult:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return PopulationResult(**self._control(
+            "add_population", platform, extent_wkt=extent_wkt, crs=crs, resolution=resolution, name=name,
+            extra_domains=extra, module="adapters.public_api.population"))
+
+    def check_population(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        self._control("check_population", platform, extra_domains=extra, module="adapters.public_api.population")
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
                       name: str = "", min_length: Optional[float] = None, share_values: bool = True) -> ContourResult:

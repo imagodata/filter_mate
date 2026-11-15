@@ -46,6 +46,7 @@ _TIMEOUTS = {
 _TILE_OPTIONS = {
     'GDAL_DISABLE_READDIR_ON_OPEN': 'EMPTY_DIR', 'CPL_VSIL_CURL_ALLOWED_EXTENSIONS': '.tif',
     'GDAL_HTTP_USERAGENT': 'FilterMate-QGIS-plugin',
+    'GDAL_VRT_ENABLE_PYTHON': 'NO',  # a VRT of a server runs no code here, whatever it holds
 }
 _AUTHID = re.compile(r'[A-Za-z]{2,10}:[A-Za-z0-9_.]{1,20}')
 ELEVATION_FIELD = 'elevation'
@@ -123,12 +124,15 @@ def _in_background(label: str, work: Callable[[Callable[[], str]], Any]) -> Any:
 
 class _Gdal:
     """GDAL in the thread that reads: its HTTP limits and a quiet error handler, both of this thread alone.
-    ``tiles``: the files read are the tiles of an elevation model, asked by their names."""
+    ``tiles``: the files read are the tiles of a grid, asked by their names; ``extensions`` the only ones it reads
+    by HTTP (a VRT that names its tiles: ``.tif,.vrt``)."""
 
-    def __init__(self, tiles: bool = False) -> None:
+    def __init__(self, tiles: bool = False, extensions: str = '.tif') -> None:
         from osgeo import gdal
         self.gdal = gdal
         self._options = dict(_TIMEOUTS, **(_TILE_OPTIONS if tiles else {}))
+        if tiles:
+            self._options['CPL_VSIL_CURL_ALLOWED_EXTENSIONS'] = extensions
         self._previous: Dict[str, Optional[str]] = {}
 
     def __enter__(self):

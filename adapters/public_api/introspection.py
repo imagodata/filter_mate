@@ -461,13 +461,13 @@ def _request(layer, attributes: List[int], geometry: bool, selected_only: bool, 
     return request
 
 
-def _measurer(layer, measure: str):
-    """``(function of a geometry, unit, ellipsoid)`` measuring lengths in metres or areas in square metres.
+def distance_area(layer):
+    """``(QgsDistanceArea, planar, ellipsoid)`` for the geometries of ``layer``.
 
     On the ellipsoid of the project, or of the layer CRS when the project has none and the layer is in degrees;
     without an ellipsoid the measure is planar, in the units of the layer CRS.
     """
-    from qgis.core import QgsDistanceArea, QgsProject, QgsUnitTypes, QgsWkbTypes
+    from qgis.core import QgsDistanceArea, QgsProject
     project = QgsProject.instance()
     crs = layer.crs()
     ellipsoid = _safe(project.ellipsoid, '') or ''
@@ -478,6 +478,17 @@ def _measurer(layer, measure: str):
     planar = ellipsoid.upper() in ('', 'NONE')
     if not planar:
         calculator.setEllipsoid(ellipsoid)
+    return calculator, planar, ellipsoid
+
+
+def _measurer(layer, measure: str):
+    """``(function of a geometry, unit, ellipsoid)`` measuring lengths in metres or areas in square metres.
+
+    On the ellipsoid of the project, or of the layer CRS when the project has none and the layer is in degrees;
+    without an ellipsoid the measure is planar, in the units of the layer CRS.
+    """
+    from qgis.core import QgsUnitTypes, QgsWkbTypes
+    calculator, planar, ellipsoid = distance_area(layer)
     polygons = QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry
     lines = QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.GeometryType.LineGeometry
     if measure == 'area':
@@ -497,7 +508,7 @@ def _measurer(layer, measure: str):
         def run(geometry):
             return calculator.convertLengthMeasurement(length(geometry), target)
         unit = 'm'
-    if planar and _safe(crs.isGeographic, False):
+    if planar and _safe(layer.crs().isGeographic, False):
         unit = 'degrees' if measure == 'length' else 'square degrees'
     return run, unit, '' if planar else ellipsoid
 
