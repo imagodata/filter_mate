@@ -497,7 +497,7 @@ def wms_capabilities(base):
 
 
 class MapHandler(BaseHTTPRequestHandler):
-    """``/<name>/<z>/<x>/<y>.png`` (tiles, holes: every other tile fails, dead: none answers) and ``/<name>`` (WMS)."""
+    """``/<name>/<z>/<x>/<y>.png`` (tiles, slow, holes: every other tile fails, dead: none answers) and ``/<name>`` (WMS)."""
 
     def log_message(self, *args):
         pass
@@ -516,6 +516,8 @@ class MapHandler(BaseHTTPRequestHandler):
         if len(steps) == 4:
             z, x, y = int(steps[1]), int(steps[2]), int(steps[3].split(".")[0])
             TILES.append((name, z, x, y))
+            if name == "slow":
+                time.sleep(1.5)  # a capture that lasts: the other tasks of the same Filter end before it
             if name == "dead" or (name == "holes" and (x + y) % 2):
                 self.send_error(404 if name == "dead" else 500)
                 return

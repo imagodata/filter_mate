@@ -171,7 +171,14 @@ BACKGROUND_BUSY = "a FilterMate filter is still running in the background: try a
 _CONFLICTING_TASKS = frozenset({"FilterEngineTask", "CrossFilterTask", "CoverageExportTask", "HeightAboveGroundTask"})
 
 
-def _background_tasks_running(allow_finishing: bool = False) -> bool:
+def _cross_task_layer_ids(task):
+    """The ids of the layers a cross filter task reads or changes; None when they cannot be told."""
+    jobs = [getattr(task, 'source_job', None)] + list(getattr(task, 'target_jobs', None) or [])
+    ids = {getattr(job, 'layer_id', None) for job in jobs if job is not None}
+    return None if not ids or not all(isinstance(layer_id, str) for layer_id in ids) else ids
+
+
+def _background_tasks_running(allow_finishing: bool = False, layer_id: Optional[str] = None) -> bool:
     """A dock or automation task still changes or reads the filters.
 
     Args:
@@ -180,13 +187,24 @@ def _background_tasks_running(allow_finishing: bool = False) -> bool:
             applies that task's own server subsets there. Everything else,
             busy_reason() included, waits until ``finished()`` returns, so an
             API call cannot start in the middle of it (2026-10-20).
+        layer_id: the layer about to be filtered. A cross filter task that neither
+            reads nor changes it does not count (2026-11-15: one Filter of the dock
+            with a WFS and a web map among its targets; the capture of the web map,
+            a cross filter task, still ran when the WFS filter was set, and that
+            filter was refused).
     """
+    def concerned(task):
+        if layer_id is None:
+            return True
+        ids = _cross_task_layer_ids(task)
+        return ids is None or layer_id in ids
+
     try:
         from ...core.services.cross_filter_service import _finished, get_cross_filter_service
         services = [get_cross_filter_service()]
         if _API_SERVICE is not None and _API_SERVICE is not services[0]:
             services.append(_API_SERVICE)
-        if any(not _finished(task) for service in services for task in service._running):
+        if any(not _finished(task) and concerned(task) for service in services for task in service._running):
             return True
         from qgis.core import QgsApplication
         # Not activeTasks(): it drops a task in its finished() as soon as another
@@ -206,6 +224,7 @@ def _background_tasks_running(allow_finishing: bool = False) -> bool:
             return False
 
     return any(type(task).__name__ in _CONFLICTING_TASKS and not (allow_finishing and finishing(task))
+               and (type(task).__name__ != 'CrossFilterTask' or concerned(task))
                for task in tasks)
 
 

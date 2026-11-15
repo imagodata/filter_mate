@@ -24,7 +24,9 @@ import time
 import traceback
 from http.server import ThreadingHTTPServer
 
-from qgis.core import Qgis, QgsApplication, QgsFeature, QgsGeometry, QgsProject, QgsRasterLayer, QgsVectorLayer
+from qgis.core import (
+    Qgis, QgsApplication, QgsFeature, QgsGeometry, QgsProject, QgsRasterLayer, QgsRectangle, QgsVectorLayer,
+)
 from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.utils import iface
 import qgis.utils
@@ -163,11 +165,15 @@ def s_setup():
     project.addMapLayer(zones)
     bench.wfs_layer(services.server_port, 'keyed')
     bench.wfs_layer(services.server_port, 'strict')
-    uri = f"type=xyz&url=http://127.0.0.1:{maps.server_port}/tiles/{{z}}/{{x}}/{{y}}.png&zmin=0&zmax=14&crs=EPSG:3857"
+    # Tiles that take 1.5 s each, and a map that looks elsewhere (QGIS keeps the tiles it drew): the capture of the
+    # web map then lasts longer than the filter of the WFS layer, which is ready while the capture still runs.
+    # Its filter was refused there ("A FilterMate task is still reading layers"): seen in the CI on QGIS 3.34
+    # with Python 3.12, where a WFS is not read at all and is ready at once (2026-11-15).
+    uri = f"type=xyz&url=http://127.0.0.1:{maps.server_port}/slow/{{z}}/{{x}}/{{y}}.png&zmin=0&zmax=14&crs=EPSG:3857"
     tiles = QgsRasterLayer(uri, 'tuiles', 'wms')
     project.addMapLayer(tiles)
     STATE['tiles_source'] = tiles.source()
-    iface.mapCanvas().setExtent(zones.extent())
+    iface.mapCanvas().setExtent(QgsRectangle(5000000, 5000000, 5000600, 5000300))
     check('the source, the WFS layers and the tiles load', zones.isValid() and layer('keyed').isValid()
           and layer('strict').isValid() and tiles.isValid())
 
@@ -263,8 +269,9 @@ def s_filter_check():
     inside, outside = bench.pixel(tiles, 300, 250), bench.pixel(tiles, 680, 380)
     check('dock: inside the source the image of the tiles, outside it nothing',
           inside is not None and inside[3] == 255 and (outside or (0, 0, 0, 0))[3] == 0, (inside, outside))
-    # (None at all when the canvas had already drawn them: QGIS keeps the tiles it fetched.)
-    check('dock: no tile beyond the source was asked', len(bench.TILES) <= 9, len(bench.TILES))
+    asked = [tile for tile in bench.TILES if tile[1] == 14]
+    check('dock: the tiles over the source were asked for the capture, and no other of that level',
+          0 < len(asked) <= 9, (len(asked), len(bench.TILES)))
     said = ' | '.join(message_bar_texts())
     check('dock: the message says the tiles are a still image, and its resolution', 'still image' in said, said[:600])
     if STATE['wfs']:

@@ -281,7 +281,7 @@ class ServerSubsetJob(QObject):
         if layer.isEditable():
             raise ServerFilterError(_tr('Finish editing the layer before applying a server filter.'))
         from ..public_api.operations import _background_tasks_running
-        if _background_tasks_running(allow_finishing=True):
+        if _background_tasks_running(allow_finishing=True, layer_id=layer.id()):
             raise ServerFilterError(_tr('A FilterMate task is still reading layers. Retry after it finishes.'))
         if transfer_mode_for_layer(layer) != ASYNC:
             raise ServerFilterError(_tr('This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.'))
@@ -456,7 +456,7 @@ def apply_server_subset_sync(layer, subset):
         raise ServerFilterError('{}: {}'.format(name, _tr(
             'Server filter installation failed. The previous provider was already invalid and could not be restored.')))
     from ..public_api.operations import _background_tasks_running
-    if _background_tasks_running(allow_finishing=True):
+    if _background_tasks_running(allow_finishing=True, layer_id=layer.id()):
         raise ServerFilterError('{}: {}'.format(name, _tr('A FilterMate task is still reading layers. Retry after it finishes.')))
     from ...infrastructure.database.sql_utils import feature_picker_guard
     before = layer.subsetString()
