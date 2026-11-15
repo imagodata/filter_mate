@@ -46,6 +46,7 @@ class TestRiskClasses:
         ("add_layer", OUTSIDE), ("add_service_layer", OUTSIDE), ("add_basemap", OUTSIDE),
         # Elevation is read from the network; contours and a copy are layers made of the project, undone with the turn.
         ("add_elevation", OUTSIDE), ("contour_lines", PROJECT), ("duplicate_layer", PROJECT),
+        ("add_osm_features", OUTSIDE),
     ])
     def test_class_of_the_tools_of_the_catalog(self, name, risk):
         assert risk_of(tools_by_name()[name]) == risk
@@ -565,7 +566,8 @@ class TestAskedAlone:
 
     def test_the_tools_asked_alone(self):
         tools = tools_by_name()
-        for name in ("add_layer", "add_service_layer", "add_basemap", "add_elevation", "delete_features", "export_layout",
+        for name in ("add_layer", "add_service_layer", "add_basemap", "add_elevation", "add_osm_features", "delete_features",
+                     "export_layout",
                      "change_settings", "apply_settings_profile"):
             assert asked_alone(name, tools[name]), name  # in the catalog, and asked alone
         assert asked_alone("run_pyqgis", spec("run_pyqgis", destructive=True))

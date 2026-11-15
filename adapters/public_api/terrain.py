@@ -107,13 +107,18 @@ def _in_background(label: str, work: Callable[[Callable[[], str]], Any]) -> Any:
         # (2026-11-15).
         stop.set()
         worker.wait()
-    error = outcome.get('error')
+    error = outcome.pop('error', None)
+    if error is None:
+        return outcome.get('result')
     if isinstance(error, ValueError):
-        raise error
-    if error is not None:
-        logger.error("%s failed: %r", label, error)
-        raise ValueError(f"unexpected {type(error).__name__} (details in the FilterMate log)")
-    return outcome.get('result')
+        said = str(error)
+    else:
+        logger.error("%s failed: %s", label, repr(error))  # its text: a record kept would keep its frames
+        said = f"unexpected {type(error).__name__} (details in the FilterMate log)"
+    # A new error, not the one of the worker: that one carries the frames of the work, with the files GDAL holds
+    # open in them, and a caller that removes these files right after could not on Windows.
+    del error
+    raise ValueError(said)
 
 
 class _Gdal:

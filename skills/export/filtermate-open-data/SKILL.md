@@ -1,6 +1,6 @@
 ---
 name: filtermate-open-data
-description: "Bring data in, take layers out through the MCP server of the FilterMate QGIS plugin: find datasets on the open data platforms the user allowed, add a layer from a file, a URL, a WFS service or a satellite scene, add a web basemap or the elevation of an area, remove layers from the project. Use when the user asks for it in QGIS with FilterMate."
+description: "Bring data in, take layers out through the MCP server of the FilterMate QGIS plugin: bring data in - what OpenStreetMap maps in an area (buildings, roads, shops, hospitals...), datasets of the open data platforms the user allowed, a file, a URL, a WFS service, a satellite scene, a web basemap, the elevation of an area - and remove layers from the project. Use when the user asks for it in QGIS with FilterMate."
 ---
 
 <!-- Generated from skills/open-data/SKILL.md by scripts/export_agent_skills.py: do not edit by hand. -->
@@ -32,6 +32,31 @@ named mcp_..., from the next turn on.
 4. A platform that does not answer, or finds nothing after two searches: search another one the user allowed
    instead of asking it again in other words. For the French reference layers (communes, departments, cadastre,
    roads, buildings), ign_wfs first when it is allowed.
+
+## OpenStreetMap
+
+add_osm_features brings in what OpenStreetMap maps in an area, by tags, from a server the user enabled: anywhere
+in the world, when the project holds no such layer. For the reference layers of France (cadastre, communes), a
+layer of ign_wfs is the official source.
+
+- **Tags** are written as OpenStreetMap writes them, and a feature is kept when it carries one of them. Buildings:
+  building. Roads: highway (the main ones: highway=motorway, trunk, primary, secondary). Hospitals:
+  amenity=hospital. Schools: amenity=school. Restaurants and cafes: amenity=restaurant, amenity=cafe. Shops: shop
+  (shop=supermarket). Pharmacies: amenity=pharmacy. Police: amenity=police. Parks: leisure=park. Water:
+  natural=water, and rivers waterway=river. Forests: landuse=forest, natural=wood. Railways: railway=rail, and
+  stations railway=station. Leave the value out for every value of a key.
+- **geometry.** points when the features are counted, measured from or made into a heatmap: a hospital is a
+  point here and an area there, and points makes one layer of them. polygons for buildings and land use, lines
+  for roads and rivers, as_mapped when the user wants them as they are.
+- **The area** is the extent_wkt of find_place with crs EPSG:4326, or the visible map: a town or a district.
+  The buildings of a whole city are hundreds of thousands of features, and a region is refused.
+- The layers are in longitude and latitude. A filter by distance takes metres whatever the layer; a Processing
+  algorithm measures in the units of the layer, degrees here.
+- A server that is busy or does not answer: ask another one the user enabled, not the same again.
+- Tell the user that OpenStreetMap is mapped by volunteers, complete in some places and sparse in others: a
+  count is what is mapped, not a census.
+- When add_osm_features is not offered, no OpenStreetMap server is ticked: say that one can be ticked in the
+  settings of the agent, Sources tab.
 
 ## Satellite imagery
 

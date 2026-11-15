@@ -32,9 +32,10 @@ from ...core.agent.mcp_client import McpError
 from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
 from ...core.agent.basemaps import shown as basemap_shown
 from ...core.agent.elevation import known as elevation_known
+from ...core.agent.osm import SERVERS as OVERPASS_SERVERS
 from ...core.agent.open_data import (
-    KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_STAC, KIND_XYZ, NO_DATA_KINDS, NO_FILE_KINDS, SERVICE_KINDS,
-    display_source,
+    KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OVERPASS, KIND_STAC, KIND_XYZ, NO_DATA_KINDS, NO_FILE_KINDS,
+    SERVICE_KINDS, display_source,
     parse_extra_domains,
 )
 from ...core.agent.sources import (
@@ -98,6 +99,7 @@ SERVICE_TOOL = "add_service_layer"
 IMAGERY_TOOL = "search_imagery"
 BASEMAP_TOOL = "add_basemap"
 ELEVATION_TOOL = "add_elevation"
+OSM_TOOL = "add_osm_features"
 PLACE_TOOL = "find_place"
 NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
                      "only takes local files. When data from the web is asked, say so and call show_settings_link "
@@ -106,11 +108,13 @@ NO_BASEMAP_NOTE = ("\n\nThe user enabled no web basemap: add_basemap is not avai
                    "that one can be ticked in the Sources tab of the settings of the agent, under Basemaps (OpenStreetMap, "
                    "Carto, IGN...), or an XYZ address added there, and call show_settings_link with target sources: "
                    "the user gets a button to that tab, then asks again. Do not try another way.")
-NO_ELEVATION_NOTE = ("\n\nThe user enabled no elevation source: add_elevation is not available. When a terrain, "
-                     "relief, elevation or contour map is asked and the project holds no elevation raster, say that "
-                     "Copernicus DEM can be ticked in the Sources tab of the settings of the agent, under Satellite "
-                     "imagery, and call show_settings_link with target sources: the user gets a button to that tab, "
-                     "then asks again. Do not try another way.")
+# Short: these notes are read at every request, and the tools they name are then not offered at all.
+NO_ELEVATION_NOTE = ("\n\nNo elevation source is enabled (add_elevation is not available): for a relief or contour "
+                     "map of a place the project has no elevation raster of, say that Copernicus DEM can be ticked "
+                     "in the Sources tab, under Satellite imagery, and call show_settings_link with target sources.")
+NO_OSM_NOTE = ("\n\nNo OpenStreetMap server is enabled (add_osm_features is not available): for the buildings, "
+               "roads, shops, hospitals... of a place no layer of the project holds, say that one can be ticked in "
+               "the Sources tab, under Open data platforms, and call show_settings_link with target sources.")
 # The skill whose tools bring into the project what a connector finds (add_layer, add_service_layer...).
 DATA_SKILL = "open-data"
 ADD_FOUND_NOTE = ("add_layer adds a file this connector finds, by its https URL (geojson or gpkg first; a raster with "
@@ -874,6 +878,8 @@ class AgentChatController(QObject):
             left_out.add(BASEMAP_TOOL)
         if KIND_ELEVATION not in kinds:
             left_out.add(ELEVATION_TOOL)
+        if KIND_OVERPASS not in kinds and KIND_OVERPASS not in configured_kinds.values():
+            left_out.add(OSM_TOOL)
         if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
             left_out.add(PLACE_TOOL)
         if not databases or not for_chat:
@@ -1786,6 +1792,12 @@ class AgentChatController(QObject):
         elif names["elevation"]:
             notes.append("\n\nElevation sources the user enabled (the platform argument of add_elevation): "
                          + ", ".join(names["elevation"]) + ".")
+        has_osm = OSM_TOOL in offered if offered is not None else bool(names["osm"])
+        if not has_osm:
+            notes.append(NO_OSM_NOTE)
+        elif names["osm"]:
+            notes.append("\n\nOpenStreetMap servers the user enabled (the platform argument of add_osm_features): "
+                         + ", ".join(names["osm"]) + ".")
         if configured_basemaps and has_basemaps:
             notes.append("\n\nBasemaps of the configuration file (the platform argument of add_basemap): "
                          + ", ".join(configured_basemaps) + ".")
@@ -1816,6 +1828,9 @@ class AgentChatController(QObject):
                 return _tr("It serves its tiles.")
             if source.kind == KIND_ELEVATION:
                 self._accessor().check_elevation(platform_name(source), extra_domains=domains)
+                return _tr("It answers.")
+            if source.kind == KIND_OVERPASS:
+                self._accessor().check_osm(platform_name(source), extra_domains=domains)
                 return _tr("It answers.")
             if source.kind == KIND_DATABASE:
                 from ...adapters.public_api import database_tables
@@ -2263,10 +2278,15 @@ class AgentChatController(QObject):
                 args.get("name") or self._basemap_label(str(args.get("platform", "")), short=True)),
             # Elevation, contours and a copy are layers added: the same words, already in every language.
             "add_elevation": lambda: _tr("Layer added: {}").format(
-                args.get("name") or self._elevation_label(str(args.get("platform", "")), short=True)),
+                one_line(str(args.get("name") or ""), 100) or self._elevation_label(str(args.get("platform", "")),
+                                                                                   short=True)),
+            # A name is shown as the model sent it, not checked yet: on one line.
+            "add_osm_features": lambda: _tr("Layer added: {}").format(
+                one_line(str(args.get("name") or ""), 100) or self._osm_tags(args)),
             "contour_lines": lambda: _tr("Layer added: {}").format(
-                args.get("name") or "Contours {}".format(args.get("interval", ""))),  # as sent: not checked yet
-            "duplicate_layer": lambda: _tr("Layer added: {}").format(args.get("name") or "{} (copy)".format(layer)),
+                one_line(str(args.get("name") or ""), 100) or "Contours {}".format(one_line(str(args.get("interval", "")), 20))),
+            "duplicate_layer": lambda: _tr("Layer added: {}").format(
+                one_line(str(args.get("name") or ""), 100) or "{} (copy)".format(layer)),
             UNDO_AGENT_STEP: lambda: _tr("Undo of the last request"),
             "describe_settings": lambda: _tr("Reading the settings of FilterMate"),
             "show_settings_link": lambda: _tr("Reading the settings of FilterMate"),
@@ -2534,6 +2554,26 @@ class AgentChatController(QObject):
             return one_line(platform, 100)
         return one_line(source.title if short else f"{source.title} · {display_source(source.base)}", 300)
 
+    @staticmethod
+    def _osm_tags(arguments) -> str:
+        """The tags a call asks OpenStreetMap for, as the user reads them: amenity=hospital, building."""
+        tags = arguments.get("tags") if isinstance(arguments, dict) else None
+        shown = [f"{tag.get('key', '')}={tag['value']}" if tag.get("value") else str(tag.get("key", ""))
+                 for tag in (tags if isinstance(tags, list) else []) if isinstance(tag, dict)]
+        # Ten tags at most, a key of 60 characters and a value of 80: all of them are shown, whatever they are.
+        return one_line("OpenStreetMap: " + ", ".join(shown), 1500)
+
+    def _osm_label(self, platform: str) -> str:
+        """What the user reads of the OpenStreetMap server a model named: its title, and where it is."""
+        wanted = platform.strip().lower()
+        for server in OVERPASS_SERVERS:
+            if server.id == wanted:
+                return one_line(f"{server.title} · {display_source(server.url)}", 300)
+        for source in custom_from_json(load_settings().custom_sources):
+            if source.id == wanted:
+                return one_line(f"{source.title} · {display_source(source.address)}", 300)
+        return one_line(platform, 100)
+
     def _confirm_text(self, call: ToolCallPart) -> str:
         names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
@@ -2554,10 +2594,16 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to add this web basemap under the layers of the project:\n{}\n\nIts server "
                        "draws the map as you move it: it sees which areas you look at, and nothing of your layers. "
                        "Do you agree?").format(self._basemap_label(str(call.arguments.get("platform", ""))))
-        elif call.name in ("add_layer", ELEVATION_TOOL):
-            # The elevation of an area is a layer read from a server too: the same words, already in every language.
-            shown = (self._elevation_label(str(call.arguments.get("platform", ""))) if call.name == ELEVATION_TOOL
-                     else display_source(str(call.arguments.get("source", ""))))
+        elif call.name in ("add_layer", ELEVATION_TOOL, OSM_TOOL):
+            # The elevation of an area and the features of OpenStreetMap are layers read from a server too: the same
+            # words, already in every language.
+            if call.name == ELEVATION_TOOL:
+                shown = self._elevation_label(str(call.arguments.get("platform", "")))
+            elif call.name == OSM_TOOL:
+                shown = "{}\n{}".format(self._osm_tags(call.arguments),
+                                        self._osm_label(str(call.arguments.get("platform", OVERPASS_SERVERS[0].id))))
+            else:
+                shown = display_source(str(call.arguments.get("source", "")))
             text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
                        "server by QGIS, and what the layer holds can be sent to the provider of the agent. "
                        "Do you agree?").format(shown)
