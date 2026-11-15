@@ -10515,6 +10515,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>Изрязване по обхвата на източника: съответстващите обекти на тази уеб услуга не могат да бъдат изброени (повече от 500 или няма стабилен ключ). Обекти в този обхват може да са извън самия източник.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Изрязване по обхвата на източника: тази версия на QGIS не може да провери отговорите на уеб услуга, затова съответстващите ѝ обекти не се изброяват. Обекти в този обхват може да са извън самия източник.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Отдалеченото копие не можа да бъде прочетено или филтрирано; предишният филтър е запазен.</translation>

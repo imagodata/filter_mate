@@ -10497,6 +10497,11 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <translation>Oříznuto podle rozsahu zdroje: odpovídající prvky této webové služby nelze vypsat (více než 500, nebo chybí stabilní klíč). Prvky uvnitř tohoto rozsahu mohou ležet mimo samotný zdroj.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Oříznuto podle rozsahu zdroje: tato verze QGIS nedokáže ověřit odpovědi webové služby, takže její odpovídající prvky nejsou vypsány. Prvky uvnitř tohoto rozsahu mohou ležet mimo samotný zdroj.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Vzdálenou kopii se nepodařilo přečíst nebo vyfiltrovat; předchozí filtr zůstává zachován.</translation>

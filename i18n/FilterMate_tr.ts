@@ -10515,6 +10515,11 @@ onnxruntime PyPI'dan pip ile gelir, model huggingface.co/{1} adresinden; her dos
         <translation>Kaynağın kapsamına göre kesildi: bu web hizmetinin eşleşen nesneleri listelenemiyor (500'den fazla veya kararlı anahtar yok). Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Kaynağın kapsamına göre kesildi: QGIS'in bu sürümü bir web hizmetinin yanıtlarını denetleyemez, bu yüzden eşleşen nesneleri listelenmez. Bu kapsamın içindeki nesneler kaynağın kendisinin dışında kalabilir.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Uzak kopya okunamadı veya filtrelenemedi; önceki filtre korunuyor.</translation>

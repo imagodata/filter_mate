@@ -10515,6 +10515,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>ตัดตามขอบเขตของแหล่งข้อมูล: ไม่สามารถแจกแจงฟีเจอร์ที่ตรงกันของบริการเว็บนี้ได้ (มากกว่า 500 รายการ หรือไม่มีคีย์ที่คงที่) ฟีเจอร์ที่อยู่ในขอบเขตนี้อาจอยู่นอกตัวแหล่งข้อมูลเอง</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>ตัดตามขอบเขตของแหล่งข้อมูล: QGIS รุ่นนี้ตรวจสอบคำตอบของบริการเว็บไม่ได้ จึงไม่แจกแจงฟีเจอร์ที่ตรงกัน ฟีเจอร์ที่อยู่ในขอบเขตนี้อาจอยู่นอกตัวแหล่งข้อมูลเอง</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>ไม่สามารถอ่านหรือกรองสำเนาระยะไกลได้ ยังคงใช้ตัวกรองก่อนหน้า</translation>

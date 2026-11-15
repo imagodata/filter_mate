@@ -10515,6 +10515,11 @@ onnxruntime vine de pe PyPI cu pip, modelul de pe huggingface.co/{1}, fiecare fi
         <translation>Decupare după extinderea sursei: entitățile corespunzătoare ale acestui serviciu web nu pot fi enumerate (peste 500 sau fără cheie stabilă). Entități din această extindere se pot afla în afara sursei propriu-zise.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Decupare după extinderea sursei: această versiune de QGIS nu poate verifica răspunsurile unui serviciu web, așa că entitățile sale corespunzătoare nu sunt enumerate. Entități din această extindere se pot afla în afara sursei propriu-zise.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Copia la distanță nu a putut fi citită sau filtrată; filtrul anterior este păstrat.</translation>

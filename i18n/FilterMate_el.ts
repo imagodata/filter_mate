@@ -10515,6 +10515,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>Αποκοπή με βάση την έκταση της πηγής: οι οντότητες αυτής της διαδικτυακής υπηρεσίας που ταιριάζουν δεν μπορούν να απαριθμηθούν (περισσότερες από 500 ή χωρίς σταθερό κλειδί). Οντότητες μέσα σε αυτή την έκταση μπορεί να βρίσκονται εκτός της ίδιας της πηγής.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Αποκοπή με βάση την έκταση της πηγής: αυτή η έκδοση του QGIS δεν μπορεί να ελέγξει τις απαντήσεις μιας διαδικτυακής υπηρεσίας, επομένως οι οντότητές της που ταιριάζουν δεν απαριθμούνται. Οντότητες μέσα σε αυτή την έκταση μπορεί να βρίσκονται εκτός της ίδιας της πηγής.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Το απομακρυσμένο αντίγραφο δεν ήταν δυνατό να διαβαστεί ή να φιλτραριστεί· διατηρείται το προηγούμενο φίλτρο.</translation>

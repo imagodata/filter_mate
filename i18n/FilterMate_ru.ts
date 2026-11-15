@@ -10515,6 +10515,11 @@ onnxruntime загружается из PyPI с помощью pip, модель
         <translation>Обрезка по экстенту источника: подходящие объекты этой веб-службы нельзя перечислить (более 500 или нет стабильного ключа). Объекты внутри этого экстента могут лежать вне самого источника.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Обрезка по экстенту источника: эта версия QGIS не может проверить ответы веб-службы, поэтому её подходящие объекты не перечисляются. Объекты внутри этого экстента могут лежать вне самого источника.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Не удалось прочитать или отфильтровать удалённую копию; прежний фильтр сохранён.</translation>

@@ -101,7 +101,12 @@ jobs:
             timeout 900 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
               --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py 2>&1 \
               | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
-            timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py'
+            timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py
+            # Web services ticked among the layers to filter: tiles captured then cut, a WFS cut by the extent of
+            # the source, what the dock says of them, Unfilter (two local servers, no public service).
+            timeout 300 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+              --profiles-path /tmp/profiles-web --code /src/tests/qgis_headless/check_dock_web_targets.py 2>&1 \
+              | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"'
 
     - name: Streaming sources checks (local HTTP fixtures, no public service)
       if: ${{ !cancelled() }}

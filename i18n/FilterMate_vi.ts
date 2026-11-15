@@ -10515,6 +10515,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>Cắt theo phạm vi của nguồn: không thể liệt kê các đối tượng khớp của dịch vụ web này (hơn 500, hoặc không có khóa ổn định). Các đối tượng nằm trong phạm vi đó có thể nằm ngoài chính nguồn.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Cắt theo phạm vi của nguồn: phiên bản QGIS này không thể kiểm tra các phản hồi của dịch vụ web, nên các đối tượng khớp của nó không được liệt kê. Các đối tượng nằm trong phạm vi đó có thể nằm ngoài chính nguồn.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Không đọc hoặc lọc được bản sao từ xa; giữ bộ lọc trước đó.</translation>

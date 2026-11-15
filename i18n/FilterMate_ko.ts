@@ -10515,6 +10515,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>소스 범위로 잘라냈습니다: 이 웹 서비스의 일치하는 피처를 나열할 수 없습니다(500개 초과 또는 안정적인 키 없음). 이 범위 안의 피처가 소스 자체의 바깥에 있을 수 있습니다.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>소스 범위로 잘라냈습니다: 이 버전의 QGIS는 웹 서비스의 응답을 확인할 수 없어 일치하는 피처를 나열하지 않습니다. 이 범위 안의 피처가 소스 자체의 바깥에 있을 수 있습니다.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>원격 복사본을 읽거나 필터할 수 없습니다. 이전 필터를 유지합니다.</translation>

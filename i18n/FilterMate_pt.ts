@@ -10515,6 +10515,11 @@ O onnxruntime vem do PyPI com o pip, o modelo de huggingface.co/{1}, cada arquiv
         <translation>Recorte pela extensão da origem: as entidades correspondentes deste serviço web não podem ser enumeradas (mais de 500, ou sem chave estável). Entidades dentro dessa extensão podem ficar fora da própria origem.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Recorte pela extensão da origem: esta versão do QGIS não consegue verificar as respostas de um serviço web, pelo que as suas entidades correspondentes não são enumeradas. Entidades dentro dessa extensão podem ficar fora da própria origem.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Não foi possível ler ou filtrar a cópia remota; o filtro anterior é mantido.</translation>

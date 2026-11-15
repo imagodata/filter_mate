@@ -10515,6 +10515,11 @@ onnxruntime komt van PyPI met pip, het model van huggingface.co/{1}, elk bestand
         <translation>Uitgesneden op het extent van de bron: de overeenkomende objecten van deze webdienst kunnen niet worden opgesomd (meer dan 500, of geen stabiele sleutel). Objecten binnen dat extent kunnen buiten de bron zelf liggen.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Uitgesneden op het extent van de bron: deze versie van QGIS kan de antwoorden van een webdienst niet controleren, dus de overeenkomende objecten worden niet opgesomd. Objecten binnen dat extent kunnen buiten de bron zelf liggen.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>De externe kopie kon niet worden gelezen of gefilterd; het vorige filter blijft behouden.</translation>

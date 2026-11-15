@@ -330,3 +330,46 @@ def test_a_service_that_takes_no_filter_by_extent_is_refused_as_before(extent, m
     assert applied is False and queued == []
     assert builder.last_error.startswith("More than 500 keys would be sent")
 
+
+
+# A QGIS that cannot check what a service answers (before 3.26, or before 3.36 under Python 3.12) reads no service:
+# the exact filter was refused there, and a WFS is now cut by the extent of the source, which needs no read.
+UNVERIFIED = Outcome(keys=(), complete=False, fetched=0, reason="unverified_filter")
+
+
+@pytest.mark.parametrize("operator, old_subset, expected", [
+    (None, None, BOX), ("AND", '"nature" = 2', f'("nature" = 2) AND ({BOX})'),
+])
+def test_a_qgis_that_cannot_check_a_service_cuts_it_by_the_extent(extent, operator, old_subset, expected):
+    """It was refused: "The service filter cannot be proved complete"."""
+    applied, queued, builder = _apply(extent, UNVERIFIED, old_subset, operator)
+    assert applied is True and queued == [expected] and not builder.last_error
+    said = [warning for warning in builder.user_warnings if warning.startswith(BY_EXTENT)]
+    assert len(said) == 1 and "this version of QGIS cannot check" in said[0] and "more than 500" not in said[0]
+    assert builder.remote_materialization_outcome is None
+
+
+def test_a_qgis_that_cannot_check_a_service_still_refuses_what_an_extent_cannot_say(extent):
+    applied, queued, builder = _apply(extent, UNVERIFIED, '"nature" = 2', "AND NOT")
+    assert applied is False and queued == []
+    queued = []
+    builder = _Builder(queued)
+    crs = object()
+    layer = SimpleNamespace(crs=lambda: crs, subsetString=lambda: "")
+    extent.outcome = UNVERIFIED
+    applied = executor.apply_remote_spatial_filter(builder, layer, SimpleNamespace(crs=lambda: crs), ["disjoint"],
+                                                   None, None, False, None, None)
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("The service filter cannot be proved complete")
+
+
+@pytest.mark.parametrize("provider", ["oapif", "arcgisfeatureserver"])
+def test_a_qgis_that_cannot_check_a_service_refuses_those_that_take_no_filter_by_extent(extent, monkeypatch, provider):
+    from core.domain.source_capability import classify
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.source_capability_probe"], "capability_for_layer",
+                        lambda layer: classify(provider, "url='https://example.org/x'"))
+    monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.remote_materializer"], "unfiltered_snapshot",
+                        lambda layer: layer, raising=False)
+    applied, queued, builder = _apply(extent, UNVERIFIED, None, None)
+    assert applied is False and queued == []
+    assert builder.last_error.startswith("The service filter cannot be proved complete")

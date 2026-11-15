@@ -10515,6 +10515,11 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>በምንጩ ክልል ተቆርጧል፦ የዚህ የድር አገልግሎት ተዛማጅ ባህሪያት ሊዘረዘሩ አይችሉም (ከ500 በላይ፣ ወይም የተረጋጋ ቁልፍ የለም)። በዚያ ክልል ውስጥ ያሉ ባህሪያት ከምንጩ ራሱ ውጭ ሊሆኑ ይችላሉ።</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>በምንጩ ክልል ተቆርጧል፦ ይህ የQGIS ስሪት የድር አገልግሎትን መልሶች ማረጋገጥ አይችልም፣ ስለዚህ ተዛማጅ ባህሪያቱ አይዘረዘሩም። በዚያ ክልል ውስጥ ያሉ ባህሪያት ከምንጩ ራሱ ውጭ ሊሆኑ ይችላሉ።</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>የርቀት ቅጂው ሊነበብ ወይም ሊጣራ አልቻለም፤ የቀደመው ማጣሪያ ይቆያል።</translation>

@@ -10515,6 +10515,11 @@ Az onnxruntime a PyPI-ről érkezik pip-pel, a modell a huggingface.co/{1} címr
         <translation>Kivágás a forrás kiterjedése szerint: ennek a webszolgáltatásnak az egyező objektumai nem sorolhatók fel (több mint 500, vagy nincs stabil kulcs). A kiterjedésen belüli objektumok magán a forráson kívül is lehetnek.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Kivágás a forrás kiterjedése szerint: a QGIS ezen verziója nem tudja ellenőrizni egy webszolgáltatás válaszait, ezért az egyező objektumai nincsenek felsorolva. A kiterjedésen belüli objektumok magán a forráson kívül is lehetnek.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>A távoli másolat nem olvasható vagy nem szűrhető; az előző szűrő megmarad.</translation>

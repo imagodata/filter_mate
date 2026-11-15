@@ -10515,6 +10515,11 @@ onnxruntime proviene da PyPI con pip, il modello da huggingface.co/{1}, ogni fil
         <translation>Ritaglio sull'estensione della sorgente: gli elementi corrispondenti di questo servizio web non possono essere elencati (più di 500, o nessuna chiave stabile). Alcuni elementi dentro questa estensione possono trovarsi fuori dalla sorgente stessa.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Ritaglio sull'estensione della sorgente: questa versione di QGIS non può verificare le risposte di un servizio web, quindi i suoi elementi corrispondenti non vengono elencati. Alcuni elementi dentro questa estensione possono trovarsi fuori dalla sorgente stessa.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Impossibile leggere o filtrare la copia remota; viene mantenuto il filtro precedente.</translation>

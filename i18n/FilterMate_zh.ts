@@ -10515,6 +10515,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>按源的范围裁剪：无法列出此 Web 服务的匹配要素（超过 500 个，或没有稳定的键）。该范围内的要素可能位于源本身之外。</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>按源的范围裁剪：此版本的 QGIS 无法检查 Web 服务的响应，因此不会列出其匹配要素。该范围内的要素可能位于源本身之外。</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>无法读取或过滤远程副本；保留先前的过滤器。</translation>

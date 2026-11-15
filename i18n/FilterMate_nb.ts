@@ -10515,6 +10515,11 @@ onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fi
         <translation>Klippet etter kildens utstrekning: de samsvarende objektene i denne nettjenesten kan ikke listes (flere enn 500, eller ingen stabil nøkkel). Objekter innenfor denne utstrekningen kan ligge utenfor selve kilden.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Klippet etter kildens utstrekning: denne versjonen av QGIS kan ikke kontrollere svarene fra en nettjeneste, så de samsvarende objektene listes ikke. Objekter innenfor denne utstrekningen kan ligge utenfor selve kilden.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Den eksterne kopien kunne ikke leses eller filtreres; det forrige filteret beholdes.</translation>

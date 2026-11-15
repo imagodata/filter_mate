@@ -10515,6 +10515,11 @@ onnxruntime PyPI'dan pip orqali olinadi, model huggingface.co/{1} manzilidan, ha
         <translation>Manba qamrovi bo'yicha kesildi: bu veb-xizmatning mos obyektlarini sanab bo'lmaydi (500 dan ortiq yoki barqaror kalit yo'q). Shu qamrov ichidagi obyektlar manbaning o'zidan tashqarida bo'lishi mumkin.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Manba qamrovi bo'yicha kesildi: QGIS ning bu versiyasi veb-xizmat javoblarini tekshira olmaydi, shuning uchun uning mos obyektlari sanab o'tilmaydi. Shu qamrov ichidagi obyektlar manbaning o'zidan tashqarida bo'lishi mumkin.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Masofaviy nusxani o'qib yoki filtrlab bo'lmadi; oldingi filtr saqlanadi.</translation>

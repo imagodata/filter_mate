@@ -10515,6 +10515,11 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
         <translation>Dipotong menurut cakupan sumber: fitur yang cocok dari layanan web ini tidak dapat didaftar (lebih dari 500, atau tidak ada kunci yang stabil). Fitur di dalam cakupan itu mungkin berada di luar sumber itu sendiri.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Dipotong menurut cakupan sumber: versi QGIS ini tidak dapat memeriksa jawaban layanan web, sehingga fitur yang cocok tidak didaftar. Fitur di dalam cakupan itu mungkin berada di luar sumber itu sendiri.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Salinan jarak jauh tidak dapat dibaca atau difilter; filter sebelumnya dipertahankan.</translation>

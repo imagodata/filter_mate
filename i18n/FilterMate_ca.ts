@@ -10515,6 +10515,11 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <translation>Retall per l'extensió de l'origen: les entitats coincidents d'aquest servei web no es poden llistar (més de 500, o sense clau estable). Algunes entitats dins d'aquesta extensió poden quedar fora de l'origen mateix.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Retall per l'extensió de l'origen: aquesta versió de QGIS no pot comprovar les respostes d'un servei web, de manera que les seves entitats coincidents no es llisten. Algunes entitats dins d'aquesta extensió poden quedar fora de l'origen mateix.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>No s'ha pogut llegir o filtrar la còpia remota; es conserva el filtre anterior.</translation>

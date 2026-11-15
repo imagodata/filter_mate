@@ -10515,6 +10515,11 @@ onnxruntime stammt von PyPI per pip, das Modell von huggingface.co/{1}; jede Dat
         <translation>Zuschnitt auf die Ausdehnung der Quelle: Die passenden Objekte dieses Webdienstes können nicht aufgelistet werden (mehr als 500 oder kein stabiler Schlüssel). Objekte innerhalb dieser Ausdehnung können außerhalb der Quelle selbst liegen.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Zuschnitt auf die Ausdehnung der Quelle: Diese QGIS-Version kann die Antworten eines Webdienstes nicht prüfen, daher werden dessen passende Objekte nicht aufgelistet. Objekte innerhalb dieser Ausdehnung können außerhalb der Quelle selbst liegen.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Die entfernte Kopie konnte nicht gelesen oder gefiltert werden; der vorherige Filter bleibt erhalten.</translation>

@@ -10515,6 +10515,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>قص حسب نطاق المصدر: لا يمكن سرد المعالم المطابقة في خدمة الويب هذه (أكثر من 500، أو لا يوجد مفتاح ثابت). قد تقع معالم داخل هذا النطاق خارج المصدر نفسه.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>قص حسب نطاق المصدر: هذا الإصدار من QGIS لا يستطيع التحقق من ردود خدمة الويب، لذلك لا تُسرد معالمها المطابقة. قد تقع معالم داخل هذا النطاق خارج المصدر نفسه.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>تعذّرت قراءة النسخة البعيدة أو تصفيتها؛ يبقى عامل التصفية السابق.</translation>

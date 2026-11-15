@@ -10515,6 +10515,11 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <translation>Dipotong mengikut liputan sumber: fitur yang sepadan bagi perkhidmatan web ini tidak dapat disenaraikan (lebih daripada 500, atau tiada kunci stabil). Fitur di dalam liputan itu mungkin berada di luar sumber itu sendiri.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Dipotong mengikut liputan sumber: versi QGIS ini tidak dapat menyemak jawapan perkhidmatan web, maka fitur yang sepadan tidak disenaraikan. Fitur di dalam liputan itu mungkin berada di luar sumber itu sendiri.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Salinan jauh tidak dapat dibaca atau ditapis; tapisan sebelumnya dikekalkan.</translation>

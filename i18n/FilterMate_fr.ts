@@ -10639,6 +10639,11 @@ onnxruntime vient de PyPI avec pip, le modèle de huggingface.co/{1}, chaque fic
         <translation>Découpe par l'emprise de la source : les entités correspondantes de ce service web ne peuvent pas être listées (plus de 500, ou pas de clé stable). Des entités situées dans cette emprise peuvent se trouver hors de la source elle-même.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Découpe par l'emprise de la source : cette version de QGIS ne peut pas contrôler les réponses d'un service web, ses entités correspondantes ne sont donc pas listées. Des entités situées dans cette emprise peuvent se trouver hors de la source elle-même.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>La copie distante n'a pas pu être lue ou filtrée ; le filtre précédent est conservé.</translation>

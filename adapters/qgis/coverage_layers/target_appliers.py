@@ -278,13 +278,21 @@ def _is_polygon_layer(layer) -> bool:
         return False
 
 
-_TOO_MANY_KEYS = object()  # more matching features than a web service is sent as a list
+class _Unlisted:
+    """The matching features of a web service could not be listed; ``reason`` is the one of the bounded read.
+
+    ``key_limit``: more of them than a service is sent as a list. ``unverified_filter``: nothing was read, this
+    QGIS cannot check what a service answers.
+    """
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
 
 
-def BY_EXTENT() -> str:
+def BY_EXTENT(reason: str = '') -> str:
     """What is said of a web service cut by the extent of the source: the words of the dock (filter_executor)."""
     from ...backends.ogr.filter_executor import _remote_message
-    return _remote_message('by_extent')
+    return _remote_message('by_extent_unverified' if reason == 'unverified_filter' else 'by_extent')
 
 
 class VectorTargetJob(TargetJob):
@@ -411,8 +419,8 @@ class VectorTargetJob(TargetJob):
                               materialization_limits(ENV_VARS), self.feedback)
         self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
         if not outcome.complete:
-            if outcome.reason == 'key_limit':
-                return _TOO_MANY_KEYS  # compute() cuts by the extent of the source, or refuses with this reason
+            if outcome.reason in ('key_limit', 'unverified_filter'):
+                return _Unlisted(outcome.reason)  # compute() cuts by the extent of the source, or refuses with it
             if outcome.reason not in ('feature_limit', 'timeout'):
                 self.outcome.message = _remote_message(outcome.reason)
                 return None
@@ -478,10 +486,10 @@ class VectorTargetJob(TargetJob):
                     self.outcome.message = self._no_key
                 return
             kept = self._compute_remote(geometry, methods, parts, part_methods, coverage)
-            if kept is _TOO_MANY_KEYS:
-                if not self._cut_by_extent(geometry, request.methods):
+            if isinstance(kept, _Unlisted):
+                if not self._cut_by_extent(geometry, request.methods, kept.reason):
                     from ...backends.ogr.filter_executor import _remote_message
-                    self.outcome.message = _remote_message('key_limit')
+                    self.outcome.message = _remote_message(kept.reason)
                 return
             if kept is None:
                 return
@@ -530,13 +538,14 @@ class VectorTargetJob(TargetJob):
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
 
-    def _cut_by_extent(self, geometry, methods) -> bool:
+    def _cut_by_extent(self, geometry, methods, reason: str = '') -> bool:
         """Cut the target by the extent of the source, on the server, where its features cannot be listed.
 
         2026-11-15: a web service was refused past 500 matching features, or without a stable key. A WFS is asked
         what meets the rectangle of the source instead (``source_capability.extent_subset``): no key is listed, so
         the result has no bound. It is a cut by extent, and says so: a feature inside the rectangle and outside the
-        source itself stays, whatever the predicate.
+        source itself stays, whatever the predicate. So is a WFS on a QGIS that cannot check what a service answers
+        (``reason`` ``unverified_filter``: before 3.26, or before 3.36 under Python 3.12), where nothing is read.
 
         Returns:
             False where the cut cannot be made, the job left as it was: a service that takes no such filter, AND NOT
@@ -555,7 +564,7 @@ class VectorTargetJob(TargetJob):
         self._source = None
         self._expression = expression
         self.outcome.details['by_extent'] = True
-        self.outcome.message = BY_EXTENT()
+        self.outcome.message = BY_EXTENT(reason)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
         return True

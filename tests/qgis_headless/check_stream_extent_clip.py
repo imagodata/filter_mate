@@ -252,12 +252,18 @@ def check_wfs(operations):
 
     check_dialect(keyed.fields())
     large = QgsGeometry.fromWkt("POLYGON((95 95, 705 95, 505 405, 95 405, 95 95))")  # a trapeze: 61 x 31 in its box
-    if Qgis.QGIS_VERSION_INT < 33200:
-        # A filter of a web service is installed on a copy of the provider, off the main thread, which QGIS does
-        # from 3.32 (server_subset_job); before, it is refused, by extent as by keys, and the layer is left alone.
+    from filter_mate.adapters.qgis.remote_materializer import supports_reply_validation
+    from filter_mate.adapters.qgis.server_subset_job import transfer_mode_for_layer
+    from filter_mate.core.filter.server_transfer_policy import REFUSE
+    # What this QGIS can do (the versions of the CI differ): set the filter of a WFS at all (from 3.24), and check
+    # what a service answers, without which no feature is read (from 3.26, and from 3.36 under Python 3.12).
+    exact = supports_reply_validation()
+    print(f"   this QGIS sets a WFS filter: {transfer_mode_for_layer(keyed)}; reads a service: {exact}", flush=True)
+    if transfer_mode_for_layer(keyed) == REFUSE:
+        # Before 3.24 the setter of a WFS filter crashes: refused, by extent as by keys, the layer left alone.
         for layer in (keyed, keyless):
             report = operations.cross_filter_by_geometry(large, crs, [layer.id()])
-            check(f"QGIS before 3.32, {layer.name()}: refused with its reason, the layer left as it was",
+            check(f"QGIS that sets no WFS filter, {layer.name()}: refused with its reason, the layer left as it was",
                   bool(report.failed) and layer.subsetString() == "" and len(shown(layer)) == TOTAL,
                   (report.failed, layer.subsetString()[:80]))
         check("the server refused no request", not REFUSED, REFUSED)
@@ -276,9 +282,17 @@ def check_wfs(operations):
     # copy waited for the network timeout of QGIS (60 s), and the read was counted as failed.
     check("a service read right after it opened is not held by a reply of the network cache", elapsed < 20,
           round(elapsed, 1))
-    check("under 500 features: the keys are listed, nothing is said of an extent",
-          not report.error and not report.failed and '"id" IN' in keyed.subsetString() and "by_extent" not in info
-          and info.get("kept") == len(few) == 24, (report.error, report.failed, keyed.subsetString()[:80], info))
+    if exact:
+        check("under 500 features: the keys are listed, nothing is said of an extent",
+              not report.error and not report.failed and '"id" IN' in keyed.subsetString() and "by_extent" not in info
+              and info.get("kept") == len(few) == 24, (report.error, report.failed, keyed.subsetString()[:80], info))
+    else:
+        # It was refused there ("The service filter cannot be proved complete"): nothing is read, so nothing is
+        # listed, whatever the number of features.
+        check("a QGIS that cannot check a service: cut by the extent of the source, and says why",
+              not report.error and not report.failed and keyed.subsetString().startswith("intersects_bbox(")
+              and "this version of QGIS" in str(info.get("by_extent")),
+              (report.error, report.failed, keyed.subsetString()[:80], info))
     check("under 500 features: the layer gives them", shown(keyed) == few, len(shown(keyed)))
     operations.clear_filters([keyed.id()])
 

@@ -1041,6 +1041,11 @@ def _remote_message(reason):
             'RemoteMaterializer',
             'Cut by the extent of the source: the matching features of this web service cannot be listed (more '
             'than 500, or no stable key). Features inside that extent may lie outside the source itself.'),
+        # The same cut where no read can be checked (QGIS before 3.26, or before 3.36 under Python 3.12).
+        'by_extent_unverified': QCoreApplication.translate(
+            'RemoteMaterializer',
+            'Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so '
+            'its matching features are not listed. Features inside that extent may lie outside the source itself.'),
     }
     return messages.get(reason, QCoreApplication.translate(
         'RemoteMaterializer',
@@ -1207,7 +1212,7 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
             mark_partial_result(layer, partial, final)
         return success
 
-    def cut_by_extent():
+    def cut_by_extent(reason=''):
         """The subset that asks the server what meets the extent of the source, queued; None when there is none.
 
         No key is listed: the result has no bound, and is a cut by extent, said so (a feature inside the rectangle
@@ -1220,7 +1225,8 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         expression = extent_subset(capability, rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum())
         if expression is None:
             return None
-        builder.user_warnings.append(_remote_message('by_extent'))
+        builder.user_warnings.append(_remote_message(
+            'by_extent_unverified' if reason == 'unverified_filter' else 'by_extent'))
         builder.remote_materialization_outcome = None  # nothing was read, or what was read is not what is kept
         return write(builder._combine_with_old_subset(old_subset, combine_operator, expression), False)
 
@@ -1283,8 +1289,10 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
                               materialization_limits(builder.task_params), builder._feedback)
         builder.remote_materialization_outcome = outcome
         if not outcome.complete:
-            if outcome.reason == 'key_limit':
-                cut = cut_by_extent()
+            if outcome.reason in ('key_limit', 'unverified_filter'):
+                # Not listed (more than 500 keys), or not read at all (a QGIS that cannot check what a service
+                # answers: the exact filter was refused there, with no way out but a local copy).
+                cut = cut_by_extent(outcome.reason)
                 return refuse(outcome.reason) if cut is None else cut
             if outcome.reason not in ('feature_limit', 'timeout'):
                 return refuse(outcome.reason)

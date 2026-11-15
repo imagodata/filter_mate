@@ -10515,6 +10515,11 @@ onnxruntime pride iz PyPI s pip, model iz huggingface.co/{1}, vsaka datoteka je 
         <translation>Obrezano po obsegu vira: ujemajočih se objektov te spletne storitve ni mogoče našteti (več kot 500 ali brez stabilnega ključa). Objekti znotraj tega obsega so lahko zunaj samega vira.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Obrezano po obsegu vira: ta različica QGIS ne more preveriti odgovorov spletne storitve, zato njeni ujemajoči se objekti niso našteti. Objekti znotraj tega obsega so lahko zunaj samega vira.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Oddaljene kopije ni bilo mogoče prebrati ali filtrirati; prejšnji filter je ohranjen.</translation>

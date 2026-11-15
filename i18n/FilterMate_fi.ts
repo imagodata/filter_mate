@@ -10515,6 +10515,11 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>Rajattu lähteen laajuuden mukaan: tämän verkkopalvelun vastaavia kohteita ei voi luetella (yli 500 tai ei pysyvää avainta). Tämän laajuuden sisällä olevat kohteet voivat sijaita itse lähteen ulkopuolella.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Rajattu lähteen laajuuden mukaan: tämä QGIS-versio ei voi tarkistaa verkkopalvelun vastauksia, joten sen vastaavia kohteita ei luetella. Tämän laajuuden sisällä olevat kohteet voivat sijaita itse lähteen ulkopuolella.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Etäkopiota ei voitu lukea tai suodattaa; aiempi suodatin säilytetään.</translation>

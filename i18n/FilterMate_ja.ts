@@ -10515,6 +10515,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>ソースの範囲で切り抜きました: この Web サービスの該当地物は列挙できません (500 件超、または安定したキーなし)。この範囲内の地物がソース自体の外側にある場合があります。</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>ソースの範囲で切り抜きました: このバージョンの QGIS は Web サービスの応答を検証できないため、該当地物は列挙されません。この範囲内の地物がソース自体の外側にある場合があります。</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>リモートコピーを読み取れないか、フィルタできませんでした。以前のフィルタを維持します。</translation>

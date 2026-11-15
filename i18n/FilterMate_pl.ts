@@ -10515,6 +10515,11 @@ onnxruntime pochodzi z PyPI przez pip, model z huggingface.co/{1}, każdy plik j
         <translation>Przycięto do zasięgu źródła: pasujących obiektów tej usługi sieciowej nie można wyliczyć (ponad 500 albo brak stabilnego klucza). Obiekty w tym zasięgu mogą leżeć poza samym źródłem.</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>Przycięto do zasięgu źródła: ta wersja QGIS nie może sprawdzić odpowiedzi usługi sieciowej, więc jej pasujące obiekty nie są wyliczane. Obiekty w tym zasięgu mogą leżeć poza samym źródłem.</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>Nie udało się odczytać lub przefiltrować zdalnej kopii; zachowano poprzedni filtr.</translation>

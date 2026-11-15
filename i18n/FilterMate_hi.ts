@@ -10515,6 +10515,11 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>स्रोत के विस्तार से काटा गया: इस वेब सेवा के मेल खाने वाले फ़ीचर सूचीबद्ध नहीं किए जा सकते (500 से अधिक, या कोई स्थिर कुंजी नहीं)। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
     </message>
     <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1047"/>
+        <source>Cut by the extent of the source: this version of QGIS cannot check the answers of a web service, so its matching features are not listed. Features inside that extent may lie outside the source itself.</source>
+        <translation>स्रोत के विस्तार से काटा गया: QGIS का यह संस्करण वेब सेवा के उत्तरों की जाँच नहीं कर सकता, इसलिए उसके मेल खाने वाले फ़ीचर सूचीबद्ध नहीं किए जाते। उस विस्तार के भीतर के फ़ीचर स्वयं स्रोत के बाहर हो सकते हैं।</translation>
+    </message>
+    <message>
         <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
         <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
         <translation>रिमोट प्रतिलिपि पढ़ी या फ़िल्टर नहीं की जा सकी; पिछला फ़िल्टर बनाए रखा गया है।</translation>

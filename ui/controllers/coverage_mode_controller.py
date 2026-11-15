@@ -3277,10 +3277,7 @@ class CoverageModeController(BaseController):
             sampled_targets = [o for o in task.outcomes if o.success and o.details.get('capture_resampled')]
             if sampled_targets:
                 parts.append(self.tr("{0} raster target(s) resampled to the configured pixel limit").format(len(sampled_targets)))
-            # A web service target read up to its budget: applied, its message (already translated) says so.
-            partial = sorted({o.message for o in task.outcomes if o.success and o.message
-                              and (o.details.get('partial') or o.details.get('by_extent')
-                                   or o.details.get('captured'))})
+            partial = self._outcome_notes(task.outcomes)
             parts.extend(partial)
             emptied = self._emptied_text(task.outcomes)
             if emptied:
@@ -3335,6 +3332,17 @@ class CoverageModeController(BaseController):
         """Disable the Filter button while a task runs; enabled again once no other task of the dock runs."""
         button = getattr(self.dockwidget, 'pushButton_action_filter', None)
         self._call(button, 'setEnabled', not busy and not self.is_running())
+
+    @staticmethod
+    def _outcome_notes(outcomes) -> List[str]:
+        """What the targets that were filtered say of their result (already translated), each once.
+
+        A web service read up to its budget (``partial``), a web service cut by the extent of the source
+        (``by_extent``), a web map turned into a still image (``captured``): applied, and not exactly what
+        a filter of a local layer gives.
+        """
+        return sorted({o.message for o in outcomes if o.success and o.message
+                       and (o.details.get('partial') or o.details.get('by_extent') or o.details.get('captured'))})
 
     def _after_run(self, layer: Any, outcomes, message: str, warning: bool = False) -> None:
         show_info, show_warning = _feedback()
@@ -3596,17 +3604,22 @@ class CoverageModeController(BaseController):
                     operation = self.service.history.peek_undo(source_id)
                     run.op_id = operation.op_id if operation is not None else None
             failures = [o for o in task.outcomes if not o.success]
+            emptied, notes = '', []
             if not result:
                 message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))
             else:
                 message = self.tr("{0} raster / point cloud target(s) filtered").format(len(task.outcomes) - len(failures))
+                # 2026-11-15: said here too. A web map cut by a vector source is a still image, at a resolution.
+                notes = self._outcome_notes(task.outcomes)
+                if notes:
+                    message += ' — ' + ' — '.join(notes)
                 emptied = self._emptied_text(task.outcomes)
                 if emptied:
                     message += ' — ' + emptied
                 if failures:
                     message += ' — ' + self._failure_text(failures)
             self._after_run(self._map_layer(source_id), task.outcomes, message,
-                            warning=not result or bool(failures) or bool(emptied))
+                            warning=not result or bool(failures) or bool(emptied) or bool(notes))
 
         task = self.service.run(request, job, on_done=done)
         if task is not None:
