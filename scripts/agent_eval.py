@@ -254,6 +254,16 @@ class SimulatedProject:
                     "maximum": 608.0, "mean": 234.1, "size": "0.4 MB",
                     "note": "a surface model: buildings and trees are in it"}
 
+        def add_population(args):
+            if args.get("platform", "meta_population") != "meta_population":
+                raise ToolFailure(f"{args['platform']!r} is not enabled in the agent sources. Enabled: meta_population.")
+            shown = args.get("name") or "Population (65 x 93 m)"
+            added_layer("population", shown, {"id": "population_1", "kind": "raster",
+                                              "bands": [{"band": 1, "name": "Band 1"}]})
+            return {"layer_id": "population_1", "name": shown, "platform": "meta_population", "crs_authid": "EPSG:4326",
+                    "resolution": "about 65 x 93 m", "width": 157, "height": 133, "total": 823263, "maximum": 214.2,
+                    "note": "people estimated per pixel: say so before a number is taken as a census"}
+
         def add_osm_features(args):
             if args.get("platform", "overpass_fr") not in ("overpass_de", "overpass_fr"):
                 raise ToolFailure(f"{args['platform']!r} is not enabled in the agent sources. Enabled: overpass_de, "
@@ -566,7 +576,7 @@ class SimulatedProject:
                 "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))"}]},
             "add_basemap": lambda args: {"layer_id": "xyz_1", "name": args.get("name") or args["platform"], "layer_kind": "raster"},
             "add_elevation": add_elevation, "duplicate_layer": duplicate_layer, "contour_lines": contour_lines,
-            "add_osm_features": add_osm_features,
+            "add_osm_features": add_osm_features, "add_population": add_population,
             "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{
                 "id": "S2B_31TCJ_20261031_0_L2A", "title": "S2B_31TCJ_20261031_0_L2A", "publisher": "sentinel-2-l2a",
                 "description": "2026-10-31 · cloud cover 2.1 %", "page": "", "resources": [

@@ -554,6 +554,25 @@ class ElevationResult:
 
 
 @dataclass(frozen=True)
+class PopulationResult:
+    """The people of an area, added to the project as a raster of people per pixel, on the grid of its source."""
+    layer_id: str
+    name: str
+    platform: str = ""
+    crs_authid: str = ""
+    # Size of a pixel on the ground ("about 65 x 93 m"), and of the grid, in pixels.
+    resolution: str = ""
+    width: int = 0
+    height: int = 0
+    # People in the pixels written (the area, grown to whole pixels), and in the most crowded pixel.
+    total: int = 0
+    maximum: Optional[float] = None
+    size: str = ""
+    attribution: str = ""
+    note: str = ""
+
+
+@dataclass(frozen=True)
 class OsmResult:
     """OpenStreetMap features added to the project: a layer per kind of geometry."""
     platform: str
@@ -786,6 +805,16 @@ class FilterMateAccessor(Protocol):
 
     def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
         """Ask an elevation source for the start of a tile; raises FilterRejected when its server gives none."""
+        ...
+
+    def add_population(self, platform: str = "meta_population", extent_wkt: str = "", crs: str = "",
+                       resolution: Optional[float] = None, name: str = "",
+                       extra_domains: Optional[str] = None) -> PopulationResult:
+        """Add the people of an area as a raster of people per pixel; raises FilterRejected when it cannot be read."""
+        ...
+
+    def check_population(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        """Ask a population source for a few pixels; raises FilterRejected when its server gives none."""
         ...
 
     def add_osm_features(self, platform: str, tags: List[Dict[str, Any]], extent_wkt: str = "", crs: str = "",
@@ -1206,6 +1235,19 @@ class InMemoryAccessor:
                                height=400, minimum=150.0, maximum=600.0, mean=230.0)
 
     def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        return None
+
+    def add_population(self, platform: str = "meta_population", extent_wkt: str = "", crs: str = "",
+                       resolution: Optional[float] = None, name: str = "",
+                       extra_domains: Optional[str] = None) -> PopulationResult:
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or "Population", provider_type="gdal",
+                               layer_kind="raster")
+        self.layers.append(summary)
+        return PopulationResult(layer_id=summary.layer_id, name=summary.name, platform=platform,
+                                crs_authid="EPSG:4326", resolution="about 65 x 93 m", width=157, height=133,
+                                total=823263, maximum=214.2)
+
+    def check_population(self, platform: str, extra_domains: Optional[str] = None) -> None:
         return None
 
     def add_osm_features(self, platform: str, tags: List[Dict[str, Any]], extent_wkt: str = "", crs: str = "",

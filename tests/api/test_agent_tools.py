@@ -501,6 +501,31 @@ class TestHandlers:
         refused = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "platform": "earth_search"}))
         assert refused.is_error and "not enabled" in refused.content  # a platform of another kind is not ticked here
 
+    def test_population_is_added_only_from_a_source_the_user_ticked(self, tmp_path):
+        accessor, lyon = Accessor(), "POLYGON((4.78 45.7, 4.92 45.7, 4.92 45.8, 4.78 45.8, 4.78 45.7))"
+        failed, message = run(accessor, tmp_path, "add_population", extent_wkt=lyon, crs="EPSG:4326")
+        assert failed and "not enabled" in message and len(accessor.layers) == 1
+        asked = []
+        accessor.add_population = lambda platform, **options: asked.append((platform, options)) \
+            or InMemoryAccessor.add_population(accessor, platform, **options)
+        executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, platforms=("meta_population",)))
+        result = executor.execute(ToolCallPart("c", "add_population", {"extent_wkt": lyon, "crs": "EPSG:4326"}))
+        answer = json.loads(result.content)
+        assert not result.is_error and answer["platform"] == "meta_population" and answer["total"] == 823263
+        assert answer["crs_authid"] == "EPSG:4326" and answer["resolution"] == "about 65 x 93 m"
+        assert "" not in answer.values() and None not in answer.values()  # what the call did not set is not told
+        platform, options = asked[0]
+        assert platform == "meta_population" and options["extent_wkt"] == lyon and options["resolution"] is None
+        assert not executor.execute(ToolCallPart("c", "add_population", {"extent_wkt": lyon, "resolution": 1000})).is_error
+        assert asked[-1][1]["resolution"] == 1000
+        for wrong in ({"extent_wkt": lyon, "resolution": 10}, {"extent_wkt": lyon, "resolution": 20000}, {"platform": ""}):
+            assert executor.execute(ToolCallPart("c", "add_population", wrong)).is_error, wrong  # refused by the schema
+        # An address a model would write is no argument of the tool: the call runs, and nothing of it reaches QGIS.
+        made = executor.execute(ToolCallPart("c", "add_population", {"extent_wkt": lyon, "url": "https://example.org/p.tif"}))
+        assert not made.is_error and "example.org" not in json.dumps(asked[-1])
+        refused = executor.execute(ToolCallPart("c", "add_population", {"extent_wkt": lyon, "platform": "copernicus_dem"}))
+        assert refused.is_error and "not enabled" in refused.content  # a source of another kind is not ticked here
+
     def test_openstreetmap_features_come_only_from_a_server_the_user_ticked(self, tmp_path):
         accessor, lyon = Accessor(), "POLYGON((4.78 45.7, 4.92 45.7, 4.92 45.8, 4.78 45.8, 4.78 45.7))"
         hospitals = [{"key": "amenity", "value": "hospital"}]

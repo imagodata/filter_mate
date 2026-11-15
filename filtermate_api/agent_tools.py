@@ -498,6 +498,12 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             target_crs=args["target_crs"], name=args["name"], extra_domains=extra_domains)))
         return {key: value for key, value in answer.items() if value not in (None, "")}
 
+    def add_population(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = _asked(args, lambda platform: asdict(accessor.add_population(
+            platform, extent_wkt=args["extent_wkt"], crs=args["crs"], resolution=args.get("resolution"),
+            name=args["name"], extra_domains=extra_domains)))
+        return {key: value for key, value in answer.items() if value not in (None, "")}
+
     def add_osm_features(args: Dict[str, Any]) -> Dict[str, Any]:
         answer = _asked(args, lambda platform: asdict(accessor.add_osm_features(
             platform, args["tags"], extent_wkt=args["extent_wkt"], crs=args["crs"], geometry=args["geometry"],
@@ -550,6 +556,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,
         "add_elevation": add_elevation, "contour_lines": contour_lines, "duplicate_layer": duplicate_layer,
+        "add_population": add_population,
         "add_osm_features": add_osm_features,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
     }

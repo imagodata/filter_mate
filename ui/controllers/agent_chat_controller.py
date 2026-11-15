@@ -33,8 +33,10 @@ from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
 from ...core.agent.basemaps import shown as basemap_shown
 from ...core.agent.elevation import known as elevation_known
 from ...core.agent.osm import SERVERS as OVERPASS_SERVERS
+from ...core.agent.population import known as population_known
 from ...core.agent.open_data import (
-    KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OVERPASS, KIND_STAC, KIND_XYZ, NO_DATA_KINDS, NO_FILE_KINDS,
+    KIND_DATABASE, KIND_ELEVATION, KIND_GEOCODER, KIND_OVERPASS, KIND_POPULATION, KIND_STAC, KIND_XYZ, NO_DATA_KINDS,
+    NO_FILE_KINDS,
     SERVICE_KINDS, display_source,
     parse_extra_domains,
 )
@@ -100,6 +102,7 @@ IMAGERY_TOOL = "search_imagery"
 BASEMAP_TOOL = "add_basemap"
 ELEVATION_TOOL = "add_elevation"
 OSM_TOOL = "add_osm_features"
+POPULATION_TOOL = "add_population"
 PLACE_TOOL = "find_place"
 NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
                      "only takes local files. When data from the web is asked, say so and call show_settings_link "
@@ -115,6 +118,9 @@ NO_ELEVATION_NOTE = ("\n\nNo elevation source is enabled (add_elevation is not a
 NO_OSM_NOTE = ("\n\nNo OpenStreetMap server is enabled (add_osm_features is not available): for the buildings, "
                "roads, shops, hospitals... of a place no layer of the project holds, say that one can be ticked in "
                "the Sources tab, under Open data platforms, and call show_settings_link with target sources.")
+NO_POPULATION_NOTE = ("\n\nNo population source is enabled (add_population is not available): for how many people "
+                      "live in a place, say that one can be ticked in the Sources tab, under Satellite imagery, and "
+                      "call show_settings_link with target sources.")
 # The skill whose tools bring into the project what a connector finds (add_layer, add_service_layer...).
 DATA_SKILL = "open-data"
 ADD_FOUND_NOTE = ("add_layer adds a file this connector finds, by its https URL (geojson or gpkg first; a raster with "
@@ -880,6 +886,8 @@ class AgentChatController(QObject):
             left_out.add(ELEVATION_TOOL)
         if KIND_OVERPASS not in kinds and KIND_OVERPASS not in configured_kinds.values():
             left_out.add(OSM_TOOL)
+        if KIND_POPULATION not in kinds:
+            left_out.add(POPULATION_TOOL)
         if KIND_GEOCODER not in kinds and KIND_GEOCODER not in configured_kinds.values():
             left_out.add(PLACE_TOOL)
         if not databases or not for_chat:
@@ -1792,6 +1800,12 @@ class AgentChatController(QObject):
         elif names["elevation"]:
             notes.append("\n\nElevation sources the user enabled (the platform argument of add_elevation): "
                          + ", ".join(names["elevation"]) + ".")
+        has_population = POPULATION_TOOL in offered if offered is not None else bool(names["population"])
+        if not has_population:
+            notes.append(NO_POPULATION_NOTE)
+        elif names["population"]:
+            notes.append("\n\nPopulation sources the user enabled (the platform argument of add_population): "
+                         + ", ".join(names["population"]) + ".")
         has_osm = OSM_TOOL in offered if offered is not None else bool(names["osm"])
         if not has_osm:
             notes.append(NO_OSM_NOTE)
@@ -1831,6 +1845,9 @@ class AgentChatController(QObject):
                 return _tr("It answers.")
             if source.kind == KIND_OVERPASS:
                 self._accessor().check_osm(platform_name(source), extra_domains=domains)
+                return _tr("It answers.")
+            if source.kind == KIND_POPULATION:
+                self._accessor().check_population(platform_name(source), extra_domains=domains)
                 return _tr("It answers.")
             if source.kind == KIND_DATABASE:
                 from ...adapters.public_api import database_tables
@@ -2280,6 +2297,9 @@ class AgentChatController(QObject):
             "add_elevation": lambda: _tr("Layer added: {}").format(
                 one_line(str(args.get("name") or ""), 100) or self._elevation_label(str(args.get("platform", "")),
                                                                                    short=True)),
+            POPULATION_TOOL: lambda: _tr("Layer added: {}").format(
+                one_line(str(args.get("name") or ""), 100) or self._population_label(str(args.get("platform", "")),
+                                                                                    short=True)),
             # A name is shown as the model sent it, not checked yet: on one line.
             "add_osm_features": lambda: _tr("Layer added: {}").format(
                 one_line(str(args.get("name") or ""), 100) or self._osm_tags(args)),
@@ -2555,6 +2575,14 @@ class AgentChatController(QObject):
         return one_line(source.title if short else f"{source.title} · {display_source(source.base)}", 300)
 
     @staticmethod
+    def _population_label(platform: str, short: bool = False) -> str:
+        """What the user reads of the population source a model named: its title, and the server it is read from."""
+        source = population_known(platform or "meta_population")
+        if source is None:
+            return one_line(platform, 100)
+        return one_line(source.title if short else f"{source.title} · {display_source(source.base)}", 300)
+
+    @staticmethod
     def _osm_tags(arguments) -> str:
         """The tags a call asks OpenStreetMap for, as the user reads them: amenity=hospital, building."""
         tags = arguments.get("tags") if isinstance(arguments, dict) else None
@@ -2594,11 +2622,13 @@ class AgentChatController(QObject):
             text = _tr("The agent wants to add this web basemap under the layers of the project:\n{}\n\nIts server "
                        "draws the map as you move it: it sees which areas you look at, and nothing of your layers. "
                        "Do you agree?").format(self._basemap_label(str(call.arguments.get("platform", ""))))
-        elif call.name in ("add_layer", ELEVATION_TOOL, OSM_TOOL):
+        elif call.name in ("add_layer", ELEVATION_TOOL, OSM_TOOL, POPULATION_TOOL):
             # The elevation of an area and the features of OpenStreetMap are layers read from a server too: the same
             # words, already in every language.
             if call.name == ELEVATION_TOOL:
                 shown = self._elevation_label(str(call.arguments.get("platform", "")))
+            elif call.name == POPULATION_TOOL:
+                shown = self._population_label(str(call.arguments.get("platform", "")))
             elif call.name == OSM_TOOL:
                 shown = "{}\n{}".format(self._osm_tags(call.arguments),
                                         self._osm_label(str(call.arguments.get("platform", OVERPASS_SERVERS[0].id))))
