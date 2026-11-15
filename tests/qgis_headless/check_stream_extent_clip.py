@@ -441,13 +441,7 @@ def check_wfs(operations):
           (report.failed, keyless.subsetString()[:80], unfiltered[:2], info))
     check("no stable key: the layer gives what meets the extent", shown(keyless) == few, len(shown(keyless)))
     operations.clear_filters([keyless.id()])
-    from filter_mate.core.filter.server_transfer_policy import ASYNC
-    if transfer_mode_for_layer(keyed) == ASYNC:
-        check_refused_keys(operations, server.server_port, crs, exact)
-    else:
-        # From 3.24 to 3.31 QGIS sets a WFS filter without asking the service anything: a list it refuses is not
-        # seen when it is set, only as an empty layer when it is read (as before 2026-11-15).
-        print("SKIP a list of keys the service refuses: this QGIS sets a WFS filter without preparing it", flush=True)
+    check_refused_keys(operations, server.server_port, crs, exact)
     check("the server refused no request (QGIS shows an empty layer for a refused one, and says nothing)",
           not REFUSED, REFUSED)
     for layer in (keyed, keyless):
