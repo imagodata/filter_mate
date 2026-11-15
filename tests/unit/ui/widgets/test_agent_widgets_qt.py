@@ -32,12 +32,13 @@ def _load():
     try:
         for name, path in (("", _ROOT), (".core", _ROOT / "core"), (".core.agent", _ROOT / "core" / "agent"),
                            (".ui", _ROOT / "ui"), (".ui.widgets", _ROOT / "ui" / "widgets"),
-                           (".ui.styles", _ROOT / "ui" / "styles")):
+                           (".ui.styles", _ROOT / "ui" / "styles"), (".ui.layout", _ROOT / "ui" / "layout")):
             package = types.ModuleType(_PKG + name)
             package.__path__ = [str(path)]
             sys.modules[_PKG + name] = package
         modules = [importlib.import_module(f"{_PKG}.{name}")
-                   for name in ("ui.widgets.agent_widgets_strip", "ui.widgets.agent_thread", "core.agent.widgets")]
+                   for name in ("ui.widgets.agent_widgets_strip", "ui.widgets.agent_thread", "core.agent.widgets",
+                                "ui.layout.action_bar_manager")]
     finally:
         for name, previous in saved.items():
             if previous is None:
@@ -47,7 +48,7 @@ def _load():
     return (app, *modules)
 
 
-_APP, strip_module, thread_module, model = _load()
+_APP, strip_module, thread_module, model, action_bar_module = _load()
 Qt = QtCore.Qt
 
 
@@ -301,3 +302,84 @@ class TestQuestionCard:
         card.close_button.click()
         assert declined == [True] and card.done and card.result.text() == "No answer"
         assert "No answer" in thread.toPlainText()
+
+
+class TestWidth:
+    """The thread as wide as its frame, whatever it holds (no horizontal scroll bar: a wider content was cut)."""
+
+    PATH = r"C:\\Users\\Simon\\Documents\\FilterMate\\exports\\layouts\\Ciliwung_buildings_within_100_m_landscape_A4.pdf"
+
+    def test_a_long_word_wraps_and_the_thread_keeps_its_width(self, thread):
+        thread.add_card("Layout exported", True, "pdf", "")
+        thread.add_text("Exported to " + self.PATH)
+        thread.end_answer()
+        _run()
+        assert thread.widget().width() <= thread.viewport().width()
+        label = thread._items[-1].widget
+        assert label.width() <= thread.viewport().width() and label.minimumSizeHint().width() < 300
+        assert thread.toPlainText().endswith(self.PATH)  # the transcription keeps the word as it was
+
+    def test_a_copy_of_the_long_word_is_the_word(self, thread):
+        thread.add_text(self.PATH)
+        thread.end_answer()
+        label = thread._items[-1].widget
+        label.setSelection(0, len(label.text()))
+        assert thread_module.ZWSP in label.selectedText()
+        QtWidgets.QApplication.clipboard().setText(label.selectedText())
+        _run(50)
+        assert QtWidgets.QApplication.clipboard().text() == self.PATH
+
+    def test_a_long_link_is_cut_with_an_ellipsis_and_keeps_its_text_in_its_tooltip(self, thread):
+        label = "Open the settings of the exports of the layouts in the tab of the configuration, section Layouts"
+        thread.add_link(label, lambda: None)
+        _run()
+        button = thread.widget().findChild(QtWidgets.QPushButton, "pushButton_agent_link")
+        assert thread.widget().width() <= thread.viewport().width()
+        assert button.width() < button.sizeHint().width() and button.text().endswith("…")
+        assert label in button.toolTip()
+
+    def test_a_short_link_shows_its_whole_text(self, thread):
+        thread.add_link("Open the settings", lambda: None)
+        _run()
+        button = thread.widget().findChild(QtWidgets.QPushButton, "pushButton_agent_link")
+        assert button.text() == "Open the settings"
+
+    def test_a_short_word_is_left_as_it_is(self):
+        assert thread_module.breakable("Les bâtiments à moins de 100 m") == "Les bâtiments à moins de 100 m"
+
+
+class TestActionBarSpacing:
+    def test_the_same_gap_between_each_two_buttons_with_a_button_added_or_removed(self):
+        bar = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout(bar)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        buttons = []
+        for index in range(5):  # as in the .ui: a spacer between each two
+            button = QtWidgets.QPushButton(bar)
+            button.setFixedSize(34, 34)
+            buttons.append(button)
+            layout.addWidget(button)
+            if index < 4:
+                layout.addItem(QtWidgets.QSpacerItem(4, 20, QtWidgets.QSizePolicy.Expanding,
+                                                     QtWidgets.QSizePolicy.Minimum))
+        added = QtWidgets.QPushButton(bar)  # Compare, after the third one, without a spacer
+        added.setFixedSize(34, 34)
+        layout.insertWidget(layout.indexOf(buttons[2]) + 1, added)
+        action_bar_module.even_action_spacing(layout)
+        bar.show()
+
+        def gaps():
+            _run(30)
+            shown = sorted((b for b in bar.findChildren(QtWidgets.QPushButton) if b.isVisible()), key=lambda b: b.x())
+            return [after.x() - before.x() - 34 for before, after in zip(shown, shown[1:])]
+
+        for width in (560, 360):
+            bar.resize(width, 40)
+            measured = gaps()
+            assert len(measured) == 5 and max(measured) - min(measured) <= 1, measured
+        added.setParent(None)
+        action_bar_module.even_action_spacing(layout)
+        measured = gaps()
+        assert len(measured) == 4 and max(measured) - min(measured) <= 1, measured
+        bar.deleteLater()
