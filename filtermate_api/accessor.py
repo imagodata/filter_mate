@@ -554,6 +554,19 @@ class ElevationResult:
 
 
 @dataclass(frozen=True)
+class OsmResult:
+    """OpenStreetMap features added to the project: a layer per kind of geometry."""
+    platform: str
+    tags: List[str] = field(default_factory=list)
+    # {"layer_id", "name", "geometry" (points, lines or polygons), "feature_count", "fields"}, top first.
+    layers: List[Dict[str, Any]] = field(default_factory=list)
+    feature_count: int = 0
+    crs_authid: str = ""
+    attribution: str = ""
+    note: str = ""
+
+
+@dataclass(frozen=True)
 class ContourResult:
     """Contour lines drawn from a raster, added to the project as a line layer."""
     layer_id: str
@@ -773,6 +786,16 @@ class FilterMateAccessor(Protocol):
 
     def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
         """Ask an elevation source for the start of a tile; raises FilterRejected when its server gives none."""
+        ...
+
+    def add_osm_features(self, platform: str, tags: List[Dict[str, Any]], extent_wkt: str = "", crs: str = "",
+                         geometry: str = "as_mapped", name: str = "",
+                         extra_domains: Optional[str] = None) -> OsmResult:
+        """Add the OpenStreetMap features that carry given tags in an area; raises FilterRejected when refused."""
+        ...
+
+    def check_osm(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        """Ask an Overpass server for nothing at all; raises FilterRejected when it does not answer as one."""
         ...
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
@@ -1183,6 +1206,25 @@ class InMemoryAccessor:
                                height=400, minimum=150.0, maximum=600.0, mean=230.0)
 
     def check_elevation(self, platform: str, extra_domains: Optional[str] = None) -> None:
+        return None
+
+    def add_osm_features(self, platform: str, tags: List[Dict[str, Any]], extent_wkt: str = "", crs: str = "",
+                         geometry: str = "as_mapped", name: str = "",
+                         extra_domains: Optional[str] = None) -> OsmResult:
+        shown = [f"{tag['key']}={tag['value']}" if tag.get("value") else tag["key"] for tag in tags]
+        kinds = ["points", "polygons"] if geometry == "as_mapped" else [geometry]
+        made = []
+        for kind in kinds:
+            title = (name or "OSM " + ", ".join(shown)) + (f" ({kind})" if len(kinds) > 1 else "")
+            summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=title, provider_type="ogr",
+                                   feature_count=12, crs_authid="EPSG:4326")
+            self.layers.append(summary)
+            made.append({"layer_id": summary.layer_id, "name": title, "geometry": kind, "feature_count": 12,
+                         "fields": ["osm_id", "osm_type", "name"] + [tag["key"].replace(":", "_") for tag in tags]})
+        return OsmResult(platform=platform, tags=shown, layers=made, feature_count=12 * len(made),
+                         crs_authid="EPSG:4326", attribution="© OpenStreetMap contributors (ODbL)")
+
+    def check_osm(self, platform: str, extra_domains: Optional[str] = None) -> None:
         return None
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,

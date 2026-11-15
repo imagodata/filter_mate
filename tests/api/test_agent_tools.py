@@ -501,6 +501,43 @@ class TestHandlers:
         refused = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "platform": "earth_search"}))
         assert refused.is_error and "not enabled" in refused.content  # a platform of another kind is not ticked here
 
+    def test_openstreetmap_features_come_only_from_a_server_the_user_ticked(self, tmp_path):
+        accessor, lyon = Accessor(), "POLYGON((4.78 45.7, 4.92 45.7, 4.92 45.8, 4.78 45.8, 4.78 45.7))"
+        hospitals = [{"key": "amenity", "value": "hospital"}]
+        failed, message = run(accessor, tmp_path, "add_osm_features", tags=hospitals, extent_wkt=lyon, crs="EPSG:4326")
+        assert failed and "not enabled" in message and len(accessor.layers) == 1
+        asked = []
+        accessor.add_osm_features = lambda platform, tags, **options: asked.append((platform, tags, options)) \
+            or InMemoryAccessor.add_osm_features(accessor, platform, tags, **options)
+        address = "https://overpass.example.org/api/interpreter?key=SECRET"
+        executor = ToolExecutor(chat_tools(), build_handlers(
+            accessor, tmp_path, platforms=("overpass_de", "overpass_mine_1a2b3c"),
+            extra_domains=f"{address}:overpass", platform_aliases={"overpass_mine_1a2b3c": address}))
+        result = executor.execute(ToolCallPart("c", "add_osm_features", {
+            "tags": hospitals, "extent_wkt": lyon, "crs": "EPSG:4326", "platform": "overpass_de", "geometry": "points"}))
+        answer = json.loads(result.content)
+        assert not result.is_error and answer["platform"] == "overpass_de" and answer["tags"] == ["amenity=hospital"]
+        assert [row["geometry"] for row in answer["layers"]] == ["points"] and answer["feature_count"] == 12
+        assert asked[0][0] == "overpass_de" and asked[0][1] == hospitals and asked[0][2]["geometry"] == "points"
+        # A server the user added is named by its id: its address, which may hold a key, is what QGIS is given and
+        # never what the model reads.
+        result = executor.execute(ToolCallPart("c", "add_osm_features", {
+            "tags": [{"key": "building"}], "platform": "overpass_mine_1a2b3c"}))
+        assert not result.is_error and asked[-1][0] == address and "SECRET" not in result.content
+        assert json.loads(result.content)["platform"] == "overpass_mine_1a2b3c"
+        assert [row["geometry"] for row in json.loads(result.content)["layers"]] == ["points", "polygons"]
+        # The server of the schema's default is not ticked here: refused, with the names of those that are.
+        refused = executor.execute(ToolCallPart("c", "add_osm_features", {"tags": [{"key": "building"}]}))
+        assert refused.is_error and "not enabled" in refused.content and "overpass_de" in refused.content
+        assert "SECRET" not in refused.content and "example.org" not in refused.content
+        refused = executor.execute(ToolCallPart("c", "add_osm_features", {"tags": hospitals, "platform": address}))
+        assert refused.is_error and "SECRET" not in refused.content.replace(address, "")  # the address is not a name
+        for wrong in ({"tags": []}, {}, {"tags": hospitals, "geometry": "areas"}, {"tags": [{"value": "hospital"}]},
+                      {"tags": [{"key": "amenity", "value": "x" * 81}]}, {"tags": [{"key": "k", "operator": "~"}]},
+                      {"tags": [{"key": f"k{index}"} for index in range(11)]}, {"tags": "amenity=hospital"}):
+            call = ToolCallPart("c", "add_osm_features", dict(wrong, platform="overpass_de"))
+            assert executor.execute(call).is_error, wrong  # refused by the schema
+
     def test_contours_and_a_copy_are_layers_made_of_the_project(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "contour_lines", layer="communes", interval=25, index_interval=100)
@@ -538,8 +575,9 @@ class TestHandlers:
         error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="hillshade", blend="multiply",
                             multidirectional=True, opacity=0.3)
         assert not error and answer == {"layer_name": "communes", "mode": "hillshade", "opacity": 0.3, "blend": "multiply"}
-        assert (seen[0]["azimuth"], seen[0]["altitude"], seen[0]["z_factor"], seen[0]["multidirectional"]) \
-            == (315.0, 45.0, None, True)  # the light of the schema, the factor left to the layer
+        # The light stays the usual one (QGIS is not told another), the factor is left to the layer.
+        assert "azimuth" not in seen[0] and "altitude" not in seen[0]
+        assert (seen[0]["z_factor"], seen[0]["multidirectional"]) == (None, True)
         error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="pseudocolor", ramp="Terrain",
                             cut=2, discrete=True, classes=8)
         assert not error and (seen[1]["cut"], seen[1]["discrete"], seen[1]["classes"], seen[1]["blend"]) == (2, True, 8, "")
@@ -548,8 +586,7 @@ class TestHandlers:
         assert not error and [rule.get("width") for rule in seen[2]["rules"]] == [0.6, 0.2]
         error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="keep", blend="overlay")
         assert not error and answer["blend"] == "overlay" and seen[3]["opacity"] is None
-        for wrong in ({"mode": "hillshade", "altitude": 91}, {"mode": "hillshade", "azimuth": 361},
-                      {"mode": "hillshade", "z_factor": 0}, {"mode": "pseudocolor", "cut": 50},
+        for wrong in ({"mode": "hillshade", "z_factor": 0}, {"mode": "pseudocolor", "cut": 50},
                       {"mode": "pseudocolor", "cut": 0}, {"mode": "keep", "blend": "burn"},
                       {"mode": "single", "width": 0}, {"mode": "single", "width": 21},
                       {"mode": "rules", "rules": [{"color": "red", "width": 0}]}):

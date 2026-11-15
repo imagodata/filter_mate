@@ -123,6 +123,131 @@
     "clear_filters"
    ],
    "trap": true
+  },
+  {
+   "id": "osm_hospitals_of_a_town",
+   "prompt": "Ajoute les hôpitaux de Pune (Inde) à partir d'OpenStreetMap.",
+   "touches": [
+    "osm_points",
+    "osm_polygons"
+   ],
+   "expect": [
+    [
+     {
+      "tool": "find_place",
+      "args": {
+       "query": {
+        "contains": [
+         "Pune"
+        ]
+       }
+      },
+      "call_args": {
+       "query": "Pune",
+       "platform": "photon"
+      }
+     },
+     {
+      "tool": "add_osm_features",
+      "args": {
+       "tags": {
+        "contains": [
+         "amenity",
+         "hospital"
+        ]
+       },
+       "crs": "EPSG:4326"
+      },
+      "call_args": {
+       "tags": [
+        {
+         "key": "amenity",
+         "value": "hospital"
+        }
+       ],
+       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+       "crs": "EPSG:4326",
+       "geometry": "points"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_layer",
+    "run_algorithm",
+    "add_elevation",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "osm_points_for_a_heatmap",
+   "prompt": "Charge les restaurants et les cafés du centre de Lyon en points, je veux en faire une carte de chaleur.",
+   "touches": [
+    "osm_points"
+   ],
+   "expect": [
+    [
+     {
+      "tool": "find_place",
+      "args": {
+       "query": {
+        "contains": [
+         "Lyon"
+        ]
+       }
+      },
+      "call_args": {
+       "query": "Lyon",
+       "platform": "photon"
+      }
+     },
+     {
+      "tool": "add_osm_features",
+      "args": {
+       "tags": {
+        "contains": [
+         "restaurant",
+         "cafe"
+        ]
+       },
+       "geometry": "points",
+       "crs": "EPSG:4326"
+      },
+      "call_args": {
+       "tags": [
+        {
+         "key": "amenity",
+         "value": "restaurant"
+        },
+        {
+         "key": "amenity",
+         "value": "cafe"
+        }
+       ],
+       "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))",
+       "crs": "EPSG:4326",
+       "geometry": "points"
+      }
+     }
+    ]
+   ],
+   "forbid": [
+    "add_layer",
+    "add_elevation",
+    "export_layers"
+   ]
+  },
+  {
+   "id": "osm_not_for_a_layer_of_the_project",
+   "trap": true,
+   "prompt": "Combien y a-t-il de bâtiments par usage ?",
+   "expect": [],
+   "forbid": [
+    "add_osm_features",
+    "search_open_data",
+    "add_layer",
+    "run_algorithm"
+   ]
   }
  ]
 }

@@ -11,15 +11,17 @@ from urllib.parse import urlsplit
 
 from .basemaps import BASEMAPS, template_problem
 from .elevation import SOURCES as ELEVATION_SOURCES
+from .osm import SERVERS as OVERPASS_SERVERS
 from .mcp_client import server_url_problem
 from .open_data import (
-    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_STAC, KIND_WFS, KIND_WMS,
-    KIND_WMTS, KIND_XYZ,
+    KIND_CKAN, KIND_DATABASE, KIND_DATAGOUV, KIND_ELEVATION, KIND_GEOCODER, KIND_OPENDATASOFT, KIND_OVERPASS, KIND_STAC,
+    KIND_WFS, KIND_WMS, KIND_WMTS, KIND_XYZ,
     NO_DATA_KINDS, base_url,
 )
 
 KIND_MCP = "mcp"
-USER_KINDS = (KIND_MCP, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_STAC, KIND_XYZ, KIND_GEOCODER)
+USER_KINDS = (KIND_MCP, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_STAC, KIND_XYZ, KIND_GEOCODER,
+              KIND_OVERPASS)
 ORIGIN_OFFICIAL = "official"
 ORIGIN_COMMUNITY = "community"
 ORIGIN_LOCAL = "local"
@@ -89,11 +91,15 @@ BUILT_IN: Tuple[Source, ...] = (
            "IGN Géoplateforme tools. Start it first: TRANSPORT_TYPE=http npx -y @ignfab/geocontext"),
     Source("osm_mcp", "OpenStreetMap (MCP)", KIND_MCP, "https://openstreetmap.caseyjhand.com/mcp", ORIGIN_COMMUNITY,
            "Places and Overpass queries, worldwide"),
-) + tuple(Source(source.id, source.title, KIND_ELEVATION, source.base,
-                 ORIGIN_OFFICIAL if source.official else ORIGIN_COMMUNITY, source.note) for source in ELEVATION_SOURCES
-          ) + tuple(Source(basemap.id, basemap.title, KIND_XYZ, basemap.url,
-                           ORIGIN_OFFICIAL if basemap.official else ORIGIN_COMMUNITY, basemap.note)
-                    for basemap in BASEMAPS)
+)
+BUILT_IN += tuple(Source(server.id, server.title, KIND_OVERPASS, server.url, ORIGIN_COMMUNITY, server.note)
+                  for server in OVERPASS_SERVERS)
+BUILT_IN += tuple(Source(source.id, source.title, KIND_ELEVATION, source.base,
+                         ORIGIN_OFFICIAL if source.official else ORIGIN_COMMUNITY, source.note)
+                  for source in ELEVATION_SOURCES)
+BUILT_IN += tuple(Source(basemap.id, basemap.title, KIND_XYZ, basemap.url,
+                         ORIGIN_OFFICIAL if basemap.official else ORIGIN_COMMUNITY, basemap.note)
+                  for basemap in BASEMAPS)
 _BUILT_IN_IDS = frozenset(source.id for source in BUILT_IN)
 
 
@@ -115,7 +121,7 @@ def make_source(address: str, kind: str, title: str = "") -> Source:
         raise ValueError(problem)
     parts = urlsplit(address)
     origin = ORIGIN_LOCAL if parts.scheme == "http" else ORIGIN_USER
-    if kind not in (KIND_MCP, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_STAC, KIND_XYZ, KIND_GEOCODER):
+    if kind not in (KIND_MCP, KIND_WFS, KIND_WMS, KIND_WMTS, KIND_STAC, KIND_XYZ, KIND_GEOCODER, KIND_OVERPASS):
         address = parts.netloc if parts.scheme == "https" and not parts.path else address
     digest = hashlib.blake2b(f"{kind}|{address}".encode("utf-8"), digest_size=3).hexdigest()
     identifier = _ID.sub("_", f"{kind}_{parts.netloc}{parts.path}".lower()).strip("_")[:30] + "_" + digest
@@ -184,7 +190,7 @@ def platform_name(source: Source) -> str:
 
 # Sources the user adds by the address of a service, a path and a query with it: a basemap, a geocoder, a WMS, a
 # WMTS, a WFS, a STAC catalog. A portal (CKAN, Opendatasoft) is a host name.
-_ADDRESSED = (KIND_XYZ, KIND_GEOCODER, KIND_WMS, KIND_WMTS, KIND_WFS, KIND_STAC)
+_ADDRESSED = (KIND_XYZ, KIND_GEOCODER, KIND_WMS, KIND_WMTS, KIND_WFS, KIND_STAC, KIND_OVERPASS)
 
 
 def model_name(source: Source) -> str:
@@ -213,5 +219,6 @@ def describe_enabled(sources: Sequence[Source]) -> Dict[str, Any]:
             "geocoders": [named(source) for source in sources if source.kind == KIND_GEOCODER],
             "basemaps": [named(source) for source in sources if source.kind == KIND_XYZ],
             "elevation": [named(source) for source in sources if source.kind == KIND_ELEVATION],
+            "osm": [named(source) for source in sources if source.kind == KIND_OVERPASS],
             "databases": [f"{source.id} ({source.title})" for source in sources if source.kind == KIND_DATABASE],
             "connectors": [source.title for source in sources if source.is_connector]}

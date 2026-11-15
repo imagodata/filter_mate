@@ -530,6 +530,33 @@ Eight calls and about 6 s of tools on Lyon (373 x 380 pixels, 0.4 MB read).
   served by parts by a server of this machine (which can also stall, or serve what is no image), and with
   `FM_NET=1` the real ones.
 
+### OpenStreetMap (2026-11-15)
+
+"The hospitals of Pune", "the buildings along the river", "a heatmap of the restaurants": what a place holds,
+when no layer of the project has it. `add_osm_features` (`adapters/public_api/osm_features.py`) brings in the
+features of OpenStreetMap that carry given tags in an area, from an Overpass server the user ticked.
+
+- A model gives tags (`amenity=hospital`, `building`) and an area, never a query: the Overpass query is written by
+  `core/agent/osm.py` from tags checked one by one (a key in letters, digits and `: _ . -`; a value without a
+  quote nor a backslash), so nothing of a model is a piece of a query language. Ten tags, 10 000 km2 and 64 MB at
+  most.
+- The answer (OpenStreetMap XML) is copied to a temporary file through `bounded_http` (bounded, ended by Stop),
+  then read by the OSM driver of GDAL in a worker thread, with a configuration written per request: the keys asked
+  become columns, and a feature is kept when it carries one of the tags (the nodes of a way come with tags of
+  their own, a door, a traffic light). The query asks for the nodes before the ways (`(._;>;); out body;`): in
+  the order Overpass gives by default, GDAL builds no area (0 polygon for the hospitals of Lyon).
+- One layer per kind of geometry (`as_mapped`), or one layer of points (a point inside each area, the middle of
+  each line) to count, to measure distances and for a heatmap: a hospital is a node here and an area there. The
+  layers are kept in a GeoPackage of the QGIS profile, in EPSG:4326, with `osm_id`, `osm_type`, `name`, a column
+  per key asked (`addr:street` is `addr_street`) and `other_tags`; a column no feature fills is dropped.
+- The public servers are run by volunteers and often busy. Measured on 2026-11-15 on the hospitals of Lyon (34
+  features): overpass.openstreetmap.fr answered in 2 s each time, overpass-api.de answered 502 or 429 twice out of
+  three and in 28 s the third. So the first is the default, and a refusal says to ask another server of the list
+  rather than the same again. An answer the server cut for its time or its memory (a 200 that ends with a
+  remark) is refused, never read as whole.
+- Checked by `tests/qgis_headless/check_agent_osm.py` in QGIS 3.22, LTR and latest (52 checks; an Overpass server
+  of this machine that can be busy, stop short or go slow; with `FM_NET=1` the real ones).
+
 ## Objects on a raster
 
 `adapters/public_api/drawn_objects.py`, with `POST /objects/segment` and `GET /map/context`:
@@ -608,6 +635,9 @@ Eight calls and about 6 s of tools on Lyon (373 x 380 pixels, 0.4 MB read).
 - **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
   opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
   asset links, so they are left out for now.
+- **OpenStreetMap** (`core/agent/osm.py`): two Overpass servers (openstreetmap.fr, overpass-api.de), and any
+  the user adds by its address (named to the model by its id, as its address may hold a key). `add_osm_features`
+  is offered only when one is ticked; ticked alone it opens neither `search_open_data` nor the web to `add_layer`.
 - **Elevation** (`core/agent/elevation.py`): Copernicus DEM GLO-30, worldwide at 30 m, one GeoTIFF per square
   degree in a public bucket of AWS, read by parts and without an account. `add_elevation` is offered only when
   it is ticked (listed with the satellite imagery); a model names the source and an area, never an address, and
@@ -646,6 +676,15 @@ Each entry was checked to answer without an account; `tests/qgis_headless/check_
 
     pip install -r requirements-mcp.txt
     python scripts/export_agent_tools.py
+    python scripts/agent_request_weight.py     # what every tool weighs in a request of a local model
+
+A description is read at every request. With every tool offered to a local model (the families off), the
+instructions and the tools must hold in the 32k context Ollama is asked for: beyond, it asks for 64k, which
+doubles the memory of the model. On 2026-11-15, 70 tools and the instructions weigh 99,719 characters for
+100,352 at most: about 600 characters are left. The elevation, contour and OpenStreetMap tools were written
+shorter for that (the light of a hillshade is no argument a model reads; the REST route keeps it), and the next
+tool needs room made first (`cross_filter` alone weighs 7,000). A test fails when the step is passed
+(`test_ollama_provider.py`).
 
 The catalog is JSON because that server needs pydantic and the MCP SDK, which QGIS does not have. A test fails when the
 two disagree. The chat leaves out `undo_filter`, `redo_filter` and `filter_status`: the first two only walk the dock's
@@ -832,7 +871,7 @@ Measured on 2026-11-14 (QGIS 3.44, times in the tools):
     FILTERMATE_AGENT_API_KEY=... python scripts/agent_eval.py --live \
         --provider anthropic --model claude-haiku-5-5                    # real model, costs money
 
-104 cases in French and English (69 shared, the others with the skills), on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
+107 cases in French and English (69 shared, the others with the skills), on a simulated project with attribute, spatial, raster, LiDAR, open data, export and
 read-only requests, and one attribute value holding a prompt injection. A case is scored on the filters finally applied.
 It is what decides whether a model, in particular a local one, is good enough to offer. `--json` writes, for each case, the tools called and their
 arguments (on the simulated project, no data of a user), to read a failure without running it again.

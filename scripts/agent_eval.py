@@ -254,6 +254,28 @@ class SimulatedProject:
                     "maximum": 608.0, "mean": 234.1, "size": "0.4 MB",
                     "note": "a surface model: buildings and trees are in it"}
 
+        def add_osm_features(args):
+            if args.get("platform", "overpass_fr") not in ("overpass_de", "overpass_fr"):
+                raise ToolFailure(f"{args['platform']!r} is not enabled in the agent sources. Enabled: overpass_de, "
+                                  "overpass_fr.")
+            shown = [f"{tag['key']}={tag['value']}" if tag.get("value") else tag["key"] for tag in args["tags"]]
+            geometry = args.get("geometry", "as_mapped")
+            kinds = ["points", "polygons"] if geometry == "as_mapped" else [geometry]
+            title = args.get("name") or "OSM " + ", ".join(shown)
+            fields = {"osm_id": ["1", "9"], "name": ["Hôpital Édouard Herriot"],
+                      **{tag["key"].replace(":", "_"): [tag.get("value") or "yes"] for tag in args["tags"]}}
+            made = []
+            for kind in kinds:
+                name = f"{title} ({kind})" if len(kinds) > 1 else title
+                added_layer(f"osm_{kind}", name, {
+                    "id": f"osm_{kind}_1", "kind": "vector", "count": 29, "fields": dict(fields),
+                    "geometry": {"points": "Point", "lines": "MultiLineString", "polygons": "MultiPolygon"}[kind]})
+                made.append({"layer_id": f"osm_{kind}_1", "name": name, "geometry": kind, "feature_count": 29,
+                             "fields": list(fields)})
+            return {"platform": args.get("platform", "overpass_fr"), "tags": shown, "layers": made,
+                    "feature_count": 29 * len(made), "crs_authid": "EPSG:4326",
+                    "note": "data of OpenStreetMap as its contributors mapped it"}
+
         def duplicate_layer(args):
             source, layer = self._layer(args["layer"])
             if layer["kind"] not in ("vector", "raster"):
@@ -544,6 +566,7 @@ class SimulatedProject:
                 "extent_wkt": "POLYGON((1.39 43.55, 1.49 43.55, 1.49 43.65, 1.39 43.65, 1.39 43.55))"}]},
             "add_basemap": lambda args: {"layer_id": "xyz_1", "name": args.get("name") or args["platform"], "layer_kind": "raster"},
             "add_elevation": add_elevation, "duplicate_layer": duplicate_layer, "contour_lines": contour_lines,
+            "add_osm_features": add_osm_features,
             "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{
                 "id": "S2B_31TCJ_20261031_0_L2A", "title": "S2B_31TCJ_20261031_0_L2A", "publisher": "sentinel-2-l2a",
                 "description": "2026-10-31 · cloud cover 2.1 %", "page": "", "resources": [

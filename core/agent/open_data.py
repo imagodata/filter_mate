@@ -16,6 +16,7 @@ from urllib.parse import parse_qs, quote, unquote, urljoin, urlsplit
 
 from .basemaps import BASEMAPS
 from .elevation import SOURCES as ELEVATION_SOURCES
+from .osm import SERVERS as OVERPASS_SERVERS
 
 KIND_DATAGOUV = "datagouv"
 KIND_OPENDATASOFT = "opendatasoft"
@@ -36,10 +37,14 @@ KIND_DATABASE = "database"
 # An elevation model: tiles of one square degree, of which add_elevation reads the part an area needs. Nothing
 # is searched in it, and a model never writes one of its addresses.
 KIND_ELEVATION = "elevation"
-NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER, KIND_DATABASE, KIND_ELEVATION)
+# An Overpass server: the features of OpenStreetMap that carry given tags in an area, asked by add_osm_features
+# with a query the plugin writes. It lists no dataset, and no file of it is given to add_layer.
+KIND_OVERPASS = "overpass"
+NO_DATA_KINDS = (KIND_XYZ, KIND_GEOCODER, KIND_DATABASE, KIND_ELEVATION, KIND_OVERPASS)
 # What only shows images or places: ticked alone, these do not open the web to add_layer (a WMS is searched, though).
 NO_FILE_KINDS = NO_DATA_KINDS + (KIND_WMS, KIND_WMTS)
-KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ, KIND_WMS, KIND_WMTS, KIND_GEOCODER)
+KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC, KIND_XYZ, KIND_WMS, KIND_WMTS, KIND_GEOCODER,
+         KIND_OVERPASS)
 
 # Built in: name -> (kind, host). The user adds others in the configuration (APP.OPTIONS.AGENT.open_data_domains).
 PLATFORMS: Dict[str, Tuple[str, str]] = {
@@ -64,6 +69,7 @@ PLATFORMS: Dict[str, Tuple[str, str]] = {
 }
 PLATFORMS.update({basemap.id: (KIND_XYZ, basemap.url) for basemap in BASEMAPS})
 PLATFORMS.update({source.id: (KIND_ELEVATION, source.base) for source in ELEVATION_SOURCES})
+PLATFORMS.update({server.id: (KIND_OVERPASS, server.url) for server in OVERPASS_SERVERS})
 # What add_layer can open from a URL (a service needs a provider URI, which a model does not get to write).
 GEO_FORMATS = frozenset({
     "geojson", "gpkg", "geopackage", "shp", "shapefile", "zip", "kml", "gml", "csv", "fgb", "flatgeobuf",

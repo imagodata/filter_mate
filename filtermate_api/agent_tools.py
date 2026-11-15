@@ -102,8 +102,8 @@ LAYER_ARGUMENTS = ("layer", "layers", "layer_name", "source_layer", "target_laye
                    "raster", "guide_layer", "example_layer", "above")
 # What set_layer_style takes besides the layer and the mode: always given (a default of the schema), or only when
 # the model gave it.
-_STYLE_DEFAULTS = ("field", "color", "ramp", "classes", "method", "invert", "band", "discrete", "blend", "azimuth",
-                   "altitude", "multidirectional")
+_STYLE_DEFAULTS = ("field", "color", "ramp", "classes", "method", "invert", "band", "discrete", "blend",
+                   "multidirectional")
 _STYLE_OPTIONAL = ("opacity", "minimum", "maximum", "rules", "cut", "width", "z_factor")
 
 
@@ -466,6 +466,13 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
             target_crs=args["target_crs"], name=args["name"], extra_domains=extra_domains)))
         return {key: value for key, value in answer.items() if value not in (None, "")}
 
+    def add_osm_features(args: Dict[str, Any]) -> Dict[str, Any]:
+        answer = _asked(args, lambda platform: asdict(accessor.add_osm_features(
+            platform, args["tags"], extent_wkt=args["extent_wkt"], crs=args["crs"], geometry=args["geometry"],
+            name=args["name"], extra_domains=extra_domains)))
+        answer["feature_count"] = sum(row.get("feature_count", 0) for row in answer["layers"])  # the card shows it
+        return {key: value for key, value in answer.items() if value not in (None, "")}
+
     def contour_lines(args: Dict[str, Any]) -> Dict[str, Any]:
         answer = asdict(accessor.contour_lines(args["layer"], args["interval"],
                                                index_interval=args.get("index_interval"), band=args["band"],
@@ -511,6 +518,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
         "add_service_layer": add_service_layer, "add_basemap": add_basemap, "find_place": find_place, "search_imagery": search_imagery,
         "add_elevation": add_elevation, "contour_lines": contour_lines, "duplicate_layer": duplicate_layer,
+        "add_osm_features": add_osm_features,
         "segment_objects": segment_objects, "similar_objects": similar_objects,
     }
     return {name: _guarded(_one_layer_per_name(accessor, handler)) for name, handler in handlers.items()}
