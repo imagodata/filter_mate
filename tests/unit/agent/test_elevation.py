@@ -3,8 +3,8 @@
 import pytest
 
 from core.agent.elevation import (
-    MAX_LEVELS, MAX_PIXELS, MAX_TILES, SOURCES, bbox_problem, contour_problem, ground_size, is_index, known,
-    metric_grid, resolution_for, tile_name, tile_url, tiles_for, utm_authid,
+    MAX_LEVELS, MAX_MESSAGE, MAX_PIXELS, MAX_TILES, SOURCES, bbox_problem, contour_problem, ground_size, is_index,
+    known, metric_grid, quiet_message, resolution_for, tile_name, tile_url, tiles_for, utm_authid,
 )
 from core.agent.open_data import KIND_ELEVATION, NO_DATA_KINDS, resolve_platform
 from core.agent.sources import BUILT_IN, describe_enabled
@@ -138,3 +138,37 @@ def test_too_many_levels_are_refused_with_an_interval_that_fits():
 ])
 def test_an_index_contour_is_a_whole_number_of_index_intervals(elevation, index, expected):
     assert is_index(elevation, index) is expected
+
+
+def test_a_refusal_names_no_height_when_the_values_are_not_shared():
+    told = contour_problem(1234.5, 4321.0, 1.0, None)
+    quiet = contour_problem(1234.5, 4321.0, 1.0, None, tell_heights=False)
+    assert "1234.5" in told and "4321" in told and "or more" in told
+    assert quiet and not any(char.isdigit() for char in quiet.replace("an interval of 1 ", "").replace(str(MAX_LEVELS), ""))
+    # What says nothing of the raster is said the same.
+    assert contour_problem(0.0, 500.0, 25.0, 60.0, tell_heights=False) == contour_problem(0.0, 500.0, 25.0, 60.0)
+
+
+@pytest.mark.parametrize("said, kept, gone", [
+    ("`/vsicurl/https://bucket.example.org/a/b.tif?X-Amz-Signature=SECRET' does not exist in the file system",
+     "does not exist", ("example.org", "SECRET", "vsicurl", "https")),
+    ("Attempt to create new tiff file `/home/simon/.local/share/QGIS/QGIS3/profiles/default/filtermate/open_data/"
+     "elevation-ab12/copernicus_dem_30m.tif' failed: No space left on device",
+     "copernicus_dem_30m.tif' failed: No space left on device", ("/home", "simon", "profiles")),
+    ("C:\\Users\\Simon\\AppData\\Roaming\\QGIS\\QGIS4\\dem.tif: Permission denied", "dem.tif: Permission denied",
+     ("Users", "Simon", "AppData")),
+    ("/vsizip//vsicurl/http://127.0.0.1:8080/a.zip/dem.tif not recognized as a supported file format",
+     "not recognized", ("127.0.0.1", "vsizip", "a.zip")),
+    ("HTTP error code : 503", "HTTP error code : 503", ()),
+])
+def test_what_a_library_said_goes_to_a_model_without_an_address_nor_a_folder(said, kept, gone):
+    message = quiet_message(said)
+    assert kept in message
+    for word in gone:
+        assert word not in message, (word, message)
+
+
+def test_a_message_is_one_short_line_and_never_empty():
+    assert quiet_message("") == quiet_message(None) == "no reason given"
+    assert quiet_message("a\n  b\tc") == "a b c"
+    assert len(quiet_message("x" * 5000)) == MAX_MESSAGE

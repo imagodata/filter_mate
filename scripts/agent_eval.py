@@ -670,7 +670,9 @@ def score_case(case: Dict[str, Any], calls: Sequence[Any], by_ref: Dict[str, str
         called = {call.name: call for call in calls}
 
         def step_made(step):
-            if step.get("any"):  # a tool called several times in a chain (a style per layer): one call that fits
+            # A tool called several times in a chain (a style per layer): one call that fits, the last or not. As
+            # for the other steps, a call counts as it was sent, answered or refused.
+            if step.get("any"):
                 return any(call.name == step["tool"] and matches(step.get("args", {}), call.arguments, by_ref)
                            for call in calls)
             call = latest.get(step["tool"]) or (called.get(step["tool"]) if step["tool"] not in write_tools else None)
@@ -697,10 +699,12 @@ class ScriptedTransport:
         skill of the case first): what a model does when the tools of a task are offered once its skill is loaded.
         A call made before would be answered "call load_skill first", and a chain that styles the layers it makes
         would style layers that are not there."""
+        asked = {(step.get("call_args") or step.get("args") or {}).get("name") for step in self._steps
+                 if step["tool"] == "load_skill"}
         loaded: List[str] = []
         for step in self._steps:
             skills = held.get(step["tool"]) or ()
-            if skills and not set(skills) & set(loaded):
+            if skills and not set(skills) & (set(loaded) | asked):  # one the case loads itself is not loaded twice
                 loaded.append(skill if skill in skills else skills[0])
         self._steps = [{"tool": "load_skill", "call_args": {"name": name}} for name in loaded] + self._steps
 

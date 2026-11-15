@@ -8,6 +8,7 @@ A model names a source of the list, and an area: it never writes an address.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
 
@@ -140,11 +141,19 @@ def resolution_for(bbox: Sequence[float], asked: Optional[float], finest: float)
     return float(asked), note
 
 
-def contour_problem(minimum: float, maximum: float, interval: float, index_interval: Optional[float]) -> str:
-    """Why contours cannot be drawn with these intervals over this range of elevations; "" when they can."""
+def contour_problem(minimum: float, maximum: float, interval: float, index_interval: Optional[float],
+                    tell_heights: bool = True) -> str:
+    """Why contours cannot be drawn with these intervals over this range of elevations; "" when they can.
+
+    ``tell_heights`` False: the message names no height of the raster, nor an interval computed from them (the
+    values of a layer of the user are not sent when they said so).
+    """
     if not math.isfinite(interval) or interval <= 0:
         return "interval is a height above zero, in the units of the raster (25 for a contour every 25 m)"
     if math.isfinite(minimum) and math.isfinite(maximum) and (maximum - minimum) / interval > MAX_LEVELS:
+        if not tell_heights:
+            return (f"an interval of {interval:g} makes more than {MAX_LEVELS} levels over the heights of this "
+                    "raster: ask for a larger one")
         fitting = _round_up((maximum - minimum) / MAX_LEVELS)
         return (f"an interval of {interval:g} makes more than {MAX_LEVELS} levels between {minimum:g} and "
                 f"{maximum:g}: ask for {fitting:g} or more")
@@ -173,3 +182,19 @@ def is_index(elevation: float, index_interval: float) -> bool:
     """Whether a contour at ``elevation`` is an index contour: a whole number of times ``index_interval``."""
     ratio = elevation / index_interval
     return abs(ratio - round(ratio)) < 1e-6
+
+
+# An address: any scheme, with the /vsi... prefixes GDAL reads it through. A folder: what ends with a separator,
+# under a root or a drive.
+_ADDRESS = re.compile(r"(?:/vsi[a-z0-9_]+/)*[a-z][a-z0-9+.-]*://[^\s'\"`<>]+", re.IGNORECASE)
+_VSI = re.compile(r"/vsi[a-z0-9_]+/", re.IGNORECASE)
+_FOLDER = re.compile(r"(?:[A-Za-z]:)?(?:[\\/][^\s\\/'\"`<>]+)+[\\/]")
+MAX_MESSAGE = 300
+
+
+def quiet_message(text: str) -> str:
+    """What a library said of a failure, in one short line a model may read: no address (it may hold the key of an
+    account, or be the source of a layer of the user) and no folder of this machine, only the name of a file."""
+    text = _ADDRESS.sub("its address", text or "")
+    text = _FOLDER.sub("", _VSI.sub("", text))
+    return " ".join(text.split())[:MAX_MESSAGE] or "no reason given"

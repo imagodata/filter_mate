@@ -656,13 +656,13 @@ class QGISFilterMateAccessor:
         self._control("check_elevation", platform, extra_domains=extra, module="adapters.public_api.terrain")
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                      name: str = "", min_length: Optional[float] = None) -> ContourResult:
+                      name: str = "", min_length: Optional[float] = None, share_values: bool = True) -> ContourResult:
         return ContourResult(**self._control(
             "contour_lines", layer, interval, index_interval=index_interval, band=band, name=name,
-            min_length=min_length, module="adapters.public_api.terrain"))
+            min_length=min_length, share_values=share_values, module="adapters.public_api.terrain"))
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
-        return LayerSummary(**self._control("duplicate_layer", layer, name=name))
+        return LayerSummary(**self._control("duplicate_layer", layer, name=name, changes={"layer": layer}))
 
     def find_place(self, query: str, platform: str = "ign_geocoder", limit: int = 5,
                    extra_domains: Optional[str] = None) -> PlacesResult:

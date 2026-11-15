@@ -776,8 +776,9 @@ class FilterMateAccessor(Protocol):
         ...
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                      name: str = "", min_length: Optional[float] = None) -> ContourResult:
-        """Draw the contour lines of a raster as a new line layer; raises FilterRejected when refused."""
+                      name: str = "", min_length: Optional[float] = None, share_values: bool = True) -> ContourResult:
+        """Draw the contour lines of a raster as a new line layer; raises FilterRejected when refused.
+        ``share_values`` False: neither the answer nor a refusal tells a height of the raster."""
         ...
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:
@@ -1185,7 +1186,7 @@ class InMemoryAccessor:
         return None
 
     def contour_lines(self, layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                      name: str = "", min_length: Optional[float] = None) -> ContourResult:
+                      name: str = "", min_length: Optional[float] = None, share_values: bool = True) -> ContourResult:
         found = self._find(layer)
         if found is None:
             raise FilterRejected(f"layer {layer!r} not found")
@@ -1195,7 +1196,7 @@ class InMemoryAccessor:
         return ContourResult(layer_id=summary.layer_id, name=summary.name, source_layer=found.name, feature_count=18,
                              interval=interval, index_interval=index_interval,
                              index_count=4 if index_interval else 0, left_out=0 if min_length == 0 else 7,
-                             minimum=175.0, maximum=600.0,
+                             minimum=175.0 if share_values else None, maximum=600.0 if share_values else None,
                              fields=["elevation", "is_index"])
 
     def duplicate_layer(self, layer: str, name: str = "") -> LayerSummary:

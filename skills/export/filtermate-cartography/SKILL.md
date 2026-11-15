@@ -27,6 +27,8 @@ All of this changes how the project shows, never its data, and is undone with th
   steps), gray, or hillshade (a shaded relief drawn from elevations). A relief map, with its contours, is the
   terrain skill: load it.
 - Labels of a layer of lines follow them with placement curved (rivers, roads).
+- One layer is drawn one way. duplicate_layer adds a second layer on the same data, just above the first, for
+  what needs two: a road with a wider line under it, an elevation as colors and as a relief.
 - After a style the user will judge by eye, look with view_map when it is offered.
 
 ## Choosing a style

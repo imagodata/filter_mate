@@ -506,16 +506,29 @@ Eight calls and about 6 s of tools on Lyon (373 x 380 pixels, 0.4 MB read).
   line has `elevation` and `is_index` (a multiple of `index_interval`). Closed contours shorter than ten pixels
   are left out and counted (`left_out`): in a surface model they are the bumps of buildings (on Lyon, 634 of 852
   lines for an eighth of their length). The layer comes drawn in thin lines with the index contours thicker.
-- Both read in a worker thread while the event loop turns: the interface stays alive and Stop ends them. The
-  Processing algorithms of GDAL stay refused (`core/agent/processing_policy.py`): they build a command line, and
-  these tools give GDAL values this code builds, never a text of the model.
+- Both read in a worker thread while the event loop turns: the interface stays alive and Stop ends them. GDAL
+  reads with its own HTTP client, which Stop cannot cut in the middle of a request: it is heard between two tiles
+  and at each block, and a server gone mute is given up after 8 s (measured: a Stop pressed 1 s into a tile that
+  stalls is answered after 8.0 s). When QGIS closes meanwhile, the work is told to end and waited for, without
+  turning on an event loop that no longer waits. The other operations of FilterMate are refused meanwhile.
+- The Processing algorithms of GDAL stay refused (`core/agent/processing_policy.py`): they build a command line,
+  and these tools give GDAL values this code builds, never a text of the model. A CRS is an authid, never a
+  definition (which can name a grid by its address). What GDAL says of a failure goes to the model without an
+  address nor a folder of this machine (`elevation.quiet_message`), and a refusal names no height of a raster of
+  the user when the values are not shared.
+- A layer the user protected is read (its contours are drawn) and never copied: a copy is a second layer on the
+  same source and no protected one, so what is edited in it is written in the file of the layer copied
+  (`duplicate_layer` is among the tools that change their layer, `permissions.CHANGED_LAYERS`).
+- A raster stored with a scale or an offset (tenths of metres in whole numbers) is read through them, and its
+  heights are read by GDAL in the worker, never on the main thread: the raster may be on a server.
 - `set_layer_style` draws a raster as a hillshade (blended between its pixels when the map is closer than they
   are), mixes a layer with what is under it (`blend`), leaves the extreme values out of a ramp (`cut`), draws
   flat steps (`discrete`), and gives a width to one symbol or to each rule; `Terrain` is a ramp of FilterMate (the
   style of QGIS holds none that reads as heights). `set_labels` writes labels along lines (`placement`).
   `duplicate_layer` adds a second layer on the same data: one layer is drawn one way.
-- Checked by `tests/qgis_headless/check_agent_terrain.py` in QGIS 3.22, LTR and latest: 108 checks, the tiles
-  served by parts by a server of this machine, and with `FM_NET=1` the real ones.
+- Checked by `tests/qgis_headless/check_agent_terrain.py` in QGIS 3.22, LTR and latest: 125 checks, the tiles
+  served by parts by a server of this machine (which can also stall, or serve what is no image), and with
+  `FM_NET=1` the real ones.
 
 ## Objects on a raster
 

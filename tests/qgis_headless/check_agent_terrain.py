@@ -48,9 +48,11 @@ def refused(function, *args, **kwargs):
     return ""
 
 
-def make_dem(path, epsg, origin, pixel, size=200, bands=1, slope=3.0):
-    """A cone: 500 at the middle, ``slope`` lower per pixel away from it (76 at the corners of 200 pixels)."""
-    dataset = gdal.GetDriverByName("GTiff").Create(path, size, size, bands, gdal.GDT_Float32)
+def make_dem(path, epsg, origin, pixel, size=200, bands=1, slope=3.0, factor=1, nodata=False):
+    """A cone: 500 at the middle, ``slope`` lower per pixel away from it (76 at the corners of 200 pixels).
+    ``factor``: stored as whole numbers of 1/factor, with that scale. ``nodata``: every pixel is no data."""
+    kind = gdal.GDT_Int16 if factor != 1 else gdal.GDT_Float32
+    dataset = gdal.GetDriverByName("GTiff").Create(path, size, size, bands, kind)
     dataset.SetGeoTransform((origin[0], pixel, 0, origin[1], 0, -pixel))
     reference = osr.SpatialReference()
     reference.ImportFromEPSG(epsg)
@@ -58,7 +60,14 @@ def make_dem(path, epsg, origin, pixel, size=200, bands=1, slope=3.0):
     rows, columns = numpy.mgrid[0:size, 0:size]
     cone = (500 - numpy.hypot(columns - size / 2, rows - size / 2) * slope).astype("float32")
     for band in range(1, bands + 1):
-        dataset.GetRasterBand(band).WriteArray(cone)
+        if factor != 1:
+            dataset.GetRasterBand(band).WriteArray(numpy.round(cone * factor).astype("int16"))
+            dataset.GetRasterBand(band).SetScale(1.0 / factor)
+        elif nodata:
+            dataset.GetRasterBand(band).SetNoDataValue(-9999)
+            dataset.GetRasterBand(band).Fill(-9999)
+        else:
+            dataset.GetRasterBand(band).WriteArray(cone)
     dataset.FlushCache()
     del dataset
 
@@ -190,6 +199,34 @@ def check_contours(project, work):
             ("an unknown layer", lambda: terrain.contour_lines("nope", 25), "not found")):
         said = refused(call)
         check(f"contours: {label} is refused, nothing added", needle in said and len(project.mapLayers()) == count, said)
+    quiet = refused(terrain.contour_lines, "dem", 0.5, share_values=False)
+    check("contours: a refusal names no height of the raster when its values are not shared",
+          "more than 500 levels over the heights of this raster" in quiet and "between" not in quiet
+          and "75" not in quiet, quiet)
+    quiet = refused(terrain.contour_lines, "dem", 1000, share_values=False)
+    check("contours: nor when no contour is found", quiet.startswith("no contour every 1000")
+          and "between" not in quiet, quiet)
+    hidden = terrain.contour_lines("dem", 50, share_values=False)
+    check("contours: nor in the answer", hidden["minimum"] is None and hidden["maximum"] is None
+          and hidden["feature_count"] > 3, hidden)
+    project.removeMapLayer(hidden["layer_id"])
+    # Whole numbers of tenths of metres, as many elevation files are stored: the heights are those QGIS shows.
+    tenths = os.path.join(work, "tenths.tif")
+    make_dem(tenths, 32631, (640000, 5070000), 30, factor=10)
+    scaled = QgsRasterLayer(tenths, "tenths")
+    project.addMapLayer(scaled)
+    drawn = terrain.contour_lines("tenths", 25, index_interval=100)
+    heights = {feature["elevation"] for feature in project.mapLayer(drawn["layer_id"]).getFeatures()}
+    check("contours: a raster stored with a scale is read through it", heights == set(range(100, 500, 25))
+          and drawn["minimum"] == 100 and drawn["maximum"] == 475 and drawn["index_count"] >= 4, (drawn, sorted(heights)))
+    project.removeMapLayers([drawn["layer_id"], scaled.id()])
+    empty = os.path.join(work, "empty.tif")
+    make_dem(empty, 32631, (640000, 5070000), 30, nodata=True)
+    nothing = QgsRasterLayer(empty, "empty")
+    project.addMapLayer(nothing)
+    said = refused(terrain.contour_lines, "empty", 25)
+    check("contours: a raster with no value is said so", said == "the raster holds no value to draw contours from", said)
+    project.removeMapLayer(nothing.id())
     limit = terrain.MAX_CONTOUR_PIXELS
     terrain.MAX_CONTOUR_PIXELS = 1000
     said = refused(terrain.contour_lines, "dem", 25)
@@ -204,6 +241,7 @@ def check_style(project, dem, points, work):
     from filter_mate.core.agent.messages import ToolCallPart
 
     modes = QPainter.CompositionMode
+    dem.setBlendMode(modes.CompositionMode_Screen)  # not the default: an undo must bring this one back
     recorder = EffectsRecorder()
     recorder.before_call(ToolCallPart("s1", "set_layer_style", {"layer": "dem"}))
     before = dem.renderer().type()
@@ -221,15 +259,16 @@ def check_style(project, dem, points, work):
     check("style: the blending alone changes with keep", dem.renderer().type() == "hillshade"
           and dem.blendMode() == modes.CompositionMode_Overlay and abs(dem.opacity() - 0.4) < 1e-6
           and kept == {"layer_name": "dem", "mode": "keep", "blend": "overlay"}, kept)
-    style.set_layer_style("dem", "keep", blend="normal")
-    check("style: normal covers again", dem.blendMode() == modes.CompositionMode_SourceOver)
     effects = recorder.finish()
     apply_effects(effects, undo=True)
     check("style: undoing the turn brings the renderer, the opacity and the blending back",
-          dem.renderer().type() == before and dem.blendMode() == modes.CompositionMode_SourceOver
+          dem.renderer().type() == before and dem.blendMode() == modes.CompositionMode_Screen
           and abs(dem.opacity() - 1.0) < 1e-6, (dem.renderer().type(), dem.blendMode(), dem.opacity()))
     apply_effects(effects, undo=False)
-    check("style: redoing draws the hillshade again", dem.renderer().type() == "hillshade")
+    check("style: redoing draws the hillshade again, blended as the turn left it",
+          dem.renderer().type() == "hillshade" and dem.blendMode() == modes.CompositionMode_Overlay)
+    style.set_layer_style("dem", "keep", blend="normal")
+    check("style: normal covers again", dem.blendMode() == modes.CompositionMode_SourceOver)
     for label, arguments, needle in (
             ("keep with nothing to change", {"mode": "keep"}, "give opacity or blend"),
             ("an unknown blending", {"mode": "keep", "blend": "burn"}, "blend is one of"),
@@ -358,8 +397,9 @@ def check_duplicate(project, dem, contours):
     check("duplicate: an unknown layer is refused", "not found" in said, said)
 
 
-def serve_tiles(tiles, delay):
-    """A bucket on this machine: the tiles of ``tiles`` by parts, a 404 for the others; what was asked."""
+def serve_tiles(tiles, delay, stall=None):
+    """A bucket on this machine: the tiles of ``tiles`` by parts, a 404 for the others; what was asked.
+    ``stall`` set: a part asked is begun, then nothing more comes (a server gone mute), until it is cleared."""
     asked = []
 
     class Bucket(BaseHTTPRequestHandler):
@@ -395,6 +435,12 @@ def serve_tiles(tiles, delay):
             self.end_headers()
             if body:
                 try:
+                    if stall is not None and stall.is_set() and wanted != "bytes=0-0":
+                        self.wfile.write(part[:50])
+                        self.wfile.flush()
+                        while stall.is_set():
+                            time.sleep(0.2)
+                        return
                     self.wfile.write(part)
                 except (BrokenPipeError, ConnectionResetError):
                     pass  # the reading was stopped
@@ -423,7 +469,8 @@ def check_elevation(project, work):
     with open(tile, "rb") as handle:
         tiles = {TILE: handle.read()}
     delay = [0.0]
-    server, asked = serve_tiles(tiles, delay)
+    stall = threading.Event()
+    server, asked = serve_tiles(tiles, delay, stall)
     real = elevation.SOURCES[0]
     local = elevation.ElevationSource(real.id, real.title, f"http://127.0.0.1:{server.server_address[1]}",
                                       real.resolution, real.attribution, real.note)
@@ -496,20 +543,40 @@ def check_elevation(project, work):
               and 333 <= in_lambert["width"] < 365, in_lambert)
         project.removeMapLayer(in_lambert["layer_id"])
         coast = terrain.add_elevation(extent_wkt="POLYGON((4.9 45.7, 5.1 45.7, 5.1 45.8, 4.9 45.8, 4.9 45.7))",
-                                      crs="EPSG:4326")
-        check("elevation: a tile the source does not have is open sea, and said so", "open sea" in coast["note"]
-              and coast["minimum"] == 0, coast)
+                                      crs="4326")
+        check("elevation: a tile the source does not have is written at 0 m, and said so", "open sea" in coast["note"]
+              and "leaves out" in coast["note"] and coast["minimum"] == 0, coast)
         project.removeMapLayer(coast["layer_id"])
+        project.setCrs(QgsCoordinateReferenceSystem("EPSG:27700"))
+        british = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
+        check("elevation: not on the grid of another country, which stretches the ground",
+              british["crs_authid"] == "EPSG:32631", british)
+        project.removeMapLayer(british["layer_id"])
+        project.setCrs(QgsCoordinateReferenceSystem("EPSG:3857"))
+        # A group of basemaps at the bottom of the tree is a background too: the elevation goes above it.
+        other = QgsRasterLayer("type=xyz&url=http://127.0.0.1:9/b/%7Bz%7D/%7Bx%7D/%7By%7D.png&zmax=19&zmin=0", "photo", "wms")
+        project.addMapLayer(other, False)
+        project.layerTreeRoot().addGroup("Fonds").addLayer(other)
+        grouped = terrain.add_elevation(extent_wkt=LYON, crs="EPSG:4326")
+        order = [node.layerId() for node in project.layerTreeRoot().findLayers()]
+        check("elevation: above a group of basemaps too",
+              order == [data.id(), grouped["layer_id"], basemap.id(), other.id()], order)
+        project.removeMapLayers([grouped["layer_id"], other.id()])
+        project.layerTreeRoot().removeChildNode(project.layerTreeRoot().findGroup("Fonds"))
 
         count, files = len(project.mapLayers()), written()
         for label, arguments, needle in (
                 ("open sea", {"extent_wkt": "POLYGON((10 10, 10.1 10, 10.1 10.1, 10 10.1, 10 10))", "crs": "EPSG:4326"},
-                 "no elevation over this area"),
+                 "has no tile there"),
                 ("an area too large", {"extent_wkt": "POLYGON((0 40, 9 40, 9 49, 0 49, 0 40))", "crs": "EPSG:4326"},
                  "16 at most"),
                 ("a point", {"extent_wkt": "POINT(4.84 45.76)", "crs": "EPSG:4326"}, "a point or a line"),
                 ("a WKT that is none", {"extent_wkt": "POLYGON((", "crs": "EPSG:4326"}, "could not be read"),
                 ("an unknown CRS", {"extent_wkt": LYON, "crs": "EPSG:999999"}, "unknown CRS"),
+                ("a CRS written as a definition, which can name a grid by its address",
+                 {"extent_wkt": LYON, "crs": "+proj=longlat +nadgrids=https://example.org/g.tif"}, "unknown CRS"),
+                ("a definition to write in", {"extent_wkt": LYON, "crs": "EPSG:4326", "target_crs": "+proj=utm +zone=31"},
+                 "unknown CRS"),
                 ("a CRS in degrees to write in", {"extent_wkt": LYON, "crs": "EPSG:4326", "target_crs": "EPSG:4326"},
                  "not in metres"),
                 ("a resolution too fine for the area",
@@ -524,13 +591,15 @@ def check_elevation(project, work):
             check(f"elevation: {label} is refused, nothing added nor kept", needle in said
                   and len(project.mapLayers()) == count and written() == files, said)
 
+        from filter_mate.adapters.public_api import operations
         delay[0] = 0.4
         # While the source is asked which tiles it has, then while the tile is read.
         for label, after in (("the question to the source", 150), ("the reading", 700)):
             gdal.VSICurlClearCache()  # what GDAL read of the tile above would answer without the network
+            busy = []
             stop = QTimer()
             stop.setSingleShot(True)
-            stop.timeout.connect(lambda: bounded_http.abort_active())
+            stop.timeout.connect(lambda: (busy.append(operations.busy_reason()), bounded_http.abort_active()))
             stop.start(after)
             started = time.monotonic()
             said = refused(terrain.add_elevation, extent_wkt=LYON, crs="EPSG:4326")
@@ -538,9 +607,52 @@ def check_elevation(project, work):
             check(f"elevation: Stop ends {label}, nothing added nor kept", said == "stopped"
                   and len(project.mapLayers()) == count and written() == files and time.monotonic() - started < 20,
                   (said, round(time.monotonic() - started, 1)))
+            check(f"elevation: FilterMate is busy during {label}, and free again after the Stop",
+                  busy and "add_elevation" in busy[0] and operations.busy_reason() == "", (busy, operations.busy_reason()))
         delay[0] = 0.0
-        check("elevation: FilterMate is free again after a Stop",
-              refused(terrain.add_elevation, extent_wkt="POINT(4.84 45.76)", crs="EPSG:4326").startswith("the area"))
+        # A server gone mute in the middle of a tile: GDAL gives it up after 8 s, and Stop is heard then.
+        gdal.VSICurlClearCache()
+        stall.set()
+        stop = QTimer()
+        stop.setSingleShot(True)
+        stop.timeout.connect(lambda: bounded_http.abort_active())
+        stop.start(1000)
+        started = time.monotonic()
+        said = refused(terrain.add_elevation, extent_wkt=LYON, crs="EPSG:4326")
+        waited = time.monotonic() - started
+        stop.stop()
+        stall.clear()
+        check("elevation: Stop is heard within seconds of a server gone mute, nothing added nor kept",
+              said == "stopped" and waited < 15 and len(project.mapLayers()) == count and written() == files,
+              (said, round(waited, 1)))
+        print(f"INFO a Stop pressed 1 s into a tile that stalls is answered after {waited:.1f} s", flush=True)
+        # A tile the server has, but that is no image: said as it is, without its address.
+        whole = tiles[TILE]
+        tiles[TILE] = b"<html>503 Slow Down</html>" * 200
+        gdal.VSICurlClearCache()
+        said = refused(terrain.add_elevation, extent_wkt=LYON, crs="EPSG:4326")
+        check("elevation: a tile that cannot be read is said so, without its address",
+              said.startswith("a tile of the elevation could not be read from its server") and "127.0.0.1" not in said
+              and "http" not in said and "TypeError" not in said and len(project.mapLayers()) == count
+              and written() == files, said)
+        tiles[TILE] = whole
+        gdal.VSICurlClearCache()
+        # A raster of the user read from a server, at an address that does not end with .tif.
+        with open(os.path.join(work, "dem.tif"), "rb") as handle:
+            tiles["/user/dem.tiff"] = handle.read()
+        address = f"http://127.0.0.1:{server.server_address[1]}/user/dem.tiff"
+        distant = QgsRasterLayer("/vsicurl/" + address, "distant", "gdal")
+        project.addMapLayer(distant)
+        far = terrain.contour_lines("distant", 25) if distant.isValid() else {}
+        check("contours: from a raster read from a server", far.get("feature_count", 0) > 5 and far["minimum"] == 100, far)
+        project.removeMapLayer(far.get("layer_id", ""))
+        del tiles["/user/dem.tiff"]
+        gdal.VSICurlClearCache()
+        said = refused(terrain.contour_lines, "distant", 25)
+        check("contours: a raster its server no longer gives is said so, without its address",
+              said.startswith("the raster could not be read") and "127.0.0.1" not in said and "dem.tiff" not in said, said)
+        project.removeMapLayer(distant.id())
+        count = len(project.mapLayers())
 
         check("elevation: the Test of the Sources tab", terrain.check_elevation("copernicus_dem")["status"] == 200)
         tiles.clear()
@@ -626,6 +738,21 @@ def check_tools(project, work):
         check("tool set_labels: along the lines", not error and json.loads(content)["placement"] == "curved", content)
         error, content = tool("contour_lines", layer="Relief", interval=25, index_interval=60)
         check("tool contour_lines: a refusal the model can act on", error and "multiple of interval" in content, content)
+        # A layer the user protected: read (its contours), never copied, since a copy is edited in its place.
+        from filter_mate.adapters.agent import protected_layers
+        protected_layers.write_ids([project.mapLayersByName("Relief")[0].id()])
+        try:
+            layers = len(project.mapLayers())
+            error, content = tool("duplicate_layer", layer="Relief", name="Copie")
+            check("tool duplicate_layer: a protected layer is not copied", error and "protected" in content
+                  and len(project.mapLayers()) == layers, content)
+            error, content = tool("set_layer_style", layer="Relief", mode="keep", blend="multiply")
+            check("tool set_layer_style: nor blended", error and "protected" in content, content)
+            error, content = tool("contour_lines", layer="Relief", interval=10, name="Lues")
+            check("tool contour_lines: a protected raster is read", not error and json.loads(content)["name"] == "Lues",
+                  content)
+        finally:
+            protected_layers.write_ids([])
         error, content = tool("add_elevation", extent_wkt=LYON, crs="EPSG:4326", platform="datagouv")
         check("tool add_elevation: a platform that is not ticked", error and "not enabled" in content, content)
         error, content = tools([])("add_elevation", extent_wkt=LYON, crs="EPSG:4326")

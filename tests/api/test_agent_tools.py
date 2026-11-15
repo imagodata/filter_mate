@@ -495,9 +495,9 @@ class TestHandlers:
         assert platform == "copernicus_dem" and options["extent_wkt"] == lyon and options["resolution"] is None
         for wrong in ({"extent_wkt": lyon, "resolution": 5}, {"extent_wkt": lyon, "resolution": 6000}, {"platform": ""}):
             assert executor.execute(ToolCallPart("c", "add_elevation", wrong)).is_error, wrong  # refused by the schema
-        # An address a model would write is no argument of the tool: nothing of it reaches QGIS.
-        executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "url": "https://example.org/dem.tif"}))
-        assert "example.org" not in json.dumps(asked[-1])
+        # An address a model would write is no argument of the tool: the call runs, and nothing of it reaches QGIS.
+        made = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "url": "https://example.org/dem.tif"}))
+        assert not made.is_error and len(asked) == 2 and "example.org" not in json.dumps(asked[-1])
         refused = executor.execute(ToolCallPart("c", "add_elevation", {"extent_wkt": lyon, "platform": "earth_search"}))
         assert refused.is_error and "not enabled" in refused.content  # a platform of another kind is not ticked here
 
@@ -523,6 +523,12 @@ class TestHandlers:
         result = executor.execute(ToolCallPart("c", "contour_lines", {"layer": "communes", "interval": 25}))
         answer = json.loads(result.content)
         assert not result.is_error and "minimum" not in answer and "maximum" not in answer and answer["feature_count"]
+        seen = []
+        accessor.contour_lines = lambda layer, interval, **options: seen.append(options) \
+            or InMemoryAccessor.contour_lines(accessor, layer, interval, **options)
+        executor = ToolExecutor(chat_tools(), build_handlers(accessor, tmp_path, share_values=False))
+        executor.execute(ToolCallPart("c", "contour_lines", {"layer": "communes", "interval": 25}))
+        assert seen[0]["share_values"] is False  # a refusal names no height either: QGIS is told
 
     def test_a_relief_is_a_style(self, api):
         accessor, root = api

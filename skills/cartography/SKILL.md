@@ -6,7 +6,7 @@ metadata:
   version: 3
   plugin_min: 5.1.0
   audience: chat, mcp
-  tools: set_layer_style, set_labels, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap
+  tools: set_layer_style, set_labels, describe_layer, field_values, layer_statistics, create_layout, export_layout, set_project_crs, group_layers, rename_layer, map_theme, bookmark, zoom_to, map_context, view_map, add_basemap, duplicate_layer
   risk: change
   trust: builtin
 ---
@@ -31,6 +31,8 @@ All of this changes how the project shows, never its data, and is undone with th
   steps), gray, or hillshade (a shaded relief drawn from elevations). A relief map, with its contours, is the
   terrain skill: load it.
 - Labels of a layer of lines follow them with placement curved (rivers, roads).
+- One layer is drawn one way. duplicate_layer adds a second layer on the same data, just above the first, for
+  what needs two: a road with a wider line under it, an elevation as colors and as a relief.
 - After a style the user will judge by eye, look with view_map when it is offered.
 
 ## Choosing a style

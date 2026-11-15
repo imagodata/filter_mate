@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import math
 import os
+import re
 import shutil
 import tempfile
 import threading
@@ -18,7 +19,7 @@ import time
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from ...core.agent.elevation import (
-    MAX_CONTOUR_PIXELS, MAX_PIXELS, ElevationSource, contour_problem, is_index, known, metric_grid, resolution_for,
+    MAX_CONTOUR_PIXELS, ElevationSource, contour_problem, is_index, known, metric_grid, quiet_message, resolution_for,
     tile_url, tiles_for, utm_authid,
 )
 from ...core.agent.open_data import KIND_ELEVATION, megabytes, resolve_platform
@@ -32,14 +33,21 @@ TILE_TIMEOUT_MS = 20_000
 READ_TIMEOUT_S = 240.0  # what one reading may last, whatever the network does
 STOPPED = 'stopped'
 _TOO_LONG = 'too long'
-_MISSING = (403, 404)  # no tile there: open sea
-_HTTP_OPTIONS = {
-    'GDAL_HTTP_TIMEOUT': '60', 'GDAL_HTTP_CONNECTTIMEOUT': '15', 'GDAL_HTTP_LOW_SPEED_TIME': '20',
-    'GDAL_HTTP_LOW_SPEED_LIMIT': '100', 'GDAL_HTTP_MAX_RETRY': '2', 'GDAL_HTTP_RETRY_DELAY': '1',
-    # One file is asked, by its name: no listing of its folder, no file beside it.
+_MISSING = (403, 404)  # no tile there: open sea, or a country the public model leaves out
+# GDAL reads with its own HTTP client, which Stop cannot cut in the middle of a request: a server that goes mute is
+# given up after 8 s (2026-11-15: 20 s were waited after a Stop), a request that never ends after 30 s.
+_TIMEOUTS = {
+    'GDAL_HTTP_TIMEOUT': '30', 'GDAL_HTTP_CONNECTTIMEOUT': '10', 'GDAL_HTTP_LOW_SPEED_TIME': '8',
+    'GDAL_HTTP_LOW_SPEED_LIMIT': '1000', 'GDAL_HTTP_MAX_RETRY': '1', 'GDAL_HTTP_RETRY_DELAY': '1',
+}
+# For the tiles of an elevation model alone: one file is asked, by its name, with no listing of its folder and no
+# file beside it. A raster of the user keeps what QGIS reads it with (a world file beside it, an address that ends
+# with .tiff or with a query).
+_TILE_OPTIONS = {
     'GDAL_DISABLE_READDIR_ON_OPEN': 'EMPTY_DIR', 'CPL_VSIL_CURL_ALLOWED_EXTENSIONS': '.tif',
     'GDAL_HTTP_USERAGENT': 'FilterMate-QGIS-plugin',
 }
+_AUTHID = re.compile(r'[A-Za-z]{2,10}:[A-Za-z0-9_.]{1,20}')
 ELEVATION_FIELD = 'elevation'
 INDEX_FIELD = 'is_index'
 # A closed contour shorter than this many pixels is a bump or a pit of the size of a building: in a surface model
@@ -51,14 +59,15 @@ CONTOUR_WIDTH = 0.2
 INDEX_WIDTH = 0.5
 _DSM_NOTE = ("a surface model: buildings and trees are in it, so a dense town or a forest stands above its ground; "
              "heights are metres above the EGM2008 geoid")
+_NO_TILE = "has no tile there (open sea, or a country the public model leaves out)"
 
 
 def _in_background(label: str, work: Callable[[Callable[[], str]], Any]) -> Any:
     """What ``work(ended)`` returns, run in a worker thread while the event loop turns.
 
     ``ended()`` answers "" while the work may go on, and why it must end once the user pressed Stop or it lasted too
-    long: the work asks it often (the progress callbacks of GDAL) and gives up. Meanwhile the other operations of
-    FilterMate are refused (``operations.busy_reason``).
+    long: the work asks it often (between two files, in the progress callbacks of GDAL) and gives up. The caller
+    holds ``operations.running`` meanwhile, so that no other operation of FilterMate starts.
 
     Raises:
         ValueError: Stopped, too long, or what the work raised as one.
@@ -87,15 +96,16 @@ def _in_background(label: str, work: Callable[[Callable[[], str]], Any]) -> Any:
     timer.timeout.connect(lambda: loop.quit() if worker.isFinished() else None)
     forget = on_abort(stop.set)
     try:
-        with running(label):
-            worker.start()
-            timer.start()
-            while not worker.isFinished():
-                loop.exec()
+        worker.start()
+        timer.start()
+        loop.exec()
     finally:
         timer.stop()
         forget()
-        stop.set()  # a loop left another way (QGIS closing): the work ends at its next step
+        # The loop is left once the work has ended, or at once when QGIS is closing: then the work is told to end at
+        # its next step and waited for here. Turning on a loop that no longer waits held a whole processor
+        # (2026-11-15).
+        stop.set()
         worker.wait()
     error = outcome.get('error')
     if isinstance(error, ValueError):
@@ -107,12 +117,13 @@ def _in_background(label: str, work: Callable[[Callable[[], str]], Any]) -> Any:
 
 
 class _Gdal:
-    """GDAL in the thread that reads: its HTTP options and a quiet error handler, both of this thread alone."""
+    """GDAL in the thread that reads: its HTTP limits and a quiet error handler, both of this thread alone.
+    ``tiles``: the files read are the tiles of an elevation model, asked by their names."""
 
-    def __init__(self, remote: bool) -> None:
+    def __init__(self, tiles: bool = False) -> None:
         from osgeo import gdal
         self.gdal = gdal
-        self._options = _HTTP_OPTIONS if remote else {}
+        self._options = dict(_TIMEOUTS, **(_TILE_OPTIONS if tiles else {}))
         self._previous: Dict[str, Optional[str]] = {}
 
     def __enter__(self):
@@ -129,10 +140,21 @@ class _Gdal:
             self.gdal.SetThreadLocalConfigOption(name, value)
 
 
-def _said(gdal, exc: Optional[BaseException] = None) -> str:
-    """What GDAL said of a failure, in one short line without the address read."""
-    text = (str(exc) if exc is not None else '') or gdal.GetLastErrorMsg() or 'no reason given'
-    return ' '.join(text.replace('/vsicurl/', '').split())[:300]
+def _attempt(gdal, call: Callable[[], Any]) -> Tuple[Any, str]:
+    """``(what call returned, "")``, or ``(None, what GDAL said)`` when it failed.
+
+    GDAL answers None, or raises when the application turned its exceptions on; its Python layer raises a TypeError
+    when handed the None of a file it could not open (2026-11-15: a tile cut short gave "unexpected TypeError").
+    The message holds neither an address nor a folder of this machine.
+    """
+    gdal.ErrorReset()
+    try:
+        answer = call()
+    except (RuntimeError, TypeError) as exc:
+        return None, quiet_message(gdal.GetLastErrorMsg() or str(exc))
+    if answer is None:
+        return None, quiet_message(gdal.GetLastErrorMsg())
+    return answer, ''
 
 
 def _ended_error(reason: str) -> ValueError:
@@ -149,6 +171,23 @@ def _canvas_crs():
     return canvas.mapSettings().destinationCrs() if canvas is not None else QgsProject.instance().crs()
 
 
+def _named_crs(text: str):
+    """The CRS an authid names (EPSG:2154, or 2154 alone).
+
+    Only an authid: a PROJ or a WKT definition a model would write can name a grid by its address.
+
+    Raises:
+        ValueError: Not an authid, or one QGIS does not know.
+    """
+    from qgis.core import QgsCoordinateReferenceSystem
+    text = text.strip()
+    text = f"EPSG:{text}" if text.isdigit() else text
+    crs = QgsCoordinateReferenceSystem(text) if _AUTHID.fullmatch(text) else None
+    if crs is None or not crs.isValid():
+        raise ValueError(f"unknown CRS {text[:40]!r}: give an authid such as EPSG:4326 or EPSG:2154")
+    return crs
+
+
 def _area_in_degrees(extent_wkt: str, crs: str) -> List[float]:
     """``[west, south, east, north]`` of the area asked: a WKT in ``crs`` (the CRS of the map by default), or the
     visible map.
@@ -156,18 +195,16 @@ def _area_in_degrees(extent_wkt: str, crs: str) -> List[float]:
     Raises:
         ValueError: A WKT or a CRS that cannot be read, no map here, an area that is a point or off the globe.
     """
-    from qgis.core import (
-        QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsProject,
-    )
+    from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsProject
     from .project_control import _canvas
     if (extent_wkt or '').strip():
         geometry = QgsGeometry.fromWkt(extent_wkt)
         if geometry.isNull() or geometry.isEmpty():
             raise ValueError("the WKT of the area could not be read")
         rect = geometry.boundingBox()
-        source = QgsCoordinateReferenceSystem(crs) if (crs or '').strip() else _canvas_crs()
+        source = _named_crs(crs) if (crs or '').strip() else _canvas_crs()
         if not source.isValid():
-            raise ValueError(f"unknown CRS {crs!r}")
+            raise ValueError("give the crs of extent_wkt: the map has none")
     else:
         try:
             canvas = _canvas()
@@ -190,31 +227,31 @@ def _area_in_degrees(extent_wkt: str, crs: str) -> List[float]:
 
 
 def _grid_crs(target_crs: str, bbox: Sequence[float]):
-    """The CRS the elevation is written in: the one asked, the one of the project when it keeps distances in metres,
-    else the UTM zone of the area.
+    """The CRS the elevation is written in: the one asked, the one of the project when it is in metres, keeps
+    distances and is made for this area, else the UTM zone of the area.
 
     Raises:
         ValueError: A CRS asked that QGIS does not know, or that is not in metres.
     """
-    from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes
+    from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsRectangle, QgsUnitTypes
 
     def in_metres(crs) -> bool:
         return (crs.isValid() and not crs.isGeographic()
                 and crs.mapUnits() == QgsUnitTypes.DistanceUnit.DistanceMeters)
 
-    text = (target_crs or '').strip()
-    if text:
-        asked = QgsCoordinateReferenceSystem(f"EPSG:{text}" if text.isdigit() else text)
-        if not asked.isValid():
-            raise ValueError(f"{text!r} is no CRS QGIS knows: give an authid such as EPSG:2154 or EPSG:32631")
+    if (target_crs or '').strip():
+        asked = _named_crs(target_crs)
         if not in_metres(asked):
-            raise ValueError(f"{asked.authid() or text} is not in metres: elevation is written on a grid in metres "
-                             "(a UTM zone, a national grid), which slopes, shading and contours need; leave "
-                             "target_crs out for the UTM zone of the area")
+            raise ValueError(f"{asked.authid()} is not in metres: elevation is written on a grid in metres (a UTM "
+                             "zone, a national grid), which slopes, shading and contours need; leave target_crs out "
+                             "for the UTM zone of the area")
         return asked
     project = QgsProject.instance().crs()
     if metric_grid(project.authid(), not project.isGeographic(), in_metres(project)):
-        return project
+        # A national grid far from its country stretches the ground (Lambert-93 over Japan): only where it is made for.
+        made_for = project.bounds()
+        if made_for.isNull() or made_for.isEmpty() or made_for.contains(QgsRectangle(bbox[0], bbox[1], bbox[2], bbox[3])):
+            return project
     return QgsCoordinateReferenceSystem(utm_authid((bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0))
 
 
@@ -238,17 +275,18 @@ def _grid(bbox: Sequence[float], crs, resolution: float) -> Tuple[Tuple[float, f
     height = int(round((bounds[3] - bounds[1]) / resolution))
     if width < 2 or height < 2:
         raise ValueError(f"the area is smaller than two pixels of {resolution:g} m: ask for a larger one")
-    if width * height > 2 * MAX_PIXELS:  # a CRS used far from where it is made for stretches the area
+    # What contour_lines takes: a CRS used far from where it is made for stretches the area.
+    if width * height > MAX_CONTOUR_PIXELS:
         raise ValueError(f"in {crs.authid() or 'this CRS'} this area makes a grid of {width} x {height} pixels: leave "
                          "target_crs out, or ask for a coarser resolution")
     return bounds, width, height
 
 
 def _tiles_there(source: ElevationSource, tiles: Sequence[Tuple[int, int]]) -> List[str]:
-    """The addresses of the tiles of ``tiles`` the server has: none over open sea.
+    """The addresses of the tiles of ``tiles`` the server has.
 
     Raises:
-        ValueError: The server did not answer, or answered with an error.
+        ValueError: Stopped, the server did not answer, or answered with an error.
     """
     urls = [tile_url(source, latitude, longitude) for latitude, longitude in tiles]
     replies = fetch_together([{'url': url, 'headers': {'Range': 'bytes=0-0'}, 'headers_only': True,
@@ -269,45 +307,60 @@ def _tiles_there(source: ElevationSource, tiles: Sequence[Tuple[int, int]]) -> L
 def _warp(urls: Sequence[str], path: str, crs_text: str, bounds: Sequence[float], resolution: float,
           ended: Callable[[], str]) -> Dict[str, Any]:
     """Read the part of the tiles the grid needs and write it at ``path``; its statistics. Worker thread."""
-    with _Gdal(remote=True) as gdal:
-        def progress(_done, _message, _data) -> int:
-            return 0 if ended() else 1
+    with _Gdal(tiles=True) as gdal:
+        opened = []
         try:
-            dataset = gdal.Warp(
-                path, ['/vsicurl/' + url for url in urls], format='GTiff', dstSRS=crs_text, xRes=resolution,
-                yRes=resolution, outputBounds=tuple(bounds), resampleAlg='bilinear', outputType=gdal.GDT_Float32,
-                creationOptions=['COMPRESS=DEFLATE', 'PREDICTOR=3', 'TILED=YES'], callback=progress)
-        except RuntimeError as exc:  # GDAL raises when the application turned its exceptions on
-            dataset, failure = None, _said(gdal, exc)
-        else:
-            failure = '' if dataset is not None else _said(gdal)
-        reason = ended()
-        if reason:
-            dataset = None
-            raise _ended_error(reason)
-        if dataset is None:
-            raise ValueError(f"the elevation could not be read from its server: {failure}")
-        try:
-            minimum, maximum, mean, _deviation = dataset.GetRasterBand(1).ComputeStatistics(False)
-        except RuntimeError:
-            minimum = maximum = mean = float('nan')
-        answer = {'width': dataset.RasterXSize, 'height': dataset.RasterYSize, 'minimum': minimum, 'maximum': maximum,
-                  'mean': mean}
-        dataset.FlushCache()
-        dataset = None  # closes the file before QGIS opens it
-        return answer
+            for url in urls:  # one by one: Stop is heard between two tiles, and a tile that fails says why
+                reason = ended()
+                if reason:
+                    raise _ended_error(reason)
+                tile, failure = _attempt(gdal, lambda url=url: gdal.Open('/vsicurl/' + url))
+                reason = ended()  # a request cut by a mute server after a Stop is a Stop, not a failure of the tile
+                if reason:
+                    raise _ended_error(reason)
+                if tile is None:
+                    raise ValueError(f"a tile of the elevation could not be read from its server: {failure}")
+                opened.append(tile)
+            dataset, failure = _attempt(gdal, lambda: gdal.Warp(
+                path, opened, format='GTiff', dstSRS=crs_text, xRes=resolution, yRes=resolution,
+                outputBounds=tuple(bounds), resampleAlg='bilinear', outputType=gdal.GDT_Float32,
+                creationOptions=['COMPRESS=DEFLATE', 'PREDICTOR=3', 'TILED=YES'],
+                callback=lambda _done, _message, _data: 0 if ended() else 1))
+            reason = ended()
+            if reason:
+                dataset = None
+                raise _ended_error(reason)
+            if dataset is None:
+                raise ValueError(f"the elevation could not be read from its server: {failure}")
+            read, _failure = _attempt(gdal, lambda: dataset.GetRasterBand(1).ComputeStatistics(False))
+            minimum, maximum, mean = (read[0], read[1], read[2]) if read and len(read) >= 3 else (float('nan'),) * 3
+            answer = {'width': dataset.RasterXSize, 'height': dataset.RasterYSize, 'minimum': minimum,
+                      'maximum': maximum, 'mean': mean}
+            dataset.FlushCache()
+            dataset = None  # closes the file before QGIS opens it
+            return answer
+        finally:
+            opened.clear()
+
+
+def _only_web_images(node) -> bool:
+    """Whether a node of the layer tree holds web images alone: a basemap, or a group of basemaps."""
+    from .layer_style import _drawn_by_its_service
+    if hasattr(node, 'layer'):
+        layer = node.layer()
+        return layer is not None and _drawn_by_its_service(layer)
+    members = [member.layer() for member in node.findLayers()] if hasattr(node, 'findLayers') else []
+    return bool(members) and all(layer is not None and _drawn_by_its_service(layer) for layer in members)
 
 
 def _under_the_data(project, layer) -> None:
-    """Put ``layer`` in the tree above the web images at the bottom, under everything else: elevation is a background
-    for the data, and must not sit under an opaque basemap."""
-    from .layer_style import _drawn_by_its_service
+    """Put ``layer`` in the tree above the web images at the bottom (a basemap, a group of basemaps), under
+    everything else: elevation is a background for the data, and must not sit under an opaque basemap."""
     root = project.layerTreeRoot()
     children = root.children()
     index = len(children)
     for child in reversed(children):
-        node_layer = child.layer() if hasattr(child, 'layer') else None
-        if node_layer is None or not _drawn_by_its_service(node_layer):
+        if not _only_web_images(child):
             break
         index -= 1
     project.addMapLayer(layer, False)
@@ -316,6 +369,17 @@ def _under_the_data(project, layer) -> None:
 
 def _rounded(value: float, digits: int = 1) -> Optional[float]:
     return round(float(value), digits) if isinstance(value, (int, float)) and math.isfinite(value) else None
+
+
+def _elevation_source(platform: str, extra_domains: str) -> ElevationSource:
+    try:
+        kind, _base = resolve_platform(platform, extra_domains)
+    except ValueError:
+        raise ValueError(f"{platform!r} is not an elevation source of the list") from None
+    source = known(platform)
+    if kind != KIND_ELEVATION or source is None:
+        raise ValueError(f"{platform} holds no elevation model")
+    return source
 
 
 def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: str = '',
@@ -331,30 +395,25 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
             server that does not answer, stopped; the message says which.
     """
     from qgis.core import QgsApplication, QgsProject, QgsRasterLayer
-    try:
-        kind, _base = resolve_platform(platform, extra_domains)
-    except ValueError:
-        raise ValueError(f"{platform!r} is not an elevation source of the list") from None
-    source = known(platform)
-    if kind != KIND_ELEVATION or source is None:
-        raise ValueError(f"{platform} holds no elevation model")
+    source = _elevation_source(platform, extra_domains)
     bbox = _area_in_degrees(extent_wkt, crs)
     tiles = tiles_for(bbox)
     size, coarser = resolution_for(bbox, resolution, source.resolution)
     grid_crs = _grid_crs(target_crs, bbox)
-    bounds, width, height = _grid(bbox, grid_crs, size)
-    urls = _tiles_there(source, tiles)
-    if not urls:
-        raise ValueError(f"{source.title} has no elevation over this area: it is open sea, or off the model")
+    bounds, _width, _height = _grid(bbox, grid_crs, size)
     root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
     folder = ''
     kept = False
     try:
-        os.makedirs(root, exist_ok=True)
-        folder = tempfile.mkdtemp(prefix='elevation-', dir=root)
-        path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
-        crs_text = grid_crs.authid() or grid_crs.toWkt()
-        read = _in_background('add_elevation', lambda ended: _warp(urls, path, crs_text, bounds, size, ended))
+        with running('add_elevation'):  # from the first request: a call made meanwhile would run nested inside this one
+            urls = _tiles_there(source, tiles)
+            if not urls:
+                raise ValueError(f"{source.title} {_NO_TILE}")
+            os.makedirs(root, exist_ok=True)
+            folder = tempfile.mkdtemp(prefix='elevation-', dir=root)
+            path = os.path.join(folder, f"{source.id}_{size:g}m.tif")
+            crs_text = grid_crs.authid() or grid_crs.toWkt()
+            read = _in_background('add_elevation', lambda ended: _warp(urls, path, crs_text, bounds, size, ended))
         title = (name or '').strip()[:200] or f"Elevation ({source.title.split(' (')[0]} {size:g} m)"
         layer = QgsRasterLayer(path, title, 'gdal')
         if not layer.isValid():
@@ -372,7 +431,7 @@ def add_elevation(platform: str = 'copernicus_dem', extent_wkt: str = '', crs: s
             shutil.rmtree(folder, ignore_errors=True)
     notes = [note for note in (coarser, _DSM_NOTE) if note]
     if len(urls) < len(tiles):
-        notes.append("part of the area is open sea, written at 0 m")
+        notes.append(f"for part of the area the model {_NO_TILE}: written at 0 m")
     return {'layer_id': layer.id(), 'name': layer.name(), 'platform': platform, 'crs_authid': grid_crs.authid(),
             'resolution': size, 'width': read['width'], 'height': read['height'],
             'minimum': _rounded(read['minimum']), 'maximum': _rounded(read['maximum']), 'mean': _rounded(read['mean']),
@@ -386,34 +445,53 @@ def check_elevation(platform: str, extra_domains: str = '') -> Dict[str, Any]:
     Raises:
         ValueError: Not an elevation source, or its server did not answer with a tile.
     """
-    try:
-        kind, _base = resolve_platform(platform, extra_domains)
-    except ValueError:
-        raise ValueError(f"{platform!r} is not an elevation source of the list") from None
-    source = known(platform)
-    if kind != KIND_ELEVATION or source is None:
-        raise ValueError(f"{platform} holds no elevation model")
-    if not _tiles_there(source, [(45, 4)]):  # Lyon: land in every model of the list
+    source = _elevation_source(platform, extra_domains)
+    with running('check_elevation'):
+        there = _tiles_there(source, [(45, 4)])  # Lyon: land in every model of the list
+    if not there:
         raise ValueError(f"the server of {source.title} answers, but not with its tiles")
     return {'platform': platform, 'status': 200}
 
 
+def _unscaled(gdal, dataset, band_number: int):
+    """``(dataset, band)`` whose values are the heights QGIS shows: a band stored with a scale or an offset (tenths
+    of metres in whole numbers) is read through them. 2026-11-15: contours were drawn on the stored numbers, ten
+    times the heights."""
+    band = dataset.GetRasterBand(band_number)
+    scale, offset = band.GetScale(), band.GetOffset()
+    if scale in (None, 1.0) and offset in (None, 0.0):
+        return dataset, band
+    view, failure = _attempt(gdal, lambda: gdal.Translate('', dataset, format='VRT', bandList=[band_number],
+                                                          unscale=True, outputType=gdal.GDT_Float32))
+    if view is None:
+        raise ValueError(f"the raster could not be read with its scale and offset: {failure}")
+    return view, view.GetRasterBand(1)
+
+
 def _contours(source: str, band_number: int, path: str, interval: float, index_interval: Optional[float],
-              min_length: Optional[float], remote: bool, ended: Callable[[], str]) -> Dict[str, Any]:
+              min_length: Optional[float], tell_heights: bool, ended: Callable[[], str]) -> Dict[str, Any]:
     """Draw the contour lines of a band into a new GeoPackage at ``path``; how many, and between which heights.
     ``min_length``: closed contours shorter than this are left out (None: ``SPECK_PIXELS`` pixels; 0: none).
-    Worker thread."""
-    with _Gdal(remote=remote) as gdal:
+    Worker thread: the raster is read here, never on the main thread (it may be on a server)."""
+    with _Gdal() as gdal:
         from osgeo import ogr, osr
-        try:
-            dataset = gdal.Open(source)
-        except RuntimeError as exc:
-            dataset, failure = None, _said(gdal, exc)
-        else:
-            failure = '' if dataset is not None else _said(gdal)
-        if dataset is None:
+        opened, failure = _attempt(gdal, lambda: gdal.Open(source))
+        reason = ended()
+        if reason:
+            raise _ended_error(reason)
+        if opened is None:
             raise ValueError(f"the raster could not be read: {failure}")
-        band = dataset.GetRasterBand(band_number)
+        dataset, band = _unscaled(gdal, opened, band_number)
+        span, _failure = _attempt(gdal, lambda: band.ComputeRasterMinMax(True))
+        lowest, highest = (span[0], span[1]) if span and len(span) == 2 else (float('nan'), float('nan'))
+        # A band of no data alone: nothing, bounds upside down, or (GDAL 3.4) 0 and 0 with an error said.
+        nothing_read = bool(gdal.GetLastErrorMsg()) and lowest == highest
+        if (not (math.isfinite(lowest) and math.isfinite(highest)) or lowest > highest or abs(lowest) > 1e300
+                or nothing_read):
+            raise ValueError("the raster holds no value to draw contours from")
+        problem = contour_problem(lowest, highest, interval, index_interval, tell_heights)
+        if problem:
+            raise ValueError(problem)
         reference = None
         if dataset.GetProjection():
             reference = osr.SpatialReference()
@@ -428,28 +506,21 @@ def _contours(source: str, band_number: int, path: str, interval: float, index_i
         nodata = band.GetNoDataValue()
         if nodata is not None and math.isfinite(nodata):
             options.append(f"NODATA={nodata!r}")
-
-        def progress(_done, _message, _data) -> int:
-            return 0 if ended() else 1
-        try:
-            code = gdal.ContourGenerateEx(band, lines, options=options, callback=progress)
-        except RuntimeError as exc:
-            code, failure = 1, _said(gdal, exc)
-        else:
-            failure = _said(gdal) if code else ''
+        code, failure = _attempt(gdal, lambda: gdal.ContourGenerateEx(
+            band, lines, options=options, callback=lambda _done, _message, _data: 0 if ended() else 1))
         reason = ended()
         if reason:
             vector = None
             raise _ended_error(reason)
-        if code:
+        if code is None or code:
             vector = None
-            raise ValueError(f"the contours could not be drawn: {failure}")
+            raise ValueError(f"the contours could not be drawn: {failure or quiet_message(gdal.GetLastErrorMsg())}")
         if min_length is None:
             transform = dataset.GetGeoTransform()
             min_length = SPECK_PIXELS * max(abs(transform[1]), abs(transform[5]))
         count = index_count = 0
         specks: List[int] = []  # removed once the reading is over: a layer is not changed under its own cursor
-        lowest, highest = float('inf'), float('-inf')
+        first, last = float('inf'), float('-inf')
         lines.StartTransaction()
         lines.ResetReading()
         for feature in lines:
@@ -463,7 +534,7 @@ def _contours(source: str, band_number: int, path: str, interval: float, index_i
             lines.SetFeature(feature)
             count += 1
             index_count += flag
-            lowest, highest = min(lowest, height), max(highest, height)
+            first, last = min(first, height), max(last, height)
             reason = ended() if count % 2000 == 0 else ''
             if reason:
                 lines.RollbackTransaction()
@@ -475,7 +546,8 @@ def _contours(source: str, band_number: int, path: str, interval: float, index_i
         vector = None  # closes the file before QGIS opens it
         dataset = None
         return {'count': count, 'index_count': index_count, 'left_out': len(specks),
-                'minimum': lowest if count else None, 'maximum': highest if count else None}
+                'minimum': first if count else None, 'maximum': last if count else None,
+                'lowest': lowest, 'highest': highest}
 
 
 def _contour_style(layer, with_index: bool) -> None:
@@ -494,19 +566,20 @@ def _contour_style(layer, with_index: bool) -> None:
 
 
 def contour_lines(layer: str, interval: float, index_interval: Optional[float] = None, band: int = 1,
-                  name: str = '', min_length: Optional[float] = None) -> Dict[str, Any]:
+                  name: str = '', min_length: Optional[float] = None, share_values: bool = True) -> Dict[str, Any]:
     """Draw the contour lines of a raster of the project (an elevation model) as a new line layer.
 
     Each line has ``elevation`` (the height of its level) and ``is_index`` (1 for an index contour, a whole number
     of times ``index_interval``; 0 otherwise). The layer is a temporary GeoPackage added on top of the project,
     drawn in thin brown lines with the index contours thicker. Closed contours shorter than ``min_length`` (ten
     pixels of the raster by default; 0 keeps every line) are left out: the bumps of the size of a building.
+    ``share_values`` False: neither the answer nor a refusal tells a height of the raster.
 
     Raises:
         ValueError: Not a raster with values, a band it does not have, a raster too large, intervals that make no
             sense or too many levels, no contour between its heights, stopped.
     """
-    from qgis.core import Qgis, QgsProcessingUtils, QgsProject, QgsRasterBandStats, QgsVectorLayer
+    from qgis.core import QgsProcessingUtils, QgsProject, QgsVectorLayer
     from .layer_style import _drawn_by_its_service
     found = resolve_layer(layer)
     if found is None:
@@ -524,39 +597,38 @@ def contour_lines(layer: str, interval: float, index_interval: Optional[float] =
     if min_length is not None and (not math.isfinite(float(min_length)) or float(min_length) < 0):
         raise ValueError("min_length is a length in the units of the raster, 0 to keep every contour")
     min_length = float(min_length) if min_length is not None else None
+    problem = contour_problem(float('nan'), float('nan'), interval, index_interval)  # before anything is read
+    if problem:
+        raise ValueError(problem)
     if found.width() * found.height() > MAX_CONTOUR_PIXELS:
         raise ValueError(f"'{found.name()}' holds {found.width()} x {found.height()} pixels, more than the "
                          f"{MAX_CONTOUR_PIXELS // 1_000_000} million contours are drawn from: bring in a smaller "
                          "area (add_elevation) or a coarser raster")
-    flags = getattr(getattr(Qgis, 'RasterBandStatistic', None), 'All', None)
-    if flags is None:
-        flags = QgsRasterBandStats.Stats.Min | QgsRasterBandStats.Stats.Max
     source = found.dataProvider().dataSourceUri()
-    remote = source.lower().startswith(('/vsicurl/', 'http://', 'https://'))
-    if remote:
-        lowest = highest = float('nan')  # not read twice over the network: the levels are counted as they are made
-    else:
-        stats = found.dataProvider().bandStatistics(band, flags, found.extent(), 250000)
-        lowest, highest = stats.minimumValue, stats.maximumValue
-    problem = contour_problem(lowest, highest, interval, index_interval)
-    if problem:
-        raise ValueError(problem)
     path = QgsProcessingUtils.generateTempFilename('contours.gpkg')
-    made = _in_background('contour_lines', lambda ended: _contours(source, band, path, interval, index_interval,
-                                                                   min_length, remote, ended))
+    with running('contour_lines'):
+        made = _in_background('contour_lines', lambda ended: _contours(
+            source, band, path, interval, index_interval, min_length, bool(share_values), ended))
     if not made['count']:
-        between = f" between {lowest:g} and {highest:g}" if math.isfinite(lowest) and math.isfinite(highest) else ''
+        between = f" between {made['lowest']:g} and {made['highest']:g}" if share_values else ''
         only_specks = (f" but {made['left_out']} closed ones too short to be kept (min_length 0 keeps them)"
                        if made['left_out'] else '')
         raise ValueError(f"no contour every {interval:g}{between}{only_specks}: ask for a smaller interval")
     title = (name or '').strip()[:200] or f"Contours {interval:g}"
-    contours = QgsVectorLayer(path + '|layername=contours', title, 'ogr')
+    options = QgsVectorLayer.LayerOptions()
+    options.skipCrsValidation = True  # a raster with no CRS makes lines with none: QGIS would ask for one in a dialog
+    contours = QgsVectorLayer(path + '|layername=contours', title, 'ogr', options)
     if not contours.isValid():
         del contours
         raise ValueError("the contours were drawn but QGIS cannot open the layer written")
+    if not contours.crs().isValid() and found.crs().isValid():
+        contours.setCrs(found.crs())
     _contour_style(contours, index_interval is not None)
-    QgsProject.instance().addMapLayer(contours)
+    project = QgsProject.instance()
+    project.addMapLayer(contours, False)
+    project.layerTreeRoot().insertLayer(0, contours)  # on top, wherever the layer tree would put a new layer
     return {'layer_id': contours.id(), 'name': contours.name(), 'source_layer': found.name(),
             'crs_authid': contours.crs().authid(), 'feature_count': made['count'], 'interval': interval,
             'index_interval': index_interval, 'index_count': made['index_count'], 'left_out': made['left_out'],
-            'minimum': made['minimum'], 'maximum': made['maximum'], 'fields': [ELEVATION_FIELD, INDEX_FIELD]}
+            'minimum': made['minimum'] if share_values else None,
+            'maximum': made['maximum'] if share_values else None, 'fields': [ELEVATION_FIELD, INDEX_FIELD]}

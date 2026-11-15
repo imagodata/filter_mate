@@ -57,6 +57,9 @@ CHANGED_LAYERS = {
     "set_labels": ("layer",), "update_features": ("layer",), "delete_features": ("layer",),
     "add_features": ("layer",), "add_field": ("layer",), "join_layers": ("layer",), "rename_layer": ("layer",),
     "remove_layers": ("layers",),
+    # A copy is a second layer on the same source, and no protected one: what is edited in it is written in the
+    # file of the layer copied (2026-11-15: a protected layer was edited through its copy).
+    "duplicate_layer": ("layer",),
 }
 # Without any layer named, these act on every layer.
 ALL_WHEN_NONE = frozenset({"clear_filters"})
