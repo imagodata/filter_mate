@@ -102,3 +102,45 @@ def test_turning_on_is_asked_at_every_level_turning_off_is_not(level):
     assert policy.verdict(tools["turn_on_agent_options"], {"sources": ["datagouv"]}) == ASK
     if level != "advisor":
         assert policy.verdict(tools["turn_off_agent_options"], {"sources": ["datagouv"]}) != ASK
+
+
+# --- 2026-11-16, review of #505: a key never goes to another provider, a withdrawn consent never comes back ---------
+
+def test_a_key_shared_with_another_provider_is_refused():
+    """The dialog kept one place for a key: a provider remembered before another key replaced it there."""
+    from core.agent.agent_options import switch_problem
+    anthropic = ProviderEntry("anthropic", "claude", "https://api.anthropic.com", "X", "https://api.anthropic.com",
+                              "https://api.anthropic.com")
+    openai = ProviderEntry("openai", "gpt", "https://api.openai.com/v1", "X", "https://api.openai.com/v1",
+                           "https://api.openai.com/v1")
+    assert switch_problem(anthropic, (openai, anthropic), "https://api.anthropic.com", needs_key=True) == "shared_key"
+    alone = ProviderEntry("anthropic", "claude", "https://api.anthropic.com", "Y", "https://api.anthropic.com",
+                          "https://api.anthropic.com")
+    assert switch_problem(alone, (openai, alone), "https://api.anthropic.com", needs_key=True) == ""
+
+
+def test_a_consent_or_a_key_for_another_address_is_refused():
+    from core.agent.agent_options import switch_problem
+    moved = ProviderEntry("openai", "gpt", "https://other.example/v1", "Z", "https://api.openai.com/v1",
+                          "https://api.openai.com/v1")
+    assert switch_problem(moved, (moved,), "https://other.example/v1", needs_key=True) == "consent"
+    keyless = ProviderEntry("openai", "gpt", "https://api.openai.com/v1", "Z", "https://api.openai.com/v1", "")
+    assert switch_problem(keyless, (keyless,), "https://api.openai.com/v1", needs_key=True) == "key"
+    local = ProviderEntry("ollama", "qwen3:8b", "http://localhost:11434", "", "http://localhost:11434", "")
+    assert switch_problem(local, (local,), "http://localhost:11434", needs_key=False) == ""
+
+
+def test_two_providers_of_one_model_have_different_labels():
+    here = ProviderEntry("ollama", "qwen3:8b", "")
+    there = ProviderEntry("ollama", "qwen3:8b", "http://gpu.example:11434")
+    assert here.label != there.label and "gpu.example" in there.label
+
+
+def test_allowed_always_still_asks_to_turn_on():
+    """Turning on widens what the agent reaches: asked at every level, whatever the Tools tab says."""
+    from core.agent.permissions import ASK, PermissionPolicy
+    from core.agent.tool_catalog import chat_tools
+    turn_on = next(tool for tool in chat_tools() if tool.name == "turn_on_agent_options")
+    policy = PermissionPolicy("autonomous")
+    policy.rules = {"turn_on_agent_options": "allow"}
+    assert policy.verdict(turn_on, {"mcp_server": True}) == ASK

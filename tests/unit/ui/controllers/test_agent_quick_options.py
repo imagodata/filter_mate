@@ -48,7 +48,7 @@ def test_saving_a_provider_with_consent_remembers_it(monkeypatch):
     assert [entry.label for entry in saved[0]] == ["ollama · qwen3:8b", "openai · gpt-x"]
     saved.clear()
     Controller._remember_provider(agent_settings.AgentSettings(preset="ollama", model="qwen3:8b", consent=False))
-    assert saved == []
+    assert [entry.label for entry in saved[0]] == ["openai · gpt-x"]  # without consent: out of the list, if there
 
 
 # --- one way to apply a change, at once (a click) or once the request ends (the agent) ---------------------------
@@ -69,6 +69,10 @@ def host(monkeypatch):
     made.apply_agent_options = lambda change: Controller.apply_agent_options(made, change)
     made._menu_providers = lambda values: Controller._menu_providers(made, values)
     made._options_sources = lambda values: Controller._options_sources(made, values)
+    made._policy, made._transcript, made._recap_from = MagicMock(), [], 0
+    made.panel = SimpleNamespace(set_status=MagicMock(), fill_options=MagicMock())
+    made._engine = None
+    made.chat_busy = lambda: made._engine is not None and made._engine.busy
     return made
 
 
@@ -77,14 +81,6 @@ def test_a_click_applies_at_once(host):
     assert host.store["values"].enabled_sources == ("datagouv", "osm_tiles")
     host._restart_engine.assert_called_once()
     host._reset_view.assert_not_called()
-
-
-def test_another_provider_resets_the_view(host):
-    qwen = ProviderEntry("ollama", "qwen3:8b", "http://localhost:11434")
-    assert Controller.apply_agent_options(host, Change(provider=qwen)) == ""
-    values = host.store["values"]
-    assert (values.preset, values.model, values.consent) == ("ollama", "qwen3:8b", True)
-    host._reset_view.assert_called_once()
 
 
 def test_a_provider_without_its_key_is_not_switched_to(host):
@@ -173,3 +169,94 @@ def test_the_options_read(host, monkeypatch):
     view = Controller._agent_options_tool(host, {})
     assert view["provider"] == "anthropic · m" and "ollama · qwen3:8b" in view["providers"]
     assert {"id": "datagouv", "title": "data.gouv.fr", "group": "open_data", "on": True} in view["sources"]
+
+
+# --- 2026-11-16, review of #505 -------------------------------------------------------------------------------------
+
+def _entry(preset, model, base, authcfg, key=True):
+    target = agent_settings.target_of(preset, base)
+    return ProviderEntry(preset, model, base, authcfg, target, target if key else "")
+
+
+def test_a_new_server_gets_a_key_place_of_its_own():
+    values = agent_settings.AgentSettings(preset="anthropic", model="m", authcfg="X",
+                                          key_target=agent_settings.target_of("anthropic", ""))
+    assert Controller._key_place(values, agent_settings.target_of("anthropic", "")) == "X"
+    assert Controller._key_place(values, agent_settings.target_of("openai", "")) == ""
+
+
+def test_a_key_shared_with_another_provider_is_not_switched_to(host, monkeypatch):
+    anthropic = _entry("anthropic", "claude", "", "key1")
+    openai = _entry("openai", "gpt", "", "key1")
+    monkeypatch.setattr(chat_controller, "read_providers", lambda: (openai, anthropic))
+    host.store["values"] = agent_settings.AgentSettings(preset="openai", model="gpt", consent=True, authcfg="key1",
+                                                        consent_target=openai.consent_target, key_target=openai.key_target)
+    assert Controller.apply_agent_options(host, Change(provider=anthropic))
+    assert host.store["values"].preset == "openai"
+
+
+def test_a_withdrawn_consent_is_forgotten(monkeypatch):
+    saved = []
+    entry = _entry("openai", "gpt", "", "key9")
+    monkeypatch.setattr(chat_controller, "read_providers", lambda: (entry,))
+    monkeypatch.setattr(chat_controller, "write_providers", saved.append)
+    Controller._remember_provider(agent_settings.AgentSettings(preset="openai", model="gpt", consent=False,
+                                                               authcfg="key9"))
+    assert saved == [()]
+
+
+def test_another_provider_keeps_the_thread(host, monkeypatch):
+    qwen = _entry("ollama", "qwen3:8b", "http://localhost:11434", "", key=False)
+    monkeypatch.setattr(chat_controller, "read_providers", lambda: (qwen,))
+    host._policy, host._transcript, host._recap_from = MagicMock(), ["a", "b"], 0
+    assert Controller.apply_agent_options(host, Change(provider=qwen)) == ""
+    host._reset_view.assert_not_called()
+    host._restart_engine.assert_called_once()
+    host._policy.forget.assert_called_once()
+    assert host._recap_from == 2  # the new provider is not told what came before
+
+
+def test_a_click_during_a_recipe_waits_and_says_so(host):
+    host._engine, host._building, host._replaying = None, False, True
+    host.panel = SimpleNamespace(set_status=MagicMock())
+    host.chat_busy = lambda: True
+    Controller._click_option(host, Change(sources_on=("osm_tiles",)))
+    assert len(host._pending_options) == 1 and host.store["values"].enabled_sources == ("datagouv",)
+    host.panel.set_status.assert_called_once()
+
+
+def test_the_mcp_server_does_not_wait_for_the_request(host):
+    host.panel = SimpleNamespace(set_status=MagicMock())
+    host.chat_busy = lambda: True
+    Controller._click_option(host, Change(mcp_server=True))
+    assert host._pending_options == [] and host.store["values"].mcp_enabled is True
+
+
+def test_an_mcp_server_that_fails_is_unticked(host):
+    host._mcp = SimpleNamespace(error="port taken")
+    Controller.apply_agent_options(host, Change(mcp_server=True))
+    assert host.store["values"].mcp_enabled is False
+
+
+def _call(arguments):
+    from core.agent.messages import ToolCallPart
+    return ToolCallPart("c1", "turn_on_agent_options", arguments)
+
+
+def test_nothing_to_turn_on_asks_nothing(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    host._ask_user = MagicMock(return_value=False)
+    assert Controller.confirm(host, _call({"sources": ["datagouv"]})) is True  # already on
+    host._ask_user.assert_not_called()
+
+
+def test_the_question_names_the_sources_and_where_data_goes(host, monkeypatch):
+    _tools_host(host, monkeypatch)
+    monkeypatch.setattr(chat_controller, "_tr", lambda text: text)  # the words themselves, not a mocked Qt
+    monkeypatch.setattr(chat_controller, "source_group_titles", lambda: [("connectors", "MCP connectors")])
+    host._ask_user = MagicMock(return_value=True)
+    host._turn_on_question = lambda change: Controller._turn_on_question(host, change)
+    assert Controller.confirm(host, _call({"sources": ["osm_mcp"], "mcp_server": True})) is True
+    question = host._ask_user.call_args.args[1]
+    assert "(MCP connectors)" in question and "sends what the agent asks to" in question
+    assert "other applications on this computer" in question and "osm_mcp" not in question

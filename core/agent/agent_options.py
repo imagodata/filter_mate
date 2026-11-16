@@ -30,7 +30,14 @@ class ProviderEntry:
 
     @property
     def label(self) -> str:
-        return f"{self.preset} · {self.model}"
+        """Preset and model, and the host when it is not the usual address of the preset: two servers of one model
+        are two providers (the data goes to one or the other)."""
+        from urllib.parse import urlsplit
+        from .providers import PRESETS
+        usual = (PRESETS.get(self.preset) or ("", ""))[1].rstrip("/")
+        address = self.base_url.strip().rstrip("/")
+        host = urlsplit(address).netloc if address and address != usual else ""
+        return f"{self.preset} · {self.model}" + (f" · {host}" if host else "")
 
     def same(self, other: "ProviderEntry") -> bool:
         return (self.preset, self.model, self.base_url) == (other.preset, other.model, other.base_url)
@@ -116,3 +123,19 @@ def apply_change(enabled_ids: Tuple[str, ...], change: Change) -> Tuple[str, ...
     """The ids ticked once ``change`` is made: their order kept, the new ones at the end."""
     kept = tuple(source_id for source_id in enabled_ids if source_id not in change.sources_off)
     return kept + tuple(source_id for source_id in change.sources_on if source_id not in kept)
+
+
+def switch_problem(entry: ProviderEntry, providers: Sequence[ProviderEntry], target: str, needs_key: bool) -> str:
+    """Why switching to ``entry`` is refused, "" when it may be: ``target`` is the server it sends to.
+
+    "consent": the user agreed to send data to another address (or withdrew it); "key": its key was not stored for
+    that server; "shared_key": another provider remembered holds the same key place with another server (the
+    settings dialog kept one place for a key up to 2026-11-16: the key there may be another provider's)."""
+    if entry.consent_target != target:
+        return "consent"
+    if needs_key:
+        if not entry.authcfg or entry.key_target != target:
+            return "key"
+        if any(other.authcfg == entry.authcfg and other.key_target != entry.key_target for other in providers):
+            return "shared_key"
+    return ""
