@@ -70,20 +70,20 @@ class TestRemoteRepoFromConfig:
 
     def test_parses_full_entry(self):
         repo = RemoteRepo.from_config_entry({
-            "name": "Constructel",
-            "git_url": "http://192.168.160.31:9082/",
+            "name": "Acme",
+            "git_url": "http://git.example.internal:9082/",
             "branch": "master",
-            "local_clone": "~/.cache/filter_mate/repos/constructel",
-            "target_collection": "constructel_sketches",
+            "local_clone": "~/.cache/filter_mate/repos/acme",
+            "target_collection": "acme_sketches",
             "is_default": True,
             "auth_header": "Bearer tok",
         })
         assert repo is not None
-        assert repo.name == "Constructel"
+        assert repo.name == "Acme"
         assert repo.is_default is True
         assert repo.has_remote
         assert repo.expanded_local_clone.endswith(
-            os.path.join(".cache", "filter_mate", "repos", "constructel")
+            os.path.join(".cache", "filter_mate", "repos", "acme")
         )
 
     def test_preserves_unknown_fields_in_extra(self):
@@ -211,9 +211,9 @@ class TestManagerSelection:
         assert mgr.get_default() is None
 
     def test_get_by_name_is_case_sensitive(self):
-        mgr = RemoteRepoManager(FakeExtension([{"name": "Constructel"}]))
-        assert mgr.get_by_name("Constructel") is not None
-        assert mgr.get_by_name("constructel") is None
+        mgr = RemoteRepoManager(FakeExtension([{"name": "Acme"}]))
+        assert mgr.get_by_name("Acme") is not None
+        assert mgr.get_by_name("acme") is None
 
 
 # ---------------------------------------------------------------------------

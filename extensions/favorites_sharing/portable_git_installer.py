@@ -108,7 +108,7 @@ class DownloadOverride:
     """Optional override of the pinned release metadata.
 
     Useful for:
-    - Pointing at an internal Constructel mirror (intranet-only postes)
+    - Pointing at an internal company mirror (intranet-only postes)
     - Pinning a different upstream version per deployment
     - Bypassing GitHub when blocked by corporate firewall
     """

@@ -739,10 +739,11 @@ Each entry was checked to answer without an account; `tests/qgis_headless/check_
 
 A description is read at every request. With every tool offered to a local model (the families off), the
 instructions and the tools must hold in the 32k context Ollama is asked for: beyond, it asks for 64k, which
-doubles the memory of the model. A local model is not sent what only checks an argument (`maxLength`,
-`minLength`, `maxItems`, `minItems`, `additionalProperties`), and an optional value (`anyOf` a type or null) is
-written as its type (`providers/ollama_chat.wire_schema`): the plugin checks every call against the whole schema
-of the catalog, so nothing is lost, and 6,600 characters were won. On 2026-11-15, 71 tools and the instructions
+doubles the memory of the model. No model is sent what only checks an argument (`maxLength`, `minLength`,
+`maxItems`, `minItems`, `additionalProperties`, `title`), an empty default or a bound beyond a million, and an
+optional value (`anyOf` a type or null) is written as its type (`core/agent/tool_schema.for_model`; Ollama only
+until lot 2 of the token diet, 2026-11-16): the plugin checks every call against the whole schema of the catalog
+and takes its defaults from it, so nothing is lost. On 2026-11-15, 71 tools and the instructions
 weigh 94,343 characters for 100,352 at most: about 6,000 characters are left. A test fails when the step is
 passed (`test_ollama_provider.py`).
 

@@ -4,6 +4,9 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Docs: [AI and data](docs/AI_AND_DATA.md) says what the AGENT sends, to whom and when; [TRADEMARKS.md](TRADEMARKS.md)
+  covers the name and the logo; the README links both, and the Discord. Internal notes are no longer published.
+
 ### AGENT (experimental)
 
 - **Set FilterMate up with no AI model.** *Set up FilterMate* (the first-run card, Vector > FilterMate, the ⋯ menu of the panel, and a new button of the welcome when no model is connected) no longer sends a request to a model: it asks with cards of choices in the AGENT thread, ticked as your settings are now. Which sections you use (FILTERING, EXPORTING, AGENT), which data you work with (rasters, point clouds, PostgreSQL, web services) and how big your layers are (timeouts and warnings follow), the look of the panel (theme, size, language, where the buttons go), then what you filter and export (zoom to what is kept, history in the project, rasters and point clouds filtered by a vector layer, groups kept in a GeoPackage or a KML, export formats). The last card shows every setting before and after; nothing changes until Apply, and a link puts them back as they were. Nothing is sent anywhere. The setup may turn the AGENT section off, since you choose it; a model still never changes the settings of the agent. With a model connected, *Refine the setup with the agent* follows.

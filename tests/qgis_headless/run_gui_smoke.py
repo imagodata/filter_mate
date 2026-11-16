@@ -2232,6 +2232,12 @@ def s_panels_set():
     messages = importlib.import_module(f'{PACKAGE}.core.agent.messages')
     panels, d = panels_module(), dock()
     recorder = turn_effects.EffectsRecorder()
+    # What the panel holds before the turn: in the whole smoke, earlier steps left predicates on zones (2026-11-16:
+    # the undo put back ['Intersect'] they had set, and a check that wanted [] failed on every image).
+    before = app().PROJECT_LAYERS[layer('zones').id()]['filtering']
+    PANELS['before'] = (list(before.get('geometric_predicates') or []),
+                        list(d.widgets['FILTERING']['GEOMETRIC_PREDICATES']['WIDGET'].checkedItems()),
+                        d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT'), before.get('buffer_value', 0.0))
     layers = [{'layer': 'zones', 'filtering': {'layers_to_filter': ['lieux'], 'geometric_predicates': ['Intersect'],
                                                'buffer_value': 25.0}},
               {'layer': 'lieux', 'exploring': {'single_selection_expression': '"code"'}}]
@@ -2291,10 +2297,13 @@ def s_panels_undo_check():
     d = dock()
     kept = app().PROJECT_LAYERS[layer('zones').id()]['filtering']
     done, left = PANELS['undo']
-    check('panels: undo puts the options and the panel back', not left and kept.get('geometric_predicates') in ([], None)
-          and d.widgets['FILTERING']['GEOMETRIC_PREDICATES']['WIDGET'].checkedItems() == []
-          and d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT') != 'GeoJSON',
-          f"done={done} left={left} {kept} {d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT')}")
+    predicates, shown, datatype, buffer = PANELS['before']
+    check('panels: undo puts the options and the panel back', not left
+          and list(kept.get('geometric_predicates') or []) == predicates and abs(kept.get('buffer_value', 0.0) - buffer) < 1e-6
+          and d.widgets['FILTERING']['GEOMETRIC_PREDICATES']['WIDGET'].checkedItems() == shown
+          and d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT') == datatype,
+          f"done={done} left={left} before={PANELS['before']} {kept} "
+          f"{d.project_props['EXPORTING'].get('DATATYPE_TO_EXPORT')}")
 
 
 PANEL_STEPS = [s_panels_setup, s_panels_zones, s_panels_set, s_panels_check, s_panels_other_layer_check,
